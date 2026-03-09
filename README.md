@@ -1,8 +1,15 @@
 # 🇹🇷 Cevahir AI
 
-**End-to-end open-source Turkish LLM project** with custom tokenizer, transformer architecture and cognitive AI pipeline.
+**End-to-end open-source Turkish LLM project with custom tokenizer, transformer architecture and cognitive AI pipeline.**
 
 **Türk Gençlerine Armağanımdır.** · Production Ready · Full Stack AI Development
+
+
+<p align="center">
+  <img src="image/cevahir_ai_visual.jpeg" width="700">
+</p>
+
+
 
 ---
 
