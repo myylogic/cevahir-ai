@@ -6,7 +6,7 @@
 
 
 <p align="center">
-  <img src="image/cevahir_ai_visual.jpeg" width="700">
+  <img src="image/cevahir_ai_visual.jpeg" width="900">
 </p>
 
 
