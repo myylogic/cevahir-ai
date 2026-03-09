@@ -2,7 +2,7 @@
 
 **End-to-end open-source Turkish LLM project with custom tokenizer, transformer architecture and cognitive AI pipeline.**
 
-**Türk Gençlerine Armağanımdır.** · Production Ready · Full Stack AI Development
+**Türk Gençlerine Armağanımdır.** · Open Source · Active Training · End-to-End Turkish LLM Development
 
 
 <p align="center">
@@ -20,7 +20,7 @@ Cevahir AI, **Türkçe** için özel olarak tasarlanmış, uçtan uca açık kay
 Bu proje, yapay zeka alanında kendini geliştirmek isteyen **Türk gençlerine** bir fırsat ve referans sunmak amacıyla tamamen açık kaynak olarak paylaşılmıştır. Kodları inceleyebilir, deneyebilir ve üzerine yeni çalışmalar inşa edebilirsiniz.
 
 - **Geliştirici:** Muhammed Yasin Yılmaz ([@myylogic](https://github.com/myylogic))
-- **Durum:** Production Ready
+- **Durum:** · Open Source · Active Training · End-to-End Turkish LLM Development
 - **Son güncelleme:** 09.03.2026
 
 ---
@@ -215,4 +215,4 @@ Katkılar memnuniyetle karşılanır. Fork, feature branch, commit ve Pull Reque
 
 ---
 
-**Muhammed Yasin Yılmaz** · 09.03.2026 · Production Ready Full Stack AI Development
+**Muhammed Yasin Yılmaz** · 09.03.2026 · · Open Source · Active Training · End-to-End Turkish LLM Development
