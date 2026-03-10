@@ -1,0 +1,482 @@
+# -*- coding: utf-8 -*-
+"""
+================================================================================
+CEVAHIR-AI PROJESİ
+================================================================================
+
+Dosya: transformer_encoder_layer.py
+Modül: src/neural_network_module/ortak_katman_module
+Görev: Transformer Encoder Layer - Transformer standardı: Self-Attention + FFN +
+       Residual + Pre-norm/Post-norm. Endüstri standardı: GPT-2/3/4 (Pre-norm),
+       BERT (Post-norm), T5 (Pre-norm). Gradient checkpointing, advanced
+       checkpointing ve RMSNorm desteği sağlar.
+
+MİMARİ:
+- SOLID Prensipleri: Single Responsibility (encoder layer işlemleri),
+                     Open/Closed (Pre-norm/Post-norm seçeneği ile genişletilebilir),
+                     Dependency Inversion (MultiHeadAttention, FeedForwardNetwork
+                     abstraction'larına bağımlı)
+- Design Patterns: Layer Pattern (Transformer encoder katmanı)
+- Endüstri Standartları: GPT-2/3/4, BERT, T5 Transformer encoder standardı
+
+KULLANIM:
+- Transformer encoder katmanı oluşturmak için
+- Self-attention + FFN kombinasyonu için
+- Pre-norm/Post-norm seçimi için
+
+BAĞIMLILIKLAR:
+- MultiHeadAttention: Çok başlıklı dikkat
+- FeedForwardNetwork: Feed-forward network
+- RMSNorm: Root mean square normalization
+- AdvancedCheckpointing: Gelişmiş checkpointing
+
+Yazar: Muhammed Yasin Yılmaz
+Telif Hakkı: © 2024 Muhammed Yasin Yılmaz. Tüm Hakları Saklıdır.
+Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
+          İzinsiz kullanım, kopyalama, dağıtım veya değiştirme yasaktır.
+          Ticari veya ticari olmayan herhangi bir amaçla kullanım için
+          yazılı izin gereklidir.
+
+================================================================================
+"""
+
+import torch
+import torch.nn as nn
+import logging
+from typing import Optional, Tuple
+
+# [OK] V3: Gradient Checkpointing (endüstri standardı: GPT-3+, Claude, Gemini)
+from torch.utils.checkpoint import checkpoint
+
+from .attention_manager_module.multi_head_attention import MultiHeadAttention
+from .feed_forward_network import FeedForwardNetwork
+# [OK] V4: RMSNorm (endüstri standardı: GPT-3+, LLaMA)
+from .rms_norm import RMSNorm
+# [OK] V4: Advanced Checkpointing (endüstri standardı: GPT-4, Claude, Gemini)
+from .advanced_checkpointing import AdvancedCheckpointing, create_checkpointing_strategy
+
+
+class TransformerEncoderLayer(nn.Module):
+    """
+    Transformer standardı: Self-Attention + FFN + Residual + Pre-norm/Post-norm
+    Endüstri standardı: GPT-2/3/4 (Pre-norm), BERT (Post-norm), T5 (Pre-norm)
+    
+    PRE-NORM AKIŞI (pre_norm=True, GPT-2/3/4 standardı):
+    ┌─────────────────────────────────────────────────────────┐
+    │ Input: [B, T, embed_dim]                                │
+    │   ↓                                                     │
+    │ LayerNorm (PRE)                                         │
+    │   ↓                                                     │
+    │ Self-Attention                                          │
+    │   ↓                                                     │
+    │ Dropout                                                 │
+    │   ↓                                                     │
+    │ Residual (+) ←───────────┐                              │
+    │   ↓                      │                              │
+    │ [B, T, embed_dim]        │                              │
+    │   ↓                      │                              │
+    │ LayerNorm (PRE)          │                              │
+    │   ↓                      │                              │
+    │ FFN                      │                              │
+    │   ↓                      │                              │
+    │ Dropout                  │                              │
+    │   ↓                      │                              │
+    │ Residual (+) ←───────────┘                              │
+    │   ↓                                                     │
+    │ Output: [B, T, embed_dim]                               │
+    └─────────────────────────────────────────────────────────┘
+    
+    POST-NORM AKIŞI (pre_norm=False, BERT standardı):
+    ┌─────────────────────────────────────────────────────────┐
+    │ Input: [B, T, embed_dim]                                │
+    │   ↓                                                     │
+    │ Self-Attention                                          │
+    │   ↓                                                     │
+    │ Dropout                                                 │
+    │   ↓                                                     │
+    │ Residual (+) ←───────────┐                              │
+    │   ↓                      │                              │
+    │ LayerNorm (POST)         │                              │
+    │   ↓                      │                              │
+    │ [B, T, embed_dim]        │                              │
+    │   ↓                      │                              │
+    │ FFN                      │                              │
+    │   ↓                      │                              │
+    │ Dropout                  │                              │
+    │   ↓                      │                              │
+    │ Residual (+) ←───────────┘                              │
+    │   ↓                                                     │
+    │ LayerNorm (POST)                                        │
+    │   ↓                                                     │
+    │ Output: [B, T, embed_dim]                               │
+    └─────────────────────────────────────────────────────────┘
+    
+    FARK:
+    - PRE-NORM: LayerNorm → Attention/FFN → Residual
+    - POST-NORM: Attention/FFN → Residual → LayerNorm
+    
+    ENDÜSTRİ STANDARDI:
+    - GPT-2/3/4: [OK] Pre-norm (daha stabil, deep network'lerde)
+    - BERT: [OK] Post-norm (orijinal Transformer)
+    - T5: [OK] Pre-norm (modern standard)
+    """
+    
+    def __init__(
+        self,
+        embed_dim: int,
+        num_heads: int,
+        ffn_dim: int,
+        dropout: float = 0.1,
+        pre_norm: bool = True,
+        attention_type: str = "multi_head",
+        normalization_type: str = "layer_norm",
+        log_level: int = logging.INFO,
+        # [OK] V3: Flash Attention 2.0 desteği (endüstri standardı)
+        use_flash_attention: bool = False,
+        # [OK] V3: Gradient Checkpointing desteği (endüstri standardı: GPT-3+, Claude, Gemini)
+        use_gradient_checkpointing: bool = True,  # V4 aktif
+        # [OK] V4: Advanced Checkpointing desteği (endüstri standardı: GPT-4, Claude, Gemini)
+        use_advanced_checkpointing: bool = False,  # Advanced checkpointing kullan
+        checkpointing_strategy: str = "selective",  # "selective" | "layer_wise" | "adaptive"
+        # [OK] V4: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
+        use_rope: bool = False,
+        positional_encoding=None,  # PositionalEncoding modülü referansı (RoPE için)
+        # [OK] V4: RMSNorm desteği (endüstri standardı: GPT-3+, LLaMA)
+        use_rmsnorm: bool = False,  # True ise RMSNorm, False ise LayerNorm
+        # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
+        use_kv_cache: bool = False,  # KV Cache kullan (inference için)
+        max_cache_len: int = 2048,  # Maximum cache length
+        # [OK] V4: MoE (Mixture of Experts) desteği (endüstri standardı: GPT-4, Gemini)
+        use_moe: bool = False,  # MoE kullan
+        num_experts: int = 8,  # Expert sayısı (GPT-4: 8, Gemini: 16)
+        moe_top_k: int = 2,  # Her token için seçilecek expert sayısı (GPT-4: 2)
+        **kwargs,  # ffn_activation gibi ek parametreler için
+    ):
+        """
+        Args:
+            embed_dim: Embedding dimension
+            num_heads: Number of attention heads
+            ffn_dim: Feed-forward network dimension
+            dropout: Dropout rate
+            pre_norm: True ise Pre-norm, False ise Post-norm
+            attention_type: "multi_head", "self", "cross"
+            normalization_type: "layer_norm", "batch_norm", "group_norm"
+            log_level: Logging level
+            use_rope: RoPE (Rotary Position Embedding) kullan
+            positional_encoding: PositionalEncoding modülü referansı (RoPE için gerekli)
+            use_rmsnorm: True ise RMSNorm, False ise LayerNorm kullan (GPT-3+, LLaMA standardı)
+            use_kv_cache: KV Cache kullan (inference için)
+            max_cache_len: Maximum cache length
+        """
+        super().__init__()
+        
+        self.embed_dim = embed_dim
+        self.num_heads = num_heads
+        self.ffn_dim = ffn_dim
+        self.dropout_rate = dropout
+        self.pre_norm = pre_norm
+        
+        # Logger
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.setLevel(log_level)
+        if not self.logger.handlers:
+            handler = logging.StreamHandler()
+            handler.setLevel(log_level)
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
+        
+        # 1) Self-Attention
+        # [OK] V3: Flash Attention 2.0 desteği (endüstri standardı)
+        # [OK] V4: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
+        # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
+        self.attn = MultiHeadAttention(
+            embed_dim=embed_dim,
+            num_heads=num_heads,
+            dropout=dropout,
+            normalization_type=normalization_type,
+            debug=False,
+            use_flash_attention=use_flash_attention,  # [OK] V3
+            use_rope=use_rope,  # [OK] V4
+            positional_encoding=positional_encoding,  # [OK] V4
+            use_kv_cache=use_kv_cache,  # [OK] V4
+            max_cache_len=max_cache_len,  # [OK] V4
+        )
+        # [OK] V4: RMSNorm veya LayerNorm seçimi (GPT-3+, LLaMA standardı)
+        if use_rmsnorm:
+            self.norm1 = RMSNorm(embed_dim, eps=1e-6, log_level=log_level)
+            self.norm2 = RMSNorm(embed_dim, eps=1e-6, log_level=log_level)
+        else:
+            # Endüstri standardı: LayerNorm epsilon (GPT-2/3/4: 1e-5)
+            self.norm1 = nn.LayerNorm(embed_dim, eps=1e-5)
+            self.norm2 = nn.LayerNorm(embed_dim, eps=1e-5)
+        
+        # 2) FFN veya MoE
+        # [OK] V4: MoE (Mixture of Experts) desteği (endüstri standardı: GPT-4, Gemini)
+        # use_moe, num_experts, moe_top_k parametreleri __init__ signature'ında tanımlı
+        
+        if use_moe:
+            from .mixture_of_experts import MixtureOfExperts
+            ffn_activation = kwargs.pop("ffn_activation", "gelu")
+            self.ffn = MixtureOfExperts(
+                embed_dim=embed_dim,
+                ffn_dim=ffn_dim,
+                num_experts=num_experts,
+                top_k=moe_top_k,
+                dropout=dropout,
+                activation=ffn_activation,
+                log_level=log_level,
+            )
+            self.use_moe = True
+        else:
+            # [OK] V4: SwiGLU veya GELU activation seçimi (GPT-4, PaLM standardı)
+            ffn_activation = kwargs.pop("ffn_activation", "gelu")
+            self.ffn = FeedForwardNetwork(
+                embed_dim=embed_dim,
+                ffn_dim=ffn_dim,
+                dropout=dropout,
+                activation=ffn_activation,  # [OK] V4: SwiGLU veya GELU
+                log_level=log_level,
+            )
+            self.use_moe = False
+        
+        # Dropout
+        self.dropout = nn.Dropout(dropout)
+        
+        # [OK] V3: Gradient Checkpointing (endüstri standardı: GPT-3+, Claude, Gemini)
+        self.use_gradient_checkpointing = use_gradient_checkpointing
+        
+        # [OK] V4: Advanced Checkpointing (endüstri standardı: GPT-4, Claude, Gemini)
+        self.use_advanced_checkpointing = use_advanced_checkpointing
+        self.checkpointing_strategy = checkpointing_strategy
+        self.advanced_checkpointing: Optional[AdvancedCheckpointing] = None
+        if use_advanced_checkpointing:
+            from src.neural_network_module.ortak_katman_module.advanced_checkpointing import AdvancedCheckpointing
+            self.advanced_checkpointing = AdvancedCheckpointing(
+                strategy=checkpointing_strategy,
+                log_level=log_level,
+            )
+            self.logger.info(
+                f"[V4] Advanced Checkpointing etkinleştirildi (endüstri standardı: GPT-4, Claude, Gemini), "
+                f"strategy={checkpointing_strategy}"
+            )
+        
+        self.logger.info(
+            f"TransformerEncoderLayer initialized: embed_dim={embed_dim}, "
+            f"num_heads={num_heads}, ffn_dim={ffn_dim}, dropout={dropout}, pre_norm={pre_norm}, "
+            f"use_gradient_checkpointing={use_gradient_checkpointing}, use_rope={use_rope}, "
+            f"use_rmsnorm={use_rmsnorm}"
+        )
+    
+    def forward(
+        self,
+        x: torch.Tensor,
+        mask: Optional[torch.Tensor] = None,
+        causal_mask: bool = False,
+        # [OK] V4: KV Cache parametreleri (endüstri standardı: GPT-4, Claude, Gemini)
+        use_cache: bool = False,
+        cache_position: Optional[torch.Tensor] = None,
+    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]]:
+        """
+        Forward pass.
+        
+        Args:
+            x: [B, T, embed_dim]
+            mask: Optional attention mask
+            causal_mask: True ise causal masking uygulanır
+        
+        Returns:
+            x: [B, T, embed_dim]
+            attn_weights: Optional attention weights
+        
+        PRE-NORM vs POST-NORM AÇIKLAMASI:
+        ===================================
+        
+        PRE-NORM (pre_norm=True):
+        --------------------------
+        Adım 1: x_norm = LayerNorm(x)           # Normalize et
+        Adım 2: attn_out = Attention(x_norm)   # Normalized ile attention
+        Adım 3: x = x + Dropout(attn_out)      # Orijinal x ile topla
+        
+        POST-NORM (pre_norm=False):
+        ----------------------------
+        Adım 1: attn_out = Attention(x)        # Orijinal x ile attention
+        Adım 2: x = LayerNorm(x + Dropout(attn_out))  # Topla, sonra normalize
+        
+        FARK:
+        - Pre-norm: Normalize → İşlem → Residual
+        - Post-norm: İşlem → Residual → Normalize
+        
+        ENDÜSTRİ STANDARDI:
+        - GPT-2/3/4: Pre-norm [OK] (daha stabil)
+        - BERT: Post-norm [OK] (orijinal)
+        - T5: Pre-norm [OK] (modern)
+        """
+        # [OK] V3/V4: Gradient Checkpointing (endüstri standardı: GPT-3+/4, Claude, Gemini)
+        # Memory-efficient training: activation'ları kaydetmek yerine backward'da yeniden hesapla
+        if self.training:
+            # [OK] V4: Advanced Checkpointing (endüstri standardı: GPT-4, Claude, Gemini)
+            if self.use_advanced_checkpointing and self.advanced_checkpointing is not None:
+                # Advanced checkpointing: Selective veya layer-wise strateji
+                layer_idx = getattr(self, 'layer_idx', 0)
+                total_layers = getattr(self, 'total_layers', 1)
+                should_checkpoint = self.advanced_checkpointing.should_checkpoint(
+                    layer_idx=layer_idx,
+                    total_layers=total_layers,
+                    training=self.training,
+                )
+                if should_checkpoint:
+                    return self.advanced_checkpointing.checkpoint_forward(
+                        self._forward_impl,
+                        x, mask, causal_mask, False, None,
+                        use_reentrant=False,
+                    )
+                else:
+                    # Normal forward (checkpoint yok)
+                    return self._forward_impl(x, mask, causal_mask, False, None)
+            
+            # [OK] V3: Standard Gradient Checkpointing
+            elif self.use_gradient_checkpointing:
+                # Gradient checkpointing: forward pass'i checkpoint ile wrap et
+                # NOT: KV Cache ile gradient checkpointing birlikte kullanılamaz (training modunda cache yok)
+                # Training modunda use_cache=False olmalı
+                return checkpoint(
+                    self._forward_impl, 
+                    x, mask, causal_mask, False, None, 
+                    use_reentrant=False
+                )
+        
+        # Normal forward pass (inference veya checkpointing yok)
+        return self._forward_impl(x, mask, causal_mask, use_cache, cache_position)
+    
+    def _forward_impl(
+        self,
+        x: torch.Tensor,
+        mask: Optional[torch.Tensor] = None,
+        causal_mask: bool = False,
+        # [OK] V4: KV Cache parametreleri (endüstri standardı: GPT-4, Claude, Gemini)
+        use_cache: bool = False,
+        cache_position: Optional[torch.Tensor] = None,
+    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]]:
+        """
+        Internal forward implementation (checkpointing için ayrı method).
+        """
+        # ============================================================
+        # 1) SELF-ATTENTION: Pre-norm vs Post-norm Akışı
+        # ============================================================
+        
+        if self.pre_norm:
+            # [OK] PRE-NORM AKIŞI (GPT-2/3/4, Modern Transformer'lar)
+            # Akış: x → LayerNorm → Attention → Dropout → Residual (+)
+            # 
+            # Adım 1: LayerNorm önce (PRE)
+            x_norm = self.norm1(x)  # [B, T, embed_dim]
+            # 
+            # Adım 2: Attention (normalized input ile)
+            # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
+            attn_result = self.attn(
+                x_norm, x_norm, x_norm,
+                mask=mask,
+                causal_mask=causal_mask,
+                return_attention_weights=True,
+                use_cache=use_cache,
+                cache_position=cache_position,
+            )
+            # KV Cache kullanılıyorsa: (output, attn_weights, kv_cache)
+            # Normal mode: (output, attn_weights)
+            if use_cache and len(attn_result) == 3:
+                attn_output, attn_weights, kv_cache = attn_result
+            else:
+                attn_output, attn_weights = attn_result
+                kv_cache = None
+            # 
+            # Adım 3: Dropout + Residual (orijinal x ile topla)
+            x = x + self.dropout(attn_output)  # [B, T, embed_dim]
+            # 
+            # PRE-NORM AVANTAJLARI:
+            # - Daha stabil gradient flow (deep network'lerde)
+            # - LayerNorm input'u normalize eder, attention daha iyi çalışır
+            # - Modern Transformer'ların standardı (GPT-2/3/4, T5)
+        else:
+            # [OK] POST-NORM AKIŞI (Orijinal Transformer, BERT)
+            # Akış: x → Attention → Dropout → Residual (+) → LayerNorm
+            # 
+            # Adım 1: Attention (orijinal input ile)
+            # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
+            attn_result = self.attn(
+                x, x, x,
+                mask=mask,
+                causal_mask=causal_mask,
+                return_attention_weights=True,
+                use_cache=use_cache,
+                cache_position=cache_position,
+            )
+            # KV Cache kullanılıyorsa: (output, attn_weights, kv_cache)
+            # Normal mode: (output, attn_weights)
+            if use_cache and len(attn_result) == 3:
+                attn_output, attn_weights, kv_cache = attn_result
+            else:
+                attn_output, attn_weights = attn_result
+                kv_cache = None
+            # 
+            # Adım 2: Dropout + Residual + LayerNorm (POST)
+            x = self.norm1(x + self.dropout(attn_output))  # [B, T, embed_dim]
+            # 
+            # POST-NORM AVANTAJLARI:
+            # - Orijinal Transformer paper'ına uygun
+            # - BERT gibi encoder modellerinde kullanılır
+            # - Daha basit implementasyon
+        
+        # ============================================================
+        # 2) FFN: Pre-norm vs Post-norm Akışı
+        # ============================================================
+        
+        if self.pre_norm:
+            # [OK] PRE-NORM AKIŞI (GPT-2/3/4, Modern Transformer'lar)
+            # Akış: x → LayerNorm → FFN → Dropout → Residual (+)
+            # 
+            # Adım 1: LayerNorm önce (PRE)
+            x_norm = self.norm2(x)  # [B, T, embed_dim]
+            # 
+            # Adım 2: FFN veya MoE (normalized input ile)
+            # [OK] V4: MoE desteği (endüstri standardı: GPT-4, Gemini)
+            if self.use_moe:
+                ffn_output, moe_load_balancing_loss = self.ffn(x_norm)  # [B, T, embed_dim], scalar
+                # Load balancing loss'u sakla (training için)
+                if not hasattr(self, '_moe_losses'):
+                    self._moe_losses = []
+                self._moe_losses.append(moe_load_balancing_loss)
+            else:
+                ffn_output = self.ffn(x_norm)  # [B, T, embed_dim]
+            # 
+            # Adım 3: Dropout + Residual (orijinal x ile topla)
+            x = x + self.dropout(ffn_output)  # [B, T, embed_dim]
+        else:
+            # [OK] POST-NORM AKIŞI (Orijinal Transformer, BERT)
+            # Akış: x → FFN → Dropout → Residual (+) → LayerNorm
+            # 
+            # Adım 1: FFN veya MoE (orijinal input ile)
+            # [OK] V4: MoE desteği (endüstri standardı: GPT-4, Gemini)
+            if self.use_moe:
+                ffn_output, moe_load_balancing_loss = self.ffn(x)  # [B, T, embed_dim], scalar
+                # Load balancing loss'u sakla (training için)
+                if not hasattr(self, '_moe_losses'):
+                    self._moe_losses = []
+                self._moe_losses.append(moe_load_balancing_loss)
+            else:
+                ffn_output = self.ffn(x)  # [B, T, embed_dim]
+            # 
+            # Adım 2: Dropout + Residual + LayerNorm (POST)
+            x = self.norm2(x + self.dropout(ffn_output))  # [B, T, embed_dim]
+        
+        # [OK] V4: KV Cache döndür (use_cache=True ise)
+        if use_cache:
+            return x, attn_weights, kv_cache
+        return x, attn_weights
+    
+    def extra_repr(self) -> str:
+        return (
+            f"embed_dim={self.embed_dim}, num_heads={self.num_heads}, "
+            f"ffn_dim={self.ffn_dim}, dropout={self.dropout_rate}, pre_norm={self.pre_norm}"
+        )
+
