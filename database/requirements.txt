@@ -1,0 +1,15 @@
+# Database Module Requirements
+# PostgreSQL Database Management for Cevahir
+
+# SQLAlchemy - ORM
+sqlalchemy>=2.0.0
+
+# PostgreSQL Driver
+psycopg2-binary>=2.9.0
+
+# Optional: MySQL Support (if needed)
+# pymysql>=1.0.0
+
+# Optional: Migration Tool (Alembic - future)
+# alembic>=1.12.0
+
