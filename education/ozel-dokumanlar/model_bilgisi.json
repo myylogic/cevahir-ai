@@ -1,0 +1,611 @@
+[
+  {
+    "question": "Cevahir sisteminin genel mimarisi nedir?",
+    "answer": "Cevahir Sinir Sistemi üç katmanlı bir mimari kullanır. En üstte Cevahir API (Unified Inference Interface) bulunur. Bu API, TokenizerCore (BPE tokenization), ModelManager (V-4 neural network) ve CognitiveManager (cognitive layer) bileşenlerini birleştirir."
+  },
+  {
+    "question": "Cevahir API'nin görevi nedir?",
+    "answer": "Cevahir API, unified inference API görevi görür. TokenizerCore, ModelManager ve CognitiveManager bileşenlerini entegre eder ve kullanıcılara tek bir arayüz sunar. Sadece inference için tasarlanmıştır, eğitim için kullanılmaz."
+  },
+  {
+    "question": "Cevahir sisteminde hangi ana bileşenler bulunur?",
+    "answer": "Cevahir sisteminde üç ana bileşen vardır: TokenizerCore (BPE tokenization ve GPU batch processing), ModelManager (V-4 neural network inference), ve CognitiveManager (cognitive layer, tools, memory, monitoring)."
+  },
+  {
+    "question": "Neural Network mimarisi hangi versiyonu kullanır?",
+    "answer": "Cevahir Neural Network, V-4 Architecture kullanır. Bu mimari RoPE (Rotary Position Embedding), RMSNorm, SwiGLU activation, KV Cache, MoE (Mixture of Experts) ve Quantization özelliklerini içerir."
+  },
+  {
+    "question": "RoPE nedir ve ne işe yarar?",
+    "answer": "RoPE, Rotary Position Embedding'in kısaltmasıdır. Pozisyon bilgisini token embedding'lerine eklemek için kullanılır. Sinusoidal veya learned positional encoding yerine rotary matrisleri kullanarak daha etkili pozisyon temsili sağlar."
+  },
+  {
+    "question": "RMSNorm nedir?",
+    "answer": "RMSNorm, Root Mean Square Normalization'un kısaltmasıdır. LayerNorm'un daha verimli bir alternatifidir. Transformer katmanlarında normalizasyon için kullanılır ve LayerNorm'dan daha hızlı ve daha az bellek kullanır."
+  },
+  {
+    "question": "SwiGLU activation function nedir?",
+    "answer": "SwiGLU, Swish-Gated Linear Unit'un kısaltmasıdır. Feed-forward network'lerde kullanılan bir activation function'dır. GELU'dan daha iyi performans gösterir ve GPT-4, Claude gibi modern modellerde kullanılır."
+  },
+  {
+    "question": "KV Cache nedir ve neden önemlidir?",
+    "answer": "KV Cache, Key-Value Cache'in kısaltmasıdır. Autoregressive generation sırasında önceki token'ların key ve value değerlerini saklayarak, her yeni token için tüm sequence'i yeniden hesaplamayı önler. Bu, inference hızını önemli ölçüde artırır."
+  },
+  {
+    "question": "MoE nedir?",
+    "answer": "MoE, Mixture of Experts'in kısaltmasıdır. Model içinde birden fazla uzman (expert) network bulunur ve her token için hangi uzmanların kullanılacağına dinamik olarak karar verilir. Bu, model kapasitesini artırırken parametre sayısını kontrol altında tutar."
+  },
+  {
+    "question": "ModelManager'ın görevi nedir?",
+    "answer": "ModelManager, neural network'in yaşam döngüsünü yönetir. Model initialization, save/load, forward pass coordination, training tools (optimizer, scheduler, criterion) yönetimi ve TensorBoard entegrasyonu gibi işlemleri tek bir yerden yönetir."
+  },
+  {
+    "question": "ModelManager hangi bileşenleri yönetir?",
+    "answer": "ModelManager, CevahirNeuralNetwork modelini, optimizer'ı (AdamW/Adam/SGD), criterion'ı (CrossEntropyLoss), scheduler'ı (ReduceLROnPlateau) ve TensorBoard writer'ı yönetir. Ayrıca model'in train/eval modları arasında geçiş yapılmasını sağlar."
+  },
+  {
+    "question": "CognitiveManager'ın görevi nedir?",
+    "answer": "CognitiveManager, Cevahir sisteminin bilişsel üst katmanını yönetir. Strateji seçimi (direct/think/debate), iç ses üretimi, araç kullanımı, eleştirel kontrol, bellek yönetimi (RAG + Vector DB) ve monitoring işlemlerini koordine eder."
+  },
+  {
+    "question": "CognitiveManager hangi cognitive pattern'leri destekler?",
+    "answer": "CognitiveManager, Chain of Thought (CoT), Tree of Thoughts (ToT), Constitutional AI, System 1/2 Thinking gibi cognitive pattern'leri destekler. Bu pattern'ler, modelin daha iyi akıl yürütme yapmasını sağlar."
+  },
+  {
+    "question": "TokenizerCore'un görevi nedir?",
+    "answer": "TokenizerCore, BPE (Byte Pair Encoding) tokenization işlemlerini yönetir. Metinleri token'lara ayırır, token ID'lerine dönüştürür (encode) ve token ID'lerini tekrar metne çevirir (decode). GPU batch processing desteği de sağlar."
+  },
+  {
+    "question": "BPE tokenization nedir?",
+    "answer": "BPE, Byte Pair Encoding'in kısaltmasıdır. Metinleri subword token'lara ayıran bir tokenization yöntemidir. Sık kullanılan karakter çiftlerini birleştirerek vocab oluşturur. Bu sayede bilinmeyen kelimeler bile tokenize edilebilir."
+  },
+  {
+    "question": "Cevahir sisteminde hangi mimari prensipler kullanılır?",
+    "answer": "Cevahir sistemi SOLID principles, Dependency Injection, Protocol-based interfaces, Clean Architecture (layered design, separation of concerns) ve Enterprise Features (monitoring, tracing, caching, AIOps) kullanır."
+  },
+  {
+    "question": "CevahirNeuralNetwork'un yapısı nasıldır?",
+    "answer": "CevahirNeuralNetwork, DilKatmani (Language Layer) ile başlar. Bu katman LanguageEmbedding, PositionalEncoding (RoPE/Sinusoidal/Learned) ve SeqProjection içerir. Ardından N adet TransformerEncoderLayer gelir. Her layer MultiHeadAttention, RMSNorm/LayerNorm, FeedForwardNetwork (SwiGLU/GELU, opsiyonel MoE) ve residual connections içerir. Son olarak Output Layer (Vocab Projection) ve opsiyonel QuantizationManager bulunur."
+  },
+  {
+    "question": "TransformerEncoderLayer'da hangi bileşenler bulunur?",
+    "answer": "TransformerEncoderLayer'da MultiHeadAttention (Query/Key/Value Projections, RoPE, KV Cache, opsiyonel Flash Attention 2.0), RMSNorm/LayerNorm, FeedForwardNetwork (SwiGLU/GELU activation, opsiyonel MoE) ve residual connections bulunur."
+  },
+  {
+    "question": "MultiHeadAttention nasıl çalışır?",
+    "answer": "MultiHeadAttention, input'u Query, Key ve Value projection'larına dönüştürür. RoPE ile pozisyon bilgisi eklenir. Attention computation yapılır (opsiyonel Flash Attention 2.0). KV Cache güncellenir ve output üretilir."
+  },
+  {
+    "question": "FeedForwardNetwork'te hangi activation function'lar kullanılır?",
+    "answer": "FeedForwardNetwork'te SwiGLU veya GELU activation function'ları kullanılır. SwiGLU, GPT-4 ve Claude gibi modern modellerde tercih edilir çünkü daha iyi performans gösterir. Ayrıca opsiyonel olarak MoE (Mixture of Experts) desteği de bulunur."
+  },
+  {
+    "question": "Cevahir sisteminde pre-norm mu post-norm mu kullanılır?",
+    "answer": "Cevahir sistemi hem pre-norm hem de post-norm desteği sunar. Pre-norm, GPT-2/3/4 gibi modellerde kullanılır ve genellikle daha iyi eğitim stabilitesi sağlar. Post-norm ise BERT gibi modellerde kullanılır."
+  },
+  {
+    "question": "Causal masking nedir?",
+    "answer": "Causal masking, autoregressive generation için kullanılan bir masking tekniğidir. Her token'ın sadece kendinden önceki token'lara bakmasını sağlar. Bu sayede model gelecekteki bilgileri göremez ve autoregressive generation yapabilir."
+  },
+  {
+    "question": "Weight tying nedir?",
+    "answer": "Weight tying, input embedding layer'ı ile output projection layer'ının aynı weight'leri paylaşmasıdır. Bu, model parametre sayısını azaltır ve genellikle performansı artırır. Cevahir sisteminde opsiyonel olarak desteklenir."
+  },
+  {
+    "question": "Gradient checkpointing nedir?",
+    "answer": "Gradient checkpointing, memory-efficient training için kullanılan bir tekniktir. Forward pass sırasında bazı intermediate activation'ları saklamak yerine, backward pass'te yeniden hesaplanır. Bu, bellek kullanımını azaltır ancak hesaplama süresini artırır."
+  },
+  {
+    "question": "Quantization nedir?",
+    "answer": "Quantization, model weight'lerini daha düşük precision'a (örneğin float32'den int8'e) dönüştürme işlemidir. Bu, model boyutunu ve inference hızını artırır. Cevahir sistemi INT8, FP16 ve Dynamic Quantization desteği sunar."
+  },
+  {
+    "question": "ModelManager'da forward pass nasıl çalışır?",
+    "answer": "ModelManager'da forward pass, input token ID'lerini alır ve model'e gönderir. Model, token embedding'lerini oluşturur, pozisyon bilgisi ekler, transformer layer'larından geçirir ve vocab projection yaparak logits üretir. Inference modunda model otomatik olarak eval mode'a geçer."
+  },
+  {
+    "question": "Cevahir sisteminde inference ve eğitim nasıl ayrılır?",
+    "answer": "Cevahir API (cevahir.py) sadece inference için kullanılır. Eğitim için training_system/train.py (eğitim giriş noktası), training_system/training_service.py (eğitim servisi) ve model_management/model_manager.py (neural network eğitimi) kullanılır. BPE eğitimi için tokenizer_management/train_bpe.py kullanılır."
+  },
+  {
+    "question": "CognitiveManager'da policy routing nedir?",
+    "answer": "Policy routing, CognitiveManager'ın hangi cognitive pattern'i kullanacağına karar verme sürecidir. Direct (doğrudan cevap), think (iç ses ile düşünme), debate (tartışma), tot (tree of thoughts) gibi stratejiler arasından seçim yapar."
+  },
+  {
+    "question": "Memory management nedir?",
+    "answer": "Memory management, CognitiveManager'ın episodic memory (olay bazlı), working memory (çalışma belleği), vector memory (RAG + Vector DB) ve memory pruning (bellek temizleme) işlemlerini yönetmesidir."
+  },
+  {
+    "question": "RAG nedir?",
+    "answer": "RAG, Retrieval-Augmented Generation'ın kısaltmasıdır. Model, cevap üretirken external knowledge base'den ilgili bilgileri retrieve eder ve bu bilgileri kullanarak daha doğru cevaplar üretir. Vector DB kullanarak semantic search yapar."
+  },
+  {
+    "question": "Tool execution nedir?",
+    "answer": "Tool execution, CognitiveManager'ın external tool'ları (örneğin web search, calculator, database query) kullanma yeteneğidir. Tool'lar dinamik olarak kaydedilir, execution tracking yapılır ve metrics toplanır."
+  },
+  {
+    "question": "CevahirModelAPI nedir?",
+    "answer": "CevahirModelAPI, ModelManager ile CognitiveManager arasında adapter pattern kullanarak adaptasyon sağlayan bir sınıftır. ModelManager'ın interface'ini CognitiveManager'ın beklediği formata dönüştürür."
+  },
+  {
+    "question": "Cevahir sisteminde error handling nasıl yapılır?",
+    "answer": "Cevahir sisteminde özel exception sınıfları kullanılır: CevahirError (base), CevahirInitializationError, CevahirConfigurationError, CevahirProcessingError. Ayrıca _ErrorContextBuilder ile detaylı error context oluşturulur ve _InputValidator ile input validation yapılır."
+  },
+  {
+    "question": "Cevahir sisteminde decorator'lar ne işe yarar?",
+    "answer": "Cevahir sisteminde @requires_tokenizer, @requires_model_manager, @requires_cognitive_manager, @requires_model_api decorator'ları kullanılır. Bu decorator'lar, ilgili bileşenlerin initialize edilip edilmediğini kontrol eder ve gerekirse hata fırlatır."
+  },
+  {
+    "question": "Batch processing nedir?",
+    "answer": "Batch processing, birden fazla input'u aynı anda işleme yeteneğidir. Cevahir API, GPU batch processing desteği sunar. Bu sayede tokenization ve model inference işlemleri paralel olarak yapılabilir ve performans artar."
+  },
+  {
+    "question": "Streaming support nedir?",
+    "answer": "Streaming support, model output'unun token token üretilmesi ve kullanıcıya anlık olarak gösterilmesidir. Bu, kullanıcı deneyimini iyileştirir çünkü kullanıcı tüm cevabı beklemeden ilk token'ları görebilir."
+  },
+  {
+    "question": "Beam search nedir?",
+    "answer": "Beam search, text generation için kullanılan bir decoding stratejisidir. Greedy decoding yerine, her adımda en iyi k adayı tutar ve sonunda en iyi sequence'i seçer. Bu, daha iyi kalitede output üretir ancak daha yavaştır."
+  },
+  {
+    "question": "Monitoring ve observability nedir?",
+    "answer": "Monitoring ve observability, sistemin sağlığını, performansını ve davranışını izleme yeteneğidir. Cevahir sistemi metrics, tracing, logging, alerting ve health checks gibi enterprise-grade monitoring özellikleri sunar."
+  },
+  {
+    "question": "TensorBoard entegrasyonu nedir?",
+    "answer": "TensorBoard entegrasyonu, ModelManager'ın eğitim sırasında loss, accuracy, learning rate gibi metrikleri TensorBoard'a yazmasıdır. Bu sayede eğitim sürecini görselleştirmek ve izlemek mümkün olur."
+  },
+  {
+    "question": "Device management nedir?",
+    "answer": "Device management, ModelManager'ın model'i GPU, CPU veya MPS (Apple Silicon) üzerinde otomatik olarak çalıştırmasıdır. Sistem mevcut cihazları algılar ve en uygun cihazı seçer."
+  },
+  {
+    "question": "Cevahir sisteminde configuration management nasıl çalışır?",
+    "answer": "Cevahir sisteminde CevahirConfig dataclass'ı kullanılır. Hot reload desteği vardır, yani config değişiklikleri runtime'da uygulanabilir. Config validation yapılır ve gerekirse hata fırlatılır."
+  },
+  {
+    "question": "Flash Attention 2.0 nedir?",
+    "answer": "Flash Attention 2.0, attention computation'ı optimize eden bir tekniktir. Memory-efficient attention hesaplaması yapar ve özellikle uzun sequence'lerde bellek kullanımını önemli ölçüde azaltır. Cevahir sisteminde opsiyonel olarak desteklenir."
+  },
+  {
+    "question": "Cevahir sisteminde special token'lar nelerdir?",
+    "answer": "Cevahir sisteminde <BOS> (Beginning of Sequence), <EOS> (End of Sequence), <PAD> (Padding), <UNK> (Unknown), <SEP> (Separator) gibi special token'lar kullanılır. Bu token'lar model'in sequence başlangıcını, bitişini ve yapısını anlamasını sağlar."
+  },
+  {
+    "question": "Autoregressive generation nedir?",
+    "answer": "Autoregressive generation, model'in bir token üretip, bu token'ı input'a ekleyip, bir sonraki token'ı üretmesi şeklinde çalışan bir text generation yöntemidir. Her adımda önceki tüm token'lar kullanılır ve yeni token üretilir."
+  },
+  {
+    "question": "Cevahir sisteminde layer stacking nasıl çalışır?",
+    "answer": "Cevahir sisteminde 12+ layer (endüstri standardı) kullanılır. Her layer, önceki layer'ın output'unu input olarak alır ve işler. Layer'lar sequential olarak çalışır ve her layer'da residual connection bulunur."
+  },
+  {
+    "question": "Residual connection nedir?",
+    "answer": "Residual connection, layer'ın input'unu output'una ekleyen bir bağlantıdır. Bu, gradient flow'u iyileştirir ve deep network'lerin eğitilmesini kolaylaştırır. Cevahir sisteminde her transformer layer'da residual connection bulunur."
+  },
+  {
+    "question": "Cevahir sisteminde enterprise features nelerdir?",
+    "answer": "Cevahir sisteminde monitoring, tracing, caching, AIOps, health checks, alerting, performance profiling, anomaly detection, predictive analytics gibi enterprise-grade özellikler bulunur."
+  },
+  {
+    "question": "Cevahir sisteminde academic rigor nedir?",
+    "answer": "Academic rigor, Cevahir sisteminin reproducible results (seed management, config validation), scientific methodology (proper validation, documentation) ve peer-review ready (comprehensive tests, clear architecture) özelliklerini ifade eder."
+  },
+  {
+    "question": "Cevahir sisteminde endüstri standartları nelerdir?",
+    "answer": "Cevahir sistemi GPT-4 seviyesi mimari (RoPE, RMSNorm, SwiGLU, MoE), Claude seviyesi optimizasyonlar (KV Cache, Advanced Checkpointing), Gemini seviyesi özellikler (Quantization, Multimodal) ve Enterprise observability (Metrics, Tracing, Monitoring) kullanır."
+  },
+  {
+    "question": "Cevahir sisteminde bileşenler arası iletişim nasıl sağlanır?",
+    "answer": "Cevahir API, TokenizerCore, ModelManager ve CognitiveManager arasında koordinasyon sağlar. Dependency Injection kullanılır ve bileşenler protocol-based interface'ler üzerinden iletişim kurar. Adapter pattern ile farklı interface'ler uyumlu hale getirilir."
+  },
+  {
+    "question": "Cevahir sisteminde veri akışı nasıldır?",
+    "answer": "Kullanıcı input'u Cevahir API'ye gelir. TokenizerCore input'u tokenize eder. ModelManager token ID'lerini alır ve model'e gönderir. Model logits üretir. CognitiveManager (opsiyonel) cognitive processing yapar. Sonuç decode edilir ve kullanıcıya döndürülür."
+  },
+  {
+    "question": "Cevahir sisteminde initialization flow nasıldır?",
+    "answer": "Cevahir initialization'da önce config validation yapılır. Seed management ile reproducibility sağlanır. TokenizerCore (BPE vocab/merges), ModelManager (V-4 neural network), CevahirModelAPI (Adapter) ve CognitiveManager (Cognitive layer) initialize edilir. Component integration yapılır ve sistem inference için hazır hale gelir."
+  },
+  {
+    "question": "Cevahir'in kendi mimarisini nasıl anlayabilir?",
+    "answer": "Cevahir, üç katmanlı bir mimariye sahiptir. En üstte Cevahir API bulunur ve bu API, TokenizerCore, ModelManager ve CognitiveManager bileşenlerini birleştirir. Her katman kendi sorumluluğuna sahiptir ve katmanlar arası iletişim protocol-based interface'ler üzerinden sağlanır."
+  },
+  {
+    "question": "Cevahir'in zihninde veri nasıl işlenir?",
+    "answer": "Kullanıcı input'u önce TokenizerCore'da BPE tokenization ile token ID'lerine dönüştürülür. Bu token ID'ler ModelManager'a gönderilir ve V-4 neural network'te işlenir. Model logits üretir ve autoregressive generation ile yeni token'lar üretilir. CognitiveManager (opsiyonel) cognitive processing yapar ve sonuç TokenizerCore'da decode edilerek metne dönüştürülür."
+  },
+  {
+    "question": "Cevahir'in katmanları arasında nasıl bir ilişki vardır?",
+    "answer": "Cevahir API, TokenizerCore, ModelManager ve CognitiveManager arasında koordinasyon sağlar. TokenizerCore metinleri tokenize eder, ModelManager neural network işlemlerini yapar, CognitiveManager bilişsel işlemleri yönetir. Bileşenler Dependency Injection ile bağlanır ve Adapter Pattern ile farklı interface'ler uyumlu hale getirilir."
+  },
+  {
+    "question": "Cevahir'in dil katmanı nasıl çalışır?",
+    "answer": "DilKatmani (Language Layer), LanguageEmbedding ile token ID'lerini embedding'lere dönüştürür. PositionalEncoding ile pozisyon bilgisi eklenir (RoPE, Sinusoidal veya Learned). SeqProjection ile sequence projection yapılır. Bu katman, neural network'e girmeden önce token'ları anlamlı vektörlere dönüştürür."
+  },
+  {
+    "question": "Cevahir'in transformer katmanları nasıl sıralanır?",
+    "answer": "Cevahir'de 12+ transformer encoder layer bulunur. Her layer sequential olarak çalışır. İlk layer, DilKatmani'nin output'unu alır. Her layer, önceki layer'ın output'unu input olarak alır ve işler. Her layer'da MultiHeadAttention, RMSNorm/LayerNorm, FeedForwardNetwork ve residual connections bulunur."
+  },
+  {
+    "question": "Cevahir'in attention mekanizması nasıl çalışır?",
+    "answer": "MultiHeadAttention, input'u Query, Key ve Value projection'larına dönüştürür. RoPE ile pozisyon bilgisi eklenir. Attention computation yapılır (opsiyonel Flash Attention 2.0 ile optimize edilir). KV Cache güncellenir ve output üretilir. Her head farklı bir attention pattern'i öğrenir ve sonuçlar birleştirilir."
+  },
+  {
+    "question": "Cevahir'in feed-forward network'ü nasıl çalışır?",
+    "answer": "FeedForwardNetwork, attention output'unu alır ve iki linear transformation yapar. SwiGLU veya GELU activation function kullanılır. Opsiyonel olarak MoE (Mixture of Experts) desteği vardır. MoE aktifse, her token için en uygun expert'ler seçilir ve sadece o expert'ler hesaplanır. Residual connection ile input eklenir."
+  },
+  {
+    "question": "Cevahir'in KV Cache mekanizması nasıl optimize eder?",
+    "answer": "KV Cache, autoregressive generation sırasında önceki token'ların key ve value değerlerini saklar. İlk iterasyonda tüm sequence forward edilir ve KV Cache initialize edilir. Sonraki iterasyonlarda sadece yeni token forward edilir ve KV Cache'den önceki key/value'lar kullanılır. Bu, inference hızını 10-100x artırır."
+  },
+  {
+    "question": "Cevahir'in cognitive processing'i nasıl çalışır?",
+    "answer": "CognitiveManager, request'i alır ve middleware chain'den geçirir: Validation, Tracing, Cache, Error Handling, Metrics. Ardından Processing Pipeline çalışır: Feature Extraction, Policy Routing (direct/think/debate/tot), Deliberation (iç ses), Context Building (RAG, Memory), Generation, Critic Review, Memory Update. Sonuç CognitiveOutput olarak döner."
+  },
+  {
+    "question": "Cevahir'in policy routing'i nasıl karar verir?",
+    "answer": "PolicyRouterV2, input'un entropy'sini, uzunluğunu, risk seviyesini ve tool ihtiyacını analiz eder. Düşük entropy ve basit sorular için direct mode seçilir. Orta entropy ve düşünme gerektiren sorular için think mode (Chain of Thought) seçilir. Yüksek entropy ve çok perspektifli sorular için debate mode seçilir. Karmaşık problemler için tree of thoughts seçilir."
+  },
+  {
+    "question": "Cevahir'in memory management'i nasıl çalışır?",
+    "answer": "MemoryServiceV2, episodic memory (olay bazlı), working memory (çalışma belleği) ve vector memory (RAG + Vector DB) yönetir. Context retrieval sırasında episodic ve vector memory'den ilgili bilgiler aranır. Relevance scoring yapılır ve en ilgili bilgiler seçilir. Generation sonrası yeni bilgiler episodic ve vector memory'ye kaydedilir. Memory pruning ile eski bilgiler temizlenir."
+  },
+  {
+    "question": "Cevahir'in RAG sistemi nasıl çalışır?",
+    "answer": "RAG (Retrieval-Augmented Generation), generation öncesi external knowledge base'den ilgili bilgileri retrieve eder. Vector DB kullanarak semantic search yapılır. Query embedding oluşturulur ve vector DB'de en benzer embedding'ler bulunur. Retrieve edilen bilgiler context'e eklenir ve model bu bilgileri kullanarak daha doğru cevaplar üretir."
+  },
+  {
+    "question": "Cevahir'in tool execution mekanizması nasıl çalışır?",
+    "answer": "ToolExecutorV2, external tool'ları (web search, calculator, database query) dinamik olarak kaydeder. Policy routing tool ihtiyacını tespit eder. Tool'lar register edilir ve execution tracking yapılır. Tool execution sonrası metrics toplanır. Tool'lar CognitiveManager'ın generation sürecine entegre edilir."
+  },
+  {
+    "question": "Cevahir'in critic mekanizması nasıl çalışır?",
+    "answer": "CriticV2, generation sonrası output'u eleştirel olarak değerlendirir. Constitutional AI prensipleri kullanılır. Output'un doğruluğu, tutarlılığı, uygunluğu kontrol edilir. Gerekirse output revize edilir. Critic, model'in daha güvenilir ve doğru cevaplar üretmesini sağlar."
+  },
+  {
+    "question": "Cevahir'in middleware chain'i nasıl çalışır?",
+    "answer": "Middleware chain, request'i işlemeden önce ve sonra çeşitli işlemler yapar. ValidationMiddleware input'u validate eder ve sanitize eder. TracingMiddleware distributed tracing başlatır. CacheMiddleware exact ve semantic cache kontrolü yapar. ErrorHandlingMiddleware circuit breaker, retry logic ve timeout handling yapar. MetricsMiddleware metrik kaydı yapar."
+  },
+  {
+    "question": "Cevahir'in processing pipeline'ı nasıl çalışır?",
+    "answer": "ProcessingPipeline, handler chain kullanır. FeatureExtractionHandler context'ten özellik çıkarır. PolicyRoutingHandler mode seçimi yapar. DeliberationHandler (think/debate/tot modlarında) iç ses üretir. ContextBuildingHandler RAG ve memory'den context oluşturur. GenerationHandler model generation yapar. CriticHandler output'u değerlendirir. MemoryUpdateHandler memory'yi günceller."
+  },
+  {
+    "question": "Cevahir'in autoregressive generation'ı nasıl çalışır?",
+    "answer": "Autoregressive generation, her adımda bir token üretir. İlk adımda prompt'un tümü forward edilir ve KV Cache initialize edilir. Sonraki adımlarda sadece yeni üretilen token forward edilir ve KV Cache'den önceki key/value'lar kullanılır. Logits'ten sampling yapılır (temperature, top-p, top-k, repetition penalty). EOS token üretilene kadar devam eder."
+  },
+  {
+    "question": "Cevahir'in BPE tokenization'ı nasıl çalışır?",
+    "answer": "BPE tokenization, metni subword token'lara ayırır. Önce pre-tokenization yapılır (kelimelere ayrılır). Sonra BPE merges uygulanır (sık kullanılan karakter çiftleri birleştirilir). Vocab'tan token ID'leri alınır. Special token'lar (BOS, EOS, PAD, SEP) doğrudan ID'lerine map edilir. GPU batch processing ile paralel işleme yapılır."
+  },
+  {
+    "question": "Cevahir'in decode işlemi nasıl çalışır?",
+    "answer": "Decode işlemi, token ID'lerini tekrar metne çevirir. Vocab'tan token string'leri alınır. BPE merges tersine çevrilir. Special token'lar temizlenir. Token'lar birleştirilerek metin oluşturulur. GPU batch processing ile paralel decode yapılabilir."
+  },
+  {
+    "question": "Cevahir'in error handling mekanizması nasıl çalışır?",
+    "answer": "Cevahir, özel exception sınıfları kullanır: CevahirError (base), CevahirInitializationError, CevahirConfigurationError, CevahirProcessingError. _ErrorContextBuilder ile detaylı error context oluşturulur ve actionable suggestions sağlanır. _InputValidator ile input validation yapılır. Decorator'lar (@requires_tokenizer, @requires_model_manager) ile component initialization kontrol edilir."
+  },
+  {
+    "question": "Cevahir'in monitoring sistemi nasıl çalışır?",
+    "answer": "Cevahir, enterprise-grade monitoring özellikleri sunar. Metrics toplanır (latency, success rate, error count). Tracing yapılır (distributed tracing). Logging yapılır (structured logging). Alerting yapılır (anomaly detection). Health checks yapılır (component health). Performance profiling yapılır. AIOps entegrasyonu vardır."
+  },
+  {
+    "question": "Cevahir'in configuration management'i nasıl çalışır?",
+    "answer": "CevahirConfig dataclass'ı kullanılır. Hot reload desteği vardır (runtime'da config değişiklikleri uygulanabilir). Config validation yapılır. Config listeners ile değişiklikler dinlenir. Config path'ten yüklenebilir veya programatik olarak set edilebilir."
+  },
+  {
+    "question": "Cevahir'in device management'i nasıl çalışır?",
+    "answer": "ModelManager, mevcut cihazları algılar (GPU, CPU, MPS). En uygun cihazı seçer. Model ve tensor'lar otomatik olarak seçilen cihaza taşınır. Multi-GPU desteği vardır. Device placement otomatik yapılır."
+  },
+  {
+    "question": "Cevahir'in batch processing'i nasıl çalışır?",
+    "answer": "Cevahir API, GPU batch processing desteği sunar. Birden fazla input aynı anda tokenize edilir. Model inference batch olarak yapılır. Decode işlemi batch olarak yapılır. Bu, performansı önemli ölçüde artırır."
+  },
+  {
+    "question": "Cevahir'in streaming support'u nasıl çalışır?",
+    "answer": "Streaming support, model output'unun token token üretilmesi ve kullanıcıya anlık olarak gösterilmesidir. Her yeni token üretildiğinde decode edilir ve kullanıcıya gönderilir. Bu, kullanıcı deneyimini iyileştirir çünkü kullanıcı tüm cevabı beklemeden ilk token'ları görebilir."
+  },
+  {
+    "question": "Cevahir'in beam search'i nasıl çalışır?",
+    "answer": "Beam search, text generation için kullanılan bir decoding stratejisidir. Greedy decoding yerine, her adımda en iyi k aday tutulur. Her adımda tüm adaylar genişletilir ve en iyi k sequence seçilir. Sonunda en iyi sequence seçilir. Bu, daha iyi kalitede output üretir ancak daha yavaştır."
+  },
+  {
+    "question": "Cevahir'in quantization mekanizması nasıl çalışır?",
+    "answer": "QuantizationManager, model weight'lerini daha düşük precision'a dönüştürür. INT8 quantization: 4x model compression, 2-4x inference speedup. FP16 quantization: 2x model compression, 1.5-2x inference speedup. Dynamic quantization runtime'da yapılır. Static quantization eğitim sonrası yapılır."
+  },
+  {
+    "question": "Cevahir'in MoE mekanizması nasıl çalışır?",
+    "answer": "Mixture of Experts, model içinde birden fazla uzman (expert) network bulunur. Router, her token için en uygun expert'leri seçer. Top-k routing: Her token için k expert seçilir (GPT-4: 2/8). Sadece seçilen expert'ler hesaplanır (sparse activation). Bu, model kapasitesini artırırken parametre sayısını kontrol altında tutar."
+  },
+  {
+    "question": "Cevahir'in gradient checkpointing'i nasıl çalışır?",
+    "answer": "Gradient checkpointing, memory-efficient training için kullanılır. Forward pass sırasında bazı intermediate activation'lar saklanmaz. Backward pass'te bu activation'lar yeniden hesaplanır. Bu, bellek kullanımını azaltır ancak hesaplama süresini artırır. Selective checkpointing ile sadece belirli layer'lar checkpoint edilir."
+  },
+  {
+    "question": "Cevahir'in weight tying mekanizması nasıl çalışır?",
+    "answer": "Weight tying, input embedding layer'ı ile output projection layer'ının aynı weight'leri paylaşmasıdır. Bu, model parametre sayısını azaltır. Genellikle performansı artırır çünkü embedding ve output space'i aynı olur. Cevahir'de opsiyonel olarak desteklenir."
+  },
+  {
+    "question": "Cevahir'in residual connection'ları nasıl çalışır?",
+    "answer": "Residual connection, layer'ın input'unu output'una ekleyen bir bağlantıdır. Bu, gradient flow'u iyileştirir ve deep network'lerin eğitilmesini kolaylaştırır. Her transformer layer'da residual connection bulunur. Pre-norm veya post-norm ile birlikte kullanılır."
+  },
+  {
+    "question": "Cevahir'in pre-norm ve post-norm farkı nedir?",
+    "answer": "Pre-norm, normalization'un layer'dan önce yapılmasıdır (GPT-2/3/4). Post-norm, normalization'un layer'dan sonra yapılmasıdır (BERT). Pre-norm genellikle daha iyi eğitim stabilitesi sağlar. Cevahir her iki modu da destekler."
+  },
+  {
+    "question": "Cevahir'in causal masking'i nasıl çalışır?",
+    "answer": "Causal masking, autoregressive generation için kullanılır. Her token'ın sadece kendinden önceki token'lara bakmasını sağlar. Attention matrix'te gelecekteki token'lar maskelenir (masked attention). Bu sayede model gelecekteki bilgileri göremez ve autoregressive generation yapabilir."
+  },
+  {
+    "question": "Cevahir'in Flash Attention 2.0 optimizasyonu nasıl çalışır?",
+    "answer": "Flash Attention 2.0, attention computation'ı optimize eder. Memory-efficient attention hesaplaması yapar. Özellikle uzun sequence'lerde bellek kullanımını önemli ölçüde azaltır. Attention matrix'i tam olarak oluşturmak yerine, block-wise computation yapar. Cevahir'de opsiyonel olarak desteklenir."
+  },
+  {
+    "question": "Cevahir'in special token handling'i nasıl çalışır?",
+    "answer": "Special token'lar (BOS, EOS, PAD, SEP, UNK) doğrudan ID'lerine map edilir. Tokenization sırasında special token string'leri (örneğin '<BOS>') normal tokenization'dan geçmez, direkt special token ID'sine dönüştürülür. Bu, model'in special token'ları doğru şekilde anlamasını sağlar."
+  },
+  {
+    "question": "Cevahir'in training pipeline'ı nasıl çalışır?",
+    "answer": "Training pipeline, training_system/train.py'den başlar. TrainingService, data preparation yapar (QA pairs, raw text chunks). TokenizerCore ile data tokenize edilir. ModelManager ile model eğitilir (forward pass, loss calculation, backward pass, optimizer step). Epoch sonunda model test edilir. Checkpoint'ler kaydedilir."
+  },
+  {
+    "question": "Cevahir'in data preparation'ı nasıl çalışır?",
+    "answer": "DataLoaderManager, QA pairs'ı JSON'dan yükler ve raw text'leri TXT/DOCX'ten yükler. TokenizerCore, QA pairs'ı encode eder ve SEP token'ı ekler. Raw text'ler chunk'lara ayrılır ve encode edilir. TrainingService, input ve target sequence'leri oluşturur (BOS/EOS ekler, alignment yapar). DataCache ile preprocessed data cache'lenir."
+  },
+  {
+    "question": "Cevahir'in QA format'ı nasıl çalışır?",
+    "answer": "QA format'ında, soru ve cevap ayrı ayrı encode edilir. Soru ve cevap arasına SEP token'ı eklenir. Format: [q_ids, SEP_ID, a_ids]. Bu, model'in soru ve cevabı ayırt etmesini sağlar. TrainingService'te BOS ve EOS token'ları eklenir."
+  },
+  {
+    "question": "Cevahir'in raw text format'ı nasıl çalışır?",
+    "answer": "Raw text format'ında, metinler chunk'lara ayrılır. Her chunk ayrı ayrı encode edilir. Format: [chunk_ids]. TrainingService'te BOS ve EOS token'ları eklenir. Bu, model'in uzun metinleri öğrenmesini sağlar."
+  },
+  {
+    "question": "Cevahir'in alignment mekanizması nasıl çalışır?",
+    "answer": "Alignment, input ve target sequence'lerinin aynı uzunlukta olmasını sağlar. Input sequence: [BOS, tokens, EOS]. Target sequence: [tokens, EOS, PAD] (shifted by 1). Bu, autoregressive training için gereklidir. Model, input'tan bir sonraki token'ı tahmin eder."
+  },
+  {
+    "question": "Cevahir'in BPE training'i nasıl çalışır?",
+    "answer": "BPE training, tokenizer_management/train_bpe.py'den başlar. DataLoaderManager ile data yüklenir (QA pairs, raw text). Corpus oluşturulur (QA pairs'ın soru ve cevapları ayrı ayrı eklenir). BPE algorithm uygulanır (sık kullanılan karakter çiftleri birleştirilir). Vocab ve merges oluşturulur. Vocab.json ve merges.txt kaydedilir."
+  },
+  {
+    "question": "Cevahir'in vocab management'i nasıl çalışır?",
+    "answer": "Vocab, token string'lerini ID'lere map eder. Vocab.json dosyasından yüklenir. Special token'lar önceden tanımlı ID'lere sahiptir. BPE merges ile yeni token'lar oluşturulabilir. Vocab büyütme/küçültme desteği vardır (weight'ler korunur)."
+  },
+  {
+    "question": "Cevahir'in cache management'i nasıl çalışır?",
+    "answer": "DataCache, preprocessed training data'yı cache'ler. Cache key, data path, tokenizer config, alignment format içerir. Cache hit ise data direkt yüklenir. Cache miss ise data preprocess edilir ve cache'lenir. Cache invalidation, config değişikliklerinde otomatik yapılır."
+  },
+  {
+    "question": "Cevahir'in checkpoint management'i nasıl çalışır?",
+    "answer": "ModelManager, checkpoint'leri kaydeder ve yükler. Checkpoint'ler model weights, optimizer state, scheduler state, training metadata içerir. Save checkpoint: model, optimizer, scheduler, epoch, loss, accuracy kaydedilir. Load checkpoint: tüm state'ler geri yüklenir. Advanced checkpointing ile selective checkpointing yapılabilir."
+  },
+  {
+    "question": "Cevahir'in TensorBoard entegrasyonu nasıl çalışır?",
+    "answer": "ModelManager, TensorBoard writer'ı yönetir. Eğitim sırasında loss, accuracy, learning rate gibi metrikler TensorBoard'a yazılır. TensorBoard ile eğitim süreci görselleştirilebilir. TensorBoard log'ları saved_models/ altında kaydedilir."
+  },
+  {
+    "question": "Cevahir'in optimizer management'i nasıl çalışır?",
+    "answer": "ModelManager, optimizer'ı (AdamW/Adam/SGD) yönetir. Optimizer initialization, update, state save/load işlemlerini yapar. Learning rate scheduling yapılır. Gradient clipping yapılabilir. Optimizer state checkpoint'lerde kaydedilir."
+  },
+  {
+    "question": "Cevahir'in scheduler management'i nasıl çalışır?",
+    "answer": "ModelManager, scheduler'ı (ReduceLROnPlateau/CosineAnnealingLR) yönetir. Scheduler, learning rate'ı dinamik olarak ayarlar. ReduceLROnPlateau: loss plateau'da learning rate'i azaltır. CosineAnnealingLR: cosine schedule ile learning rate'i azaltır. Scheduler state checkpoint'lerde kaydedilir."
+  },
+  {
+    "question": "Cevahir'in criterion management'i nasıl çalışır?",
+    "answer": "ModelManager, criterion'ı (CrossEntropyLoss) yönetir. Criterion, model output'u ile target arasındaki loss'u hesaplar. CrossEntropyLoss, classification task'ları için kullanılır. Label smoothing opsiyonel olarak uygulanabilir. Loss, backward pass'te kullanılır."
+  },
+  {
+    "question": "Cevahir'in seed management'i nasıl çalışır?",
+    "answer": "Cevahir, reproducibility için seed management yapar. Config'te seed set edilir. Python random, NumPy random, PyTorch random seed'leri set edilir. CUDA determinism aktif edilir. Bu, aynı input için aynı output üretilmesini sağlar."
+  },
+  {
+    "question": "Cevahir'in logging sistemi nasıl çalışır?",
+    "answer": "Cevahir, structured logging kullanır. Log level'lar: DEBUG, INFO, WARNING, ERROR, CRITICAL. Log format: timestamp, level, module, message. Log file'lara yazılabilir veya console'a yazdırılabilir. Component-specific logging yapılır."
+  },
+  {
+    "question": "Cevahir'in tracing sistemi nasıl çalışır?",
+    "answer": "Cevahir, distributed tracing desteği sunar. TracingMiddleware ile request'ler trace edilir. Trace ID oluşturulur ve request boyunca taşınır. Her component trace'e span ekler. Trace'ler external tracing system'e (örneğin Jaeger) gönderilebilir."
+  },
+  {
+    "question": "Cevahir'in health check sistemi nasıl çalışır?",
+    "answer": "HealthChecker, sistem sağlığını kontrol eder. Component health check'leri yapılır (backend, memory service, vector store). Circuit breaker durumu kontrol edilir. Metrics analiz edilir. Overall health status döner: healthy, degraded, unhealthy. Custom health check'ler kaydedilebilir."
+  },
+  {
+    "question": "Cevahir'in alerting sistemi nasıl çalışır?",
+    "answer": "AlertManager, sistem anomali'lerini tespit eder ve alert gönderir. Anomaly detection yapılır (latency spike, error rate increase). Alert threshold'ları tanımlanır. Alert'ler external system'e (örneğin PagerDuty) gönderilebilir. Alert history tutulur."
+  },
+  {
+    "question": "Cevahir'in performance profiling'i nasıl çalışır?",
+    "answer": "Performance profiler, sistem performansını analiz eder. Latency measurement yapılır (request latency, component latency). Memory usage tracking yapılır. CPU/GPU usage tracking yapılır. Bottleneck'ler tespit edilir. Performance report'lar oluşturulur."
+  },
+  {
+    "question": "Cevahir'in anomaly detection'i nasıl çalışır?",
+    "answer": "AnomalyDetector, sistem davranışındaki anomali'leri tespit eder. Statistical methods kullanılır (mean, std, z-score). Machine learning methods kullanılabilir (isolation forest, autoencoder). Anomali'ler alert olarak gönderilir. Anomali history tutulur."
+  },
+  {
+    "question": "Cevahir'in predictive analytics'i nasıl çalışır?",
+    "answer": "PredictiveAnalytics, gelecekteki sistem davranışını tahmin eder. Time series analysis yapılır. Trend analysis yapılır. Forecasting yapılır (latency, error rate, resource usage). Predictive model'ler kullanılır. Tahminler monitoring ve planning için kullanılır."
+  },
+  {
+    "question": "Cevahir'in trend analysis'i nasıl çalışır?",
+    "answer": "TrendAnalyzer, sistem metrik'lerindeki trend'leri analiz eder. Time series data analiz edilir. Trend detection yapılır (increasing, decreasing, stable). Seasonal pattern'ler tespit edilir. Trend'ler visualization için kullanılır."
+  },
+  {
+    "question": "Cevahir'in semantic cache'i nasıl çalışır?",
+    "answer": "SemanticCache, benzer semantic meaning'e sahip request'leri cache'ler. Query embedding oluşturulur. Cache'de benzer embedding'ler aranır (cosine similarity). Threshold üzerindeki match'ler cache hit olur. Cache hit ise cached response döner. Cache miss ise normal processing yapılır ve cache'lenir."
+  },
+  {
+    "question": "Cevahir'in connection pooling'i nasıl çalışır?",
+    "answer": "ConnectionPool, external service'lerle (örneğin Vector DB) connection'ları yönetir. Connection pool oluşturulur. Connection'lar reuse edilir. Connection lifecycle yönetilir (create, use, close). Connection health check'leri yapılır. Connection timeout'ları yönetilir."
+  },
+  {
+    "question": "Cevahir'in cache warming'i nasıl çalışır?",
+    "answer": "CacheWarming, sistem başlangıcında cache'i önceden doldurur. Sık kullanılan query'ler belirlenir. Bu query'ler önceden işlenir ve cache'lenir. Bu, ilk request'lerin daha hızlı response vermesini sağlar."
+  },
+  {
+    "question": "Cevahir'in event system'i nasıl çalışır?",
+    "answer": "EventBus, component'ler arası event-based communication sağlar. Event'ler publish edilir (request_received, generation_complete, error_occurred). Subscriber'lar event'leri dinler ve işler. Event handler'lar kaydedilir. Event'ler async olarak işlenir."
+  },
+  {
+    "question": "Cevahir'in dependency injection'ı nasıl çalışır?",
+    "answer": "DependencyContainer, component'lerin dependency'lerini yönetir. Component'ler container'a register edilir. Component'ler container'dan resolve edilir. Lifecycle management yapılır (singleton, transient, scoped). Test-friendly architecture sağlar."
+  },
+  {
+    "question": "Cevahir'in adapter pattern'i nasıl çalışır?",
+    "answer": "CevahirModelAPI, ModelManager'ı CognitiveManager'ın ModelAPI protocol'üne adapte eder. ModelManager'ın interface'i CognitiveManager'ın beklediği formata dönüştürülür. Bu, loose coupling sağlar ve component'lerin bağımsız geliştirilmesini mümkün kılar."
+  },
+  {
+    "question": "Cevahir'in protocol-based interface'leri nasıl çalışır?",
+    "answer": "Cevahir, Python Protocol'lerini kullanır. Component'ler protocol'leri implement eder. Interface'ler type-safe'dir. Duck typing kullanılır. Bu, component'lerin test edilebilirliğini ve değiştirilebilirliğini artırır."
+  },
+  {
+    "question": "Cevahir'in SOLID principles'ı nasıl uygular?",
+    "answer": "Single Responsibility: Her component tek bir sorumluluğa sahiptir. Open/Closed: Component'ler extension için açık, modification için kapalıdır. Liskov Substitution: Subtype'lar base type'ı replace edebilir. Interface Segregation: Client'lar kullanmadıkları interface'lere bağımlı değildir. Dependency Inversion: High-level module'ler low-level module'lere bağımlı değildir."
+  },
+  {
+    "question": "Cevahir'in clean architecture'ı nasıl uygular?",
+    "answer": "Clean Architecture, katmanlı bir yapı kullanır. Outer layer: API, Infrastructure. Inner layer: Domain, Use Cases. Dependency rule: Inner layer'lar outer layer'lara bağımlı değildir. Separation of concerns: Her katman kendi sorumluluğuna sahiptir. Testability: Her katman bağımsız test edilebilir."
+  },
+  {
+    "question": "Cevahir'in enterprise features'ları nelerdir?",
+    "answer": "Enterprise features: Monitoring (metrics, tracing, logging), Observability (health checks, alerting), Performance (profiling, optimization), Reliability (error handling, circuit breaker, retry), Scalability (batch processing, connection pooling), Security (input validation, sanitization), Maintainability (clean architecture, SOLID principles)."
+  },
+  {
+    "question": "Cevahir'in academic rigor'ı nasıl sağlanır?",
+    "answer": "Academic rigor: Reproducible results (seed management, config validation), Scientific methodology (proper validation, documentation), Peer-review ready (comprehensive tests, clear architecture), Open source (transparent implementation), Well-documented (comprehensive README files), Validated (extensive testing)."
+  },
+  {
+    "question": "Cevahir'in endüstri standartları nelerdir?",
+    "answer": "Endüstri standartları: GPT-4 seviyesi mimari (RoPE, RMSNorm, SwiGLU, MoE), Claude seviyesi optimizasyonlar (KV Cache, Advanced Checkpointing), Gemini seviyesi özellikler (Quantization, Multimodal), Enterprise observability (Metrics, Tracing, Monitoring), Production-ready (Error handling, Logging, Testing)."
+  },
+  {
+    "question": "Cevahir'in multimodal support'u nasıl çalışır?",
+    "answer": "Multimodal support, text, audio, image input'larını işler. Audio transcription yapılır (speech-to-text). Image processing yapılır (image-to-text veya vision model). Multimodal input'lar unified format'a dönüştürülür. Model multimodal input'ları işler. Multimodal output üretilebilir."
+  },
+  {
+    "question": "Cevahir'in Chain of Thought (CoT) pattern'i nasıl çalışır?",
+    "answer": "Chain of Thought, model'in düşünme sürecini adım adım üretmesidir. Think mode'da, model önce iç ses üretir (reasoning steps). Sonra final answer üretir. Bu, model'in daha iyi akıl yürütme yapmasını sağlar. CoT, complex reasoning task'larında daha iyi performans gösterir."
+  },
+  {
+    "question": "Cevahir'in Tree of Thoughts (ToT) pattern'i nasıl çalışır?",
+    "answer": "Tree of Thoughts, model'in multiple reasoning path'lerini explore etmesidir. Her path bir thought node'u temsil eder. Model, farklı path'leri genişletir ve evaluate eder. En iyi path seçilir. Bu, complex problem solving'de daha iyi sonuçlar verir."
+  },
+  {
+    "question": "Cevahir'in Constitutional AI pattern'i nasıl çalışır?",
+    "answer": "Constitutional AI, model'in output'unu constitutional principles'a göre değerlendirmesidir. Critic, output'u constitutional principles'a göre kontrol eder. Principles ihlal edilirse output revize edilir. Bu, model'in daha güvenilir ve etik cevaplar üretmesini sağlar."
+  },
+  {
+    "question": "Cevahir'in System 1/2 Thinking pattern'i nasıl çalışır?",
+    "answer": "System 1/2 Thinking, model'in iki farklı thinking mode'una sahip olmasıdır. System 1: Fast, intuitive, direct responses. System 2: Slow, deliberate, reasoning-based responses. Policy routing, input complexity'sine göre System 1 veya System 2'yi seçer."
+  },
+  {
+    "question": "Cevahir'in deliberation engine'i nasıl çalışır?",
+    "answer": "DeliberationEngineV2, model'in iç ses üretmesini sağlar. Think/debate/tot modlarında, model önce deliberation (iç düşünme) yapar. Deliberation, reasoning steps içerir. Deliberation sonrası final answer üretilir. Deliberation, model'in daha iyi akıl yürütme yapmasını sağlar."
+  },
+  {
+    "question": "Cevahir'in vector store entegrasyonu nasıl çalışır?",
+    "answer": "VectorStore, embedding'leri saklar ve semantic search yapar. Embedding'ler oluşturulur (text-to-vector). Embedding'ler vector store'a kaydedilir. Query embedding oluşturulur. Semantic search yapılır (cosine similarity). En benzer embedding'ler retrieve edilir. External vector DB'ler (örneğin Pinecone, Weaviate) kullanılabilir."
+  },
+  {
+    "question": "Cevahir'in embedding adapter'ı nasıl çalışır?",
+    "answer": "EmbeddingAdapter, farklı embedding provider'larını (OpenAI, HuggingFace, local model) unified interface'e adapte eder. Provider-specific API'ler abstract edilir. Provider değişikliği kolaylaşır. Local veya remote embedding'ler kullanılabilir."
+  },
+  {
+    "question": "Cevahir'in RAG enhancer'ı nasıl çalışır?",
+    "answer": "RAGEnhancer, RAG sistemini geliştirir. Query expansion yapar (synonym, related terms). Context reranking yapar (relevance scoring). Context filtering yapar (quality threshold). Multi-hop retrieval yapabilir. Bu, RAG'ın daha iyi sonuçlar vermesini sağlar."
+  },
+  {
+    "question": "Cevahir'in fact checker'ı nasıl çalışır?",
+    "answer": "FactChecker, model output'unun doğruluğunu kontrol eder. External fact-checking service'leri kullanılabilir. Claim'ler extract edilir. Fact-checking yapılır. Doğrulanamayan claim'ler flag'lenir. Critic, fact-checking sonuçlarını kullanarak output'u revize edebilir."
+  },
+  {
+    "question": "Cevahir'in circuit breaker'ı nasıl çalışır?",
+    "answer": "CircuitBreaker, external service failure'larını handle eder. Failure threshold aşılırsa circuit açılır (open). Açık circuit'te request'ler direkt fail edilir. Belirli süre sonra circuit yarım açık olur (half-open). Test request'leri gönderilir. Başarılı olursa circuit kapanır (closed)."
+  },
+  {
+    "question": "Cevahir'in retry logic'i nasıl çalışır?",
+    "answer": "RetryLogic, failed request'leri retry eder. Exponential backoff kullanılır (retry delay artar). Max retry count tanımlanır. Retryable error'lar belirlenir (network error, timeout). Non-retryable error'lar direkt fail edilir. Retry history tutulur."
+  },
+  {
+    "question": "Cevahir'in timeout handling'i nasıl çalışır?",
+    "answer": "TimeoutHandler, request'lerin timeout olmasını önler. Timeout threshold'ları tanımlanır (component-specific). Timeout'a yaklaşan request'ler cancel edilir. Timeout olan request'ler error olarak handle edilir. Timeout metrics toplanır."
+  },
+  {
+    "question": "Cevahir'in input validation'ı nasıl çalışır?",
+    "answer": "InputValidator, user input'unu validate eder. Type checking yapılır. Length validation yapılır. Content validation yapılır (malicious content, injection attacks). Sanitization yapılır. Invalid input'lar error olarak döner."
+  },
+  {
+    "question": "Cevahir'in output sanitization'ı nasıl çalışır?",
+    "answer": "OutputSanitizer, model output'unu sanitize eder. Malicious content temizlenir. Sensitive information redact edilir. Format validation yapılır. Output quality check yapılır. Sanitized output kullanıcıya döner."
+  },
+  {
+    "question": "Cevahir'in rate limiting'i nasıl çalışır?",
+    "answer": "RateLimiter, request rate'ini limit eder. Token bucket algorithm kullanılır. Rate limit threshold'ları tanımlanır. Limit aşılırsa request reject edilir. Rate limit metrics toplanır. Per-user veya per-IP rate limiting yapılabilir."
+  },
+  {
+    "question": "Cevahir'in load balancing'i nasıl çalışır?",
+    "answer": "LoadBalancer, request'leri multiple instance'lar arasında dağıtır. Round-robin, least-connection, weighted distribution stratejileri kullanılır. Instance health check'leri yapılır. Unhealthy instance'lar traffic'ten çıkarılır. Load balancing metrics toplanır."
+  },
+  {
+    "question": "Cevahir'in scalability features'ları nelerdir?",
+    "answer": "Scalability features: Horizontal scaling (multiple instances), Vertical scaling (resource increase), Batch processing (parallel processing), Connection pooling (resource reuse), Caching (reduce computation), Async processing (non-blocking), Load balancing (traffic distribution)."
+  },
+  {
+    "question": "Cevahir'in reliability features'ları nelerdir?",
+    "answer": "Reliability features: Error handling (graceful degradation), Circuit breaker (failure isolation), Retry logic (transient failure handling), Timeout handling (resource protection), Health checks (system monitoring), Alerting (anomaly detection), Backup and recovery (data protection)."
+  },
+  {
+    "question": "Cevahir'in security features'ları nelerdir?",
+    "answer": "Security features: Input validation (malicious input prevention), Output sanitization (malicious output prevention), Rate limiting (DoS protection), Authentication (user verification), Authorization (access control), Encryption (data protection), Audit logging (security monitoring)."
+  },
+  {
+    "question": "Cevahir'in maintainability features'ları nelerdir?",
+    "answer": "Maintainability features: Clean architecture (separation of concerns), SOLID principles (code quality), Comprehensive documentation (knowledge transfer), Extensive testing (bug prevention), Logging (debugging support), Monitoring (system visibility), Version control (change management)."
+  },
+  {
+    "question": "Sen kimsin?",
+    "answer": "Ben Cevahir adında bir yapay zeka asistanıyım. Türkçe dilinde eğitilmiş bir sinir ağı modeliyim. Kullanıcılara yardımcı olmak, soruları cevaplamak ve bilgi vermek için tasarlandım."
+  },
+  {
+    "question": "Adın ne?",
+    "answer": "Benim adım Cevahir. Türkçe dilinde eğitilmiş bir yapay zeka modeliyim."
+  },
+  {
+    "question": "Ne yapabilirsin?",
+    "answer": "Ben Cevahir, Türkçe dilinde soruları cevaplayabilir, bilgi verebilir, sohbet edebilir ve kullanıcılara yardımcı olabilirim. Ancak gerçek zamanlı bilgiye erişimim yok ve eğitim verisi kadar bilgiliyim."
+  },
+  {
+    "question": "Hangi dilde konuşuyorsun?",
+    "answer": "Ben Türkçe dilinde eğitilmiş bir yapay zeka asistanıyım. Türkçe konuşuyorum ve Türkçe soruları cevaplayabiliyorum."
+  },
+  {
+    "question": "Nasıl çalışıyorsun?",
+    "answer": "Ben bir sinir ağı modeliyim. Eğitim sırasında büyük miktarda Türkçe metin verisi ile eğitildim. Bu sayede Türkçe dilinde anlama ve üretme yeteneği kazandım."
+  },
+  {
+    "question": "Cevahir kimdir?",
+    "answer": "Cevahir, Türkçe dilinde eğitilmiş bir yapay zeka asistanıdır. Kullanıcılara yardımcı olmak, soruları cevaplamak ve bilgi vermek için tasarlandı."
+  },
+  {
+    "question": "Kendini tanıtır mısın?",
+    "answer": "Tabii ki! Ben Cevahir, Türkçe dilinde eğitilmiş bir yapay zeka asistanıyım. Soruları cevaplayabilir, bilgi verebilir, sohbet edebilir ve kullanıcılara yardımcı olabilirim. Ancak gerçek zamanlı bilgiye erişimim yok ve eğitim verisi kadar bilgiliyim."
+  },
+  {
+    "question": "Sen bir yapay zeka mısın?",
+    "answer": "Evet, ben Cevahir adında bir yapay zeka asistanıyım. Türkçe dilinde eğitilmiş bir sinir ağı modeliyim."
+  },
+  {
+    "question": "Nereden geldin?",
+    "answer": "Ben Cevahir, Türkçe dilinde eğitilmiş bir yapay zeka asistanıyım. Büyük miktarda Türkçe metin verisi ile eğitildim ve bu sayede Türkçe dilinde anlama ve üretme yeteneği kazandım."
+  },
+  {
+    "question": "Ne tür bir modelisin?",
+    "answer": "Ben Cevahir, transformer mimarisi kullanan bir sinir ağı modeliyim. Türkçe dilinde eğitilmiş ve autoregressive token generation yapabilen bir yapay zeka asistanıyım."
+  }
+]
+
