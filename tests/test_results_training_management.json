@@ -1,0 +1,77 @@
+{
+  "test_timestamp": "2026-01-04T18:28:03.836696",
+  "tests": {
+    "test_1_model_manager": {
+      "test_name": "test_1_model_manager",
+      "status": "passed",
+      "model_type": "CevahirNeuralNetwork",
+      "is_cevahir_neural_network": true,
+      "state_dict_keys_count": 223,
+      "is_simple_model": false,
+      "first_10_keys": [
+        "dil_katmani.language_embedding.embedding.weight",
+        "dil_katmani.seq_projection.projection_layer.weight",
+        "dil_katmani.seq_projection.projection_layer.bias",
+        "dil_katmani.layer_norm.weight",
+        "dil_katmani.layer_norm.bias",
+        "layers.0.attn.query_proj.weight",
+        "layers.0.attn.query_proj.bias",
+        "layers.0.attn.key_proj.weight",
+        "layers.0.attn.key_proj.bias",
+        "layers.0.attn.value_proj.weight"
+      ],
+      "error": null
+    },
+    "test_2_training_service": {
+      "test_name": "test_2_training_service",
+      "status": "passed",
+      "model_type": "CevahirNeuralNetwork",
+      "is_cevahir_neural_network": true,
+      "state_dict_keys_count": 223,
+      "is_simple_model": false,
+      "first_10_keys": [
+        "dil_katmani.language_embedding.embedding.weight",
+        "dil_katmani.seq_projection.projection_layer.weight",
+        "dil_katmani.seq_projection.projection_layer.bias",
+        "dil_katmani.layer_norm.weight",
+        "dil_katmani.layer_norm.bias",
+        "layers.0.attn.query_proj.weight",
+        "layers.0.attn.query_proj.bias",
+        "layers.0.attn.key_proj.weight",
+        "layers.0.attn.key_proj.bias",
+        "layers.0.attn.value_proj.weight"
+      ],
+      "error": null
+    },
+    "test_3_checkpoint_manager": {
+      "test_name": "test_3_checkpoint_manager",
+      "status": "passed",
+      "model_keys_before_save": 223,
+      "checkpoint_keys_count": 223,
+      "is_simple_model": false,
+      "keys_match": true,
+      "missing_keys_count": 0,
+      "unexpected_keys_count": 0,
+      "checkpoint_path": "C:\\Users\\myy\\AppData\\Local\\Temp\\tmpchyfv8vz\\checkpoints\\best.pth",
+      "error": null
+    },
+    "test_4_training_manager": {
+      "test_name": "test_4_training_manager",
+      "status": "passed",
+      "model_keys_before_save": 223,
+      "training_manager_keys_count": 223,
+      "checkpoint_keys_count": 223,
+      "is_simple_model": false,
+      "keys_match_model_manager": true,
+      "keys_match_checkpoint": true,
+      "checkpoint_path": "C:\\Users\\myy\\AppData\\Local\\Temp\\tmp45z5_0nx\\checkpoints\\best.pth",
+      "error": null
+    }
+  },
+  "summary": {
+    "total_tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "all_passed": true
+  }
+}
