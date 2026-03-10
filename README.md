@@ -145,7 +145,7 @@ python model_management/chat_pipeline.py
 
 ---
 
-## Eğitim Esnasında Elde Edilen Örnek Çıktılar
+## Eğitim Esnasında Elde Edilen Örnek Çıktılar - Example Generation During Training
 
 Eğitim sırasında veya epoch sonu testlerinde **TrainingServiceV2** ile alınan inference örnekleridir: modele verilen prompt, üretilen yanıt, token sayısı ve EOS bilgisi logda görülür. Aşağıya bu tür ekran görüntülerini ekleyebilirsiniz.
 
