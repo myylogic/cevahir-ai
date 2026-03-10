@@ -151,8 +151,24 @@ Eğitim sırasında veya epoch sonu testlerinde **TrainingServiceV2** ile alına
 
 ### Örnek çıktı görselleri
 
-<!-- Görsellerinizi buraya ekleyin, örn: ![Eğitim sırasında örnek çıktı](image/egitim_ornek_1.png) -->
-
+<p align="center">
+  <img src="image/1.jpeg" style="max-width:100%;">
+</p>
+<p align="center">
+  <img src="image/2.jpeg" style="max-width:100%;">
+</p>
+<p align="center">
+  <img src="image/3.jpeg" style="max-width:100%;">
+</p>
+<p align="center">
+  <img src="image/4.jpeg" style="max-width:100%;">
+</p>
+<p align="center">
+  <img src="image/5.jpeg" style="max-width:100%;">
+</p>
+<p align="center">
+  <img src="image/6.jpeg" style="max-width:100%;">
+</p>
 ---
 
 ## Eğitim
