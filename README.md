@@ -179,6 +179,12 @@ Model eğitimi için kullanılan veri seti **yaklaşık 680 bin örnek** içerir
 
 - **[Eğitim verisi (Google Drive)](https://drive.google.com/drive/folders/19G5uGS5YM3rf42OefjM3KsXRyn0ZEshW?usp=sharing)** — ~680k örnek (docx, txt, soru–cevap json vb.); `prepare_cache.py` ile uyumlu formata dönüştürülebilir.
 
+### Eğitilmiş model (indirme)
+
+Sıfırdan eğitim yapmadan doğrudan inference veya sohbet denemek isterseniz, hazır eğitilmiş model ağırlıklarını indirebilirsiniz:
+
+- **[cevahir_model.pth (Google Drive)](https://drive.google.com/file/d/1uZKs3NsNfu1a-dm1Pu8sTPj9brqQtSGZ/view?usp=sharing)** — Eğitilmiş model checkpoint; `ModelManager` veya `chat_pipeline.py` ile yüklenebilir. (Proje config’inizdeki `vocab_size`, `embed_dim`, `num_layers`, `num_heads` değerleri checkpoint ile uyumlu olmalıdır.)
+
 ### Sıfırdan eğitim akışı
 
 Sıfırdan eğitim için adımlar **sırayla** şöyledir:
