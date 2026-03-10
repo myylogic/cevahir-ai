@@ -283,3 +283,11 @@ Katkılar memnuniyetle karşılanır. Fork, feature branch, commit ve Pull Reque
 ---
 
 **Geliştirici:** Muhammed Yasin Yılmaz ([@myylogic](https://github.com/myylogic)) · **Durum:** Açık Kaynak / Aktif Geliştirme · **Tarih:** 09.03.2026
+
+<p align="center">
+  <img src="image/myy.jpeg" style="max-width:100%;">
+</p>
+
+<p align="center">
+Cevahir AI & Engine – Creator · Turkish AI Researcher
+</p>
