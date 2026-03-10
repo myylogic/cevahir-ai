@@ -1,0 +1,2 @@
+"""Metrics module tests"""
+

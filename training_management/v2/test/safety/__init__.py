@@ -1,0 +1,2 @@
+"""Safety module tests"""
+
