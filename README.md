@@ -183,7 +183,7 @@ Model eğitimi için kullanılan veri seti **yaklaşık 680 bin örnek** içerir
 
 Sıfırdan eğitim yapmadan doğrudan inference veya sohbet denemek isterseniz, hazır eğitilmiş model ağırlıklarını indirebilirsiniz:
 
-- **[cevahir_model.pth (Google Drive)](https://drive.google.com/file/d/1uZKs3NsNfu1a-dm1Pu8sTPj9brqQtSGZ/view?usp=sharing)** — Eğitilmiş model checkpoint; `ModelManager` veya `chat_pipeline.py` ile yüklenebilir. (Proje config’inizdeki `vocab_size`, `embed_dim`, `num_layers`, `num_heads` değerleri checkpoint ile uyumlu olmalıdır.)
+- **[cevahir_model.pth (Google Drive)](https://drive.google.com/drive/folders/1ggu9hHveKMz91a3cDlfr9ts3smhQhAcv?usp=sharing)** — Eğitilmiş model checkpoint; `ModelManager` veya `chat_pipeline.py` ile yüklenebilir. (Proje config’inizdeki `vocab_size`, `embed_dim`, `num_layers`, `num_heads` değerleri checkpoint ile uyumlu olmalıdır.)
 
 ### Sıfırdan eğitim akışı
 
