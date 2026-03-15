@@ -1,1585 +1,715 @@
-# 🎓 Training Management - Kapsamlı Dokümantasyon
+# Training System V3 — Modül Dokümantasyonu
 
-**Versiyon:** V-5 (Advanced)  
-**Son Güncelleme:** 2025-01-27  
-**Durum:** ✅ Production-Ready | Endüstri Standartları
+**Versiyon:** V3 (Strict Cache + Advanced GPU Batching)
+**Dizin:** `training_system/v3/`
+**Giriş Noktası:** `training_system/train.py`
+**Son Güncelleme:** 2026-03-16
 
 ---
 
-## 📋 İçindekiler
+## İçindekiler
 
 1. [Genel Bakış](#genel-bakış)
-2. [Mimari Yapı](#mimari-yapı)
-3. [Çalışma Prensibi](#çalışma-prensibi)
-4. [Alt Modüller](#alt-modüller)
-5. [API Referansı](#api-referansı)
-6. [Training Loop Detayları](#training-loop-detayları)
-7. [Validation Loop Detayları](#validation-loop-detayları)
-8. [Kullanım Örnekleri](#kullanım-örnekleri)
-9. [Entegrasyonlar](#entegrasyonlar)
-10. [Best Practices](#best-practices)
+2. [Zorunlu Eğitim Akışı](#zorunlu-eğitim-akışı)
+3. [V3 Dizin Yapısı](#v3-dizin-yapısı)
+4. [V2 → V3 Kritik Değişiklikler](#v2--v3-kritik-değişiklikler)
+5. [Bileşenler](#bileşenler)
+   - [TrainingServiceV3](#trainingservicev3)
+   - [ConfigManagerV3](#configmanagerv3)
+   - [DataCacheV3](#datacachev3)
+   - [CevahirDataset](#cevahirdataset)
+   - [BucketBatchSampler](#bucketbatchsampler)
+   - [DynamicPaddingCollator](#dynamicpaddingcollator)
+   - [DataLoader Factory](#dataloader-factory)
+6. [train.py — TRAIN\_CONFIG](#trainpy--train_config)
+7. [55+ Parametre Referansı](#55-parametre-referansı)
+8. [GPU Optimizasyonları](#gpu-optimizasyonları)
+9. [Cache Sistemi](#cache-sistemi)
+10. [Entegrasyon](#entegrasyon)
 
 ---
 
-## 🎯 Genel Bakış
+## Genel Bakış
 
-**Training Management**, Cevahir Sinir Sistemi'nin eğitim ve doğrulama süreçlerini yöneten kapsamlı bir modüldür. Endüstri standartlarında özellikler sunar:
+Training System V3, V2'nin tam yeniden yazımıdır. Üç temel yenilik taşır:
 
-### Temel Özellikler
-
-- ✅ **Advanced Training Loop:** AMP, gradient accumulation, gradient clipping
-- ✅ **Comprehensive Validation:** Advanced metrics, memory-efficient validation
-- ✅ **Checkpoint Management:** Atomic saves, best/last model tracking, rotation
-- ✅ **Learning Rate Scheduling:** Multiple schedulers, warmup support
-- ✅ **Logging & Monitoring:** File logs, TensorBoard, JSONL events
-- ✅ **Performance Tracking:** Memory usage, batch times, throughput
-- ✅ **Visualization:** Loss/accuracy plots, custom metrics, CSV/JSON export
-- ✅ **Evaluation Metrics:** Precision, Recall, F1, Top-K accuracy, Confusion Matrix
-- ✅ **V-4 Feature Validation:** Automatic validation of RoPE, RMSNorm, SwiGLU, etc.
-- ✅ **Production-Ready:** Error handling, NaN/Inf detection, progress bars
-
-### Modül Bileşenleri
-
-1. **TrainingManager** - Ana training/validation orchestrator
-2. **TrainingLogger** - Comprehensive logging system
-3. **TrainingScheduler** - Learning rate scheduling
-4. **CheckpointManager** - Model checkpoint management
-5. **EvaluationMetrics** - Performance metrics calculation
-6. **TrainingVisualizer** - Training visualization
-
----
-
-## 🏗️ Mimari Yapı
-
-### Dosya Organizasyonu
+| Yenilik | V2 | V3 |
+|---|---|---|
+| Cache yönetimi | Optional fallback (raw data işlenebilir) | **Strict mode** — cache yoksa `CacheNotFoundError` |
+| GPU batching | Statik pad (global `max_seq_length`) | **BucketSampler + DynamicPad** |
+| Config aktarımı | ~20 parametre | **55+ parametre** |
+| Train/val split | Basit random split | **Source-ID aware split** (data leakage yok) |
+| Cache doğrulama | Yok | **SHA-256 checksum + JSON metadata** |
 
 ```
-training_management/
-├── __init__.py
-├── training_manager.py        # Ana training orchestrator (~1549 satır)
-├── training_logger.py          # Logging sistemi (~445 satır)
-├── training_scheduler.py       # LR scheduling (~361 satır)
-├── checkpoint_manager.py       # Checkpoint yönetimi (~464 satır)
-├── evaluation_metrics.py       # Metrik hesaplama (~518 satır)
-├── training_visualizer.py      # Görselleştirme (~421 satır)
-└── test/
-    ├── test_training_manager.py
-    ├── test_training_manager_comprehensive.py
-    └── test_checkpoint_manager.py
-```
-
-### Mimari Katmanlar
-
-```
-┌─────────────────────────────────────────────────────────┐
-│              TrainingService (training_system)          │
-│            (Orchestrates TrainingManager)               │
-└────────────────────┬────────────────────────────────────┘
-                     │
-        ┌────────────▼────────────┐
-        │   TrainingManager       │
-        │   (Main Orchestrator)   │
-        └────────────┬────────────┘
-                     │
-    ┌────────────────┼────────────────┐
-    │                │                │
-┌───▼────┐  ┌────────▼────────┐  ┌───▼──────────┐
-│Logger  │  │   Scheduler     │  │  Checkpoint  │
-│        │  │                 │  │  Manager     │
-└────────┘  └─────────────────┘  └──────────────┘
-                     │
-    ┌────────────────┼────────────────┐
-    │                │                │
-┌───▼────┐  ┌────────▼────────┐  ┌───▼──────────┐
-│Metrics │  │  Visualizer     │  │   TensorBoard│
-│        │  │                 │  │              │
-└────────┘  └─────────────────┘  └──────────────┘
+training_system/
+├── train.py                       ← Giriş noktası (TRAIN_CONFIG burada)
+├── prepare_cache.py               ← Cache hazırlama (adım 2)
+├── v2/                            ← Geriye dönük uyumluluk
+│   └── core/training_service.py
+└── v3/                            ← Yeni pipeline
+    ├── core/
+    │   ├── training_service_v3.py ← Orchestrator
+    │   └── config_manager_v3.py   ← 55+ parametre aktarımı
+    └── data/
+        ├── cache_v3.py            ← Strict cache manager
+        ├── dataset_v3.py          ← CevahirDataset (uzunluk indeksi)
+        ├── sampler_v3.py          ← BucketBatchSampler
+        ├── collator_v3.py         ← DynamicPaddingCollator
+        └── dataloader_v3.py       ← DataLoader factory
 ```
 
 ---
 
-## ⚙️ Çalışma Prensibi
+## Zorunlu Eğitim Akışı
 
-### 1. Training Flow
+```
+ADIM 1 → python tokenizer_management/train_bpe.py
+           BPE vocab/merges dosyaları oluşturulur
 
-```python
-TrainingManager.train()
-    ↓
-1. Initialization & Validation
-    ├── V-4 Feature Validation
-    ├── Component Initialization
-    └── Config Validation
-    ↓
-2. Training Loop (for each epoch):
-    ├── _train_epoch()
-    │   ├── Forward pass (AMP)
-    │   ├── Loss calculation (PAD masked)
-    │   ├── Backward pass (gradient accumulation)
-    │   ├── Gradient clipping
-    │   ├── Optimizer step
-    │   ├── TensorBoard logging
-    │   ├── Progress bar update
-    │   └── Memory/Performance tracking
-    ├── _validate_epoch()
-    │   ├── Forward pass (no_grad)
-    │   ├── Loss/Accuracy calculation
-    │   ├── Advanced metrics (Precision, Recall, F1)
-    │   ├── TensorBoard logging
-    │   └── Progress bar update
-    ├── Scheduler step (LR update)
-    ├── Checkpoint save (best/last)
-    ├── Early stopping check
-    └── Visualization save
-    ↓
-3. Cleanup & Finalization
-    ├── Training history save
-    ├── Visualizations export
-    └── TensorBoard close
+ADIM 2 → python training_system/prepare_cache.py
+           Eğitim verisi tokenize edilir ve cache'e yazılır
+           (SHA-256 checksum + JSON metadata ile)
+
+ADIM 3 → python training_system/train.py
+           Model eğitimi başlar
+           Cache yoksa: CacheNotFoundError → eğitim başlamaz
 ```
 
-### 2. Validation Flow
+> **⚠️ ÖNEMLİ:** Adım 3 adım 2 çıktısı olmadan çalışmaz. Bu izolasyon kasıtlıdır — veri hazırlama ve model eğitimini birbirinden ayırır (MLOps best practice).
 
-```python
-_validate_epoch()
-    ↓
-1. Model.eval()
-    ↓
-2. For each batch:
-    ├── Forward pass (no_grad)
-    ├── Loss/Accuracy calculation
-    ├── Predictions/Targets collection (for metrics)
-    ├── Memory cleanup (every 50 batches)
-    └── Progress logging
-    ↓
-3. Advanced Metrics Calculation:
-    ├── Precision, Recall, F1
-    ├── Top-K Accuracy
-    └── TensorBoard logging
-    ↓
-4. Return (avg_loss, accuracy)
+---
+
+## V3 Dizin Yapısı
+
 ```
-
-### 3. Checkpoint Flow
-
-```python
-save_model(epoch, val_loss, is_best)
-    ↓
-1. CheckpointManager.save()
-    ├── Create payload (model, optimizer, history, metadata)
-    ├── Atomic save (tmp → replace)
-    ├── Update index.json
-    ├── Update last.pth alias
-    └── Update best.pth alias (if is_best)
-    ↓
-2. Rotation (if max_checkpoints exceeded)
-    └── Delete oldest/worst checkpoints
+training_system/v3/
+├── core/
+│   ├── __init__.py
+│   ├── training_service_v3.py     ← TrainingServiceV3
+│   └── config_manager_v3.py       ← ConfigManagerV3
+├── data/
+│   ├── __init__.py
+│   ├── cache_v3.py                ← DataCacheV3, CacheNotFoundError
+│   ├── dataset_v3.py              ← CevahirDataset
+│   ├── sampler_v3.py              ← BucketBatchSampler
+│   ├── collator_v3.py             ← DynamicPaddingCollator
+│   └── dataloader_v3.py           ← create_dataloaders_v3
+└── utils/
+    └── __init__.py
 ```
 
 ---
 
-## 📦 Alt Modüller
+## V2 → V3 Kritik Değişiklikler
 
-### 1. TrainingManager
+### 1. Strict Cache Mode
 
-**Dosya:** `training_management/training_manager.py`  
-**Satır Sayısı:** ~1549  
-**Görev:** Ana training/validation orchestrator
+```
+V2: Cache yoksa → raw data okunur ve işlenir (implicit, yavaş)
+V3: Cache yoksa → CacheNotFoundError (explicit, hızlı hata)
+```
 
-#### Ana Özellikler
+`CacheNotFoundError` içinde:
+- Aranan `cache_key` ve `data_hash`
+- Mevcut cache dosyaları listesi (varsa boyut + metadata)
+- Key uyuşmazlığının olası nedenleri (4 madde)
+- Adım adım çözüm talimatı
 
-- **Training Loop:**
-  - AMP (Mixed Precision Training)
-  - Gradient accumulation
-  - Gradient clipping
-  - PAD-masked loss/accuracy
-  - Progress bars (tqdm)
-  - Performance tracking
+### 2. Source-ID Aware Train/Val Split
 
-- **Validation Loop:**
-  - Advanced metrics (Precision, Recall, F1, Top-K)
-  - Memory-efficient processing
-  - Colab-optimized progress logging
-  - Error recovery (continue on batch errors)
+V2'de basit random shuffle yapılıyordu. Aynı belgeden (source) gelen chunk'lar train ve val'a dağılabiliyordu — **data leakage**.
 
-- **V-4 Feature Validation:**
-  - Automatic validation of RoPE, RMSNorm, SwiGLU
-  - Gradient checkpointing check
-  - KV Cache check
-  - Weight tying check
+V3'te:
+```
+source_id çıkarım → unique source'lar %80/%20 bölünür →
+aynı source'un TÜM chunk'ları aynı split'e gider
+```
 
-- **Monitoring:**
-  - Memory tracking (GPU)
-  - Performance tracking (batch times, throughput)
-  - NaN/Inf detection
-  - Weight update verification
+Source ID yoksa: basit random split yapılır ve WARNING logu yazılır.
 
-#### Ana Metodlar
+### 3. GPU Batching Stack
+
+```
+V2: torch.stack() → tüm sequence'lar max_seq_length'e pad (statik)
+    GPU zamanının %70-90'ı PAD token hesaplar
+
+V3: BucketBatchSampler → benzer uzunluktakiler aynı batch'e
+    DynamicPaddingCollator → batch içi maksimum uzunluğa pad
+    → padding waste %20-40'a düşer (Schwartz et al. 2020)
+```
+
+### 4. Config: 55+ Parametre
+
+V2 ConfigManager ~20 parametre geçiriyordu. V3, entropy regularization'dan SWA'ya, curriculum learning'den loss spike detection'a kadar tüm parametreleri TrainingManager'a eksiksiz aktarır.
+
+### 5. Cache Integrity
+
+Her cache dosyası yazılırken:
+- `cached_data_<key>_<hash>.pkl` → ana veri
+- `cached_data_<key>_<hash>.sha256` → SHA-256 checksum
+- `cached_data_<key>_<hash>.meta.json` → human-readable metadata
+
+Yüklemede checksum doğrulanır. Uyuşmazlık → `CacheIntegrityError`.
+
+---
+
+## Bileşenler
+
+### TrainingServiceV3
+
+**Dosya:** `v3/core/training_service_v3.py`
+**Pattern:** Facade Pattern — tüm V3 pipeline'ını orkestre eder.
 
 ```python
-class TrainingManager:
-    def __init__(model, train_loader, val_loader, optimizer, criterion, config, ...)
-    def train(epoch_callback=None) -> Tuple[float, float]
-    def _train_epoch() -> Tuple[float, float]
-    def _validate_epoch() -> Tuple[float, float]
-    def save_model(epoch, val_loss=None, is_best=None)
-    def _compute_masked_loss_and_acc(logits, targets, pad_id) -> Tuple[Tensor, float, float]
-    def _track_memory_usage(epoch=None) -> Dict[str, float]
-    def _track_performance(epoch=None) -> Dict[str, float]
-    def _detect_nan_inf(loss, logits=None) -> bool
+from training_system.v3 import TrainingServiceV3
+
+service = TrainingServiceV3(config=TRAIN_CONFIG)
+train_loss, val_loss = service.train()
+```
+
+**`__init__` adımları (sırayla):**
+
+1. BPE dosya yolları → dizin oluşturma
+2. Device seçimi (GPU/CPU)
+3. `data_dir` varlığı kontrolü
+4. `BPEValidator` — vocab/merges formatı doğrulama
+5. `TokenizerCore` başlatma
+6. Vocab size TokenizerCore'dan al → config override
+7. `DataCacheV3` strict mode ile başlat
+8. `ModelManager.initialize(optimizer=True, criterion=False, scheduler=True)`
+9. `CriterionManager` → `entropy_coeff` destekli loss oluştur
+10. `ConfigManagerV3` başlat
+
+**`train()` pipeline (5 adım):**
+
+```
+1. Model initialize (checkpoint yükle — last.pth → best.pth → en yeni .pth)
+2. load_data_from_cache() → CacheNotFoundError fırlatabilir
+3. create_dataloaders_v3() (BucketSampler + DynamicPad)
+4. ConfigManagerV3.prepare_training_config() → 55+ parametre
+5. TrainingManager.train(epoch_callback=...) → (train_loss, val_loss)
+```
+
+**Epoch sonu test:** Her epoch sonunda model `.eval()` moduna alınır, test prompt'ları için top-k=80 örnekleme ile inference yapılır ve sonuçlar loglanır.
+
+**Checkpoint arama sırası:**
+```
+resume_from_path → load_checkpoint_path → last.pth → best.pth → checkpoint_*.pth (en yeni)
 ```
 
 ---
 
-### 2. TrainingLogger
+### ConfigManagerV3
 
-**Dosya:** `training_management/training_logger.py`  
-**Satır Sayısı:** ~445  
-**Görev:** Comprehensive logging system
-
-#### Özellikler
-
-- **File Logging:**
-  - Rotating file handlers (5MB max, 5 backups)
-  - Separate error log file
-  - UTF-8 encoding support
-  - Windows/Unix compatible
-
-- **TensorBoard Integration:**
-  - Scalar logging (loss, accuracy, LR, etc.)
-  - Histogram logging (weights, gradients)
-  - Figure logging (attention maps)
-  - Text logging (epoch summaries)
-  - HParams logging
-
-- **JSONL Event Log:**
-  - Structured event logging
-  - Machine-readable format
-  - Real-time append
-
-- **Console Logging:**
-  - Optional console output
-  - Formatted messages
-
-#### Ana Metodlar
+**Dosya:** `v3/core/config_manager_v3.py`
+**Pattern:** Adapter Pattern — `TRAIN_CONFIG` → TrainingManager config sözlüğü
 
 ```python
-class TrainingLogger:
-    def __init__(run_name=None, log_dir=None, tb_log_dir=None, ...)
-    def start_tb(tb_log_dir=None, run_name=None)
-    def log_metrics(epoch, training_loss, validation_loss=None, accuracy=None, ...)
-    def log_validation_metrics(epoch, validation_loss, validation_accuracy=None, ...)
-    def log_scalar(name, value, step)
-    def log_histogram(name, values, step)
-    def log_figure(name, figure, step)
-    def log_text(name, text, step)
-    def log_event(event: Dict[str, Any])
-    def close()
+config = config_manager.prepare_training_config(
+    base_config=TRAIN_CONFIG,
+    tokenizer_core=tok,
+    device="cuda"
+)
+# → 55+ parametreli dict
+```
+
+**11 Parametre Grubu:**
+
+| Grup | İçerik |
+|---|---|
+| 1. Temel | `epochs`, `batch_size`, `max_grad_norm`, `grad_accum_steps`, `use_amp` |
+| 2. Loss | `label_smoothing`, `entropy_coeff`, `use_focal_loss`, `focal_gamma`, `aux_loss_weight` |
+| 3. Optimizer | SAM, Lookahead, AGC, Gradient Noise |
+| 4. EMA / SWA | `use_ema`, `ema_decay`, `use_swa`, `swa_start_epoch`, `swa_lr` |
+| 5. LR Schedule | LLRD, Cosine Restarts |
+| 6. Scheduled Sampling | `use_scheduled_sampling`, `ss_start_epoch`, `ss_decay_rate`, `min_teacher_forcing` |
+| 7. Curriculum | `use_curriculum`, `curriculum_strategy`, `curriculum_max_len_start` |
+| 8. Güvenlik | NaN tolerance, NaN LR reduction, spike detection |
+| 9. Monitoring | `inference_probe_interval`, `log_gradient_health`, `log_token_dist` |
+| 10. GPU Batching | `use_bucket_batching`, `num_buckets`, `use_dynamic_padding`, workers |
+| 11. Cache | `cache_dir`, `cache_strict_mode`, `cache_verify_integrity` |
+
+**Validasyon (config üretildikten sonra çalışır):**
+
+```python
+# Hata fırlatan kontroller:
+label_smoothing  ∈ [0, 0.5]
+entropy_coeff    ∈ [0, 1.0]
+ema_decay        ∈ (0, 1)
+batch_size       > 0
+epochs           > 0
 ```
 
 ---
 
-### 3. TrainingScheduler
+### DataCacheV3
 
-**Dosya:** `training_management/training_scheduler.py`  
-**Satır Sayısı:** ~361  
-**Görev:** Learning rate scheduling
-
-#### Desteklenen Scheduler Türleri
-
-1. **ReduceLROnPlateau** - Metric-based (default)
-2. **StepLR** - Step-based
-3. **ExponentialLR** - Exponential decay
-4. **CosineAnnealingLR** - Cosine annealing
-5. **CosineAnnealingWarmRestarts** - Cosine with warm restarts
-6. **OneCycleLR** - One cycle policy
-7. **NoOp** - Constant LR
-
-#### Özellikler
-
-- **Linear Warmup:**
-  - Configurable warmup steps
-  - Start factor (default: 0.1)
-  - Seamless integration with base schedulers
-
-- **Gradient Gate:**
-  - Skip LR update if gradient norm too low
-  - Prevents unnecessary updates
-
-- **Checkpoint Compatibility:**
-  - `state_dict()` / `load_state_dict()` support
-  - Resume training from checkpoint
-
-#### Ana Metodlar
+**Dosya:** `v3/data/cache_v3.py`
+**Pattern:** Cache Pattern + Fail-Fast Pattern
 
 ```python
-class TrainingScheduler:
-    def __init__(optimizer, scheduler_type="ReduceLROnPlateau", warmup_steps=0, ...)
-    def step(metric=None, gradient_norm=None, gradient_gate=None)
-    def get_last_lr() -> float
-    def state_dict() -> Dict[str, Any]
-    def load_state_dict(state: Dict[str, Any])
+cache = DataCacheV3(
+    data_dir="education/",
+    cache_dir=".cache/preprocessed_data",
+    strict_mode=True,          # V3: cache yoksa hata
+    verify_integrity=True,     # V3: SHA-256 checksum
+)
 ```
 
----
+**Cache Key Bileşenleri:**
 
-### 4. CheckpointManager
-
-**Dosya:** `training_management/checkpoint_manager.py`  
-**Satır Sayısı:** ~464  
-**Görev:** Model checkpoint management
-
-#### Özellikler
-
-- **Atomic Saves:**
-  - tmp file → fsync → os.replace
-  - Prevents corruption
-  - Windows/Unix compatible
-
-- **Alias Management:**
-  - `last.pth` - Latest checkpoint
-  - `best.pth` - Best metric checkpoint
-  - Automatic updates
-
-- **Checkpoint Rotation:**
-  - Top-K rotation (configurable)
-  - Sort by ctime or metric
-  - Automatic cleanup
-
-- **Index Management:**
-  - `index.json` - Metadata database
-  - Tracks all checkpoints
-  - Best metric tracking
-
-- **Flexible Loading:**
-  - Load by filename
-  - Load by alias (last/best)
-  - Resume support (epoch + 1)
-
-#### Ana Metodlar
-
-```python
-class CheckpointManager:
-    def __init__(checkpoint_model_dir, max_checkpoints=5, device="cuda", ...)
-    def save(model, optimizer, epoch, training_history=None, metric=None, is_best=None, ...) -> str
-    def load(model, optimizer=None, filename=None, which="path", ...) -> Tuple[int, Dict]
-    def resume(model, optimizer=None, which="last", ...) -> Tuple[int, Dict]
-    def list_checkpoints() -> List[str]
-    def get_last_checkpoint() -> Optional[str]
-    def get_best_checkpoint() -> Optional[str]
+```
+cache_key = MD5(
+    data_dir_normalized |
+    encode_mode |
+    include_whole_words |
+    include_syllables |
+    include_sep |
+    max_seq_length |
+    vocab_hash |
+    alignment_format |
+    formatted_True
+)
 ```
 
----
+Cache key uyuşmazlığının tipik nedenleri:
+- `max_seq_length` değişti
+- Vocab dosyası güncellendi (vocab_hash değişti)
+- `alignment_format` değişti
+- Eğitim verisi değişti (data_hash değişti)
 
-### 5. EvaluationMetrics
+**Cache Dosyası Yapısı:**
 
-**Dosya:** `training_management/evaluation_metrics.py`  
-**Satır Sayısı:** ~518  
-**Görev:** Performance metrics calculation
-
-#### Özellikler
-
-- **Flexible Input Support:**
-  - Sequence classification: `[N, T, C]` logits
-  - Flat classification: `[N, C]` logits
-  - Class indices: `[N]` or `[N, T]`
-  - Automatic shape alignment
-
-- **Metrics:**
-  - **Accuracy:** Token-level accuracy (PAD masked)
-  - **Top-K Accuracy:** Top-K token accuracy
-  - **Precision/Recall/F1:** Macro, Micro, Weighted
-  - **Confusion Matrix:** Per-class metrics
-
-- **PAD Masking:**
-  - `ignore_index` support
-  - Automatic masking in calculations
-
-#### Ana Metodlar
-
-```python
-class EvaluationMetrics:
-    def calculate_accuracy(predictions, targets, ignore_index=None, from_logits=True, ...) -> float
-    def accuracy_topk(predictions, targets, k=5, ignore_index=None, ...) -> float
-    def calculate_precision_recall_f1(predictions, targets, average="macro", ...) -> Dict[str, float]
-    def confusion_matrix(predictions, targets, num_classes=None, ...) -> np.ndarray
-    def calculate_metrics(predictions, targets, top_k=5, ...) -> Dict[str, float]
+```
+.cache/preprocessed_data/
+├── cached_data_<key16>_<hash8>.pkl        ← pickle veri
+├── cached_data_<key16>_<hash8>.sha256     ← SHA-256 checksum
+└── cached_data_<key16>_<hash8>.meta.json  ← human-readable metadata
 ```
 
----
-
-### 6. TrainingVisualizer
-
-**Dosya:** `training_management/training_visualizer.py`  
-**Satır Sayısı:** ~421  
-**Görev:** Training visualization
-
-#### Özellikler
-
-- **Plot Types:**
-  - Loss plots (train/val)
-  - Accuracy plots (train/val)
-  - Custom metric plots
-  - Automatic plot generation from history
-
-- **Export Formats:**
-  - PNG plots (150 DPI)
-  - CSV export
-  - JSON export (with merge support)
-
-- **Advanced Features:**
-  - EMA smoothing (optional)
-  - Epoch axis support
-  - Series alignment (auto-trim)
-  - Headless support (Agg backend)
-
-#### Ana Metodlar
-
-```python
-class TrainingVisualizer:
-    def __init__(save_dir="visualizations", style="default", run_name=None, ...)
-    def plot_loss(train_losses, val_losses=None, epochs=None, ema_alpha=None, ...) -> str
-    def plot_accuracy(train_accuracies, val_accuracies=None, epochs=None, ...) -> str
-    def plot_custom_metric(metric_values, metric_name, epochs=None, ...) -> str
-    def plot_from_history(history, save_prefix="", ema_alpha=None, ...) -> Dict[str, str]
-    def export_history_csv(history, filename="metrics.csv") -> str
-    def export_history_json(history, filename="metrics.json", merge_if_exists=True) -> str
-```
-
----
-
-## 📚 API Referansı
-
-### TrainingManager
-
-#### `__init__(model, train_loader, val_loader, optimizer, criterion, config, start_epoch=1, writer=None)`
-
-TrainingManager'ı başlatır.
-
-**Parametreler:**
-- `model: torch.nn.Module` → Neural network model
-- `train_loader` → Training data loader
-- `val_loader` → Validation data loader
-- `optimizer` → PyTorch optimizer
-- `criterion` → Loss function
-- `config: Dict[str, Any]` → Training configuration
-- `start_epoch: int` → Starting epoch (default: 1)
-- `writer: Optional[Any]` → TensorBoard writer (optional)
-
-**Config Parametreleri:**
-
-```python
-config = {
-    # Basic training
-    "device": "cuda",  # or "cpu"
-    "vocab_size": 50000,
-    "epochs": 10,
-    "batch_size": 32,
-    "learning_rate": 1e-4,
-    
-    # AMP & Gradient
-    "use_amp": True,  # Mixed precision
-    "grad_accum_steps": 1,  # Gradient accumulation
-    "max_grad_norm": 1.0,  # Gradient clipping
-    "pad_token_id": 0,  # Optional, auto-detected if None
-    
-    # TensorBoard
-    "use_tensorboard": True,
-    "tb_log_dir": "runs/training",
-    "tb_log_every_n_batches": 20,
-    "tb_log_histograms": False,
-    "tb_log_attention_image": True,
-    "tb_log_train_step": True,
-    "tb_log_val_step": False,
-    
-    # Advanced features
-    "calculate_advanced_metrics": True,  # Precision, Recall, F1
-    "enable_visualizations": True,
-    "visualization_dir": "visualizations",
-    "track_memory": True,  # GPU memory tracking
-    "track_performance": True,  # Batch time tracking
-    "use_progress_bar": True,  # tqdm progress bar
-    
-    # Checkpoint
-    "checkpoint_dir": "checkpoints",
-    "training_history_path": "training_history.json",
-    "early_stopping_patience": 3,
-    
-    # Logging
-    "log_batches_to_console": True,
+**Metadata içeriği:**
+```json
+{
+  "version": "v3",
+  "created_at": "2026-03-16 10:30:00",
+  "cache_key": "...",
+  "data_hash": "...",
+  "encode_mode": "train",
+  "max_seq_length": 768,
+  "sample_count": 560000,
+  "file_size_mb": 1240.5
 }
 ```
 
-**Örnek:**
-```python
-config = {
-    "device": "cuda",
-    "vocab_size": 50000,
-    "epochs": 30,
-    "use_amp": True,
-    "grad_accum_steps": 4,
-    "max_grad_norm": 1.0,
-    "use_tensorboard": True,
-    "calculate_advanced_metrics": True,
-    "track_memory": True,
-    "track_performance": True,
-}
+**Public API:**
 
-manager = TrainingManager(
-    model=model,
-    train_loader=train_loader,
-    val_loader=val_loader,
-    optimizer=optimizer,
-    criterion=criterion,
-    config=config
+| Metod | Açıklama |
+|---|---|
+| `load_for_training(tokenizer_core, ...)` | Strict yükleme — hata fırlatır |
+| `save(cache_key, data_hash, data, ...)` | Atomic write + checksum + metadata |
+| `clear()` | Tüm cache dosyalarını sil |
+| `list_caches()` | Mevcut cache'leri metadata ile listele |
+
+---
+
+### CevahirDataset
+
+**Dosya:** `v3/data/dataset_v3.py`
+**Temel:** `torch.utils.data.Dataset`
+
+```python
+dataset = CevahirDataset(
+    data=train_data,           # List[(inp_tensor, tgt_tensor)]
+    pad_id=0,
+    precompute_lengths=True,   # BucketBatchSampler için uzunlukları önceden hesapla
 )
 ```
 
-#### `train(epoch_callback=None) -> Tuple[float, float]`
+**Özellikler:**
 
-Training ve validation döngüsünü çalıştırır.
+- **Uzunluk indeksi:** Her sequence'ın gerçek uzunluğu (PAD'lar sayılmaz) `BucketBatchSampler`'a sağlanır
+- **Lazy tensor:** Zaten tensor ise dönüşüm yapılmaz
+- **Source ID yönetimi:** 3-tuple `(inp, tgt, source_id)` → `__getitem__` source_id'yi atar
+- **İstatistik raporu:** `get_length_stats()` → min/max/mean/median/p25/p75/p90/p99
 
-**Parametreler:**
-- `epoch_callback: Optional[Callable]` → Her epoch sonunda çağrılan callback `(epoch, train_loss, val_loss) -> None`
-
-**Dönüş:**
-- `Tuple[float, float]` → (final_train_loss, final_val_loss)
-
-**Örnek:**
 ```python
-def on_epoch_end(epoch, train_loss, val_loss):
-    print(f"Epoch {epoch}: Train={train_loss:.4f}, Val={val_loss:.4f}")
-    # Model test, custom logging, etc.
-
-train_loss, val_loss = manager.train(epoch_callback=on_epoch_end)
-```
-
-#### `save_model(epoch, val_loss=None, is_best=None)`
-
-Model checkpoint kaydeder.
-
-**Parametreler:**
-- `epoch: int` → Epoch numarası
-- `val_loss: Optional[float]` → Validation loss (best model seçimi için)
-- `is_best: Optional[bool]` → En iyi model mi? (val_loss'tan otomatik hesaplanır)
-
-**Örnek:**
-```python
-manager.save_model(epoch=5, val_loss=2.1, is_best=True)
+stats = dataset.get_length_stats()
+# → {"count": 560000, "min": 4, "max": 768, "mean": 312.5, ...}
 ```
 
 ---
 
-### TrainingLogger
+### BucketBatchSampler
 
-#### `__init__(run_name=None, log_dir=None, tb_log_dir=None, enable_tb=True, enable_console=True, enable_jsonl=True, ...)`
+**Dosya:** `v3/data/sampler_v3.py`
+**Temel:** `torch.utils.data.Sampler[List[int]]`
 
-TrainingLogger'ı başlatır.
+**Algoritma:**
 
-**Parametreler:**
-- `run_name: Optional[str]` → Run name for TensorBoard
-- `log_dir: Optional[str]` → Log directory path
-- `tb_log_dir: Optional[str]` → TensorBoard log directory
-- `enable_tb: bool` → Enable TensorBoard (default: True)
-- `enable_console: bool` → Enable console logging (default: True)
-- `enable_jsonl: bool` → Enable JSONL event logging (default: True)
-
-**Örnek:**
-```python
-logger = TrainingLogger(
-    run_name="experiment-001",
-    log_dir="./logs",
-    tb_log_dir="./runs",
-    enable_tb=True
-)
+```
+1. Tüm sequence'ları uzunluğa göre sırala
+2. num_buckets adet gruba (bucket) böl
+3. Epoch başında bucket içlerini karıştır
+4. Her bucket'tan batch'ler oluştur
+5. Tüm batch'leri karıştır (bucket sıralaması belli olmasın)
 ```
 
-#### `log_metrics(epoch, training_loss, validation_loss=None, accuracy=None, step=None)`
-
-Epoch metriklerini loglar.
-
-**Örnek:**
 ```python
-logger.log_metrics(
-    epoch=1,
-    training_loss=2.5,
-    validation_loss=2.3,
-    accuracy=85.5
+sampler = BucketBatchSampler(
+    lengths=dataset.lengths,    # Her sequence'ın gerçek uzunluğu
+    batch_size=64,
+    num_buckets=32,             # Daha fazla → daha iyi gruplama, daha az çeşitlilik
+    shuffle_buckets=True,       # Epoch bazlı randomness
+    shuffle_within_bucket=True,
+    drop_last=False,
+    seed=42,
 )
+sampler.set_epoch(epoch)        # Epoch bazlı seed değişimi
 ```
 
-#### `log_scalar(name, value, step)`
+**Padding Tasarrufu (Schwartz et al. 2020):**
 
-TensorBoard'a scalar loglar.
+```
+Statik padding: Tüm batch → max_seq_length=768
+  → GPU zamanının %70-90'ı PAD token'a gider
 
-**Örnek:**
-```python
-logger.log_scalar("LearningRate", 1e-4, step=100)
+BucketSampler + DynamicPad: Benzer uzunluktakiler → batch içi max pad
+  → padding waste %20-40'a düşer
+  → GPU throughput artar
 ```
 
 ---
 
-### TrainingScheduler
+### DynamicPaddingCollator
 
-#### `__init__(optimizer, scheduler_type="ReduceLROnPlateau", warmup_steps=0, warmup_start_factor=0.1, **kwargs)`
+**Dosya:** `v3/data/collator_v3.py`
 
-TrainingScheduler'ı başlatır.
+Batch içindeki sequence'ların maksimum uzunluğuna kadar pad eder.
 
-**Parametreler:**
-- `optimizer` → PyTorch optimizer
-- `scheduler_type: str` → Scheduler type (see supported types)
-- `warmup_steps: int` → Linear warmup steps (default: 0)
-- `warmup_start_factor: float` → Warmup start factor (default: 0.1)
-- `**kwargs` → Scheduler-specific parameters
-
-**Örnek:**
 ```python
-scheduler = TrainingScheduler(
-    optimizer=optimizer,
-    scheduler_type="ReduceLROnPlateau",
-    warmup_steps=1000,
-    warmup_start_factor=0.1,
-    mode="min",
-    factor=0.5,
-    patience=8,
-    min_lr=5e-6
+collator = DynamicPaddingCollator(
+    pad_id=0,
+    max_seq_length=768,   # Absolut üst limit (güvenlik)
+    non_blocking=True,    # Async GPU transfer
 )
 ```
 
-#### `step(metric=None, gradient_norm=None, gradient_gate=None)`
+**Karşılaştırma:**
 
-Learning rate'ı günceller.
-
-**Parametreler:**
-- `metric: Optional[float]` → Metric for ReduceLROnPlateau (e.g., val_loss)
-- `gradient_norm: Optional[float]` → Gradient norm (optional)
-- `gradient_gate: Optional[float]` → Skip LR update if gradient_norm < gradient_gate
-
-**Örnek:**
-```python
-scheduler.step(metric=val_loss, gradient_norm=avg_grad_norm)
 ```
+V2 (statik):   Batch {len=10, len=12, len=15} → pad to 768
+V3 (dinamik):  Batch {len=10, len=12, len=15} → pad to 15
+```
+
+Kısa sequence batchleri için GPU %97 daha az PAD token hesaplar.
+
+**Akademik referans:** Ott et al. 2019, fairseq — dynamic padding ile %2-3x throughput artışı.
+
+Geriye dönük uyumluluk için `create_static_collate()` factory fonksiyonu da mevcuttur (V2 arayüzü).
 
 ---
 
-### CheckpointManager
+### DataLoader Factory
 
-#### `save(model, optimizer, epoch, training_history=None, metric=None, is_best=None, tag=None, extra_state=None, with_optimizer=True) -> str`
-
-Checkpoint kaydeder.
-
-**Parametreler:**
-- `model: torch.nn.Module` → Model
-- `optimizer: Optional[torch.optim.Optimizer]` → Optimizer
-- `epoch: int` → Epoch number
-- `training_history: Optional[Dict]` → Training history
-- `metric: Optional[float]` → Metric value (for best model selection)
-- `is_best: Optional[bool]` → Is best model? (auto-calculated from metric if None)
-- `tag: Optional[str]` → Optional tag for filename
-- `extra_state: Optional[Dict]` → Additional metadata
-- `with_optimizer: bool` → Include optimizer state (default: True)
-
-**Dönüş:**
-- `str` → Saved checkpoint path
-
-**Örnek:**
-```python
-checkpoint_path = checkpoint_manager.save(
-    model=model,
-    optimizer=optimizer,
-    epoch=5,
-    training_history={"train_loss": [2.5, 2.3, ...]},
-    metric=2.1,
-    is_best=True,
-    extra_state={"config": config}
-)
-```
-
-#### `load(model, optimizer=None, filename=None, which="path", map_location=None, load_optimizer=True, strict=True) -> Tuple[Optional[int], Dict[str, Any]]`
-
-Checkpoint yükler.
-
-**Parametreler:**
-- `model: torch.nn.Module` → Model to load into
-- `optimizer: Optional[torch.optim.Optimizer]` → Optimizer to load into
-- `filename: Optional[str]` → Checkpoint filename (if which="path")
-- `which: Literal["last", "best", "path"]` → Which checkpoint to load
-- `map_location: Optional[str]` → Device mapping (default: config device)
-- `load_optimizer: bool` → Load optimizer state (default: True)
-- `strict: bool` → Strict loading (default: True)
-
-**Dönüş:**
-- `Tuple[Optional[int], Dict[str, Any]]` → (epoch, training_history)
-
-**Örnek:**
-```python
-# Load last checkpoint
-epoch, history = checkpoint_manager.load(
-    model=model,
-    optimizer=optimizer,
-    which="last"
-)
-
-# Load best checkpoint
-epoch, history = checkpoint_manager.load(
-    model=model,
-    optimizer=optimizer,
-    which="best"
-)
-
-# Load specific checkpoint
-epoch, history = checkpoint_manager.load(
-    model=model,
-    optimizer=optimizer,
-    filename="checkpoint_epoch_0005.pth",
-    which="path"
-)
-```
-
-#### `resume(model, optimizer=None, which="last", map_location=None, load_optimizer=True) -> Tuple[int, Dict[str, Any]]`
-
-Eğitime kaldığı yerden devam eder.
-
-**Dönüş:**
-- `Tuple[int, Dict[str, Any]]` → (start_epoch, training_history)
-- **Not:** `start_epoch = loaded_epoch + 1`
-
-**Örnek:**
-```python
-start_epoch, history = checkpoint_manager.resume(
-    model=model,
-    optimizer=optimizer,
-    which="last"
-)
-
-# Continue training from start_epoch
-manager.train(...)
-```
-
----
-
-### EvaluationMetrics
-
-#### `calculate_accuracy(predictions, targets, ignore_index=None, from_logits=True, return_fraction=False) -> float`
-
-Accuracy hesaplar.
-
-**Örnek:**
-```python
-accuracy = metrics.calculate_accuracy(
-    predictions=logits,  # [batch, seq_len, vocab_size]
-    targets=targets,  # [batch, seq_len]
-    ignore_index=0,  # PAD token ID
-    from_logits=True,
-    return_fraction=False  # False = percentage (0-100)
-)
-```
-
-#### `accuracy_topk(predictions, targets, k=5, ignore_index=None, from_logits=True, return_fraction=False) -> float`
-
-Top-K accuracy hesaplar.
-
-**Örnek:**
-```python
-top5_acc = metrics.accuracy_topk(
-    predictions=logits,
-    targets=targets,
-    k=5,
-    ignore_index=0
-)
-```
-
-#### `calculate_precision_recall_f1(predictions, targets, num_classes=None, average="macro", ignore_index=None, from_logits=True, return_per_class=False) -> Dict[str, float]`
-
-Precision, Recall, F1 hesaplar.
-
-**Örnek:**
-```python
-metrics_dict = metrics.calculate_precision_recall_f1(
-    predictions=logits,
-    targets=targets,
-    average="macro",  # "macro" | "micro" | "weighted"
-    ignore_index=0,
-    from_logits=True,
-    return_per_class=False
-)
-# Returns: {"precision": 85.5, "recall": 82.3, "f1_score": 83.9}
-```
-
-#### `calculate_metrics(predictions, targets, top_k=5, num_classes=None, average="macro", ignore_index=None, from_logits=None) -> Dict[str, float]`
-
-Tüm metrikleri bir arada hesaplar.
-
-**Örnek:**
-```python
-all_metrics = metrics.calculate_metrics(
-    predictions=logits,
-    targets=targets,
-    top_k=5,
-    average="macro",
-    ignore_index=0
-)
-# Returns: {
-#     "precision": 0.855,  # 0-1 range
-#     "recall": 0.823,
-#     "f1_score": 0.839,
-#     "top_k_accuracy": 0.92
-# }
-```
-
----
-
-### TrainingVisualizer
-
-#### `plot_loss(train_losses, val_losses=None, epochs=None, ema_alpha=None, save_filename="loss_plot.png", show=False) -> str`
-
-Loss grafiği çizer.
-
-**Örnek:**
-```python
-plot_path = visualizer.plot_loss(
-    train_losses=[2.5, 2.3, 2.1, ...],
-    val_losses=[2.4, 2.2, 2.0, ...],
-    epochs=[1, 2, 3, ...],
-    ema_alpha=0.9,  # Exponential moving average smoothing
-    save_filename="training_loss.png"
-)
-```
-
-#### `plot_accuracy(train_accuracies, val_accuracies=None, epochs=None, ema_alpha=None, save_filename="accuracy_plot.png", show=False) -> str`
-
-Accuracy grafiği çizer.
-
-**Örnek:**
-```python
-plot_path = visualizer.plot_accuracy(
-    train_accuracies=[0.75, 0.80, 0.85, ...],
-    val_accuracies=[0.73, 0.78, 0.83, ...],
-    epochs=[1, 2, 3, ...]
-)
-```
-
-#### `plot_from_history(history, save_prefix="", ema_alpha=None, show=False) -> Dict[str, str]`
-
-Training history'den otomatik grafikler oluşturur.
-
-**Örnek:**
-```python
-history = {
-    "train_loss": [2.5, 2.3, 2.1, ...],
-    "val_loss": [2.4, 2.2, 2.0, ...],
-    "accuracy": [0.75, 0.80, 0.85, ...]
-}
-
-paths = visualizer.plot_from_history(
-    history=history,
-    save_prefix="epoch_5",
-    ema_alpha=0.9
-)
-# Returns: {"loss": "path/to/loss.png", "accuracy": "path/to/accuracy.png"}
-```
-
-#### `export_history_csv(history, filename="metrics.csv") -> str`
-
-History'yi CSV olarak export eder.
-
-**Örnek:**
-```python
-csv_path = visualizer.export_history_csv(
-    history={
-        "train_loss": [2.5, 2.3, ...],
-        "val_loss": [2.4, 2.2, ...],
-        "accuracy": [0.75, 0.80, ...]
-    },
-    filename="training_metrics.csv"
-)
-```
-
----
-
-## 🔄 Training Loop Detayları
-
-### Training Epoch Flow
+**Dosya:** `v3/data/dataloader_v3.py`
 
 ```python
-_train_epoch()
-    ↓
-1. Model.train()
-2. Optimizer.zero_grad()
-    ↓
-3. For each batch (with progress bar):
-    ├── Parse batch (inputs, targets)
-    ├── Move to device
-    ├── Forward pass (with AMP autocast):
-    │   ├── model(inputs) → logits
-    │   ├── Compute masked loss/accuracy/perplexity
-    │   └── NaN/Inf detection
-    ├── Backward pass (with gradient accumulation):
-    │   ├── loss / grad_accum_steps
-    │   ├── scaler.scale().backward() (if AMP)
-    │   └── Accumulate gradients
-    ├── Optimizer step (every grad_accum_steps):
-    │   ├── Unscale gradients (if AMP)
-    │   ├── Clip gradients
-    │   ├── scaler.step(optimizer) (if AMP)
-    │   ├── scaler.update() (if AMP)
-    │   └── optimizer.zero_grad()
-    ├── TensorBoard logging (every N batches)
-    ├── Progress bar update
-    ├── Memory tracking (every 10 batches)
-    └── Performance tracking (batch time)
-    ↓
-4. Return (avg_loss, avg_accuracy)
-```
+from training_system.v3.data.dataloader_v3 import create_dataloaders_v3
 
-### Loss Calculation
-
-```python
-_compute_masked_loss_and_acc(logits, targets, pad_id)
-    ↓
-1. Reshape logits: [B, T, V] → [B*T, V]
-2. Reshape targets: [B, T] → [B*T]
-3. Compute cross_entropy per token (reduction="none")
-4. Create mask: targets != pad_id
-5. Apply mask to loss
-6. Average over non-padded tokens
-7. Calculate accuracy (predictions == targets) & mask
-8. Calculate perplexity: exp(min(20.0, loss))
-    ↓
-Return (loss_tensor, accuracy_float, perplexity_float)
-```
-
----
-
-## 🔍 Validation Loop Detayları
-
-### Validation Epoch Flow
-
-```python
-_validate_epoch()
-    ↓
-1. Model.eval()
-2. torch.no_grad()
-    ↓
-3. For each batch (with progress bar):
-    ├── Parse batch (inputs, targets)
-    ├── Move to device
-    ├── Forward pass (no_grad):
-    │   ├── model(inputs) → logits
-    │   ├── Compute masked loss/accuracy/perplexity
-    │   └── Collect predictions/targets (for metrics)
-    ├── Progress logging (every %5)
-    ├── Memory cleanup (every 50 batches)
-    └── TensorBoard logging (if enabled)
-    ↓
-4. Advanced Metrics Calculation:
-    ├── Concatenate predictions/targets
-    ├── Calculate Precision, Recall, F1
-    ├── Calculate Top-K Accuracy
-    └── TensorBoard logging
-    ↓
-5. Return (avg_loss, accuracy)
-```
-
-### Advanced Metrics Calculation
-
-```python
-# Precision, Recall, F1
-precision_recall_f1 = metrics.calculate_precision_recall_f1(
-    predictions=all_predictions,  # [N, T, V] logits
-    targets=all_targets,  # [N, T] class indices
-    ignore_index=pad_token_id,
-    average="macro",  # or "micro", "weighted"
-    from_logits=True
-)
-
-# Top-K Accuracy
-top_k_acc = metrics.accuracy_topk(
-    predictions=all_predictions,
-    targets=all_targets,
-    k=5,
-    ignore_index=pad_token_id,
-    from_logits=True
-)
-```
-
----
-
-## 💡 Kullanım Örnekleri
-
-### Örnek 1: Basic Training
-
-```python
-from training_management import TrainingManager
-import torch
-import torch.nn as nn
-
-# Model, optimizer, criterion setup
-model = YourModel(...)
-optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
-criterion = nn.CrossEntropyLoss(ignore_index=0)
-
-# Data loaders
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
-
-# Config
-config = {
-    "device": "cuda",
-    "vocab_size": 50000,
-    "epochs": 30,
-    "use_amp": True,
-    "grad_accum_steps": 4,
-    "max_grad_norm": 1.0,
-    "use_tensorboard": True,
-    "tb_log_dir": "runs/training",
-    "calculate_advanced_metrics": True,
-    "track_memory": True,
-    "track_performance": True,
-    "checkpoint_dir": "checkpoints",
-}
-
-# Initialize TrainingManager
-manager = TrainingManager(
-    model=model,
-    train_loader=train_loader,
-    val_loader=val_loader,
-    optimizer=optimizer,
-    criterion=criterion,
-    config=config
-)
-
-# Train
-train_loss, val_loss = manager.train()
-print(f"Final - Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
-```
-
-### Örnek 2: Training with Custom Scheduler
-
-```python
-from training_management import TrainingManager, TrainingScheduler
-
-# Optimizer
-optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
-
-# Custom scheduler with warmup
-scheduler = TrainingScheduler(
-    optimizer=optimizer,
-    scheduler_type="CosineAnnealingLR",
-    warmup_steps=1000,
-    warmup_start_factor=0.1,
-    T_max=10000,
-    eta_min=1e-6
-)
-
-# TrainingManager will use scheduler automatically
-# (scheduler is passed internally)
-```
-
-### Örnek 3: Resume Training
-
-```python
-from training_management import CheckpointManager, TrainingManager
-
-# Checkpoint manager
-checkpoint_manager = CheckpointManager(checkpoint_model_dir="checkpoints")
-
-# Resume from last checkpoint
-start_epoch, history = checkpoint_manager.resume(
-    model=model,
-    optimizer=optimizer,
-    which="last"
-)
-
-# Continue training
-config["start_epoch"] = start_epoch
-manager = TrainingManager(
-    model=model,
-    train_loader=train_loader,
-    val_loader=val_loader,
-    optimizer=optimizer,
-    criterion=criterion,
-    config=config,
-    start_epoch=start_epoch
-)
-
-manager.train()
-```
-
-### Örnek 4: Advanced Metrics
-
-```python
-from training_management import EvaluationMetrics
-
-metrics = EvaluationMetrics()
-
-# Calculate all metrics
-all_metrics = metrics.calculate_metrics(
-    predictions=logits,  # [batch, seq_len, vocab_size]
-    targets=targets,  # [batch, seq_len]
-    top_k=5,
-    average="macro",
-    ignore_index=0  # PAD token
-)
-
-print(f"Precision: {all_metrics['precision']:.2%}")
-print(f"Recall: {all_metrics['recall']:.2%}")
-print(f"F1: {all_metrics['f1_score']:.2%}")
-print(f"Top-5 Accuracy: {all_metrics['top_k_accuracy']:.2%}")
-```
-
-### Örnek 5: Visualization
-
-```python
-from training_management import TrainingVisualizer
-
-visualizer = TrainingVisualizer(
-    save_dir="visualizations",
-    run_name="experiment-001"
-)
-
-# Training history
-history = {
-    "train_loss": [2.5, 2.3, 2.1, 2.0, 1.9],
-    "val_loss": [2.4, 2.2, 2.0, 1.9, 1.8],
-    "accuracy": [0.75, 0.80, 0.85, 0.88, 0.90],
-    "precision": [0.72, 0.78, 0.83, 0.86, 0.89],
-    "recall": [0.73, 0.79, 0.84, 0.87, 0.90],
-    "f1_score": [0.725, 0.785, 0.835, 0.865, 0.895]
-}
-
-# Generate all plots
-paths = visualizer.plot_from_history(
-    history=history,
-    save_prefix="final",
-    ema_alpha=0.9
-)
-
-# Export to CSV/JSON
-csv_path = visualizer.export_history_csv(history, "metrics.csv")
-json_path = visualizer.export_history_json(history, "metrics.json")
-```
-
-### Örnek 6: Custom Epoch Callback
-
-```python
-def custom_epoch_callback(epoch, train_loss, val_loss):
-    print(f"\n=== Epoch {epoch} Summary ===")
-    print(f"Train Loss: {train_loss:.4f}")
-    print(f"Val Loss: {val_loss:.4f}")
-    
-    # Custom logic
-    if val_loss < 2.0:
-        print("🎉 Val loss below 2.0!")
-    
-    # Model testing
-    # test_model(model, test_loader)
-    
-    # Custom checkpoint
-    # torch.save(model.state_dict(), f"custom_ckpt_epoch_{epoch}.pth")
-
-# Train with callback
-train_loss, val_loss = manager.train(epoch_callback=custom_epoch_callback)
-```
-
-### Örnek 7: Checkpoint Management
-
-```python
-from training_management import CheckpointManager
-
-# Initialize
-checkpoint_manager = CheckpointManager(
-    checkpoint_model_dir="checkpoints",
-    max_checkpoints=5,  # Keep only 5 checkpoints
+train_loader, val_loader = create_dataloaders_v3(
+    train_data=train_data,
+    val_data=val_data,
+    batch_size=64,
+    pad_id=0,
     device="cuda",
-    sort_key="metric",  # Sort by metric value
-    metric_mode="min"  # Lower is better
+    use_bucket_batching=True,
+    num_buckets=32,
+    use_dynamic_padding=True,
+    max_seq_length=768,
+    num_workers=4,             # Linux/Colab; Windows'ta 0 önerilir
+    pin_memory=True,           # CUDA: sabitlenmiş RAM → DMA transfer
+    prefetch_factor=2,
+    persistent_workers=True,
 )
+```
 
-# Save checkpoint
-checkpoint_path = checkpoint_manager.save(
-    model=model,
-    optimizer=optimizer,
-    epoch=5,
-    training_history={
-        "train_loss": [2.5, 2.3, 2.1, 2.0, 1.9],
-        "val_loss": [2.4, 2.2, 2.0, 1.9, 1.8]
-    },
-    metric=1.8,  # Validation loss
-    is_best=True,  # Best model so far
-    extra_state={
-        "config": config,
-        "timestamp": datetime.now().isoformat()
-    }
-)
+**GPU Optimizasyon Katmanları:**
 
-# List all checkpoints
-all_checkpoints = checkpoint_manager.list_checkpoints()
-print(f"Saved checkpoints: {len(all_checkpoints)}")
+| Optimizasyon | Parametre | Etki |
+|---|---|---|
+| `pin_memory=True` | Sabitlenmiş RAM | PCIe üzerinden async DMA transfer |
+| `num_workers=4` | Paralel prefetch | CPU/GPU örtüşümü |
+| `prefetch_factor=2` | Worker başına 2 batch | Veri bant genişliği kullanımı |
+| `persistent_workers=True` | Worker'lar canlı | Epoch arası başlatma overhead'i yok |
+| `BucketBatchSampler` | Uzunluk gruplaması | Padding waste ↓ |
+| `DynamicPaddingCollator` | Batch-aware pad | GPU memory ↓ |
 
-# Get best/last checkpoint paths
-best_path = checkpoint_manager.get_best_checkpoint()
-last_path = checkpoint_manager.get_last_checkpoint()
+**Train vs Val farklılıkları:**
+
+```
+Train: shuffle=True, BucketBatchSampler, DynamicPad
+Val:   shuffle=False, SequentialSampler, DynamicPad (bucket yok)
 ```
 
 ---
 
-## 🔗 Entegrasyonlar
+## train.py — TRAIN_CONFIG
 
-### 1. TrainingService Entegrasyonu
+`training_system/train.py` içindeki `TRAIN_CONFIG` tüm eğitim parametrelerini içerir.
 
-**Dosya:** `training_system/training_service.py`
+**`main()` Akışı:**
 
-**Kullanım:**
-- TrainingService, TrainingManager'ı kullanarak eğitimi yönetir
-- ModelManager, TokenizerCore, DataLoaderManager entegrasyonu
-- TensorBoard writer yönetimi
-- BPE tokenizer entegrasyonu
-
-**API:**
-```python
-# TrainingService içinde
-training_manager = TrainingManager(
-    model=model_manager.model,
-    train_loader=train_loader,
-    val_loader=val_loader,
-    optimizer=optimizer,
-    criterion=criterion,
-    config=config,
-    writer=tb_writer
-)
-
-train_loss, val_loss = training_manager.train()
+```
+1. PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True → fragmentation azaltma
+2. set_seed(42)
+3. log_env_info() → GPU adı, CC, VRAM bilgisi
+4. ensure_dirs() → dizinleri oluştur
+5. normalize_config(TRAIN_CONFIG) → BPE/tokenizer ayarları config'ten yükle
+6. continuation_lr kontrolü → checkpoint varsa LR override
+7. V3 mevcut ise TrainingServiceV3 başlat, değilse V2 fallback
+8. service.train() → eğitim başlar
 ```
 
-### 2. ModelManager Entegrasyonu
+**Config Normalizasyonu (`normalize_config`):**
 
-**Dosya:** `model_management/model_manager.py`
+- `gradient_clip` → `max_grad_norm` alias
+- BPE/tokenizer ayarları `tokenizer_management/config.py`'den otomatik yüklenir (hardcoded değer yok)
+- Scheduler kwargs oluşturulur (`lr_decay_factor`, `lr_decay_patience`, `lr_threshold`, `lr_min`)
+- TensorBoard varsayılanları set edilir
+- `torch.set_float32_matmul_precision("high")` (PyTorch 2.x)
 
-**Kullanım:**
-- ModelManager'dan model, optimizer, criterion alınır
-- TrainingManager model'i eğitir
-- CheckpointManager model'i kaydeder/yükler
+---
 
-### 3. TensorBoard Entegrasyonu
+## 55+ Parametre Referansı
 
-**Kullanım:**
-- Scalar logging (loss, accuracy, LR, etc.)
-- Histogram logging (weights, gradients)
-- Image logging (attention maps)
-- Text logging (epoch summaries)
-- HParams logging
+### Temel Eğitim
 
-**Örnek:**
+| Parametre | Varsayılan | Açıklama |
+|---|---|---|
+| `epochs` | 100 | Epoch sayısı |
+| `batch_size` | 64 | Mini-batch boyutu |
+| `learning_rate` | 0.0002 | Öğrenme hızı |
+| `grad_accum_steps` | 8 | Gradient accumulation adımları (efektif batch = 64×8=512) |
+| `max_grad_norm` | 1.0 | Gradient clipping üst sınırı |
+| `use_amp` | True | Mixed precision (AMP) |
+| `early_stopping_patience` | 10 | Epoch sayısı sabır |
+| `dropout` | 0.2 | Dropout oranı |
+| `weight_decay` | 0.01 | L2 regularizasyon |
+
+### Optimizer
+
+| Parametre | Varsayılan | Açıklama |
+|---|---|---|
+| `optimizer` | `"adamw8bit"` | `adamw` / `adamw8bit` / `adam` / `radam` / `sgd` |
+| `use_sam` | `False` | Sharpness-Aware Minimization (Foret et al. 2021) |
+| `sam_rho` | 0.05 | SAM pertürbation büyüklüğü |
+| `use_lookahead` | `False` | Lookahead (Zhang et al. 2019) |
+| `lookahead_k` | 5 | Slow weights güncelleme sıklığı |
+| `lookahead_alpha` | 0.5 | Slow weights interpolasyon faktörü |
+| `use_agc` | `False` | Adaptive Gradient Clipping (Brock et al. 2021) |
+| `use_gradient_noise` | `False` | Gradient Noise (Neelakantan et al. 2015) |
+
+### Loss Fonksiyonu
+
+| Parametre | Varsayılan | Açıklama |
+|---|---|---|
+| `label_smoothing` | 0.1 | Label Smoothing (Szegedy et al. 2016) |
+| `eos_token_weight` | 1.0 | EOS token ağırlığı (1.0 = standart) |
+| `entropy_coeff` | 0.01 | Entropy regularization (Pereyra et al. 2017) — overconfidence cezası |
+| `use_focal_loss` | `False` | Focal Loss (Lin et al. 2017) |
+| `focal_gamma` | 2.0 | Focal Loss gamma |
+| `aux_loss_weight` | 0.01 | MoE auxiliary loss ağırlığı |
+
+### Scheduler & LR
+
+| Parametre | Varsayılan | Açıklama |
+|---|---|---|
+| `scheduler_type` | `"reduce_on_plateau"` | `plateau` / `cosine` / `cawr` / `step` / `onecycle` |
+| `lr_decay_factor` | 0.75 | Plateau faktörü |
+| `lr_decay_patience` | 15 | Plateau sabır (epoch) |
+| `lr_min` | 1e-6 | Minimum LR |
+| `warmup_steps` | 1500 | Warmup adım sayısı (dinamik hesaplanır) |
+| `warmup_start_factor` | 0.1 | Warmup başlangıç LR çarpanı |
+| `use_llrd` | `False` | Layer-wise LR Decay |
+| `llrd_decay_factor` | 0.9 | Katman başına LR çarpanı |
+| `use_cosine_restarts` | `False` | SGDR (Loshchilov & Hutter 2016) |
+
+### EMA & SWA
+
+| Parametre | Varsayılan | Açıklama |
+|---|---|---|
+| `use_ema` | `True` | Exponential Moving Average |
+| `ema_decay` | 0.999 | EMA bozunum faktörü |
+| `ema_update_after_step` | 100 | İlk N adımdan sonra EMA güncelle |
+| `ema_update_every` | 10 | Her N adımda bir güncelle |
+| `use_swa` | `False` | Stochastic Weight Averaging (Izmailov et al. 2018) |
+| `swa_start_epoch` | 80 | SWA başlangıç epoch'u |
+| `swa_lr` | 1e-5 | SWA sabit LR |
+| `swa_anneal_epochs` | 10 | Annealing epoch sayısı |
+
+### Exposure Bias & Curriculum
+
+| Parametre | Varsayılan | Açıklama |
+|---|---|---|
+| `use_scheduled_sampling` | `True` | Scheduled Sampling (Bengio et al. 2015) |
+| `ss_start_epoch` | 10 | Scheduled sampling başlangıç epoch'u |
+| `ss_decay_rate` | 0.05 | Her epoch teacher forcing düşüşü |
+| `min_teacher_forcing` | 0.3 | Teacher forcing alt sınırı |
+| `use_curriculum` | `False` | Curriculum Learning (Bengio et al. 2009) |
+| `curriculum_strategy` | `"length_based"` | `length_based` / `loss_based` |
+| `curriculum_max_len_start` | 64 | Başlangıçta max sequence uzunluğu |
+| `curriculum_warmup_epochs` | 20 | Tam veriyi görene kadar epoch |
+
+### Güvenlik
+
+| Parametre | Varsayılan | Açıklama |
+|---|---|---|
+| `nan_tolerance` | 3 | Art arda NaN sayısı (checkpoint'e geri dön) |
+| `nan_lr_reduction` | 0.5 | NaN sonrası LR çarpanı |
+| `spike_n_sigma` | 3.0 | Loss spike eşiği (N-sigma) |
+| `spike_window_size` | 20 | Referans pencere büyüklüğü (batch) |
+| `spike_lr_reduction` | 0.8 | Spike sonrası LR çarpanı |
+
+### Model (V5 Mimari)
+
+| Parametre | Varsayılan | Açıklama |
+|---|---|---|
+| `embed_dim` | 512 | Embedding boyutu |
+| `num_heads` | 8 | Attention head sayısı |
+| `num_kv_heads` | 2 | GQA KV head sayısı (%75 KV cache azalması) |
+| `num_layers` | 8 | Transformer layer sayısı |
+| `ffn_dim` | `None` | `None` → otomatik `embed_dim × 4` |
+| `pe_mode` | `"rope"` | Positional encoding türü |
+| `rope_scaling_type` | `"yarn"` | `"none"` / `"yarn"` / `"linear"` |
+| `rope_scaling_factor` | 2.0 | YaRN context uzatma faktörü |
+| `sliding_window` | 512 | Sliding window attention boyutu |
+| `use_rmsnorm` | `True` | RMSNorm |
+| `use_swiglu` | `True` | SwiGLU activation |
+| `use_kv_cache` | `True` | KV Cache |
+| `use_moe` | `False` | Mixture of Experts |
+| `num_experts` | 8 | Expert sayısı (MoE aktifse) |
+| `moe_top_k` | 2 | Her token için seçilen expert sayısı |
+
+### GPU Batching & Cache
+
+| Parametre | Varsayılan | Açıklama |
+|---|---|---|
+| `use_bucket_batching` | `True` | BucketBatchSampler |
+| `num_buckets` | 32 | Bucket sayısı |
+| `use_dynamic_padding` | `True` | DynamicPaddingCollator |
+| `data_loader_num_workers` | 4 (Linux) / 0 (Win) | DataLoader worker sayısı |
+| `data_loader_pin_memory` | `True` | Sabitlenmiş RAM |
+| `prefetch_factor` | 2 | Worker başına prefetch batch |
+| `persistent_workers` | `True` | Epoch arası worker canlılığı |
+| `cache_strict_mode` | `True` | Cache zorunlu (hata fırlat) |
+| `cache_verify_integrity` | `True` | SHA-256 checksum doğrulama |
+
+---
+
+## GPU Optimizasyonları
+
+### OOM Koruması
+
 ```python
-from torch.utils.tensorboard import SummaryWriter
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+```
 
-tb_writer = SummaryWriter(log_dir="runs/training")
+Büyük contiguous blok bulunamadığında allocator parçalı segment kullanır → fragmentation %30-60 azalır.
 
-manager = TrainingManager(
-    ...,
-    writer=tb_writer
-)
+### AMP (Mixed Precision)
 
-# TensorBoard görüntüleme:
-# tensorboard --logdir runs/training
+```python
+"use_amp": True   # FP16/BF16 forward pass, FP32 gradient
+```
+
+A100'de ~2x hız artışı. `torch.set_float32_matmul_precision("high")` ile matmul hassasiyeti optimize edilir.
+
+### Gradient Accumulation
+
+```python
+"batch_size": 64,
+"grad_accum_steps": 8,
+# Efektif batch = 64 × 8 = 512
+```
+
+Büyük efektif batch'i düşük GPU memory ile simüle eder.
+
+---
+
+## Cache Sistemi
+
+### Cache Neden Zorunlu?
+
+Tokenizasyon, model eğitiminden çok daha uzun sürer. Raw veriden her eğitimde tokenize etmek:
+- Eğitim başlangıcını 10-30 dakika geciktirir
+- Tokenizasyon tekrarlanabilir olmazdı (vocab değişebilir)
+- Veri bütünlüğü doğrulanamaz
+
+V3 strict mode ile bu sorunlar ortadan kalkar.
+
+### Cache Geçersizleşme Koşulları
+
+Cache key bileşenlerinden herhangi biri değişirse cache geçersiz sayılır:
+
+```
+1. max_seq_length değişti → farklı seq uzunluğu
+2. vocab_hash değişti → BPE vocab/merges güncellendi
+3. alignment_format değişti → autoregressive format değişti
+4. data_hash değişti → eğitim verisi değişti (dosya adı/boyutu)
+5. encode_mode, include_whole_words, include_syllables, include_sep değişti
+```
+
+Çözüm:
+```bash
+python training_system/prepare_cache.py
 ```
 
 ---
 
-## ✅ Best Practices
+## Entegrasyon
 
-### 1. Configuration
-
-```python
-# ✅ DO: Comprehensive config
-config = {
-    "device": "cuda",
-    "vocab_size": 50000,
-    "epochs": 30,
-    "use_amp": True,  # Enable AMP for GPU
-    "grad_accum_steps": 4,  # Effective batch size = 32 * 4 = 128
-    "max_grad_norm": 1.0,
-    "use_tensorboard": True,
-    "calculate_advanced_metrics": True,
-    "track_memory": True,
-    "track_performance": True,
-    "checkpoint_dir": "checkpoints",
-    "early_stopping_patience": 3,
-}
-
-# ❌ DON'T: Minimal config (missing important features)
-config = {
-    "device": "cuda",
-    "vocab_size": 50000,
-    "epochs": 10,
-}
-```
-
-### 2. Checkpoint Management
+### train.py'de V3/V2 Otomatik Seçimi
 
 ```python
-# ✅ DO: Use CheckpointManager
-checkpoint_manager = CheckpointManager(
-    checkpoint_model_dir="checkpoints",
-    max_checkpoints=5,  # Automatic rotation
-    sort_key="metric",  # Keep best models
-    metric_mode="min"
-)
-
-# Save with metadata
-checkpoint_manager.save(
-    model=model,
-    optimizer=optimizer,
-    epoch=epoch,
-    metric=val_loss,
-    is_best=(val_loss < best_val_loss),
-    extra_state={"config": config}
-)
-
-# ❌ DON'T: Manual checkpoint saving
-torch.save(model.state_dict(), "model.pth")  # No metadata, no rotation
-```
-
-### 3. Memory Management
-
-```python
-# ✅ DO: Enable memory tracking
-config = {
-    "track_memory": True,  # GPU memory tracking
-    "track_performance": True,  # Batch time tracking
-}
-
-# Monitor memory usage
-# TrainingManager automatically tracks and logs GPU memory
-
-# ❌ DON'T: Ignore memory
-# Memory issues can cause OOM errors
-```
-
-### 4. Error Handling
-
-```python
-# ✅ DO: Handle errors gracefully
 try:
-    train_loss, val_loss = manager.train()
-except KeyboardInterrupt:
-    print("Training interrupted, saving checkpoint...")
-    manager.save_model(epoch=manager.current_epoch, val_loss=val_loss)
-except Exception as e:
-    logger.error(f"Training failed: {e}", exc_info=True)
-    raise
+    from training_system.v3 import TrainingServiceV3
+    _TRAINING_SYSTEM_V3_AVAILABLE = True
+except ImportError:
+    TrainingServiceV3 = None
+    _TRAINING_SYSTEM_V3_AVAILABLE = False
 
-# ❌ DON'T: Ignore errors
-train_loss, val_loss = manager.train()  # No error handling
+# main() içinde:
+if _TRAINING_SYSTEM_V3_AVAILABLE:
+    service = TrainingServiceV3(config=effective_cfg)
+else:
+    service = TrainingService(config=effective_cfg)   # V2 fallback
 ```
 
-### 5. Validation Optimization
+### TrainingManager Seçimi (V3 Service içinde)
 
 ```python
-# ✅ DO: Optimize for Colab/long validation
-config = {
-    "tb_log_val_step": False,  # Disable step-level validation logging (memory)
-    "calculate_advanced_metrics": True,  # But enable advanced metrics
-}
+try:
+    from training_management.v3 import TrainingManager as V3TrainingManager
+    _has_v3 = True
+except ImportError:
+    _has_v3 = False
 
-# Progress logging is automatic (every %5)
-
-# ❌ DON'T: Enable all logging in Colab
-config = {
-    "tb_log_val_step": True,  # Can cause memory issues
-    "tb_log_histograms": True,  # Very memory intensive
-}
+# Hata durumunda V2 TrainingManager kullanılır
+from training_management.v2.core.training_manager import TrainingManager as V2TrainingManager
 ```
 
-### 6. Learning Rate Scheduling
+### V2 ile Geriye Dönük Uyumluluk
 
-```python
-# ✅ DO: Use warmup + scheduler
-scheduler = TrainingScheduler(
-    optimizer=optimizer,
-    scheduler_type="ReduceLROnPlateau",
-    warmup_steps=1000,  # Warmup for stable training
-    warmup_start_factor=0.1,
-    mode="min",
-    factor=0.5,
-    patience=8,
-    min_lr=5e-6
-)
-
-# ❌ DON'T: Constant learning rate
-# LR should adapt during training
-```
+V3 şu V2 bileşenlerini hâlâ kullanır:
+- `training_management.v2.utils.checkpoint_manager.CheckpointManager`
+- `training_management.v2.monitoring.tensorboard_manager.TensorBoardManager`
+- `training_management.v2.utils.training_logger.TrainingLogger`
+- `training_management.v2.utils.training_scheduler.TrainingScheduler`
+- `training_system.v2.core.bpe_validator.BPEValidator`
+- `training_system.v2.core.criterion_manager.CriterionManager`
+- `training_system.v2.utils.warmup_calculator.calculate_warmup_steps`
 
 ---
 
-## 📊 Performance Optimizations
-
-### 1. Mixed Precision Training (AMP)
-
-**Avantajlar:**
-- 2x faster training
-- 50% memory reduction
-- Minimal accuracy loss
-
-**Kullanım:**
-```python
-config = {
-    "use_amp": True,  # Automatically enabled on CUDA
-}
-```
-
-### 2. Gradient Accumulation
-
-**Avantajlar:**
-- Simulate larger batch sizes
-- Memory-efficient training
-- Stable gradients
-
-**Örnek:**
-```python
-# Effective batch size = batch_size * grad_accum_steps
-config = {
-    "batch_size": 32,
-    "grad_accum_steps": 4,  # Effective batch size = 128
-}
-```
-
-### 3. Progress Bars
-
-**Avantajlar:**
-- Real-time feedback
-- ETA estimation
-- Better UX
-
-**Kullanım:**
-```python
-config = {
-    "use_progress_bar": True,  # Requires tqdm
-}
-```
-
-### 4. Memory Tracking
-
-**Avantajlar:**
-- Detect memory leaks
-- Optimize batch size
-- Monitor GPU usage
-
-**Kullanım:**
-```python
-config = {
-    "track_memory": True,  # GPU memory tracking
-}
-```
-
----
-
-## 🔍 Troubleshooting
-
-### Sorun 1: "Training stopped at batch X"
-
-**Olası Nedenler:**
-- NaN/Inf in loss or logits
-- Memory overflow
-- Invalid batch data
-
-**Çözüm:**
-```python
-# Enable NaN/Inf detection (automatic)
-config = {
-    "use_amp": True,  # Can help with numerical stability
-    "max_grad_norm": 1.0,  # Gradient clipping
-}
-
-# Check batch data
-for batch in train_loader:
-    inputs, targets = batch
-    print(f"Input shape: {inputs.shape}, Target shape: {targets.shape}")
-    print(f"Input range: [{inputs.min()}, {inputs.max()}]")
-    break
-```
-
-### Sorun 2: "Validation takes too long in Colab"
-
-**Çözüm:**
-```python
-config = {
-    "tb_log_val_step": False,  # Disable step-level logging
-    "calculate_advanced_metrics": True,  # But keep metrics (uses subset)
-}
-
-# Validation automatically:
-# - Logs progress every %5
-# - Clears GPU cache every 50 batches
-# - Uses subset for advanced metrics (memory efficient)
-```
-
-### Sorun 3: "Checkpoint save failed"
-
-**Çözüm:**
-```python
-# Use CheckpointManager (atomic saves)
-checkpoint_manager = CheckpointManager(
-    checkpoint_model_dir="checkpoints",
-    max_checkpoints=5
-)
-
-# Atomic save prevents corruption
-checkpoint_manager.save(...)
-```
-
-### Sorun 4: "Memory errors during training"
-
-**Çözüm:**
-```python
-config = {
-    "use_amp": True,  # 50% memory reduction
-    "grad_accum_steps": 4,  # Smaller effective batch
-    "tb_log_histograms": False,  # Disable memory-intensive logging
-    "tb_log_val_step": False,
-}
-
-# Reduce batch size
-train_loader = DataLoader(..., batch_size=16)  # Instead of 32
-```
-
----
-
-## 📚 İlgili Dokümantasyon
-
-- [Training System Documentation](../training_system/README.md) - TrainingService, train.py
-- [Model Management Documentation](../model_management/README.md) - ModelManager API
-- [Neural Network Documentation](../neural_network/README.md) - V-4 architecture
-- [API Reference](../../API_REFERENCE.md) - Full API documentation
-
----
-
-## 🎓 Öğrenme Kaynakları
-
-### Training Best Practices
-
-- **Mixed Precision Training:** [PyTorch AMP Guide](https://pytorch.org/docs/stable/amp.html)
-- **Gradient Accumulation:** [Effective Batch Size](https://arxiv.org/abs/1706.02677)
-- **Learning Rate Scheduling:** [LR Finder Paper](https://arxiv.org/abs/1506.01186)
-
-### Metrics & Evaluation
-
-- **Precision/Recall/F1:** [Scikit-learn Documentation](https://scikit-learn.org/stable/modules/model_evaluation.html)
-- **Top-K Accuracy:** [Multi-Class Classification Metrics](https://en.wikipedia.org/wiki/Precision_and_recall)
-
----
-
-## 📝 Notlar
-
-- ✅ **Production-Ready:** Endüstri standartlarına uygun
-- ✅ **Well-Tested:** Comprehensive test suite
-- ✅ **Well-Documented:** Full API documentation
-- ✅ **Memory-Efficient:** Colab-optimized validation
-- ✅ **Error-Resilient:** Graceful error handling
-- ✅ **Observable:** Comprehensive logging and monitoring
-
----
-
-**Son Güncelleme:** 2025-01-27  
-**Versiyon:** V-5  
-**Durum:** ✅ Production-Ready
+*Yazar: Muhammed Yasin Yılmaz | Telif Hakkı © 2024 Muhammed Yasin Yılmaz. Tüm Hakları Saklıdır.*
