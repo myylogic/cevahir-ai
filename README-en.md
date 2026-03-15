@@ -184,8 +184,6 @@ The dataset used for model training contains **approximately 680,000 examples**.
 
 If you want to try inference or chat without training from scratch, you can download the ready-made trained model weights:
 
-- **[cevahir_model.pth (Google Drive)](https://drive.google.com/file/d/1uZKs3NsNfu1a-dm1Pu8sTPj9brqQtSGZ/view?usp=sharing)** — Trained model checkpoint; can be loaded with `ModelManager` or `chat_pipeline.py`. *(The `vocab_size`, `embed_dim`, `num_layers`, `num_heads` values in your project config must be compatible with the checkpoint.)*
-
 ### From-Scratch Training Flow
 
 The steps for training from scratch must be followed **in order**:
