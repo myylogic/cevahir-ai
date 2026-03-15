@@ -59,6 +59,7 @@ from .handlers import (
     DeliberationHandler,
     ContextBuildingHandler,
     GenerationHandler,
+    SelfConsistencyHandler,
     CriticHandler,
     MemoryUpdateHandler,
 )
@@ -73,12 +74,12 @@ class AsyncFeatureExtractionHandler(BaseAsyncProcessingHandler):
     Async feature extraction handler.
     SOLID: SRP - Sadece feature extraction yapar (async).
     """
-    
-    def __init__(self, memory_service):
+
+    def __init__(self, memory_service, backend=None):
         super().__init__("AsyncFeatureExtraction")
         self.memory_service = memory_service
-        # Sync handler for delegation
-        self._sync_handler = FeatureExtractionHandler(memory_service)
+        # Sync handler for delegation (Phase 9: pass backend for logit entropy)
+        self._sync_handler = FeatureExtractionHandler(memory_service, backend=backend)
     
     async def _process_async(self, context: ProcessingContext) -> ProcessingContext:
         """
@@ -184,6 +185,34 @@ class AsyncGenerationHandler(BaseAsyncProcessingHandler):
 
 
 # =============================================================================
+# Async Self-Consistency Handler  (Wang et al. 2022)
+# =============================================================================
+
+class AsyncSelfConsistencyHandler(BaseAsyncProcessingHandler):
+    """
+    Async Self-Consistency Decoding — Wang et al. 2022.
+
+    N farklı yanıt örnekler (yüksek temperature) ve en çok desteklenen
+    yanıtı çoğunluk oyu veya model skoru ile seçer.
+
+    Senkron SelfConsistencyHandler'ı thread pool üzerinde çalıştırır
+    — model generate() çağrıları I/O-bound kabul edilir.
+
+    SOLID: SRP — yalnızca async self-consistency örneklemesi.
+    """
+
+    def __init__(self, backend, cfg=None):
+        super().__init__("AsyncSelfConsistency")
+        self.backend = backend
+        self.cfg = cfg
+        self._sync_handler = SelfConsistencyHandler(backend=backend, cfg=cfg)
+
+    async def _process_async(self, context: ProcessingContext) -> ProcessingContext:
+        """N örneklem → çoğunluk seçimi (async, thread pool üzerinden)."""
+        return await asyncio.to_thread(self._sync_handler._process, context)
+
+
+# =============================================================================
 # Async Critic Handler
 # =============================================================================
 
@@ -231,6 +260,7 @@ __all__ = [
     "AsyncDeliberationHandler",
     "AsyncContextBuildingHandler",
     "AsyncGenerationHandler",
+    "AsyncSelfConsistencyHandler",
     "AsyncCriticHandler",
     "AsyncMemoryUpdateHandler",
 ]
