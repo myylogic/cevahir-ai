@@ -165,6 +165,7 @@ class CognitiveOrchestrator:
             DeliberationHandler,
             ContextBuildingHandler,
             GenerationHandler,
+            SelfConsistencyHandler,
             CriticHandler,
             MemoryUpdateHandler,
         )
@@ -173,6 +174,7 @@ class CognitiveOrchestrator:
         handlers = [
             FeatureExtractionHandler(
                 memory_service=self.memory_service,
+                backend=self.backend,  # Phase 9: Model logit-based entropy
             ),
             PolicyRoutingHandler(
                 policy_router=self.policy_router,
@@ -222,8 +224,17 @@ class CognitiveOrchestrator:
                 cfg = CognitiveManagerConfig()
             tool_policy = ToolPolicyV2(cfg, self.tool_executor)
         
+        # Config erişimi (SelfConsistency için gerekli)
+        _cfg = self.policy_router.cfg if hasattr(self.policy_router, "cfg") else None
+
+        # Self-Consistency etkin mi?
+        _sc_enabled = (
+            _cfg is not None
+            and getattr(getattr(_cfg, "policy", None), "self_consistency_enabled", False)
+        )
+
         # Core handlers
-        handlers.extend([
+        core = [
             ContextBuildingHandler(
                 memory_service=self.memory_service,
                 tool_policy=tool_policy,
@@ -231,6 +242,18 @@ class CognitiveOrchestrator:
             GenerationHandler(
                 backend=self.backend,
             ),
+        ]
+
+        # Wang et al. 2022 — Self-Consistency (config'de etkinse pipeline'a eklenir)
+        if _sc_enabled:
+            core.append(
+                SelfConsistencyHandler(
+                    backend=self.backend,
+                    cfg=_cfg,
+                )
+            )
+
+        core.extend([
             CriticHandler(
                 critic=self.critic,
             ),
@@ -238,6 +261,7 @@ class CognitiveOrchestrator:
                 memory_service=self.memory_service,
             ),
         ])
+        handlers.extend(core)
         
         return ProcessingPipeline(handlers)
     
@@ -494,6 +518,7 @@ class CognitiveOrchestrator:
             AsyncDeliberationHandler,
             AsyncContextBuildingHandler,
             AsyncGenerationHandler,
+            AsyncSelfConsistencyHandler,
             AsyncCriticHandler,
             AsyncMemoryUpdateHandler,
         )
@@ -502,6 +527,7 @@ class CognitiveOrchestrator:
         handlers = [
             AsyncFeatureExtractionHandler(
                 memory_service=self.memory_service,
+                backend=self.backend,  # Phase 9: Model logit-based entropy
             ),
             AsyncPolicyRoutingHandler(
                 policy_router=self.policy_router,
@@ -530,8 +556,15 @@ class CognitiveOrchestrator:
                 cfg = CognitiveManagerConfig()
             tool_policy = ToolPolicyV2(cfg, self.tool_executor)
         
-        # Core handlers
-        handlers.extend([
+        # Config erişimi
+        _cfg_async = self.policy_router.cfg if hasattr(self.policy_router, "cfg") else None
+        _sc_enabled_async = (
+            _cfg_async is not None
+            and getattr(getattr(_cfg_async, "policy", None), "self_consistency_enabled", False)
+        )
+
+        # Core async handlers
+        async_core = [
             AsyncContextBuildingHandler(
                 memory_service=self.memory_service,
                 tool_policy=tool_policy,  # Phase 6.1: Tool Policy Implementation
@@ -539,6 +572,18 @@ class CognitiveOrchestrator:
             AsyncGenerationHandler(
                 backend=self.backend,
             ),
+        ]
+
+        # Wang et al. 2022 — Async Self-Consistency
+        if _sc_enabled_async:
+            async_core.append(
+                AsyncSelfConsistencyHandler(
+                    backend=self.backend,
+                    cfg=_cfg_async,
+                )
+            )
+
+        async_core.extend([
             AsyncCriticHandler(
                 critic=self.critic,
             ),
@@ -546,6 +591,7 @@ class CognitiveOrchestrator:
                 memory_service=self.memory_service,
             ),
         ])
+        handlers.extend(async_core)
         
         return AsyncProcessingPipeline(handlers)
     
