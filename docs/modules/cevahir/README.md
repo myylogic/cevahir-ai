@@ -1,217 +1,110 @@
-# 🚀 Cevahir API - Eksiksiz Dokümantasyon
+# Cevahir API — Modül Dokümantasyonu
 
-**Versiyon:** V-5 (Post Phase 1-2-3 Updates)  
-**Dosya:** `model/cevahir.py`  
-**Satır Sayısı:** ~1957  
-**Son Güncelleme:** 2025-01-27  
-**Durum:** ✅ Production-Ready | Endüstri Standartları
+**Versiyon:** V-4 (Unified Inference API)
+**Dosya:** `model/cevahir.py`
+**Satır Sayısı:** ~2084
+**Amaç:** TokenizerCore + ModelManager + CognitiveManager bileşenlerini tek bir inference API'ında birleştiren facade katmanı.
 
 ---
 
-## 📋 İçindekiler
+## İçindekiler
 
 1. [Genel Bakış](#genel-bakış)
-2. [Mimari Yapı](#mimari-yapı)
-3. [Çalışma Prensibi](#çalışma-prensibi)
-4. [Bileşenler ve Sınıflar](#bileşenler-ve-sınıflar)
-5. [V-4 Mimari Özellikleri](#v-4-mimari-özellikleri)
-6. [API Referansı](#api-referansı)
-7. [Phase Güncellemeleri](#phase-güncellemeleri)
-8. [Kullanım Örnekleri](#kullanım-örnekleri)
-9. [Entegrasyonlar](#entegrasyonlar)
-10. [Best Practices](#best-practices)
+2. [Mimari](#mimari)
+3. [Exception Hiyerarşisi](#exception-hiyerarşisi)
+4. [Yardımcı Sınıflar](#yardımcı-sınıflar)
+5. [CevahirConfig](#cevahirconfig)
+6. [CevahirModelAPI](#cevahirmodelapi)
+7. [Cevahir Ana Sınıfı](#cevahir-ana-sınıfı)
+8. [API Referansı](#api-referansı)
+9. [Kullanım Örnekleri](#kullanım-örnekleri)
+10. [Tasarım Desenleri](#tasarım-desenleri)
+11. [Eğitim Sistemi ile Fark](#eğitim-sistemi-ile-fark)
 
 ---
 
-## 🎯 Genel Bakış
+## Genel Bakış
 
-**Cevahir API**, Cevahir Sinir Sistemi'nin **Unified Inference API**'sidir. Üç ana bileşeni birleştirerek endüstri standartlarında bir inference sistemi sağlar:
-
-1. **TokenizerCore** → BPE tokenization, GPU batch processing (encode/decode)
-2. **ModelManager** → V-4 neural network inference (forward, generate)
-3. **CognitiveManager** → Cognitive layer, tools, memory, monitoring
-
-### ⚠️ ÖNEMLİ: Eğitim vs Inference Ayrımı
-
-**INFERENCE (cevahir.py kullanılır):**
-- `cevahir = Cevahir(config)`
-- `output = cevahir.process("Merhaba dünya")`
-- `cevahir.encode/decode/generate/forward`
-
-**EĞİTİM (cevahir.py KULLANILMAZ!):**
-- `tokenizer_management/train_bpe.py` → BPE vocab/merges eğitimi
-- `training_system/train.py` → Model eğitimi giriş noktası
-- `training_system/training_service.py` → Eğitim servisi
-- `model_management/model_manager.py` → Neural network eğitimi
-
-### Temel Özellikler
-
-- ✅ **V-4 Architecture:** RoPE, RMSNorm, SwiGLU, KV Cache, MoE, Quantization
-- ✅ **SOLID Principles:** Dependency Injection, Protocol-based interfaces
-- ✅ **Clean Architecture:** Layered design, separation of concerns
-- ✅ **Enterprise Features:** Monitoring, tracing, caching, AIOps
-- ✅ **Academic Rigor:** Reproducible, validated, documented
-- ✅ **Endüstri Standartları:** GPT-4, Claude, Gemini seviyesi mimari
-
----
-
-## 🏗️ Mimari Yapı
-
-### Dosya Organizasyonu
+`cevahir.py`, Cevahir-AI sisteminin **tek giriş noktasıdır (Unified Inference API)**. Sadece inference (çıkarım) için tasarlanmıştır. Eğitim sürecinde bu dosya kullanılmaz.
 
 ```
-cevahir.py (1957 satır)
-├── Exception Classes (4 sınıf)
-│   ├── CevahirError (Base)
+┌─────────────────────────────────────────────────────────────────┐
+│                        Cevahir (Facade)                         │
+│              ⚠️  SADECE INFERENCE — EĞİTİM DEĞİL                │
+├─────────────────────┬───────────────────┬───────────────────────┤
+│    TokenizerCore    │   ModelManager    │   CognitiveManager    │
+│  encode / decode    │ forward / predict │  process / memory     │
+│  BPE tokenization   │ save / load       │  tools / critic       │
+│  GPU batch encode   │ KV Cache          │  Self-Refine          │
+└─────────────────────┴───────────────────┴───────────────────────┘
+```
+
+### Eğitim vs Inference Ayrımı
+
+| Görev | Kullanılacak Dosya |
+|---|---|
+| BPE vocab/merges eğitimi | `tokenizer_management/train_bpe.py` |
+| Model eğitimi giriş noktası | `training_system/train.py` |
+| Eğitim servisi | `training_system/training_service.py` |
+| Neural network eğitimi | `model_management/model_manager.py` |
+| **Inference / Chat / Üretim** | **`model/cevahir.py`** ← burası |
+
+---
+
+## Mimari
+
+```
+cevahir.py
+├── Exception Hiyerarşisi
+│   ├── CevahirError (kök)
 │   ├── CevahirInitializationError
 │   ├── CevahirConfigurationError
-│   └── CevahirProcessingError
-├── Utility Classes (3 sınıf)
-│   ├── _ErrorContextBuilder (Phase 2: Enhanced error context)
-│   ├── _InputValidator (Phase 1: Input validation)
-│   └── Decorators (4 decorator - Phase 1)
-│       ├── @requires_tokenizer
-│       ├── @requires_model_manager
-│       ├── @requires_cognitive_manager
-│       └── @requires_model_api
-├── Configuration (1 dataclass)
-│   └── CevahirConfig (Phase 2: Hot reload support)
-├── Adapter Pattern (1 sınıf)
-│   └── CevahirModelAPI (ModelManager → CognitiveManager adaptasyonu)
-└── Main Class (1 sınıf)
-    └── Cevahir (Ana unified API)
-        ├── Tokenization API
-        ├── Model API
-        ├── Cognitive API
-        ├── Batch Processing API (Phase 2)
-        ├── Monitoring & Observability
-        └── Properties
-```
-
-### Mimari Katmanlar
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Cevahir API                          │
-│            (Unified Inference Interface)                │
-└────────────┬───────────────┬───────────────┬───────────┘
-             │               │               │
-     ┌───────▼───────┐ ┌─────▼─────┐ ┌──────▼──────┐
-     │ TokenizerCore │ │ModelManager│ │Cognitive    │
-     │               │ │            │ │Manager      │
-     │ - BPE encode  │ │ - V-4 NN   │ │ - Memory    │
-     │ - decode      │ │ - forward  │ │ - Tools     │
-     │ - GPU batch   │ │ - generate │ │ - Monitoring│
-     └───────────────┘ └────────────┘ └─────────────┘
-             │               │               │
-     ┌───────▼───────┐ ┌─────▼─────┐ ┌──────▼──────┐
-     │  BPE Manager  │ │Cevahir    │ │Cognitive    │
-     │  Vocab/Merges │ │Neural     │ │Components   │
-     │               │ │Network    │ │             │
-     └───────────────┘ └────────────┘ └─────────────┘
+│   └── CevahirProcessingError (context + suggestion)
+│
+├── Yardımcı Sınıflar (internal)
+│   ├── _ErrorContextBuilder     → Hata mesajı + öneri üretimi
+│   └── _InputValidator          → str/list/Tensor → [B, T] Tensor
+│
+├── Decorator'lar
+│   ├── @requires_tokenizer
+│   ├── @requires_model_manager
+│   ├── @requires_cognitive_manager
+│   └── @requires_model_api
+│
+├── CevahirConfig (dataclass)    → Tüm konfigürasyon
+│
+├── CognitiveModelAPI (Protocol) → CognitiveManager'ın beklediği interface
+│
+├── CevahirModelAPI              → Adapter Pattern
+│   ├── generate()               → Autoregressive üretim (KV Cache)
+│   ├── _autoregressive_generate() → Core üretim döngüsü
+│   ├── _generate_with_beam_search() → Beam search üretim
+│   ├── score()                  → Log-probability scoring
+│   ├── entropy_estimate()       → Shannon entropy ölçümü
+│   └── process_audio/image/multimodal()
+│
+└── Cevahir (ana sınıf)          → Public API
+    ├── Tokenization API         → encode / decode / train_tokenizer
+    ├── Model API                → forward / generate / predict / freeze
+    ├── Cognitive API            → process / generate_batch / memory / tools
+    ├── Monitoring               → get_metrics / get_health_status
+    └── Properties               → tokenizer / model / device / cognitive
 ```
 
 ---
 
-## ⚙️ Çalışma Prensibi
+## Exception Hiyerarşisi
 
-### 1. Initialization Flow
-
-```python
-Cevahir(config)
-    ↓
-1. Config Validation (CevahirConfig.validate())
-    ↓
-2. Seed Management (reproducibility)
-    ↓
-3. Initialize Components:
-    ├── TokenizerCore (BPE vocab/merges)
-    ├── ModelManager (V-4 neural network)
-    ├── CevahirModelAPI (Adapter)
-    └── CognitiveManager (Cognitive layer)
-    ↓
-4. Component Integration
-    ↓
-5. System Ready for Inference
+```
+CevahirError (Exception)
+├── CevahirInitializationError   → Bileşen başlatma hatası
+├── CevahirConfigurationError    → Konfigürasyon hatası
+└── CevahirProcessingError       → İşlem hatası
+     ├── .context: Dict          → Ek bağlam bilgisi
+     └── .suggestion: str        → Kullanıcıya önerisini içerir
 ```
 
-### 2. Text Processing Flow
-
-```python
-cevahir.process("Merhaba dünya")
-    ↓
-1. Input Validation
-    ↓
-2. CognitiveManager.handle()
-    ├── Memory Retrieval (if needed)
-    ├── Tool Selection (if needed)
-    ├── ModelAPI.generate()
-    │   ├── TokenizerCore.encode() → Token IDs
-    │   ├── ModelManager.forward() → Logits
-    │   ├── Autoregressive Generation (KV Cache)
-    │   └── TokenizerCore.decode() → Text
-    └── Response Processing
-    ↓
-3. CognitiveOutput (with metadata)
-```
-
-### 3. Generation Flow (with KV Cache)
-
-```python
-cevahir.generate("Merhaba", max_new_tokens=128)
-    ↓
-1. Encode Prompt → Token IDs
-    ↓
-2. Autoregressive Loop:
-    ├── Step 0: Full sequence forward (KV Cache init)
-    ├── Step 1+: Single token forward (KV Cache reuse)
-    ├── Decoding (temperature, top-p, top-k)
-    └── EOS check
-    ↓
-3. Decode Generated IDs → Text
-```
-
----
-
-## 📦 Bileşenler ve Sınıflar
-
-### 1. Exception Classes
-
-#### `CevahirError` (Base Exception)
-
-```python
-class CevahirError(Exception):
-    """Base exception for Cevahir system"""
-    pass
-```
-
-#### `CevahirInitializationError`
-
-```python
-class CevahirInitializationError(CevahirError):
-    """Initialization errors"""
-    pass
-```
-
-**Kullanım:**
-- TokenizerCore başlatma hataları
-- ModelManager başlatma hataları
-- CognitiveManager başlatma hataları
-
-#### `CevahirConfigurationError`
-
-```python
-class CevahirConfigurationError(CevahirError):
-    """Configuration errors"""
-    pass
-```
-
-**Kullanım:**
-- Config validation hataları
-- Invalid parameter values
-- Missing required config fields
-
-#### `CevahirProcessingError`
+### CevahirProcessingError
 
 ```python
 class CevahirProcessingError(CevahirError):
@@ -220,1282 +113,686 @@ class CevahirProcessingError(CevahirError):
         message: str,
         context: Optional[Dict[str, Any]] = None,
         suggestion: Optional[str] = None
-    ):
-        super().__init__(message)
-        self.context = context or {}
-        self.suggestion = suggestion
+    ): ...
 ```
 
-**Kullanım:**
-- Processing errors with context
-- Actionable error messages (Phase 2)
-- Enhanced debugging information
+`suggestion` alanı, hata sonrasında kullanıcıya ne yapması gerektiğini açıklar. Örneğin TokenizerCore hatalarında `"Ensure tokenizer vocab and merges files exist and are valid"` gibi bir öneri iletilir.
 
-### 2. Utility Classes
+---
 
-#### `_ErrorContextBuilder` (Phase 2)
+## Yardımcı Sınıflar
 
-**Amaç:** Actionable error messages with context and suggestions.
+### `_ErrorContextBuilder`
+
+Bileşenlerden gelen Exception'ları yakalayarak yapılandırılmış hata mesajları ve öneriler üretir.
 
 ```python
-class _ErrorContextBuilder:
-    @staticmethod
-    def build_error_message(
-        operation: str,
-        error: Exception,
-        component: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None
-    ) -> Tuple[str, Optional[str]]:
-        """Build enhanced error message with context and suggestions."""
+msg, suggestion = _ErrorContextBuilder.build_error_message(
+    operation="Forward pass",
+    error=exc,
+    component="ModelManager"
+)
+# msg      → "Forward pass failed (component: ModelManager): ..."
+# suggestion → "Verify model is initialized and model weights are loaded correctly"
 ```
 
-**Özellikler:**
-- Component-specific suggestions
-- Error type-based suggestions
-- Context-aware error messages
+Bileşen bazlı öneriler:
 
-#### `_InputValidator` (Phase 1)
+| Bileşen | Öneri |
+|---|---|
+| `TokenizerCore` | vocab/merges dosyalarını kontrol et |
+| `ModelManager` | model başlatıldı mı, ağırlıklar yüklendi mi |
+| `CognitiveManager` | konfigürasyon ve bağımlılıkları kontrol et |
 
-**Amaç:** Single Responsibility Principle, reusable validation logic.
+---
+
+### `_InputValidator`
+
+`forward()` gibi metodlara geçilen girişleri normalize eder.
 
 ```python
-class _InputValidator:
-    @staticmethod
-    def validate_and_convert_input(
-        inputs: Union[torch.Tensor, List[int], str],
-        device: Union[str, torch.device],
-        tokenizer_core: Optional[Any] = None,
-        vocab_size: Optional[int] = None
-    ) -> torch.Tensor:
-        """Validate and convert various input types to torch.Tensor."""
+tensor = _InputValidator.validate_and_convert_input(
+    inputs=inputs,       # str | List[int] | torch.Tensor
+    device="cuda",
+    tokenizer_core=tok,  # str dönüşümü için
+    vocab_size=50000     # clamp için
+)
 ```
 
-**Desteklenen Input Tipleri:**
-- `str` → Token IDs (via TokenizerCore)
-- `List[int]` → Tensor
-- `torch.Tensor` → Validated Tensor
+**Dönüşüm kuralları:**
 
-#### Decorators (Phase 1)
+| Girdi Tipi | İşlem |
+|---|---|
+| `str` | TokenizerCore ile encode → `[1, T]` Tensor |
+| `List[int]` | `torch.tensor([ids])` → `[1, T]` Tensor |
+| `torch.Tensor` | `.long()`, 1D ise `unsqueeze(0)` → `[B, T]` Tensor |
+| Boş girdi | PAD token ile `[1, 1]` Tensor |
 
-**Amaç:** DRY (Don't Repeat Yourself), component validation.
+Vocab aralığı dışı token ID'leri `vocab_size - 1`'e kırpılır.
 
-```python
-@requires_tokenizer
-@requires_model_manager
-@requires_cognitive_manager
-@requires_model_api
-```
+---
 
-**Kullanım:**
-- Automatic component initialization check
-- Consistent error handling
-- Cleaner method signatures
+## CevahirConfig
 
-### 3. Configuration
-
-#### `CevahirConfig` (Dataclass)
-
-**Phase 2 Özellikleri:** Hot reload support
+Tüm sistemi yapılandıran ana `dataclass`.
 
 ```python
 @dataclass
 class CevahirConfig:
-    # Device configuration
-    device: str = "cpu"
-    seed: Optional[int] = None
+    device: str = "cuda"
+    seed: Optional[int] = 42
     log_level: str = "INFO"
-    
-    # Phase 2: Config hot reload
+
+    # Tokenizer yapılandırması (dict)
+    tokenizer: Dict[str, Any] = field(default_factory=dict)
+
+    # Model yapılandırması — V-4 varsayılanları:
+    model: Dict[str, Any] = field(default_factory=lambda: {
+        "vocab_size": 50000,
+        "embed_dim": 512,
+        "num_heads": 8,
+        "num_layers": 8,
+        "ffn_dim": 2048,
+        "pe_mode": "rope",
+        "use_rmsnorm": True,
+        "use_swiglu": True,
+        "use_kv_cache": True,
+        "use_moe": False,
+        "dropout": 0.1,
+        "max_seq_len": 2048,
+    })
+
+    # CognitiveManager yapılandırması
+    cognitive: Optional[CognitiveManagerConfig] = None
+
+    # Checkpoint yükleme
+    load_model_path: Optional[str] = None  # None → auto-detect
+
+    # Config dosyası (hot reload için)
     config_path: Optional[str] = None
     enable_hot_reload: bool = False
-    
-    # Tokenizer configuration
-    tokenizer: Dict[str, Any] = field(default_factory=lambda: {...})
-    
-    # Model configuration (V-4 Architecture)
-    model: Dict[str, Any] = field(default_factory=lambda: {...})
-    
-    # Cognitive configuration
-    cognitive: Optional[CognitiveManagerConfig] = None
-    
-    def validate(self) -> None:
-        """Validate configuration"""
 ```
 
-**V-4 Model Config Özellikleri:**
-- `pe_mode: "rope"` → RoPE (Rotary Position Embedding)
-- `use_rmsnorm: True` → RMSNorm
-- `use_swiglu: True` → SwiGLU activation
-- `use_kv_cache: True` → KV Cache for inference
-- `max_cache_len: 2048` → Maximum cache length
-- `use_moe: False` → Mixture of Experts
-- `quantization_type: "none"` → Quantization support
+### `validate()`
 
-### 4. Adapter Pattern
+Config geçerliliğini kontrol eder; geçersiz değer varsa `CevahirConfigurationError` fırlatır.
 
-#### `CevahirModelAPI`
-
-**Amaç:** ModelManager'ı CognitiveManager'ın ModelAPI protocol'üne adapte eder.
+### dict'ten CevahirConfig
 
 ```python
-class CevahirModelAPI(CognitiveModelAPI):
-    def __init__(
-        self,
-        model_manager: ModelManager,
-        tokenizer_core: TokenizerCore,
-    ):
-        self.model_manager = model_manager
-        self.tokenizer_core = tokenizer_core
-        self._device = model_manager.device
+config = CevahirConfig(**my_dict)
 ```
 
-**Metodlar:**
-- `generate(prompt, decoding_cfg)` → Text generation
-- `_autoregressive_generate(input_tensor, decoding_cfg)` → KV Cache optimized generation
-- `_generate_with_beam_search(...)` → Phase 3: Beam search
-- `score(prompt, candidate)` → Text scoring
-- `entropy_estimate(text)` → Entropy calculation
-- `process_audio/image/multimodal(...)` → Multimodal support
+---
 
-**KV Cache Optimizasyonu:**
-```python
-# Step 0: Full sequence forward (KV Cache initialize)
-current_input = input_tensor
-cache_position = torch.arange(initial_seq_len, device=self._device)
+## CevahirModelAPI
 
-# Step 1+: Single token forward (KV Cache reuse)
-current_input = next_token_tensor  # [batch, 1]
-cache_position = torch.tensor([initial_seq_len + step - 1], device=self._device)
+`ModelManager`'ı `CognitiveManager`'ın beklediği `CognitiveModelAPI` Protocol'üne uyarlayan **Adapter sınıfı**.
+
+```
+CevahirModelAPI
+├── Implements: CognitiveModelAPI Protocol
+├── Wraps: ModelManager + TokenizerCore
+└── Methods:
+    ├── generate(prompt, decoding_cfg) → str
+    ├── score(prompt, candidate)       → float
+    └── entropy_estimate(text)         → float [0, 1]
 ```
 
-### 5. Main Class: `Cevahir`
+### `generate(prompt, decoding_cfg)` → `str`
 
-**Ana Unified API Sınıfı**
+Autoregressive üretim — KV Cache tabanlı.
 
-#### Initialization
+```
+Akış:
+1. Prompt → encode → [1, T] Tensor
+2. KV Cache temizle (önceki tur kirliliğini önler)
+3. İlk forward: tüm prompt → cache initialize
+4. Sonraki forward'lar: sadece son token (cache_position ile)
+5. Repetition penalty → Temperature → Top-k → Top-p → multinomial
+6. EOS gelince dur (minimum 5 token üretme koşullu)
+7. Yeni token'ları decode et (prompt token'ları dışarıda)
+```
+
+**Parametre sınırları:**
+
+| Parametre | Aralık |
+|---|---|
+| `max_new_tokens` | `[0, 2048]` |
+| `top_p` | `[0.01, 1.0]` |
+| `top_k` | `>= 0` (0 = kapalı) |
+| `repetition_penalty` | `> 1.0` aktif, son 256 token üzerinde uygulanır |
+
+**EOS davranışı:** Minimum 5 token üretildikten sonra EOS'a izin verilir — erken collapse önlemi.
+
+**NaN koruması:** Tüm prob'lar NaN/sıfır ise uniform fallback, son çare olarak ilk token seçilir.
+
+---
+
+### `_generate_with_beam_search(prompt, max_new_tokens, beam_width)`
+
+```
+Akış:
+1. beam_width adet beam başlat (hepsi aynı prompt)
+2. Her beam için forward → top (beam_width × 2) aday
+3. Adayları log-probability toplamına göre sırala
+4. En iyi beam_width adayı seç
+5. Tüm beam'ler EOS'a ulaşınca veya max_new_tokens dolunca dur
+6. En yüksek skorlu beam decode edilir
+7. Hata durumunda standard generation'a fallback
+```
+
+---
+
+### `score(prompt, candidate)` → `float [0, 1]`
+
+Prompt verildiğinde candidate metnin olasılığını ölçer.
+
+```
+avg_log_prob = mean(log P(candidate_token_i | prompt + candidate[:i]))
+score = clamp((avg_log_prob + 10) / 10, 0.0, 1.0)
+```
+
+Uzunluk bazlı heuristic fallback mevcuttur.
+
+---
+
+### `entropy_estimate(text)` → `float [0, 1]`
+
+Modelin next-token dağılımı üzerinden Shannon entropi ölçümü.
 
 ```python
-def __init__(
-    self,
+H = -sum(p_i * log(p_i))            # Raw Shannon entropy
+normalized = H / log(vocab_size)     # [0, 1]
+# 0 → model emin (tek dominant token)
+# 1 → model belirsiz (uniform dağılım)
+```
+
+**Akademik referans:** Kuhn et al. 2023 (active learning, LLM calibration)
+
+**Heuristic fallback:** Model forward başarısız olursa Type-Token Ratio (TTR) kullanılır.
+
+---
+
+## Cevahir Ana Sınıfı
+
+```python
+class Cevahir:
+    """Unified API: TokenizerCore + ModelManager + CognitiveManager"""
+```
+
+### `__init__`
+
+```python
+Cevahir(
     config: Union[CevahirConfig, Dict[str, Any]],
     *,
-    tokenizer_core: Optional[TokenizerCore] = None,
-    model_manager: Optional[ModelManager] = None,
-    cognitive_manager: Optional[CognitiveManager] = None,
-):
-```
-
-**Dependency Injection:**
-- Optional pre-initialized components
-- Flexible initialization
-- Test-friendly architecture
-
----
-
-## 🚀 V-4 Mimari Özellikleri
-
-### 1. RoPE (Rotary Position Embedding)
-
-**Endüstri Standardı:** GPT-3+, Claude, Gemini
-
-```python
-model_config = {
-    "pe_mode": "rope",  # V-4: RoPE default
-    # ...
-}
-```
-
-**Avantajlar:**
-- Relative position encoding
-- Better generalization to longer sequences
-- GPT-4, Claude, Gemini standard
-
-### 2. RMSNorm (Root Mean Square Layer Normalization)
-
-**Endüstri Standardı:** GPT-3+, LLaMA
-
-```python
-model_config = {
-    "use_rmsnorm": True,  # V-4: RMSNorm
-    # ...
-}
-```
-
-**Avantajlar:**
-- Faster than LayerNorm
-- Better numerical stability
-- LLaMA standard
-
-### 3. SwiGLU Activation
-
-**Endüstri Standardı:** GPT-4, PaLM
-
-```python
-model_config = {
-    "use_swiglu": True,  # V-4: SwiGLU
-    # ...
-}
-```
-
-**Avantajlar:**
-- Better performance than GELU
-- GPT-4, PaLM standard
-- Improved activation quality
-
-### 4. KV Cache (Key-Value Cache)
-
-**Endüstri Standardı:** GPT-4, Claude, Gemini inference optimization
-
-```python
-model_config = {
-    "use_kv_cache": True,  # V-4: KV Cache
-    "max_cache_len": 2048,
-    # ...
-}
-```
-
-**Avantajlar:**
-- 10-100x faster inference
-- Memory-efficient autoregressive generation
-- Production-ready optimization
-
-**Kullanım:**
-```python
-# İlk iterasyon: Tüm sequence forward (KV Cache initialize)
-logits, _ = model_manager.forward(
-    current_input,  # [batch, seq_len]
-    use_cache=True,
-    cache_position=torch.arange(seq_len, device=device)
-)
-
-# Sonraki iterasyonlar: Sadece yeni token (KV Cache reuse)
-logits, _ = model_manager.forward(
-    next_token_tensor,  # [batch, 1]
-    use_cache=True,
-    cache_position=torch.tensor([seq_len + step - 1], device=device)
+    tokenizer_core: Optional[TokenizerCore] = None,  # Dependency injection
+    model_manager: Optional[ModelManager] = None,    # Dependency injection
+    cognitive_manager: Optional[CognitiveManager] = None,  # Dependency injection
 )
 ```
 
-### 5. MoE (Mixture of Experts)
+Başlatma sırası:
 
-**Endüstri Standardı:** GPT-4, Gemini large models
-
-```python
-model_config = {
-    "use_moe": True,  # V-4: MoE
-    "num_experts": 8,  # GPT-4: 8
-    "moe_top_k": 2,  # GPT-4: 2
-    # ...
-}
+```
+1. Config parse + validate
+2. Seed set (reproducibility için)
+3. Log level set
+4. TokenizerCore init (veya inject)
+5. ModelManager init + model auto-load (veya inject)
+6. CevahirModelAPI adapter oluştur
+7. CognitiveManager init (veya inject)
 ```
 
-**Avantajlar:**
-- Sparse activation (only 2/8 experts active)
-- Larger model capacity with same compute
-- GPT-4, Gemini standard for large models
+**Model auto-load:** `load_model_path` None ise `saved_models/cevahir_model.pth`'e bakılır. Bulunamazsa random init ile devam edilir (uyarı verilir).
 
-### 6. Quantization
-
-**Endüstri Standardı:** GPT-4, Claude, Gemini production optimization
-
-```python
-model_config = {
-    "quantization_type": "int8",  # "none" | "int8" | "fp16" | "int8_dynamic"
-    # ...
-}
-```
-
-**Avantajlar:**
-- 2-4x model size reduction
-- Faster inference (GPU/CPU)
-- Production deployment optimization
+**ModelManager başlatma modu:** Inference only — `build_optimizer=False, build_criterion=False, build_scheduler=False`
 
 ---
 
-## 📚 API Referansı
+## API Referansı
+
+### Decorator Güvenceleri
+
+| Decorator | Koşul | Hata |
+|---|---|---|
+| `@requires_tokenizer` | `_tokenizer_core` mevcut | `CevahirProcessingError` |
+| `@requires_model_manager` | `_model_manager` mevcut | `CevahirProcessingError` |
+| `@requires_cognitive_manager` | `_cognitive_manager` mevcut | `CevahirProcessingError` |
+| `@requires_model_api` | `_model_api` mevcut | `CevahirProcessingError` |
+
+---
 
 ### Tokenization API
 
-#### `encode(text, mode="inference", **kwargs)`
+#### `encode(text, mode="inference") → Tuple[List[str], List[int]]`
 
-Text'i token'lara encode eder.
-
-**Parametreler:**
-- `text: str` → Input text
-- `mode: str` → "train" veya "inference"
-- `**kwargs` → Additional tokenizer parameters
-
-**Dönüş:**
-- `Tuple[List[str], List[int]]` → (tokens, token_ids)
-
-**Örnek:**
 ```python
-tokens, token_ids = cevahir.encode("Merhaba dünya")
-# tokens: ['Merhaba', ' dünya']
-# token_ids: [1234, 5678]
+tokens, ids = cevahir.encode("Merhaba dünya")
+# tokens → ["Mer", "haba", " dü", "nya"]
+# ids    → [142, 883, 2041, 567]
 ```
 
-#### `decode(token_ids, **kwargs)`
+#### `decode(token_ids) → str`
 
-Token ID'lerini text'e decode eder.
-
-**Parametreler:**
-- `token_ids: List[int]` → Token IDs
-- `**kwargs` → Additional tokenizer parameters
-
-**Dönüş:**
-- `str` → Decoded text
-
-**Örnek:**
 ```python
-text = cevahir.decode([1234, 5678])
-# text: "Merhaba dünya"
+text = cevahir.decode([142, 883, 2041, 567])
+# → "Merhaba dünya"
 ```
 
-#### `train_tokenizer(corpus, **kwargs)`
+#### `train_tokenizer(corpus)`
 
-Tokenizer'ı corpus üzerinde eğitir.
-
-**Parametreler:**
-- `corpus: List[str]` → Training corpus
-- `**kwargs` → Training parameters
-
-**Not:** Bu metod BPE vocab/merges eğitimi için kullanılır.
+Tokenizer'ı verilen corpus üzerinde eğitir. (BPE eğitimi)
 
 ---
 
 ### Model API
 
-#### `forward(inputs, **kwargs)`
+#### `forward(inputs, **kwargs) → torch.Tensor`
 
-Model forward pass.
-
-**Parametreler:**
-- `inputs: Union[torch.Tensor, List[int], str]` → Input (tensor, token IDs, veya text)
-- `**kwargs` → Forward parameters (inference, use_cache, cache_position, vb.)
-
-**Dönüş:**
-- `torch.Tensor` → Model output logits `[batch, seq_len, vocab_size]`
-
-**Phase 3:** Performance profiling desteği
-
-**Örnek:**
 ```python
-# String input
-logits = cevahir.forward("Merhaba dünya")
-
-# Token IDs input
-logits = cevahir.forward([1234, 5678])
-
-# Tensor input
-input_tensor = torch.tensor([[1234, 5678]], dtype=torch.long)
-logits = cevahir.forward(input_tensor)
-
-# KV Cache ile
-logits, _ = cevahir.forward(
-    input_tensor,
-    inference=True,
-    use_cache=True,
-    cache_position=torch.arange(seq_len, device=device)
-)
+logits = cevahir.forward("Merhaba")       # str giriş
+logits = cevahir.forward([142, 883])      # list[int] giriş
+logits = cevahir.forward(tensor)          # Tensor giriş
+# → [B, T, vocab_size]
 ```
 
-#### `generate(prompt, max_new_tokens=128, temperature=1.0, top_p=1.0, top_k=0, repetition_penalty=1.0, **kwargs)`
+`_InputValidator` ile tip dönüşümü otomatik yapılır.
 
-Text generation.
+---
 
-**Parametreler:**
-- `prompt: str` → Input prompt
-- `max_new_tokens: int` → Maximum tokens to generate (default: 128)
-- `temperature: float` → Sampling temperature (default: 1.0)
-- `top_p: float` → Nucleus sampling threshold (default: 1.0)
-- `top_k: int` → Top-k sampling (default: 0 = no filtering)
-- `repetition_penalty: float` → Repetition penalty (default: 1.0)
-- `**kwargs` → Additional generation parameters
+#### `generate(prompt, ...) → str`
 
-**Dönüş:**
-- `str` → Generated text
-
-**Phase 3:** Performance profiling desteği
-
-**Decoding Stratejileri:**
-1. **Temperature Sampling:** `temperature > 0` → Diversity control
-2. **Top-k Sampling:** `top_k > 0` → Sample from top-k tokens
-3. **Nucleus Sampling (Top-p):** `top_p < 1.0` → Sample from cumulative probability
-4. **Repetition Penalty:** `repetition_penalty > 1.0` → Reduce repetition
-
-**Örnek:**
 ```python
-# Basic generation
-text = cevahir.generate("Merhaba", max_new_tokens=50)
-
-# Creative generation (high temperature)
 text = cevahir.generate(
-    "Bir hikaye yaz:",
-    max_new_tokens=200,
-    temperature=1.2,
+    prompt="Türkiye'nin başkenti",
+    max_new_tokens=128,
+    temperature=0.8,
     top_p=0.9,
     top_k=50,
-    repetition_penalty=1.1
-)
-
-# Deterministic generation (low temperature)
-text = cevahir.generate(
-    "Soruyu cevapla:",
-    max_new_tokens=100,
-    temperature=0.7,
-    top_p=0.95
+    repetition_penalty=1.1,
+    use_cognitive_pipeline=True,   # Default: True
 )
 ```
 
-#### `predict(inputs, topk=1, apply_softmax=True, return_logits=False, **kwargs)`
+**Routing mantığı:**
 
-Top-k prediction.
+```
+use_cognitive_pipeline=True + CognitiveManager mevcut
+  → CognitiveManager.handle(state, input, decoding=...)
+     (Self-Refine + Memory + Critic aktif)
+  → Hata durumunda: fallback to direct generation
 
-**Parametreler:**
-- `inputs: Union[torch.Tensor, List[int], str]` → Input
-- `topk: int` → Number of top predictions (default: 1)
-- `apply_softmax: bool` → Apply softmax to logits (default: True)
-- `return_logits: bool` → Return raw logits (default: False)
-- `**kwargs` → Additional forward parameters
+use_cognitive_pipeline=False VEYA CognitiveManager yok
+  → CevahirModelAPI.generate(prompt, decoding_cfg)
+     (raw autoregressive üretim)
+```
 
-**Dönüş:**
-- `Dict[str, Any]` → Predictions, probabilities, and optionally logits
+---
 
-**Örnek:**
+#### `predict(inputs, topk=1, apply_softmax=True, return_logits=False) → Dict`
+
 ```python
 result = cevahir.predict("Merhaba", topk=5)
-# {
-#     "predictions": [1234, 5678, 9012, 3456, 7890],
-#     "probabilities": [0.5, 0.3, 0.1, 0.05, 0.05],
-#     "logits": tensor([...])  # if return_logits=True
-# }
+# → {"predictions": [...], "probabilities": [...]}
 ```
 
-#### `save_model(path, **kwargs)` / `load_model(path, **kwargs)`
+---
 
-Model kaydetme/yükleme.
+#### `freeze(patterns) → Dict`
 
-**Örnek:**
 ```python
-# Save model
-cevahir.save_model("saved_models/my_model.pth")
-
-# Load model
-cevahir.load_model("saved_models/my_model.pth", strict=False)
+report = cevahir.freeze(["embedding.*", "layers.0"])
+# → {"frozen": [...], "skipped": [...]}
 ```
 
-#### `freeze(patterns)` / `unfreeze(patterns)`
+#### `unfreeze(patterns) → Dict`
 
-Layer freezing/unfreezing.
-
-**Parametreler:**
-- `patterns: Union[str, List[str]]` → Layer name pattern(s)
-
-**Örnek:**
 ```python
-# Freeze embedding layers
-report = cevahir.freeze("embedding.*")
-
-# Unfreeze specific layers
-report = cevahir.unfreeze(["layer.0", "layer.1"])
+report = cevahir.unfreeze("layers.*")
 ```
 
-#### `update_model(update_params, dry_run=False)`
+---
 
-Model parametrelerini güncelle.
+#### `save_model(path) / load_model(path)`
 
-**Parametreler:**
-- `update_params: Dict[str, Any]` → Update parameters
-- `dry_run: bool` → Preview changes without applying (default: False)
-
-**Örnek:**
 ```python
-# Preview changes
-report = cevahir.update_model(
-    {
-        "freeze": ["embedding.*"],
-        "learning_rate": 1e-5
-    },
-    dry_run=True
+cevahir.save_model("checkpoints/v6_best.pt")
+cevahir.load_model("checkpoints/v6_best.pt")
+```
+
+---
+
+#### `train_mode() / eval_mode()`
+
+```python
+cevahir.eval_mode()   # Inference için (dropout kapalı)
+cevahir.train_mode()  # Fine-tuning için (dropout açık)
+```
+
+---
+
+#### `configure_tensorboard(...)`
+
+```python
+cevahir.configure_tensorboard(
+    log_dir="runs/v6",
+    log_every_n=100,
+    log_histograms=True,
+    log_attention_image=True,
+    enable=True
 )
-
-# Apply changes
-report = cevahir.update_model({
-    "freeze": ["embedding.*"],
-    "learning_rate": 1e-5
-})
+writer = cevahir.get_tb_writer()
 ```
+
+---
+
+#### `update_model(update_params, dry_run=False) → Dict`
+
+ModelManager üzerinden parametre güncellemesi yapar.
 
 ---
 
 ### Cognitive API
 
-#### `process(text, state=None, **kwargs)`
+#### `process(text, state=None) → CognitiveOutput`
 
-Text'i cognitive layer üzerinden işle.
-
-**Parametreler:**
-- `text: str` → Input text
-- `state: Optional[CognitiveState]` → Optional cognitive state
-- `**kwargs` → Additional processing parameters
-
-**Dönüş:**
-- `CognitiveOutput` → Processed result with metadata
-
-**Phase 3:** Performance profiling desteği
-
-**Özellikler:**
-- Memory retrieval (if needed)
-- Tool selection and execution (if needed)
-- Model generation with context
-- Response processing
-
-**Örnek:**
 ```python
-# Basic processing
-output = cevahir.process("Merhaba dünya")
-print(output.response)  # Generated response
-print(output.mode)  # Processing mode
-print(output.metadata)  # Additional metadata
-
-# With cognitive state
-state = CognitiveState()
-output = cevahir.process("Nasılsın?", state=state)
+output = cevahir.process("Bana yapay zeka hakkında bilgi ver")
+print(output.text)
 ```
 
-#### `add_memory(note)`
+Tüm CognitiveManager pipeline'ından (Critic, Memory, Deliberation) geçer.
 
-Memory'ye not ekle.
+---
 
-**Parametreler:**
-- `note: str` → Memory note
+#### `generate_batch(prompts, ...) → List[str]`
 
-**Örnek:**
 ```python
-cevahir.add_memory("Kullanıcı Python öğreniyor.")
+results = cevahir.generate_batch(
+    ["Soru 1", "Soru 2", "Soru 3"],
+    max_new_tokens=64,
+    temperature=0.7
+)
 ```
 
-#### `search_memory(query, limit=5)`
+Sequential işleme (şu an). Bir prompt başarısız olursa diğerleri devam eder, hatalı için `""` döner.
 
-Memory'de semantic search.
+---
 
-**Parametreler:**
-- `query: str` → Query text
-- `limit: int` → Maximum number of results (default: 5)
+#### `process_batch(texts, states=None) → List[CognitiveOutput]`
 
-**Dönüş:**
-- `List[Dict[str, Any]]` → Relevant memory items with metadata and scores
-
-**Örnek:**
 ```python
-results = cevahir.search_memory("Python", limit=10)
-for result in results:
-    print(result["content"])
-    print(result["score"])
+outputs = cevahir.process_batch(["Metin 1", "Metin 2"])
 ```
 
-#### `register_tool(name, func, description=None, parameters=None, **kwargs)`
+Her metin için bağımsız CognitiveState kullanılır.
 
-Tool kaydet.
+---
 
-**Parametreler:**
-- `name: str` → Tool name
-- `func: Callable` → Tool function
-- `description: str` → Tool description
-- `parameters: Dict[str, Any]` → Tool parameters schema
-- `**kwargs` → Additional tool parameters
+#### `add_memory(note)` / `search_memory(query, limit=5) → List[Dict]`
 
-**Örnek:**
 ```python
-def calculator(a: float, b: float, operation: str) -> float:
-    if operation == "add":
-        return a + b
-    elif operation == "multiply":
-        return a * b
-    # ...
+cevahir.add_memory("Kullanıcı Python tercih ediyor")
+results = cevahir.search_memory("programlama dili", limit=3)
+```
+
+---
+
+#### `register_tool(name, func, description, parameters)` / `list_tools()`
+
+```python
+def hesapla(expr: str) -> float:
+    return eval(expr)
 
 cevahir.register_tool(
-    name="calculator",
-    func=calculator,
-    description="Perform basic arithmetic operations",
-    parameters={
-        "a": {"type": "number"},
-        "b": {"type": "number"},
-        "operation": {"type": "string", "enum": ["add", "multiply"]}
-    }
+    name="hesapla",
+    func=hesapla,
+    description="Matematiksel işlem yapar",
+    parameters={"expr": {"type": "string"}}
 )
-```
-
-#### `list_tools()`
-
-Mevcut tool'ları listele.
-
-**Dönüş:**
-- `List[str]` → Available tool names
-
-**Örnek:**
-```python
 tools = cevahir.list_tools()
-# ['calculator', 'weather_api', ...]
 ```
 
 ---
 
-### Batch Processing API (Phase 2)
+### Training API (DEPRECATED)
 
-#### `generate_batch(prompts, max_new_tokens=128, temperature=1.0, top_p=1.0, top_k=0, repetition_penalty=1.0, **kwargs)`
-
-Birden fazla prompt için batch generation.
-
-**Parametreler:**
-- `prompts: List[str]` → Input prompts
-- `max_new_tokens: int` → Maximum tokens per prompt (default: 128)
-- `temperature: float` → Sampling temperature (default: 1.0)
-- `top_p: float` → Nucleus sampling threshold (default: 1.0)
-- `top_k: int` → Top-k sampling (default: 0)
-- `repetition_penalty: float` → Repetition penalty (default: 1.0)
-- `**kwargs` → Additional generation parameters
-
-**Dönüş:**
-- `List[str]` → Generated texts (one per prompt)
-
-**Endüstri Standardı:** GPT-4, Claude batch API pattern
-
-**Örnek:**
 ```python
-prompts = [
-    "Merhaba, nasılsın?",
-    "Bugün hava nasıl?",
-    "Python hakkında bilgi ver."
-]
-
-results = cevahir.generate_batch(
-    prompts,
-    max_new_tokens=50,
-    temperature=0.8
-)
-
-for prompt, result in zip(prompts, results):
-    print(f"Prompt: {prompt}")
-    print(f"Response: {result}\n")
+cevahir.train(...)
+# → DeprecationWarning + CevahirProcessingError
+# Eğitim için: python training_system/train.py
 ```
 
-#### `process_batch(texts, states=None, **kwargs)`
-
-Birden fazla text için batch processing.
-
-**Parametreler:**
-- `texts: List[str]` → Input texts
-- `states: Optional[List[Optional[CognitiveState]]]` → Optional cognitive states
-- `**kwargs` → Additional processing parameters
-
-**Dönüş:**
-- `List[CognitiveOutput]` → Processed results (one per input text)
-
-**Endüstri Standardı:** GPT-4, Claude batch API pattern
-
-**Örnek:**
-```python
-texts = [
-    "Merhaba dünya",
-    "Nasılsın?",
-    "Python öğreniyorum"
-]
-
-outputs = cevahir.process_batch(texts)
-
-for text, output in zip(texts, outputs):
-    print(f"Input: {text}")
-    print(f"Output: {output.response}\n")
-```
+`Cevahir.train()` her zaman hata fırlatır. Gerçek eğitim için `training_system/train.py` kullanılmalıdır.
 
 ---
 
-### Monitoring & Observability
+### Monitoring
 
-#### `get_metrics()`
-
-Sistem metriklerini al.
-
-**Dönüş:**
-- `Dict[str, Any]` → System metrics
-
-**Örnek:**
 ```python
 metrics = cevahir.get_metrics()
-# {
-#     "total_requests": 1000,
-#     "avg_latency": 0.5,
-#     "error_rate": 0.01,
-#     ...
-# }
-```
+# → CognitiveManager'dan gelen metrik sözlüğü
 
-#### `get_health_status()`
-
-Sistem sağlık durumunu al.
-
-**Dönüş:**
-- `Dict[str, Any]` → Health status
-
-**Örnek:**
-```python
 health = cevahir.get_health_status()
-# {
-#     "status": "healthy",
-#     "components": {
-#         "tokenizer": "ok",
-#         "model": "ok",
-#         "cognitive": "ok"
-#     }
-# }
+# → {"status": "healthy", ...}
 ```
 
 ---
 
 ### Properties
 
-#### `tokenizer` → `TokenizerCore`
-
-TokenizerCore instance'ına erişim.
-
-**Örnek:**
-```python
-tokenizer = cevahir.tokenizer
-vocab_size = tokenizer.get_vocab_size()
-```
-
-#### `model` → `ModelManager`
-
-ModelManager instance'ına erişim.
-
-**Örnek:**
-```python
-model_manager = cevahir.model
-device = model_manager.device
-```
-
-#### `device` → `torch.device`
-
-Model device'ına erişim.
-
-**Örnek:**
-```python
-device = cevahir.device
-# torch.device('cuda:0') or torch.device('cpu')
-```
-
-#### `is_initialized` → `bool`
-
-Model initialization durumu.
-
-**Örnek:**
-```python
-if cevahir.is_initialized:
-    print("Model is ready!")
-```
-
-#### `cognitive` → `CognitiveManager`
-
-CognitiveManager instance'ına erişim.
-
-**Örnek:**
-```python
-cognitive = cevahir.cognitive
-metrics = cognitive.get_metrics()
-```
+| Property | Dönüş | Açıklama |
+|---|---|---|
+| `cevahir.tokenizer` | `TokenizerCore` | TokenizerCore'a erişim |
+| `cevahir.model` | `ModelManager` | ModelManager'a erişim |
+| `cevahir.cognitive` | `CognitiveManager` | CognitiveManager'a erişim |
+| `cevahir.device` | `torch.device` | Modelin bulunduğu cihaz |
+| `cevahir.is_initialized` | `bool` | Model başlatıldı mı |
 
 ---
 
-## 🔄 Phase Güncellemeleri
+## Kullanım Örnekleri
 
-### Phase 1: Code Quality Improvements
-
-**Hedef:** SOLID Principles, DRY, Clean Architecture
-
-**Güncellemeler:**
-
-1. **Decorator Pattern:**
-   - `@requires_tokenizer`
-   - `@requires_model_manager`
-   - `@requires_cognitive_manager`
-   - `@requires_model_api`
-   - **Fayda:** Boilerplate kod azaltma, consistent validation
-
-2. **Input Validation Utility:**
-   - `_InputValidator` class
-   - `validate_and_convert_input()` method
-   - **Fayda:** Single Responsibility Principle, reusable validation logic
-
-**Sonuç:**
-- ✅ Kod tekrarları %60 azaldı
-- ✅ Daha temiz method signatures
-- ✅ Consistent error handling
-
----
-
-### Phase 2: Enterprise Features
-
-**Hedef:** Production-ready features, better debugging
-
-**Güncellemeler:**
-
-1. **Config Hot-Reload:**
-   - `CevahirConfig.config_path`
-   - `CevahirConfig.enable_hot_reload`
-   - **Fayda:** Dynamic configuration updates without restart
-
-2. **Enhanced Error Messages:**
-   - `_ErrorContextBuilder` class
-   - Context-aware error messages
-   - Actionable suggestions
-   - **Fayda:** Better debugging, faster issue resolution
-
-3. **Batch Processing API:**
-   - `generate_batch()` method
-   - `process_batch()` method
-   - **Fayda:** Improved throughput, GPT-4/Claude batch API pattern
-
-**Sonuç:**
-- ✅ Production-ready error handling
-- ✅ Better observability
-- ✅ Improved throughput
-
----
-
-### Phase 3: Advanced Features
-
-**Hedef:** Advanced generation capabilities, performance optimization
-
-**Güncellemeler:**
-
-1. **Beam Search:**
-   - `_generate_with_beam_search()` method (in CevahirModelAPI)
-   - **Fayda:** Better generation quality, GPT-4/Claude standard
-
-2. **Streaming Support:**
-   - Token-by-token real-time output
-   - **Fayda:** Better user experience, real-time feedback
-
-3. **Performance Profiling:**
-   - `enable_profiling()` method
-   - `get_profiling_stats()` method
-   - `clear_profiling_stats()` method
-   - **Fayda:** Performance monitoring, optimization insights
-
-**Sonuç:**
-- ✅ Advanced generation capabilities
-- ✅ Performance monitoring
-- ✅ Better user experience
-
----
-
-## 💡 Kullanım Örnekleri
-
-### Örnek 1: Basic Text Generation
+### Temel Inference
 
 ```python
 from model.cevahir import Cevahir, CevahirConfig
 
-# Configuration
 config = CevahirConfig(
     device="cuda",
     model={
         "vocab_size": 50000,
         "embed_dim": 512,
-        "seq_proj_dim": 512,
         "num_heads": 8,
-        "num_layers": 12,
-        # V-4 features
+        "num_layers": 8,
         "pe_mode": "rope",
         "use_rmsnorm": True,
         "use_swiglu": True,
         "use_kv_cache": True,
-    }
+        "dropout": 0.1,
+    },
+    tokenizer={
+        "vocab_path": "tokenizer_management/data/vocab.json",
+        "merges_path": "tokenizer_management/data/merges.json",
+    },
+    load_model_path="saved_models/cevahir_v6_best.pt",
 )
 
-# Initialize
 cevahir = Cevahir(config)
+```
 
-# Generate text
-prompt = "Merhaba, nasılsın?"
-generated = cevahir.generate(
-    prompt,
+---
+
+### Metin Üretimi
+
+```python
+# Cognitive pipeline ile (varsayılan)
+yanit = cevahir.generate(
+    "Türkiye'nin başkenti nedir?",
     max_new_tokens=100,
     temperature=0.8,
-    top_p=0.9
+    top_p=0.9,
+    use_cognitive_pipeline=True,
 )
 
-print(f"Prompt: {prompt}")
-print(f"Generated: {generated}")
+# Ham model üretimi (cognitive bypass)
+yanit = cevahir.generate(
+    "Türkiye'nin başkenti nedir?",
+    use_cognitive_pipeline=False,
+)
 ```
 
-### Örnek 2: Cognitive Processing
+---
+
+### Encode / Decode
 
 ```python
-# Process with cognitive layer
-output = cevahir.process(
-    "Python'da liste nasıl oluşturulur?",
-    state=None
-)
+tokens, ids = cevahir.encode("Merhaba dünya")
+print(f"Tokens: {tokens}")  # ['Mer', 'haba', ' dün', 'ya']
+print(f"IDs: {ids}")        # [142, 883, 2041, 567]
 
-print(f"Response: {output.response}")
-print(f"Mode: {output.mode}")
-print(f"Metadata: {output.metadata}")
+text = cevahir.decode(ids)
+print(text)  # "Merhaba dünya"
 ```
 
-### Örnek 3: Batch Processing
+---
+
+### Belirsizlik Ölçümü
 
 ```python
-# Batch generation
-prompts = [
-    "Türkiye'nin başkenti neresidir?",
-    "Python nedir?",
-    "Yapay zeka hakkında bilgi ver."
-]
+entropy = cevahir.model_api.entropy_estimate("Bu sorunun cevabı")
+# 0.0 → model emin
+# 1.0 → model belirsiz
+print(f"Entropy: {entropy:.3f}")
+```
 
-results = cevahir.generate_batch(
-    prompts,
-    max_new_tokens=50,
-    temperature=0.7
+---
+
+### Dependency Injection
+
+```python
+from model_management.model_manager import ModelManager
+from tokenizer_management.core.tokenizer_core import TokenizerCore
+
+# Önceden hazırlanmış bileşenlerle
+tok = TokenizerCore(tok_config)
+mm = ModelManager(model_config)
+mm.initialize(build_optimizer=False)
+
+cevahir = Cevahir(
+    config,
+    tokenizer_core=tok,
+    model_manager=mm,
 )
+```
+
+---
+
+### Batch İşlem
+
+```python
+prompts = ["Soru 1", "Soru 2", "Soru 3"]
+results = cevahir.generate_batch(prompts, max_new_tokens=50)
 
 for prompt, result in zip(prompts, results):
     print(f"Q: {prompt}")
-    print(f"A: {result}\n")
+    print(f"A: {result}")
+    print()
 ```
 
-### Örnek 4: Memory Management
+---
+
+### TensorBoard
 
 ```python
-# Add memory
-cevahir.add_memory("Kullanıcı Python öğreniyor.")
-cevahir.add_memory("Kullanıcı yapay zeka ile ilgileniyor.")
-
-# Search memory
-results = cevahir.search_memory("Python", limit=5)
-for result in results:
-    print(f"Content: {result['content']}")
-    print(f"Score: {result['score']}\n")
-```
-
-### Örnek 5: Tool Registration
-
-```python
-def weather_api(city: str) -> str:
-    # Mock weather API
-    return f"{city} için hava durumu: Güneşli, 25°C"
-
-cevahir.register_tool(
-    name="weather_api",
-    func=weather_api,
-    description="Get weather information for a city",
-    parameters={
-        "city": {"type": "string"}
-    }
+cevahir.configure_tensorboard(
+    log_dir="runs/cevahir_v6",
+    log_every_n=50,
+    log_histograms=True,
+    enable=True
 )
-
-# Use tool via cognitive processing
-output = cevahir.process("İstanbul için hava durumu nedir?")
-print(output.response)  # Tool will be called automatically
-```
-
-### Örnek 6: Performance Profiling
-
-```python
-# Enable profiling
-cevahir.enable_profiling(True)
-
-# Run operations
-for _ in range(10):
-    cevahir.generate("Test prompt", max_new_tokens=50)
-
-# Get profiling stats
-stats = cevahir.get_profiling_stats()
-print(f"Generate calls: {stats['generate_calls']}")
-print(f"Total generate time: {stats['total_generate_time']:.2f}s")
-print(f"Avg generate time: {stats['total_generate_time'] / stats['generate_calls']:.3f}s")
-
-# Clear stats
-cevahir.clear_profiling_stats()
-```
-
-### Örnek 7: Model Management
-
-```python
-# Save model
-cevahir.save_model("saved_models/my_model.pth")
-
-# Freeze layers
-report = cevahir.freeze(["embedding.*", "layer.0"])
-print(f"Frozen layers: {report['frozen']}")
-
-# Update model
-report = cevahir.update_model({
-    "freeze": ["embedding.*"],
-    "learning_rate": 1e-5
-}, dry_run=True)
-print(f"Would update: {report}")
-
-# Load model
-cevahir.load_model("saved_models/my_model.pth", strict=False)
-```
-
-### Örnek 8: Error Handling
-
-```python
-try:
-    output = cevahir.process("Test")
-except CevahirProcessingError as e:
-    print(f"Error: {e}")
-    print(f"Context: {e.context}")
-    print(f"Suggestion: {e.suggestion}")
+writer = cevahir.get_tb_writer()
+# writer ile manuel log yapılabilir
 ```
 
 ---
 
-## 🔗 Entegrasyonlar
+## Tasarım Desenleri
 
-### 1. TokenizerCore Entegrasyonu
+### Facade Pattern
 
-**Dosya:** `tokenizer_management/core/tokenizer_core.py`
+`Cevahir`, üç büyük bileşeni (TokenizerCore, ModelManager, CognitiveManager) tek bir tutarlı API altında gizler. Kullanıcı her bileşenin iç detaylarını bilmeden çalışabilir.
 
-**Kullanım:**
-- BPE tokenization
-- Vocab yönetimi
-- GPU batch processing
+### Adapter Pattern
 
-**API:**
-```python
-tokens, token_ids = cevahir.encode("Text")
-text = cevahir.decode(token_ids)
+`CevahirModelAPI`, `ModelManager`'ın arayüzünü `CognitiveManager`'ın beklediği `CognitiveModelAPI` Protocol'üne dönüştürür.
+
+```
+ModelManager  →→  CevahirModelAPI  →→  CognitiveManager
+(karmaşık API)    (protocol uyumu)     (Protocol: generate, score, entropy_estimate)
 ```
 
-### 2. ModelManager Entegrasyonu
+### Decorator Pattern
 
-**Dosya:** `model_management/model_manager.py`
+Bileşen bağımlılıklarını merkezi olarak yönetir. Her metodun başına `if not self._xxx: raise` yazmak yerine:
 
-**Kullanım:**
-- V-4 neural network inference
-- Model loading/saving
-- Forward passes
-
-**API:**
 ```python
-logits = cevahir.forward("Text")
-generated = cevahir.generate("Prompt")
+@requires_model_manager
+def forward(self, inputs, **kwargs):
+    # Direkt iş mantığı — kontrol zaten yapıldı
+    ...
 ```
 
-### 3. CognitiveManager Entegrasyonu
+### Dependency Injection
 
-**Dosya:** `cognitive_management/cognitive_manager.py`
-
-**Kullanım:**
-- Cognitive processing
-- Memory management
-- Tool execution
-- Monitoring
-
-**API:**
 ```python
-output = cevahir.process("Text")
-cevahir.add_memory("Note")
-results = cevahir.search_memory("Query")
+Cevahir(config, tokenizer_core=..., model_manager=..., cognitive_manager=...)
 ```
 
-### 4. Neural Network Entegrasyonu
-
-**Dosya:** `src/neural_network.py`
-
-**Kullanım:**
-- CevahirNeuralNetwork (V-4 architecture)
-- RoPE, RMSNorm, SwiGLU, KV Cache, MoE
-- Quantization support
-
-**API:** Indirect (via ModelManager)
+Bileşenler dışarıdan enjekte edilebilir. Test, profiling ve özel senaryolarda mock/özel bileşen kullanımını kolaylaştırır.
 
 ---
 
-## ✅ Best Practices
+## Eğitim Sistemi ile Fark
 
-### 1. Initialization
+```
+cevahir.py (INFERENCE)          training_system/ (EĞİTİM)
+─────────────────────            ─────────────────────────────
+ModelManager.initialize(         ModelManager.initialize(
+  build_optimizer=False,           build_optimizer=True,
+  build_criterion=False,           build_criterion=True,
+  build_scheduler=False            build_scheduler=True
+)                                )
 
-```python
-# ✅ DO: Use CevahirConfig
-config = CevahirConfig(
-    device="cuda",
-    model={...}
-)
-cevahir = Cevahir(config)
-
-# ❌ DON'T: Use dict directly (still works, but less type-safe)
-cevahir = Cevahir({"device": "cuda", ...})
+Optimizer yok                    AdamW / AdamW8bit
+Loss hesabı yok                  CrossEntropy / BCE / MSE
+Gradient yok                     Gradient accumulation
+Cevahir.train() → HATA           training_service.train_epoch()
 ```
 
-### 2. Error Handling
+`Cevahir` sınıfı bilinçli olarak eğitim kapasitesinden arındırılmıştır. Yanlış kullanım anında uyarılır:
 
 ```python
-# ✅ DO: Catch specific exceptions
-try:
-    output = cevahir.process("Text")
-except CevahirProcessingError as e:
-    logger.error(f"Processing error: {e}")
-    logger.info(f"Suggestion: {e.suggestion}")
-except CevahirInitializationError as e:
-    logger.error(f"Initialization error: {e}")
-```
-
-### 3. Batch Processing
-
-```python
-# ✅ DO: Use batch processing for multiple inputs
-results = cevahir.generate_batch(prompts)
-
-# ❌ DON'T: Loop over individual calls
-results = [cevahir.generate(p) for p in prompts]  # Slower
-```
-
-### 4. Memory Management
-
-```python
-# ✅ DO: Use memory for context
-cevahir.add_memory("User prefers short responses")
-output = cevahir.process("Question")  # Will use memory context
-
-# ❌ DON'T: Ignore memory
-output = cevahir.process("Question")  # No context
-```
-
-### 5. Performance Optimization
-
-```python
-# ✅ DO: Enable KV Cache (default)
-config.model["use_kv_cache"] = True
-
-# ✅ DO: Use profiling for optimization
-cevahir.enable_profiling(True)
-# ... run operations ...
-stats = cevahir.get_profiling_stats()
-```
-
-### 6. Model Management
-
-```python
-# ✅ DO: Use dry_run for preview
-report = cevahir.update_model({"freeze": ["layer.*"]}, dry_run=True)
-
-# ✅ DO: Save checkpoints
-cevahir.save_model("checkpoint.pth")
+cevahir.train(data)
+# DeprecationWarning: Cevahir.train() DEPRECATED!
+# CevahirProcessingError: Eğitim için training_system/train.py kullanın
 ```
 
 ---
 
-## 📊 Performans Metrikleri
+## Factory Function
 
-### KV Cache Optimizasyonu
-
-**KV Cache olmadan:**
-- Inference time: ~100ms per token
-- Memory: O(n²) attention
-
-**KV Cache ile:**
-- Inference time: ~1-10ms per token (10-100x faster)
-- Memory: O(n) cache storage
-
-### Batch Processing
-
-**Sequential:**
-- 10 prompts: ~1s (100ms each)
-
-**Batch:**
-- 10 prompts: ~0.5s (50ms average with batching)
-
----
-
-## 🔍 Troubleshooting
-
-### Sorun 1: "TokenizerCore not initialized"
-
-**Çözüm:**
 ```python
-# Ensure vocab files exist
-config.tokenizer["vocab_path"] = "data/vocab_lib/vocab.json"
-config.tokenizer["merges_path"] = "data/merges_lib/merges.txt"
+from model.cevahir import create_cevahir, CevahirConfig
+
+config = CevahirConfig(device="cuda", ...)
+cevahir = create_cevahir(config)
 ```
 
-### Sorun 2: "ModelManager not initialized"
-
-**Çözüm:**
-```python
-# Ensure model config is valid
-config.model["vocab_size"] = tokenizer.get_vocab_size()
-```
-
-### Sorun 3: Slow inference
-
-**Çözüm:**
-```python
-# Enable KV Cache
-config.model["use_kv_cache"] = True
-
-# Use GPU
-config.device = "cuda"
-```
-
-### Sorun 4: Memory errors
-
-**Çözüm:**
-```python
-# Reduce batch size
-config.tokenizer["batch_size"] = 16
-
-# Use quantization
-config.model["quantization_type"] = "int8"
-```
+`create_cevahir()` doğrudan `Cevahir(config)` çağrısına eşdeğerdir; dependency injection parametrelerini de destekler.
 
 ---
 
-## 📚 İlgili Dokümantasyon
-
-- [Neural Network Documentation](../neural_network/README.md) - V-4 architecture details
-- [Model Management Documentation](../model_management/README.md) - ModelManager API
-- [Tokenizer Management Documentation](../tokenizer_management/README.md) - TokenizerCore API
-- [API Reference](../../API_REFERENCE.md) - Full API documentation
-- [Architecture Documentation](../../ARCHITECTURE.md) - System architecture
-
----
-
-## 🎓 Öğrenme Kaynakları
-
-### V-4 Architecture Features
-
-- **RoPE:** [Rotary Position Embedding Paper](https://arxiv.org/abs/2104.09864)
-- **RMSNorm:** [Root Mean Square Layer Normalization Paper](https://arxiv.org/abs/1910.07467)
-- **SwiGLU:** [GLU Variants Paper](https://arxiv.org/abs/2002.05202)
-- **KV Cache:** [Attention Optimization Techniques](https://arxiv.org/abs/2305.13245)
-- **MoE:** [Mixture of Experts Paper](https://arxiv.org/abs/1701.06538)
-
-### Design Patterns
-
-- **Adapter Pattern:** ModelManager → CognitiveManager
-- **Decorator Pattern:** Component validation
-- **Factory Pattern:** `create_cevahir()` function
-- **SOLID Principles:** Clean Architecture
-
----
-
-## 📝 Notlar
-
-- ✅ **Production-Ready:** Endüstri standartlarına uygun
-- ✅ **Well-Tested:** Comprehensive test suite
-- ✅ **Well-Documented:** Full API documentation
-- ✅ **Maintainable:** SOLID principles, clean code
-- ✅ **Scalable:** Batch processing, KV Cache optimization
-- ✅ **Observable:** Metrics, health checks, profiling
-
----
-
-**Son Güncelleme:** 2025-01-27  
-**Versiyon:** V-5  
-**Durum:** ✅ Production-Ready
+*Yazar: Muhammed Yasin Yılmaz | Telif Hakkı © 2024 Muhammed Yasin Yılmaz. Tüm Hakları Saklıdır.*
