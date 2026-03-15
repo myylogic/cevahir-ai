@@ -1,338 +1,577 @@
-# Cognitive Management V2 - Architecture Documentation
+# Cognitive Management — Mimari
 
-**Versiyon:** 2.0  
-**Son Güncelleme:** 2025-01-27
-
----
-
-## 📋 İÇİNDEKİLER
-
-1. [System Overview](#system-overview)
-2. [Architecture Diagrams](#architecture-diagrams)
-3. [Component Diagrams](#component-diagrams)
-4. [Flow Diagrams](#flow-diagrams)
-5. [Sequence Diagrams](#sequence-diagrams)
+**Modül:** `cognitive_management`
+**Son Güncelleme:** 2026-03-16
 
 ---
 
-## 🎯 System Overview
+## İçindekiler
 
-V2 Cognitive Management, büyük dil modelleri (LLM) için **endüstri standartlarında, akademik doğrulukta** bir bilişsel yönetim katmanıdır.
-
-### Mimari Katmanlar
-
-```
-┌─────────────────────────────────────────────────┐
-│         CognitiveManager (Public API)            │
-│  - handle() / handle_async()                    │
-│  - Enterprise Features API                      │
-└─────────────────────────────────────────────────┘
-                      ↓
-┌─────────────────────────────────────────────────┐
-│         CognitiveOrchestrator (Core)            │
-│  - Request orchestration                        │
-│  - Middleware chain execution                   │
-│  - Pipeline processing                          │
-│  - Performance monitoring                      │
-└─────────────────────────────────────────────────┘
-         ↓                    ↓
-┌─────────────────┐  ┌──────────────────────────┐
-│  Middleware     │  │   Processing Pipeline     │
-│  Chain          │  │   (Chain of Responsibility)│
-│  - Validation   │  │   - Feature Extraction    │
-│  - Tracing      │  │   - Policy Routing        │
-│  - Cache        │  │   - Deliberation          │
-│  - Error        │  │   - Context Building      │
-│  - Metrics      │  │   - Generation            │
-└─────────────────┘  │   - Critic                │
-                     │   - Memory Update         │
-                     └──────────────────────────┘
-```
+1. [Genel Mimari Yaklaşım](#genel-mimari-yaklaşım)
+2. [İşleme Pipeline'ı](#i̇şleme-pipelineı)
+3. [Chain of Responsibility Handlers](#chain-of-responsibility-handlers)
+4. [CognitiveOrchestrator](#cognitiveorchestrator)
+5. [Middleware Katmanı](#middleware-katmanı)
+6. [Event Bus](#event-bus)
+7. [Dependency Injection Container](#dependency-injection-container)
+8. [Interfaces / Protocol Tanımları](#interfaces--protocol-tanımları)
+9. [Asenkron Pipeline](#asenkron-pipeline)
+10. [Bileşen Detayları](#bileşen-detayları)
 
 ---
 
-## 🏗️ Architecture Diagrams
+## Genel Mimari Yaklaşım
 
-### High-Level Architecture
+Cognitive Management V2 birden fazla design pattern'i katmanlı biçimde uygular:
 
-```mermaid
-graph TB
-    A[User Request] --> B[CognitiveManager]
-    B --> C[CognitiveOrchestrator]
-    C --> D[Middleware Chain]
-    D --> E[Processing Pipeline]
-    E --> F[PolicyRouter]
-    E --> G[DeliberationEngine]
-    E --> H[MemoryService]
-    E --> I[Critic]
-    E --> J[ToolExecutor]
-    E --> K[Model Backend]
-    K --> L[Response]
-    L --> M[User]
+```
++-----------------------------------------------------------------+
+|                     CognitiveManager                           |
+|                  (Facade Pattern - Giris Noktasi)              |
++--------------------------+--------------------------------------+
+                           |
+                           v
++-----------------------------------------------------------------+
+|                  CognitiveOrchestrator                         |
+|           (Orchestrator Pattern - Ic Koordinasyon)             |
+|                                                                 |
+|  +----------------+  +-----------------+  +-----------------+  |
+|  |  Middleware    |  |  EventBus       |  |  PerformanceMon |  |
+|  |  Chain         |  |  (Pub/Sub)      |  |  itor           |  |
+|  +-------+--------+  +-----------------+  +-----------------+  |
+|          |                                                      |
+|          v                                                      |
+|  +-------------------------------------------------------+      |
+|  |              ProcessingPipeline                       |      |
+|  |         (Chain of Responsibility Pattern)             |      |
+|  |                                                       |      |
+|  |  Handler 1 --> Handler 2 --> ... --> Handler N        |      |
+|  +-------------------------------------------------------+      |
++-----------------------------------------------------------------+
 ```
 
-### Component Architecture
+### Uygulanan Design Patterns
 
-```mermaid
-graph LR
-    A[CognitiveManager] --> B[Orchestrator]
-    B --> C[Container]
-    C --> D[PolicyRouterV2]
-    C --> E[MemoryServiceV2]
-    C --> F[CriticV2]
-    C --> G[DeliberationEngineV2]
-    C --> H[ToolExecutorV2]
-    C --> I[EventBus]
-    C --> J[PerformanceMonitor]
-```
+| Pattern | Sınıf | Amaç |
+|---------|-------|------|
+| Facade | `CognitiveManager` | Tek giriş noktası, iç karmaşıklığı gizler |
+| Orchestrator | `CognitiveOrchestrator` | Bileşenleri koordine eder |
+| Chain of Responsibility | `ProcessingPipeline` | Her handler tek sorumluluk |
+| Strategy | `PolicyRouterV2` | Runtime'da algoritma seçimi |
+| Observer / Pub-Sub | `EventBus` | Gevşek bağlı event yönetimi |
+| Dependency Injection | `DependencyContainer` | Bağımlılıkları dışarıdan enjekte eder |
+| Adapter | `BackendAdapter` | Model backend'ini soyutlar |
+| Repository | `VectorStore` | Bellek kayıt/erişimini soyutlar |
 
-### Middleware Chain
+### SOLID Prensipleri
 
-```mermaid
-graph LR
-    A[Request] --> B[ValidationMiddleware]
-    B --> C[TracingMiddleware]
-    C --> D[CacheMiddleware]
-    D --> E[ErrorHandlingMiddleware]
-    E --> F[MetricsMiddleware]
-    F --> G[Pipeline]
-    G --> H[Response]
-```
-
-### Processing Pipeline
-
-```mermaid
-graph TD
-    A[FeatureExtractionHandler] --> B[PolicyRoutingHandler]
-    B --> C[DeliberationHandler]
-    C --> D[ContextBuildingHandler]
-    D --> E[GenerationHandler]
-    E --> F[CriticHandler]
-    F --> G[MemoryUpdateHandler]
-    G --> H[Output]
-```
+- **S** (Single Responsibility): Her handler tek bir görevi yerine getirir
+- **O** (Open/Closed): Yeni handler eklemek için mevcut handler'ları değiştirmek gerekmez
+- **L** (Liskov Substitution): `IMemoryService`, `ICritic` vb. Protocol tanımlarına uymak yeterli
+- **I** (Interface Segregation): `FullModelBackend`, `MinimalBackend` gibi ayrı Protocol'ler
+- **D** (Dependency Inversion): `CognitiveOrchestrator` concrete sınıflara değil Protocol'lere bağlıdır
 
 ---
 
-## 🔧 Component Diagrams
+## İşleme Pipeline'ı
 
-### PolicyRouterV2
+### Tam Akış Diyagramı
 
-```mermaid
-classDiagram
-    class PolicyRouterV2 {
-        +route(features, state) PolicyOutput
-        -_select_mode() Mode
-        -_decoding_from_features() DecodingConfig
-    }
-    class CognitiveManagerConfig {
-        +policy PolicyConfig
-    }
-    PolicyRouterV2 --> CognitiveManagerConfig
+```
+Kullanici Mesaji (user_message: str)
+          |
+          v
+  [ValidationMW]  <- Giris dogrulama middleware
+          |
+  [MetricsMW]     <- Metrik sayaclari baslat
+          |
+  [TracingMW]     <- Dagitik izleme span baslat
+          |
+          v
+  =========================================
+         ProcessingPipeline
+  =========================================
+
+  1. FeatureExtractionHandler
+     - QueryType sinifla
+     - DomainType belirle
+     - Karmasiklik skoru hesapla
+     - Model entropi tahmini (0-3 normalize)
+
+  2. MemoryRetrievalHandler
+     - Oturum gecmisini al (token siniri ile budanmis)
+     - RAG: VektorStore'dan ilgili bellek parcalari cek
+
+  3. ToolHandler
+     - Arac gerekli mi? (heuristik kural eslesme)
+     - Gerekirse araci calistir (calculator / search / file)
+
+  4. PolicyRoutingHandler
+     - Entropi + uzunluk --> mod sec
+     - Domain --> sicaklik ayarla
+     - DecodingConfig olustur
+
+  5. SelfConsistencyHandler
+     - Yalnizca mode == "self_consistency" ise aktif
+     - N orneklem uret (varsayilan N=3)
+     - Cogunluk / hibrit secim
+
+  6. ContextBuildingHandler
+     - Yapılandırılmış prompt inşa et:
+       [SYSTEM | MEMORY | COT | USER]
+
+  7. DeliberationHandler
+     - CoT / ToT / debate / react adimlarini uret
+     - ThoughtCandidate listesi olustur
+
+  8. GenerationHandler
+     - Nihai model cagrisi (backend.generate)
+     - ReasoningTrace kaydet
+
+  9. CriticHandler
+     - Constitutional AI kontrolü
+     - Risk / guvenlik kontrolü
+     - Gercek dogrulama (Wikipedia vb.)
+     - Self-Refine revizyonu
+
+  10. MemoryUpdateHandler
+      - Gecmise yaz
+      - Her 6 turda: ozet + vektor kayit
+  =========================================
+          |
+          v
+  CognitiveOutput (text, mode, metadata, ...)
 ```
 
-### MemoryServiceV2
+### ProcessingContext
 
-```mermaid
-classDiagram
-    class MemoryServiceV2 {
-        +add_turn() List
-        +retrieve_context() List
-        +build_context() str
-        +summarize() str
-    }
-    class EpisodicMemory {
-        +episodes List
-    }
-    class SemanticMemory {
-        +vectors Dict
-    }
-    MemoryServiceV2 --> EpisodicMemory
-    MemoryServiceV2 --> SemanticMemory
-```
+Her handler `ProcessingContext` nesnesini alır ve değiştirir:
 
-### CriticV2
-
-```mermaid
-classDiagram
-    class CriticV2 {
-        +review() Tuple[str, bool]
-        -_evaluate_aspects() Dict
-        -_should_revise() bool
-        -_revise_text() str
-    }
-    class ModelAPI {
-        +generate() str
-        +score() float
-    }
-    CriticV2 --> ModelAPI
-```
-
-### DeliberationEngineV2
-
-```mermaid
-classDiagram
-    class DeliberationEngineV2 {
-        +generate_thoughts() List[ThoughtCandidate]
-        -_build_inner_prompt() str
-        -_build_debate_prompt() str
-        -_heuristic_score() float
-    }
-    class ThoughtCandidate {
-        +text str
-        +score float
-    }
-    DeliberationEngineV2 --> ThoughtCandidate
+```python
+@dataclass
+class ProcessingContext:
+    cognitive_input: CognitiveInput    # Orijinal kullanici girdisi
+    cognitive_state: CognitiveState    # Oturum durumu
+    policy_output: PolicyOutput | None # Politika karari
+    context_messages: list[dict]       # Prompt icin mesaj listesi
+    raw_response: str                  # Model ham ciktisi
+    final_response: str                # Islenmi son yanit
+    tool_result: str | None            # Arac ciktisi
+    metadata: dict                     # Handler'lar arasi paylasilan meta
 ```
 
 ---
 
-## 🔄 Flow Diagrams
+## Chain of Responsibility Handlers
 
-### Request Processing Flow
+Her handler `BaseProcessingHandler`'dan türer ve `handle(ctx)` metodunu uygular:
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant CM as CognitiveManager
-    participant Orch as Orchestrator
-    participant MW as Middleware
-    participant Pipe as Pipeline
-    participant Backend as ModelBackend
+```python
+class BaseProcessingHandler:
+    def __init__(self):
+        self._next: BaseProcessingHandler | None = None
 
-    User->>CM: handle(state, request)
-    CM->>Orch: handle(state, request)
-    Orch->>MW: before(state, request)
-    MW-->>Orch: state, request
-    Orch->>Pipe: process(state, request)
-    Pipe->>Backend: generate(prompt)
-    Backend-->>Pipe: text
-    Pipe-->>Orch: response
-    Orch->>MW: after(state, request, response)
-    MW-->>Orch: response
-    Orch-->>CM: response
-    CM-->>User: response
+    def set_next(self, handler) -> BaseProcessingHandler:
+        self._next = handler
+        return handler
+
+    def handle(self, ctx: ProcessingContext) -> ProcessingContext:
+        # Alt sinif uygular; sonunda self._next.handle(ctx) cagrilir
+        raise NotImplementedError
 ```
 
-### Tool Execution Flow
+### Handler Açıklamaları
 
-```mermaid
-sequenceDiagram
-    participant Handler as ContextBuildingHandler
-    participant Policy as ToolPolicyV2
-    participant Executor as ToolExecutorV2
-    participant Tool
+#### 1. FeatureExtractionHandler
+- Kullanıcı mesajından `QueryType`, `DomainType`, karmaşıklık skoru çıkarır
+- Model backend'inden logit entropisi hesaplar
+- `ctx.metadata["features"]` alanını doldurur
+- `ReasoningTrace(source="direct")` başlatır
 
-    Handler->>Policy: choose_tool(features)
-    Policy->>Policy: _select_tool_from_features()
-    Policy-->>Handler: tool_name
-    Handler->>Executor: execute(tool_name, params)
-    Executor->>Tool: tool_func(**params)
-    Tool-->>Executor: result
-    Executor-->>Handler: result
+#### 2. MemoryRetrievalHandler
+- `MemoryServiceV2`'den oturum geçmişi alır (token sınırına göre budanmış)
+- `enable_rag=True` ise: Kullanıcı mesajını embed et → vektör benzerlik sorgusu → ilgili bellek parçaları
+- `ctx.metadata["memory_context"]` ve `ctx.metadata["memory_hits"]` alanlarını doldurur
+
+#### 3. ToolHandler
+- `ToolPolicyV2` ile araç kullanım kararı: `none` | `maybe` | `must`
+- `must` ise `ToolExecutorV2` ile aracı çalıştır
+- Sonuç `ctx.tool_result` alanına yazılır
+
+#### 4. PolicyRoutingHandler
+- `PolicyRouterV2.route()` çağrısı
+- Giriş: entropi, uzunluk, query_type, domain
+- Çıkış: `PolicyOutput(mode, decoding, inner_steps)`
+- `ctx.policy_output` güncellenir
+
+#### 5. SelfConsistencyHandler
+- Yalnızca `mode == "self_consistency"` ise aktif
+- `N` kez `backend.generate()` çağrısı (varsayılan N=3)
+- `_bigram_overlap()` ile aday benzerliği ölç
+- `method = "majority"` → kelime örtüşmesine göre; `"score"` → kalite puanına göre; `"hybrid"` → her ikisi
+- `ctx.metadata["self_consistency_result"]` doldurulur
+
+#### 6. ContextBuildingHandler
+- Nihai prompt mesaj listesini inşa eder:
+  - `[SYSTEM]` → system_prompt
+  - `[MEMORY]` → vektör belleği + oturum özeti
+  - `[COT]` → iç düşünce adımları (think1/debate2/tot ise)
+  - `[USER]` → kullanıcı mesajı
+- `ctx.context_messages` alanını doldurur
+
+#### 7. DeliberationHandler
+- `DeliberationEngineV2` ile akıl yürütme adımları üretir
+- `think1`: Tek CoT adımı — "Adım adım düşünelim: ..."
+- `debate2`: İki farklı perspektiften yanıt üret, en iyisini seç
+- `tot`: `TreeOfThoughts` bileşeni ile BFS/beam search
+- `react`: Düşünce → Eylem → Gözlem döngüsü
+- `ctx.metadata["reasoning_steps"]` doldurulur
+
+#### 8. GenerationHandler
+- `backend.generate(messages, decoding)` ile nihai yanıt üretir
+- `ReasoningTrace` listesine son adım eklenir
+- Hata durumunda fallback olarak doğrudan üretim dener
+
+#### 9. CriticHandler
+
+```
+Gelen yanitmetni
+    |
+    v
+ConstitutionalCritic.check()
+    - Varsayilan 16 ilke (siddet, zararli icerik, yanlilik vb.)
+    - Ihlal bulunursa --> CriticFeedback(constitutional=True)
+    |
+    v
+Risk / Guvenlik kontrolu
+    - risk_keywords_sensitive mesajda var mi? -> risk_score artar
+    - claim_markers yanita var mi? -> fact-check tetiklenir
+    |
+    v
+Task-match skoru
+    - Sorgu ile yanit kelime ortusumu
+    - Dusuk overlap --> needs_revision = True
+    |
+    v
+FactChecker.verify()  (enable_external_fact_checking=True ise)
+    - WikipediaChecker: Iddia Wikipedia'da gecerli mi?
+    - LLM fact verifier: Model kendi ciktisini sorgular
+    |
+    v
+Revizyon gerekli mi?
+    Evet --> Revizyon prompt olustur --> backend.generate()
+             critic_passes += 1 (max_passes=1 varsayilan)
+    Hayir --> Yanit onaylanir
 ```
 
-### Config Hot Reload Flow
+#### 10. MemoryUpdateHandler
+- `MemoryServiceV2.add_turn(role, content)` ile geçmişe yaz
+- Her 6 turda: `_generate_session_summary()` → özet metni → vektör store'a kayıt
+- `CognitiveState.query_type`, `CognitiveState.domain` alanları güncellenir
 
-```mermaid
-sequenceDiagram
-    participant File as Config File
-    participant Watcher as FileWatcher
-    participant Manager as ConfigManager
-    participant Listener as ConfigListener
-    participant CM as CognitiveManager
+---
 
-    File->>Watcher: File modified
-    Watcher->>Manager: _reload_from_file()
-    Manager->>Manager: _load_config()
-    Manager->>Manager: _update_cache()
-    Manager->>Listener: notify(event)
-    Listener->>CM: on_config_change()
-    CM->>CM: update components
+## CognitiveOrchestrator
+
+`CognitiveOrchestrator` tüm bileşenlerin merkezi koordinatörüdür. Pipeline'ı oluşturur, middleware'leri zincirir, event'leri yayar.
+
+### Yapılandırma
+
+```python
+orchestrator = CognitiveOrchestrator(
+    backend=backend_adapter,           # FullModelBackend implementasyonu
+    policy_router=policy_router,       # IPolicyRouter implementasyonu
+    memory_service=memory_service,     # IMemoryService implementasyonu
+    critic=critic,                     # ICritic implementasyonu
+    deliberation_engine=deliberation,  # IDeliberationEngine (opsiyonel)
+    event_bus=event_bus,               # EventBus (opsiyonel)
+    middleware=[                       # Middleware zinciri (opsiyonel)
+        ValidationMiddleware(),
+        MetricsMiddleware(),
+        TracingMiddleware(),
+    ],
+    performance_monitor=perf_mon,      # PerformanceMonitor (opsiyonel)
+    tool_executor=tool_executor,       # ToolExecutor (opsiyonel)
+)
+```
+
+### Senkron İşlem
+
+```python
+output = orchestrator.process(cognitive_input, cognitive_state)
+```
+
+### Asenkron İşlem
+
+```python
+output = await orchestrator.process_async(cognitive_input, cognitive_state)
 ```
 
 ---
 
-## 📊 Sequence Diagrams
+## Middleware Katmanı
 
-### Think Mode (CoT) Flow
+Middleware'ler istek/yanıt döngüsünde kesişen işlevler (cross-cutting concerns) için kullanılır. Her biri `handle_request()` ve `handle_response()` metotlarını uygular.
 
-```mermaid
-sequenceDiagram
-    participant Router as PolicyRouter
-    participant Deliberation as DeliberationEngine
-    participant Backend as ModelBackend
-    participant Selector as ThoughtSelector
+### Yerleşik Middleware'ler
 
-    Router->>Router: route() -> mode="think1"
-    Router-->>Deliberation: generate_thoughts(num=1)
-    Deliberation->>Backend: generate(CoT prompt)
-    Backend-->>Deliberation: thought text
-    Deliberation->>Backend: score(prompt, thought)
-    Backend-->>Deliberation: score
-    Deliberation-->>Selector: ThoughtCandidate
-    Selector-->>Router: selected_thought
-```
+**ValidationMiddleware**
+- Gelen `CognitiveInput` nesnesini doğrular
+- `user_message` boş ise hata fırlatır
+- Güvenlik keyword filtreleme (opsiyonel)
 
-### Debate Mode (Self-Consistency) Flow
+**MetricsMiddleware**
+- İstek sayacı, hata sayacı, gecikme histogramı
+- Prometheus uyumlu metrik formatı
+- `ctx.metadata["request_start_time"]` kayıt
 
-```mermaid
-sequenceDiagram
-    participant Router as PolicyRouter
-    participant Deliberation as DeliberationEngine
-    participant Backend as ModelBackend
-    participant Selector as ThoughtSelector
+**TracingMiddleware**
+- Dağıtık izleme için span oluşturur
+- `trace_id`, `span_id` üretir
+- Handler bazlı süre ölçümü
 
-    Router->>Router: route() -> mode="debate2"
-    Router-->>Deliberation: generate_thoughts(num=2)
-    loop For each thought
-        Deliberation->>Backend: generate(debate prompt)
-        Backend-->>Deliberation: thought text
-        Deliberation->>Backend: score(prompt, thought)
-        Backend-->>Deliberation: score
-    end
-    Deliberation-->>Selector: [ThoughtCandidate, ThoughtCandidate]
-    Selector->>Selector: select_best()
-    Selector-->>Router: selected_thought
-```
+### Özel Middleware Yazma
 
-### Critic Review Flow
+```python
+from cognitive_management.v2.middleware.base import BaseMiddleware
 
-```mermaid
-sequenceDiagram
-    participant Critic as CriticV2
-    participant Model as ModelAPI
-    participant Evaluator
+class MyMiddleware(BaseMiddleware):
+    def handle_request(self, ctx: ProcessingContext) -> ProcessingContext:
+        ctx.metadata["my_flag"] = True
+        return ctx
 
-    Critic->>Evaluator: _evaluate_aspects()
-    Evaluator->>Evaluator: check_length()
-    Evaluator->>Evaluator: check_coherence()
-    Evaluator->>Evaluator: check_safety()
-    Evaluator->>Evaluator: check_facts()
-    Evaluator->>Evaluator: check_style()
-    Evaluator->>Evaluator: check_relevance()
-    Evaluator-->>Critic: scores
-    Critic->>Critic: _should_revise(scores)
-    alt Needs revision
-        Critic->>Model: generate(revise prompt)
-        Model-->>Critic: revised_text
-        Critic-->>Critic: (revised_text, True)
-    else No revision
-        Critic-->>Critic: (draft_text, False)
-    end
+    def handle_response(self, ctx: ProcessingContext) -> ProcessingContext:
+        print(f"Islem tamamlandi: {ctx.final_response[:50]}")
+        return ctx
 ```
 
 ---
 
-## 🔗 İlgili Dokümantasyon
+## Event Bus
 
-- [API Reference](../api/README.md)
-- [Usage Guides](../guides/README.md)
-- [Development Guide](../development/README.md)
-- [Main Documentation](../README.md)
+`EventBus` bileşenler arası gevşek bağlı iletişim sağlar. Herhangi bir bileşen, diğer bileşenlere doğrudan referans tutmak zorunda kalmadan event yayabilir.
+
+### CognitiveEvent Tipleri
+
+| Event | Tetiklendiği An |
+|-------|----------------|
+| `REQUEST_STARTED` | İstek pipeline'a girdiğinde |
+| `POLICY_SELECTED` | PolicyRouter mod seçtiğinde |
+| `DELIBERATION_COMPLETE` | Akıl yürütme adımları tamamlandığında |
+| `GENERATION_COMPLETE` | Model çıktı ürettiğinde |
+| `CRITIC_TRIGGERED` | Critic değerlendirme başlattığında |
+| `REVISION_APPLIED` | Self-Refine revizyonu yapıldığında |
+| `MEMORY_UPDATED` | Bellek güncellediğinde |
+| `REQUEST_COMPLETE` | Tüm pipeline tamamlandığında |
+| `ERROR_OCCURRED` | Herhangi bir hata oluştuğunda |
+
+### Kullanım
+
+```python
+# Event'e abone ol
+def on_policy_selected(event: CognitiveEvent):
+    print(f"Secilen mod: {event.data['mode']}")
+
+event_bus.subscribe("POLICY_SELECTED", on_policy_selected)
+
+# Async handler kaydet
+async def on_generation(event: CognitiveEvent):
+    await log_to_external_service(event.data)
+
+event_bus.subscribe_async("GENERATION_COMPLETE", on_generation)
+```
 
 ---
 
-**Hazırlayan:** AI Assistant (Auto)  
-**Versiyon:** 2.0
+## Dependency Injection Container
 
+`DependencyContainer` bileşenlerin yaşam döngüsünü ve bağımlılıklarını yönetir.
+
+```python
+from cognitive_management.v2.container.dependency_container import DependencyContainer
+
+container = DependencyContainer()
+
+# Singleton kayit
+container.register_singleton("event_bus", EventBus())
+container.register_singleton("memory_service", MemoryServiceV2(config.memory))
+
+# Factory kayit (her resolve'da yeni instance)
+container.register_factory("critic", lambda: CriticV2(backend, config.critic))
+
+# Cozumleme
+event_bus = container.resolve("event_bus")
+```
+
+---
+
+## Interfaces / Protocol Tanımları
+
+### Backend Protocols (`backend_protocols.py`)
+
+```python
+class MinimalBackend(Protocol):
+    """Sadece generate() gerektiren minimal backend."""
+    def generate(self, messages: list[dict], config: DecodingConfig) -> str: ...
+
+class FullModelBackend(Protocol):
+    """Tam ozellikli backend - embed + generate + forward."""
+    def generate(self, messages: list[dict], config: DecodingConfig) -> str: ...
+    def embed(self, text: str) -> list[float]: ...
+    def forward(self, input_ids: torch.Tensor) -> torch.Tensor: ...
+    def entropy_estimate(self, text: str) -> float: ...
+```
+
+### Component Protocols (`component_protocols.py`)
+
+```python
+class PolicyRouter(Protocol):
+    def route(self, features: dict, state: CognitiveState) -> PolicyOutput: ...
+
+class MemoryService(Protocol):
+    def get_history(self, max_tokens: int) -> list[dict]: ...
+    def add_turn(self, role: str, content: str) -> None: ...
+    def retrieve_relevant(self, query: str, top_k: int) -> list[dict]: ...
+
+class DeliberationEngine(Protocol):
+    def deliberate(self, mode: Mode, context: str, config: DecodingConfig) -> list[ThoughtCandidate]: ...
+
+class Critic(Protocol):
+    def review(self, text: str, query: str) -> tuple[bool, list[CriticFeedback]]: ...
+
+class ToolExecutor(Protocol):
+    def execute(self, tool_name: str, args: dict) -> str: ...
+```
+
+---
+
+## Asenkron Pipeline
+
+`AsyncProcessingPipeline` ve `AsyncProcessingHandler` sınıfları, senkron pipeline'ın tam asenkron karşılığıdır.
+
+### Asenkron Handler Yapısı
+
+```python
+class BaseAsyncProcessingHandler:
+    async def handle(self, ctx: ProcessingContext) -> ProcessingContext:
+        # Islemi yap
+        result = await some_async_operation()
+        ctx.metadata["result"] = result
+        # Zinciri devam ettir
+        if self._next:
+            return await self._next.handle(ctx)
+        return ctx
+```
+
+### Asenkron Pipeline Oluşturma
+
+```python
+pipeline = AsyncProcessingPipeline()
+pipeline.add_handler(AsyncFeatureExtractionHandler(backend))
+pipeline.add_handler(AsyncMemoryRetrievalHandler(memory_service))
+pipeline.add_handler(AsyncGenerationHandler(backend))
+
+output = await pipeline.execute(ctx)
+```
+
+---
+
+## Bileşen Detayları
+
+### PolicyRouterV2 — Karar Mantığı
+
+```
+entropi < entropy_gate_think (1.5)
+    --> mode = "direct"
+
+entropy_gate_think <= entropi < entropy_gate_debate (2.5)
+    --> mode = "think1"  (Chain-of-Thought)
+    --> inner_steps = 1
+
+entropy_gate_debate <= entropi < entropy_gate_tot (3.0)
+    --> mode = "debate2" veya "self_consistency"
+    --> inner_steps = self_consistency_n (3)
+
+entropi >= entropy_gate_tot (3.0) VE uzunluk > length_gate_tot (300)
+    --> mode = "tot"
+    --> inner_steps = tot_max_depth x tot_branching_factor
+```
+
+Domain bazlı sıcaklık ayarı:
+
+```python
+temperature_map = {
+    "math":     0.45,   # config.decoding_bounds.math_temperature
+    "code":     0.50,   # config.decoding_bounds.code_temperature
+    "creative": 0.85,   # config.decoding_bounds.creative_temperature
+    # Diger domain'ler: default_decoding.temperature (0.65)
+}
+```
+
+### TreeOfThoughts Algoritması
+
+```
+Kok dugum: baslangic baglamlari
+    |
+    +-- Genislet (branching_factor = 3 aday)
+    |       |
+    |       +-- Degerlendir (scorer: kelime/anlam uyum skoru)
+    |       |
+    |       +-- Budama (top_k = 5 en iyi tut)
+    |
+    +-- Derinligi artir (max_depth = 3'e kadar)
+    |
+    +-- En yuksek skorlu yaprak --> nihai yanit
+```
+
+### MemoryServiceV2 — Bellek Katmanları
+
+```
+Oturum Bellegi (RAM - kisa donem)
+    history: list[dict]
+    max_history_tokens: 3072
+    Budama: token siniri asilinca eski mesajlari sil
+
+Epizodik Vektor Bellegi (ChromaDB - uzun donem)
+    Collection: "cognitive_memory"
+    Path: "./memory/episodic_store"
+    Embedding: sentence-transformers/all-MiniLM-L6-v2
+    top_k: 5, score_threshold: 0.7
+
+Her 6 turda:
+    1. Oturum ozeti uret
+    2. Ozeti embed et (EmbeddingAdapter)
+    3. ChromaDB'ye yaz (metadata + vektor)
+    4. history.clear() (eski mesajlar vektor'de artik)
+```
+
+### AIOps İzleme Sistemi
+
+```
+PerformanceMonitor
+    - Request latency (ortalama, p95, p99)
+    - Token/saniye throughput
+    - Handler bazli sure profili
+
+AnomalyDetector
+    - Latency spike tespiti (EWMA tabanli)
+    - Error rate artisi
+    - Bellek kullanim anomalisi
+
+TrendAnalyzer
+    - Zaman serisi trend analizi
+    - Mevsimsellik tespiti
+
+PredictiveAnalytics
+    - Yaklasan yuk artisi tahmini
+    - Onleyici cache isitma onerileri
+
+AlertingManager
+    - Threshold bazli uyari uretimi
+    - Webhook / callback entegrasyonu
+
+HealthCheck
+    - Sistem durumu ozeti
+    - Backend baglanti sagligi
+    - VectorStore baglanti sagligi
+```
