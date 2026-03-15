@@ -51,6 +51,12 @@ from pathlib import Path
 from typing import Any, Dict
 import torch
 
+# [V6 OOM FIX] Fragmentation önleme: Ayrılmış ama kullanılmayan bellek büyüdüğünde
+# PyTorch cUDA allocator'ı non-contiguous segment'lere izin ver.
+# expandable_segments=True → büyük contiguous blok bulunamadığında allocator parçalı alır.
+# Bu ayar torch.cuda başlamadan önce set edilmeli.
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
 
 
 # Proje kök dizinini sys.path'e ekle
@@ -62,6 +68,31 @@ if project_root not in sys.path:
 
 
 from training_system.v2.core.training_service import TrainingService  # noqa: E402
+
+# model_management exception'ları — OOM gibi hatalar için kullanıcıya açıklayıcı log
+try:
+    from model_management.exceptions import OOMRecoveryError, CevahirModelError
+    _MM_EXCEPTIONS_AVAILABLE = True
+except ImportError:
+    OOMRecoveryError = None   # type: ignore
+    CevahirModelError = None  # type: ignore
+    _MM_EXCEPTIONS_AVAILABLE = False
+
+# V3 Training System — varsa kullan, yoksa V2'ye geri dön
+try:
+    from training_system.v3 import TrainingServiceV3
+    _TRAINING_SYSTEM_V3_AVAILABLE = True
+except ImportError:
+    TrainingServiceV3 = None  # type: ignore
+    _TRAINING_SYSTEM_V3_AVAILABLE = False
+
+# V3 TrainingManager — varsa kullan, yoksa V2'ye geri dön
+try:
+    from training_management.v3 import TrainingManager as V3TrainingManager
+    _V3_AVAILABLE = True
+except ImportError:
+    V3TrainingManager = None
+    _V3_AVAILABLE = False
 # Config'ten BPE ve tokenizer ayarlarını al
 
 try:
@@ -298,6 +329,11 @@ def normalize_config(cfg: Dict[str, Any]) -> Dict[str, Any]:
     else:
         out.setdefault("device", "cpu")
         train_logger.warning(" GPU kullanılamıyor, CPU modunda çalışılacak")
+    # [OK] V5: GQA, Sliding Window, YaRN varsayılanları (geriye dönük uyumluluk)
+    out.setdefault("num_kv_heads", None)       # None = standart MHA (GQA devre dışı)
+    out.setdefault("sliding_window", None)     # None = full attention
+    out.setdefault("rope_scaling_type", "none")  # standart RoPE
+    out.setdefault("rope_scaling_factor", 1.0)   # ölçekleme yok
     # GPU tokenizer desteği (config'ten alındı - load_tokenizer_config() içinde)
     # NOT: use_gpu zaten load_tokenizer_config() içinde config'ten alındı
     # batch_size model eğitimi için (tokenizer_batch_size değil)
@@ -346,20 +382,34 @@ TRAIN_CONFIG: Dict[str, Any] = {
     "model_save_path": "saved_models/cevahir_model.pth",
     # === Eğitim Parametreleri ===
     "epochs": 100,#100 için artırıldı - daha fazla epoch ile daha iyi öğrenme
-    # 24×3: batch 32 OOM verdi → 24×3, efektif 72 (22GB GPU için güvenli)
-    "batch_size": 72,  # 64 az, 96 sınırda; 72 orta yol
-    "grad_accum_steps": 4,  # efektif batch = 24×3 = 72
+    # [V6 OOM FIX] batch_size 32 → 16: Dense causal mask fix sonrası 16 güvenli,
+    # efektif batch = 16×8 = 128 (önceki 32×4=128 ile aynı) — grad_accum artırıldı
+    "batch_size": 64,  # 32 → 16: OOM güvenlik marjı (H100 94 GB ama fragmentation riski)
+    "grad_accum_steps": 8,  # 4 → 8: efektif batch = 16×8 = 128 (aynı kalır)
     "learning_rate": 0.0002,  #  DÜZELTME: 0.0001 → 0.0002 (2x artış, model daha hızlı öğrenir)
     "continuation_learning_rate": None,  # Devam eğitimi: set edilirse (örn. 1e-4) checkpoint varken LR bu değere çekilir
     "dropout": 0.2,  # FIXED: 0.15 → 0.2 (better regularization, reduces overfitting)
     "weight_decay": 0.01,  # NEW: L2 regularization (standard for Adam optimizer)
+    # ==========================================================================
+    # Optimizer Seçimi
+    # ==========================================================================
+    # "adamw"      → Standart AdamW (varsayılan, her ortamda çalışır)
+    # "adamw8bit"  → bitsandbytes 8-bit AdamW — optimizer m/v durumlarını uint8
+    #                olarak saklar → ~8 GB VRAM tasarrufu (Dettmers et al. 2022)
+    #                Gereksinim: pip install bitsandbytes
+    #                bitsandbytes yoksa otomatik standart AdamW'a fallback yapar.
+    # "adam"       → Standart Adam (weight_decay L2, AdamW gibi decoupled değil)
+    # "radam"      → RAdam — ısınma aşamasında varyans düzeltmesi (Liu et al. 2019)
+    # "sgd"        → SGD + momentum (Nesterov opsiyonel)
+    # ==========================================================================
+    "optimizer": "adamw8bit",  # 8-bit AdamW → ~8 GB VRAM tasarrufu (bitsandbytes gerekli)
     "pad_token_id": 0,  # [OK] SABİTLEME: PAD ID'yi sezgiye bırakma, tokenizer TOKEN_MAPPING (<PAD>=0)
     "ignore_index": 0,  #  KRİTİK: Loss hesaplamasında PAD token'larını ignore et (PAD_ID=0)
     # [CRITICAL FIX] EOS Token Weight - Degenerate Generation Fix
     # BEFORE: eos_token_weight=10.0 → Model learned to generate EOS immediately (empty responses)
     # AFTER:  eos_token_weight=1.0  → Standard weight, no aggressive bias
     # Evidence: E18-E19 showed 91-96% EOS prob, all responses empty/gibberish
-    "label_smoothing": 0.0,  # Keep at 0.0 (EOS learning now balanced with weight=1.0)
+    "label_smoothing": 0.1,  # V3: Label Smoothing (Szegedy et al. 2016) — entropy collapse önleme
     "eos_token_weight": 1.0,  # FIXED: 10.0 → 1.0 (removes aggressive EOS bias, allows natural generation)
     # [OK] YENİ: Learning Rate Scheduler Ayarları (daha dengeli)
     #  KRİTİK DÜZELTME: LR scheduler çok agresif, model öğrenemiyor!
@@ -384,9 +434,21 @@ TRAIN_CONFIG: Dict[str, Any] = {
     # === GPU Tokenizer Desteği ===
     # NOT: use_gpu ve tokenizer_batch_size normalize_config() içinde BPE_DETAILED_CONFIG'ten alınacak
     # Hardcoded değerler YOK - config'ten alınır!
-    # === DataLoader Optimizasyonu ===
-    "data_loader_num_workers": 4,  # CPU core sayısına göre ayarlanabilir (RAM kullanımı için)
-    "data_loader_pin_memory": True,  # GPU transfer hızlandırma (CUDA için)
+    # === DataLoader Optimizasyonu V3 ===
+    # num_workers: Linux/Colab'ta 4 worker veriyi GPU'ya paralel prefetch eder (RAM → GPU bant genişliği kullanımı).
+    # Windows'ta spawn tabanlı multiprocessing pickle sorunlarına yol açabileceğinden otomatik 0 seçilir.
+    # 179 GB RAM ile num_workers=4 + pin_memory=True → GPU'nun asla veri beklememesi sağlanır.
+    "data_loader_num_workers": 0 if sys.platform.startswith("win") else 4,
+    "data_loader_pin_memory": True,  # GPU transfer hızlandırma — page-locked bellek → DMA transfer (CUDA için)
+    # --- GPU Batching V3 (BucketSampler + DynamicPad) ---
+    "use_bucket_batching": True,    # BucketBatchSampler: seq uzunluğuna göre gruplama → padding waste azalır
+    "num_buckets": 32,              # Bucket sayısı (daha fazla = daha az padding, daha az randomness)
+    "use_dynamic_padding": True,    # DynamicPaddingCollator: batch içi max uzunluğa pad (global pad yok)
+    "prefetch_factor": 2,           # Worker başına prefetch batch (num_workers>0 ise aktif)
+    "persistent_workers": True,     # Worker'ları epoch'lar arası canlı tut (num_workers>0 ise)
+    # --- Cache V3 (Strict Mode) ---
+    "cache_strict_mode": True,      # Cache yoksa eğitim BAŞLAMAZ (CacheNotFoundError fırlatır)
+    "cache_verify_integrity": True, # Cache SHA-256 checksum doğrulama
     # === Logging ===
     "enable_file_logging": False,  #  DOSYA LOGGING KAPALI: Windows dosya kilidi sorununu önlemek için
     # === TensorBoard ===
@@ -432,9 +494,134 @@ TRAIN_CONFIG: Dict[str, Any] = {
     "use_advanced_checkpointing": False,  # Advanced checkpointing (opsiyonel, V4 default: False)
     "checkpointing_strategy": "selective",  # Checkpointing strategy (V4 default: "selective")
     "quantization_type": "none",  # Quantization type (V4 default: "none")
-    "use_moe": False,  # Mixture of Experts (opsiyonel, V4 default: False)
-    "num_experts": 8,  # Expert sayısı (MoE için, V4 default: 8)
-    "moe_top_k": 2,  # Her token için seçilecek expert sayısı (MoE için, V4 default: 2)
+    # ==========================================================================
+    # MoE (Mixture of Experts) - V4 Mimari Özelliği
+    # ==========================================================================
+    # MoE, her FFN bloğunu N adet "expert" alt ağa böler ve her token için
+    # sadece top-k expert aktive edilir. GPT-4, Mixtral, Switch Transformer standardı.
+    #
+    # ⚠️  MoE'yu ETKİNLEŞTİRMEK İÇİN (sonraki eğitimde):
+    #   "use_moe": True   → MoE aktif (mevcut checkpoint ile başlat YA DA sıfırdan eğit)
+    #   "num_experts": 8  → 8 expert (VRAM'e göre 4-16 arası ayarla)
+    #   "moe_top_k": 2    → Her token için 2 expert seçilir (Mixtral standardı)
+    #
+    # 💡 MoE gerektirdiği VRAM: num_experts × FFN parametreleri
+    #    512 embed, 8 expert, ffn_dim=2048 → ~16M ek parametre
+    #    Başlamak için: num_experts=4, moe_top_k=1 (daha az VRAM)
+    #
+    # ⚠️  MoE ile eğitime başlarken mevcut checkpoint'ten yüklemek uyumsuzluk
+    #    yaratabilir. Yeni eğitim başlatmak en güvenli yoldur.
+    # ==========================================================================
+    "use_moe": False,  # [OOM FIX] False: MoE devre dışı — aktifleştirmek için True yap (üstteki notu oku)
+    # OOM AÇIKLAMASI: use_moe=True iken 8 expert × ffn_dim=2048 → anlık aktivasyon VRAM'i
+    # ~8x büyüyor (her expert tüm batch için forward çalışıyor). 512 embed, 8 expert:
+    # 8 × (512→2048→512) × batch_size × seq_len → OOM. num_experts=4, moe_top_k=1 ile başla.
+    "num_experts": 8,  # Expert sayısı (MoE aktifse, VRAM'e göre 4-16 arası)
+    "moe_top_k": 2,   # Her token için seçilecek expert sayısı (Mixtral standardı: 2)
+
+    # ==========================================================================
+    # V5 MİMARİ YENİLİKLERİ — GQA + Sliding Window + YaRN RoPE
+    # ==========================================================================
+    #
+    # ── GQA (Grouped Query Attention) ──────────────────────────────────────────
+    # KV head sayısını azaltarak cache boyutu ve inference hızı iyileştirilir.
+    # num_kv_heads = None  → standart MHA (geriye dönük uyumluluk, tüm Q=K=V)
+    # num_kv_heads = 1     → MQA: maksimum hız, minimal cache
+    # num_kv_heads = 2     → GQA: num_heads=8'de %75 KV cache azalması  ← ÖNERİLEN
+    # num_kv_heads = 4     → GQA: %50 azalma, kalite/hız dengesi
+    #
+    # 🔄 Mevcut checkpoint'ten yüklemek için:
+    #    num_kv_heads=None (MHA) ile eğitilmiş model, num_kv_heads=2 ile
+    #    checkpoint uyumsuzdur → yeni eğitim başlatılmalıdır.
+    # ==========================================================================
+    "num_kv_heads": 2,     # GQA: num_heads=8'de %75 KV cache azalması (LLaMA-2/3 standardı)
+
+    # ── Sliding Window Attention ───────────────────────────────────────────────
+    # Her token yalnızca önceki N token'a attend eder (long-context verimlilik).
+    # None  → full attention (default, kısa context için yeterli)
+    # 512   → hafif yerellik (hızlı, kısa metinler için)
+    # 2048  → Gemma standardı (uzun context, dengeli)
+    # 4096  → Mistral-7B standardı (en uzun context desteği)
+    #
+    # ⚠️  Sliding window + causal mask birlikte çalışır (causal mask üst üste gelir).
+    # ==========================================================================
+    "sliding_window": 512,  # None→full | 512 | 2048→Gemma | 4096→Mistral
+
+    # ── YaRN RoPE Context Uzatma ───────────────────────────────────────────────
+    # Standart RoPE 2048 token ötesinde zayıflar; YaRN bu sınırı kaldırır.
+    # rope_scaling_type = "none"   → standart RoPE, 2048 token
+    # rope_scaling_type = "yarn"   → YaRN NTK-by-parts (LLaMA-3.1 standardı) ← ÖNERİLEN
+    # rope_scaling_type = "linear" → Position Interpolation (basit, daha az etkin)
+    #
+    # rope_scaling_factor: hedef_context / orijinal_context
+    #   4096 / 2048 = 2.0   → 2x uzatma
+    #   8192 / 2048 = 4.0   → 4x uzatma (LLaMA-3.1 short context standardı)
+    #
+    # ⚠️  YaRN, fine-tuning (az adım) ile bile etkin; pretrain gerektirmez.
+    # ==========================================================================
+    "rope_scaling_type": "yarn",   # "none" | "yarn" (önerilir) | "linear"
+    "rope_scaling_factor": 2.0,    # 1.0=devre dışı | 2.0=2x | 4.0=4x uzatma
+
+    # ==========================================================================
+    # V3 EĞİTİM SİSTEMİ — İleri Seviye Bileşenler
+    # ==========================================================================
+
+    # --- Kayıp Fonksiyonu (CompositeLossManager) ---
+    # label_smoothing yukarıda tanımlı (0.1)
+    "entropy_coeff": 0.01,          # Entropy regularization (Pereyra et al. 2017) — overconfidence cezası
+    "use_focal_loss": False,         # Focal Loss (Lin et al. 2017) — imbalanced token sınıfları için
+    "focal_gamma": 2.0,              # Focal Loss gamma (2.0 önerilir; yüksek=kolay tokenlara daha az ağırlık)
+    "aux_loss_weight": 0.01,         # MoE/MoD auxiliary loss ağırlığı (MoE aktifse devreye girer)
+
+    # --- Exposure Bias: Scheduled Sampling (Bengio et al. 2015) ---
+    "use_scheduled_sampling": True,  # Teacher forcing → kendi tahminleri geçişi
+    "ss_start_epoch": 10,            # Kaçıncı epoch'ta scheduled sampling başlasın
+    "ss_decay_rate": 0.05,           # Her epoch teacher forcing oranı bu kadar düşer
+    "min_teacher_forcing": 0.3,      # Teacher forcing oranı bu değerin altına düşmez
+
+    # --- EMA Ağırlıkları (Yazici et al. 2019) ---
+    "use_ema": True,                 # Exponential Moving Average ağırlıkları aktif
+    "ema_decay": 0.999,              # EMA bozunum faktörü (0.999 önerilen)
+
+    # --- SAM Optimizer (Foret et al. 2021) ---
+    "use_sam": False,                # SAM Optimizer — her adım 2x ileri geçiş (daha yavaş, daha iyi genelleme)
+    "sam_rho": 0.05,                 # SAM pertürbation büyüklüğü (0.05 önerilen)
+
+    # --- Lookahead Optimizer (Zhang et al. 2019) ---
+    "use_lookahead": False,          # Lookahead — slow/fast ağırlık çifti
+    "lookahead_k": 5,                # Her k adımda slow weights güncellenir
+    "lookahead_alpha": 0.5,          # Slow weights interpolasyon faktörü
+
+    # --- SWA: Stochastic Weight Averaging (Izmailov et al. 2018) ---
+    "use_swa": False,                # SWA aktif (son epoch'larda ağırlık ortalaması alır)
+    "swa_start_epoch": 80,           # SWA kaçıncı epoch'tan itibaren başlasın
+    "swa_lr": 1e-5,                  # SWA learning rate (sabit, düşük)
+
+    # --- LLRD: Layer-wise Learning Rate Decay ---
+    "use_llrd": False,               # LLRD aktif (her katmana farklı LR)
+    "llrd_decay_factor": 0.9,        # Her katman bir öncekinin decay_factor katı LR alır
+
+    # --- Curriculum Learning (Bengio et al. 2009) ---
+    "use_curriculum": False,         # Curriculum Learning — kolay→zor örnek sıralama
+    "curriculum_strategy": "length_based",  # "length_based" | "loss_based" | "random"
+    "curriculum_max_len_start": 64,  # Başlangıçta max sequence uzunluğu
+    "curriculum_warmup_epochs": 20,  # Bu kadar epoch sonra tam veri seti (max_seq_length)
+
+    # --- Güvenlik: NaN Kurtarma ---
+    "nan_tolerance": 3,              # Art arda bu kadar NaN sonrası checkpoint'e geri dön
+    "nan_lr_reduction": 0.5,         # NaN sonrası LR bu faktörle azaltılır
+
+    # --- Güvenlik: Loss Spike Detection ---
+    "spike_n_sigma": 3.0,            # N-sigma eşiğinin üstündeki kayıp artışı spike sayılır
+    "spike_window_size": 20,         # Referans pencere büyüklüğü (kaç batch)
+    "spike_lr_reduction": 0.8,       # Spike sonrası LR azaltma faktörü
+
+    # --- İzleme ---
+    "inference_probe_interval": 5,   # Kaç epoch'ta bir çıkarım kalite testi yapılır
+    "log_gradient_health": True,     # Her epoch gradyan sağlık raporu logla
+    "log_token_dist": True,          # Token dağılım monitörünü logla
+    "save_every_n_epochs": 10,       # Periyodik checkpoint kaydetme sıklığı
+
     # === Vocab Boyutu (DİNAMİK) ===
     # NOT: vocab_size normalize_config() içinde config'ten alınacak
     # TokenizerCore tarafından otomatik belirlenecek
@@ -467,6 +654,12 @@ TRAIN_CONFIG: Dict[str, Any] = {
 # =========================
 def main() -> None:
     try:
+        # [MEM] CUDA bellek fragment azaltma — CUDA init ÖNCESINDE ayarlanmalı.
+        # expandable_segments:True → PyTorch, OS'tan ihtiyaç kadar küçük bloklar ister,
+        # büyük "havuz" yerine esnek segment kullanır → fragmentation %30-60 azalır.
+        # Not: log_env_info() CUDA'yı init eder, bu satır ondan önce gelmeli.
+        os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
         #  Loglar burada yazılacak (modül seviyesinde değil)
         train_logger.info("Eğitim başlatılıyor...")
         train_logger.info("Eğitim süreci başlatılıyor...")
@@ -520,6 +713,9 @@ def main() -> None:
                         "use_rmsnorm", "use_swiglu", "use_kv_cache", "max_cache_len",
                         "use_advanced_checkpointing", "checkpointing_strategy", "quantization_type",
                         "use_moe", "num_experts", "moe_top_k",
+                        # V-5 yenilikleri (GQA, Sliding Window, YaRN)
+                        "num_kv_heads", "sliding_window",
+                        "rope_scaling_type", "rope_scaling_factor",
                         # BPE ve tokenizer ayarları (config'ten yüklendi)
                         "vocab_path", "merges_path", "bpe_rebuild",
                         "bpe_max_merges", "bpe_min_frequency", "bpe_max_iter",
@@ -537,26 +733,73 @@ def main() -> None:
             train_logger.info("[OK] BPE ve tokenizer ayarları tokenizer_management/config.py'den yüklendi")
         else:
             train_logger.warning("  Config yüklenemedi, fallback değerler kullanılıyor")
-        # [OK] Training Pipeline Validation (v1 kaldırıldı - artık kullanılmıyor)
-        # Eğitim servisi
-        train_logger.info("Eğitim servisi başlatılıyor...")
-        training_service = TrainingService({
-            **effective_cfg,
-            "model_module": "src.neural_network",      # modül yolun buysa (sen de öyle)
-            "model_class":  "CevahirNeuralNetwork",    # sınıf adın: CevahirNeuralNetwork
-        })
+        # Eğitim servisi seçimi — V3 > V2 öncelik sırası
+        if _TRAINING_SYSTEM_V3_AVAILABLE:
+            train_logger.info(
+                "[V3] Training System V3 kullanılıyor (strict cache, GPU batching V3, config V3)..."
+            )
+            train_logger.info(
+                "[V3] Zorunlu adımlar:\n"
+                "  1. python tokenizer_management/train_bpe.py\n"
+                "  2. python training_system/prepare_cache.py  ← ZORUNLU\n"
+                "  3. python training_system/train.py          ← ŞU AN\n"
+                "  Cache bulunamazsa CacheNotFoundError fırlatılır."
+            )
 
-        # Koşu özetini dosyaya yaz (TB hparams zaten TrainingService içinde)
-        log_run_summary(training_service)
-        # Eğitim
-        train_logger.info("Eğitim başlıyor...")
-        train_loss, val_loss = training_service.train()
-        train_logger.info(f"Eğitim tamamlandı. Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}")
+            train_logger.info("Eğitim servisi V3 başlatılıyor...")
+            training_service_v3 = TrainingServiceV3({
+                **effective_cfg,
+                "model_module": "src.neural_network",
+                "model_class":  "CevahirNeuralNetwork",
+                "use_v3_training": True,
+            })
+
+            # Eğitim V3
+            train_logger.info("Eğitim V3 başlıyor...")
+            train_loss, val_loss = training_service_v3.train()
+            train_logger.info(f"[V3] Eğitim tamamlandı. Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}")
+
+        else:
+            # V2 fallback
+            if _V3_AVAILABLE:
+                train_logger.info("[V2+V3] TrainingSystem V3 yok, training_management.v3 ile V2 TrainingService...")
+            else:
+                train_logger.warning("[V2] V3 modülleri import edilemedi, V2 TrainingService kullanılıyor.")
+
+            train_logger.info("Eğitim servisi V2 başlatılıyor...")
+            training_service = TrainingService({
+                **effective_cfg,
+                "model_module": "src.neural_network",
+                "model_class":  "CevahirNeuralNetwork",
+                "use_v3_training": _V3_AVAILABLE,
+            })
+
+            # Koşu özeti (V2)
+            log_run_summary(training_service)
+
+            # Eğitim V2
+            train_logger.info("Eğitim V2 başlıyor...")
+            train_loss, val_loss = training_service.train()
+            train_logger.info(f"[V2] Eğitim tamamlandı. Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}")
         print("\nTensorBoard’ı açmak için:\n  tensorboard --logdir runs/cevahir_training --port 6006\n")
     except KeyboardInterrupt:
         train_logger.warning("Eğitim kullanıcı tarafından durduruldu (KeyboardInterrupt).")
+    except torch.cuda.OutOfMemoryError as oom:
+        # Eğitim döngüsü dışında (örn. model build sırasında) CUDA OOM
+        train_logger.error(
+            f"[OOM] CUDA Out-of-Memory — model derleme veya ilk forward sırasında. "
+            f"batch_size veya max_seq_length küçültün. Hata: {oom}",
+            exc_info=False,
+        )
     except Exception as e:
-        train_logger.error(f"Eğitim sırasında hata oluştu: {str(e)}", exc_info=True)
+        # Typed model_management hatalarına ek açıklama ekle
+        if _MM_EXCEPTIONS_AVAILABLE and CevahirModelError and isinstance(e, CevahirModelError):
+            train_logger.error(
+                f"[ModelError] {type(e).__name__}: {e}",
+                exc_info=True,
+            )
+        else:
+            train_logger.error(f"Eğitim sırasında hata oluştu: {str(e)}", exc_info=True)
 
 
 
