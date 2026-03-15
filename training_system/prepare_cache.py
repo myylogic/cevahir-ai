@@ -43,6 +43,13 @@ from pathlib import Path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from training_system.data_cache import DataCache
+# V3: DataCacheV3 ile checksum + metadata desteği
+try:
+    from training_system.v3.data.cache_v3 import DataCacheV3
+    _CACHE_V3_AVAILABLE = True
+except ImportError:
+    DataCacheV3 = None  # type: ignore
+    _CACHE_V3_AVAILABLE = False
 from tokenizer_management.core.tokenizer_core import TokenizerCore
 from tokenizer_management.config import BPE_CONFIG, TOKENIZER_CONFIG, BPE_DETAILED_CONFIG
 import logging
@@ -531,6 +538,42 @@ def prepare_cache(
         logger.error(f" Cache işleme hatası: {e}", exc_info=True)
         raise
     
+    # V3: Yeni oluşturulan cache dosyaları için checksum + metadata kaydet
+    if _CACHE_V3_AVAILABLE and not from_cache:
+        logger.info("\n[3.5] V3 integrity dosyaları oluşturuluyor (checksum + metadata)...")
+        try:
+            cache_v3 = DataCacheV3(
+                data_dir=data_dir, cache_dir=cache_dir,
+                cache_enabled=True, strict_mode=False, verify_integrity=True,
+            )
+            for pkl_file in Path(cache_dir).glob("cached_data_*.pkl"):
+                sha_path = pkl_file.with_suffix(".sha256")
+                meta_path = pkl_file.with_suffix(".meta.json")
+                if not sha_path.exists():
+                    cache_v3._save_checksum(pkl_file)
+                    logger.info(f"[V3] Checksum: {sha_path.name}")
+                if not meta_path.exists():
+                    stem = pkl_file.stem
+                    rest = stem[12:] if stem.startswith("cached_data_") else stem
+                    parts = rest.rsplit("_", 1)
+                    ck = parts[0] if len(parts) == 2 else rest
+                    dh = parts[1] if len(parts) == 2 else ""
+                    cache_v3._save_metadata(
+                        cache_path=pkl_file, cache_key=ck, data_hash=dh,
+                        encode_mode="train",
+                        include_whole_words=include_whole_words,
+                        include_syllables=include_syllables,
+                        include_sep=include_sep,
+                        max_seq_length=max_seq_length,
+                        alignment_format="autoregressive_v2",
+                        sample_count=len(formatted_data),
+                        file_size_mb=pkl_file.stat().st_size / (1024 * 1024),
+                    )
+                    logger.info(f"[V3] Metadata: {meta_path.name}")
+            logger.info("[V3] Integrity dosyaları hazır")
+        except Exception as e:
+            logger.warning(f"[V3] Integrity oluşturma hatası (devam ediliyor): {e}")
+
     # Cache dosyalarını listele
     logger.info("\n[4] Cache dosyaları:")
     cache_path = Path(cache_dir)
@@ -538,8 +581,13 @@ def prepare_cache(
         cache_files = list(cache_path.glob("cached_data_*.pkl"))
         for cache_file in cache_files:
             file_size_mb = cache_file.stat().st_size / (1024 * 1024)
-            logger.info(f"   📁 {cache_file.name} ({file_size_mb:.2f} MB)")
-    
+            meta_ok = "OK" if cache_file.with_suffix(".meta.json").exists() else "?"
+            sha_ok = "OK" if cache_file.with_suffix(".sha256").exists() else "?"
+            logger.info(
+                f"   📁 {cache_file.name} ({file_size_mb:.2f} MB) "
+                f"[checksum={sha_ok}, meta={meta_ok}]"
+            )
+
     logger.info("\n" + "="*60)
     logger.info("[OK] CACHE HAZIRLAMA TAMAMLANDI!")
     logger.info("="*60)
