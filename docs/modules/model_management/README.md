@@ -1,1161 +1,939 @@
-# 🤖 Model Management - Kapsamlı Dokümantasyon
+# Model Management Modülü — Dokümantasyon
 
-**Versiyon:** V-5  
-**Son Güncelleme:** 2025-01-27  
+**Versiyon:** 4.1.0
+**Son Güncelleme:** 2026-03-16
 **Durum:** Production-Ready
+**Ana Dizin:** `model_management/`
 
 ---
 
-## 📋 İçindekiler
+## İçindekiler
 
 1. [Genel Bakış](#genel-bakış)
-2. [Mimari Yapı](#mimari-yapı)
-3. [Ana Bileşenler](#ana-bileşenler)
-4. [Çalışma Prensibi](#çalışma-prensibi)
-5. [API Referansı](#api-referansı)
-6. [Kullanım Örnekleri](#kullanım-örnekleri)
-7. [Modül Detayları](#modül-detayları)
+2. [Mimari ve Dosya Yapısı](#mimari-ve-dosya-yapısı)
+3. [ModelManager](#modelmanager)
+4. [ModelInitializer](#modelinitializer)
+5. [ModelSaver](#modelsaver)
+6. [ModelLoader](#modelloader)
+7. [ModelUpdater](#modelupdater)
+8. [ModelProfiler](#modelprofiler)
+9. [ModelHealthMonitor](#modelhealthmonitor)
+10. [Config Schema](#config-schema)
+11. [Exception Hiyerarşisi](#exception-hiyerarşisi)
+12. [Kullanım Örnekleri](#kullanım-örnekleri)
+13. [Eğitim Entegrasyonu](#eğitim-entegrasyonu)
 
 ---
 
-## 🎯 Genel Bakış
+## Genel Bakış
 
-**Model Management**, Cevahir Sinir Sistemi'nde modelin yaşam döngüsünü (lifecycle) yöneten merkezi modüldür. Model initialization, training tools (optimizer, scheduler, criterion), save/load, update, ve forward pass işlemlerini tek bir yerden yönetir.
-
-### Temel Özellikler
-
-- ✅ **Model Lifecycle Management:** Build, initialize, save, load
-- ✅ **Training Tools:** Optimizer, scheduler, criterion management
-- ✅ **Forward Pass:** Inference ve training için unified API
-- ✅ **TensorBoard Integration:** Tek yerden TensorBoard yönetimi
-- ✅ **V-4 Architecture Support:** Tüm V-4 parametrelerini otomatik destekler
-- ✅ **Device Management:** GPU/CPU/MPS otomatik seçimi
-- ✅ **Flexible Updates:** Freeze/unfreeze, learning rate scheduling, vb.
-
----
-
-## 🏗️ Mimari Yapı
-
-### Yüksek Seviye Mimari
+`model_management` modülü, Cevahir-AI modelinin yaşam döngüsünü yönetir: oluşturma, eğitim bileşenlerini başlatma, kaydetme/yükleme, profilleme ve sağlık izleme. SOLID prensiplerini uygular; her dosya tek bir sorumluluğa odaklanır.
 
 ```
-ModelManager (Orchestrator)
-├── ModelInitializer
-│   ├── build_model()
-│   ├── initialize_optimizer()
-│   ├── initialize_criterion()
-│   └── initialize_scheduler()
-│
-├── ModelSaver
-│   ├── save_checkpoint()
-│   ├── save_weights_only()
-│   └── save_additional_info()
-│
-├── ModelLoader
-│   ├── load_model()
-│   ├── load_optimizer()
-│   ├── load_scheduler()
-│   └── load_all()
-│
-└── ModelUpdater
-    ├── update_model()
-    ├── update_optimizer()
-    ├── update_scheduler()
-    └── bulk_update()
-```
-
-### ModelManager İlişkileri
-
-```
-ModelManager
-    │
-    ├── HAS-A CevahirNeuralNetwork (Model)
-    ├── HAS-A Optimizer (AdamW/Adam/SGD/...)
-    ├── HAS-A Criterion (CrossEntropyLoss/...)
-    ├── HAS-A Scheduler (ReduceLROnPlateau/...)
-    │
-    ├── USES ModelInitializer (build/initialize)
-    ├── USES ModelSaver (save checkpoint)
-    ├── USES ModelLoader (load checkpoint)
-    └── USES ModelUpdater (update parameters)
+train.py / cevahir.py
+        |
+        v
+   ModelManager          <- Üst düzey API (facade)
+   |-- ModelInitializer  <- Model + Optimizer + Scheduler oluşturma
+   |-- ModelSaver        <- Atomik checkpoint kaydetme + SHA-256
+   |-- ModelLoader       <- Güvenli checkpoint yükleme + versiyon kontrolü
+   |-- ModelUpdater      <- Freeze/Unfreeze, LR güncelleme
+   |-- ModelProfiler     <- Parametre sayımı, bellek, FLOP, zamanlama
+   +-- ModelHealthMonitor<- Gradient, ağırlık, attention sağlık izleme
 ```
 
 ---
 
-## 🧩 Ana Bileşenler
+## Mimari ve Dosya Yapısı
 
-### 1. ModelManager
+```
+model_management/
+|-- __init__.py              # Herkese açık API (tüm sınıflar burada toplanır)
+|-- model_manager.py         # ModelManager -- merkezi facade
+|-- model_initializer.py     # ModelInitializer -- model/opt/sched oluşturma
+|-- model_saver.py           # ModelSaver -- checkpoint kaydetme
+|-- model_loader.py          # ModelLoader -- checkpoint yükleme
+|-- model_updater.py         # ModelUpdater -- parametre güncelleme
+|-- profiler.py              # ModelProfiler -- profilleme araçları
+|-- health_monitor.py        # ModelHealthMonitor -- sağlık izleme
+|-- config_schema.py         # Typed config dataclass'ları
+|-- exceptions.py            # Exception hiyerarşisi
++-- test/
+    |-- test_model_manager.py
+    +-- test_model_manager_comprehensive.py
+```
 
-**Dosya:** `model_management/model_manager.py`  
-**Sınıf:** `ModelManager`
+### Katman Mimarisi (içten dışa)
 
-**Sorumluluklar:**
-- Model lifecycle orchestration
-- Training tools management (optimizer, scheduler, criterion)
-- Forward pass coordination
-- Save/load operations
-- TensorBoard integration
-- Device management
-
-**Özellikler:**
-- ✅ V-2/V-3/V-4 Architecture support (otomatik parametre geçişi)
-- ✅ Pre-norm/Post-norm desteği
-- ✅ Causal masking
-- ✅ KV Cache support (V-4)
-- ✅ TensorBoard integration
-- ✅ Multimodal API (audio, vision, text)
+| Katman | Dosya | Görev |
+|--------|-------|-------|
+| 1 | `exceptions.py` | Hata hiyerarşisi |
+| 2 | `config_schema.py` | Tip-güvenli konfigürasyon |
+| 3 | `profiler.py` | Model profil araçları |
+| 4 | `health_monitor.py` | Sağlık izleme |
+| 5 | `model_initializer.py` | Model/opt/sched oluşturma |
+| 6 | `model_saver.py` | Checkpoint kaydetme |
+| 7 | `model_loader.py` | Checkpoint yükleme |
+| 8 | `model_updater.py` | Parametre güncelleme |
+| 9 | `model_manager.py` | Üst düzey facade |
 
 ---
 
-### 2. ModelInitializer
+## ModelManager
 
-**Dosya:** `model_management/model_initializer.py`  
-**Sınıf:** `ModelInitializer`
+**Dosya:** `model_management/model_manager.py`
 
-**Sorumluluklar:**
-- Model initialization (V-2/V-3/V-4 support)
-- Optimizer initialization (AdamW/Adam/SGD/RAdam/RMSprop)
-- Criterion initialization (CrossEntropyLoss/BCEWithLogits/MSELoss/SmoothL1Loss)
-- Scheduler initialization (ReduceLROnPlateau/Cosine/Step/Exponential/OneCycleLR)
+Tüm alt bileşenleri birleştiren merkezi yönetim sınıfı. Eğitim ve inference işlemlerinin giriş noktasıdır.
 
-**Özellikler:**
-- ✅ Automatic parameter filtering (constructor signature-based)
-- ✅ Weight decay parameter groups (bias/LayerNorm exclusion)
-- ✅ Torch.compile support
-- ✅ Seed management (deterministic training)
+### `__init__` Parametreleri
 
----
+| Parametre | Tip | Varsayılan | Açıklama |
+|-----------|-----|------------|----------|
+| `config` | `Dict[str, Any]` | — | Model ve eğitim konfigürasyonu |
+| `model_class` | `Type[nn.Module]` | `CevahirNeuralNetwork` | Model sınıfı |
+| `device` | `str\|torch.device\|None` | config'ten | Cihaz |
+| `initializer` | sınıf | `ModelInitializer` | DI: oluşturucu |
+| `saver` | sınıf | `ModelSaver` | DI: kaydedici |
+| `updater` | sınıf | `ModelUpdater` | DI: güncelleyici |
+| `tokenizer` | Any | `None` | Multimodal: tokenizer |
+| `audio_processor` | Any | `None` | Multimodal: ses |
+| `vision_processor` | Any | `None` | Multimodal: görüntü |
 
-### 3. ModelSaver
+### Ana Metodlar
 
-**Dosya:** `model_management/model_saver.py`  
-**Sınıf:** `ModelSaver`
+| Metod | Açıklama |
+|-------|----------|
+| `build_model()` | Modeli oluşturur, cihaza taşır, profil raporunu loglar |
+| `build_optimizer()` | Optimizer oluşturur |
+| `build_criterion()` | Loss fonksiyonunu oluşturur |
+| `build_scheduler()` | LR scheduler oluşturur |
+| `initialize(...)` | Tek çağrıda tüm bileşenleri başlatır |
+| `forward(input_ids, ...)` | Model forward geçişi; OOM recovery dahil |
+| `generate(input_ids, ...)` | Autoregressive token üretimi |
+| `predict(input_ids, ...)` | Top-k tahmin, logit/softmax seçeneği |
+| `save(epoch, ...)` | Checkpoint kaydeder |
+| `load(path, ...)` | Checkpoint yükler |
+| `train_mode()` | `model.train()` + dropout aktif |
+| `eval_mode()` | `model.eval()` + dropout kapalı |
+| `health_check()` | `HealthReport` döndürür |
+| `profile()` | Profil raporu döndürür |
+| `setup_tensorboard(log_dir)` | TensorBoard writer başlatır |
 
-**Sorumluluklar:**
-- Checkpoint saving (model + optimizer + scheduler + metadata)
-- Weights-only saving
-- Full model saving (pickle)
-- Additional info saving (JSON)
-- Atomic writes (crash-safe)
-
-**Özellikler:**
-- ✅ Atomic checkpoint writes
-- ✅ Latest checkpoint marker
-- ✅ Old checkpoint pruning
-- ✅ Metadata preservation
-
----
-
-### 4. ModelLoader
-
-**Dosya:** `model_management/model_loader.py`  
-**Sınıf:** `ModelLoader`
-
-**Sorumluluklar:**
-- Model loading (state_dict veya full checkpoint)
-- Optimizer state loading
-- Scheduler state loading
-- Additional info loading (JSON)
-- Device management (automatic)
-
-**Özellikler:**
-- ✅ Multiple checkpoint formats support
-- ✅ Automatic device mapping
-- ✅ Strict/non-strict loading
-- ✅ Weights-only loading (PyTorch 2.x)
-
----
-
-### 5. ModelUpdater
-
-**Dosya:** `model_management/model_updater.py`  
-**Sınıf:** `ModelUpdater`
-
-**Sorumluluklar:**
-- Model parameter updates (freeze/unfreeze, setattr, device)
-- Optimizer updates (learning rate, weight decay, betas, eps, vb.)
-- Scheduler updates (factor, patience, step_size, gamma, vb.)
-- Bulk updates (model + optimizer + scheduler)
-
-**Özellikler:**
-- ✅ Pattern-based freeze/unfreeze (glob + regex)
-- ✅ Dry-run mode (preview changes)
-- ✅ Automatic frozen param filtering (optimizer)
-- ✅ Validation (type checking, range checking)
-
----
-
-## ⚙️ Çalışma Prensibi
-
-### 1. Model Initialization Flow
+### Device Seçimi (Öncelik Sırası)
 
 ```
-User creates ModelManager(config)
-    ↓
-ModelManager.__init__()
-    ├── Parse device (cuda/mps/cpu)
-    ├── Store config
-    └── Initialize components (model=None, optimizer=None, ...)
-    ↓
-User calls initialize()
-    ↓
-ModelManager.initialize()
-    ├── build_model() → ModelInitializer.build_model()
-    │   ├── Filter config params (constructor signature)
-    │   ├── Create CevahirNeuralNetwork(**filtered_params)
-    │   └── Move to device
-    ├── build_optimizer() → ModelInitializer.initialize_optimizer()
-    │   ├── Create param groups (weight decay split)
-    │   └── Create optimizer (AdamW/Adam/SGD/...)
-    ├── build_criterion() → ModelInitializer.initialize_criterion()
-    │   └── Create loss function (CrossEntropyLoss/...)
-    └── build_scheduler() → ModelInitializer.initialize_scheduler()
-        └── Create scheduler (ReduceLROnPlateau/...)
-    ↓
-Model ready for training/inference
+1. __init__(device=...) ile açıkça belirtildi
+2. config["device"] == "cuda" ve CUDA mevcutsa -> cuda
+3. config["device"] == "mps" ve MPS mevcutsa -> mps
+4. CUDA otomatik keşfi -> cuda (varsa)
+5. Fallback -> cpu
 ```
 
-### 2. Forward Pass Flow
+### TensorBoard Entegrasyonu
 
-```
-User calls forward(inputs, **kwargs)
-    ↓
-ModelManager.forward()
-    ├── Check model is initialized
-    ├── Set model mode (train/eval)
-    ├── Move inputs to device
-    ├── Apply mask transformations (if needed)
-    ├── Call model.forward(**params)
-    │   └── CevahirNeuralNetwork.forward()
-    │       ├── DilKatmani (embedding + PE)
-    │       ├── TransformerEncoderLayer × N
-    │       └── Output layer
-    ├── Extract logits and aux info
-    └── Return (logits, aux)
+```python
+mm = ModelManager(config)
+mm.setup_tensorboard(log_dir="runs/cevahir_v6")
+
+# Her model forward'unda otomatik yazılan metrikler:
+# - train/loss, train/perplexity
+# - grad_norm, lr
+# - attn_entropy (model bu degeri sakliyorsa)
 ```
 
-### 3. Save/Load Flow
+### Otomatik Profil Raporu
 
-#### Save Flow:
-```
-User calls save(save_path, epoch=5)
-    ↓
-ModelManager.save()
-    └── ModelSaver.save_model()
-        ├── Collect state_dicts
-        │   ├── model.state_dict()
-        │   ├── optimizer.state_dict()
-        │   └── scheduler.state_dict()
-        ├── Collect metadata
-        │   ├── epoch
-        │   ├── config
-        │   └── additional_info
-        ├── Create checkpoint dict
-        └── Atomic write (temp file → final file)
-```
-
-#### Load Flow:
-```
-User calls load(load_path)
-    ↓
-ModelManager.load()
-    ├── Load checkpoint (torch.load)
-    ├── Extract state_dicts
-    │   ├── model_state_dict
-    │   ├── optimizer_state_dict
-    │   └── scheduler_state_dict
-    ├── Build model (if None)
-    ├── Load state_dicts
-    │   ├── model.load_state_dict()
-    │   ├── optimizer.load_state_dict()
-    │   └── scheduler.load_state_dict()
-    └── Update config (epoch, etc.)
-```
-
-### 4. Update Flow
+`build_model()` çağrısının ardından otomatik olarak `ModelProfiler.full_report()` çalıştırılır:
 
 ```
-User calls update(update_params)
-    ↓
-ModelManager.update()
-    └── ModelUpdater.bulk_update()
-        ├── Update Model
-        │   ├── setattr (if specified)
-        │   ├── freeze/unfreeze (pattern matching)
-        │   └── device transfer (if specified)
-        ├── Update Optimizer
-        │   ├── learning_rate
-        │   ├── weight_decay
-        │   ├── betas, eps, momentum, ...
-        │   └── Filter frozen params
-        └── Update Scheduler
-            ├── ReduceLROnPlateau: factor, patience, ...
-            ├── StepLR: step_size, gamma
-            └── CosineAnnealingLR: T_max, eta_min
-        ↓
-Return UpdateReport
+[Profiler] == Model Raporu ==
+  Parametreler : ParamStats(total=85.23M, trainable=85.23M, frozen=0, trainable_mem=325.2 MB)
+  Model boyutu : 325.2 MB
+  Bellek       : MemorySnapshot(cuda) alloc=1.32 GB / total=8.00 GB (16.5%)
+  FLOP (T=512) : FlopEstimate(total=42.3 GFLOPs, attn=18.1, ffn=24.1, seq=512, batch=1)
 ```
 
 ---
 
-## 📚 API Referansı
+## ModelInitializer
 
-### ModelManager API
+**Dosya:** `model_management/model_initializer.py`
 
-#### `__init__(config, model_class=None, **kwargs)`
+Model örneği, optimizer, loss fonksiyonu ve LR scheduler oluşturmak için statik metodlar içerir. Tüm metodlar `@staticmethod`tur; instance oluşturmaya gerek yoktur.
 
-ModelManager'ı başlatır.
+### `build_model()`
 
-**Parametreler:**
-- `config` (Dict[str, Any]): Model ve training konfigürasyonu
-- `model_class` (Optional[Type[nn.Module]]): Model sınıfı (None ise CevahirNeuralNetwork)
-- `device` (Optional[Union[str, torch.device]]): Device override
-- `tokenizer` (Optional[Any]): Tokenizer (multimodal için)
-- `audio_processor` (Optional[Any]): Audio processor (multimodal için)
-- `vision_processor` (Optional[Any]): Vision processor (multimodal için)
+```python
+model = ModelInitializer.build_model(
+    model_class=CevahirNeuralNetwork,
+    config=config_dict,
+    device=torch.device("cuda"),
+    compile_model=True,    # torch.compile (PyTorch 2.0+)
+)
+```
 
-**Örnek:**
+**Sıralı adımlar:**
+1. `_apply_seed(config)` — deterministik başlatma (opsiyonel)
+2. `_resolve_device(config)` — cihaz seçimi
+3. `_filter_kwargs_for_ctor(model_class, config)` — config'i model imzasına göre süz
+4. `model_class(**ctor_kwargs).to(device)` — model oluşturma
+5. `torch.compile(model, ...)` — derleme (opsiyonel, `torch_compile=True`)
+6. `gradient_checkpointing_enable()` — (opsiyonel)
+7. `_apply_quantization(...)` — INT8/INT4 (opsiyonel)
+8. `_wrap_distributed(...)` — DDP/FSDP (opsiyonel)
+
+**Güvenli imza süzme:** Config'teki bilinmeyen anahtarlar otomatik filtrelenir; model `__init__` imzası `inspect.signature` ile okunur.
+
+### `initialize_optimizer()`
+
+**Desteklenen optimizer'lar:**
+
+| İsim | Açıklama |
+|------|----------|
+| `adamw` | PyTorch AdamW (opsiyonel fused) |
+| `adamw8bit` / `adamw_8bit` | bitsandbytes 8-bit AdamW — optimizer m/v durumlarini uint8 saklar, ~%75 bellek azalmasi |
+| `adam` | Standart Adam |
+| `radam` | Rectified Adam |
+| `rmsprop` | RMSProp |
+| `sgd` | Stochastic Gradient Descent |
+
+**Parametre grupları (3 ayrı grup):**
+
+```
+Grup 1 — Embedding: lr = base_lr x embedding_lr_scale (varsayilan 1.0)
+Grup 2 — Decay:     lr = base_lr, weight_decay = config degeri
+Grup 3 — No-decay:  lr = base_lr, weight_decay = 0.0
+         (bias, norm, layernorm, bn gibi parametreler)
+```
+
+> **Not:** `embedding_lr_scale` varsayılanı 1.0'dır (base_lr ile aynı). Eski değer 0.1 idi ve EOS/nadir token öğrenimini zayıflatıyordu.
+
+**AdamW8bit (bitsandbytes):**
+
+```python
+# Dettmers et al. 2022 -- 8-bit optimizer
+# Kurulum: pip install bitsandbytes
+# Mevcut degilse otomatik standart AdamW'a fallback
+optimizer: str = "adamw8bit"
+```
+
+### `initialize_criterion()`
+
+| İsim | Sınıf |
+|------|-------|
+| `cross_entropy` / `ce` | `nn.CrossEntropyLoss` (label_smoothing, ignore_index destekli) |
+| `bce_with_logits` / `bce` | `nn.BCEWithLogitsLoss` |
+| `mse` | `nn.MSELoss` |
+| `smooth_l1` / `huber` | `nn.SmoothL1Loss` |
+
+```python
+# PAD token'larini loss'tan cikarmak icin:
+ignore_index: 0   # 0=PAD ignore, -100=hepsini say (varsayilan -100)
+```
+
+### `initialize_scheduler()`
+
+| Tür | Config anahtarı | Açıklama |
+|-----|-----------------|----------|
+| `reduce_on_plateau` | `scheduler_type: "rop"` | Validation loss platoya ulaşınca LR düşür |
+| `cosine` | `scheduler_type: "cosine"` | Kosinüs azalma |
+| `cosine_warm_restarts` | `scheduler_type: "cawr"` | Warm restart'lı kosinüs |
+| `step` | `scheduler_type: "step"` | Sabit adımda LR çarpanı |
+| `exponential` | `scheduler_type: "explr"` | Üstel azalma |
+| `onecycle` | `scheduler_type: "onecycle"` | OneCycleLR (steps_per_epoch ve epochs zorunlu) |
+| `none` | `scheduler_type: "none"` | Scheduler yok |
+
+### `build_training_components()` — Tek Çağrı
+
+```python
+optimizer, criterion, scheduler = ModelInitializer.build_training_components(model, config)
+```
+
+### Quantization Desteği
+
+| Tür | Açıklama | Gereksinim |
+|-----|----------|------------|
+| `int8` | LLM.int8() — threshold=6.0, ~%50 VRAM azalması | `bitsandbytes` |
+| `int4` | NF4 + double quantization, ~%75 VRAM azalması | `bitsandbytes` |
+
+### Dağıtık Eğitim
+
+| Strateji | Açıklama |
+|----------|----------|
+| `ddp` | DistributedDataParallel — gradientleri senkronize eder |
+| `fsdp` | FullyShardedDataParallel — model parametrelerini GPU'lara parçalar |
+
 ```python
 config = {
-    "vocab_size": 60000,
-    "embed_dim": 1024,
-    "num_heads": 16,
-    "num_layers": 12,
-    "learning_rate": 1e-4,
-    "device": "cuda",
+    "distributed_strategy": "ddp",
+    "distributed_backend": "nccl",
+    "local_rank": 0,
 }
-manager = ModelManager(config)
+# torchrun ile baslatilir
 ```
 
 ---
 
-#### `initialize(**kwargs) -> ModelManager`
+## ModelSaver
 
-Model ve training tools'u başlatır.
+**Dosya:** `model_management/model_saver.py`
+**Checkpoint Versiyonu:** `4.1` / Format: `2`
 
-**Parametreler:**
-- `build_optimizer` (bool): Optimizer oluştur (default: True)
-- `build_criterion` (bool): Criterion oluştur (default: True)
-- `build_scheduler` (bool): Scheduler oluştur (default: True)
-- `reset` (bool): Önceki state'i sıfırla (default: False)
+Atomik kayıt (tmp → `os.replace`) ve SHA-256 bütünlük doğrulaması ile güvenli checkpoint yönetimi.
 
-**Örnek:**
+### `save_checkpoint()` — Ana API
+
 ```python
-manager.initialize(
+path = ModelSaver.save_checkpoint(
+    model,
+    optimizer=optimizer,
+    scheduler=scheduler,
+    epoch=epoch,
+    config=config,
+    metadata={"val_loss": 2.34, "train_loss": 1.87},
+    save_dir="saved_models/checkpoints",
+    filename_template="checkpoint_ep{epoch:04d}.pth",
+    create_latest_marker=True,  # latest.txt olusturur
+    keep_last_n=5,              # En eski 5 checkpoint disindakileri sil
+    prefix_for_prune="checkpoint_",
+)
+```
+
+**Kaydedilen checkpoint yapısı:**
+
+```python
+{
+    "model_state_dict": ...,
+    "optimizer_state_dict": ...,
+    "scheduler_state_dict": ...,
+    "epoch": epoch,
+    "config": config,
+    "metadata": {
+        # Kullanici metadata (val_loss, train_loss vb.)
+        "cevahir_version": "4.1",
+        "checkpoint_format": 2,
+        "saved_at": "2026-03-16T10:30:00Z",
+        "total_params": 85234567,
+        "trainable_params": 85234567,
+        "sha256": "abc123..."
+    }
+}
+```
+
+**SHA-256 sidecar dosyası:** `checkpoint_ep0010.pth.sha256` — dışarıdan hızlı bütünlük doğrulaması için.
+
+### Akıllı Checkpoint Budama
+
+```
+prefer_best_val_loss=True (varsayilan):
+  1. Her checkpoint'in metadata'sindaki val_loss kontrol edilir
+  2. En iyi val_loss'a sahip checkpoint KESINLIKLE korunur
+  3. Geriye kalan slotlara en yeni checkpoint'ler yerlestirilir
+```
+
+### Atomik Yazma
+
+```
+1. BytesIO -> serialize et
+2. tempfile.mkstemp() -> gecici dosyaya yaz
+3. os.replace(tmp, hedef) -> atomik tasi
+```
+
+CUDA hatası durumunda tensörler CPU'ya taşınarak yeniden denenir.
+
+### Diğer Metodlar
+
+| Metod | Açıklama |
+|-------|----------|
+| `save_weights_only(model, ...)` | Sadece state_dict kaydeder |
+| `save_full_model(model, ...)` | Tüm model (pickle) — genellikle önerilmez |
+| `save_additional_info(info, ...)` | Ek bilgileri JSON olarak kaydeder |
+| `save_model(...)` | Eski API (geriye dönük uyumluluk) |
+
+---
+
+## ModelLoader
+
+**Dosya:** `model_management/model_loader.py`
+
+### `load_model()` — Tek Model Yükleme
+
+```python
+model = ModelLoader.load_model(
+    model_class=CevahirNeuralNetwork,
+    model_path="saved_models/checkpoints/checkpoint_ep0010.pth",
+    device="cuda",
+    config=config,
+    strict=True,
+    weights_only=None,
+)
+```
+
+**Yükleme adımları:**
+1. `_verify_sha256(path)` — SHA-256 sidecar kontrolü (varsa)
+2. `_check_version_compatibility(ckpt)` — format versiyon uyumluluğu
+3. `_extract_state_dicts(ckpt)` — model/opt/sch state dict ayırma
+4. `model_class(**ctor_kwargs).to(device)` — model örneği oluştur
+5. Vocab size kontrolü (`embedding.weight` şekli)
+6. `model.load_state_dict(model_sd, strict=strict)` — ağırlık yükleme
+7. Eksik/beklenmeyen anahtar uyarıları
+
+### `load_all()` — Tek Çağrıda Hepsi
+
+```python
+model, opt_sd, sch_sd, meta = ModelLoader.load_all(
+    model_class=CevahirNeuralNetwork,
+    ckpt_path="checkpoint_ep0010.pth",
+    device="cuda",
+    config=config,
+)
+# meta: {"epoch": 10, "config": {...}}
+```
+
+### Checkpoint Format Desteği
+
+| Format | Açıklama |
+|--------|----------|
+| `{"model_state_dict": ..., "optimizer_state_dict": ..., ...}` | Tam checkpoint (önerilen) |
+| `{"state_dict": ...}` | Framework uyumlu |
+| `{str: Tensor, ...}` | Düz state_dict |
+
+### Versiyon Uyumluluğu
+
+```
+Format 1 -> Format 2: Geriye dönük uyumlu
+Format 3+: CheckpointVersionError firlatir
+```
+
+---
+
+## ModelUpdater
+
+**Dosya:** `model_management/model_updater.py`
+
+Model parametrelerini ve eğitim bileşenlerini çalışma zamanında güncellemek için statik metodlar.
+
+### Temel Metodlar
+
+| Metod | Açıklama |
+|-------|----------|
+| `freeze_layers(model, layers)` | Belirtilen katmanları dondurur (`requires_grad=False`) |
+| `unfreeze_layers(model, layers)` | Dondurulmuş katmanları serbest bırakır |
+| `freeze_all_except(model, patterns)` | Belirtilen desenler hariç tüm katmanları dondurur |
+| `update_learning_rate(optimizer, lr)` | Tüm param gruplarında LR günceller |
+| `update_weight_decay(optimizer, wd)` | Weight decay günceller |
+| `step_scheduler(scheduler, metric)` | Scheduler adımı (plateau için metric gerekli) |
+| `apply_weight_noise(model, std)` | Ağırlıklara Gaussian gürültü ekler |
+| `reset_parameters(model, layers)` | Seçili katmanların ağırlıklarını sıfırlar |
+
+### Desen Tabanlı Dondurma
+
+```python
+# Glob/regex desen destegi
+ModelUpdater.freeze_all_except(model, patterns=["layers.7.*", "output_layer"])
+# Sadece son katman ve output projection egitilebilir kalir
+```
+
+---
+
+## ModelProfiler
+
+**Dosya:** `model_management/profiler.py`
+
+Model boyutu, parametre sayısı, FLOP tahmini ve zamanlama için statik araçlar. Instance oluşturmaya gerek yoktur.
+
+### Veri Sınıfları
+
+| Sınıf | Alanlar |
+|-------|---------|
+| `ParamStats` | `total`, `trainable`, `frozen`, `trainable_mb`, `by_layer` |
+| `MemorySnapshot` | `allocated_mb`, `reserved_mb`, `free_mb`, `total_mb`, `device` |
+| `FlopEstimate` | `total_flops`, `attention_flops`, `ffn_flops`, `embedding_flops`, `gflops` |
+| `TimingResult` | `mean_ms`, `std_ms`, `min_ms`, `max_ms`, `tokens_per_second` |
+
+### `count_parameters()`
+
+```python
+stats = ModelProfiler.count_parameters(model)
+print(stats)
+# ParamStats(total=85.23M, trainable=85.23M, frozen=0, trainable_mem=325.2 MB)
+
+# Katman bazli dagilim (en buyuk 5 katman):
+#   embedding:    30.72M params
+#   layers:       54.01M params
+#   output_layer:  0.50M params
+```
+
+### `memory_snapshot()`
+
+```python
+mem = ModelProfiler.memory_snapshot("cuda")
+print(mem)
+# MemorySnapshot(cuda) alloc=3.72 GB / total=8.00 GB (46.5%)
+
+print(f"Kullanim: {mem.utilization_pct:.1f}%")
+print(f"Bos: {mem.free_mb:.0f} MB")
+```
+
+### `estimate_flops()`
+
+Kaplan et al. 2020 / PaLM paper formüllerine göre teorik FLOP tahmini:
+
+```
+Attention: 4 x B x L x T x D^2   (QKV + Output projeksiyonu)
+           2 x B x L x H x T^2   (dikkat skoru)
+FFN:       2 x B x L x T x D x F x 2
+B=batch, L=num_layers, T=seq_len, D=embed_dim, H=num_heads, F=ffn_dim
+```
+
+```python
+flops = ModelProfiler.estimate_flops(model, seq_len=512, batch_size=4)
+print(flops)
+# FlopEstimate(total=42.3 GFLOPs, attn=18.1, ffn=24.1, seq=512, batch=4)
+```
+
+### `benchmark_forward()`
+
+```python
+sample = torch.randint(0, 32000, (1, 512)).cuda()
+timing = ModelProfiler.benchmark_forward(model, sample, n_warmup=3, n_runs=20)
+print(timing)
+# TimingResult(mean=23.45ms +-0.87, tok/s=21834, runs=20)
+```
+
+GPU için `torch.cuda.Event` tabanlı hassas ölçüm kullanır.
+
+### `profile_context()` — torch.profiler Entegrasyonu
+
+```python
+with ModelProfiler.profile_context(model, output_path="./profiler_trace") as prof:
+    logits, _ = model(inputs)
+
+print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=20))
+# Chrome trace dosyasina kaydedilir (TensorBoard ile goruntulenebilir)
+```
+
+### `full_report()` — Özet Rapor
+
+```python
+report = ModelProfiler.full_report(model, seq_len=512, run_timing=True)
+# Doner: {"params": ParamStats, "memory": MemorySnapshot,
+#          "flops": FlopEstimate, "timing": TimingResult, "size_mb": float}
+```
+
+---
+
+## ModelHealthMonitor
+
+**Dosya:** `model_management/health_monitor.py`
+
+Gradient akışı, ağırlık dağılımı ve attention entropy patolojilerini tespit eder.
+
+### Tespit Edilen Patolojiler
+
+| Patoloji | Eşik | Seviye |
+|----------|------|--------|
+| NaN gradient | Herhangi biri | CRITICAL |
+| Inf gradient | Herhangi biri | CRITICAL |
+| Gradient vanishing | `grad_norm < 1e-8` | INFO |
+| Gradient exploding | `grad_norm > 1e4` | WARNING |
+| NaN ağırlık | Herhangi biri | CRITICAL |
+| Ölü ağırlık | `std < 1e-9` | INFO |
+| Ağırlık patlaması | `abs_max > 1e3` | WARNING |
+| Attention collapse | `entropy < 0.05` | WARNING |
+| Attention uniform | `entropy > 0.99` | INFO |
+
+### Veri Sınıfları
+
+| Sınıf | Açıklama |
+|-------|----------|
+| `GradientHealth` | Gradient NaN/Inf/vanish/explode bilgisi |
+| `WeightHealth` | Ağırlık dağılımı, ölü/patlayan katmanlar |
+| `AttentionHealth` | Attention entropy, collapse/uniform katmanlar |
+| `HealthReport` | Üç raporu birleştiren birleşik rapor |
+
+### Severity Seviyeleri
+
+```
+OK       -> Her sey normal
+INFO     -> Vanishing gradient veya olü katman var (izle)
+WARNING  -> Exploding gradient veya attention collapse (müdahale et)
+CRITICAL -> NaN/Inf (eğitim bozuldu, dur)
+```
+
+### `full_health_check()` — Birleşik Kontrol
+
+```python
+report = ModelHealthMonitor.full_health_check(
+    model,
+    sample_input=sample,
+    check_gradients=True,
+    check_weights=True,
+    check_attention=True,
+    raise_on_critical=True,     # CRITICAL durumda HealthCheckError firlatir
+)
+
+if not report.is_healthy:
+    print(report.summary())
+```
+
+**Örnek çıktı:**
+
+```
+============================================================
+  ⚠ MODEL SAGLIK RAPORU -- WARNING
+============================================================
+GradientHealth [WARNING]
+  ⚠  Exploding gradients: ['layers.3.ffn.fc1.weight']
+  norm: max=1.23e+05, min=1.23e-06, mean=3.45e+00
+
+WeightHealth [OK]
+  global: mean=0.0012, std=0.0345, max_abs=0.8921
+
+AttentionHealth [OK]
+  entropy: mean=0.423, min=0.312, max=0.687
+============================================================
+```
+
+### `quick_gradient_check()` — Her Batch İçin Hızlı Kontrol
+
+```python
+# backward() sonrasi her batch'te:
+is_safe, msg = ModelHealthMonitor.quick_gradient_check(model)
+if not is_safe:
+    logger.warning(f"NaN/Inf gradient -- batch atlaniyor: {msg}")
+    optimizer.zero_grad()
+    continue
+```
+
+### `log_gradient_norms()` — TensorBoard Entegrasyonu
+
+```python
+norms = ModelHealthMonitor.log_gradient_norms(
+    model, step=global_step, tb_writer=writer, top_n=10
+)
+# En yuksek 10 gradient normunu TensorBoard'a yazar
+```
+
+### Attention Entropy İzleme
+
+Model `_last_attn_entropy` attribute'unu tutuyorsa (CevahirNeuralNetwork bunu yapar), her forward sonrası otomatik okunur:
+
+```python
+# Modelin forward() sirasinda hesaplanir ve saklanir:
+self._last_attn_entropy = normalized_entropy   # [0, 1]
+
+# HealthMonitor bunu okur:
+health = ModelHealthMonitor.check_attention_entropy(model)
+# Collapse (< 0.05), Normal, Uniform (> 0.99)
+```
+
+---
+
+## Config Schema
+
+**Dosya:** `model_management/config_schema.py`
+
+Düz `Dict[str, Any]` yerine tip-güvenli, doğrulanabilir yapılandırma şemaları.
+
+### Sınıflar
+
+#### `ModelArchConfig`
+
+```python
+arch = ModelArchConfig(
+    embed_dim=512,
+    num_heads=8,
+    num_layers=8,
+    vocab_size=32000,
+    ffn_dim=None,
+    use_swiglu=True,
+    use_rmsnorm=True,
+    num_kv_heads=2,
+    pe_mode="rope",
+    rope_scaling_type="yarn",
+    rope_scaling_factor=4.0,
+    use_moe=False,
+    quantization_type="none",
+    tie_weights=True,
+)
+arch.validate()
+
+print(arch.head_dim)                  # 64
+print(arch.effective_ffn_dim)         # 2048
+print(arch.parameter_count_estimate)  # yaklasik 85M
+```
+
+**Doğrulanan kurallar:**
+- `embed_dim % num_heads == 0`
+- `num_heads % num_kv_heads == 0` (GQA uyumluluğu)
+- `rope_scaling_factor >= 1.0`
+- `moe_top_k <= num_experts`
+- `tie_weights=True` ise `seq_proj_dim == embed_dim`
+
+#### `TrainingConfig`
+
+```python
+training = TrainingConfig(
+    learning_rate=2e-4,
+    batch_size=72,
+    grad_accum_steps=4,
+    optimizer="adamw8bit",
+    scheduler_type="reduce_on_plateau",
+    use_amp=True,
+    use_gradient_checkpointing=True,
+    use_ema=True,
+    ema_decay=0.999,
+)
+print(training.effective_batch_size)  # 288 (72 x 4)
+```
+
+#### `CheckpointConfig`
+
+```python
+ckpt_cfg = CheckpointConfig(
+    save_dir="saved_models/checkpoints",
+    keep_last_n=5,
+    save_every_n_epochs=10,
+    enable_sha256=True,
+)
+```
+
+#### `DistributedConfig`
+
+```python
+dist_cfg = DistributedConfig(
+    enabled=True,
+    backend="nccl",
+    strategy="ddp",
+    world_size=4,
+)
+```
+
+#### `QuantConfig`
+
+```python
+quant_cfg = QuantConfig(
+    quant_type="int4",
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype="bfloat16",
+    bnb_4bit_use_double_quant=True,
+)
+```
+
+#### `CevahirConfig` — Birleşik Konfigürasyon
+
+```python
+# train.py'deki düz dict'ten olustur:
+cfg = CevahirConfig.from_flat_dict(TRAIN_CONFIG)
+cfg.validate_all()
+
+print(cfg.arch.embed_dim)
+print(cfg.training.effective_batch_size)
+
+d = cfg.to_dict()
+```
+
+---
+
+## Exception Hiyerarşisi
+
+**Dosya:** `model_management/exceptions.py`
+
+```
+CevahirModelError
+|-- ModelNotInitializedError     -> initialize() cagirilmadan kullanim
+|-- ModelBuildError              -> model/optimizer/scheduler olusturma hatasi
+|    +-- QuantizationError       -> INT8/INT4 quantization basarisizligi
+|-- CheckpointError              -> checkpoint I/O taban hatasi
+|    |-- CheckpointNotFoundError -> dosya yok
+|    |-- CheckpointCorruptError  -> SHA-256 uyumsuz / format bozuk
+|    +-- CheckpointVersionError  -> versiyon uyumsuzlugu
+|-- ForwardError                 -> model forward pass hatasi
+|    +-- OOMRecoveryError        -> CUDA OOM -> kurtarma basarisiz
+|-- DeviceError                  -> device secimi / transfer hatasi
+|    +-- DeviceMismatchError     -> tensor device uyumsuzlugu
+|-- ShapeError                   -> tensor sekil uyumsuzlugu
+|    +-- VocabSizeMismatchError  -> vocab_size checkpoint vs model
+|-- DistributedSetupError        -> DDP/FSDP kurulum hatasi
++-- HealthCheckError             -> model saglik testi basarisiz
+```
+
+### Kullanım
+
+```python
+from model_management import (
+    CevahirModelError,
+    CheckpointNotFoundError,
+    OOMRecoveryError,
+    VocabSizeMismatchError,
+)
+
+try:
+    model = ModelLoader.load_model(CevahirNeuralNetwork, path, config=config)
+except CheckpointNotFoundError as e:
+    print(f"Checkpoint bulunamadi: {e.path}")
+except VocabSizeMismatchError as e:
+    print(f"Vocab uyumsuz: model={e.model_vocab}, ckpt={e.checkpoint_vocab}")
+except CevahirModelError as e:
+    print(f"Genel model hatasi: {e.message} | {e.context}")
+```
+
+---
+
+## Kullanım Örnekleri
+
+### Hızlı Başlangıç
+
+```python
+from model_management import ModelManager
+
+config = {
+    "vocab_size": 32000,
+    "embed_dim": 512,
+    "num_heads": 8,
+    "num_kv_heads": 2,
+    "num_layers": 8,
+    "ffn_dim": None,
+    "use_swiglu": True,
+    "use_pytorch_sdpa": True,
+    "logit_soft_cap": 30.0,
+    "dropout": 0.1,
+    "max_seq_length": 2048,
+    "learning_rate": 2e-4,
+    "weight_decay": 0.01,
+    "optimizer": "adamw8bit",
+    "scheduler_type": "reduce_on_plateau",
+    "criterion": "cross_entropy",
+    "ignore_index": 0,
+    "device": "cuda",
+}
+
+mm = ModelManager(config)
+mm.initialize(
+    build_model=True,
     build_optimizer=True,
     build_criterion=True,
     build_scheduler=True,
 )
 ```
 
----
+### Eğitim Döngüsü Entegrasyonu
 
-#### `build_model() -> nn.Module`
-
-Modeli oluşturur (V-2/V-3/V-4 support).
-
-**Dönüş:**
-- `nn.Module`: Oluşturulan model
-
-**Özellikler:**
-- ✅ Otomatik parametre filtreleme (constructor signature-based)
-- ✅ V-2/V-3/V-4 parametreleri otomatik geçirilir
-- ✅ Device'a otomatik taşınır
-
-**Örnek:**
 ```python
-model = manager.build_model()
-```
+mm.train_mode()
 
----
+for batch in dataloader:
+    input_ids = batch["input_ids"].to(mm.device)
+    labels = batch["labels"].to(mm.device)
 
-#### `forward(inputs, **kwargs) -> Tuple[torch.Tensor, Optional[torch.Tensor]]`
+    logits, _ = mm.forward(input_ids)
+    loss = mm.criterion(
+        logits[:, :-1].reshape(-1, vocab_size),
+        labels[:, 1:].reshape(-1)
+    )
+    (loss / grad_accum_steps).backward()
 
-Forward pass yapar.
+    # NaN kontrol
+    is_safe, msg = ModelHealthMonitor.quick_gradient_check(mm.model)
+    if not is_safe:
+        mm.optimizer.zero_grad()
+        continue
 
-**Parametreler:**
-- `inputs` (torch.Tensor): Input tensor [B, T]
-- `inference` (Optional[bool]): Inference mode (None ise model.training kullanılır)
-- `return_aux` (bool): Auxiliary info döndür (default: True)
-- `mask` (Optional[torch.Tensor]): Attention mask
-- `causal_mask` (Optional[bool]): Causal mask override
-- `use_cache` (bool): KV Cache kullan (V-4, default: False)
-- `cache_position` (Optional[torch.Tensor]): Cache position (V-4)
+    torch.nn.utils.clip_grad_norm_(mm.model.parameters(), 1.0)
+    mm.optimizer.step()
+    mm.optimizer.zero_grad()
 
-**Dönüş:**
-- `Tuple[torch.Tensor, Optional[torch.Tensor]]`: (logits, aux_info)
-
-**Örnek:**
-```python
-# Training
-logits, aux = manager.forward(inputs, inference=False)
-
-# Inference with KV Cache
-logits, aux = manager.forward(
-    inputs,
-    inference=True,
-    use_cache=True,
-    cache_position=torch.arange(seq_len),
+# Epoch sonu checkpoint
+mm.save(
+    epoch=epoch,
+    metadata={"val_loss": val_loss, "train_loss": avg_loss},
+    keep_last_n=5,
 )
 ```
 
----
-
-#### `predict(inputs, **kwargs) -> Dict[str, Any]`
-
-Prediction yapar (top-k, softmax).
-
-**Parametreler:**
-- `inputs` (torch.Tensor): Input tensor
-- `topk` (int): Top-k prediction (default: 1)
-- `apply_softmax` (bool): Softmax uygula (default: True)
-- `return_logits` (bool): Logits döndür (default: False)
-
-**Dönüş:**
-- `Dict[str, Any]`: `{"probs": ..., "topk_values": ..., "topk_indices": ..., "logits": ...}`
-
-**Örnek:**
-```python
-result = manager.predict(inputs, topk=5, apply_softmax=True)
-print(result["topk_indices"])  # Top-5 token IDs
-```
-
----
-
-#### `save(save_path=None, **kwargs) -> str`
-
-Model checkpoint'ini kaydeder.
-
-**Parametreler:**
-- `save_path` (Optional[str]): Kayıt yolu (None ise default)
-- `epoch` (Optional[int]): Epoch numarası
-- `additional_info` (Optional[Dict[str, Any]]): Ek bilgiler
-
-**Dönüş:**
-- `str`: Kaydedilen dosyanın yolu
-
-**Örnek:**
-```python
-save_path = manager.save(
-    save_path="saved_models/checkpoint_epoch_5.pth",
-    epoch=5,
-    additional_info={"loss": 2.1, "accuracy": 0.36},
-)
-```
-
----
-
-#### `load(load_path=None, **kwargs) -> None`
-
-Model checkpoint'ini yükler.
-
-**Parametreler:**
-- `load_path` (Optional[str]): Yükleme yolu (None ise default)
-- `strict` (bool): Strict loading (default: True)
-- `map_location` (Optional[Union[str, torch.device]]): Device mapping
-- `weights_only` (Optional[bool]): Sadece weights (PyTorch 2.x)
-
-**Örnek:**
-```python
-manager.load(
-    load_path="saved_models/checkpoint_epoch_5.pth",
-    strict=True,
-)
-```
-
----
-
-#### `update(update_params, **kwargs) -> Dict[str, List[str]]`
-
-Model, optimizer, scheduler'ı günceller.
-
-**Parametreler:**
-- `update_params` (Dict[str, Any]): Update parametreleri
-  ```python
-  {
-      "model": {
-          "freeze": ["encoder.*"],  # Pattern-based freeze
-          "unfreeze": ["head.*"],
-          "setattr": {"dropout_p": 0.2},
-          "device": "cuda:0",
-      },
-      "optimizer": {
-          "learning_rate": 1e-5,
-          "weight_decay": 0.01,
-      },
-      "scheduler": {
-          "factor": 0.5,
-          "patience": 5,
-      },
-  }
-  ```
-- `dry_run` (bool): Sadece preview (default: False)
-
-**Dönüş:**
-- `Dict[str, List[str]]`: Update raporu
-
-**Örnek:**
-```python
-report = manager.update({
-    "model": {"freeze": ["dil_katmani.*"]},
-    "optimizer": {"learning_rate": 5e-5},
-})
-```
-
----
-
-#### `freeze(patterns) -> Dict[str, List[str]]`
-
-Parametreleri dondurur (pattern-based).
-
-**Parametreler:**
-- `patterns` (Union[str, List[str]]): Pattern listesi (glob veya regex)
-
-**Örnek:**
-```python
-# Glob pattern
-manager.freeze("encoder.*")
-
-# Regex pattern
-manager.freeze("r:^backbone\\.layers\\.(0|1)\\.")
-
-# Multiple patterns
-manager.freeze(["dil_katmani.*", "encoder.layers.0.*"])
-```
-
----
-
-#### `unfreeze(patterns) -> Dict[str, List[str]]`
-
-Parametreleri çözer (pattern-based).
-
-**Parametreler:**
-- `patterns` (Union[str, List[str]]): Pattern listesi
-
-**Örnek:**
-```python
-manager.unfreeze("head.*")
-```
-
----
-
-#### `configure_tensorboard(**kwargs) -> None`
-
-TensorBoard'u yapılandırır.
-
-**Parametreler:**
-- `writer` (Optional[Any]): External SummaryWriter
-- `log_dir` (Optional[str]): Log dizini
-- `log_every_n` (Optional[int]): Her N forward'ta log
-- `log_histograms` (Optional[bool]): Histogram logging
-- `log_attention_image` (Optional[bool]): Attention image logging
-- `enable` (Optional[bool]): TensorBoard'u aktifleştir
-
-**Örnek:**
-```python
-manager.configure_tensorboard(
-    log_dir="runs/experiment_1",
-    log_every_n=10,
-    log_histograms=True,
-    enable=True,
-)
-```
-
----
-
-#### `train_mode() -> None`
-
-Model'i training mode'a alır.
-
-**Örnek:**
-```python
-manager.train_mode()
-```
-
----
-
-#### `eval_mode() -> None`
-
-Model'i eval mode'a alır.
-
-**Örnek:**
-```python
-manager.eval_mode()
-```
-
----
-
-#### `get_tb_writer() -> Optional[Any]`
-
-TensorBoard writer'ı döndürür.
-
-**Örnek:**
-```python
-writer = manager.get_tb_writer()
-if writer:
-    writer.add_scalar("loss/train", loss_value, step)
-```
-
----
-
-### ModelInitializer API
-
-#### `build_model(model_class, config, **kwargs) -> nn.Module`
-
-Modeli oluşturur.
-
-**Parametreler:**
-- `model_class` (Type[nn.Module]): Model sınıfı
-- `config` (Dict[str, Any]): Konfigürasyon
-- `extra_kwargs` (Optional[Dict[str, Any]]): Ek parametreler
-- `device` (Optional[torch.device]): Device override
-- `compile_model` (Optional[bool]): Torch.compile kullan
-
-**Örnek:**
-```python
-from src.neural_network import CevahirNeuralNetwork
-
-config = {
-    "vocab_size": 60000,
-    "embed_dim": 1024,
-    "num_heads": 16,
-    "num_layers": 12,
-    "pe_mode": "rope",  # V-4
-    "use_rmsnorm": True,  # V-4
-}
-
-model = ModelInitializer.build_model(
-    CevahirNeuralNetwork,
-    config,
-    device=torch.device("cuda"),
-)
-```
-
----
-
-#### `initialize_optimizer(model, config) -> optim.Optimizer`
-
-Optimizer oluşturur.
-
-**Desteklenen Optimizer'lar:**
-- `adamw` (default)
-- `adam`
-- `sgd`
-- `radam`
-- `rmsprop`
-
-**Parametreler:**
-- `learning_rate` (float): Learning rate (default: 1e-3)
-- `weight_decay` (float): Weight decay (default: 0.0)
-- `betas` (tuple): Adam betas (default: (0.9, 0.999))
-- `eps` (float): Epsilon (default: 1e-8)
-- `no_weight_decay_keywords` (List[str]): Weight decay exclusion (default: ["bias", "layernorm", ...])
-
-**Örnek:**
-```python
-optimizer = ModelInitializer.initialize_optimizer(model, {
-    "optimizer": "adamw",
-    "learning_rate": 1e-4,
-    "weight_decay": 0.01,
-})
-```
-
----
-
-#### `initialize_criterion(config) -> nn.Module`
-
-Loss function oluşturur.
-
-**Desteklenen Loss Function'lar:**
-- `cross_entropy` (default)
-- `bce_with_logits`
-- `mse`
-- `smooth_l1`
-
-**Parametreler:**
-- `criterion` (str): Loss function tipi
-- `label_smoothing` (float): Label smoothing (default: 0.0)
-- `ignore_index` (int): Ignore index (default: -100)
-
-**Örnek:**
-```python
-criterion = ModelInitializer.initialize_criterion({
-    "criterion": "cross_entropy",
-    "label_smoothing": 0.1,
-})
-```
-
----
-
-#### `initialize_scheduler(optimizer, config) -> Optional[LRScheduler]`
-
-Learning rate scheduler oluşturur.
-
-**Desteklenen Scheduler'lar:**
-- `reduce_on_plateau` (default)
-- `cosine`
-- `cosine_warm_restarts`
-- `step`
-- `exponential`
-- `onecycle`
-
-**Örnek:**
-```python
-scheduler = ModelInitializer.initialize_scheduler(optimizer, {
-    "scheduler_type": "reduce_on_plateau",
-    "lr_decay_factor": 0.5,
-    "lr_decay_patience": 5,
-})
-```
-
----
-
-### ModelSaver API
-
-#### `save_checkpoint(**kwargs) -> str`
-
-Tam checkpoint kaydeder.
-
-**Parametreler:**
-- `model` (nn.Module): Model
-- `optimizer` (Optional[Optimizer]): Optimizer
-- `scheduler` (Optional[LRScheduler]): Scheduler
-- `epoch` (Optional[int]): Epoch
-- `config` (Optional[Dict]): Config
-- `metadata` (Optional[Dict]): Metadata
-- `save_dir` (str): Save dizini
-- `filename` (Optional[str]): Dosya adı
-- `filename_template` (str): Template (default: "checkpoint_ep{epoch:04d}.pth")
-- `create_latest_marker` (bool): Latest marker oluştur (default: True)
-- `keep_last_n` (int): Son N checkpoint'i tut (default: 0)
-
-**Örnek:**
-```python
-save_path = ModelSaver.save_checkpoint(
-    model=model,
-    optimizer=optimizer,
-    scheduler=scheduler,
-    epoch=5,
-    config=config,
-    save_dir="saved_models",
-    filename_template="checkpoint_ep{epoch:04d}.pth",
-    keep_last_n=3,
-)
-```
-
----
-
-#### `save_weights_only(model, **kwargs) -> str`
-
-Sadece model weights'lerini kaydeder.
-
-**Örnek:**
-```python
-weights_path = ModelSaver.save_weights_only(
-    model=model,
-    save_dir="saved_models",
-    filename="weights.pth",
-)
-```
-
----
-
-### ModelLoader API
-
-#### `load_model(model_class, model_path, **kwargs) -> nn.Module`
-
-Modeli yükler.
-
-**Parametreler:**
-- `model_class` (Type[nn.Module]): Model sınıfı
-- `model_path` (str): Model dosya yolu
-- `device` (Optional[Union[str, torch.device]]): Device
-- `config` (Optional[Dict]): Config (model reconstruction için)
-- `strict` (bool): Strict loading (default: True)
-- `weights_only` (Optional[bool]): Weights-only loading
-
-**Örnek:**
-```python
-model = ModelLoader.load_model(
-    CevahirNeuralNetwork,
-    "saved_models/checkpoint.pth",
-    device="cuda",
-    config=config,
-)
-```
-
----
-
-#### `load_all(model_class, ckpt_path, **kwargs) -> Tuple`
-
-Tüm checkpoint'i yükler (model + optimizer + scheduler + meta).
-
-**Dönüş:**
-- `Tuple[nn.Module, Optional[Dict], Optional[Dict], Dict]`: (model, optimizer_state, scheduler_state, meta)
-
-**Örnek:**
-```python
-model, opt_state, sch_state, meta = ModelLoader.load_all(
-    CevahirNeuralNetwork,
-    "saved_models/checkpoint.pth",
-    config=config,
-)
-```
-
----
-
-### ModelUpdater API
-
-#### `bulk_update(**kwargs) -> UpdateReport`
-
-Toplu güncelleme yapar.
-
-**Parametreler:**
-- `model` (Optional[nn.Module]): Model
-- `optimizer` (Optional[Optimizer]): Optimizer
-- `scheduler` (Optional[LRScheduler]): Scheduler
-- `update_params` (Dict[str, Any]): Update parametreleri
-- `dry_run` (bool): Dry-run mode (default: False)
-- `filter_frozen_params` (bool): Frozen params filtrele (default: True)
-
-**Örnek:**
-```python
-report = ModelUpdater.bulk_update(
-    model=model,
-    optimizer=optimizer,
-    scheduler=scheduler,
-    update_params={
-        "model": {"freeze": ["encoder.*"]},
-        "optimizer": {"learning_rate": 5e-5},
-        "scheduler": {"factor": 0.5},
-    },
-)
-```
-
----
-
-## 💻 Kullanım Örnekleri
-
-### Örnek 1: ModelManager ile Training Setup
+### Checkpoint Kaydet / Yükle
 
 ```python
-from model_management import ModelManager
-import torch
-
-# Config
-config = {
-    "vocab_size": 60000,
-    "embed_dim": 1024,
-    "seq_proj_dim": 1024,
-    "num_heads": 16,
-    "num_layers": 12,
-    "ffn_dim": None,  # Auto: 4x seq_proj_dim
-    "pre_norm": True,
-    "causal_mask": True,
-    # V-4 Features
-    "pe_mode": "rope",
-    "use_rmsnorm": True,
-    "use_swiglu": True,
-    "use_kv_cache": True,
-    # Training
-    "learning_rate": 1e-4,
-    "optimizer": "adamw",
-    "weight_decay": 0.01,
-    "criterion": "cross_entropy",
-    "scheduler_type": "reduce_on_plateau",
-    "device": "cuda",
-}
-
-# Initialize
-manager = ModelManager(config)
-manager.initialize()
-
-# Training loop
-manager.train_mode()
-for epoch in range(10):
-    for batch in dataloader:
-        inputs, targets = batch
-        
-        # Forward
-        logits, _ = manager.forward(inputs, inference=False)
-        
-        # Loss
-        loss = manager.criterion(logits.view(-1, logits.size(-1)), targets.view(-1))
-        
-        # Backward
-        loss.backward()
-        manager.optimizer.step()
-        manager.optimizer.zero_grad()
-    
-    # Save checkpoint
-    manager.save(f"saved_models/checkpoint_epoch_{epoch}.pth", epoch=epoch)
-```
-
----
-
-### Örnek 2: Inference with KV Cache
-
-```python
-# Initialize for inference
-manager = ModelManager(config)
-manager.initialize(build_optimizer=False, build_criterion=False, build_scheduler=False)
-manager.load("saved_models/checkpoint_epoch_5.pth")
-manager.eval_mode()
-
-# First forward: Full sequence
-input_ids = torch.tensor([[1, 2, 3, 4, 5]], dtype=torch.long)
-logits, _ = manager.forward(
-    input_ids,
-    inference=True,
-    use_cache=True,
-    cache_position=torch.arange(5),
+# Kaydet
+path = ModelSaver.save_checkpoint(
+    model, optimizer=optimizer, epoch=10,
+    config=config, metadata={"val_loss": 2.34},
+    save_dir="saved_models", keep_last_n=5,
 )
 
-# Next forward: Single token (autoregressive)
-new_token = torch.tensor([[6]], dtype=torch.long)
-logits, _ = manager.forward(
-    new_token,
-    inference=True,
-    use_cache=True,
-    cache_position=torch.tensor([5]),
+# Yükle
+model, opt_sd, sch_sd, meta = ModelLoader.load_all(
+    CevahirNeuralNetwork, path, device="cuda", config=config,
 )
+optimizer.load_state_dict(opt_sd)
+print(f"Epoch {meta['epoch']} yuklendi")
 ```
 
----
-
-### Örnek 3: Pattern-based Freeze/Unfreeze
+### Profil + Sağlık Kontrolü
 
 ```python
-# Freeze encoder layers
-manager.freeze("dil_katmani.*")  # Freeze language layer
-manager.freeze("layers.0.*")     # Freeze first layer
-manager.freeze("layers.1.*")     # Freeze second layer
+from model_management import ModelProfiler, ModelHealthMonitor
 
-# Unfreeze head
-manager.unfreeze("output_layer.*")
+# Profil
+stats = ModelProfiler.count_parameters(model)
+mem = ModelProfiler.memory_snapshot("cuda")
+flops = ModelProfiler.estimate_flops(model, seq_len=512)
 
-# Advanced: Regex patterns
-manager.freeze("r:^layers\\.(0|1|2)\\..*")  # Freeze layers 0, 1, 2
-```
-
----
-
-### Örnek 4: Learning Rate Scheduling
-
-```python
-# Update learning rate
-manager.update({
-    "optimizer": {
-        "learning_rate": 5e-5,  # Reduce LR
-    },
-})
-
-# Update scheduler
-manager.update({
-    "scheduler": {
-        "factor": 0.5,      # Reduce LR by 50%
-        "patience": 5,      # Wait 5 epochs
-        "threshold": 1e-4,  # Minimum improvement
-    },
-})
-```
-
----
-
-### Örnek 5: Checkpoint Management
-
-```python
-# Save checkpoint
-save_path = manager.save(
-    save_path="saved_models/checkpoint_epoch_10.pth",
-    epoch=10,
-    additional_info={
-        "loss": 2.1,
-        "accuracy": 0.36,
-        "perplexity": 10.5,
-    },
+# Saglik kontrolü (epoch sonu)
+report = ModelHealthMonitor.full_health_check(
+    model, sample_input=sample, raise_on_critical=True
 )
-
-# Load checkpoint
-manager.load(
-    load_path="saved_models/checkpoint_epoch_10.pth",
-    strict=True,
-)
-
-# Get epoch from config
-epoch = manager.config.get("current_epoch", 0)
-print(f"Resumed from epoch {epoch}")
+if not report.is_healthy:
+    print(report.summary())
 ```
 
 ---
 
-### Örnek 6: TensorBoard Integration
+## Eğitim Entegrasyonu
+
+### train.py'deki Tipik Kullanım
 
 ```python
-# Configure TensorBoard
-manager.configure_tensorboard(
-    log_dir="runs/experiment_1",
-    log_every_n=10,
-    log_histograms=True,
-    log_attention_image=True,
-    enable=True,
-)
+mm = ModelManager(TRAIN_CONFIG)
+mm.initialize(build_model=True, build_optimizer=True,
+              build_criterion=True, build_scheduler=True)
+mm.setup_tensorboard("runs/cevahir_v6")
 
-# Training loop (TensorBoard automatically logs)
-for step, batch in enumerate(dataloader):
-    logits, _ = manager.forward(batch["inputs"])
-    # TensorBoard automatically logs:
-    # - Model weights (histograms)
-    # - Attention maps (images)
-    # - Forward pass stats
+if resume_path:
+    mm.load(resume_path)
+
+for epoch in range(start_epoch, total_epochs):
+    mm.train_mode()
+    for batch in train_loader:
+        # training step...
+        pass
+
+    mm.eval_mode()
+    val_loss = validate(mm, val_loader)
+
+    if mm.scheduler:
+        mm.scheduler.step(val_loss)
+
+    mm.save(epoch=epoch, metadata={"val_loss": val_loss})
+
+    if epoch % 10 == 0:
+        report = mm.health_check()
+        if not report.is_healthy:
+            logger.warning(report.summary())
 ```
 
 ---
 
-## 🔧 V-4 Architecture Support
+## Bağımlılıklar
 
-ModelManager, V-4 Architecture özelliklerini otomatik olarak destekler:
-
-### V-4 Parametreleri
-
-```python
-config = {
-    # V-4 Features
-    "pe_mode": "rope",                    # RoPE (Rotary Position Embedding)
-    "use_rmsnorm": True,                  # RMSNorm (Root Mean Square Normalization)
-    "use_swiglu": True,                   # SwiGLU (Swish-Gated Linear Unit)
-    "use_kv_cache": True,                 # KV Cache (Key-Value Cache)
-    "max_cache_len": 2048,                # Maximum cache length
-    "use_advanced_checkpointing": False,  # Advanced checkpointing
-    "quantization_type": "none",          # Quantization ("none" | "int8" | "fp16")
-    "use_moe": False,                     # MoE (Mixture of Experts)
-    "num_experts": 8,                     # Number of experts
-    "moe_top_k": 2,                       # Top-k experts
-}
-```
-
-### Otomatik Parametre Geçişi
-
-ModelInitializer, config'teki tüm V-4 parametrelerini otomatik olarak model constructor'ına geçirir:
-
-```python
-# ModelInitializer otomatik olarak:
-# 1. Model constructor signature'ını okur
-# 2. Config'teki parametreleri filtreler
-# 3. Uygun parametreleri model'e geçirir
-# 4. V-4 özellikleri otomatik aktif hale gelir
-```
+| Paket | Versiyon | Zorunlu | Amaç |
+|-------|----------|---------|------|
+| `torch` | >= 2.0 | Evet | PyTorch çekirdek |
+| `bitsandbytes` | >= 0.41 | Hayır | AdamW8bit + INT8/INT4 quantization |
+| `torch.distributed` | PyTorch ile gelir | Hayır | DDP/FSDP |
 
 ---
 
-## 📊 Performans ve Best Practices
-
-### 1. Device Management
-
-```python
-# GPU kullanımı (otomatik)
-config = {"device": "cuda"}  # Otomatik GPU seçilir
-
-# CPU kullanımı (test için)
-config = {"device": "cpu"}
-
-# MPS (Apple Silicon)
-config = {"device": "mps"}
-```
-
-### 2. Memory Optimization
-
-```python
-# Gradient checkpointing
-config = {"use_gradient_checkpointing": True}
-
-# Advanced checkpointing
-config = {
-    "use_advanced_checkpointing": True,
-    "checkpointing_strategy": "selective",
-}
-
-# KV Cache (inference)
-config = {
-    "use_kv_cache": True,
-    "max_cache_len": 2048,
-}
-```
-
-### 3. Training Optimization
-
-```python
-# Weight decay parameter groups
-config = {
-    "weight_decay": 0.01,
-    "no_weight_decay_keywords": ["bias", "layernorm", "norm"],
-}
-
-# Learning rate scheduling
-config = {
-    "scheduler_type": "reduce_on_plateau",
-    "lr_decay_factor": 0.5,
-    "lr_decay_patience": 5,
-}
-```
-
----
-
-## 🔗 İlişkiler ve Entegrasyonlar
-
-### ModelManager ↔ CevahirNeuralNetwork
-
-**İlişki:** Composition (Has-A)
-
-```python
-ModelManager
-    │
-    └── HAS-A CevahirNeuralNetwork (self.model)
-            │
-            ├── FORWARD → ModelManager.forward()
-            ├── SAVE → ModelManager.save()
-            └── LOAD → ModelManager.load()
-```
-
-### ModelManager ↔ Training System
-
-**İlişki:** Used-By
-
-```python
-TrainingService
-    │
-    └── USES ModelManager
-            │
-            ├── initialize() → Setup
-            ├── forward() → Training loop
-            ├── save() → Checkpoint saving
-            └── load() → Checkpoint loading
-```
-
-### ModelManager ↔ Cevahir API
-
-**İlişki:** Used-By (Adapter Pattern)
-
-```python
-Cevahir (Unified API)
-    │
-    └── USES ModelManager (via CevahirModelAPI adapter)
-            │
-            ├── forward() → Inference
-            ├── generate() → Text generation
-            └── load() → Model loading
-```
-
----
-
-## 📖 Daha Fazla Bilgi
-
-- **[Neural Network Dokümantasyonu](../neural_network/README.md)**
-- **[API Referansı](../../API_REFERENCE.md)**
-- **[Sistem Mimarisi](../../ARCHITECTURE.md)**
-
----
-
-**Son Güncelleme:** 2025-01-27  
-**Versiyon:** V-5
-
+*Yazar: Muhammed Yasin Yılmaz — Cevahir-AI Projesi*
+*Telif Hakkı: © 2024-2026 Muhammed Yasin Yılmaz. Tüm Hakları Saklıdır.*
