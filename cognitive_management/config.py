@@ -114,7 +114,9 @@ class MemoryConfig:
     openai_api_key: Optional[str] = None  # OpenAI embeddings için API key
     
     vector_store_provider: str = "chroma"  # "chroma" | "pinecone" | "weaviate" | "qdrant" | "milvus" | "memory"
-    vector_store_path: Optional[str] = None  # Local storage path (Chroma için)
+    vector_store_path: Optional[str] = "./memory/episodic_store"  # Local storage path (Chroma için)
+    # Default: disk-persisted episodic memory that survives across sessions.
+    # Set to None for in-memory (session-only) mode.
     vector_store_collection_name: str = "cognitive_memory"  # Collection/database name
     
     # Pinecone configuration (if using Pinecone)
@@ -134,23 +136,34 @@ class MemoryConfig:
 @dataclass
 class PolicyConfig:
     """
-    Strateji seçimi (direct/think/debate/tot) için kapılar.
-    entropy_gate: Belirsizlik eşiği.
-    length_gate: Girdi uzunluğu eşiği.
-    
-    Phase 4: Tree of Thoughts (ToT) support added.
+    Strateji seçimi (direct/think/debate/tot/self_consistency) için kapılar.
+
+    Akademik Referanslar:
+        • Wei et al. 2022     — CoT: think1 modu
+        • Wang et al. 2022    — Self-Consistency: debate2 + self_consistency
+        • Yao et al. 2023     — Tree of Thoughts: tot modu
+        • Madaan et al. 2023  — Self-Refine: critic max_passes
+
+    Eşik Kılavuzu (normalize edilmiş 0–3 entropi ölçeği):
+        entropy_gate_think   : 1.5  → Hafif belirsizlik → CoT
+        entropy_gate_debate  : 2.5  → Orta belirsizlik  → Self-Consistency
+        entropy_gate_tot     : 3.0  → Yüksek belirsizlik → ToT
     """
-    debate_enabled: bool = True  # Phase 3: Debate mode aktif
-    entropy_gate_think: float = 1.5  # Phase 3: Daha erişilebilir eşik (CoT için)
-    entropy_gate_debate: float = 2.5  # Phase 3: Debate için orta eşik
-    entropy_gate_tot: float = 3.0  # Phase 4: ToT için yüksek eşik (complex problems)
-    length_gate_debate: int = 200  # Phase 3: Uzun mesajlar için debate
-    length_gate_tot: int = 300  # Phase 4: Çok uzun/karmaşık problemler için ToT
-    allow_inner_steps: bool = True  # Phase 3: Think/debate modları aktif
-    tot_enabled: bool = True  # Phase 4: Tree of Thoughts mode aktif
-    tot_max_depth: int = 3  # Phase 4: Maximum tree depth for ToT
-    tot_branching_factor: int = 3  # Phase 4: Number of children per node
-    tot_top_k: int = 5  # Phase 4: Number of top paths to keep
+    debate_enabled: bool = True
+    entropy_gate_think: float = 1.5
+    entropy_gate_debate: float = 2.5
+    entropy_gate_tot: float = 3.0
+    length_gate_debate: int = 200
+    length_gate_tot: int = 300
+    allow_inner_steps: bool = True
+    tot_enabled: bool = True
+    tot_max_depth: int = 3
+    tot_branching_factor: int = 3
+    tot_top_k: int = 5
+    # V3: Self-Consistency (Wang et al. 2022)
+    self_consistency_enabled: bool = True    # N örneklem → çoğunluk oyu
+    self_consistency_n: int = 3             # Örneklem sayısı (3–5 önerilir)
+    self_consistency_method: str = "hybrid" # "majority" | "score" | "hybrid"
 
 @dataclass
 class ToolsConfig:
@@ -166,12 +179,22 @@ class ToolsConfig:
 @dataclass
 class DecodingBounds:
     """
-    Dinamik üretim düğmeleri için güvenli aralıklar.
+    Dinamik üretim parametreleri için güvenli aralıklar.
+
+    Domain-aware decoding kılavuzu:
+        Konuşma / basit sorgu : temperature → 0.5–0.65
+        Genel bilgi           : temperature → 0.60–0.70
+        Yaratıcı içerik       : temperature → 0.75–0.90
+        Matematik / mantık    : temperature → 0.40–0.55 (düşük = tutarlı)
     """
-    max_new_tokens_bounds: Tuple[int, int] = (16, 128)  # Eğitimsiz model için kısa
-    temperature_bounds: Tuple[float, float] = (0.5, 0.8)  # Daha düşük sıcaklık
-    top_p_default: float = 0.8  # Daha konservatif
-    repetition_penalty_default: float = 1.2  # Daha yüksek tekrar cezası
+    max_new_tokens_bounds: Tuple[int, int] = (32, 512)
+    temperature_bounds: Tuple[float, float] = (0.40, 0.90)
+    top_p_default: float = 0.90
+    repetition_penalty_default: float = 1.15
+    # Domain-specific temperature overrides
+    math_temperature: float = 0.45      # Deterministik çıktı
+    creative_temperature: float = 0.85  # Çeşitlilik
+    code_temperature: float = 0.50      # Tutarlı ve doğru kod
 
 @dataclass
 class SafetyConfig:
@@ -254,16 +277,20 @@ class CognitiveManagerConfig:
     # Varsayılan decoding ayarları (policy bunu güncelleyebilir)
     default_decoding: DecodingConfig = field(
         default_factory=lambda: DecodingConfig(
-            max_new_tokens=64,  # Eğitimsiz model için kısa
-            temperature=0.6,    # Daha düşük sıcaklık
-            top_p=0.8,          # Daha konservatif
-            top_k=0,            # <- types.DecodingConfig ile uyumlu
-            repetition_penalty=1.2  # Daha yüksek tekrar cezası
+            max_new_tokens=128,
+            temperature=0.65,
+            top_p=0.90,
+            top_k=0,
+            repetition_penalty=1.15,
         )
     )
 
     # Sistem prompt'u gibi üst seviye davranış ayarları
-    default_system_prompt: str = "Türkçe asistan. Kısa, anlamlı cevaplar ver."
+    default_system_prompt: str = (
+        "Sen Cevahir, Türkçe konuşan bir yapay zeka asistanısın. "
+        "Doğru, yararlı ve anlaşılır cevaplar ver. "
+        "Emin olmadığında belirsizliğini belirt."
+    )
 
     # =========================
     # Yardımcı Metotlar
@@ -360,6 +387,12 @@ class CognitiveManagerConfig:
             raise ValueError("default_decoding.top_k negatif olamaz.")
         if dd.repetition_penalty <= 0.0:
             raise ValueError("default_decoding.repetition_penalty > 0 olmalı.")
+
+        # V3: Self-Consistency validation
+        if self.policy.self_consistency_n < 1:
+            raise ValueError("policy.self_consistency_n >= 1 olmalı.")
+        if self.policy.self_consistency_method not in {"majority", "score", "hybrid"}:
+            raise ValueError("policy.self_consistency_method geçersiz (majority|score|hybrid).")
 
     # Ortam değişkenlerinden hızlı yükleme (opsiyonel, hafif)
     @staticmethod
