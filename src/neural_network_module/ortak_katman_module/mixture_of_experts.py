@@ -222,23 +222,52 @@ class MixtureOfExperts(nn.Module):
         
         # Initialize output
         output = torch.zeros_like(x)  # [B, T, embed_dim]
-        
-        # Process each expert
+
+        # [OOM FIX] Sparse dispatch: yalnızca atanan token'ları her expert'e gönder.
+        # Eski kod: self.experts[expert_idx](x) → TÜM batch [B, T, D] her expert için
+        # işleniyordu → num_experts × batch_size aktivasyon → 8x VRAM kullanımı.
+        # Yeni kod: expert'e atanan token'lar seçilir, sadece onlar işlenir.
+        # [B, T, D] → flatten [B*T, D] → mask ile expert_token_count satır seçilir.
+        B, T, D = x.shape
+        x_flat = x.view(B * T, D)  # [B*T, D]
+
         for expert_idx in range(self.num_experts):
-            # Find tokens assigned to this expert
+            # expert_mask: [B, T, top_k] — bu expert'e atanan (batch, token, k) pozisyonlar
             expert_mask = (expert_indices == expert_idx)  # [B, T, top_k]
-            
-            if expert_mask.any():
-                # Get expert output
-                expert_output = self.experts[expert_idx](x)  # [B, T, embed_dim]
-                
-                # Weighted sum over top_k experts
-                for k in range(self.top_k):
-                    mask = expert_mask[:, :, k]  # [B, T]
-                    weight = expert_weights[:, :, k]  # [B, T]
-                    
-                    # Add weighted expert output
-                    output += expert_output * mask.unsqueeze(-1) * weight.unsqueeze(-1)
-        
+
+            # En az bir token atanmışsa işle
+            if not expert_mask.any():
+                continue
+
+            # top_k boyutları boyunca herhangi bir k için bu expert'e atanan token'lar
+            # token_selected: [B, T] bool — en az bir k'da bu expert seçildi mi
+            token_selected = expert_mask.any(dim=-1)  # [B, T]
+            token_selected_flat = token_selected.view(B * T)  # [B*T]
+
+            # Seçili token'ları al
+            selected_tokens = x_flat[token_selected_flat]  # [N_selected, D]
+
+            if selected_tokens.shape[0] == 0:
+                continue
+
+            # Sadece seçili token'lar için expert'i çalıştır [OOM FIX: N_selected << B*T]
+            expert_out_selected = self.experts[expert_idx](selected_tokens)  # [N_selected, D]
+
+            # Tam boyutlu tensöre geri yaz
+            expert_out_full = torch.zeros(B * T, D, dtype=x.dtype, device=x.device)
+            expert_out_full[token_selected_flat] = expert_out_selected
+            expert_out_full = expert_out_full.view(B, T, D)  # [B, T, D]
+
+            # Ağırlıklı toplam (top_k boyunca)
+            for k in range(self.top_k):
+                mask_k = expert_mask[:, :, k]   # [B, T]
+                weight_k = expert_weights[:, :, k]  # [B, T]
+                output = output + expert_out_full * mask_k.unsqueeze(-1) * weight_k.unsqueeze(-1)
+
+            # [MEM] Expert çıktısı artık gerekli değil
+            del expert_out_selected, expert_out_full, selected_tokens
+
+        del x_flat  # [MEM] Flatten copy serbest bırak
+
         return output, load_balancing_loss
 
