@@ -74,8 +74,19 @@ class PositionalEncoding(nn.Module):
         max_len: int = 2048,
         dropout: float = 0.1,
         mode: str = "sinusoidal",
-        num_heads: Optional[int] = None,  # ✅ YENİ: RoPE için head_dim hesaplama
+        num_heads: Optional[int] = None,  #  YENİ: RoPE için head_dim hesaplama
         log_level: int = logging.INFO,
+        # [OK] V5: YaRN RoPE (Yet Another RoPE Extension) — uzun context için
+        # "none"    → standart RoPE (default, geriye dönük uyumluluk)
+        # "linear"  → basit linear interpolation (PI: Position Interpolation)
+        # "dynamic" → Dynamic NTK-aware interpolation (inference'ta otomatik)
+        # "yarn"    → YaRN NTK-by-parts (LLaMA 3.1 standardı, önerilir)
+        rope_scaling_type: str = "none",
+        # Context extension factor — eğer max_len > original_max_len
+        # Örnek: original 2048, hedef 8192 → scale = 8192/2048 = 4.0
+        rope_scaling_factor: float = 1.0,
+        # YaRN için orijinal pretrain context uzunluğu
+        rope_original_max_len: int = 2048,
     ) -> None:
         super().__init__()
 
@@ -88,9 +99,22 @@ class PositionalEncoding(nn.Module):
         if not (0.0 <= dropout <= 1.0):
             raise ValueError(f"dropout 0-1 arasında olmalı; gelen={dropout}")
         mode = str(mode).lower()
-        # ✅ V3: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
+        #  V3: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
         if mode not in {"sinusoidal", "learned", "rope"}:
             raise ValueError("mode 'sinusoidal', 'learned' veya 'rope' olmalıdır.")
+
+        # [OK] V5: YaRN RoPE parametreleri
+        rope_scaling_type = str(rope_scaling_type).lower()
+        if rope_scaling_type not in {"none", "linear", "dynamic", "yarn"}:
+            raise ValueError(
+                f"rope_scaling_type '{rope_scaling_type}' geçersiz. "
+                f"Geçerli: 'none', 'linear', 'dynamic', 'yarn'"
+            )
+        if rope_scaling_factor <= 0.0:
+            raise ValueError(f"rope_scaling_factor > 0 olmalı; gelen={rope_scaling_factor}")
+        self.rope_scaling_type = rope_scaling_type
+        self.rope_scaling_factor = rope_scaling_factor
+        self.rope_original_max_len = rope_original_max_len
 
         # ---- Logger (tekil handler)
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -123,25 +147,57 @@ class PositionalEncoding(nn.Module):
             self._init_learned(self.pe_embed)
             self.rope_freqs = None  # type: ignore
         else:  # rope
-            # ✅ V3: RoPE (Rotary Position Embedding) - endüstri standardı
+            #  V3/V5: RoPE (Rotary Position Embedding) - endüstri standardı
             # RoPE direkt PE eklemez, rotary matrix'leri hesaplar
-            # Attention içinde kullanılacak
+            # Attention içinde kullanılacak (apply_rotary_pos_emb)
             self.pe = None  # type: ignore
             self.pe_embed = None  # type: ignore
-            # ✅ DÜZELTME: RoPE için head_dim kullanılmalı (embed_dim değil)
-            # head_dim = embed_dim // num_heads
+            #  DÜZELTME: RoPE için head_dim kullanılmalı (embed_dim değil)
             if num_heads is not None and num_heads > 0:
                 self.rope_dim = embed_dim // num_heads  # head_dim
-                rope_freqs = self._build_rope_freqs(max_len, self.rope_dim)
-                self.register_buffer("rope_freqs", rope_freqs, persistent=False)  # [max_len, rope_dim // 2]
-                self.logger.info(f"[V3] RoPE initialized: max_len={max_len}, rope_dim={self.rope_dim} (head_dim, num_heads={num_heads})")
             else:
-                # Fallback: num_heads verilmemişse embed_dim kullan (uyumluluk için)
-                self.rope_dim = embed_dim
+                self.rope_dim = embed_dim  # fallback
+                self.logger.warning(
+                    f"[V3] RoPE initialized without num_heads: rope_dim={self.rope_dim} (embed_dim). "
+                    "Attention'da head_dim kullanılıyorsa uyumsuzluk olabilir!"
+                )
+
+            # [OK] V5: YaRN vs standart RoPE frekans hesaplama
+            if rope_scaling_type == "yarn" and rope_scaling_factor > 1.0:
+                rope_freqs = self._build_yarn_rope_freqs(
+                    max_len, self.rope_dim,
+                    scale_factor=rope_scaling_factor,
+                    original_max_len=rope_original_max_len,
+                )
+                self.register_buffer("rope_freqs", rope_freqs, persistent=False)
+                self.logger.info(
+                    f"[V5] YaRN RoPE initialized: max_len={max_len}, rope_dim={self.rope_dim} "
+                    f"(head_dim), scale_factor={rope_scaling_factor}, "
+                    f"original_max_len={rope_original_max_len} — LLaMA-3.1 standardı"
+                )
+            elif rope_scaling_type == "linear" and rope_scaling_factor > 1.0:
                 rope_freqs = self._build_rope_freqs(max_len, self.rope_dim)
-                self.register_buffer("rope_freqs", rope_freqs, persistent=False)  # [max_len, rope_dim // 2]
-                self.logger.warning(f"[V3] RoPE initialized without num_heads: max_len={max_len}, rope_dim={self.rope_dim} (embed_dim). "
-                                  f"Attention'da head_dim kullanılıyorsa uyumsuzluk olabilir!")
+                # Linear interpolation: frekansları scale_factor'a böl
+                rope_freqs = rope_freqs / rope_scaling_factor
+                self.register_buffer("rope_freqs", rope_freqs, persistent=False)
+                self.logger.info(
+                    f"[V5] Linear RoPE initialized: max_len={max_len}, "
+                    f"scale_factor={rope_scaling_factor} — Position Interpolation (PI) yöntemi"
+                )
+            else:
+                # Standart RoPE (geriye dönük uyumluluk)
+                rope_freqs = self._build_rope_freqs(max_len, self.rope_dim)
+                self.register_buffer("rope_freqs", rope_freqs, persistent=False)
+                if rope_scaling_type == "none" or rope_scaling_factor == 1.0:
+                    self.logger.info(
+                        f"[V3] Standart RoPE initialized: max_len={max_len}, "
+                        f"rope_dim={self.rope_dim} (head_dim, num_heads={num_heads})"
+                    )
+                else:
+                    self.logger.info(
+                        f"[V5] Dynamic RoPE initialized: max_len={max_len}, "
+                        f"rope_dim={self.rope_dim} (inference'ta otomatik scale)"
+                    )
 
         self.max_len = max_len  # mevcut kapasite
 
@@ -166,9 +222,70 @@ class PositionalEncoding(nn.Module):
         nn.init.normal_(emb.weight, mean=0.0, std=0.02)
     
     @staticmethod
+    def _build_yarn_rope_freqs(
+        max_len: int,
+        dim: int,
+        scale_factor: float = 8.0,
+        original_max_len: int = 2048,
+        base: float = 10000.0,
+        # YaRN low/high frequency cutoffs (LLaMA-3.1 değerleri)
+        low_freq_factor: float = 1.0,
+        high_freq_factor: float = 4.0,
+    ) -> torch.Tensor:
+        """
+        [OK] V5: YaRN (Yet Another RoPE Extension) frekans hesaplama.
+        Kaynak: Peng et al., "YaRN: Efficient Context Window Extension of Large Language Models"
+                https://arxiv.org/abs/2309.00071
+        LLaMA-3.1 ve Mistral-Nemo bu yöntemi kullanır.
+
+        YaRN NTK-by-parts: Düşük frekanslı boyutlar (long-range dependency) scale edilir,
+        yüksek frekanslı boyutlar (local pattern) olduğu gibi bırakılır, ortadakiler blend.
+
+        Args:
+            max_len: Yeni maksimum context uzunluğu (hedef)
+            dim: RoPE boyutu (head_dim)
+            scale_factor: Context uzatma oranı (hedef / orijinal)
+            original_max_len: Orijinal pretrain context uzunluğu
+            base: RoPE base frekansı (default: 10000.0)
+            low_freq_factor: Düşük freq cutoff (wavelength > L/low → scale)
+            high_freq_factor: Yüksek freq cutoff (wavelength < L/high → keep)
+
+        Returns:
+            freqs: [max_len, dim // 2]
+        """
+        # Standart inv_freq: θ_i = base^(-2i/d) for i in [0, d/2)
+        inv_freq = 1.0 / (base ** (torch.arange(0, dim, 2, dtype=torch.float32) / dim))
+
+        # Frekans wavelength cutoffs
+        low_freq_wavelen  = float(original_max_len) / low_freq_factor   # büyük wavelength → scale
+        high_freq_wavelen = float(original_max_len) / high_freq_factor   # küçük wavelength → keep
+
+        new_inv_freq = torch.empty_like(inv_freq)
+        for i, freq in enumerate(inv_freq.tolist()):
+            wavelen = 2.0 * math.pi / freq
+            if wavelen < high_freq_wavelen:
+                # Yüksek frekans (küçük wavelength): yerel pattern, ölçekleme yok
+                new_inv_freq[i] = freq
+            elif wavelen > low_freq_wavelen:
+                # Düşük frekans (büyük wavelength): uzun bağımlılık, scale down
+                new_inv_freq[i] = freq / scale_factor
+            else:
+                # Orta bölge: yumuşak geçiş (smooth blend)
+                smooth = (
+                    (float(original_max_len) / wavelen - low_freq_factor)
+                    / (high_freq_factor - low_freq_factor)
+                )
+                new_inv_freq[i] = (1.0 - smooth) * (freq / scale_factor) + smooth * freq
+
+        # Pozisyon frekansları: [max_len, dim//2]
+        positions = torch.arange(max_len, dtype=torch.float32).unsqueeze(1)   # [max_len, 1]
+        freqs = positions * new_inv_freq.unsqueeze(0)                         # [max_len, dim//2]
+        return freqs
+
+    @staticmethod
     def _build_rope_freqs(max_len: int, dim: int, base: float = 10000.0) -> torch.Tensor:
         """
-        ✅ V3: RoPE (Rotary Position Embedding) frequencies hesaplama
+         V3: RoPE (Rotary Position Embedding) frequencies hesaplama
         Endüstri standardı: GPT-3+, Claude, Gemini
         
         Args:
@@ -215,8 +332,21 @@ class PositionalEncoding(nn.Module):
                 nn.init.normal_(new_embed.weight[self.max_len :], mean=0.0, std=0.02)
             self.pe_embed = new_embed
         else:  # rope
-            # ✅ V3: RoPE frequencies'i genişlet
-            new_rope_freqs = self._build_rope_freqs(new_len, self.rope_dim).to(self.pos_idx.device)
+            # [OK] V5: RoPE/YaRN frequencies'i genişlet (scaling türüne göre)
+            dev = self.pos_idx.device
+            if self.rope_scaling_type == "yarn" and self.rope_scaling_factor > 1.0:
+                new_rope_freqs = self._build_yarn_rope_freqs(
+                    new_len, self.rope_dim,
+                    scale_factor=self.rope_scaling_factor,
+                    original_max_len=self.rope_original_max_len,
+                ).to(dev)
+            elif self.rope_scaling_type == "linear" and self.rope_scaling_factor > 1.0:
+                new_rope_freqs = (
+                    self._build_rope_freqs(new_len, self.rope_dim).to(dev)
+                    / self.rope_scaling_factor
+                )
+            else:
+                new_rope_freqs = self._build_rope_freqs(new_len, self.rope_dim).to(dev)
             self.rope_freqs = new_rope_freqs  # type: ignore[assignment]
 
         self.max_len = new_len
@@ -233,7 +363,7 @@ class PositionalEncoding(nn.Module):
             raise ValueError(f"[B,T,D] bekleniyor; gelen şekil={tuple(x.shape)}")
         B, T, D = x.shape
         
-        # ✅ JIT tracing/scripting sırasında shape kontrollerini atla (TracerWarning önleme)
+        #  JIT tracing/scripting sırasında shape kontrollerini atla (TracerWarning önleme)
         try:
             is_tracing = torch._C._get_tracing_state() is not None
         except (AttributeError, RuntimeError):
@@ -271,7 +401,7 @@ class PositionalEncoding(nn.Module):
     
     def apply_rotary_pos_emb(self, x: torch.Tensor, positions: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
-        ✅ V3: RoPE (Rotary Position Embedding) uygulama
+         V3: RoPE (Rotary Position Embedding) uygulama
         Endüstri standardı: GPT-3+, Claude, Gemini
         
         Args:
@@ -304,7 +434,7 @@ class PositionalEncoding(nn.Module):
         
         # RoPE frequencies: [max_len, D//2]
         # Sadece ihtiyacımız olan positions'ları al
-        # ✅ JIT tracing/scripting sırasında max_pos hesaplamasını optimize et (TracerWarning önleme)
+        #  JIT tracing/scripting sırasında max_pos hesaplamasını optimize et (TracerWarning önleme)
         try:
             is_tracing = torch._C._get_tracing_state() is not None
         except (AttributeError, RuntimeError):
@@ -322,7 +452,7 @@ class PositionalEncoding(nn.Module):
         # RoPE frequencies: [T, D//2]
         rope_freqs = self.rope_freqs[positions].to(device=x.device, dtype=x.dtype)  # [T, D//2]
         
-        # ✅ ENDÜSTRİ STANDARDI: RoPE rotation (GPT-3+, Claude, Gemini)
+        #  ENDÜSTRİ STANDARDI: RoPE rotation (GPT-3+, Claude, Gemini)
         # Split x into pairs: [B*H, T, D] -> [B*H, T, D//2, 2]
         # Her çift (x[2i], x[2i+1]) bir complex number temsil eder
         x_reshaped = x.reshape(B * H, T, D // 2, 2)  # [B*H, T, D//2, 2]
@@ -353,7 +483,12 @@ class PositionalEncoding(nn.Module):
     # ------------------------- Temsil ------------------------- #
     def extra_repr(self) -> str:
         rope_info = f", rope_dim={self.rope_dim}" if self.mode == "rope" else ""
+        yarn_info = (
+            f", rope_scaling={self.rope_scaling_type}(x{self.rope_scaling_factor:.1f})"
+            if self.mode == "rope" and self.rope_scaling_type != "none" and self.rope_scaling_factor > 1.0
+            else ""
+        )
         return (
-            f"embed_dim={self.embed_dim}, max_len={self.max_len}, mode='{self.mode}'{rope_info}, "
-            f"dropout={self.dropout.p:.2f}"
+            f"embed_dim={self.embed_dim}, max_len={self.max_len}, mode='{self.mode}'"
+            f"{rope_info}{yarn_info}, dropout={self.dropout.p:.2f}"
         )
