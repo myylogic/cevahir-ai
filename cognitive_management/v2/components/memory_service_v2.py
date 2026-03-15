@@ -574,36 +574,70 @@ class MemoryServiceV2(IMemoryService):
                     "content": summary_content,
                 }
                 history.insert(insert_pos, summary_turn)
+
+                # Memory consolidation: persist summary to vector store for cross-session retrieval
+                self._persist_summary_to_vector_store(
+                    summary_text=summary_content,
+                    turn_index=user_turns,
+                )
     
     def _generate_session_summary(self, turns: List[Dict[str, Any]]) -> str:
         """
-        Generate a simple session summary from conversation turns.
-        
+        Generate a meaningful session summary from conversation turns.
+
+        Extracts actual content snippets (user questions and assistant answers)
+        to create a semantically rich summary that can be retrieved later.
+
         Args:
             turns: List of conversation turns
-            
+
         Returns:
-            Summary text
+            Summary text with actual content
         """
         if not turns:
             return "Önceki konuşma özeti yok."
-        
-        # Simple summary: concatenate key points
+
         user_messages = [t.get("content", "") for t in turns if t.get("role") == ROLE_USER]
         assistant_messages = [t.get("content", "") for t in turns if t.get("role") == ROLE_ASSISTANT]
-        
-        summary_parts = []
-        if user_messages:
-            summary_parts.append(f"Kullanıcı {len(user_messages)} mesaj gönderdi.")
-        if assistant_messages:
-            summary_parts.append(f"Asistan {len(assistant_messages)} yanıt verdi.")
-        
-        # Add first few words from recent messages as context
-        if user_messages:
-            recent_user = user_messages[-1][:100] if len(user_messages[-1]) > 100 else user_messages[-1]
-            summary_parts.append(f"Son kullanıcı mesajı: {recent_user}...")
-        
-        return " | ".join(summary_parts) if summary_parts else "Konuşma özeti oluşturulamadı."
+
+        summary_parts = ["[KONUŞMA ÖZETİ]"]
+
+        # Include actual content from up to 3 most recent Q&A pairs
+        pairs = list(zip(user_messages, assistant_messages))
+        for i, (q, a) in enumerate(pairs[-3:], 1):
+            q_snip = q[:150].rstrip() + ("..." if len(q) > 150 else "")
+            a_snip = a[:200].rstrip() + ("..." if len(a) > 200 else "")
+            summary_parts.append(f"S{i}: {q_snip}")
+            summary_parts.append(f"C{i}: {a_snip}")
+
+        return "\n".join(summary_parts)
+
+    def _persist_summary_to_vector_store(self, summary_text: str, turn_index: int) -> None:
+        """
+        Persist session summary to vector store for cross-session retrieval.
+
+        Session summaries are the most semantically rich items in episodic memory -
+        they should always be available for retrieval in future sessions.
+
+        Args:
+            summary_text: Session summary text
+            turn_index: Turn index for unique ID generation
+        """
+        if not self._vector_memory_enabled or not self._embedding_adapter or not self._vector_store:
+            return
+
+        try:
+            embedding = self._embedding_adapter.encode_single(summary_text)
+            item_id = f"summary_{turn_index}"
+            self._vector_store.add(
+                texts=[summary_text],
+                embeddings=[embedding],
+                metadata=[{"role": ROLE_SYSTEM_SUMMARY, "timestamp": turn_index}],
+                ids=[item_id],
+            )
+        except Exception as e:
+            import logging
+            logging.debug(f"Session summary vector store'a yazılamadı: {e}")
     
     def prune(
         self,
