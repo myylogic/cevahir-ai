@@ -150,6 +150,20 @@ class TransformerEncoderLayer(nn.Module):
         use_moe: bool = False,  # MoE kullan
         num_experts: int = 8,  # Expert sayısı (GPT-4: 8, Gemini: 16)
         moe_top_k: int = 2,  # Her token için seçilecek expert sayısı (GPT-4: 2)
+        # [OK] V5: GQA (Grouped Query Attention) desteği (LLaMA-2/3, Mistral standardı)
+        num_kv_heads: Optional[int] = None,  # None → standart MHA
+        # [OK] V5: Sliding Window Attention (Mistral-7B standardı)
+        sliding_window: Optional[int] = None,  # None → full attention
+        # [V6] F.scaled_dot_product_attention (PyTorch 2.0+) — MHA'ya iletilir
+        use_pytorch_sdpa: bool = True,
+        # [V6] QK-Norm (Gemma/PaLM 2) — MHA'ya iletilir
+        use_qk_norm: bool = False,
+        # [V6] Parallel Residual / Attention+FFN Paralel (GPT-J, PaLM standardı)
+        # x = x + attn(norm(x)) + ffn(norm(x)) — tek paylaşımlı norm, paralel branch
+        # Avantaj: Tek forward norm geçişi, azaltılmış latency
+        parallel_residual: bool = False,
+        # [V6] Attention Logit Soft-Cap (Gemma 2) — MHA'ya iletilir (0=kapalı)
+        attn_logit_cap: float = 0.0,
         **kwargs,  # ffn_activation gibi ek parametreler için
     ):
         """
@@ -201,7 +215,20 @@ class TransformerEncoderLayer(nn.Module):
             positional_encoding=positional_encoding,  # [OK] V4
             use_kv_cache=use_kv_cache,  # [OK] V4
             max_cache_len=max_cache_len,  # [OK] V4
+            num_kv_heads=num_kv_heads,   # [OK] V5: GQA
+            sliding_window=sliding_window,  # [OK] V5: Sliding Window
+            use_pytorch_sdpa=use_pytorch_sdpa,   # [V6]: F.scaled_dot_product_attention
+            use_qk_norm=use_qk_norm,             # [V6]: QK-Norm (Gemma/PaLM 2)
+            attn_logit_cap=attn_logit_cap,       # [V6]: Attention Logit Soft-Cap
         )
+
+        # [V6] Feature C: Parallel Residual (GPT-J, PaLM standardı)
+        self.parallel_residual = parallel_residual
+        if parallel_residual:
+            self.logger.info(
+                "[V6] Parallel Residual etkinleştirildi (GPT-J/PaLM standardı): "
+                "attn ve ffn aynı norm'dan besleniyor (tek norm geçişi)"
+            )
         # [OK] V4: RMSNorm veya LayerNorm seçimi (GPT-3+, LLaMA standardı)
         if use_rmsnorm:
             self.norm1 = RMSNorm(embed_dim, eps=1e-6, log_level=log_level)
@@ -261,11 +288,17 @@ class TransformerEncoderLayer(nn.Module):
                 f"strategy={checkpointing_strategy}"
             )
         
+        # [V6] Fix 7: MoE _moe_losses — başlangıçta liste olarak başlat (bellek sızıntısı önleme)
+        self._moe_losses = []
+
         self.logger.info(
             f"TransformerEncoderLayer initialized: embed_dim={embed_dim}, "
-            f"num_heads={num_heads}, ffn_dim={ffn_dim}, dropout={dropout}, pre_norm={pre_norm}, "
+            f"num_heads={num_heads}, num_kv_heads={num_kv_heads}, "
+            f"ffn_dim={ffn_dim}, dropout={dropout}, pre_norm={pre_norm}, "
             f"use_gradient_checkpointing={use_gradient_checkpointing}, use_rope={use_rope}, "
-            f"use_rmsnorm={use_rmsnorm}"
+            f"use_rmsnorm={use_rmsnorm}, sliding_window={sliding_window}, "
+            f"[V6] pytorch_sdpa={use_pytorch_sdpa}, qk_norm={use_qk_norm}, "
+            f"parallel_residual={parallel_residual}, attn_logit_cap={attn_logit_cap}"
         )
     
     def forward(
@@ -349,6 +382,20 @@ class TransformerEncoderLayer(nn.Module):
         # Normal forward pass (inference veya checkpointing yok)
         return self._forward_impl(x, mask, causal_mask, use_cache, cache_position)
     
+    def get_and_reset_moe_loss(self) -> Optional[torch.Tensor]:
+        """
+        [V6] Fix 7: MoE auxiliary loss'u döndürür ve listeyi temizler.
+        Her training step'inde çağrılmalı; bellek sızıntısını önler.
+
+        Returns:
+            Birikmiş MoE load balancing loss toplamı, yoksa None.
+        """
+        if not self._moe_losses:
+            return None
+        loss = sum(self._moe_losses)
+        self._moe_losses.clear()  # [V6] Fix 7: Liste temizlenir — bellek sızıntısı önlenir
+        return loss
+
     def _forward_impl(
         self,
         x: torch.Tensor,
@@ -362,9 +409,17 @@ class TransformerEncoderLayer(nn.Module):
         Internal forward implementation (checkpointing için ayrı method).
         """
         # ============================================================
+        # [V6] Feature C: Parallel Residual (GPT-J, PaLM standardı)
+        # Tek paylaşımlı norm; attn ve ffn aynı normalized input'tan beslenir
+        # x = x + attn(norm(x)) + ffn(norm(x))
+        # ============================================================
+        if self.parallel_residual and self.pre_norm:
+            return self._parallel_forward_impl(x, mask, causal_mask, use_cache, cache_position)
+
+        # ============================================================
         # 1) SELF-ATTENTION: Pre-norm vs Post-norm Akışı
         # ============================================================
-        
+
         if self.pre_norm:
             # [OK] PRE-NORM AKIŞI (GPT-2/3/4, Modern Transformer'lar)
             # Akış: x → LayerNorm → Attention → Dropout → Residual (+)
@@ -442,9 +497,7 @@ class TransformerEncoderLayer(nn.Module):
             # [OK] V4: MoE desteği (endüstri standardı: GPT-4, Gemini)
             if self.use_moe:
                 ffn_output, moe_load_balancing_loss = self.ffn(x_norm)  # [B, T, embed_dim], scalar
-                # Load balancing loss'u sakla (training için)
-                if not hasattr(self, '_moe_losses'):
-                    self._moe_losses = []
+                # [V6] Fix 7: _moe_losses __init__'de başlatıldı; hasattr kontrolü yok
                 self._moe_losses.append(moe_load_balancing_loss)
             else:
                 ffn_output = self.ffn(x_norm)  # [B, T, embed_dim]
@@ -474,9 +527,62 @@ class TransformerEncoderLayer(nn.Module):
             return x, attn_weights, kv_cache
         return x, attn_weights
     
+    def _parallel_forward_impl(
+        self,
+        x: torch.Tensor,
+        mask: Optional[torch.Tensor] = None,
+        causal_mask: bool = False,
+        use_cache: bool = False,
+        cache_position: Optional[torch.Tensor] = None,
+    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]]:
+        """
+        [V6] Feature C: Parallel Residual forward (GPT-J, PaLM standardı)
+
+        Akış:
+            x_norm = norm1(x)                        # Tek paylaşımlı norm
+            attn_out = attn(x_norm)                  # Attention branch
+            ffn_out  = ffn(x_norm)                   # FFN branch (aynı x_norm)
+            x = x + dropout(attn_out) + dropout(ffn_out)  # Paralel residual
+
+        Avantaj: Sequential pre-norm'a kıyasla tek norm geçişi → daha düşük latency.
+        Referans: GPT-J (EleutherAI), PaLM (Google).
+        """
+        # Tek paylaşımlı norm (norm1 kullanılır; norm2 bu path'te kullanılmaz)
+        x_norm = self.norm1(x)  # [B, T, embed_dim]
+
+        # Attention branch
+        attn_result = self.attn(
+            x_norm, x_norm, x_norm,
+            mask=mask,
+            causal_mask=causal_mask,
+            return_attention_weights=True,
+            use_cache=use_cache,
+            cache_position=cache_position,
+        )
+        if use_cache and len(attn_result) == 3:
+            attn_output, attn_weights, kv_cache = attn_result
+        else:
+            attn_output, attn_weights = attn_result
+            kv_cache = None
+
+        # FFN branch (aynı x_norm'dan)
+        if self.use_moe:
+            ffn_output, moe_load_balancing_loss = self.ffn(x_norm)
+            self._moe_losses.append(moe_load_balancing_loss)
+        else:
+            ffn_output = self.ffn(x_norm)
+
+        # Paralel residual: her iki branch aynı anda eklenir
+        x = x + self.dropout(attn_output) + self.dropout(ffn_output)  # [B, T, embed_dim]
+
+        if use_cache:
+            return x, attn_weights, kv_cache
+        return x, attn_weights
+
     def extra_repr(self) -> str:
         return (
             f"embed_dim={self.embed_dim}, num_heads={self.num_heads}, "
-            f"ffn_dim={self.ffn_dim}, dropout={self.dropout_rate}, pre_norm={self.pre_norm}"
+            f"ffn_dim={self.ffn_dim}, dropout={self.dropout_rate}, pre_norm={self.pre_norm}, "
+            f"parallel_residual={self.parallel_residual}"
         )
 
