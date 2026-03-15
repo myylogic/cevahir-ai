@@ -43,7 +43,6 @@ import sys
 import os
 import math
 import logging
-import time
 from typing import Optional, Dict, Any, Protocol, runtime_checkable
 
 import torch
@@ -150,6 +149,37 @@ class CevahirNeuralNetwork(nn.Module):
         use_moe: bool = False,  # MoE kullan (büyük modeller için)
         num_experts: int = 8,  # Expert sayısı (GPT-4: 8, Gemini: 16)
         moe_top_k: int = 2,  # Her token için seçilecek expert sayısı (GPT-4: 2)
+        # [OK] V5: GQA (Grouped Query Attention) — LLaMA-2/3, Mistral, Gemini standardı
+        # None       → standart MHA (num_kv_heads = num_heads)
+        # 1          → MQA (Multi-Query Attention, en hızlı)
+        # 2..n-1     → GQA (verimli denge) — Önerilen: num_heads // 4 veya // 8
+        # Örnek: num_heads=8, num_kv_heads=2 → %75 KV cache azalması
+        num_kv_heads: Optional[int] = None,
+        # [OK] V5: Sliding Window Attention — Mistral-7B, Gemma standardı
+        # None → full attention (default, geriye dönük uyumluluk)
+        # int  → her token yalnızca önceki N token'a attend eder (long-context verimli)
+        # Önerilen: 2048 (orta uzunluk) veya 4096 (Mistral standardı)
+        sliding_window: Optional[int] = None,
+        # [OK] V5: YaRN RoPE genişletme (uzun context desteği)
+        # "none"   → standart RoPE (default)
+        # "yarn"   → YaRN NTK-by-parts (LLaMA-3.1 standardı, önerilir)
+        # "linear" → Position Interpolation (PI, basit)
+        rope_scaling_type: str = "none",
+        # Context uzatma faktörü (hedef / orijinal)
+        # Örnek: 8192 / 2048 = 4.0 (4x context uzatma)
+        rope_scaling_factor: float = 1.0,
+        # [V6] F.scaled_dot_product_attention (PyTorch 2.0+) — tüm layer'lara iletilir
+        use_pytorch_sdpa: bool = True,
+        # [V6] QK-Norm (Gemma/PaLM 2) — attention logit patlamasını önler
+        use_qk_norm: bool = False,
+        # [V6] Parallel Residual / Attention+FFN Paralel (GPT-J, PaLM)
+        # x = x + attn(norm(x)) + ffn(norm(x)) — tek norm, paralel branch
+        parallel_residual: bool = False,
+        # [V6] Output Logit Soft-Cap (Gemma 2): logits = tanh(logits/cap)*cap
+        # 0.0 = devre dışı; 30.0 = önerilen (mevcut 1/sqrt(d) yerine)
+        logit_soft_cap: float = 30.0,
+        # [V6] Attention Logit Soft-Cap (Gemma 2) — tüm layer'lara iletilir (0=kapalı)
+        attn_logit_cap: float = 0.0,
         # ---- TensorBoard / Telemetri seçenekleri ----
         use_tensorboard: bool = False,
         tb_writer: Optional[_SummaryWriterLike] = None,
@@ -204,6 +234,17 @@ class CevahirNeuralNetwork(nn.Module):
             "use_moe": use_moe,
             "num_experts": num_experts,
             "moe_top_k": moe_top_k,
+            # [OK] V5: GQA, Sliding Window, YaRN
+            "num_kv_heads": num_kv_heads,
+            "sliding_window": sliding_window,
+            "rope_scaling_type": rope_scaling_type,
+            "rope_scaling_factor": rope_scaling_factor,
+            # [V6] Yeni özellikler
+            "use_pytorch_sdpa": use_pytorch_sdpa,
+            "use_qk_norm": use_qk_norm,
+            "parallel_residual": parallel_residual,
+            "logit_soft_cap": logit_soft_cap,
+            "attn_logit_cap": attn_logit_cap,
             "use_tensorboard": use_tensorboard,
             "tb_log_dir": tb_log_dir,
             "tb_log_every_n": tb_log_every_n,
@@ -281,21 +322,39 @@ class CevahirNeuralNetwork(nn.Module):
         )
         
         # 2) Positional Encoding (RoPE, Sinusoidal, Learned)
+        # [OK] V5: YaRN RoPE desteği — uzun context için
+        pe_max_len = kwargs.get("pe_max_len", 2048)
         self.pos_encoding = PositionalEncoding(
             embed_dim=embed_dim,
-            max_len=kwargs.get("pe_max_len", 2048),
+            max_len=pe_max_len,
             dropout=kwargs.get("pe_dropout", 0.0),
             mode=pe_mode,
             num_heads=num_heads if pe_mode.lower() == "rope" else None,  # [OK] RoPE için num_heads
             log_level=log_level,
+            # [OK] V5: YaRN RoPE ölçekleme
+            rope_scaling_type=rope_scaling_type,
+            rope_scaling_factor=rope_scaling_factor,
+            rope_original_max_len=kwargs.get("rope_original_max_len", 2048),
         )
         
         # 3) Embedding Dropout (Transformer  standardı)
         self.embed_dropout = nn.Dropout(dropout)
         
-        # [OK] YENİ (V-2): FFN dimension hesapla
-        if ffn_dim is None:
+        # [V6] Fix 6: SwiGLU ffn_dim otomatik hesaplama (LLaMA standardı, parametre paritesi)
+        # SwiGLU iki gate kullanır; standart 4x FFN ile eş parametre için 2/3 oranı gerekir
+        # 256'nın katına yuvarla → tensor core optimal (A100/H100)
+        if use_swiglu and ffn_dim is None:
+            raw = int(2 / 3 * 4 * effective_dim)
+            ffn_dim = (raw + 255) // 256 * 256  # embed_dim=512 → 1536
+            self.logger.info(
+                f"[V6] SwiGLU ffn_dim otomatik hesaplandı: {ffn_dim} "
+                f"(= round_256(2/3*4*{effective_dim}), LLaMA standardı)"
+            )
+        elif ffn_dim is None:
             ffn_dim = effective_dim * 4  # GPT standardı: 4x embed_dim
+
+        # [V6] Output Logit Soft-Cap (Feature D) — forward'da kullanılır
+        self.logit_soft_cap = float(logit_soft_cap)
         
         # [OK] YENİ (V-2): Layer stacking - N adet TransformerEncoderLayer
         # [OK] V3: Flash Attention 2.0 desteği (endüstri standardı)
@@ -330,8 +389,28 @@ class CevahirNeuralNetwork(nn.Module):
                 use_moe=use_moe,  # [OK] V4
                 num_experts=num_experts,  # [OK] V4
                 moe_top_k=moe_top_k,  # [OK] V4
+                num_kv_heads=num_kv_heads,      # [OK] V5: GQA
+                sliding_window=sliding_window,  # [OK] V5: Sliding Window
+                use_pytorch_sdpa=use_pytorch_sdpa,   # [V6]: F.scaled_dot_product_attention
+                use_qk_norm=use_qk_norm,             # [V6]: QK-Norm (Gemma/PaLM 2)
+                parallel_residual=parallel_residual,  # [V6]: Parallel Residual (GPT-J/PaLM)
+                attn_logit_cap=attn_logit_cap,       # [V6]: Attention Logit Soft-Cap
             ) for _ in range(num_layers)
         ])
+
+        # [V6] Feature E: Scaled Residual Projection Init (LLaMA / DeepNet standardı)
+        # Derinlikle birlikte varyans büyümesini önler; eğitim stabilitesini artırır
+        # out_proj ve fc2 ağırlıkları 1/sqrt(2*N) ile ölçeklenir (N = num_layers)
+        _residual_init_scale = 1.0 / math.sqrt(2.0 * num_layers)
+        for _layer in self.layers:
+            if hasattr(_layer, 'attn') and hasattr(_layer.attn, 'out_proj'):
+                nn.init.normal_(_layer.attn.out_proj.weight, mean=0.0, std=_residual_init_scale)
+            if hasattr(_layer, 'ffn') and hasattr(_layer.ffn, 'fc2') and _layer.ffn.fc2 is not None:
+                nn.init.normal_(_layer.ffn.fc2.weight, mean=0.0, std=_residual_init_scale)
+        self.logger.info(
+            f"[V6] Scaled Residual Init uygulandı: out_proj + fc2 ağırlıkları "
+            f"1/sqrt(2*{num_layers}) = {_residual_init_scale:.4f} ile başlatıldı (LLaMA/DeepNet)"
+        )
         
         # [OK] V-2/V-3/V-4: TransformerEncoderLayer kullanılıyor (eski NeuralLayerProcessor ve TensorProcessingManager yerine)
         
@@ -388,6 +467,7 @@ class CevahirNeuralNetwork(nn.Module):
         # --- TB/telemetri durumu ---
         self._global_step: int = 0
         self._last_snapshot: Dict[str, Any] = {}
+        self._last_attn_entropy: Optional[float] = None  # Attention entropy monitoring
         self._tb_log_every_n = int(tb_log_every_n) if tb_log_every_n and tb_log_every_n > 0 else 10
         self._tb_log_histograms = bool(tb_log_histograms)
         self._tb_log_attention_image = bool(tb_log_attention_image)
@@ -415,14 +495,20 @@ class CevahirNeuralNetwork(nn.Module):
         )
         
         self.logger.info(
-            f"[INIT] Cevahir sinir ağı başlatıldı (V-2/V-3/V-4 + ENDÜSTRİ STANDARDI REFACTOR): vocab_size={vocab_size}, "
-            f"embed_dim={embed_dim}, effective_dim={effective_dim}, num_heads={num_heads}, "
-            f"num_layers={num_layers}, ffn_dim={ffn_dim}, pre_norm={pre_norm}, causal_mask={causal_mask}, "
+            f"[INIT] Cevahir sinir ağı başlatıldı (V6 — GQA + YaRN + Sliding Window + F.sdpa + QK-Norm + Soft-Cap): "
+            f"vocab_size={vocab_size}, embed_dim={embed_dim}, effective_dim={effective_dim}, "
+            f"num_heads={num_heads}, num_kv_heads={num_kv_heads}, "
+            f"num_layers={num_layers}, ffn_dim={ffn_dim}, pre_norm={pre_norm}, "
+            f"causal_mask={causal_mask}, sliding_window={sliding_window}, "
             f"use_flash_attention={use_flash_attention}, pe_mode={pe_mode}, "
+            f"rope_scaling={rope_scaling_type}(x{rope_scaling_factor:.1f}), "
             f"use_gradient_checkpointing={use_gradient_checkpointing}, tie_weights={tie_weights}, "
             f"use_rope={use_rope}, use_rmsnorm={use_rmsnorm}, use_swiglu={use_swiglu}, "
             f"use_kv_cache={use_kv_cache}, max_cache_len={max_cache_len}, "
-            f"quantization_type={quantization_type}, use_moe={use_moe}, num_experts={num_experts}"
+            f"quantization_type={quantization_type}, use_moe={use_moe}, num_experts={num_experts}, "
+            f"[V6] pytorch_sdpa={use_pytorch_sdpa}, qk_norm={use_qk_norm}, "
+            f"parallel_residual={parallel_residual}, logit_soft_cap={logit_soft_cap}, "
+            f"attn_logit_cap={attn_logit_cap}"
         )
         self.logger.info(
             "[INIT] [OK] ENDÜSTRİ STANDARDI REFACTOR: DilKatmani deprecated, embedding ve positional encoding doğrudan kullanılıyor. "
@@ -604,7 +690,6 @@ class CevahirNeuralNetwork(nn.Module):
             final_output: [B, T, vocab_size]
             attn_weights: Optional attention weights (son layer'dan)
         """
-        t_start = time.time()
         step = self._global_step
 
         try:
@@ -613,7 +698,6 @@ class CevahirNeuralNetwork(nn.Module):
                 self.logger.error(f"[FORWARD] Hatalı giriş türü: {type(x)}. torch.Tensor bekleniyordu.")
                 raise TypeError(f"Beklenen giriş türü torch.Tensor, ancak {type(x)} alındı.")
             self.logger.debug(f"[FORWARD] Giriş -> shape={x.shape}, dtype={x.dtype}, device={x.device}")
-            t_input = time.time()
 
             # 2) Embedding + Positional Encoding (ENDÜSTRİ STANDARDI: Transformer Yakın Kuzenlerine Benzer)
             # [OK] REFACTOR: DilKatmani deprecated, doğrudan embedding ve positional encoding kullanılıyor
@@ -623,22 +707,21 @@ class CevahirNeuralNetwork(nn.Module):
             embedded = self.embed_dropout(embedded)  # [B, T, embed_dim]
             if not isinstance(embedded, torch.Tensor):
                 raise TypeError("Embedding çıktısı geçerli bir tensör değil!")
-            t_embedding = time.time()
 
             # [OK] YENİ (V-2): Layer stacking - N adet TransformerEncoderLayer
             # Causal mask belirleme
             use_causal = causal_mask if causal_mask is not None else self.causal_mask
-            
+
             # Layer stacking: Her layer'da Attention + FFN + Residual
             x = embedded
             attn_weights = None
             kv_cache_output = None  # [OK] V4: KV Cache çıktısı için
-            
-            t_layers_start = time.time()
+            _layer_attn_entropies = []  # Attention entropy per layer for collapse detection
+
             for i, layer in enumerate(self.layers):
                 layer_result = layer(
-                    x, 
-                    mask=mask, 
+                    x,
+                    mask=mask,
                     causal_mask=use_causal,
                     use_cache=use_cache,  # [OK] V4
                     cache_position=cache_position,  # [OK] V4
@@ -653,8 +736,34 @@ class CevahirNeuralNetwork(nn.Module):
                 # Son layer'ın attention weights'ini sakla
                 if i == len(self.layers) - 1:
                     attn_weights = layer_attn_weights
-            t_layers_end = time.time()
-            t_attention = t_layers_end  # Timing için
+
+                # Attention entropy monitoring (collapse / uniformity detection)
+                if layer_attn_weights is not None and self.training:
+                    try:
+                        # attn_weights: [B, H, T_q, T_k]
+                        p = layer_attn_weights.detach().float().clamp(min=1e-10)
+                        log_p = torch.log(p)
+                        # Shannon entropy over key dimension: [B, H, T_q]
+                        h = -(p * log_p).sum(dim=-1).mean().item()
+                        # Max entropy for uniform distribution over T_k tokens
+                        t_k = layer_attn_weights.shape[-1]
+                        max_h = math.log(t_k) if t_k > 1 else 1.0
+                        normalized_h = h / max_h if max_h > 0 else 0.0
+                        _layer_attn_entropies.append(normalized_h)
+                        # Collapse detection: entropy < 0.05 → near-total focus on one token
+                        if normalized_h < 0.05:
+                            self.logger.warning(
+                                f"[ATTN] Attention collapse detected! layer={i}, "
+                                f"entropy={normalized_h:.4f} (step={step})"
+                            )
+                    except Exception:
+                        pass
+
+            # Store mean attention entropy across all layers in this step
+            self._last_attn_entropy = (
+                sum(_layer_attn_entropies) / len(_layer_attn_entropies)
+                if _layer_attn_entropies else None
+            )
 
             # ❌ ESKİ (V-1): Kaldırıldı
             # attention_output, attn_weights = self.layer_processor(embedded, key=embedded, value=embedded)
@@ -665,26 +774,24 @@ class CevahirNeuralNetwork(nn.Module):
             # Bu, accuracy takılı kalma sorununu çözer (logits çok geniş aralıkta olmaz)
             # Transformer  ve LLaMA'da output layer'dan önce normalization kullanılır
             x_normalized = self.output_norm(x)  # [B, T, embed_dim]  # [OK] REFACTOR: effective_dim kullanılıyor
-            
+
             # [OK] V3: Weight tying durumunda da output_layer [vocab_size, embed_dim] bekliyor
             # [OK] REFACTOR: embed_dim kullanıyoruz, weight tying doğrudan çalışır
             logits_raw = self.output_layer(x_normalized)  # [B, T, vocab_size]
-            # [AUDIT FIX] Logit scale: output_norm.scale eğitimde büyüyebiliyor (-14..28 aralığı),
-            # logit'ler patlıyor → softmax aşırı sivri, mode collapse. 1/sqrt(d) ile sınırla.
-            final_output = logits_raw / math.sqrt(self.output_layer.in_features)
+
+            # [V6] Feature D: Output Logit Soft-Cap (Gemma 2 standardı)
+            # tanh(logits / cap) * cap → logit'leri [-cap, +cap] aralığına sıkıştırır
+            # Önceki: logits_raw / sqrt(d) — sabit bölme, daha kaba
+            # Yeni: tanh soft-cap → sürekli türevli, eğitim stabilitesi daha iyi
+            if self.logit_soft_cap > 0.0:
+                final_output = torch.tanh(logits_raw / self.logit_soft_cap) * self.logit_soft_cap
+            else:
+                final_output = logits_raw  # Cap kapalı — sınırsız logit
+
             if not isinstance(final_output, torch.Tensor):
                 raise TypeError("Çıktı katmanı geçerli bir tensör döndürmüyor!")
-            
-            t_output = time.time()
 
-            # 6) Bellek Yönetimi
-            # ❌ DEPRECATED: MemoryManager kaldırıldı (2026-01-04)
-            # PyTorch'un built-in bellek yönetimi yeterli
-            # KV Cache zaten TransformerEncoderLayer içinde yönetiliyor (use_kv_cache=True)
-            # Gradient Checkpointing zaten var (use_gradient_checkpointing=True)
-            t_memory = time.time()
-
-            # 7) Snapshot (panel için özet) - GEREKSIZ TENSOR PRINT'LERI KALDIRILDI
+            # 7) Snapshot (panel için özet)
             try:
                 self._last_snapshot = {
                     "step": step,
@@ -693,7 +800,7 @@ class CevahirNeuralNetwork(nn.Module):
                         "shape": tuple(embedded.shape),
                         "stats": self._tensor_stats(embedded),
                     },
-                    "layer_output": {  # [OK] YENİ: Layer stacking output
+                    "layer_output": {
                         "shape": tuple(x.shape),
                         "stats": self._tensor_stats(x),
                     },
@@ -707,30 +814,20 @@ class CevahirNeuralNetwork(nn.Module):
                         "max": float(attn_weights.detach().max().item()),
                         "mean": float(attn_weights.detach().mean().item()),
                     },
-                    "timings": {
-                        "input": t_input - t_start,
-                        "embedding": t_embedding - t_input,
-                        "layers": t_layers_end - t_layers_start,  # [OK] YENİ: Layer stacking timing
-                        "output": t_output - t_layers_end,
-                        "memory": t_memory - t_output,
-                        "total": t_memory - t_start,
+                    "attn_entropy": {
+                        "mean_normalized": self._last_attn_entropy,
+                        "collapse_threshold": 0.05,
+                        "status": (
+                            "collapse" if self._last_attn_entropy is not None and self._last_attn_entropy < 0.05
+                            else "uniform" if self._last_attn_entropy is not None and self._last_attn_entropy > 0.95
+                            else "normal" if self._last_attn_entropy is not None
+                            else "not_computed"
+                        ),
                     },
                 }
             except Exception:
                 # snapshot hiçbir zaman modeli düşürmesin
                 pass
-
-            # 8) TensorBoard telemetri KAPATILDI - gereksiz loglar
-            # TensorBoard logging devre dışı bırakıldı
-
-            if self.logger.isEnabledFor(logging.DEBUG):
-                self.logger.debug(
-                    "[FORWARD] Zamanlar (V-2) | "
-                    f"Input:{t_input - t_start:.4f}s, Emb:{t_embedding - t_input:.4f}s, "
-                    f"Layers:{t_layers_end - t_layers_start:.4f}s ({self.num_layers} layer), "
-                    f"Out:{t_output - t_layers_end:.4f}s, Mem:{t_memory - t_output:.4f}s, "
-                    f"Toplam:{t_memory - t_start:.4f}s"
-                )
 
             # step'i artır
             self._global_step += 1
