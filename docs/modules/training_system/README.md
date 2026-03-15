@@ -1,1017 +1,925 @@
 # 🎯 Training System - Kapsamlı Dokümantasyon
 
-**Versiyon:** V-1 (Production-Ready)  
-**Son Güncelleme:** 2025-01-27  
-**Durum:** ✅ Production-Ready | Endüstri Standartları
+**Versiyon:** V-3 (Current)
+**Son Güncelleme:** 2026-03-16
+**Durum:** ✅ Production-Ready | V2 + V3 Dual Stack
 
 ---
 
 ## 📋 İçindekiler
 
 1. [Genel Bakış](#genel-bakış)
-2. [Mimari Yapı](#mimari-yapı)
-3. [Çalışma Prensibi](#çalışma-prensibi)
-4. [Core Components](#core-components)
-5. [Training Pipeline](#training-pipeline)
-6. [Data Management](#data-management)
-7. [BPE Management](#bpe-management)
-8. [Model Initialization](#model-initialization)
-9. [TensorBoard Integration](#tensorboard-integration)
-10. [API Referansı](#api-referansı)
-11. [Kullanım Örnekleri](#kullanım-örnekleri)
-12. [Best Practices](#best-practices)
+2. [Dizin Yapısı](#dizin-yapısı)
+3. [Zorunlu İş Akışı](#zorunlu-iş-akışı)
+4. [Kök Araçlar](#kök-araçlar)
+   - [train.py](#trainpy)
+   - [prepare_cache.py](#prepare_cachepy)
+   - [config_validator.py](#config_validatorpy)
+   - [health_check.py](#health_checkpy)
+   - [data_cache.py](#data_cachepy)
+5. [V3 Sistemi](#v3-sistemi)
+   - [TrainingServiceV3](#trainingservicev3)
+   - [ConfigManagerV3](#configmanagerv3)
+   - [DataCacheV3](#datacachev3)
+   - [CevahirDataset](#cevahirdataset)
+   - [BucketBatchSampler](#bucketbatchsampler)
+   - [DynamicPaddingCollator](#dynamicpaddingcollator)
+   - [DataLoader V3](#dataloader-v3)
+6. [V2 Sistemi](#v2-sistemi)
+   - [TrainingService (V2)](#trainingservice-v2)
+   - [ConfigManager (V2)](#configmanager-v2)
+   - [CriterionManager](#criterionmanager)
+   - [BPEValidator](#bpevalidator)
+   - [DataPreparator (Deprecated)](#datapreparator-deprecated)
+   - [DataLoaderWrapper (V2)](#dataloaderwrapper-v2)
+   - [WarmupCalculator](#warmupcalculator)
+7. [V2 → V3 Otomatik Seçim](#v2--v3-otomatik-seçim)
+8. [Konfigürasyon Parametreleri](#konfigürasyon-parametreleri)
+9. [GPU Optimizasyonları](#gpu-optimizasyonları)
+10. [Cache Sistemi Karşılaştırması](#cache-sistemi-karşılaştırması)
 
 ---
 
-## 🎯 Genel Bakış
+## Genel Bakış
 
-**Training System**, Cevahir Sinir Sistemi'nin eğitim sürecini orkestra eden üst seviye bir servistir. BPE tokenizer yönetimi, veri hazırlama, model initialization ve TensorBoard entegrasyonunu tek bir serviste birleştirir.
+Training System, Cevahir-AI modelinin eğitimini yöneten end-to-end sistemdir. İki paralel stack içerir:
 
-### Temel Özellikler
+- **V2 Stack:** Kararlı, production-ready temel eğitim sistemi
+- **V3 Stack:** GPU-optimize edilmiş gelişmiş eğitim sistemi — Strict Cache, BucketBatchSampler, DynamicPadding
 
-- ✅ **BPE Tokenizer Management:** Otomatik vocab/merges yönetimi, rebuild logic
-- ✅ **Data Preparation:** Hybrid corpus (QA + raw text), smart caching
-- ✅ **Model Initialization:** Checkpoint loading, V-2/V-3/V-4 feature support
-- ✅ **TensorBoard Integration:** Comprehensive logging, BPE dashboard, model graphs
-- ✅ **Training Orchestration:** TrainingManager entegrasyonu, epoch callbacks
-- ✅ **Data Caching:** Preprocessed data cache, cache invalidation
-- ✅ **Epoch Testing:** Automatic model testing after each epoch
-- ✅ **Colab Optimized:** GPU detection, aggressive GPU activation
+```
+train_bpe.py → prepare_cache.py → train.py
+     ↓               ↓               ↓
+  BPE vocab      V3 Cache        V2 veya V3
+  oluştur        hazırla         otomatik seçim
+```
 
-### Modül Bileşenleri
-
-1. **TrainingService** - Ana orchestrator (~1286 satır)
-2. **train.py** - Training entry point ve config yönetimi (~461 satır)
-3. **DataCache** - Preprocessed data cache sistemi (~243 satır)
+> ⚠️ **Bu sıra zorunludur.** `prepare_cache.py` çalıştırılmadan `train.py` başlatılmamalıdır.
 
 ---
 
-## 🏗️ Mimari Yapı
-
-### Dosya Organizasyonu
+## Dizin Yapısı
 
 ```
 training_system/
-├── __init__.py
-├── training_service.py      # Ana orchestrator (~1286 satır)
-├── train.py                 # Entry point & config (~461 satır)
-├── data_cache.py            # Data cache sistemi (~243 satır)
-├── test_epoch_callback.py   # Epoch callback test
-└── test/
-    └── test_training_service.py  # Unit testler
-```
-
-### Mimari Katmanlar
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     train.py                                │
-│              (Entry Point & Config)                         │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-        ┌────────────▼────────────┐
-        │   TrainingService       │
-        │   (Main Orchestrator)   │
-        └────────────┬────────────┘
-                     │
-    ┌────────────────┼────────────────┐
-    │                │                │
-┌───▼────┐  ┌────────▼────────┐  ┌───▼──────────┐
-│Tokenizer│  │   DataCache     │  │   Model      │
-│Core     │  │                 │  │   Manager    │
-└────────┘  └─────────────────┘  └──────────────┘
-                     │
-    ┌────────────────┼────────────────┐
-    │                │                │
-┌───▼────┐  ┌────────▼────────┐  ┌───▼──────────┐
-│Training│  │   TensorBoard   │  │   BPE        │
-│Manager │  │                 │  │   Manager    │
-└────────┘  └─────────────────┘  └──────────────┘
+├── train.py                    # Ana giriş noktası (80+ parametre TRAIN_CONFIG)
+├── train_bpe.py                # BPE tokenizer eğitimi
+├── prepare_cache.py            # Veri ön-işleme ve cache hazırlama
+├── config_validator.py         # 5 aşamalı config validasyonu
+├── health_check.py             # Eğitim sonrası model kalite kontrolü
+├── data_cache.py               # V2 DataCache (graceful fallback)
+│
+├── v2/
+│   ├── core/
+│   │   ├── training_service.py     # V2 TrainingService (936 satır)
+│   │   ├── config_manager.py       # V2 ConfigManager (21 parametre)
+│   │   ├── criterion_manager.py    # CriterionManager + EntropyRegCriterion
+│   │   ├── bpe_validator.py        # BPE dosya varlık kontrolü
+│   │   └── data_preparator.py      # DEPRECATED stub
+│   ├── data/
+│   │   └── data_loader_wrapper.py  # SimpleDataset + create_dataloaders()
+│   └── utils/
+│       └── warmup_calculator.py    # Dinamik warmup adımı hesaplama
+│
+└── v3/
+    ├── core/
+    │   ├── training_service_v3.py  # V3 TrainingService (725 satır)
+    │   └── config_manager_v3.py    # V3 ConfigManager (55+ parametre, 11 grup)
+    └── data/
+        ├── cache_v3.py             # DataCacheV3 (strict mode, SHA-256)
+        ├── dataset_v3.py           # CevahirDataset (uzunluk indeksi)
+        ├── sampler_v3.py           # BucketBatchSampler
+        ├── collator_v3.py          # DynamicPaddingCollator
+        └── dataloader_v3.py        # create_dataloaders_v3() factory
 ```
 
 ---
 
-## ⚙️ Çalışma Prensibi
+## Zorunlu İş Akışı
 
-### 1. Training Pipeline Flow
-
-```python
-train.py main()
-    ↓
-1. Environment Setup
-    ├── Logging configuration
-    ├── GPU detection & activation
-    ├── Seed setting
-    └── Directory creation
-    ↓
-2. Config Normalization
-    ├── Tokenizer config loading
-    ├── BPE config loading
-    ├── Config merging
-    └── Default values
-    ↓
-3. TrainingService Initialization
-    ├── BPE paths setup
-    ├── Device detection (GPU/CPU)
-    ├── TokenizerCore initialization
-    ├── BPE rebuild logic (if needed)
-    ├── ModelManager initialization
-    ├── TensorBoard setup
-    └── Model initialization
-    ↓
-4. Training Execution
-    ├── Data preparation (with caching)
-    ├── TrainingManager creation
-    ├── Training loop
-    ├── Epoch callbacks
-    ├── Model testing
-    └── Checkpoint saving
-    ↓
-5. Finalization
-    ├── Model saving
-    ├── TensorBoard closing
-    └── Summary logging
+### Adım 1 — BPE Eğitimi
+```bash
+python training_system/train_bpe.py
 ```
+Çıktı: `bpe_vocab.json`, `bpe_merges.txt`
 
-### 2. BPE Management Flow
-
-```python
-TrainingService.__init__()
-    ↓
-1. Check BPE Files
-    ├── vocab.json exists?
-    ├── merges.txt exists?
-    └── Files non-empty?
-    ↓
-2. Rebuild Decision
-    ├── Files exist → Load only (no rebuild)
-    ├── Files missing + rebuild=True → Rebuild
-    └── Files missing + rebuild=False → Error
-    ↓
-3. If Rebuild Needed:
-    ├── Load QA data (JSON)
-    ├── Load raw text (TXT/DOCX)
-    ├── Create hybrid corpus
-    ├── Train BPE tokenizer
-    └── Save vocab/merges
-    ↓
-4. Vocab Finalization
-    ├── Load existing vocab
-    ├── Sample texts collection
-    └── Vocab extension
+### Adım 2 — Cache Hazırlama
+```bash
+python training_system/prepare_cache.py \
+  --data-dir ./data/raw \
+  --cache-dir ./training_system/cache \
+  --max-seq-length 512
 ```
+Çıktı: `cache/*.pkl` + `cache/*.sha256` + `cache/*.meta.json` (V3 üçlü yapısı)
 
-### 3. Data Preparation Flow
+### Adım 3 — Eğitim
+```bash
+python training_system/train.py
+```
+`TRAIN_CONFIG` içindeki `use_v3_training_system: True/False` parametresine göre V3 veya V2 otomatik seçilir.
 
-```python
-_prepare_data()
-    ↓
-1. Cache Check
-    ├── Cache key generation
-    ├── Vocab hash calculation
-    ├── Data dir hash calculation
-    └── Cache lookup
-    ↓
-2. If Cache Hit:
-    └── Return cached data
-    ↓
-3. If Cache Miss:
-    ├── Load raw data (TokenizerCore)
-    ├── Process & encode
-    ├── Create dataset (input/target pairs)
-    ├── Train/Val split (80/20)
-    ├── Create DataLoaders
-    └── Save to cache
-    ↓
-4. TensorBoard Logging
-    ├── Data statistics
-    ├── Sequence length histograms
-    └── Sample preview
+### Adım 4 — Sağlık Kontrolü (Opsiyonel)
+```bash
+python training_system/health_check.py \
+  --model-path saved_models/cevahir_model.pth
 ```
 
 ---
 
-## 🎯 Core Components
+## Kök Araçlar
 
-### 1. TrainingService
+### train.py
 
-Ana orchestrator sınıfı. Tüm training sürecini yönetir.
+Ana giriş noktası. `TRAIN_CONFIG` dict içinde 80+ parametre barındırır.
 
-#### Özellikler
+**Önemli işlevler:**
 
-- BPE tokenizer yönetimi (rebuild/load)
-- Data preparation (hybrid corpus, caching)
-- Model initialization (checkpoint loading)
-- TensorBoard entegrasyonu
-- TrainingManager koordinasyonu
-- Epoch callbacks
-- Model testing
+| Fonksiyon | Açıklama |
+|---|---|
+| `normalize_config()` | `gradient_clip → max_grad_norm`, BPE yolları, scheduler_kwargs, TensorBoard defaults |
+| `log_env_info()` | PyTorch sürümü, CUDA kullanılabilirliği, GPU adı |
+| `ensure_dirs()` | `saved_models/`, `logs/`, `cache/` dizinlerini oluşturur |
+| `main()` | OOM fix → seed → normalize_config → V3/V2 seçim → eğitim |
 
-#### Initialization
-
+**OOM Fix (Kritik):**
 ```python
-class TrainingService:
-    def __init__(self, config: Dict[str, Any]):
-        """
-        Initialize TrainingService.
-        
-        Responsibilities:
-        - BPE vocab/merges yönetimi
-        - TokenizerCore initialization
-        - ModelManager initialization
-        - TensorBoard setup
-        - Device detection (GPU/CPU)
-        """
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+```
+GPU bellek parçalanmasını önler; eğitim başlamadan önce set edilir.
+
+**V5 Mimari (TRAIN_CONFIG):**
+```python
+"num_kv_heads": 2,                # GQA — %75 KV cache azalması
+"rope_scaling_type": "yarn",      # YaRN — uzun context genişletme
+"rope_scaling_factor": 2.0,
+"sliding_window": 512,            # Sliding Window Attention
 ```
 
-**Config Parametreleri:**
+---
 
-```python
-config = {
-    # Paths
-    "data_dir": "education",  # Training data directory
-    "vocab_path": "data/vocab_lib/vocab.json",
-    "merges_path": "data/merges_lib/merges.txt",
-    "model_save_path": "saved_models/cevahir_model.pth",
-    "checkpoint_dir": "saved_models/checkpoints/",
-    
-    # BPE Settings
-    "bpe_rebuild": False,  # Rebuild BPE if files missing
-    "merge_operations": 50000,  # Target vocab size
-    "bpe_min_frequency": 2,
-    "bpe_max_iter": 50000,
-    
-    # Training Settings
-    "epochs": 30,
-    "batch_size": 32,
-    "learning_rate": 8e-5,
-    "max_seq_length": 512,
-    
-    # Model Architecture
-    "embed_dim": 1024,
-    "seq_proj_dim": 1024,
-    "num_heads": 16,
-    "num_layers": 12,
-    
-    # TensorBoard
-    "use_tensorboard": True,
-    "tb_log_dir": "runs/cevahir_training",
-    
-    # Data Cache
-    "enable_data_cache": True,
-    "cache_dir": ".cache/preprocessed_data",
-    
-    # V-2/V-3/V-4 Features
-    "use_rmsnorm": True,
-    "use_swiglu": True,
-    "use_kv_cache": True,
-    # ... (see train.py for full config)
-}
+### prepare_cache.py
+
+Eğitim verisini autoregressive formata dönüştürür ve V3 cache yapısına kaydeder.
+
+**4 Adımlı Süreç:**
+
+```
+1. Cache temizle (--no-clear-cache ile atlanabilir)
+2. TokenizerCore yükle (BPE vocab + merges)
+3. Veri encode et → format_data_func()
+4. DataCacheV3.save() → pkl + sha256 + meta.json
 ```
 
-### 2. train.py
-
-Training entry point ve config yönetimi.
-
-#### Özellikler
-
-- Global logging setup
-- Environment info logging
-- Config normalization
-- Tokenizer config loading
-- TrainingService initialization
-- Error handling
-
-#### Main Functions
-
-**`set_seed(seed: int = 42)`**
-
-Random seed ayarlama (reproducibility için).
-
-```python
-def set_seed(seed: int = 42) -> None:
-    """
-    Set random seeds for reproducibility.
-    
-    Args:
-        seed: Random seed value
-    """
+**`format_data_func()` — Autoregressive Format:**
+```
+inp: [BOS] + encoded_input   (truncate sağdan, BOS korunur)
+tgt: encoded_target + [EOS]  (truncate sağdan, EOS korunur)
 ```
 
-**`log_env_info()`**
+**Deduplication:** `hash(inp_tuple) + source_id` ile duplicate tespiti; kaynak ayrımı korunur.
 
-Ortam bilgilerini loglama (GPU, PyTorch version, etc.).
+**Overlap Analizi:** Pre-format ve post-format hash collision oranı loglanır (veri sızıntısı tespiti).
 
+**CLI Parametreleri:**
+
+| Parametre | Default | Açıklama |
+|---|---|---|
+| `--data-dir` | — | Ham veri dizini |
+| `--cache-dir` | `./cache` | Cache çıktı dizini |
+| `--max-seq-length` | 512 | Maksimum token uzunluğu |
+| `--include-whole-words` | False | Tam kelime encoding |
+| `--include-syllables` | False | Hece bazlı encoding |
+| `--include-sep` | False | SEP token ekle |
+| `--no-clear-cache` | False | Mevcut cache'i temizleme |
+
+---
+
+### config_validator.py
+
+`TRAIN_CONFIG` dict'ini eğitimden önce doğrular. 5 aşamalı validasyon sistemi.
+
+**`ValidationResult` Dataclass:**
 ```python
-def log_env_info() -> None:
-    """
-    Log environment information:
-    - PyTorch version
-    - CUDA availability
-    - GPU information
-    - Memory info
-    """
+@dataclass
+class ValidationResult:
+    passed: bool
+    errors: List[str]
+    warnings: List[str]
+    suggestions: List[str]
+
+    def print_report() -> None  # Renkli terminal çıktısı
 ```
 
-**`load_tokenizer_config()`**
+**5 Validasyon Aşaması:**
 
-Tokenizer ve BPE config'lerini yükleme.
+| Aşama | Kontrol |
+|---|---|
+| 1. Zorunlu Alan | 11 zorunlu alan varlığı (`vocab_size`, `embed_dim`, `num_heads`, `num_layers`, `batch_size`, `epochs`, `lr`, `device`, `data_dir`, `bpe_vocab_path`, `bpe_merges_path`) |
+| 2. Tür | 50+ alan tür uyumu (`int`, `float`, `bool`, `str`, `list`, `Optional`) |
+| 3. Aralık | 30+ alan değer aralığı (`lr ∈ [1e-7, 1.0]`, `dropout ∈ [0,1]`, `label_smoothing ∈ [0,0.5]`) |
+| 4. Tutarlılık | 8 çapraz-alan kuralı (aşağıya bakın) |
+| 5. Best-Practice | 6 öneri (label_smoothing=0.0 uyarısı, vb.) |
 
+**Tutarlılık Kuralları (Aşama 4):**
+- `swa_start_epoch < epochs`
+- LLRD + AdamW uyum kontrolü
+- `tie_weights=True` → `embed_dim == seq_proj_dim`
+- `grad_accum_steps > batch_size` → WARNING (olağandışı yapılandırma)
+- `use_amp=True + device="cpu"` → WARNING
+- `moe_top_k < num_experts`
+- `embed_dim % num_heads == 0`
+- SAM + Lookahead birlikte kullanım uyarısı
+
+**Kullanım:**
 ```python
-def load_tokenizer_config() -> Dict[str, Any]:
-    """
-    Load BPE and tokenizer configs from tokenizer_management/config.py.
-    
-    Returns:
-        Dictionary with tokenizer and BPE settings
-    """
+from training_system.config_validator import ConfigValidator
+
+result = ConfigValidator.validate(config)
+result.print_report()
+
+# Hata varsa ValueError fırlatır, uyarıları loglar
+ConfigValidator.validate_and_raise(config)
 ```
 
-**`normalize_config(cfg: Dict[str, Any])`**
+---
 
-Config normalizasyonu ve merging.
+### health_check.py
 
-```python
-def normalize_config(cfg: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Normalize and merge training configuration.
-    
-    - Loads tokenizer config
-    - Merges with provided config
-    - Sets defaults
-    - GPU detection
-    
-    Returns:
-        Normalized config dictionary
-    """
+Eğitim sonrası model kalite kontrolü. 8 sabit Türkçe/İngilizce prompt ile inference testi.
+
+**Ölçülen Metrikler:**
+
+| Metrik | Production Kriteri | Açıklama |
+|---|---|---|
+| `entropy` | > 2.0 | Shannon entropy — düşük = tekrarcı çıktı |
+| `eos_ratio` | < 0.3 | Erken EOS oranı — yüksek = yetersiz üretim |
+| `avg_len` | > 5 | Ortalama yanıt uzunluğu (token) |
+| `ttr` | > 0.3 | Type-Token Ratio — kelime çeşitliliği |
+
+**Çıktı:** JSON raporu + terminal özeti
+
+**CLI:**
+```bash
+python health_check.py \
+  --model-path saved_models/cevahir_model.pth \
+  --config-path training_system/train.py \
+  --verbose
 ```
 
-### 3. DataCache
+---
 
-Preprocessed data cache sistemi.
+### data_cache.py
 
-#### Özellikler
+V2 DataCache — graceful fallback ile cache yönetimi.
 
-- Cache key generation (parametre-based)
-- Vocab hash calculation
-- Data dir hash calculation
-- Atomic file writes
-- Cache invalidation
+| Metod | Açıklama |
+|---|---|
+| `get_cached_data()` | Cache'den yükle, bulunamazsa `None` döndür (V3'ten farklı!) |
+| `save_cached_data()` | Atomic write ile cache'e kaydet |
+| `get_or_process()` | Cache varsa yükle, yoksa işle ve kaydet |
+| `get_or_process_corpus()` | BPE eğitim corpus cache'i |
 
-#### API
+**Cache Key:** `MD5(data_dir + encode_mode + vocab_path + merges_path + max_seq + ...)`
 
-**`get_or_process()`**
+**V3'ten Farkı:**
+- V2: `get_cached_data()` → `None` döndürür (fallback desteği)
+- V3: `load_strict()` → `CacheNotFoundError` fırlatır (strict mode)
 
-Cache'den yükle veya işle ve cache'e kaydet.
+---
 
-```python
-def get_or_process(
-    self,
-    tokenizer_core,
-    encode_mode: str,
-    include_whole_words: bool,
-    include_syllables: bool,
-    include_sep: bool,
-    max_seq_length: int,
-    process_func
-) -> Tuple[List[Tuple[List[int], List[int]]], bool]:
-    """
-    Load from cache or process and save to cache.
-    
-    Returns:
-        (processed_data, from_cache)
-    """
+## V3 Sistemi
+
+### TrainingServiceV3
+
+**Dosya:** `v3/core/training_service_v3.py` (725 satır)
+
+V3 eğitim orkestratörü. Strict Cache Mode, Source-ID aware split ve gelişmiş GPU optimizasyonu sunar.
+
+**`__init__()` — 10 Adım:**
+
+```
+1.  BPE yollarını al (config'ten veya varsayılan)
+2.  Device kurulumu (CUDA/CPU)
+3.  data_dir doğrulama
+4.  BPEValidator.validate_files()
+5.  TokenizerCore yükle
+6.  vocab_size al
+7.  DataCacheV3 oluştur (strict_mode=True)
+8.  ModelManager oluştur
+9.  CriterionManager oluştur
+10. ConfigManagerV3 oluştur
 ```
 
-**Örnek:**
+**`train()` — 5 Adım:**
 
+```
+1. Model initialize (_initialize_model)
+2. Cache'den veri yükle (load_data_from_cache — STRICT)
+3. Source-ID aware split (_source_id_aware_split)
+4. V3 DataLoader oluştur (create_dataloaders_v3)
+5. V3 Config hazırla + TrainingManager başlat
+```
+
+**`_source_id_aware_split()` — Veri Sızıntısı Önleme:**
+
+Aynı `source_id`'ye ait kayıtların train ve val'e bölünmesini önler:
+```
+source_id=1 → tüm örnekleri train'e
+source_id=2 → tüm örnekleri val'e
+```
+Fallback: source_id yoksa basit random split + WARNING.
+
+**`_initialize_model()` — Checkpoint Fallback Zinciri:**
+```
+last.pth → best.pth → checkpoint_*.pth (en yeni) → sıfırdan
+```
+
+**`_test_model_inline()` — Epoch Sonu Testi:**
+- `top_k=80` ile generation
+- Min 5 token EOS koruma
+- Sadece loglama amaçlı (eğitimi etkilemez)
+
+---
+
+### ConfigManagerV3
+
+**Dosya:** `v3/core/config_manager_v3.py`
+
+55+ parametre, 11 grup halinde V3 TrainingManager'a iletir.
+
+**11 Parametre Grubu:**
+
+| Grup | Temel Parametreler |
+|---|---|
+| **Temel** | `vocab_size`, `epochs`, `batch_size`, `device`, `seed` |
+| **Optimizer** | `lr`, `weight_decay`, `optimizer_type`, `use_adagrad`, `use_adamw8bit` |
+| **Scheduler** | `scheduler_type`, `scheduler_kwargs`, `warmup_steps` |
+| **Regularizasyon** | `dropout`, `label_smoothing`, `entropy_coeff`, `focal_loss_gamma` |
+| **Gradient** | `max_grad_norm`, `grad_accum_steps`, `use_amp`, `agc_clip_val` |
+| **Optimizasyon** | `use_sam`, `sam_rho`, `use_lookahead`, `lookahead_k`, `lookahead_alpha` |
+| **EMA/SWA** | `use_ema`, `ema_decay`, `use_swa`, `swa_start_epoch`, `swa_lr` |
+| **LLRD** | `use_llrd`, `llrd_decay` |
+| **Curriculum** | `use_curriculum`, `curriculum_strategy`, `scheduled_sampling_start` |
+| **Güvenlik** | `nan_recovery_enabled`, `spike_detection_enabled`, `spike_threshold` |
+| **Token** | `pad_id`, `bos_id`, `eos_id`, `unk_id` |
+
+**Dahili Validasyon:**
 ```python
-from training_system.data_cache import DataCache
+assert 0.0 <= label_smoothing <= 0.5
+assert 0.0 <= entropy_coeff <= 1.0
+assert 0.0 < ema_decay < 1.0
+assert batch_size > 0
+assert epochs > 0
+```
 
-cache = DataCache(
-    data_dir="education",
-    cache_dir=".cache/preprocessed_data",
-    cache_enabled=True
+---
+
+### DataCacheV3
+
+**Dosya:** `v3/data/cache_v3.py`
+
+**Strict Cache Mode** — Cache yoksa eğitim durur, graceful fallback yok.
+
+**Özel Exception'lar:**
+```python
+class CacheNotFoundError(Exception): ...  # Cache bulunamadı
+class CacheIntegrityError(Exception): ... # SHA-256 uyuşmazlığı
+```
+
+**Üçlü Dosya Yapısı:**
+```
+cache/
+├── {cache_key}.pkl       # Asıl veri (pickle)
+├── {cache_key}.sha256    # SHA-256 checksum
+└── {cache_key}.meta.json # Metadata (tarih, parametre, boyut)
+```
+
+**Cache Key Bileşenleri (MD5, 9 bileşen):**
+```
+data_dir + encode_mode + vocab_hash + max_seq + include_whole_words
++ include_syllables + include_sep + bpe_vocab_path + bpe_merges_path
+```
+
+**`load_strict()` Akışı:**
+```
+1. cache_key eşleşmesi ara
+2. Eşleşme yoksa → CacheNotFoundError (detaylı mesaj: mevcut cache'ler listelenir)
+3. Eşleşme varsa → SHA-256 checksum doğrula
+4. Checksum hatalı → CacheIntegrityError
+5. Başarılı → veri döndür
+```
+
+**`save()` — Atomic Write:**
+```
+1. tmp dosyaya yaz
+2. SHA-256 hesapla
+3. tmp → asıl dosya rename (atomic)
+4. .sha256 ve .meta.json yaz
+```
+
+**`load_for_training()` — Üst Seviye API:**
+```python
+cache.load_for_training(
+    tokenizer=tokenizer,
+    data_dir=config["data_dir"],
+    config=config
 )
+# vocab_hash + data_hash hesapla → cache_key → load_strict()
+```
 
-def process_data():
-    return tokenizer_core.load_training_data(
-        encode_mode="train",
-        include_whole_words=True,
-        include_syllables=True,
-        include_sep=True,
-    )
+---
 
-# Cache'den yükle veya işle
-data, from_cache = cache.get_or_process(
-    tokenizer_core=tokenizer_core,
-    encode_mode="train",
-    include_whole_words=True,
-    include_syllables=True,
-    include_sep=True,
-    max_seq_length=512,
-    process_func=process_data
+### CevahirDataset
+
+**Dosya:** `v3/data/dataset_v3.py`
+
+`torch.utils.data.Dataset` alt sınıfı. BucketBatchSampler entegrasyonu için uzunluk indeksi tutar.
+
+**Özellikler:**
+- **Uzunluk indeksi:** Her sequence için PAD hariç gerçek uzunluk (BucketBatchSampler için)
+- **Lazy tensor:** Veri liste ise `__getitem__`'da tensor'a çevir
+- **Source-ID drop:** 3-tuple `(inp, tgt, source_id)` → `(inp, tgt)`
+- **`get_length_stats()`:** `min / max / mean / median / p25 / p75 / p90 / p99`
+
+**Uzunluk Hesaplama (`_compute_lengths`):**
+```python
+# PAD token'larını geriye doğru say; son non-PAD pozisyonu bul
+for i in range(len(inp_list) - 1, -1, -1):
+    if inp_list[i] != pad_id:
+        real_len = i + 1; break
+```
+
+---
+
+### BucketBatchSampler
+
+**Dosya:** `v3/data/sampler_v3.py`
+
+Sequence uzunluklarına göre gruplama yaparak padding waste'i minimize eder.
+
+**Referans:** Schwartz et al. 2020, "Right Tool for the Job"
+
+**Algoritma:**
+```
+1. Sequence'ları uzunluğa göre sırala (sorted_indices)
+2. num_buckets adet eşit büyüklükte bucket'a böl
+3. Her epoch: bucket içi shuffle → batch oluştur → batch'leri shuffle
+4. Epoch bazlı seed: rng = Random(seed + epoch)
+```
+
+**Padding Waste Karşılaştırması:**
+```
+Statik Padding:  GPU'nun %70-90'ı PAD token hesaplar
+Bucket Batching: Padding waste %20-40'a düşer
+```
+
+**Parametreler:**
+
+| Parametre | Default | Açıklama |
+|---|---|---|
+| `lengths` | — | Her örnek için gerçek uzunluk listesi |
+| `batch_size` | — | Batch başına örnek sayısı |
+| `num_buckets` | 32 | Bucket sayısı (↑ = daha az padding, ↓ randomness) |
+| `shuffle_buckets` | True | Epoch başında batch shuffle |
+| `shuffle_within_bucket` | True | Bucket içi shuffle |
+| `drop_last` | False | Son incomplete batch'i at |
+| `seed` | 42 | Tekrarlanabilirlik için temel seed |
+
+**Epoch Güncellemesi:**
+```python
+sampler.set_epoch(epoch)  # Her epoch başında çağrılmalı
+```
+
+---
+
+### DynamicPaddingCollator
+
+**Dosya:** `v3/data/collator_v3.py`
+
+Her batch'i kendi içindeki maksimum sequence uzunluğuna pad eder.
+
+**Referans:** Ott et al. 2019, "Scaling Neural Machine Translation" (fairseq)
+
+**V2 Karşılaştırması:**
+```
+V2 (custom_collate): torch.stack() → global max_seq_length'e pad
+V3 (DynamicPaddingCollator): batch içi max uzunluğa pad
+```
+
+**GPU Etkisi (Örnek):**
+```
+Batch {len=10, len=12, len=15}:
+  V2: 512 token'a pad → 97% PAD hesabı
+  V3: 15 token'a pad  → sıfır gereksiz PAD hesabı
+```
+
+**`__call__()` Akışı:**
+```python
+max_len = max(item[0].size(-1) for item in batch)
+if max_seq_length: max_len = min(max_len, max_seq_length)
+
+inputs  = torch.full((batch_size, max_len), pad_id, dtype=torch.long)
+targets = torch.full((batch_size, max_len), pad_id, dtype=torch.long)
+
+for i, (inp, tgt) in enumerate(batch):
+    inp_len = min(inp.size(-1), max_len)
+    inputs[i, :inp_len] = inp[:inp_len]
+    # ... targets aynı
+```
+
+**Geriye Uyumluluk:**
+```python
+# V2 static collate (pre-padded veriler için):
+collate_fn = create_static_collate(pad_id=0)
+```
+
+---
+
+### DataLoader V3
+
+**Dosya:** `v3/data/dataloader_v3.py`
+
+**6 GPU Optimizasyon Katmanı:**
+
+| # | Optimizasyon | Etki |
+|---|---|---|
+| 1 | `pin_memory=True` | Sabitlenmiş RAM → PCIe DMA hızlı transfer |
+| 2 | `non_blocking=True` | Async GPU transfer (hesaplama ile örtüşür) |
+| 3 | `prefetch_factor=2` | N batch önceden hazırla |
+| 4 | `persistent_workers=True` | Worker process'leri epoch'lar arası canlı |
+| 5 | `BucketBatchSampler` | Padding waste minimize |
+| 6 | `DynamicPaddingCollator` | Batch başına dinamik pad uzunluğu |
+
+**`create_dataloaders_v3()` — Train / Val Farkı:**
+
+| | Train | Val |
+|---|---|---|
+| Sampler | `BucketBatchSampler` (shuffle) | `SequentialSampler` |
+| Bucket | `use_bucket_batching=True` | `False` |
+| Shuffle | `True` | `False` |
+
+**Windows Uyarısı:**
+```python
+if num_workers > 0 and os.name == "nt":
+    logger.warning("Windows'ta num_workers>0 sorunlu olabilir...")
+```
+
+---
+
+## V2 Sistemi
+
+### TrainingService (V2)
+
+**Dosya:** `v2/core/training_service.py` (936 satır)
+
+**`__init__()` Adımları:**
+- BPEValidator → TokenizerCore → vocab_size → DataCache (optional) → CriterionManager → ConfigManager → DataPreparator
+
+**`train()` Ana Akış:**
+```
+1. Model initialize (_initialize_model)
+2. Cache'den veri yükle (graceful fallback: None döndürür)
+3. Random split (source_id dikkate almaz)
+4. V2 DataLoader (create_dataloaders)
+5. V2 Config hazırla + TrainingManager
+```
+
+**`prepare_from_cache()` — Next-Token Alignment Doğrulama:**
+```python
+# inp[i+1] == tgt[i] kontrolü — autoregressive format doğrulaması
+_validate_alignment(data)
+```
+
+**`_test_model_after_epoch()` — Epoch Sonu Testi:**
+- Cevahir.generate() kullanmaz (standalone test)
+- Model doğrudan çağrılır
+
+---
+
+### ConfigManager (V2)
+
+**Dosya:** `v2/core/config_manager.py` (109 satır)
+
+`TRAIN_CONFIG` → V2 TrainingManager formatına dönüştürür.
+
+**`prepare_training_config()` — 21 Parametre:**
+
+Özel token ID çıkarımı:
+```python
+pad_id = tokenizer.special_tokens["<PAD>"]
+bos_id = tokenizer.special_tokens["<BOS>"]
+eos_id = tokenizer.special_tokens["<EOS>"]
+unk_id = tokenizer.special_tokens["<UNK>"]
+```
+
+**V3 ConfigManagerV3 ile Farkı:**
+
+| | V2 ConfigManager | V3 ConfigManagerV3 |
+|---|---|---|
+| Parametre sayısı | ~21 | 55+ |
+| Gruplar | Yok (düz dict) | 11 grup |
+| Entropy coeff | ✗ | ✓ |
+| SAM/Lookahead | ✗ | ✓ |
+| EMA/SWA | ✗ | ✓ |
+| LLRD | ✗ | ✓ |
+| Curriculum | ✗ | ✓ |
+| NaN Recovery | ✗ | ✓ |
+
+---
+
+### CriterionManager
+
+**Dosya:** `v2/core/criterion_manager.py`
+
+Loss fonksiyonu oluşturma ve yapılandırma.
+
+**`EntropyRegCriterion(nn.Module)` — Entropy Regularization:**
+
+> Referans: Pereyra et al. 2017, "Regularizing Neural Networks by Penalizing Confident Output Distributions"
+
+```python
+loss = CE_loss + entropy_coeff * (-mean_entropy)
+# Yüksek confidence → negatif entropy → penalize
+# Model daha "düşük emin" çıktılar üretmeye teşvik edilir
+```
+
+**Memory-Safe Chunk Hesaplama:**
+```python
+_CHUNK = 512  # Her forward'da max 512 örnek işle
+# Büyük vocab_size'da OOM riskini önler
+```
+
+**`LossComputation` Uyumluluk Property'leri:**
+```python
+@property
+def weight(self) -> Optional[Tensor]: ...
+@property
+def label_smoothing(self) -> float: ...
+@property
+def ignore_index(self) -> int: ...
+```
+
+**`CriterionManager.create_criterion()` Akışı:**
+```
+1. Vocab ağırlık tensor oluştur (EOS özel ağırlığı)
+2. CrossEntropyLoss(label_smoothing, ignore_index=pad_id)
+3. entropy_coeff > 0 ise → EntropyRegCriterion ile sarmala
+4. Döndür
+```
+
+---
+
+### BPEValidator
+
+**Dosya:** `v2/core/bpe_validator.py` (99 satır)
+
+BPE vocab ve merges dosyalarının varlığını ve içeriğini doğrular.
+
+**Strateji:** Fixed vocab (vocab sadece `train_bpe.py` ile oluşturulur, otomatik oluşturma yok)
+
+```python
+validator = BPEValidator(
+    vocab_path="bpe_vocab.json",
+    merges_path="bpe_merges.txt"
 )
+validator.validate_files()
+# Eksik veya boşsa → RuntimeError (train_bpe.py çalıştır mesajı)
+```
 
-if from_cache:
-    print("✅ Data loaded from cache!")
+---
+
+### DataPreparator (Deprecated)
+
+**Dosya:** `v2/core/data_preparator.py` (62 satır)
+
+> ⛔ **DEPRECATED** — Artık kullanılmıyor.
+
+```python
+# Örnekleme sırasında uyarı:
+DeprecationWarning: "DataPreparator kullanımdan kaldırıldı.
+TrainingService.prepare_from_cache() kullanın."
+```
+
+İşlevler `training_service.py` ve `prepare_cache.py`'ye taşındı.
+
+---
+
+### DataLoaderWrapper (V2)
+
+**Dosya:** `v2/data/data_loader_wrapper.py` (130 satır)
+
+**`SimpleDataset`:**
+```python
+class SimpleDataset(Dataset):
+    def __getitem__(self, idx) -> Tuple[Tensor, Tensor]:
+        return self.data[idx]  # (inp, tgt) tuple
+```
+
+**`custom_collate()`:**
+```python
+inputs  = torch.stack([item[0] for item in batch])
+targets = torch.stack([item[1] for item in batch])
+# Tüm sequence'lar aynı uzunlukta varsayılır (pre-padded)
+```
+
+**`create_dataloaders()`:**
+```python
+DataLoader(
+    pin_memory=True,
+    persistent_workers=(num_workers > 0),
+    prefetch_factor=(prefetch_factor if num_workers > 0 else None),
+)
+```
+
+**V3 ile Farkı:**
+
+| | V2 DataLoader | V3 DataLoader |
+|---|---|---|
+| Sampler | RandomSampler / SequentialSampler | BucketBatchSampler |
+| Collate | `torch.stack()` (statik) | DynamicPaddingCollator (dinamik) |
+| Padding | Global max_seq_length | Batch içi max uzunluk |
+| Padding Waste | %70-90 | %20-40 |
+
+---
+
+### WarmupCalculator
+
+**Dosya:** `v2/utils/warmup_calculator.py` (68 satır)
+
+```python
+def calculate_warmup_steps(
+    batches_per_epoch: int,
+    grad_accum_steps: int = 1,
+    warmup_epochs: float = 1.0,
+) -> int:
+    steps = (batches_per_epoch // grad_accum_steps) * warmup_epochs
+    return max(1, int(steps))  # Minimum 1 warmup step
+```
+
+V2 TrainingService içinde `train()` akışında çağrılır.
+
+---
+
+## V2 → V3 Otomatik Seçim
+
+`train.py → main()` içinde:
+
+```python
+if config.get("use_v3_training_system", False):
+    from training_system.v3.core.training_service_v3 import TrainingServiceV3
+    service = TrainingServiceV3(config)
 else:
-    print("📝 Data processed and cached!")
+    from training_system.v2.core.training_service import TrainingService
+    service = TrainingService(config)
 ```
 
-**`clear_cache()`**
-
-Tüm cache dosyalarını sil.
-
+**V3 için TRAIN_CONFIG:**
 ```python
-def clear_cache(self) -> int:
-    """
-    Clear all cache files.
-    
-    Returns:
-        Number of deleted files
-    """
+"use_v3_training_system": True,
+"use_bucket_batching": True,
+"num_buckets": 32,
+"use_dynamic_padding": True,
+"prefetch_factor": 2,
+"persistent_workers": True,
 ```
+
+**Ne Zaman V3 Kullanılmalı?**
+
+| Durum | Öneri |
+|---|---|
+| GPU ile eğitim | V3 (pin_memory + async transfer) |
+| Değişken uzunluklu sequences | V3 (BucketBatchSampler) |
+| Büyük dataset (>100K örnek) | V3 (DynamicPadding) |
+| Cache bütünlüğü kritik | V3 (SHA-256 strict mode) |
+| Source bazlı data split | V3 (source_id_aware_split) |
+| CPU ile hızlı prototip | V2 (daha basit) |
 
 ---
 
-## 🔄 Training Pipeline
+## Konfigürasyon Parametreleri
 
-### 1. Initialization Phase
-
-```python
-TrainingService.__init__(config)
-    ↓
-1. BPE Path Setup
-    ├── vocab_path
-    ├── merges_path
-    └── Directory creation
-    ↓
-2. Device Detection
-    ├── CUDA available?
-    ├── GPU activation (Colab optimized)
-    └── Device test
-    ↓
-3. TokenizerCore Init
-    ├── Config preparation
-    ├── TokenizerCore creation
-    └── Data directory validation
-    ↓
-4. DataCache Init
-    ├── Cache directory setup
-    └── Cache enabled check
-    ↓
-5. BPE Management
-    ├── File existence check
-    ├── Rebuild decision
-    ├── BPE training (if needed)
-    └── Vocab finalization
-    ↓
-6. ModelManager Init
-    ├── Config preparation
-    ├── ModelManager creation
-    └── Model initialization
-    ↓
-7. TensorBoard Setup
-    ├── SummaryWriter creation
-    ├── Run header logging
-    └── BPE dashboard logging
-```
-
-### 2. Training Phase
+### Kritik V5 Mimari Parametreleri
 
 ```python
-TrainingService.train()
-    ↓
-1. Model Initialization
-    ├── Checkpoint loading (if exists)
-    └── Model init (if not)
-    ↓
-2. Data Preparation
-    ├── Cache check
-    ├── Data loading/processing
-    ├── Dataset creation
-    ├── Train/Val split
-    └── DataLoader creation
-    ↓
-3. TrainingManager Setup
-    ├── Config preparation
-    ├── TrainingManager creation
-    └── TensorBoard writer assignment
-    ↓
-4. Training Loop
-    ├── Epoch iteration
-    ├── Training epoch
-    ├── Validation epoch
-    ├── Epoch callback (testing)
-    ├── Checkpoint saving
-    └── History saving
-    ↓
-5. Finalization
-    ├── Final model save
-    ├── TensorBoard hparams
-    └── Writer closing
-```
-
-### 3. Epoch Callback Flow
-
-```python
-on_epoch_end(epoch, train_loss, val_loss)
-    ↓
-1. Model Testing
-    ├── Model.eval()
-    ├── Test prompts
-    ├── Autoregressive generation
-    └── Response decoding
-    ↓
-2. Result Logging
-    ├── Console logging
-    ├── TensorBoard text
-    └── File saving
-    ↓
-3. History Saving
-    ├── Training history JSON
-    └── Epoch test results (TXT/JSON)
-```
-
----
-
-## 📊 Data Management
-
-### 1. Hybrid Corpus
-
-TrainingService, hem QA format (JSON) hem de raw text (TXT/DOCX) verilerini birleştirir.
-
-**QA Format:**
-
-```json
-{
-  "question": "Soru metni",
-  "answer": "Cevap metni"
-}
-```
-
-**Raw Text:**
-
-```
-Metin içeriği...
-```
-
-**Hybrid Corpus Creation:**
-
-```python
-# QA data
-qa_data = qa_loader.load()  # List[(question, answer)]
-
-# Raw text
-raw_data = raw_loader.load()  # List[str]
-
-# Hybrid corpus
-corpus = []
-for q, a in qa_data:
-    corpus.extend([q, a])
-corpus.extend(raw_data)
-```
-
-### 2. Data Caching
-
-Preprocessed data cache sistemi, her epoch'ta dosyaları tekrar okumak/encode etmek yerine cache'den yükler.
-
-**Cache Key Components:**
-- Data directory path
-- Encode mode
-- Include flags (whole_words, syllables, sep)
-- Max sequence length
-- Vocab hash (vocab değişirse cache invalid)
-- Data dir hash (dosyalar değişirse cache invalid)
-
-**Cache Invalidation:**
-- Vocab değiştiğinde (vocab hash değişir)
-- Data dosyaları değiştiğinde (data dir hash değişir)
-- Encoding parametreleri değiştiğinde (cache key değişir)
-
-**Örnek:**
-
-```python
-# İlk çalıştırma: Cache yok, veri işlenir ve cache'e kaydedilir
-data, from_cache = cache.get_or_process(...)
-# from_cache = False
-# Veri işlenir: ~10 dakika
-
-# İkinci çalıştırma: Cache var, veri cache'den yüklenir
-data, from_cache = cache.get_or_process(...)
-# from_cache = True
-# Veri yüklenir: ~10 saniye (600x hızlanma!)
-```
-
-### 3. Autoregressive Format
-
-Training data, autoregressive learning için hazırlanır:
-
-```python
-# Input:  [BOS, token1, token2, ..., tokenN, EOS]
-# Target: [token1, token2, ..., tokenN, EOS]  # BOS YOK, bir token kaydırılmış
-
-# Model öğrenir:
-# BOS → token1
-# token1 → token2
-# ...
-# tokenN → EOS
-```
-
----
-
-## 🔧 BPE Management
-
-### 1. Rebuild Logic
-
-TrainingService, BPE vocab/merges dosyalarının varlığını kontrol eder:
-
-**Logic:**
-1. **Files exist** → Load only (no rebuild)
-2. **Files missing + `bpe_rebuild=True`** → Rebuild from scratch
-3. **Files missing + `bpe_rebuild=False`** → Raise error
-
-**Örnek:**
-
-```python
-# Config
-config = {
-    "bpe_rebuild": False,  # Dosyalar varsa rebuild yapma
-    "vocab_path": "data/vocab_lib/vocab.json",
-    "merges_path": "data/merges_lib/merges.txt",
-}
-
-# Senaryo 1: Dosyalar var
-# → Sadece yükle, rebuild yapma
-
-# Senaryo 2: Dosyalar yok + bpe_rebuild=True
-config["bpe_rebuild"] = True
-# → Rebuild yap, dosyaları oluştur
-
-# Senaryo 3: Dosyalar yok + bpe_rebuild=False
-config["bpe_rebuild"] = False
-# → Hata ver: "BPE vocab/merges dosyaları bulunamadı!"
-```
-
-### 2. BPE Training
-
-Eğer rebuild gerekiyorsa, hybrid corpus ile BPE training yapılır:
-
-```python
-# 1. QA data load
-qa_loader = DataLoaderManager(LoadMode.QA_TRAIN)
-qa_data = qa_loader.load()
-
-# 2. Raw text load
-raw_loader = DataLoaderManager(LoadMode.TEXT_INFER)
-raw_data = raw_loader.load()
-
-# 3. Hybrid corpus
-corpus = []
-for q, a in qa_data:
-    corpus.extend([q, a])
-corpus.extend(raw_data)
-
-# 4. BPE training
-tokenizer_core.train_model(
-    corpus,
-    method="bpe",
-    vocab_size=merge_operations,
-    max_iter=bpe_max_iter,
-    min_frequency=bpe_min_frequency,
-    include_whole_words=bpe_include_whole,
-    include_syllables=bpe_include_syllables,
-    include_sep=bpe_include_sep,
-)
-```
-
-### 3. Vocab Finalization
-
-Vocab genişletme için sample texts kullanılır:
-
-```python
-# Sample texts collection
-sample_texts = _get_sample_texts()  # İlk 50 dosyadan örnekler
-
-# Vocab finalization
-tokenizer_core.finalize_vocab(sample_texts)
-```
-
----
-
-## 🤖 Model Initialization
-
-### 1. Checkpoint Loading
-
-TrainingService, mevcut checkpoint'i yüklemeyi dener:
-
-```python
-def _initialize_model(self) -> None:
-    if os.path.exists(MODEL_SAVE_PATH):
-        # Checkpoint var → Yükle
-        self.model_manager.load(MODEL_SAVE_PATH, weights_only=True)
-    else:
-        # Checkpoint yok → Yeni model init
-        self.model_manager.initialize()
-```
-
-### 2. V-2/V-3/V-4 Feature Support
-
-TrainingService, tüm V-2/V-3/V-4 özelliklerini destekler:
-
-**V-2 Features:**
-- `num_layers`: Transformer layer sayısı
-- `ffn_dim`: FFN dimension
-- `pre_norm`: Pre-norm/Post-norm
-- `causal_mask`: Causal masking
-
-**V-3 Features:**
-- `use_flash_attention`: Flash Attention 2.0
-- `pe_mode`: Positional encoding mode (rope/sinusoidal/learned)
-- `use_gradient_checkpointing`: Memory-efficient training
-- `tie_weights`: Weight tying
-
-**V-4 Features:**
-- `use_rmsnorm`: RMSNorm
-- `use_swiglu`: SwiGLU activation
-- `use_kv_cache`: KV Cache
-- `use_moe`: Mixture of Experts
-- `quantization_type`: Model quantization
-
----
-
-## 📈 TensorBoard Integration
-
-### 1. Run Header
-
-Training başlangıcında config bilgileri loglanır:
-
-```python
-_tb_log_run_header()
-    ├── Device info
-    ├── BPE parameters
-    ├── Training parameters
-    ├── Model architecture (V-2/V-3/V-4)
-    └── Config JSON (TensorBoard text)
-```
-
-### 2. BPE Dashboard
-
-BPE vocab ve merges bilgileri:
-
-```python
-_log_bpe_dashboard()
-    ├── Vocab size (scalar)
-    ├── Merges count (scalar)
-    ├── Special tokens count
-    ├── Word tokens count
-    ├── Syllable tokens count
-    ├── Word length histogram
-    ├── Syllable length histogram
-    └── Top 20 tokens (text)
-```
-
-### 3. Data Dashboard
-
-Training data istatistikleri:
-
-```python
-# Data statistics
-├── Total samples (scalar)
-├── Train/Val split (scalar)
-├── Input sequence length histogram
-├── Target sequence length histogram
-├── UNK rate (scalar)
-└── Sample decoded preview (text)
-```
-
-### 4. Model Weights
-
-Model parametreleri:
-
-```python
-_tb_log_model_weights(step)
-    ├── Total parameters (scalar)
-    ├── Trainable parameters (scalar)
-    └── Weight histograms (optional)
-```
-
-### 5. Optimizer Info
-
-Optimizer parametreleri:
-
-```python
-_tb_log_optimizer(step)
-    ├── Learning rate (scalar)
-    ├── Beta1 (scalar)
-    └── Beta2 (scalar)
-```
-
-### 6. Epoch Test Results
-
-Her epoch sonunda test sonuçları:
-
-```python
-# TensorBoard text logging
-_tb().add_text(f"Epoch_{epoch}/Test", f"Q: {prompt}\nA: {response}", epoch)
-```
-
----
-
-## 📝 API Referansı
-
-### TrainingService
-
-#### `__init__(config: Dict[str, Any])`
-
-TrainingService'i initialize et.
-
-**Parameters:**
-- `config`: Configuration dictionary
-
-**Örnek:**
-
-```python
-from training_system.training_service import TrainingService
-
-config = {
-    "data_dir": "education",
-    "epochs": 30,
-    "batch_size": 32,
-    "learning_rate": 8e-5,
-    # ... (see full config in train.py)
-}
-
-service = TrainingService(config)
-```
-
-#### `train() -> Tuple[float, float]`
-
-Eğitimi başlat.
-
-**Returns:**
-- `(train_loss, val_loss)`: Final loss değerleri
-
-**Örnek:**
-
-```python
-train_loss, val_loss = service.train()
-print(f"Final Train Loss: {train_loss:.6f}")
-print(f"Final Val Loss: {val_loss:.6f}")
-```
-
-#### `_prepare_data() -> Tuple[TorchDataLoader, TorchDataLoader, int]`
-
-Eğitim verisini hazırla.
-
-**Returns:**
-- `(train_loader, val_loader, seq_len)`: DataLoaders ve sequence length
-
-#### `_test_model_after_epoch(epoch: int, train_loss: float, val_loss: float, test_prompts: Optional[List[str]] = None) -> None`
-
-Epoch sonunda modeli test et.
-
-**Parameters:**
-- `epoch`: Epoch numarası
-- `train_loss`: Train loss
-- `val_loss`: Validation loss
-- `test_prompts`: Test prompt'ları (None ise default)
-
-#### `save_model(epoch: int = None) -> None`
-
-Model'i kaydet.
-
-**Parameters:**
-- `epoch`: Epoch numarası (None ise config'ten alınır)
-
----
-
-## 🎯 Kullanım Örnekleri
-
-### Örnek 1: Basit Training
-
-```python
-from training_system.train import main
-
-# train.py içindeki TRAIN_CONFIG kullanılır
-if __name__ == "__main__":
-    main()
-```
-
-### Örnek 2: Custom Config ile Training
-
-```python
-from training_system.training_service import TrainingService
-
-config = {
-    "data_dir": "education",
-    "epochs": 10,
-    "batch_size": 16,
-    "learning_rate": 1e-4,
+TRAIN_CONFIG = {
+    # Temel mimari
     "embed_dim": 512,
-    "num_layers": 6,
-    "bpe_rebuild": False,  # Mevcut vocab kullan
-    "enable_data_cache": True,
-    "use_tensorboard": True,
-}
+    "num_heads": 8,
+    "num_layers": 8,
+    "ffn_dim": 2048,
 
-service = TrainingService(config)
-train_loss, val_loss = service.train()
+    # GQA (Grouped Query Attention)
+    "num_kv_heads": 2,           # 4 grup → %75 KV cache azalması
+
+    # RoPE + YaRN
+    "rope_scaling_type": "yarn",
+    "rope_scaling_factor": 2.0,
+
+    # Sliding Window Attention
+    "sliding_window": 512,
+
+    # Optimizer
+    "use_adamw8bit": True,       # bitsandbytes — ~8 GB VRAM tasarrufu
+
+    # V3 Training System
+    "use_v3_training_system": True,
+    "use_bucket_batching": True,
+    "num_buckets": 32,
+}
 ```
 
-### Örnek 3: BPE Rebuild ile Training
+### Gelişmiş Eğitim Parametreleri (V3 ConfigManagerV3)
 
 ```python
-config = {
-    "data_dir": "education",
-    "bpe_rebuild": True,  # BPE'yi sıfırdan oluştur
-    "merge_operations": 60000,
-    "bpe_min_frequency": 2,
-    "epochs": 30,
-    # ...
-}
+# Entropy Regularization (Pereyra et al. 2017)
+"entropy_coeff": 0.01,          # 0 = devre dışı
 
-service = TrainingService(config)
-service.train()
+# Focal Loss (Lin et al. 2017)
+"focal_loss_gamma": 2.0,        # 0 = standart CrossEntropy
+
+# SAM (Sharpness-Aware Minimization)
+"use_sam": False,
+"sam_rho": 0.05,
+
+# Lookahead
+"use_lookahead": False,
+"lookahead_k": 5,
+"lookahead_alpha": 0.5,
+
+# AGC (Adaptive Gradient Clipping)
+"agc_clip_val": 0.01,
+
+# EMA (Exponential Moving Average)
+"use_ema": True,
+"ema_decay": 0.999,
+
+# SWA (Stochastic Weight Averaging)
+"use_swa": False,
+"swa_start_epoch": 5,
+"swa_lr": 1e-4,
+
+# LLRD (Layer-wise Learning Rate Decay)
+"use_llrd": False,
+"llrd_decay": 0.9,
+
+# Scheduled Sampling
+"scheduled_sampling_start": 0.0,
+
+# NaN Recovery
+"nan_recovery_enabled": True,
+"spike_detection_enabled": True,
+"spike_threshold": 5.0,
 ```
 
-### Örnek 4: Cache Kullanımı
+---
+
+## GPU Optimizasyonları
+
+### Bellek Yönetimi
 
 ```python
-from training_system.data_cache import DataCache
+# train.py başında — OOM parçalanmasını önler
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
-# Cache'i aktif et
-cache = DataCache(
-    data_dir="education",
-    cache_dir=".cache/preprocessed_data",
-    cache_enabled=True
+# bitsandbytes ile 8-bit AdamW
+"use_adamw8bit": True  # ~8 GB VRAM tasarrufu
+```
+
+### DataLoader GPU Optimizasyonları
+
+```python
+DataLoader(
+    pin_memory=True,          # RAM → GPU DMA hızlı transfer
+    num_workers=4,            # Parallel veri yükleme
+    prefetch_factor=2,        # 2 batch önceden hazırla
+    persistent_workers=True,  # Process overhead sıfırla
 )
+```
 
-# İlk çalıştırma: Cache yok, işle
-data, from_cache = cache.get_or_process(...)
-print(f"From cache: {from_cache}")  # False
+### Gradient Optimizasyonları
 
-# İkinci çalıştırma: Cache var, yükle
-data, from_cache = cache.get_or_process(...)
-print(f"From cache: {from_cache}")  # True
-
-# Cache'i temizle
-deleted = cache.clear_cache()
-print(f"Deleted {deleted} cache files")
+```python
+"use_amp": True,              # Mixed precision (FP16/BF16)
+"grad_accum_steps": 4,        # Effective batch_size = batch * 4
+"max_grad_norm": 1.0,         # Gradient clipping
+"agc_clip_val": 0.01,         # Adaptive Gradient Clipping
 ```
 
 ---
 
-## 🎓 Best Practices
+## Cache Sistemi Karşılaştırması
 
-### 1. BPE Management
-
-- ✅ İlk training'de `bpe_rebuild=True` kullan
-- ✅ Sonraki training'lerde `bpe_rebuild=False` (mevcut vocab kullan)
-- ✅ Vocab değiştiğinde cache'i temizle
-- ✅ BPE parametrelerini config'te tut
-
-### 2. Data Caching
-
-- ✅ Cache'i aktif tut (performans için)
-- ✅ Vocab değiştiğinde cache'i temizle
-- ✅ Data dosyaları değiştiğinde cache otomatik invalid olur
-- ✅ Cache dizinini `.gitignore`'a ekle
-
-### 3. Training Configuration
-
-- ✅ Config'i `train.py` içinde merkezi tut
-- ✅ Tokenizer config'i `tokenizer_management/config.py`'den al
-- ✅ GPU detection'ı aktif tut (Colab için)
-- ✅ TensorBoard'u aktif tut (monitoring için)
-
-### 4. Model Checkpointing
-
-- ✅ Her epoch sonunda checkpoint kaydet
-- ✅ Best model'i takip et
-- ✅ Checkpoint'leri `saved_models/checkpoints/` altında sakla
-
-### 5. Error Handling
-
-- ✅ KeyboardInterrupt handling (partial checkpoint)
-- ✅ NaN loss detection
-- ✅ OOV token clamping
-- ✅ Exception logging
+| Özellik | V2 DataCache | V3 DataCacheV3 |
+|---|---|---|
+| Bulunamama durumu | `None` döndür | `CacheNotFoundError` fırlat |
+| Bütünlük doğrulama | Yok | SHA-256 checksum |
+| Metadata | Yok | `.meta.json` (tarih, param, boyut) |
+| Atomic write | Yok (doğrudan yaz) | tmp → rename |
+| Cache key bileşeni | ~5 bileşen | 9 bileşen |
+| İzin verilen hata | Evet (fallback) | Hayır (strict) |
+| Kullanım senaryosu | Prototip/geliştirme | Production eğitimi |
 
 ---
 
-## 🔗 İlgili Dokümantasyon
-
-- [Training Management](../training_management/README.md) - Training loop detayları
-- [Model Management](../model_management/README.md) - Model yönetimi
-- [Tokenizer Management](../tokenizer_management/README.md) - BPE tokenizer
-- [Data Loader Management](../data_loader_management/README.md) - Veri yükleme
-- [Neural Network](../neural_network/README.md) - Model mimarisi
-
----
-
-**Hazırlayan:** AI Assistant (Auto)  
-**Versiyon:** V-1  
-**Durum:** ✅ Production-Ready
-
+*Yazar: Muhammed Yasin Yılmaz — Cevahir-AI Projesi*
+*© 2024 Muhammed Yasin Yılmaz. Tüm Hakları Saklıdır.*
