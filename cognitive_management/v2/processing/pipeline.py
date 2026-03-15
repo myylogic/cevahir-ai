@@ -54,6 +54,9 @@ from cognitive_management.cognitive_types import (
     DecodingConfig,
     PolicyOutput,
     ThoughtCandidate,
+    ReasoningTrace,
+    CriticFeedback,
+    SelfConsistencyResult,
 )
 
 
@@ -66,13 +69,16 @@ class ProcessingContext:
     """
     Processing context.
     Pipeline boyunca taşınan veri.
-    
-    Phase 3: Enhanced with retrieved contexts and advanced metadata.
+
+    V3: SelfConsistencyResult, CriticFeedback, ReasoningTrace,
+        memory_hit_count ve latency_ms alanları eklendi.
+        CognitiveOutput'un tüm zengin alanları bu context üzerinden
+        pipeline sonunda doldurulur.
     """
     state: CognitiveState
     request: CognitiveInput
     decoding_config: Optional[DecodingConfig] = None
-    
+
     # Pipeline boyunca değişen veriler
     features: dict = field(default_factory=dict)
     policy_output: Optional[PolicyOutput] = None
@@ -82,13 +88,21 @@ class ProcessingContext:
     draft_text: Optional[str] = None
     final_text: Optional[str] = None
     revised: bool = False
-    
+
     # Phase 3: Memory retrieval
     retrieved_contexts: List[dict] = field(default_factory=list)
-    
+
+    # V3: Zengin çıktı alanları
+    reasoning_traces: List[ReasoningTrace] = field(default_factory=list)
+    critic_feedback: List[CriticFeedback] = field(default_factory=list)
+    critic_passes: int = 0          # Self-Refine geçiş sayısı (_last_passes)
+    self_consistency_result: Optional[SelfConsistencyResult] = None
+    memory_hit_count: int = 0
+
     # Metadata
     processing_steps: List[str] = field(default_factory=list)
     errors: List[str] = field(default_factory=list)
+    start_time: float = field(default_factory=lambda: __import__("time").time())
 
 
 # =============================================================================
@@ -236,7 +250,7 @@ class ProcessingPipeline:
         
         # Process through chain
         result_context = self._first_handler.handle(context)
-        
+
         if not result_context:
             # Pipeline failed
             return CognitiveOutput(
@@ -245,13 +259,51 @@ class ProcessingPipeline:
                 tool_used=None,
                 revised_by_critic=False,
             )
-        
-        # Build output
+
+        # --- Latency ---
+        import time as _time
+        latency_ms = (_time.time() - result_context.start_time) * 1000.0
+
+        # --- reasoning_chain: sıralı ReasoningTrace listesi ---
+        reasoning_chain = list(result_context.reasoning_traces)  # kopya, orijinalini koru
+
+        # --- critic_passes: CriticHandler'ın set ettiği Self-Refine geçiş sayısı ---
+        critic_passes = result_context.critic_passes
+
+        # --- query_type / domain: policy_output veya features'dan ---
+        po = result_context.policy_output
+        query_type = (
+            po.query_type if po and hasattr(po, "query_type") else
+            result_context.features.get("query_type")
+        )
+        domain = (
+            po.domain if po and hasattr(po, "domain") else
+            result_context.features.get("domain")
+        )
+
+        # --- context_sources: retrieved belge başlıkları ---
+        context_sources = [
+            ctx.get("title", ctx.get("id", ""))
+            for ctx in result_context.retrieved_contexts
+            if ctx
+        ]
+
+        # Build full output
         return CognitiveOutput(
             text=result_context.final_text or result_context.draft_text or "",
-            used_mode=result_context.policy_output.mode if result_context.policy_output else "direct",
+            used_mode=po.mode if po else "direct",
             tool_used=result_context.tool_name,
             revised_by_critic=result_context.revised,
+            # V3 zengin alanlar
+            reasoning_chain=reasoning_chain,
+            critic_passes=critic_passes,
+            critic_feedback=result_context.critic_feedback,
+            memory_hits=result_context.memory_hit_count,
+            latency_ms=round(latency_ms, 2),
+            query_type=query_type,
+            domain=domain,
+            self_consistency_result=result_context.self_consistency_result,
+            context_sources=context_sources,
         )
 
 
