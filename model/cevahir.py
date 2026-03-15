@@ -706,8 +706,8 @@ class CevahirModelAPI(CognitiveModelAPI):
                     logger.debug(f"[GEN] Step {step}: Generated token_id={next_token_id}, token_text='{token_text}', eos_id={eos_id}, "
                                f"is_eos={next_token_id == eos_id if eos_id is not None else False}")
                 
-                # EOS gelince dur; erken EOS'u "ignore" etmeyiz (sonraki tokenlar anlamsız oluyordu)
-                if eos_id is not None and next_token_id == eos_id:
+                # EOS gelince dur; ama minimum 5 token üretmeden durma (erken collapse önlemi)
+                if eos_id is not None and next_token_id == eos_id and tokens_generated >= 5:
                     generated.append(next_token_id)
                     break
                 
@@ -924,41 +924,66 @@ class CevahirModelAPI(CognitiveModelAPI):
     
     def entropy_estimate(self, text: str) -> float:
         """
-        Estimate text entropy.
-        
-        Endüstri Standardı: Proper entropy calculation
+        Estimate uncertainty as Shannon entropy of next-token logit distribution.
+
+        Uses the model's own probability distribution over the vocabulary to
+        compute H = -sum(p_i * log(p_i)) for the last token position.
+        High entropy → model is uncertain (many plausible next tokens).
+        Low entropy → model is confident (one dominant next token).
+
+        This is the academically correct uncertainty metric used in active
+        learning and LLM calibration research (Kuhn et al. 2023).
+
+        Returns:
+            Normalized entropy in [0, 1] (0=certain, 1=maximally uncertain)
         """
         if not text:
             return 0.5
-        
+
         try:
-            # Character-level entropy
-            unique_chars = len(set(text))
-            total_chars = len(text)
-            if total_chars == 0:
+            # Encode text to token IDs
+            tokens, _ = self._tokenizer_core.encode(text, mode="inference")
+            if not tokens:
                 return 0.5
-            
-            char_entropy = unique_chars / total_chars
-            
-            # Token-level entropy (if tokenized)
-            try:
-                tokens, _ = self.tokenizer_core.encode(text, mode="inference")
-                unique_tokens = len(set(tokens))
-                total_tokens = len(tokens)
-                if total_tokens > 0:
-                    token_entropy = unique_tokens / total_tokens
-                    # Combine
-                    entropy = (char_entropy * 0.3 + token_entropy * 0.7)
-                else:
-                    entropy = char_entropy
-            except Exception:
-                entropy = char_entropy
-            
-            # Normalize to 0-1 range
-            return max(0.1, min(1.0, entropy))
-            
+
+            # Build input tensor (batch_size=1, seq_len=T)
+            token_tensor = torch.tensor(
+                [tokens], dtype=torch.long, device=self.config.device
+            )
+
+            # Forward pass to get logits [1, T, vocab_size] with no gradient
+            with torch.no_grad():
+                logits, _ = self._model_manager.forward(token_tensor)
+
+            # Take last token position: [vocab_size]
+            last_logits = logits[0, -1, :]
+
+            # Softmax → probability distribution
+            probs = torch.softmax(last_logits.float(), dim=-1)
+
+            # Shannon entropy: H = -sum(p * log(p))
+            # Clamp to avoid log(0)
+            log_probs = torch.log(probs.clamp(min=1e-10))
+            entropy = -(probs * log_probs).sum().item()
+
+            # Max entropy for a uniform distribution over vocab_size
+            vocab_size = probs.shape[0]
+            max_entropy = torch.log(torch.tensor(float(vocab_size))).item()
+
+            # Normalize to [0, 1]
+            normalized = entropy / max_entropy if max_entropy > 0 else 0.5
+            return float(max(0.0, min(1.0, normalized)))
+
         except Exception as e:
-            logger.warning(f"Entropy estimation error: {e}")
+            logger.debug(f"Logit entropy estimation failed, falling back to heuristic: {e}")
+            # Heuristic fallback: token type-token ratio as diversity proxy
+            try:
+                tokens, _ = self._tokenizer_core.encode(text, mode="inference")
+                if tokens:
+                    ttr = len(set(tokens)) / len(tokens)
+                    return float(max(0.1, min(1.0, ttr)))
+            except Exception:
+                pass
             return 0.5
     
     # Multimodal support
@@ -1380,11 +1405,16 @@ class Cevahir:
         top_p: float = 1.0,
         top_k: int = 0,
         repetition_penalty: float = 1.0,
+        use_cognitive_pipeline: bool = True,
         **kwargs
     ) -> str:
         """
         Generate text from prompt.
-        
+
+        When cognitive manager is available, routes through the full cognitive
+        pipeline (Critic + Memory + Deliberation) by default.
+        Set use_cognitive_pipeline=False for raw model generation (bypass).
+
         Args:
             prompt: Input prompt
             max_new_tokens: Maximum tokens to generate
@@ -1392,8 +1422,11 @@ class Cevahir:
             top_p: Nucleus sampling threshold
             top_k: Top-k sampling
             repetition_penalty: Repetition penalty
+            use_cognitive_pipeline: If True and cognitive manager available,
+                                    routes through full cognitive pipeline
+                                    (Self-Refine, Memory, Critic). Default: True.
             **kwargs: Additional generation parameters
-        
+
         Returns:
             Generated text
         """
@@ -1401,7 +1434,43 @@ class Cevahir:
             # Phase 3: Performance profiling
             profiling = getattr(self, '_profiling_enabled', False)
             start_time = time.time() if profiling else None
-            
+
+            # Route through cognitive pipeline when available (Critic + Memory + Self-Refine)
+            cognitive_manager = getattr(self, '_cognitive_manager', None)
+            if use_cognitive_pipeline and cognitive_manager is not None:
+                try:
+                    state = CognitiveState()
+                    decoding_override = DecodingConfig(
+                        max_new_tokens=max_new_tokens,
+                        temperature=temperature,
+                        top_p=top_p,
+                        top_k=top_k,
+                        repetition_penalty=repetition_penalty,
+                    )
+                    input_msg = CognitiveInput(user_message=prompt)
+                    cognitive_output = cognitive_manager.handle(
+                        state,
+                        input_msg,
+                        decoding=decoding_override,
+                    )
+                    result = cognitive_output.text if cognitive_output and cognitive_output.text else ""
+
+                    # Phase 3: Record profiling stats
+                    if profiling and start_time is not None:
+                        elapsed = time.time() - start_time
+                        if not hasattr(self, '_profiling_stats'):
+                            self.enable_profiling(True)
+                        self._profiling_stats["generate_calls"] += 1
+                        self._profiling_stats["total_generate_time"] += elapsed
+
+                    return result
+                except Exception as cognitive_err:
+                    # Cognitive pipeline failed - fall through to direct generation
+                    logger.warning(
+                        f"Cognitive pipeline generate başarısız, doğrudan üretim kullanılıyor: {cognitive_err}"
+                    )
+
+            # Direct model generation (no cognitive pipeline)
             decoding_cfg = DecodingConfig(
                 max_new_tokens=max_new_tokens,
                 temperature=temperature,
@@ -1410,7 +1479,7 @@ class Cevahir:
                 repetition_penalty=repetition_penalty,
             )
             result = self._model_api.generate(prompt, decoding_cfg)
-            
+
             # Phase 3: Record profiling stats
             if profiling and start_time is not None:
                 elapsed = time.time() - start_time
@@ -1418,7 +1487,7 @@ class Cevahir:
                     self.enable_profiling(True)
                 self._profiling_stats["generate_calls"] += 1
                 self._profiling_stats["total_generate_time"] += elapsed
-            
+
             return result
         except Exception as e:
             msg, suggestion = _ErrorContextBuilder.build_error_message(
