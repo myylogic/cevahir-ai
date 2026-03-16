@@ -1,4 +1,4 @@
-# 📂 Data Loader Management - Kapsamlı Dokümantasyon
+#  Data Loader Management - Kapsamlı Dokümantasyon
 
 **Versiyon:** V-5  
 **Son Güncelleme:** 2025-01-27  
@@ -6,7 +6,7 @@
 
 ---
 
-## 📋 İçindekiler
+##  İçindekiler
 
 1. [Genel Bakış](#genel-bakış)
 2. [Mimari Yapı](#mimari-yapı)
@@ -19,19 +19,19 @@
 
 ---
 
-## 🎯 Genel Bakış
+##  Genel Bakış
 
 **DataLoaderManager**, Cevahir Sinir Sistemi'nde eğitim ve inference için veri yükleme işlemlerini yöneten, SOLID prensiplere uygun bir modüldür. Raw text, JSON, DOCX dosyalarından veri yükler ve farklı formatları (QA pairs, sentiment, instruction) standart QA formatına dönüştürür.
 
 ### Temel Özellikler
 
-- ✅ **SOLID Uyumlu:** Yalın, test edilebilir tasarım
-- ✅ **Multi-format Support:** JSON, TXT, DOCX
-- ✅ **Smart Text Splitting:** Akıllı metin bölme (cümle bazlı, overlap)
-- ✅ **Token Estimation:** Türkçe için optimize token tahmini
-- ✅ **Format Conversion:** Sentiment, instruction → QA format
-- ✅ **Fail-fast:** Strict mode ile hata yakalama
-- ✅ **Hybrid Training:** QA pairs + Raw text chunks
+-  **SOLID Uyumlu:** Yalın, test edilebilir tasarım
+-  **Multi-format Support:** JSON, TXT, DOCX
+-  **Smart Text Splitting:** Akıllı metin bölme (cümle bazlı, overlap)
+-  **Token Estimation:** Türkçe için optimize token tahmini
+-  **Format Conversion:** Sentiment, instruction → QA format
+-  **Fail-fast:** Strict mode ile hata yakalama
+-  **Hybrid Training:** QA pairs + Raw text chunks
 
 ---
 
@@ -198,9 +198,9 @@ Output: List[str] (chunks with overlap)
 - `List[Tuple[str, str]]`: `[(question, answer), ...]`
 
 **Özellikler:**
-- ✅ Multiple key support ("Soru"/"question"/"instruction"/"prompt")
-- ✅ Format conversion (sentiment, instruction → QA)
-- ✅ Smart splitting (uzun cevapları böler)
+-  Multiple key support ("Soru"/"question"/"instruction"/"prompt")
+-  Format conversion (sentiment, instruction → QA)
+-  Smart splitting (uzun cevapları böler)
 
 ---
 
@@ -217,9 +217,9 @@ Output: List[str] (chunks with overlap)
 - `List[str]`: Raw text chunks
 
 **Özellikler:**
-- ✅ Smart splitting (uzun metinleri böler)
-- ✅ DOCX support (paragraph extraction)
-- ✅ Token-aware chunking
+-  Smart splitting (uzun metinleri böler)
+-  DOCX support (paragraph extraction)
+-  Token-aware chunking
 
 ---
 
@@ -235,9 +235,9 @@ Output: List[str] (chunks with overlap)
 - `List[str]`: Raw text chunks
 
 **Özellikler:**
-- ✅ Smart splitting
-- ✅ DOCX support
-- ✅ Overlap management
+-  Smart splitting
+-  DOCX support
+-  Overlap management
 
 ---
 
@@ -251,9 +251,9 @@ estimated_tokens = word_count * 1.33  # Türkçe için optimize
 ```
 
 **Özellikler:**
-- ✅ Türkçe için optimize (1 token ≈ 0.75 kelime)
-- ✅ Hızlı hesaplama (word count bazlı)
-- ✅ Sentence-level ve word-level estimation
+-  Türkçe için optimize (1 token ≈ 0.75 kelime)
+-  Hızlı hesaplama (word count bazlı)
+-  Sentence-level ve word-level estimation
 
 ---
 
@@ -268,9 +268,9 @@ estimated_tokens = word_count * 1.33  # Türkçe için optimize
    - Overlap ekle (son N kelimeyi yeni chunk'a kopyala)
 
 **Özellikler:**
-- ✅ Cümle sınırlarında böler (bağlam korunur)
-- ✅ Overlap management (20 token default)
-- ✅ Veri kaybı yok (tüm metin korunur)
+-  Cümle sınırlarında böler (bağlam korunur)
+-  Overlap management (20 token default)
+-  Veri kaybı yok (tüm metin korunur)
 
 ---
 
