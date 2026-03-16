@@ -1,4 +1,4 @@
-# 🔤 Tokenizer Management - Kapsamlı Dokümantasyon
+#  Tokenizer Management - Kapsamlı Dokümantasyon
 
 **Versiyon:** V-5  
 **Son Güncelleme:** 2025-01-27  
@@ -7,7 +7,7 @@
 
 ---
 
-## 📋 İçindekiler
+##  İçindekiler
 
 1. [Genel Bakış](#genel-bakış)
 2. [Mimari Yapı](#mimari-yapı)
@@ -28,17 +28,17 @@
 
 ### Temel Özellikler
 
-- ✅ **Türkçe Optimize:** Heceleme, morfoloji, ünlü uyumu, ünsüz benzeşmesi
-- ✅ **BPE Training:** Deterministik, tekrar üretilebilir merge stratejisi
-- ✅ **Hybrid Tokenization:** Whole words + syllables + morphology
-- ✅ **GPU Support:** Hızlandırılmış batch processing
-- ✅ **Production-Ready:** Atomic file operations, error handling, logging
-- ✅ **Config-Driven:** Tamamen yapılandırılabilir parametreler
-- ✅ **Public API Ready:** Harici kullanım için hazır
+-  **Türkçe Optimize:** Heceleme, morfoloji, ünlü uyumu, ünsüz benzeşmesi
+-  **BPE Training:** Deterministik, tekrar üretilebilir merge stratejisi
+-  **Hybrid Tokenization:** Whole words + syllables + morphology
+-  **GPU Support:** Hızlandırılmış batch processing
+-  **Production-Ready:** Atomic file operations, error handling, logging
+-  **Config-Driven:** Tamamen yapılandırılabilir parametreler
+-  **Public API Ready:** Harici kullanım için hazır
 
 ---
 
-## 🏗️ Mimari Yapı
+##  Mimari Yapı
 
 ### Yüksek Seviye Mimari
 
@@ -95,7 +95,7 @@ Clean Text Output
 
 ---
 
-## ⚙️ Çalışma Prensibi
+##  Çalışma Prensibi
 
 ### 1. TokenizerCore - Ana API
 
@@ -184,11 +184,11 @@ ID'leri metne çevirir:
 ```
 
 **Özellikler:**
-- ✅ Deterministik seçim (freq + lexicographic)
-- ✅ Special token protection
-- ✅ GPU batch processing (optional)
-- ✅ Memory-efficient (streaming for large corpus)
-- ✅ Progress tracking (log intervals)
+-  Deterministik seçim (freq + lexicographic)
+-  Special token protection
+-  GPU batch processing (optional)
+-  Memory-efficient (streaming for large corpus)
+-  Progress tracking (log intervals)
 
 ---
 
@@ -208,10 +208,10 @@ Token Encoding:
 ```
 
 **Özellikler:**
-- ✅ BPE merge application (rank-based)
-- ✅ Character-level fallback (OOV handling)
-- ✅ GPU acceleration (optional)
-- ✅ Reverse vocab mapping (ID → token)
+-  BPE merge application (rank-based)
+-  Character-level fallback (OOV handling)
+-  GPU acceleration (optional)
+-  Reverse vocab mapping (ID → token)
 
 ---
 
@@ -247,11 +247,11 @@ ID Decoding:
 **Dosya:** `tokenizer_management/bpe/tokenization/pretokenizer.py`
 
 **Özellikler:**
-- ✅ Unicode normalization (NFC, Türkçe karakterler korunur)
-- ✅ Türkçe lowercase (İ→i, I→ı)
-- ✅ Noktalama ayrıştırma (.,!? ayrı token)
-- ✅ Whitespace preservation (boşluk tokenları korunur)
-- ✅ Valid token filtering (Türkçe karakterler + ASCII)
+-  Unicode normalization (NFC, Türkçe karakterler korunur)
+-  Türkçe lowercase (İ→i, I→ı)
+-  Noktalama ayrıştırma (.,!? ayrı token)
+-  Whitespace preservation (boşluk tokenları korunur)
+-  Valid token filtering (Türkçe karakterler + ASCII)
 
 **Örnek:**
 ```python
@@ -294,14 +294,14 @@ syllables = syllabifier.syllabify_word("merhaba")
 **Dosya:** `tokenizer_management/bpe/tokenization/morphology.py`
 
 **Özellikler:**
-- ✅ TDK uyumlu kök çıkarımı
-- ✅ Ünlü uyumu kontrolü
-- ✅ Ünsüz benzeşmesi
-- ✅ Yumuşama kuralları (p→b, ç→c, t→d, k→ğ/g)
-- ✅ Olumsuzluk ekleri (ma/me)
-- ✅ Zaman ekleri (dı/di/du/dü)
-- ✅ Kişi ekleri (im/ın/un/ün)
-- ✅ Bileşik fiil desteği (yardım etti → yardım et)
+-  TDK uyumlu kök çıkarımı
+-  Ünlü uyumu kontrolü
+-  Ünsüz benzeşmesi
+-  Yumuşama kuralları (p→b, ç→c, t→d, k→ğ/g)
+-  Olumsuzluk ekleri (ma/me)
+-  Zaman ekleri (dı/di/du/dü)
+-  Kişi ekleri (im/ın/un/ün)
+-  Bileşik fiil desteği (yardım etti → yardım et)
 
 **Örnek:**
 ```python
@@ -319,10 +319,10 @@ morphemes = morphology.analyze(["geldim"])
 **Dosya:** `tokenizer_management/bpe/tokenization/postprocessor.py`
 
 **Özellikler:**
-- ✅ Noktalama boşluk düzeltme
-- ✅ Whitespace collapse
-- ✅ Sentence capitalization (Türkçe: İ→i)
-- ✅ Multiple punctuation reduction (... → .)
+-  Noktalama boşluk düzeltme
+-  Whitespace collapse
+-  Sentence capitalization (Türkçe: İ→i)
+-  Multiple punctuation reduction (... → .)
 
 **Örnek:**
 ```python
@@ -333,7 +333,7 @@ text = postprocessor.process(["Merhaba", ",", "nasılsın", "?"])
 
 ---
 
-## 📚 API Referansı
+##  API Referansı
 
 ### TokenizerCore
 
