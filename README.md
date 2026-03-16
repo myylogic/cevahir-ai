@@ -11,7 +11,7 @@ Tokenizer eğitiminden bilişsel katmana kadar uzanan **uçtan uca (end-to-end)*
 *Cevahir AI & Engine is a full-stack open-source AI engine that provides an end-to-end infrastructure for building and deploying language models—from tokenizer training to cognitive reasoning layers.*
 
 <p align="center">
-  <img src="image/cevahir_ai_visual.jpeg" style="max-width:100%;">
+  <img src="image/6E09AD00-FEB9-4A66-B577-FB64041723BF.png" style="max-width:100%;">
 </p>
 
 ---
