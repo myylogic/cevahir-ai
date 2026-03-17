@@ -120,11 +120,24 @@ class KVCache:
         self.eviction_strategy = eviction_strategy
         self.num_sink_tokens = max(0, int(num_sink_tokens))
 
-        if self.eviction_strategy == "sliding_window" and self.num_sink_tokens >= max_cache_len:
-            raise ValueError(
-                f"num_sink_tokens ({self.num_sink_tokens}) >= max_cache_len ({max_cache_len}). "
-                f"Sliding window için en az 1 slot non-sink alana gerek var."
-            )
+        if self.eviction_strategy == "sliding_window":
+            # Kesin hata: sıfır non-sink alan kalıyor
+            if self.num_sink_tokens >= max_cache_len:
+                raise ValueError(
+                    f"num_sink_tokens ({self.num_sink_tokens}) >= max_cache_len ({max_cache_len}). "
+                    f"Sliding window için en az 1 non-sink slot gerekli."
+                )
+            # [V8 Fix] Zayıf boundary: 1 non-sink slot sliding window için pratik değil.
+            # num_sink_tokens > max_cache_len * 0.75 → thrashing riski (her eviction'da
+            # sadece 1-2 yeni token tutulabilir, fayda/maliyet oranı bozulur).
+            _min_sliding = max(1, max_cache_len // 4)  # en az %25 non-sink alan
+            if self.num_sink_tokens > max_cache_len - _min_sliding:
+                raise ValueError(
+                    f"num_sink_tokens ({self.num_sink_tokens}) çok büyük: "
+                    f"max_cache_len={max_cache_len} için non-sink alan en az "
+                    f"{_min_sliding} slot olmalı (önerilen: max_cache_len'in en fazla %%75'i). "
+                    f"Maksimum güvenli num_sink_tokens: {max_cache_len - _min_sliding}."
+                )
 
         # Logger
         self.logger = logging.getLogger(self.__class__.__name__)
