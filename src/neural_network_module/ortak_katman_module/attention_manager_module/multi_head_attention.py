@@ -102,8 +102,11 @@ class MultiHeadAttention(nn.Module):
         use_rope: bool = False,
         positional_encoding=None,  # PositionalEncoding modülü referansı (RoPE için)
         # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
-        use_kv_cache: bool = False,  # KV Cache kullan (inference için)
-        max_cache_len: int = 2048,  # Maximum cache length
+        use_kv_cache: bool = False,       # KV Cache kullan (inference için)
+        max_cache_len: int = 2048,        # Maximum cache length
+        # [V5] StreamingLLM / Attention Sink eviction parametreleri
+        kv_eviction_strategy: str = "sliding_window",  # "none" | "sliding_window"
+        kv_num_sink_tokens: int = 4,      # Attention sink token sayısı (Xiao et al. 2023)
         # [OK] V5: GQA (Grouped Query Attention) desteği (endüstri standardı: LLaMA-2/3, Mistral, Gemini)
         # num_kv_heads < num_heads: GQA (çoklu query, az KV head)
         # num_kv_heads == 1: MQA (Multi-Query Attention)
@@ -284,13 +287,16 @@ class MultiHeadAttention(nn.Module):
                 self.logger.info("[V4] RoPE etkinleştirildi (endüstri standardı: GPT-3+, Claude, Gemini)")
 
         # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
-        self.use_kv_cache = use_kv_cache  # KV Cache kullanım bayrağı (training/inference kontrolü forward'da yapılır)
+        self.use_kv_cache = use_kv_cache
         self.max_cache_len = max_cache_len
+        # [V5] StreamingLLM eviction parametreleri (KVCache yapıcısına iletilir)
+        self.kv_eviction_strategy = kv_eviction_strategy
+        self.kv_num_sink_tokens = kv_num_sink_tokens
         self.kv_cache: Optional[KVCache] = None
         if self.use_kv_cache:
             self.logger.info(
-                f"[V4] KV Cache etkinleştirildi (endüstri standardı: GPT-4, Claude, Gemini), "
-                f"max_cache_len={max_cache_len}"
+                f"[V5] KV Cache etkinleştirildi: max_cache_len={max_cache_len}, "
+                f"eviction='{kv_eviction_strategy}', num_sink_tokens={kv_num_sink_tokens}"
             )
 
         # --- Dropout ---
@@ -771,12 +777,15 @@ class MultiHeadAttention(nn.Module):
                 # [OK] V5 GQA: Cache num_kv_heads boyutunda tutulur (hafıza tasarrufu)
                 self.kv_cache = KVCache(
                     batch_size=B,
-                    num_heads=self.num_kv_heads,  # [V5] GQA: kv_heads boyutunda cache
+                    num_heads=self.num_kv_heads,       # [V5] GQA: kv_heads boyutunda cache
                     head_dim=self.head_dim,
                     max_cache_len=self.max_cache_len,
                     device=device,
                     dtype=query.dtype,
                     log_level=self.logger.level,
+                    # [V5] StreamingLLM parametreleri
+                    eviction_strategy=self.kv_eviction_strategy,
+                    num_sink_tokens=self.kv_num_sink_tokens,
                 )
                 self.logger.debug(
                     f"[V5] KV Cache başlatıldı (GQA uyumlu): "
