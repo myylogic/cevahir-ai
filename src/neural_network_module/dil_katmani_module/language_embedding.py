@@ -61,9 +61,9 @@ class LanguageEmbedding(nn.Module):
         log_level: int = logging.INFO,
         *,
         padding_idx: Optional[int] = None,
-        scale_by_sqrt: bool = True,
+        scale_by_sqrt: bool = False,
         dropout: float = 0.1,
-        norm_type: Optional[str] = None,  # "layer_norm" | None
+        norm_type: Optional[str] = None,  # "layer_norm" | "none" | None→LayerNorm
         norm_eps: float = 1e-5,
         device: Optional[torch.device] = None,
         dtype: Optional[torch.dtype] = None,
@@ -106,17 +106,22 @@ class LanguageEmbedding(nn.Module):
 
         self._initialize_weights(self.init_method)
 
-        # [FIX] Opsiyonel normalizasyon (token-wise)
-        # By default, add LayerNorm to stabilize output distribution
-        # This prevents dominant token collapse regardless of embedding init
-        if norm_type is None:
-            # [FIX] DEFAULT: Add LayerNorm unless explicitly disabled
-            self.norm = nn.LayerNorm(self.embed_dim, eps=norm_eps, elementwise_affine=True)
-            self.logger.info(f"[FIX] LayerNorm added by default to embedding output (prevent collapse)")
-        elif norm_type.lower() in {"layer_norm", "layernorm", "ln"}:
-            self.norm = nn.LayerNorm(self.embed_dim, eps=norm_eps, elementwise_affine=True)
+        # Opsiyonel normalizasyon (token-wise)
+        # norm_type=None veya "layer_norm"/"ln"  → LayerNorm (varsayılan, çöküşü önler)
+        # norm_type="none" / "skip" / "identity" → normalizasyon yok (ablasyon / harici norm için)
+        _norm_key = norm_type.lower() if isinstance(norm_type, str) else None
+        if _norm_key in {None, "layer_norm", "layernorm", "ln"}:
+            self.norm: nn.Module = nn.LayerNorm(self.embed_dim, eps=norm_eps, elementwise_affine=True)
+            if norm_type is None:
+                self.logger.info("LayerNorm added by default to embedding output (prevent token collapse).")
+        elif _norm_key in {"none", "skip", "identity"}:
+            self.norm = nn.Identity()
+            self.logger.info("Embedding normalization disabled (norm_type='none').")
         else:
-            raise ValueError(f"Desteklenmeyen norm_type: {norm_type}")
+            raise ValueError(
+                f"Desteklenmeyen norm_type: '{norm_type}'. "
+                f"Geçerli seçenekler: 'layer_norm', 'ln', 'none', 'skip', 'identity', None."
+            )
 
         self.dropout = nn.Dropout(float(dropout)) if dropout > 0.0 else nn.Identity()
 
@@ -124,7 +129,7 @@ class LanguageEmbedding(nn.Module):
             f"LanguageEmbedding initialized | "
             f"vocab_size={self.vocab_size}, embed_dim={self.embed_dim}, "
             f"init={self.init_method}, padding_idx={self.padding_idx}, "
-            f"scale_by_sqrt={self.scale_by_sqrt}, norm={type(self.norm).__name__ if self.norm else None}, "
+            f"scale_by_sqrt={self.scale_by_sqrt}, norm={type(self.norm).__name__}, "
             f"dropout={dropout}"
         )
 
@@ -244,9 +249,8 @@ class LanguageEmbedding(nn.Module):
         if self.scale_by_sqrt:
             out = out * math.sqrt(self.embed_dim)
 
-        if self.norm is not None:
-            # LayerNorm son eksen (D) üzerinde çalışır
-            out = self.norm(out)
+        # norm: LayerNorm veya Identity — her ikisi de doğrudan çağrılabilir
+        out = self.norm(out)
 
         out = self.dropout(out)
         self._log_tensor_stats(out, "After LanguageEmbedding")
@@ -257,17 +261,22 @@ class LanguageEmbedding(nn.Module):
     @torch.no_grad()
     def _initialize_weights(self, method: str, *, weight: Optional[torch.Tensor] = None) -> None:
         """
-        Embedding ağırlıklarını başlatır. padding satırı 0'lanır ve başlatmadan sonra korunur.
-        [FIX] Special token importance: BOS, EOS scaled up to prevent suppression
-        [FIX] Unit normalization: All tokens initialized with uniform importance
+        Embedding ağırlıklarını başlatır.
+
+        Akış:
+          1. Seçilen method (xavier, kaiming, normal, uniform) uygulanır.
+          2. Tüm token satırları L2 unit-normalize edilir, ardından 0.15 ile ölçeklenir
+             (hedef std ≈ 0.15). Bu adım bütün init methodlarına uygulandığından
+             son dağılım method seçiminden bağımsız olarak aynıdır.
+          3. padding_idx satırı sıfırlanır (her zaman).
+
+        Not: Unit normalizasyon, başlangıçta baskın token yoktur garantisi verir.
+             Farklı bir başlangıç dağılımı istiyorsanız bu adımı kaldırın.
         """
         method = str(method).lower()
         w = weight if weight is not None else self.embedding.weight
 
         pad_idx = self.padding_idx
-        pad_backup = None
-        if pad_idx is not None and 0 <= pad_idx < w.shape[0]:
-            pad_backup = torch.zeros_like(w[pad_idx])
 
         if method in {"xavier", "xavier_uniform"}:
             nn.init.xavier_uniform_(w)
@@ -298,9 +307,9 @@ class LanguageEmbedding(nn.Module):
             # Scale to reasonable range (target std ≈ 0.15)
             w.mul_(0.15)
         
-        # padding satırını sıfırla/koru
+        # padding satırı her zaman sıfır olmalı (init methodundan bağımsız)
         if pad_idx is not None and 0 <= pad_idx < w.shape[0]:
-            w[pad_idx].zero_() if pad_backup is None else w[pad_idx].copy_(pad_backup)
+            w[pad_idx].zero_()
         
         self.logger.info(
             f"[FIX] Embedding weights unit-normalized: "
