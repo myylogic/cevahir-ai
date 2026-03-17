@@ -74,7 +74,7 @@ class PositionalEncoding(nn.Module):
         max_len: int = 2048,
         dropout: float = 0.1,
         mode: str = "sinusoidal",
-        num_heads: Optional[int] = None,  #  YENİ: RoPE için head_dim hesaplama
+        num_heads: Optional[int] = None,  # ✅ YENİ: RoPE için head_dim hesaplama
         log_level: int = logging.INFO,
         # [OK] V5: YaRN RoPE (Yet Another RoPE Extension) — uzun context için
         # "none"    → standart RoPE (default, geriye dönük uyumluluk)
@@ -99,7 +99,7 @@ class PositionalEncoding(nn.Module):
         if not (0.0 <= dropout <= 1.0):
             raise ValueError(f"dropout 0-1 arasında olmalı; gelen={dropout}")
         mode = str(mode).lower()
-        #  V3: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
+        # ✅ V3: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
         if mode not in {"sinusoidal", "learned", "rope"}:
             raise ValueError("mode 'sinusoidal', 'learned' veya 'rope' olmalıdır.")
 
@@ -147,20 +147,28 @@ class PositionalEncoding(nn.Module):
             self._init_learned(self.pe_embed)
             self.rope_freqs = None  # type: ignore
         else:  # rope
-            #  V3/V5: RoPE (Rotary Position Embedding) - endüstri standardı
+            # ✅ V3/V5: RoPE (Rotary Position Embedding) - endüstri standardı
             # RoPE direkt PE eklemez, rotary matrix'leri hesaplar
             # Attention içinde kullanılacak (apply_rotary_pos_emb)
             self.pe = None  # type: ignore
             self.pe_embed = None  # type: ignore
-            #  DÜZELTME: RoPE için head_dim kullanılmalı (embed_dim değil)
-            if num_heads is not None and num_heads > 0:
-                self.rope_dim = embed_dim // num_heads  # head_dim
-            else:
-                self.rope_dim = embed_dim  # fallback
-                self.logger.warning(
-                    f"[V3] RoPE initialized without num_heads: rope_dim={self.rope_dim} (embed_dim). "
-                    "Attention'da head_dim kullanılıyorsa uyumsuzluk olabilir!"
+            # [V8 Fix] RoPE için head_dim kullanılmalı (embed_dim değil).
+            # num_heads verilmezse rope_dim = embed_dim olur; bu attention'da
+            # head_dim ile shape uyumsuzluğu yaratır → RuntimeError kaçınılmaz.
+            # Sessiz fallback yerine açık ValueError: hatayı erken yakala.
+            if num_heads is None or num_heads <= 0:
+                raise ValueError(
+                    "mode='rope' seçildiğinde num_heads parametresi zorunludur. "
+                    f"Gelen: num_heads={num_heads}. "
+                    "RoPE her attention head'e ayrı ayrı uygulanır; "
+                    "head_dim = embed_dim // num_heads hesaplaması için num_heads gereklidir."
                 )
+            if embed_dim % num_heads != 0:
+                raise ValueError(
+                    f"embed_dim ({embed_dim}) num_heads ({num_heads}) ile tam bölünemiyor. "
+                    f"head_dim = {embed_dim}/{num_heads} = {embed_dim/num_heads:.2f} (tamsayı olmalı)."
+                )
+            self.rope_dim = embed_dim // num_heads  # head_dim (doğru)
 
             # [OK] V5: YaRN vs standart RoPE frekans hesaplama
             if rope_scaling_type == "yarn" and rope_scaling_factor > 1.0:
@@ -285,7 +293,7 @@ class PositionalEncoding(nn.Module):
     @staticmethod
     def _build_rope_freqs(max_len: int, dim: int, base: float = 10000.0) -> torch.Tensor:
         """
-         V3: RoPE (Rotary Position Embedding) frequencies hesaplama
+        ✅ V3: RoPE (Rotary Position Embedding) frequencies hesaplama
         Endüstri standardı: GPT-3+, Claude, Gemini
         
         Args:
@@ -363,7 +371,7 @@ class PositionalEncoding(nn.Module):
             raise ValueError(f"[B,T,D] bekleniyor; gelen şekil={tuple(x.shape)}")
         B, T, D = x.shape
         
-        #  JIT tracing/scripting sırasında shape kontrollerini atla (TracerWarning önleme)
+        # ✅ JIT tracing/scripting sırasında shape kontrollerini atla (TracerWarning önleme)
         try:
             is_tracing = torch._C._get_tracing_state() is not None
         except (AttributeError, RuntimeError):
@@ -401,7 +409,7 @@ class PositionalEncoding(nn.Module):
     
     def apply_rotary_pos_emb(self, x: torch.Tensor, positions: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
-         V3: RoPE (Rotary Position Embedding) uygulama
+        ✅ V3: RoPE (Rotary Position Embedding) uygulama
         Endüstri standardı: GPT-3+, Claude, Gemini
         
         Args:
@@ -434,7 +442,7 @@ class PositionalEncoding(nn.Module):
         
         # RoPE frequencies: [max_len, D//2]
         # Sadece ihtiyacımız olan positions'ları al
-        #  JIT tracing/scripting sırasında max_pos hesaplamasını optimize et (TracerWarning önleme)
+        # ✅ JIT tracing/scripting sırasında max_pos hesaplamasını optimize et (TracerWarning önleme)
         try:
             is_tracing = torch._C._get_tracing_state() is not None
         except (AttributeError, RuntimeError):
@@ -452,7 +460,7 @@ class PositionalEncoding(nn.Module):
         # RoPE frequencies: [T, D//2]
         rope_freqs = self.rope_freqs[positions].to(device=x.device, dtype=x.dtype)  # [T, D//2]
         
-        #  ENDÜSTRİ STANDARDI: RoPE rotation (GPT-3+, Claude, Gemini)
+        # ✅ ENDÜSTRİ STANDARDI: RoPE rotation (GPT-3+, Claude, Gemini)
         # Split x into pairs: [B*H, T, D] -> [B*H, T, D//2, 2]
         # Her çift (x[2i], x[2i+1]) bir complex number temsil eder
         x_reshaped = x.reshape(B * H, T, D // 2, 2)  # [B*H, T, D//2, 2]
