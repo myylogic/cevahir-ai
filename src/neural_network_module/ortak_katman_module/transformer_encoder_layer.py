@@ -43,7 +43,7 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 import torch
 import torch.nn as nn
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 # [OK] V3: Gradient Checkpointing (endüstri standardı: GPT-3+, Claude, Gemini)
 from torch.utils.checkpoint import checkpoint
@@ -169,7 +169,15 @@ class TransformerEncoderLayer(nn.Module):
         # Derin katmanlar daha yüksek rate alır (lineer decay ile neural_network.py'den set edilir).
         # 0.0 = kapalı (default, geriye dönük uyumlu)
         drop_path_rate: float = 0.0,
-        **kwargs,  # ffn_activation gibi ek parametreler için
+        # FFN activation seçimi — FeedForwardNetwork'e iletilir
+        # "swiglu" | "geglu" | "gelu" | "gelu_tanh" | "relu" | "silu" | "mish"
+        ffn_activation: str = "gelu",
+        # FFN bias — FeedForwardNetwork'e iletilir (LLaMA/PaLM standardı: False)
+        ffn_use_bias: bool = False,
+        # [V7] KV Cache eviction (StreamingLLM) — MHA'ya iletilir
+        kv_eviction_strategy: str = "sliding_window",  # "none" | "sliding_window"
+        kv_num_sink_tokens: int = 4,    # Attention sink token sayısı (Xiao et al. 2023)
+        **kwargs,  # Geriye dönük uyumluluk için (artık ffn_activation buraya gelmez)
     ):
         """
         Args:
@@ -222,9 +230,11 @@ class TransformerEncoderLayer(nn.Module):
             max_cache_len=max_cache_len,  # [OK] V4
             num_kv_heads=num_kv_heads,   # [OK] V5: GQA
             sliding_window=sliding_window,  # [OK] V5: Sliding Window
-            use_pytorch_sdpa=use_pytorch_sdpa,   # [V6]: F.scaled_dot_product_attention
-            use_qk_norm=use_qk_norm,             # [V6]: QK-Norm (Gemma/PaLM 2)
-            attn_logit_cap=attn_logit_cap,       # [V6]: Attention Logit Soft-Cap
+            use_pytorch_sdpa=use_pytorch_sdpa,       # [V6]: F.scaled_dot_product_attention
+            use_qk_norm=use_qk_norm,               # [V6]: QK-Norm (Gemma/PaLM 2)
+            attn_logit_cap=attn_logit_cap,         # [V6]: Attention Logit Soft-Cap
+            kv_eviction_strategy=kv_eviction_strategy,  # [V7]: StreamingLLM eviction
+            kv_num_sink_tokens=kv_num_sink_tokens,      # [V7]: Attention sink sayısı
         )
 
         # [V6] Feature C: Parallel Residual (GPT-J, PaLM standardı)
@@ -249,25 +259,24 @@ class TransformerEncoderLayer(nn.Module):
         
         if use_moe:
             from .mixture_of_experts import MixtureOfExperts
-            ffn_activation = kwargs.pop("ffn_activation", "gelu")
             self.ffn = MixtureOfExperts(
                 embed_dim=embed_dim,
                 ffn_dim=ffn_dim,
                 num_experts=num_experts,
                 top_k=moe_top_k,
                 dropout=dropout,
-                activation=ffn_activation,
+                activation=ffn_activation,  # [V7] explicit param
                 log_level=log_level,
             )
             self.use_moe = True
         else:
             # [OK] V4: SwiGLU veya GELU activation seçimi (GPT-4, PaLM standardı)
-            ffn_activation = kwargs.pop("ffn_activation", "gelu")
             self.ffn = FeedForwardNetwork(
                 embed_dim=embed_dim,
                 ffn_dim=ffn_dim,
                 dropout=dropout,
-                activation=ffn_activation,  # [OK] V4: SwiGLU veya GELU
+                activation=ffn_activation,  # [V7] explicit param (swiglu/geglu/gelu/...)
+                use_bias=ffn_use_bias,       # [V7] bias kontrolü iletildi
                 log_level=log_level,
             )
             self.use_moe = False
@@ -309,12 +318,13 @@ class TransformerEncoderLayer(nn.Module):
         self.logger.info(
             f"TransformerEncoderLayer initialized: embed_dim={embed_dim}, "
             f"num_heads={num_heads}, num_kv_heads={num_kv_heads}, "
-            f"ffn_dim={ffn_dim}, dropout={dropout}, pre_norm={pre_norm}, "
-            f"use_gradient_checkpointing={use_gradient_checkpointing}, use_rope={use_rope}, "
-            f"use_rmsnorm={use_rmsnorm}, sliding_window={sliding_window}, "
+            f"ffn_dim={ffn_dim}, ffn_activation={ffn_activation}, dropout={dropout}, "
+            f"pre_norm={pre_norm}, use_gradient_checkpointing={use_gradient_checkpointing}, "
+            f"use_rope={use_rope}, use_rmsnorm={use_rmsnorm}, sliding_window={sliding_window}, "
             f"[V6] pytorch_sdpa={use_pytorch_sdpa}, qk_norm={use_qk_norm}, "
             f"parallel_residual={parallel_residual}, attn_logit_cap={attn_logit_cap}, "
-            f"[V7] drop_path_rate={drop_path_rate}"
+            f"[V7] drop_path_rate={drop_path_rate}, "
+            f"kv_eviction='{kv_eviction_strategy}', kv_sink_tokens={kv_num_sink_tokens}"
         )
     
     def forward(
@@ -325,7 +335,10 @@ class TransformerEncoderLayer(nn.Module):
         # [OK] V4: KV Cache parametreleri (endüstri standardı: GPT-4, Claude, Gemini)
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
-    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]]:
+    ) -> Union[
+        Tuple[torch.Tensor, Optional[torch.Tensor]],
+        Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]],
+    ]:
         """
         Forward pass.
         
@@ -463,7 +476,10 @@ class TransformerEncoderLayer(nn.Module):
         # [OK] V4: KV Cache parametreleri (endüstri standardı: GPT-4, Claude, Gemini)
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
-    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]]:
+    ) -> Union[
+        Tuple[torch.Tensor, Optional[torch.Tensor]],
+        Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]],
+    ]:
         """
         Internal forward implementation (checkpointing için ayrı method).
         """
@@ -607,7 +623,10 @@ class TransformerEncoderLayer(nn.Module):
         causal_mask: bool = False,
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
-    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]]:
+    ) -> Union[
+        Tuple[torch.Tensor, Optional[torch.Tensor]],
+        Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]],
+    ]:
         """
         [V6] Feature C: Parallel Residual forward (GPT-J, PaLM standardı)
 
