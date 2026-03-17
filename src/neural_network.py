@@ -180,6 +180,12 @@ class CevahirNeuralNetwork(nn.Module):
         logit_soft_cap: float = 30.0,
         # [V6] Attention Logit Soft-Cap (Gemma 2) — tüm layer'lara iletilir (0=kapalı)
         attn_logit_cap: float = 0.0,
+        # [V7] Stochastic Depth / LayerDrop (Huang et al. 2016, DeiT standardı)
+        # Training sırasında her layer'ın residual path'i drop_rate olasılığıyla sıfırlanır.
+        # Lineer decay: layer 0 → 0.0, son layer → drop_path_rate değeri.
+        # Inference'ta etki yoktur; geriye dönük uyumlu (default=0.0 = kapalı).
+        # Önerilen aralık: 0.05 – 0.20 (model derinliğine göre)
+        drop_path_rate: float = 0.0,
         # ---- TensorBoard / Telemetri seçenekleri ----
         use_tensorboard: bool = False,
         tb_writer: Optional[_SummaryWriterLike] = None,
@@ -245,6 +251,8 @@ class CevahirNeuralNetwork(nn.Module):
             "parallel_residual": parallel_residual,
             "logit_soft_cap": logit_soft_cap,
             "attn_logit_cap": attn_logit_cap,
+            # [V7] Stochastic Depth
+            "drop_path_rate": drop_path_rate,
             "use_tensorboard": use_tensorboard,
             "tb_log_dir": tb_log_dir,
             "tb_log_every_n": tb_log_every_n,
@@ -367,6 +375,19 @@ class CevahirNeuralNetwork(nn.Module):
         # [OK] V4: FFN activation seçimi (SwiGLU veya GELU)
         ffn_activation = "swiglu" if use_swiglu else "gelu"
         
+        # [V7] Stochastic Depth — lineer decay rate listesi (DeiT / Touvron et al. 2021 standardı)
+        # İlk layer: rate=0, son layer: rate=drop_path_rate
+        # Derin layer'lar daha fazla regularize edilir → en kritik erken katmanlar korunur.
+        _dpr: list = [
+            float(x) for x in
+            torch.linspace(0.0, float(drop_path_rate), num_layers)
+        ] if drop_path_rate > 0.0 else [0.0] * num_layers
+        if drop_path_rate > 0.0:
+            self.logger.info(
+                f"[V7] Stochastic Depth lineer decay: 0.0 → {drop_path_rate:.4f} "
+                f"({num_layers} layer, DeiT standardı)"
+            )
+
         self.layers = nn.ModuleList([
             TransformerEncoderLayer(
                 embed_dim=effective_dim,  # [OK] REFACTOR: seq_proj_dim yerine effective_dim (embed_dim)
@@ -395,8 +416,21 @@ class CevahirNeuralNetwork(nn.Module):
                 use_qk_norm=use_qk_norm,             # [V6]: QK-Norm (Gemma/PaLM 2)
                 parallel_residual=parallel_residual,  # [V6]: Parallel Residual (GPT-J/PaLM)
                 attn_logit_cap=attn_logit_cap,       # [V6]: Attention Logit Soft-Cap
-            ) for _ in range(num_layers)
+                drop_path_rate=_dpr[_i],             # [V7]: Stochastic Depth (lineer decay)
+            ) for _i in range(num_layers)
         ])
+
+        # [V7] Bug Fix: layer_idx ve total_layers her layer'a set edilmeli.
+        # Advanced checkpointing "selective" ve "adaptive" stratejileri bu değerlere
+        # dayanır; set edilmezse tüm layer'lar idx=0, total=1 varsayar → yanlış strateji.
+        for _i, _layer in enumerate(self.layers):
+            _layer.layer_idx = _i
+            _layer.total_layers = num_layers
+
+        self.logger.info(
+            f"[V7] layer_idx (0..{num_layers-1}) ve total_layers={num_layers} "
+            f"tüm TransformerEncoderLayer'lara set edildi (advanced checkpointing fix)"
+        )
 
         # [V6] Feature E: Scaled Residual Projection Init (LLaMA / DeepNet standardı)
         # Derinlikle birlikte varyans büyümesini önler; eğitim stabilitesini artırır
