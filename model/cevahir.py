@@ -612,6 +612,10 @@ class CevahirModelAPI(CognitiveModelAPI):
                     f"top_p={top_p}, top_k={top_k}, repetition_penalty={repetition_penalty}, "
                     f"prompt_length={initial_seq_len}, eos_id={eos_id}")
         
+        # Her adımda yeni tensor yaratmak yerine tek buffer önceden ayrılır.
+        # Bu, inference sırasında Python GC baskısını azaltır.
+        _next_token_buf = torch.zeros(1, 1, dtype=torch.long, device=self._device)
+
         with torch.no_grad():
             tokens_generated = 0
             for step in range(max_new_tokens):
@@ -649,60 +653,75 @@ class CevahirModelAPI(CognitiveModelAPI):
                     logger.debug(f"[GEN] Step {step}: logits range=[{next_logits.min().item():.2f}, {next_logits.max().item():.2f}], "
                                f"top_5_tokens={top_5_indices.tolist()}, top_5_probs={top_5_probs.tolist()}")
                 
-                # Apply repetition penalty
-                if repetition_penalty > 1.0:
-                    for token_id in generated[-256:]:  # Last 256 tokens
-                        if 0 <= token_id < next_logits.shape[0]:
-                            next_logits[token_id] /= repetition_penalty
-                
-                # Apply temperature
-                if temperature > 0:
-                    next_logits = next_logits / temperature
+                # ── Greedy / Sampling ──────────────────────────────────────────────
+                # Akademik referanslar:
+                #   Repetition penalty : Keskar et al. (2019) CTRL
+                #   Top-k filtering    : Fan et al. (2018)
+                #   Nucleus (top-p)    : Holtzman et al. (2020)
+                #   Numerical stability: log-sum-exp trick (Bishop, 2006)
+
+                # Repetition penalty — Keskar et al. (2019) formülasyonu:
+                # Pozitif logit'leri böl (bastır), negatif logit'leri çarp (daha negatif yap).
+                # set() ile aynı token'a çift uygulama önlenir.
+                if repetition_penalty != 1.0:
+                    for _rid in set(generated[-256:]):
+                        if 0 <= _rid < next_logits.shape[0]:
+                            if next_logits[_rid] > 0:
+                                next_logits[_rid] /= repetition_penalty
+                            else:
+                                next_logits[_rid] *= repetition_penalty
+
+                # Greedy decoding (temperature == 0.0): argmax — NaN/Inf riski yok.
+                if temperature == 0.0:
+                    next_token_id = int(torch.argmax(next_logits).item())
                 else:
-                    next_logits = next_logits * float('inf')  # Greedy
-                
-                # Top-k filtering
-                if top_k > 0:
-                    top_k = min(top_k, next_logits.shape[0])
-                    top_k_values, top_k_indices = torch.topk(next_logits, top_k)
-                    # Create filtered logits
-                    filtered_logits = torch.full_like(next_logits, float('-inf'))
-                    filtered_logits[top_k_indices] = top_k_values
-                    next_logits = filtered_logits
-                
-                # Top-p (nucleus) sampling
-                if top_p < 1.0 and top_p > 0.0:  # top_p=0.0 is invalid, skip filtering
-                    sorted_logits, sorted_indices = torch.sort(next_logits, descending=True)
-                    cumulative_probs = torch.cumsum(torch.softmax(sorted_logits, dim=0), dim=0)
-                    # Remove tokens with cumulative probability > top_p
-                    sorted_indices_to_remove = cumulative_probs > top_p
-                    sorted_indices_to_remove[0] = False  # Keep at least one token
-                    indices_to_remove = sorted_indices[sorted_indices_to_remove]
-                    next_logits[indices_to_remove] = float('-inf')
-                
-                # Sample - ensure we have valid probabilities
-                probs = torch.softmax(next_logits, dim=0)
-                # Safety check: ensure we have valid probabilities (not all NaN or zero)
-                if torch.isnan(probs).any() or (probs == 0).all() or probs.sum() == 0:
-                    # Fallback: use uniform distribution over valid (non-inf) tokens
-                    valid_mask = ~torch.isinf(next_logits)
-                    if valid_mask.any():
+                    # Temperature scaling
+                    if temperature != 1.0:
+                        next_logits = next_logits / temperature
+
+                    # Top-k filtering — Fan et al. (2018)
+                    if top_k > 0:
+                        _k = min(top_k, next_logits.shape[0])
+                        top_k_values, top_k_indices = torch.topk(next_logits, _k)
+                        filtered_logits = torch.full_like(next_logits, float('-inf'))
+                        filtered_logits[top_k_indices] = top_k_values
+                        next_logits = filtered_logits
+
+                    # Nucleus (top-p) filtering — Holtzman et al. (2020)
+                    # Sağa kaydırma: eşiği tam aşan token da korunur (orijinal kağıt impl.).
+                    if 0.0 < top_p < 1.0:
+                        sorted_logits, sorted_indices = torch.sort(next_logits, descending=True)
+                        cumulative_probs = torch.cumsum(
+                            torch.softmax(sorted_logits, dim=0), dim=0
+                        )
+                        sorted_indices_to_remove = cumulative_probs > top_p
+                        # Shift sağa: eşiği geçiren token dahil edilsin
+                        sorted_indices_to_remove[1:] = sorted_indices_to_remove[:-1].clone()
+                        sorted_indices_to_remove[0] = False  # En yüksek olasılıklı token her zaman kalır
+                        next_logits[sorted_indices[sorted_indices_to_remove]] = float('-inf')
+
+                    # Sayısal kararlılık: log-sum-exp trick — softmax overflow'u önler
+                    next_logits = next_logits - next_logits.max()
+                    probs = torch.softmax(next_logits, dim=0)
+
+                    # Geçersiz dağılım fallback
+                    if torch.isnan(probs).any() or probs.sum() < 1e-8:
+                        valid_mask = ~torch.isinf(next_logits) & ~torch.isnan(next_logits)
                         probs = torch.zeros_like(next_logits)
-                        probs[valid_mask] = 1.0 / valid_mask.sum().float()
-                    else:
-                        # Last resort: use first token
-                        probs = torch.zeros_like(next_logits)
-                        probs[0] = 1.0
-                
-                next_token_id = torch.multinomial(probs, 1).item()
+                        if valid_mask.any():
+                            probs[valid_mask] = 1.0 / valid_mask.sum().float()
+                        else:
+                            probs[0] = 1.0
+
+                    next_token_id = int(torch.multinomial(probs, 1).item())
                 
                 # [OK] DEBUG: Üretilen token bilgisi (HER ZAMAN ilk 10 step için)
                 if step < 10:
                     # Token'ın ne olduğunu decode et
                     try:
                         token_text = self.tokenizer_core.decode([next_token_id], method="bpe", remove_specials=False)
-                    except:
-                        token_text = f"<decode_error>"
+                    except Exception as _dec_err:
+                        token_text = f"<decode_error:{type(_dec_err).__name__}>"
                     logger.debug(f"[GEN] Step {step}: Generated token_id={next_token_id}, token_text='{token_text}', eos_id={eos_id}, "
                                f"is_eos={next_token_id == eos_id if eos_id is not None else False}")
                 
@@ -715,12 +734,9 @@ class CevahirModelAPI(CognitiveModelAPI):
                 tokens_generated += 1
                 
                 # [OK] V4: KV Cache kullanıldığında, input'u güncelleme gerekmez
-                # Sadece sonraki iterasyon için next_token_tensor hazırla
-                next_token_tensor = torch.tensor(
-                    [[next_token_id]],
-                    dtype=torch.long,
-                    device=self._device
-                )
+                # Önceden ayrılmış buffer'a yaz — per-step tensor alloc önlenir.
+                _next_token_buf[0, 0] = next_token_id
+                next_token_tensor = _next_token_buf
                 
                 # KV Cache kullanılmıyorsa (fallback), input'u güncelle
                 if not use_cache:
@@ -841,8 +857,14 @@ class CevahirModelAPI(CognitiveModelAPI):
                     if all(finished for _, _, finished in beams):
                         break
                 
-                # Select best beam
-                best_sequence, _, _ = max(beams, key=lambda x: x[1])
+                # Length normalization — Wu et al. (2016) Google NMT formülü:
+                # score / (generated_length ^ alpha).  Alpha=0.6 literature standardı.
+                # Kısa sequence'ların yüksek log-prob avantajını dengeler.
+                _LP_ALPHA = 0.6
+                best_sequence, _, _ = max(
+                    beams,
+                    key=lambda x: x[1] / max(1, len(x[0]) - initial_seq_len) ** _LP_ALPHA
+                )
                 
                 # Decode
                 generated_text = self.tokenizer_core.decode(
@@ -942,18 +964,20 @@ class CevahirModelAPI(CognitiveModelAPI):
 
         try:
             # Encode text to token IDs
-            tokens, _ = self._tokenizer_core.encode(text, mode="inference")
+            tokens, _ = self.tokenizer_core.encode(text, mode="inference")
             if not tokens:
                 return 0.5
 
             # Build input tensor (batch_size=1, seq_len=T)
             token_tensor = torch.tensor(
-                [tokens], dtype=torch.long, device=self.config.device
+                [tokens], dtype=torch.long, device=self._device
             )
 
             # Forward pass to get logits [1, T, vocab_size] with no gradient
             with torch.no_grad():
-                logits, _ = self._model_manager.forward(token_tensor)
+                logits, _ = self.model_manager.forward(
+                    token_tensor, inference=True, return_aux=False
+                )
 
             # Take last token position: [vocab_size]
             last_logits = logits[0, -1, :]
@@ -978,7 +1002,7 @@ class CevahirModelAPI(CognitiveModelAPI):
             logger.debug(f"Logit entropy estimation failed, falling back to heuristic: {e}")
             # Heuristic fallback: token type-token ratio as diversity proxy
             try:
-                tokens, _ = self._tokenizer_core.encode(text, mode="inference")
+                tokens, _ = self.tokenizer_core.encode(text, mode="inference")
                 if tokens:
                     ttr = len(set(tokens)) / len(tokens)
                     return float(max(0.1, min(1.0, ttr)))
