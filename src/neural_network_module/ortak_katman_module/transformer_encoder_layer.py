@@ -302,8 +302,14 @@ class TransformerEncoderLayer(nn.Module):
                 f"strategy={checkpointing_strategy}"
             )
         
-        # [V6] Fix 7: MoE _moe_losses — başlangıçta liste olarak başlat (bellek sızıntısı önleme)
-        self._moe_losses = []
+        # [V8 Fix] MoE auxiliary loss: liste yerine scalar accumulation.
+        # Eski tasarım: self._moe_losses = [] → her forward tensor ekleniyor,
+        # get_and_reset_moe_loss() çağrılmazsa tüm computation graph'lar bellekte kalıyor.
+        # Yeni tasarım: None veya scalar tensor. Birden fazla forward'da gradyan
+        # akışı korunur (gradient accumulation), ancak N adımlık liste yoktur.
+        self._moe_loss_accum: Optional[torch.Tensor] = None
+        # Kaç adımda bir reset edilmeden accumulate edildiğini izle (debug/warning için)
+        self._moe_accum_steps: int = 0
 
         # [V7] Stochastic Depth (Huang et al. 2016 — Deep Networks with Stochastic Depth)
         # drop_path_rate > 0 ise training'de residual path rastgele sıfırlanır.
@@ -456,16 +462,24 @@ class TransformerEncoderLayer(nn.Module):
 
     def get_and_reset_moe_loss(self) -> Optional[torch.Tensor]:
         """
-        [V6] Fix 7: MoE auxiliary loss'u döndürür ve listeyi temizler.
-        Her training step'inde çağrılmalı; bellek sızıntısını önler.
+        [V8 Fix] MoE auxiliary loss'u döndürür ve accumulation'ı sıfırlar.
+        Her training step'inde optimizer.step() öncesinde çağrılmalı.
+
+        Eski tasarım (V6): Liste → her forward tensor ekliyordu; reset edilmezse
+        computation graph'lar bellekte birikirdi (memory leak).
+        Yeni tasarım (V8): Scalar accumulation → sadece tek tensor tutuluyor;
+        gradient accumulation desteği korunuyor, leak riski yok.
+
+        Kullanım:
+            loss = model_loss + layer.get_and_reset_moe_loss()
+            loss.backward()
 
         Returns:
-            Birikmiş MoE load balancing loss toplamı, yoksa None.
+            Birikmiş MoE load balancing loss (scalar tensor), yoksa None.
         """
-        if not self._moe_losses:
-            return None
-        loss = sum(self._moe_losses)
-        self._moe_losses.clear()  # [V6] Fix 7: Liste temizlenir — bellek sızıntısı önlenir
+        loss = self._moe_loss_accum
+        self._moe_loss_accum = None   # Sıfırla — computation graph serbest bırakıldı
+        self._moe_accum_steps = 0
         return loss
 
     def _forward_impl(
@@ -580,11 +594,15 @@ class TransformerEncoderLayer(nn.Module):
             # [OK] V4: MoE desteği (endüstri standardı: GPT-4, Gemini)
             if self.use_moe:
                 ffn_output, moe_load_balancing_loss = self.ffn(x_norm)  # [B, T, embed_dim], scalar
-                # [V6] Fix 7: _moe_losses __init__'de başlatıldı; hasattr kontrolü yok
-                self._moe_losses.append(moe_load_balancing_loss)
+                # [V8 Fix] Scalar accumulation (liste değil) — memory leak yok
+                self._moe_loss_accum = (
+                    moe_load_balancing_loss if self._moe_loss_accum is None
+                    else self._moe_loss_accum + moe_load_balancing_loss
+                )
+                self._moe_accum_steps += 1
             else:
                 ffn_output = self.ffn(x_norm)  # [B, T, embed_dim]
-            # 
+            #
             # Adım 3: Dropout + Stochastic Depth + Residual (orijinal x ile topla)
             # [V7] Stochastic depth FFN branch
             _ffn_residual = self._stochastic_depth(
@@ -599,8 +617,12 @@ class TransformerEncoderLayer(nn.Module):
             # [OK] V4: MoE desteği (endüstri standardı: GPT-4, Gemini)
             if self.use_moe:
                 ffn_output, moe_load_balancing_loss = self.ffn(x)  # [B, T, embed_dim], scalar
-                # [V6] Fix 7: _moe_losses __init__'de başlatıldı; hasattr kontrolü gerekmiyor
-                self._moe_losses.append(moe_load_balancing_loss)
+                # [V8 Fix] Scalar accumulation
+                self._moe_loss_accum = (
+                    moe_load_balancing_loss if self._moe_loss_accum is None
+                    else self._moe_loss_accum + moe_load_balancing_loss
+                )
+                self._moe_accum_steps += 1
             else:
                 ffn_output = self.ffn(x)  # [B, T, embed_dim]
             #
@@ -660,7 +682,12 @@ class TransformerEncoderLayer(nn.Module):
         # FFN branch (aynı x_norm'dan)
         if self.use_moe:
             ffn_output, moe_load_balancing_loss = self.ffn(x_norm)
-            self._moe_losses.append(moe_load_balancing_loss)
+            # [V8 Fix] Scalar accumulation
+            self._moe_loss_accum = (
+                moe_load_balancing_loss if self._moe_loss_accum is None
+                else self._moe_loss_accum + moe_load_balancing_loss
+            )
+            self._moe_accum_steps += 1
         else:
             ffn_output = self.ffn(x_norm)
 
