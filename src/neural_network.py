@@ -549,10 +549,8 @@ class CevahirNeuralNetwork(nn.Module):
             "SeqProjection kaldırıldı (Transformer standardı)."
         )
         
-        # [OK] V4: Model'i quantize et (eğer quantization aktifse ve inference modundaysa)
-        if quantization_type != "none" and not self.training:
-            self.logger.info(f"[V4] Model quantization uygulanıyor: {quantization_type}")
-            self.quantization_manager.quantize_model(self)
+        # Quantization __init__ içinde uygulanmaz (self.training bu noktada daima True).
+        # Eğitim tamamlandıktan sonra apply_quantization() çağrılmalıdır.
 
     # ------------------ Pickling-safe ------------------ #
     def __getstate__(self):
@@ -886,3 +884,61 @@ class CevahirNeuralNetwork(nn.Module):
             if hasattr(layer, "attn") and getattr(layer.attn, "kv_cache", None) is not None:
                 layer.attn.kv_cache.clear()
         self.logger.debug("[V4] KV Cache tüm layer'larda temizlendi.")
+
+    def apply_quantization(self, calibration_data: list | None = None) -> None:
+        """
+        Eğitim tamamlandıktan sonra modeli quantize eder.
+
+        __init__ içinde değil, burada çağrılır; çünkü __init__ sırasında
+        self.training=True olduğundan quantization anlamlı değildir.
+
+        Kullanım:
+            model = CevahirNeuralNetwork(..., quantization_type="int8_dynamic")
+            # ... eğitim döngüsü ...
+            model.eval()
+            model.apply_quantization()   # ← eğitim bitti, deploy öncesi
+            logits = model(x)
+
+        Args:
+            calibration_data: Yalnızca quantization_type="int8" için gerekli.
+                              Her eleman torch.Tensor veya (Tensor, ...) tuple'ı.
+        """
+        qt = self.quantization_manager.quantization_type
+        if qt == "none":
+            self.logger.info("[QUANTIZATION] quantization_type='none', işlem atlandı.")
+            return
+
+        if self.training:
+            self.logger.warning(
+                "[QUANTIZATION] Model eğitim modunda. "
+                "Quantization öncesi eval() moduna alınıyor."
+            )
+            self.eval()
+
+        before_mb = self.quantization_manager.get_model_size_mb(self)
+        self.logger.info(
+            f"[QUANTIZATION] Başlıyor: type='{qt}', "
+            f"model boyutu={before_mb:.1f} MB"
+        )
+
+        self.quantization_manager.quantize_model(self, calibration_data=calibration_data)
+
+        after_mb = self.quantization_manager.get_model_size_mb(self)
+        savings_pct = (1.0 - after_mb / before_mb) * 100 if before_mb > 0 else 0.0
+        self.logger.info(
+            f"[QUANTIZATION] Tamamlandı: {before_mb:.1f} MB → {after_mb:.1f} MB "
+            f"({savings_pct:.1f}% tasarruf)"
+        )
+
+    def get_quantization_info(self) -> dict:
+        """
+        Quantization durumu hakkında özet bilgi döndürür.
+
+        Returns:
+            dict: quantization_type, is_quantized, model_size_mb alanlarını içerir.
+        """
+        return {
+            "quantization_type": self.quantization_manager.quantization_type,
+            "is_quantized": self.quantization_manager.is_quantized(self),
+            "model_size_mb": round(self.quantization_manager.get_model_size_mb(self), 2),
+        }
