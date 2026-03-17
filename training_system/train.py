@@ -388,7 +388,6 @@ TRAIN_CONFIG: Dict[str, Any] = {
     "grad_accum_steps": 8,  # 4 → 8: efektif batch = 16×8 = 128 (aynı kalır)
     "learning_rate": 0.0002,  #  DÜZELTME: 0.0001 → 0.0002 (2x artış, model daha hızlı öğrenir)
     "continuation_learning_rate": None,  # Devam eğitimi: set edilirse (örn. 1e-4) checkpoint varken LR bu değere çekilir
-    "dropout": 0.2,  # FIXED: 0.15 → 0.2 (better regularization, reduces overfitting)
     "weight_decay": 0.01,  # NEW: L2 regularization (standard for Adam optimizer)
     # ==========================================================================
     # Optimizer Seçimi
@@ -489,7 +488,7 @@ TRAIN_CONFIG: Dict[str, Any] = {
     # [OK] V-4 İYİLEŞTİRMELERİ (Endüstri Standardı: GPT-3+/4, LLaMA, PaLM, Claude, Gemini)
     "use_rmsnorm": True,  # RMSNorm kullan (V4 default: True, LayerNorm yerine)
     "use_swiglu": True,  # SwiGLU activation kullan (V4 default: True, GELU yerine)
-    "use_kv_cache": True,  # KV Cache kullan (V4 default: True, inference için)
+    "use_kv_cache": False,  # KV Cache: training'de False (gereksiz buffer allocation önlenir); inference'ta True yap
     "max_cache_len": 2048,  # Maximum cache length (V4 default: 2048)
     "use_advanced_checkpointing": False,  # Advanced checkpointing (opsiyonel, V4 default: False)
     "checkpointing_strategy": "selective",  # Checkpointing strategy (V4 default: "selective")
