@@ -38,21 +38,34 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import logging
 
 
 class RMSNorm(nn.Module):
     """
-    [OK] V4: RMSNorm (Root Mean Square Layer Normalization)
-    Endüstri standardı: GPT-3+, LLaMA, PaLM
-    
+    [V5] RMSNorm (Root Mean Square Layer Normalization)
+    Endüstri standardı: GPT-3+, LLaMA 2, Mistral, Gemma
+
     Formula:
-    RMSNorm(x) = x / sqrt(mean(x^2) + eps) * g
-    
+        RMSNorm(x) = x / sqrt(mean(x^2) + eps) * scale
+
+    Numerik Stabilite (FP16/BF16):
+        Norm hesaplaması daima float32'de yapılır; overflow/NaN önlenir.
+        Sonuç, girişin orijinal dtype'ına geri cast edilir.
+        Referans: LLaMA 2 / Mistral implementasyonu.
+
+    Performans (PyTorch 2.4+):
+        torch.nn.functional.rms_norm fused kernel varsa kullanılır.
+        Yoksa manuel float32-upcast implementasyona fallback yapılır.
+
     Args:
-        dim: Normalize edilecek dimension
-        eps: Numerical stability için epsilon (default: 1e-6)
+        dim: Normalize edilecek son boyut.
+        eps: Sayısal stabilite için epsilon (default: 1e-6).
     """
+
+    # PyTorch 2.4+ fused kernel kontrolü — sınıf yüklendiğinde bir kez yapılır
+    _USE_FUSED: bool = hasattr(F, "rms_norm")
     
     def __init__(
         self,
@@ -84,32 +97,44 @@ class RMSNorm(nn.Module):
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
         
-        self.logger.info(f"[V4] RMSNorm initialized: dim={dim}, eps={eps}")
+        self.logger.info(
+            f"[V5] RMSNorm initialized: dim={dim}, eps={eps}, "
+            f"fused_kernel={self._USE_FUSED}"
+        )
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Forward pass.
-        
+
         Args:
-            x: [..., dim] - Input tensor (son dimension normalize edilir)
-        
+            x: [..., dim] — Giriş tensörü (son boyut normalize edilir).
+
         Returns:
-            x: [..., dim] - Normalized tensor
-        
-        Formula:
-            RMSNorm(x) = x / sqrt(mean(x^2) + eps) * scale
+            [..., dim] — Normalize edilmiş tensör, girişle aynı dtype.
+
+        Akış:
+            1. PyTorch 2.4+: F.rms_norm fused kernel (en hızlı yol).
+            2. Diğer: float32 upcast → rsqrt → orijinal dtype'a cast.
+               FP16/BF16'da x*x overflow riskini ortadan kaldırır.
         """
-        # [OK] V4: RMSNorm hesaplama (GPT-3+, LLaMA standardı)
-        # mean(x^2) hesapla (son dimension üzerinde)
-        x_norm = torch.mean(x ** 2, dim=-1, keepdim=True)  # [..., 1]
-        
-        # sqrt(mean(x^2) + eps)
-        x_norm = torch.rsqrt(x_norm + self.eps)  # [..., 1] - rsqrt = 1/sqrt (daha hızlı)
-        
-        # x / sqrt(mean(x^2) + eps) * scale
-        x = x * x_norm * self.scale  # [..., dim]
-        
-        return x
+        # --- Path 1: PyTorch 2.4+ fused kernel ---
+        # scale, input dtype'ına cast edilir (FP16/BF16 uyumluluğu için)
+        if self._USE_FUSED:
+            return F.rms_norm(x, (self.dim,), self.scale.to(x.dtype), self.eps)
+
+        # --- Path 2: Float32 upcast (FP16/BF16 overflow koruması) ---
+        # LLaMA 2 / Mistral standardı:
+        # Norm hesaplaması float32'de yapılır → NaN/inf riski ortadan kalkar.
+        # Sonuç girişin orijinal dtype'ına geri döndürülür.
+        orig_dtype = x.dtype
+        x_fp32 = x.float()                                          # FP16/BF16 → FP32
+
+        # mean(x^2) — x*x, x**2'den hafif daha hızlı (pow dispatch yok)
+        rms = torch.mean(x_fp32 * x_fp32, dim=-1, keepdim=True)    # [..., 1]
+        x_normed = x_fp32 * torch.rsqrt(rms + self.eps)            # [..., dim]
+
+        # Scale FP32'ye cast edilir, sonuç orijinal dtype'a döndürülür
+        return (x_normed * self.scale.float()).to(orig_dtype)
     
     def extra_repr(self) -> str:
         return f"dim={self.dim}, eps={self.eps}"
