@@ -164,6 +164,11 @@ class TransformerEncoderLayer(nn.Module):
         parallel_residual: bool = False,
         # [V6] Attention Logit Soft-Cap (Gemma 2) — MHA'ya iletilir (0=kapalı)
         attn_logit_cap: float = 0.0,
+        # [V7] Stochastic Depth / LayerDrop (Huang et al. 2016, DeiT standardı)
+        # Her layer'ın residual path'ini training sırasında rastgele siler.
+        # Derin katmanlar daha yüksek rate alır (lineer decay ile neural_network.py'den set edilir).
+        # 0.0 = kapalı (default, geriye dönük uyumlu)
+        drop_path_rate: float = 0.0,
         **kwargs,  # ffn_activation gibi ek parametreler için
     ):
         """
@@ -291,6 +296,16 @@ class TransformerEncoderLayer(nn.Module):
         # [V6] Fix 7: MoE _moe_losses — başlangıçta liste olarak başlat (bellek sızıntısı önleme)
         self._moe_losses = []
 
+        # [V7] Stochastic Depth (Huang et al. 2016 — Deep Networks with Stochastic Depth)
+        # drop_path_rate > 0 ise training'de residual path rastgele sıfırlanır.
+        # layer_idx arttıkça oran artar (lineer decay, neural_network.py'den set edilir).
+        self.drop_path_rate: float = float(drop_path_rate)
+        if self.drop_path_rate > 0.0:
+            self.logger.info(
+                f"[V7] Stochastic Depth etkinleştirildi: drop_path_rate={self.drop_path_rate:.4f} "
+                f"(Huang et al. 2016, DeiT standardı)"
+            )
+
         self.logger.info(
             f"TransformerEncoderLayer initialized: embed_dim={embed_dim}, "
             f"num_heads={num_heads}, num_kv_heads={num_kv_heads}, "
@@ -298,7 +313,8 @@ class TransformerEncoderLayer(nn.Module):
             f"use_gradient_checkpointing={use_gradient_checkpointing}, use_rope={use_rope}, "
             f"use_rmsnorm={use_rmsnorm}, sliding_window={sliding_window}, "
             f"[V6] pytorch_sdpa={use_pytorch_sdpa}, qk_norm={use_qk_norm}, "
-            f"parallel_residual={parallel_residual}, attn_logit_cap={attn_logit_cap}"
+            f"parallel_residual={parallel_residual}, attn_logit_cap={attn_logit_cap}, "
+            f"[V7] drop_path_rate={drop_path_rate}"
         )
     
     def forward(
@@ -382,6 +398,49 @@ class TransformerEncoderLayer(nn.Module):
         # Normal forward pass (inference veya checkpointing yok)
         return self._forward_impl(x, mask, causal_mask, use_cache, cache_position)
     
+    # =========================================================================
+    # [V7] Stochastic Depth — Huang et al. (2016) "Deep Networks with Stochastic Depth"
+    # DeiT, RoBERTa, modern ViT implementasyonlarında kullanılan regularization tekniği.
+    # =========================================================================
+
+    @staticmethod
+    def _stochastic_depth(
+        residual: torch.Tensor,
+        drop_rate: float,
+        training: bool,
+    ) -> torch.Tensor:
+        """
+        Residual path'e stochastic depth uygular.
+
+        Training sırasında drop_rate olasılığıyla tüm residual branch sıfırlanır
+        (batch boyutunda bağımsız Bernoulli örneklemesi). Beklenen değeri korumak
+        için hayatta kalan örneğe 1/(1-drop_rate) ölçeği uygulanır.
+
+        Inference'ta hiçbir şey sıfırlanmaz — davranış değişmez.
+
+        Args:
+            residual : Residual katkı tensörü [B, T, D]
+            drop_rate: 0.0 → kapalı; (0, 1) → drop olasılığı
+            training  : model.training ile aynı değer
+
+        Returns:
+            Ölçeklendirilmiş ve maskelenmiş (veya değişmemiş) residual tensör.
+
+        Referans:
+            Huang et al. (2016) — https://arxiv.org/abs/1603.09382
+            Touvron et al. (2021) DeiT — DropPath implementasyonu
+        """
+        if not training or drop_rate == 0.0:
+            return residual
+
+        survival_prob = 1.0 - drop_rate
+        # [B, 1, 1] şeklinde Bernoulli maskesi → tüm T ve D boyutlarına broadcast
+        shape = (residual.shape[0], 1, 1)
+        mask = torch.empty(shape, dtype=residual.dtype, device=residual.device)
+        mask.bernoulli_(survival_prob)
+        # Beklenen değeri koru: E[mask * x / p] = x
+        return residual * mask / survival_prob
+
     def get_and_reset_moe_loss(self) -> Optional[torch.Tensor]:
         """
         [V6] Fix 7: MoE auxiliary loss'u döndürür ve listeyi temizler.
@@ -445,9 +504,13 @@ class TransformerEncoderLayer(nn.Module):
                 attn_output, attn_weights = attn_result
                 kv_cache = None
             # 
-            # Adım 3: Dropout + Residual (orijinal x ile topla)
-            x = x + self.dropout(attn_output)  # [B, T, embed_dim]
-            # 
+            # Adım 3: Dropout + Stochastic Depth + Residual (orijinal x ile topla)
+            # [V7] Stochastic depth: training'de residual path rastgele sıfırlanabilir
+            _attn_residual = self._stochastic_depth(
+                self.dropout(attn_output), self.drop_path_rate, self.training
+            )
+            x = x + _attn_residual  # [B, T, embed_dim]
+            #
             # PRE-NORM AVANTAJLARI:
             # - Daha stabil gradient flow (deep network'lerde)
             # - LayerNorm input'u normalize eder, attention daha iyi çalışır
@@ -455,7 +518,7 @@ class TransformerEncoderLayer(nn.Module):
         else:
             # [OK] POST-NORM AKIŞI (Orijinal Transformer, BERT)
             # Akış: x → Attention → Dropout → Residual (+) → LayerNorm
-            # 
+            #
             # Adım 1: Attention (orijinal input ile)
             # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
             attn_result = self.attn(
@@ -473,9 +536,13 @@ class TransformerEncoderLayer(nn.Module):
             else:
                 attn_output, attn_weights = attn_result
                 kv_cache = None
-            # 
-            # Adım 2: Dropout + Residual + LayerNorm (POST)
-            x = self.norm1(x + self.dropout(attn_output))  # [B, T, embed_dim]
+            #
+            # Adım 2: Dropout + Stochastic Depth + Residual + LayerNorm (POST)
+            # [V7] Stochastic depth: training'de residual path rastgele sıfırlanabilir
+            _attn_residual = self._stochastic_depth(
+                self.dropout(attn_output), self.drop_path_rate, self.training
+            )
+            x = self.norm1(x + _attn_residual)  # [B, T, embed_dim]
             # 
             # POST-NORM AVANTAJLARI:
             # - Orijinal Transformer paper'ına uygun
@@ -502,25 +569,31 @@ class TransformerEncoderLayer(nn.Module):
             else:
                 ffn_output = self.ffn(x_norm)  # [B, T, embed_dim]
             # 
-            # Adım 3: Dropout + Residual (orijinal x ile topla)
-            x = x + self.dropout(ffn_output)  # [B, T, embed_dim]
+            # Adım 3: Dropout + Stochastic Depth + Residual (orijinal x ile topla)
+            # [V7] Stochastic depth FFN branch
+            _ffn_residual = self._stochastic_depth(
+                self.dropout(ffn_output), self.drop_path_rate, self.training
+            )
+            x = x + _ffn_residual  # [B, T, embed_dim]
         else:
             # [OK] POST-NORM AKIŞI (Orijinal Transformer, BERT)
             # Akış: x → FFN → Dropout → Residual (+) → LayerNorm
-            # 
+            #
             # Adım 1: FFN veya MoE (orijinal input ile)
             # [OK] V4: MoE desteği (endüstri standardı: GPT-4, Gemini)
             if self.use_moe:
                 ffn_output, moe_load_balancing_loss = self.ffn(x)  # [B, T, embed_dim], scalar
-                # Load balancing loss'u sakla (training için)
-                if not hasattr(self, '_moe_losses'):
-                    self._moe_losses = []
+                # [V6] Fix 7: _moe_losses __init__'de başlatıldı; hasattr kontrolü gerekmiyor
                 self._moe_losses.append(moe_load_balancing_loss)
             else:
                 ffn_output = self.ffn(x)  # [B, T, embed_dim]
-            # 
-            # Adım 2: Dropout + Residual + LayerNorm (POST)
-            x = self.norm2(x + self.dropout(ffn_output))  # [B, T, embed_dim]
+            #
+            # Adım 2: Dropout + Stochastic Depth + Residual + LayerNorm (POST)
+            # [V7] Stochastic depth FFN branch
+            _ffn_residual = self._stochastic_depth(
+                self.dropout(ffn_output), self.drop_path_rate, self.training
+            )
+            x = self.norm2(x + _ffn_residual)  # [B, T, embed_dim]
         
         # [OK] V4: KV Cache döndür (use_cache=True ise)
         if use_cache:
@@ -573,7 +646,14 @@ class TransformerEncoderLayer(nn.Module):
             ffn_output = self.ffn(x_norm)
 
         # Paralel residual: her iki branch aynı anda eklenir
-        x = x + self.dropout(attn_output) + self.dropout(ffn_output)  # [B, T, embed_dim]
+        # [V7] Stochastic depth: her iki branch için aynı drop_path_rate uygulanır
+        _attn_res = self._stochastic_depth(
+            self.dropout(attn_output), self.drop_path_rate, self.training
+        )
+        _ffn_res = self._stochastic_depth(
+            self.dropout(ffn_output), self.drop_path_rate, self.training
+        )
+        x = x + _attn_res + _ffn_res  # [B, T, embed_dim]
 
         if use_cache:
             return x, attn_weights, kv_cache
@@ -583,6 +663,7 @@ class TransformerEncoderLayer(nn.Module):
         return (
             f"embed_dim={self.embed_dim}, num_heads={self.num_heads}, "
             f"ffn_dim={self.ffn_dim}, dropout={self.dropout_rate}, pre_norm={self.pre_norm}, "
-            f"parallel_residual={self.parallel_residual}"
+            f"parallel_residual={self.parallel_residual}, "
+            f"drop_path_rate={self.drop_path_rate:.4f}"
         )
 
