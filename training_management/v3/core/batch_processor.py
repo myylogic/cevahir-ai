@@ -132,9 +132,10 @@ class BatchProcessor:
                 f"Desteklenen tipler: Tensor, dict, tuple, list"
             )
 
-        # Cihaza taşı
-        inputs = inputs.to(self.device)
-        targets = targets.to(self.device)
+        # Cihaza taşı — non_blocking=True: pinned_memory DataLoader ile async CUDA transfer
+        # (CPU→GPU aktarımı, model forward başlamadan önce arka planda tamamlanır)
+        inputs = inputs.to(self.device, non_blocking=True)
+        targets = targets.to(self.device, non_blocking=True)
 
         # Dtype dönüşümü (gerekirse)
         inputs, targets = self._ensure_dtype(inputs, targets)
@@ -193,8 +194,13 @@ class BatchProcessor:
             )
 
         # Otoregressif kaydırma: inputs son tokeni almaz, targets ilk tokeni almaz
-        inputs = tensor[:, :-1].contiguous()
-        targets = tensor[:, 1:].contiguous()
+        # [PERF FIX] .contiguous() CPU'da çağrılıp ardından .to(device) yapılıyordu:
+        # bu, CPU'da ekstra bir kopya + GPU'ya transfer = toplam 2 tahsis demektir.
+        # CUDA transferi (.to('cuda')) zaten contiguous tensor döndürür.
+        # CPU eğitimi için downstream (F.linear vb.) non-contiguous slice'ı tolere eder.
+        # Gerçekten gerekirse .to(device) sonrası contiguous() çağrılabilir.
+        inputs = tensor[:, :-1]
+        targets = tensor[:, 1:]
 
         return inputs, targets
 
