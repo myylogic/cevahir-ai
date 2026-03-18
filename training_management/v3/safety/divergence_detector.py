@@ -24,6 +24,8 @@ from collections import deque
 from enum import Enum
 from typing import Any, Deque, Dict, List, Optional
 
+import torch
+
 logger = logging.getLogger(__name__)
 
 
@@ -84,10 +86,10 @@ class DivergenceDetector:
         self._current_status: ConvergenceStatus = ConvergenceStatus.HEALTHY
         self._total_epochs_tracked: int = 0
 
-        # Geçmiş kayıtları
-        self._train_loss_history: List[float] = []
-        self._val_loss_history: List[float] = []
-        self._epoch_history: List[int] = []
+        # Geçmiş kayıtları — FIX: deque(maxlen) replaces List + manual slicing
+        self._train_loss_history: Deque[float] = deque(maxlen=2000)
+        self._val_loss_history: Deque[float] = deque(maxlen=2000)
+        self._epoch_history: Deque[int] = deque(maxlen=2000)
 
         # Divergence tespiti için kayan pencere
         self._val_loss_window: Deque[float] = deque(maxlen=diverge_window)
@@ -138,12 +140,7 @@ class DivergenceDetector:
         self._epoch_history.append(epoch)
         self._val_loss_window.append(val_loss)
         self._total_epochs_tracked += 1
-        # [MEM-FIX] Unbounded history listelerini sınırla: max 2000 epoch kaydı tut
-        _MAX_HISTORY = 2000
-        if len(self._train_loss_history) > _MAX_HISTORY:
-            self._train_loss_history = self._train_loss_history[-_MAX_HISTORY:]
-            self._val_loss_history = self._val_loss_history[-_MAX_HISTORY:]
-            self._epoch_history = self._epoch_history[-_MAX_HISTORY:]
+        # deque(maxlen=2000) handles eviction automatically — no manual slicing needed
 
         # --- Early stopping güncellemesi ---
         if val_loss < self._best_val_loss - self.min_delta:
@@ -313,11 +310,8 @@ class DivergenceDetector:
             return False
 
         window = list(self._val_loss_window)
-        # Monoton artış: her eleman bir öncekinden büyük
-        is_monoton_increasing = all(
-            window[i] >= window[i - 1]
-            for i in range(1, len(window))
-        )
+        # FIX: zip-based pairwise comparison — no index arithmetic, single list copy
+        is_monoton_increasing = all(b >= a for a, b in zip(window, window[1:]))
 
         if is_monoton_increasing:
             logger.warning(
@@ -361,11 +355,14 @@ class DivergenceDetector:
             return False
 
         # Son birkaç değerdeki maksimum değişim
-        recent = self._val_loss_history[-min(self.diverge_window, len(self._val_loss_history)):]
+        # FIX: vectorized torch diff instead of O(n) Python loop
+        n = min(self.diverge_window, len(self._val_loss_history))
+        recent = list(self._val_loss_history)[-n:]
         if len(recent) < 2:
             return False
 
-        max_change = max(abs(recent[i] - recent[i - 1]) for i in range(1, len(recent)))
+        recent_t = torch.tensor(recent, dtype=torch.float32)
+        max_change = (recent_t[1:] - recent_t[:-1]).abs().max().item()
         is_plateau = max_change < self.plateau_threshold
 
         if is_plateau:
