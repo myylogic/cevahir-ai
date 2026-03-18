@@ -6,7 +6,7 @@ Cevahir V3 Eğitim Sistemi — Per-layer gradient sağlık izleme modülü.
 Her katman için gradient norm, varyans, ölü nöron oranı ve
 gradient akış skoru hesaplanır. TensorBoard entegrasyonu mevcuttur.
 
-Yazar: Cevahir Sinir Sistemi V3
+Yazar: Muhammed Yasin Yılmaz
 Tarih: 2026
 """
 
