@@ -160,32 +160,36 @@ class TokenDistributionMonitor:
             )
             return
 
-        # Gradient takibini devre dışı bırak, CPU'ya taşı
+        # FIX: only pay GPU→CPU transfer cost on log interval batches
+        # Previously, logits.argmax().cpu().tolist() ran every single batch —
+        # now it runs once every log_every_n_batches batches instead.
+        self._batch_counter += 1
+        if self._batch_counter % self.log_every_n_batches != 0:
+            return
+
         with torch.no_grad():
             # (B, T) — her pozisyon için argmax token ID'si
             predicted = logits.argmax(dim=-1).reshape(-1).cpu().tolist()
 
         # Pencereye ekle
         self._token_window.extend(predicted)
-        self._batch_counter += 1
         self._cache_dirty = True  # İstatistikler yeniden hesaplanmalı
 
         # Periyodik uyarı kontrolü
-        if self._batch_counter % self.log_every_n_batches == 0:
-            stats = self.get_stats()
-            if stats["is_collapsed"]:
-                logger.error(
-                    "TOKEN COLLAPSE TESPİT EDİLDİ! "
-                    "eos_ratio=%.3f entropy=%.3f ttr=%.3f",
-                    stats["eos_ratio"],
-                    stats["unigram_entropy"],
-                    stats["type_token_ratio"],
-                )
-            elif stats["eos_ratio"] > WARNING_EOS_RATIO:
-                logger.warning(
-                    "Yüksek EOS oranı uyarısı: eos_ratio=%.3f",
-                    stats["eos_ratio"],
-                )
+        stats = self.get_stats()
+        if stats["is_collapsed"]:
+            logger.error(
+                "TOKEN COLLAPSE TESPİT EDİLDİ! "
+                "eos_ratio=%.3f entropy=%.3f ttr=%.3f",
+                stats["eos_ratio"],
+                stats["unigram_entropy"],
+                stats["type_token_ratio"],
+            )
+        elif stats["eos_ratio"] > WARNING_EOS_RATIO:
+            logger.warning(
+                "Yüksek EOS oranı uyarısı: eos_ratio=%.3f",
+                stats["eos_ratio"],
+            )
 
     def get_stats(self) -> Dict:
         """
