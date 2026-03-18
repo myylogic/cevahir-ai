@@ -166,11 +166,13 @@ class GradientManager:
             logger.debug("clip_gradients: Hesaplanmış gradyan bulunamadı")
             return 0.0
 
-        # Kırpma öncesi norm'u hesapla (izleme için)
-        total_norm = self._compute_total_norm(params_with_grad, norm_type)
-
-        # PyTorch'un yerleşik kırpma fonksiyonunu kullan
-        nn.utils.clip_grad_norm_(params_with_grad, _max_norm, norm_type=norm_type)
+        # [PERF FIX] Önceki kod önce _compute_total_norm() ile norm hesaplıyor,
+        # ardından clip_grad_norm_() ile tekrar hesaplatıyordu (2 tam iterasyon).
+        # clip_grad_norm_() zaten norm'u döndürür — tek geçişte hem kırp hem ölç.
+        total_norm_tensor = nn.utils.clip_grad_norm_(
+            params_with_grad, _max_norm, norm_type=norm_type
+        )
+        total_norm = total_norm_tensor.item()  # Tek GPU→CPU senkronizasyon noktası
 
         if total_norm > _max_norm * 2:
             logger.debug(
