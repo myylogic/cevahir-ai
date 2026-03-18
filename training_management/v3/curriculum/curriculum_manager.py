@@ -212,6 +212,11 @@ class CurriculumManager:
         self._loss_scores: Optional[Dict[int, float]] = None
         self._last_loss_update_epoch: int = -1
 
+        # FIX: LENGTH_BASED sample length cache — avoids O(n) dataset scan per epoch
+        # Cache is keyed by dataset object identity; invalidated if dataset changes.
+        self._length_cache: Optional[Dict[int, int]] = None
+        self._length_cache_dataset_id: Optional[int] = None
+
         logger.info(
             "CurriculumManager başlatıldı: strategy=%s, curriculum_epochs=%d, "
             "seq_len=[%d, %d]",
@@ -360,19 +365,34 @@ class CurriculumManager:
                 )
                 return dataloader
 
-            # Dahil edilecek örnek indekslerini bul
-            included_indices: List[int] = []
-            for idx in range(len(dataset)):  # type: ignore[arg-type]
-                try:
-                    sample = dataset[idx]
-                    sample_len = sample_len_fn(sample)
-                    if sample_len <= current_max:
-                        included_indices.append(idx)
-                except Exception as exc:
-                    logger.warning(
-                        "Örnek %d uzunluğu hesaplanamadı: %s. Dahil edilmiyor.",
-                        idx, exc,
-                    )
+            # FIX: Build length cache once per dataset — subsequent epochs use dict lookup
+            # instead of O(n) dataset[idx] access (which may involve disk I/O).
+            if (
+                self._length_cache is None
+                or self._length_cache_dataset_id != id(dataset)
+            ):
+                logger.info(
+                    "LENGTH_BASED: uzunluk önbelleği oluşturuluyor (%d örnek)...",
+                    len(dataset),  # type: ignore[arg-type]
+                )
+                self._length_cache = {}
+                self._length_cache_dataset_id = id(dataset)
+                for idx in range(len(dataset)):  # type: ignore[arg-type]
+                    try:
+                        sample = dataset[idx]
+                        self._length_cache[idx] = sample_len_fn(sample)
+                    except Exception as exc:
+                        logger.warning(
+                            "Örnek %d uzunluğu hesaplanamadı: %s. Önbellekte -1.",
+                            idx, exc,
+                        )
+                        self._length_cache[idx] = -1  # geçersiz → filtrelenecek
+
+            # Cache üzerinden filtrele: O(n) dict lookup, sıfır dataset I/O
+            included_indices: List[int] = [
+                idx for idx, length in self._length_cache.items()
+                if 0 < length <= current_max
+            ]
 
             if not included_indices:
                 logger.warning(
