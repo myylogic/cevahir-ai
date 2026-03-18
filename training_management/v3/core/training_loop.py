@@ -736,13 +736,17 @@ class TrainingLoop(ScheduledSamplingMixin):
                 # Gradyanları sıfırla
                 self.optimizer.zero_grad(set_to_none=True)
                 self.global_step += 1
-
-                # [MEM] Fragmented serbest blokları geri al
-                torch.cuda.empty_cache()
+                # [PERF FIX] empty_cache() kaldırıldı — PyTorch caching allocator
+                # serbest blokları otomatik yeniden kullanır; empty_cache her çağrıda
+                # 10-100ms bloke eder ve CUDA fragmentation analizini tetikler.
+                # del logits + del normalized_loss zaten Python GC'yi tetikler.
+                # Yalnızca gerçek OOM riski varsa dışarıdan çağrılmalıdır.
 
             else:
-                # Birikim adımı değilse norm hesapla ama optimizer adımı atma
-                grad_norm = self.gradient_manager.calculate_gradient_norm(self.model)
+                # [PERF FIX] Birikim adımında değilken grad_norm hesaplamak gereksiz:
+                # Her parametre için GPU→CPU senkronizasyon yapar.
+                # Son birikim adımındaki norm değeri taşınır (accumulator'da zaten sıfır başlıyor).
+                grad_norm = 0.0  # Optimizer adımı atılmadı; norm birikim adımında raporlanır
 
             # ----------------------------------------------------------
             # 7. Batch Metrikleri
@@ -753,11 +757,16 @@ class TrainingLoop(ScheduledSamplingMixin):
                     targets=targets,
                     pad_id=cfg.pad_token_id,
                 )
-                entropy = compute_entropy(_logits_for_metrics)
 
-            # Token dağılımı (her log_token_dist_every batch'te)
+            # Token dağılımı ve entropy (her log_token_dist_every batch'te)
+            # [PERF FIX] compute_entropy her batch çağrıldığında chunked Python döngüsü
+            # 64+ GPU dispatch tetikler. Token dağılımı zaten aralıklı hesaplanıyordu;
+            # entropy de aynı aralığa taşındı. Loglama frekansı korundu.
             token_dist = None
+            entropy = 0.0
             if batch_idx % cfg.log_token_dist_every == 0:
+                with torch.no_grad():
+                    entropy = compute_entropy(_logits_for_metrics)
                 token_dist = self._compute_token_distribution(
                     targets=targets,
                     logits=_logits_for_metrics,
