@@ -142,22 +142,17 @@ class SAM(torch.optim.Optimizer):
         # Tüm parametreleri aynı cihaza normalize etmek için referans cihaz
         shared_device = self.param_groups[0]["params"][0].device
 
-        # Adaptive SAM: her gradient'i parametre büyüklüğüyle ölçekle
-        norm = torch.norm(
-            torch.stack(
-                [
-                    # Adaptive: |w| * |g|, Normal: |g|
-                    ((torch.abs(p) if group["adaptive"] else torch.ones_like(p)) * p.grad)
-                    .norm(p=2)
-                    .to(shared_device)
-                    for group in self.param_groups
-                    for p in group["params"]
-                    if p.grad is not None
-                ]
-            ),
-            p=2,
-        )
-        return norm
+        # FIX: accumulate squared norms directly — avoids Python list + torch.stack()
+        # allocation; equivalent math: sqrt(sum(||g_i||^2)) = L2 norm of all gradients
+        norm_sq = torch.zeros(1, device=shared_device)
+        for group in self.param_groups:
+            for p in group["params"]:
+                if p.grad is None:
+                    continue
+                # FIX: skip torch.ones_like(p) in non-adaptive path — p.grad is sufficient
+                g = torch.abs(p) * p.grad if group["adaptive"] else p.grad
+                norm_sq += g.norm(p=2).to(shared_device).pow_(2)
+        return norm_sq.sqrt().squeeze()
 
     # ------------------------------------------------------------------
     # SAM güncelleme adımları
@@ -196,10 +191,10 @@ class SAM(torch.optim.Optimizer):
                 if p.grad is None:
                     continue
 
-                # Perturbation: epsilon = scale * (|w| veya 1) * g
+                # Perturbation: epsilon = scale * (|w|^2 veya 1) * g
+                # FIX: skip torch.ones_like(p) in non-adaptive path (identity multiply)
                 e_w = (
-                    (torch.pow(p, 2) if group["adaptive"] else torch.ones_like(p))
-                    * p.grad
+                    (p.pow(2) * p.grad if group["adaptive"] else p.grad)
                     * scale.to(p)
                 )
 
