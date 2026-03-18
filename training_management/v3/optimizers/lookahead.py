@@ -35,6 +35,9 @@ Kullanım:
         loss.backward()
         optimizer.step()  # Her k adımda bir slow_weights güncellenir
         optimizer.zero_grad()
+
+
+          Yazar : Muhammed Yasin Yılmaz 2026
 """
 
 import copy
@@ -182,8 +185,9 @@ class Lookahead(torch.optim.Optimizer):
                         continue
 
                     slow = param_state["slow_weight"]
-                    # Interpolasyon: slow = slow + alpha * (fast - slow)
-                    slow.add_(p.detach() - slow, alpha=self.alpha)
+                    # FIX: lerp_ is a single fused op — avoids temp tensor (p.detach()-slow)
+                    # lerp_(end, w) → slow = slow + w*(end-slow) = (1-α)*slow + α*fast
+                    slow.lerp_(p.detach(), self.alpha)
                     # Fast weights'i slow'a sıfırla (yeni başlangıç)
                     p.data.copy_(slow)
 
