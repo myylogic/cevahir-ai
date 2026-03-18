@@ -333,6 +333,19 @@ class TrainingManager:
         self._best_epoch: int = -1
         self._history: List[Dict] = []
 
+        # FIX 1: Cache scheduler signature once — avoids inspect.signature() every epoch
+        self._scheduler_needs_metrics: bool = False
+        if scheduler is not None:
+            import inspect
+            sched_step = getattr(scheduler, "step", None)
+            if sched_step is not None:
+                try:
+                    sig = inspect.signature(sched_step)
+                    params = list(sig.parameters.keys())
+                    self._scheduler_needs_metrics = "metrics" in params or "val_loss" in params
+                except (ValueError, TypeError):
+                    pass
+
         # Rastgele tohum
         if config.seed is not None:
             self._set_seed(config.seed)
@@ -516,19 +529,14 @@ class TrainingManager:
             # 5. Öğrenme Oranı Zamanlayıcı Adımı
             # ==============================================================
             if self.scheduler is not None:
-                # Bazı zamanlayıcılar val_loss ister (ReduceLROnPlateau vb.)
+                # FIX 1: _scheduler_needs_metrics cached in __init__ — no inspect per epoch
                 try:
-                    sched_method = getattr(self.scheduler, "step", None)
-                    if sched_method is not None:
-                        import inspect
-                        sig = inspect.signature(sched_method)
-                        params = list(sig.parameters.keys())
-                        if "metrics" in params or "val_loss" in params:
-                            self.scheduler.step(val_metrics["loss"])
-                        else:
-                            self.scheduler.step()
+                    if self._scheduler_needs_metrics:
+                        self.scheduler.step(val_metrics["loss"])
+                    else:
+                        self.scheduler.step()
                 except Exception as e:
-                    logger.warning(f"Scheduler adımı başarısız: {e}")
+                    logger.warning(f"Scheduler step failed: {e}")
 
             current_lr = self._get_current_lr()
             logger.debug(f"Mevcut öğrenme oranı: {current_lr:.2e}")
@@ -816,12 +824,9 @@ class TrainingManager:
                 if isinstance(pv, (int, float)):
                     metric_map[f"InferenceQuality/{pk}"] = pv
 
-        # TensorBoard'a yaz
+        # TensorBoard'a yaz — _safe_call already handles exceptions; no outer try/except needed
         for tag, value in metric_map.items():
-            try:
-                self._safe_call("add_scalar", tb, tag, value, epoch)
-            except Exception:
-                pass
+            self._safe_call("add_scalar", tb, tag, value, epoch)
 
     def _save_checkpoints(
         self,
@@ -848,6 +853,17 @@ class TrainingManager:
             return
 
         cfg = self.config
+
+        # FIX 2: Skip expensive state_dict() when nothing will be saved this epoch
+        should_save_best = cfg.save_best and is_best
+        should_save_last = cfg.save_last
+        should_save_periodic = (
+            cfg.save_every_n_epochs > 0
+            and (epoch + 1) % cfg.save_every_n_epochs == 0
+        )
+        if not (should_save_best or should_save_last or should_save_periodic):
+            return
+
         checkpoint_data = {
             "epoch": epoch,
             "model_state_dict": self.model.state_dict(),
