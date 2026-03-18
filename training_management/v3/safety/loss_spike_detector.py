@@ -81,7 +81,8 @@ class LossSpikeDetector:
 
         # --- Dahili durum ---
         self._loss_window: Deque[float] = deque(maxlen=window_size)
-        self._loss_history_full: List[float] = []
+        # FIX: use deque(maxlen) instead of List + manual slicing — O(1) append, no copy
+        self._loss_history_full: Deque[float] = deque(maxlen=10_000)
         self._spike_count: int = 0
         self._last_spike_epoch: Optional[int] = None
         self._recovery_remaining: int = 0  # Recovery için kalan epoch sayısı
@@ -130,9 +131,7 @@ class LossSpikeDetector:
         # Geçmişe ekle
         self._loss_window.append(loss)
         self._loss_history_full.append(loss)
-        # [MEM-FIX] _loss_history_full sınırsız büyümeyi önle: max 10000 entry tut
-        if len(self._loss_history_full) > 10000:
-            self._loss_history_full = self._loss_history_full[-10000:]
+        # deque(maxlen=10_000) handles eviction automatically — no manual slicing needed
 
         # Recovery sayacını geri say
         if self._recovery_remaining > 0:
@@ -173,17 +172,17 @@ class LossSpikeDetector:
         window_list = list(self._loss_window)
 
         # Mevcut loss'u çıkar (kendisiyle karşılaştırmamak için)
-        if len(window_list) > 1:
-            reference = window_list[:-1]
-        else:
+        if len(window_list) <= 1:
             return False
 
+        reference = window_list[:-1]
         if len(reference) < 2:
             return False
 
-        mean_val = sum(reference) / len(reference)
-        variance = sum((x - mean_val) ** 2 for x in reference) / len(reference)
-        std_val = math.sqrt(variance) if variance > 0 else 0.0
+        # FIX: replace O(n) Python loops with vectorized torch ops
+        ref_t = torch.tensor(reference, dtype=torch.float32)
+        mean_val = ref_t.mean().item()
+        std_val  = ref_t.std(unbiased=False).item()
 
         threshold = mean_val + self.n_sigma * std_val
 
@@ -303,12 +302,10 @@ class LossSpikeDetector:
         """
         if not self._loss_window:
             return 0.0, 0.0
-        values = list(self._loss_window)
-        mean_val = sum(values) / len(values)
-        if len(values) < 2:
-            return mean_val, 0.0
-        variance = sum((x - mean_val) ** 2 for x in values) / len(values)
-        std_val = math.sqrt(variance)
+        # FIX: vectorized torch ops instead of Python loops
+        t = torch.tensor(list(self._loss_window), dtype=torch.float32)
+        mean_val = t.mean().item()
+        std_val  = t.std(unbiased=False).item() if t.numel() > 1 else 0.0
         return mean_val, std_val
 
     def _handle_spike(
