@@ -501,32 +501,47 @@ class CompositeLossManager:
     def _apply_min_response_mask(
         self,
         logits: torch.Tensor,
+        targets: torch.Tensor,
         min_tokens: int,
-    ) -> torch.Tensor:
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
-        İlk min_tokens pozisyonda EOS logit'lerini -inf yapar.
+        İlk min_tokens pozisyonda EOS hedeflerini PAD (ignore_index) olarak işaretler.
 
-        Bu, modelin çok kısa (min_response_tokens'dan az token içeren)
-        yanıtlar üretmesini engeller. Türkçe cevaplar için minimum uzunluk
-        garantisi sağlar.
+        Modelin çok kısa yanıtlar üretmesini engeller; Türkçe cevaplar için
+        minimum uzunluk garantisi sağlar.
+
+        [PERF FIX] Önceki uygulama logits tensörünü (.clone() ile) kopyalıyordu:
+            - logits: [batch, seq_len, vocab_size] ≈ 64 × 512 × 32000 × 2 bayt ≈ 4 GB
+            - Yalnızca tek bir sütun (EOS token) değiştiriliyordu
+        Yeni uygulama targets tensörünü kopyalar:
+            - targets: [batch, seq_len] ≈ 64 × 512 × 8 bayt ≈ 256 KB — 16.000× daha küçük
+            - EOS olan hedef pozisyonları pad_token_id (ignore_index) olarak işaretlenir
+            - CrossEntropyLoss(ignore_index=pad_token_id) bu pozisyonları zaten atlar
+        Davranış farkı: Logit maskeleme (logit → -inf) yerine hedef maskeleme
+        (target → ignore) — her ikisi de modelin o pozisyonda EOS'u doğru tahmin
+        etmesini kayıp hesabının dışında tutar.
 
         Args:
-            logits    : [batch, seq_len, vocab_size]
+            logits    : [batch, seq_len, vocab_size] — değiştirilmeden döndürülür
+            targets   : [batch, seq_len] — EOS pozisyonları maskelenir
             min_tokens: EOS'un yasaklı olduğu ilk N pozisyon sayısı
 
         Returns:
-            Maskelenmiş logits [batch, seq_len, vocab_size]
+            (logits, masked_targets): logits değişmez, targets'ta ilk N EOS → pad_id
         """
         if min_tokens <= 0:
-            return logits
+            return logits, targets
 
-        seq_len = logits.shape[1]
+        seq_len = targets.shape[1]
         mask_len = min(min_tokens, seq_len)
+        if mask_len == 0:
+            return logits, targets
 
-        # İlk mask_len pozisyondaki EOS logit'lerini -inf yap
-        masked_logits = logits.clone()
-        masked_logits[:, :mask_len, self.config.eos_token_id] = float("-inf")
-        return masked_logits
+        # [B, mask_len] — yalnızca küçük dilimdeki EOS pozisyonlarını işaretle
+        masked_targets = targets.clone()
+        eos_positions = masked_targets[:, :mask_len] == self.config.eos_token_id
+        masked_targets[:, :mask_len][eos_positions] = self.config.pad_token_id
+        return logits, masked_targets
 
     def _extract_aux_loss(
         self,
@@ -608,10 +623,12 @@ class CompositeLossManager:
         targets = targets.to(self.device)
 
         # ---------------------------------------------------
-        # Adım 1: EOS minimum yanıt maskesi
+        # Adım 1: EOS minimum yanıt maskesi (target-space)
         # ---------------------------------------------------
         if cfg.min_response_tokens > 0:
-            logits = self._apply_min_response_mask(logits, cfg.min_response_tokens)
+            logits, targets = self._apply_min_response_mask(
+                logits, targets, cfg.min_response_tokens
+            )
 
         # ---------------------------------------------------
         # Adım 2: Çapraz Entropi Kaybı
