@@ -238,16 +238,15 @@ class GradientHealthMonitor:
         for layer_name, grads in layer_grads.items():
             # Tüm parametrelerin gradientlarını tek tensöre birleştir
             flat = torch.cat([g.reshape(-1) for g in grads])
-
-            # --- L2 norm ---
-            norm = float(flat.norm(2).item())
-
-            # --- Varyans ---
-            variance = float(flat.var().item()) if flat.numel() > 1 else 0.0
-
-            # --- Ölü nöron oranı ---
             total_params = flat.numel()
-            dead_count = int((flat.abs() < self.dead_threshold).sum().item())
+
+            # FIX: fuse 3 separate .item() GPU→CPU syncs into a single transfer
+            norm2   = flat.norm(2)
+            var_val = flat.var() if total_params > 1 else flat.new_zeros(())
+            dead_f  = (flat.abs() < self.dead_threshold).sum().float()
+            # torch.stack + .tolist() = single GPU→CPU transfer for all 3 values
+            norm, variance, dead_count_f = torch.stack([norm2, var_val, dead_f]).tolist()
+            dead_count = int(dead_count_f)
             dead_ratio = dead_count / max(total_params, 1)
 
             # --- Flow skoru ---
