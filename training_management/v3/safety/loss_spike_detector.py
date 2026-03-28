@@ -133,9 +133,11 @@ class LossSpikeDetector:
         self._loss_history_full.append(loss)
         # deque(maxlen=10_000) handles eviction automatically — no manual slicing needed
 
-        # Recovery sayacını geri say
+        # Recovery sayacını geri say; sıfırlandığında LR'ı geri yükle
         if self._recovery_remaining > 0:
             self._recovery_remaining -= 1
+            if self._recovery_remaining == 0 and self._original_lrs:
+                self._restore_lrs()
             logger.debug(
                 "Recovery modu | kalan: %d epoch", self._recovery_remaining
             )
@@ -367,6 +369,21 @@ class LossSpikeDetector:
                 "Warmup restart: LR %.6f → %.6f", pg["lr"], restart_lr
             )
             pg["lr"] = restart_lr
+
+    def _restore_lrs(self) -> None:
+        """
+        Recovery süresi dolduğunda spike öncesi LR değerlerini geri yükler.
+        _temporary_lr_reduce() veya _warmup_restart() ile kaydedilen
+        _original_lrs listesini kullanır.
+        """
+        if not self._original_lrs:
+            return
+        for pg, orig_lr in zip(self.optimizer.param_groups, self._original_lrs):
+            logger.info(
+                "Recovery tamamlandı — LR restore: %.6f → %.6f", pg["lr"], orig_lr
+            )
+            pg["lr"] = orig_lr
+        self._original_lrs = []
 
     def __repr__(self) -> str:
         return (
