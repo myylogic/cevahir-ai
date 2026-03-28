@@ -3,7 +3,7 @@
 Cevahir Sinir Sistemi - Unified Inference API
 ===============================================
 
-V-4 Architecture + TokenizerCore + ModelManager + CognitiveManager
+V-7 Architecture + TokenizerCore + ModelManager + CognitiveManager
 Endüstri Standartları: GPT-4, Claude, Gemini seviyesinde mimari
 
 ⚠️ ÖNEMLİ: Bu modül SADECE INFERENCE için tasarlanmıştır!
@@ -1109,7 +1109,12 @@ class Cevahir:
         """
         # Parse config
         if isinstance(config, dict):
-            self.config = CevahirConfig(**config)
+            try:
+                self.config = CevahirConfig(**config)
+            except TypeError as e:
+                raise CevahirConfigurationError(
+                    f"Geçersiz config anahtarı: {e}"
+                ) from e
         else:
             self.config = config
         
@@ -1336,9 +1341,11 @@ class Cevahir:
         Returns:
             Decoded text
         """
-        # Handle None input
+        # Handle None or empty input
         if token_ids is None:
             raise CevahirProcessingError("Decode: token_ids cannot be None")
+        if len(token_ids) == 0:
+            raise CevahirProcessingError("Decode: token_ids cannot be empty")
         
         try:
             return self._tokenizer_core.decode(token_ids, **kwargs)
