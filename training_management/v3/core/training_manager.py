@@ -40,7 +40,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import torch
 import torch.nn as nn
@@ -424,6 +424,7 @@ class TrainingManager:
         self,
         start_epoch: int = 0,
         end_epoch: Optional[int] = None,
+        epoch_callback: Optional[Callable[[int, float, float], None]] = None,
     ) -> Dict:
         """
         Ana eğitim döngüsü - tüm bileşenleri koordine eder.
@@ -491,8 +492,8 @@ class TrainingManager:
                 )
             except Exception as e:
                 logger.error(f"Eğitim epoch {epoch} başarısız: {e}", exc_info=True)
-                # NaN kurtarma denenilebilir
-                self._safe_call("trigger", self.nan_recovery, model=self.model)
+                # Gradient NaN kurtarma dene (trigger() yok; handle_nan_gradients kullan)
+                self._safe_call("handle_nan_gradients", self.nan_recovery, model=self.model)
                 continue
 
             logger.info(
@@ -551,14 +552,14 @@ class TrainingManager:
                 )
                 if nan_detected:
                     logger.error(f"Epoch {epoch}: NaN/Inf kayıp tespit edildi!")
-                    recovery_success = self._safe_call(
-                        "recover",
+                    _nan_tensor = torch.tensor(float("nan"))
+                    _action = self._safe_call(
+                        "handle_nan_loss",
                         self.nan_recovery,
                         model=self.model,
-                        optimizer=self.optimizer,
-                        epoch=epoch,
+                        loss=_nan_tensor,
                     )
-                    if not recovery_success:
+                    if _action is None:
                         logger.error("NaN kurtarma başarısız, eğitim durduruluyor")
                         break
 
@@ -566,7 +567,7 @@ class TrainingManager:
             # 7. Kayıp Ani Artış Tespiti
             # ==============================================================
             spike_detected = self._safe_call(
-                "detect",
+                "update",
                 self.loss_spike_detector,
                 loss=train_metrics["loss"],
                 epoch=epoch,
@@ -580,24 +581,24 @@ class TrainingManager:
                 self._safe_call(
                     "intervene",
                     self.loss_spike_detector,
-                    optimizer=self.optimizer,
-                    model=self.model,
                 )
 
             # ==============================================================
             # 8. Iraksama Tespiti
             # ==============================================================
-            diverged = self._safe_call(
-                "detect",
+            # detect() yok; doğru API: update(train_loss, val_loss, epoch) → ConvergenceStatus
+            _div_status = self._safe_call(
+                "update",
                 self.divergence_detector,
-                train_metrics=train_metrics,
-                val_metrics=val_metrics,
+                train_loss=train_metrics["loss"],
+                val_loss=val_metrics["loss"],
                 epoch=epoch,
             )
-            if diverged:
+            # ConvergenceStatus enum her zaman truthy — .value string karşılaştırması gerekli
+            if _div_status is not None and _div_status.value in ("diverging", "overfitting"):
                 logger.warning(
-                    f"Epoch {epoch}: Model ıraksaması tespit edildi! "
-                    f"Eğitim durdurulabilir."
+                    f"Epoch {epoch}: Model ıraksaması/overfitting tespit edildi! "
+                    f"Durum: {_div_status.value}. Eğitim durdurulabilir."
                 )
 
             # ==============================================================
@@ -605,22 +606,25 @@ class TrainingManager:
             # ==============================================================
             if cfg.log_gradient_health:
                 self._safe_call(
-                    "log",
+                    "compute",
                     self.gradient_health_monitor,
                     model=self.model,
-                    epoch=epoch,
-                    grad_norm=train_metrics.get("gradient_norm", 0.0),
                 )
 
             # ==============================================================
             # 10. Token Dağılım Monitörü
             # ==============================================================
-            if cfg.log_token_dist:
+            if cfg.log_token_dist and self.token_distribution_monitor is not None:
+                _tb_writer = (
+                    getattr(self.tensorboard_manager, "_writer", None)
+                    if self.tensorboard_manager is not None
+                    else None
+                )
                 self._safe_call(
-                    "log",
+                    "log_to_tensorboard",
                     self.token_distribution_monitor,
-                    token_dist=train_metrics.get("token_dist", {}),
-                    epoch=epoch,
+                    writer=_tb_writer,
+                    global_step=epoch,
                 )
 
             # ==============================================================
@@ -632,9 +636,8 @@ class TrainingManager:
                 and (epoch + 1) % cfg.probe_interval == 0
             ):
                 probe_results = self._safe_call(
-                    "probe",
+                    "run",
                     self.inference_quality_probe,
-                    model=self.model,
                     epoch=epoch,
                 )
                 if probe_results:
@@ -718,6 +721,21 @@ class TrainingManager:
                 f"Süre: {epoch_elapsed:.1f}s | "
                 f"En iyi epoch: {self._best_epoch}"
             )
+
+            # ==============================================================
+            # 16. Epoch Callback (isteğe bağlı: inference testi vb.)
+            # ==============================================================
+            if epoch_callback is not None:
+                try:
+                    epoch_callback(
+                        epoch,
+                        float(train_metrics.get("loss", 0.0)),
+                        float(val_metrics.get("loss", 0.0)),
+                    )
+                except Exception as _cb_exc:
+                    logger.warning(
+                        f"epoch_callback hatası (epoch {epoch}): {_cb_exc}"
+                    )
 
         # ------------------------------------------------------------------
         # Eğitim Tamamlandı
