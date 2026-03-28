@@ -315,7 +315,7 @@ class NaNRecovery:
         """
         if self.checkpoint_manager is not None:
             try:
-                self.checkpoint_manager.restore_latest(model)
+                self.checkpoint_manager.load_last(model)
                 logger.critical(
                     "Kritik NaN eşiği aşıldı (%d). Checkpoint geri yüklendi.",
                     self._consecutive_nans,
