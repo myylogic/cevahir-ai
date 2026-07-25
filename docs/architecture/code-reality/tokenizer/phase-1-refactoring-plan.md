@@ -27,6 +27,19 @@
 > **geliştirme ortamında** koşulmalıdır. Aşağıdaki "test reality" kaynaktan
 > statik olarak çıkarılmıştır; canlı pass/fail durumu Faz 0'da doldurulacaktır.
 
+### 0.1 Mimari Referans Haritası
+
+| Referans | Ne için |
+|----------|---------|
+| [master-architecture §2](../../master-architecture.md#2-katmanlı-görünüm-layered-view) (L1) | Tokenizer'ın sistemdeki yeri |
+| [master-architecture §10](../../master-architecture.md#10-bağımlılık-yönü-ve-kural-i̇hlalleri) | `vocab_size` sözleşmesi (Tokenizer→Model) |
+| [research §4](README.md#4-i̇ç-mimari) | İç mimari (iki katlı facade + bileşenler) |
+| [research §5](README.md#5-veri--kontrol-akışı) | encode/decode/train akışları |
+| [research §8](README.md#8-refactor-sinyalleri--tech-debt) | Refactor sinyalleri (bu planın kaynağı) |
+| [research §9](README.md#9-kod-referansları) | `dosya:satır` giriş noktaları |
+| [neural-network research §7](../neural-network/README.md#7-bağımlılıklar) | `vocab_size` → embedding boyutu (tüketici) |
+| [data research §8](../data/README.md#8-refactor-sinyalleri--tech-debt) | Token tahmini hizalama (Data ile ortak) |
+
 ---
 
 ## A. TEST FAZI (önce test)
