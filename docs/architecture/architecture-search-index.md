@@ -48,7 +48,7 @@ belgelenir. **Durum** sütunu dokümantasyon ilerlemesini gösterir.
 | 4 | **Training Management** | `training_management/` | [`code-reality/training-management/`](code-reality/training-management/) | ✅ |
 | 5 | **Training System** | `training_system/` | [`code-reality/training-system/`](code-reality/training-system/) | ✅ |
 | 6 | **Data (Loader + Processing)** | `data_loader_management/`, `data_processing/` | [`code-reality/data/`](code-reality/data/) | ✅ |
-| 7 | **Cognitive** | `cognitive_management/` | [`code-reality/cognitive/`](code-reality/cognitive/) | ⏳ |
+| 7 | **Cognitive** | `cognitive_management/` | [`code-reality/cognitive/`](code-reality/cognitive/) | ✅ |
 | 8 | **Chatting** | `chatting_management/` | [`code-reality/chatting/`](code-reality/chatting/) | ⏳ |
 | 9 | **API** | `api/` | [`code-reality/api/`](code-reality/api/) | ⏳ |
 | 10 | **Database** | `database/` | [`code-reality/database/`](code-reality/database/) | ⏳ |
