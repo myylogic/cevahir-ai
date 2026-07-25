@@ -44,7 +44,7 @@ belgelenir. **Durum** sütunu dokümantasyon ilerlemesini gösterir.
 |---|---------------|--------|--------------|-------|
 | 1 | **Tokenizer** | `tokenizer_management/` | [`code-reality/tokenizer/`](code-reality/tokenizer/) | ✅ |
 | 2 | **Neural Network** | `src/neural_network.py`, `src/neural_network_module/` | [`code-reality/neural-network/`](code-reality/neural-network/) | ✅ |
-| 3 | **Model / Engine** | `model/`, `model_management/` | [`code-reality/model-engine/`](code-reality/model-engine/) | ⏳ |
+| 3 | **Model / Engine** | `model/`, `model_management/` | [`code-reality/model-engine/`](code-reality/model-engine/) | ✅ |
 | 4 | **Training Management** | `training_management/` | [`code-reality/training-management/`](code-reality/training-management/) | ⏳ |
 | 5 | **Training System** | `training_system/` | [`code-reality/training-system/`](code-reality/training-system/) | ⏳ |
 | 6 | **Data (Loader + Processing)** | `data_loader_management/`, `data_processing/` | [`code-reality/data/`](code-reality/data/) | ⏳ |
