@@ -4,6 +4,9 @@
 > Bu doküman, tokenizer biriminin **kodundan çıkarılmış** mimarisini ayrıntılı
 > olarak haritalar. Üst düzey bağlam için [master-architecture](../../master-architecture.md) (L1),
 > gezinme için [search index](../../architecture-search-index.md).
+>
+> 🔧 **Eşleşen plan:** Bu research ile birlikte okunacak test+geliştirme planı →
+> [`phase-1-refactoring-plan.md`](phase-1-refactoring-plan.md)
 
 ---
 
