@@ -17,6 +17,7 @@
 docs/architecture/
 ├── master-architecture.md          ← Uçtan uca sistem, katmanlar, akışlar
 ├── architecture-search-index.md    ← (bu dosya) gezinme + arama
+├── development-roadmap.md          ← Önceliklendirilmiş refactor/geliştirme planı
 └── code-reality/                   ← Kodun mimarideki birebir karşılığı
     ├── tokenizer/
     ├── neural-network/

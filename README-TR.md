@@ -1,14 +1,25 @@
-# 🇹🇷 Cevahir AI & Engine
+# Cevahir AI & Engine
 
-**Full-stack open-source AI engine.**
+**Diller:** [English](README.md) · Türkçe
 
-Tokenizer eğitiminden bilişsel katmana kadar uzanan **uçtan uca (end-to-end)** dil modeli altyapısını tek bir repo içinde sunar. Türkçe LLM projesi olarak başlamış; dil bağımsız mimarisi sayesinde istediğiniz dilde model eğitmenize olanak tanır.
+Tek bir depo içinde, **sıfırdan** yazılmış **uçtan uca bir dil modeli (LLM)
+motoru.** Cevahir, bir dil modeli inşa etmenin tüm yığınını kapsar: BPE
+tokenizer eğitiminden başlayıp, PyTorch ile yazılmış decoder-only bir
+Transformer'a, eğitim boru hattına, çıkarım motoruna ve bellek/araç/öz-eleştiri
+içeren bilişsel akıl yürütme katmanına kadar. Her katman kaynağı görünür
+biçimde, harici bir modelin sarmalayıcısı olarak değil, incelenebilir açık bir
+bileşen olarak inşa edilmiştir.
 
-*"Sınırlı kaynaklarla küresel teknoloji devlerine meydan okuyan, Türk gençliğinin vizyonuyla şekillenmiş bir özgürlük manifestosu. Bu sadece bir model değil; kendi yapay zeka dünyanızı inşa etmeniz için tasarlanmış eksiksiz bir fabrikadır."*
+Motor önce Türkçe için ayarlandı (tokenizer, Türkçe morfoloji ve heceleme
+kurallarıyla gelir); ancak mimari **dil-agnostiktir**: sözlük, merges ve model
+herhangi bir dil ve veri seti için yeniden eğitilebilir.
 
-**Türk Gençlerine Armağanımdır.** · Open Source · Full-Stack AI Engine · End-to-End
-
-*Cevahir AI & Engine is a full-stack open-source AI engine that provides an end-to-end infrastructure for building and deploying language models—from tokenizer training to cognitive reasoning layers.*
+> **Mimari dokümantasyonu:** Sistemin koddan çıkarılmış, güvenilir ve güncel
+> anlatımı [`docs/architecture/`](docs/architecture/) altındadır.
+> [`master-architecture.md`](docs/architecture/master-architecture.md) ve
+> [arama indeksi](docs/architecture/architecture-search-index.md) ile başlayın;
+> birim-içi ayrıntılar
+> [`docs/architecture/code-reality/`](docs/architecture/code-reality/) altındadır.
 
 <p align="center">
   <img src="image/87E09A64-4E1F-41D5-84AF-7D7C56F6C229.png" style="max-width:100%;">
@@ -16,284 +27,317 @@ Tokenizer eğitiminden bilişsel katmana kadar uzanan **uçtan uca (end-to-end)*
 
 ---
 
-## Vizyon ve Manifesto
+## Teknik olarak ne?
 
-Cevahir, devasa GPU çiftliklerinin ve kapalı kutu algoritmaların hüküm sürdüğü bir çağda, bilginin demokratikleşmesini savunur.
+Cevahir, **decoder-only (nedensel/causal) bir dil modeli motorudur.** Bir
+fine-tuning betiği ya da barındırılan bir modelin istemcisi değildir — modelin
+kendisi ve çevresindeki tüm makineyi doğrudan uygular:
 
-- **Sınırlı Kaynak, Sınırsız İnovasyon:** Büyük bütçelerle değil, optimize edilmiş akıllı mimariyle dünya standartlarında iş çıkarılabileceğinin kanıtıdır.
-- **Türk Gençliğine Armağan:** Teknoloji tüketen değil, teknolojiye yön veren bir nesil için bir referans mimaridir.
-- **Tam yapay zeka altyapısı:** Tokenizer eğitiminden bilişsel katmana kadar uzanan tam yapay zeka altyapısını tek bir repo içinde sunan **nadir** açık kaynak projelerden biridir; her hücresi açık kaynaktır.
+- Türkçe-farkında bir ön-tokenizer, heceleyici ve morfolojik analizciye sahip
+  **sıfırdan bir BPE tokenizer**; CPU ve opsiyonel GPU kod yolları.
+- PyTorch (`torch.nn`) ile yazılmış bir **Transformer decoder**: RoPE/YaRN
+  konumsal kodlama, çok-başlı nedensel dikkat (Flash / PyTorch-SDPA / manuel
+  backend'ler), SwiGLU ileri-besleme, RMSNorm, opsiyonel Mixture-of-Experts
+  katmanı, kayan-pencere tahliyeli KV cache, weight tying, nicemleme
+  (quantization) ve aktivasyon checkpoint'leme.
+- Tokenizer, model ve bilişsel katmanı tek bir API arkasında birleştiren; hem
+  otoregresif hem beam-search çözümlemeli **birleşik çıkarım motoru**
+  (`Cevahir`).
+- **İki katmanlı eğitim yığını**: veri cache, split, model init yapan bir
+  koşu/servis katmanı; döngü, gradyan/kayıp yönetimi, kararlılık koruması,
+  müfredat (curriculum), EMA/SAM/Lookahead ve TensorBoard içeren bir
+  eğitim-motoru katmanı.
+- Tek bir `generate` çağrısını bir akıl yürütme boru hattına dönüştüren
+  **bilişsel katman**: öznitelik çıkarımı, entropi tabanlı politika yönlendirme
+  (direct / think / debate / tree-of-thoughts / self-consistency), vektör deposu
+  üzerinden RAG bellek, anayasal + gerçek-doğrulamalı öz-eleştiri (self-refine)
+  ve araç kullanımı.
+- **Servis yüzeyi**: oturum/sohbet yöneticisi ve Flask REST API (JWT kimlik
+  doğrulama, sürümlü route'lar); repository tabanlı kalıcılık katmanı.
 
-Cevahir **sadece Türkçe ile sınırlı değildir.** Motor, Türkçe için önce optimize edilmiş olsa da **dil bağımsız** bir altyapı sunar; istediğiniz dilde ve veri setiyle kendi modellerinizi eğitebilirsiniz.
+Kod tabanındaki dahili model mimarisi `V-4` etiketini taşır; bu README onu
+bir sürüm etiketiyle değil **gerçek bileşenleriyle** anlatır (kaynak birkaç
+dahili sürüm etiketini karışık kullanmaktadır).
 
 ---
 
-## Özellikler
+## Kanonik birimler
 
-- **Türkçe BPE tokenizer** — Uçtan uca eğitim, vocab/merges, encode-decode pipeline (Unicode, İ/ı kuralları, heceleme, morfoloji desteği)
-- **Transformer decoder** — RoPE, RMSNorm, SwiGLU, causal mask, weight tying, KV cache, Flash Attention altyapısı
-- **Model Management** — Build, eğitim bileşenleri, save/load, forward/predict, TensorBoard
-- **Cognitive Management** — Strateji (direct/think/debate/tot), bellek (RAG, vector DB), critic, araç kullanımı, middleware, izleme
-- **Sohbet pipeline** — ChattingManager, oturum/geçmiş, Cevahir unified API ile sohbet asistanı akışı
+Sistem on kanonik birime ayrılır. Her biri doğrudan koddan çıkarılarak
+[`docs/architecture/code-reality/`](docs/architecture/code-reality/) altında
+derinlemesine belgelenmiştir.
 
----
-
-## Cevahir Engine: Sadece Bir Model Değil, Bir Ekosistem
-
-**Cevahir AI & Engine**, dil modeli inşa etmek için **uçtan uca (end-to-end)** altyapı sunan **full-stack açık kaynak bir AI engine**’dir. Pek çok açık kaynak proje yalnızca *training framework* sunar (tokenizer → model → eğitim → inference). Cevahir’de buna ek olarak **sohbet sistemi**, **cognitive management** (strateji katmanları: think / debate / ToT), **unified engine API**, **araç kullanımı** ve **RAG bellek** tek bir repo’da yer alır; bu yapı projeyi *AI engine / full-stack AI* kategorisine taşır.
-
-Cevahir'in kalbi olan bu altyapı ile **istediğiniz dilde**, istediğiniz veri setiyle kendi özel yapay zeka modellerinizi eğitebilirsiniz.
-
-### 1. Türkçe Odaklı Hibrit Tokenizer (BPE)
-
-Cevahir Engine, Türkçe dil yapısına "yerli" bir bakış açısıyla yaklaşır; aynı altyapı **dil bağımsız** mimariye sahiptir:
-
-- **Byte Pair Encoding (BPE):** Türkçe'nin eklemeli yapısını, Unicode karakterlerini (İ/ı, Ş/ş vb.) ve morfolojik özelliklerini tanıyan özel bir encoding süreci. Diğer diller için de vocab/merges yeniden eğitilerek kullanılabilir.
-- **Dil Bağımsız Mimari:** Altyapı Türkçe için optimize edilmiş olsa da, motor **tüm dünya dillerinde** yüksek performanslı modeller üretme kapasitesine sahiptir; proje Türkçe ile sınırlı değildir.
-- **GPU Destekli Batch Tokenization:** Milyonlarca satır veriyi saniyeler içinde işleme yeteneği.
-
-### 2. Esnek Model Mimarisi (Transformer V-4)
-
-- **Modüler Yapı:** RoPE, RMSNorm, SwiGLU ve Flash Attention gibi modern bileşenlerle kendi sinir ağı konfigürasyonunuzu (katman sayısı, kafa sayısı, boyut) saniyeler içinde tanımlayın.
-- **Sınırsız Model Üretimi:** Kendi dikey uzmanlık modellerinizi (Hukuk, Tıp, Yazılım vb.) sıfırdan eğitebilir veya mevcut ağırlıklar üzerinden devam edebilirsiniz.
-
-### 3. Cognitive Management (Bilişsel Yönetim)
-
-Modelin sadece metin üretmesini değil, **düşünmesini** sağlar:
-
-- **Strateji Katmanları:** Direct, Think, Debate ve Tree of Thoughts (ToT) ile karmaşık problemleri çözme yeteneği.
-- **Dinamik Bellek:** RAG ve Vector DB entegrasyonu ile modelin güncel verilerle konuşmasını sağlayan yapı hazır haldedir.
+| Birim | Kaynak | Sorumluluk |
+|-------|--------|------------|
+| **Tokenizer** | `tokenizer_management/` | BPE eğitim + encode/decode; Türkçe morfoloji/heceleme; OOV karakter fallback |
+| **Neural Network** | `src/` | Decoder-only Transformer: embedding, RoPE/YaRN, dikkat, SwiGLU, RMSNorm, MoE, KV cache, nicemleme |
+| **Model / Engine** | `model/`, `model_management/` | `Cevahir` facade + model yaşam döngüsü (build/init/save/load/update), çözümleme, sağlık, profil |
+| **Training Management** | `training_management/` | Eğitim motoru: döngü, gradyan/kayıp/batch, güvenlik dedektörleri, müfredat, optimizer'lar, izleme |
+| **Training System** | `training_system/` | Koşu/servis katmanı: veri cache, kaynak-farkında split, model init, epoch QA |
+| **Data** | `data_loader_management/`, `data_processing/` | Eğitim-zamanı veri yükleme (akıllı bölme) + offline toplama (Wikipedia/altyazı) |
+| **Cognitive** | `cognitive_management/` | Akıl yürütme boru hattı, politika yönlendirme, deliberation, RAG bellek, critic, araçlar, AIOps izleme |
+| **Chatting** | `chatting_management/` | Oturum/konuşma/kullanıcı yönetimi, bağlam inşası |
+| **API** | `api/` | Flask REST yüzeyi (v3 route'lar, servisler, JWT, middleware) |
+| **Database** | `database/` | Repository + Unit-of-Work kalıcılık, tipli modeller |
 
 ---
 
 ## Mimari
 
+Katmanlı görünüm (bağımlılık yönü yukarıdan aşağıya). Tam anlatım ve akışlar için
+[`master-architecture.md`](docs/architecture/master-architecture.md).
+
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Cevahir (Unified API)                 │
-│                     model/cevahir.py                     │
-└─────────────────────────────────────────────────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-        ▼               ▼               ▼
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│ TokenizerCore│ │ ModelManager  │ │CognitiveMgr  │
-│ (Türkçe BPE) │ │ (V-4 NN)     │ │ (Cognitive)  │
-└──────────────┘ └──────────────┘ └──────────────┘
-        │               │               │
-        ▼               ▼               ▼
-  vocab/merges    Neural Network   Memory/Tools
-                  (RoPE, RMSNorm,  (RAG, Critic,
-                   SwiGLU, …)       Tools)
+        ┌──────────────────────────────────────────────┐
+        │  Servis: api/ (Flask, JWT)  ·  chatting_mgmt   │
+        └───────────────────────┬──────────────────────┘
+                                ▼
+        ┌──────────────────────────────────────────────┐
+        │  Bilişsel: cognitive_management/ (v2)          │
+        │  politika · deliberation · RAG · critic        │
+        └───────────────────────┬──────────────────────┘
+                                ▼
+        ┌──────────────────────────────────────────────┐
+        │  Motor (facade): model/cevahir.py :: Cevahir   │
+        │  CevahirModelAPI adaptörü (model ↔ bilişsel)   │
+        └──────────────┬──────────────────┬─────────────┘
+                       ▼                  ▼
+        ┌──────────────────────┐ ┌────────────────────────┐
+        │ Model yaşam döngüsü   │ │ Sinir ağı (src/)       │
+        │ model_management/     │ │ CevahirNeuralNetwork   │
+        └──────────────┬────────┘ └────────────────────────┘
+                       ▼
+        ┌──────────────────────────────────────────────┐
+        │  Eğitim: training_system/ + training_mgmt/     │
+        └───────────────────────┬──────────────────────┘
+                                ▼
+        ┌──────────────────────┐ ┌────────────────────────┐
+        │ Tokenizer             │ │ Data + Database        │
+        │ tokenizer_management/ │ │ yükleyiciler · repo'lar │
+        └──────────────────────┘ └────────────────────────┘
 ```
 
-- **Cevahir** — encode/decode, generate, process (cognitive), generate_batch, process_batch
-- **TokenizerCore** — BPE (Türkçe odaklı, dil bağımsız), GPU batch, OOV hece fallback
-- **ModelManager** — Model yaşam döngüsü, checkpoint, TensorBoard
-- **CognitiveManager** — handle(), strateji seçimi, bellek, critic, register_tool(), get_metrics()
+**Kompozisyon:** `Cevahir.__init__` (`model/cevahir.py`) çıkarımın composition
+root'udur — tokenizer'ı, modeli (`ModelManager` ile), bir adaptörü
+(`CevahirModelAPI`) ve bilişsel yöneticiyi kurup birbirine bağlar. Eğitim bu
+facade'dan **geçmez**; kendi giriş noktası (`training_system/train.py`) vardır ve
+`ModelManager`'ı paylaşır.
+
+---
+
+## Bileşen ayrıntısı
+
+### Tokenizer (`tokenizer_management/`)
+`TokenizerCore`, `BPEManager`'ı sarar; `BPEManager` bir `Pretokenizer` (Unicode
+normalizasyonu, Türkçe İ/ı işleme, noktalama/boşluk bölme), opsiyonel bir
+`Syllabifier` ve `Morphology` analizciyi, ve BPE
+`Encoder`/`Decoder`/`Trainer`'ı orkestre eder. Sözlükte olmayan token'lar
+karakter-seviye id'lere, en son `[UNK]`'a düşer. CPU yollarının yanında GPU
+batch yolları vardır.
+
+### Sinir ağı (`src/`)
+`CevahirNeuralNetwork` şunları montajlar: `LanguageEmbedding` (√d ölçekleme ve
+opsiyonel weight tying) → `PositionalEncoding` (sinüzoidal / öğrenilen / RoPE /
+YaRN) → N × decoder bloğu (pre-norm: RMSNorm → nedensel çok-başlı dikkat →
+residual → RMSNorm → SwiGLU FFN **veya** MoE → residual) → final RMSNorm → çıkış
+projeksiyonu. Dikkat, çalışma zamanında Flash, PyTorch-SDPA veya manuel backend
+seçer. Kayan-pencere `KVCache` otoregresif çözümlemeyi hızlandırır. Blok sınıfı
+tarihsel nedenlerle `TransformerEncoderLayer` adını taşır ama **nedensel bir
+decoder** bloğudur.
+
+### Motor (`model/`, `model_management/`)
+`Cevahir`, `encode/decode`, `forward`, `generate` (otoregresif ve beam search),
+`process` (bilişsel), batch varyantları ve bellek/araç API'lerini sunar.
+`ModelManager` model yaşam döngüsüne sahiptir; `CevahirModelAPI` modeli bilişsel
+katmanın `ModelAPI` protokolüne uyarlar; böylece bilişsel katman somut ağa
+bağımlı olmaz.
+
+### Eğitim (`training_system/`, `training_management/`)
+`TrainingService` (servis katmanı) cihazı, veriyi (cache'ten),
+kaynak-id-farkında train/val split'i ve model başlatmayı hazırlar; ardından
+`TrainingManager`'a (motor katmanı) devreder. Motor, gradyan/kayıp yönetimi,
+NaN/loss-spike/divergence koruması, müfredat, optimizer stratejileri (SAM,
+Lookahead, EMA) ve TensorBoard izlemesiyle epoch döngüsünü yürütür.
+
+### Bilişsel (`cognitive_management/`)
+`CognitiveManager` (facade) → `CognitiveOrchestrator` → 8 aşamalı bir
+Chain-of-Responsibility boru hattı: `FeatureExtraction → PolicyRouting →
+Deliberation → ContextBuilding → Generation → SelfConsistency → Critic →
+MemoryUpdate`. Politika yönlendirme, entropi/uzunluktan bir akıl yürütme modu
+seçer; deliberation CoT/debate/ToT/react çalıştırır; bellek, RAM oturumu ile
+epizodik bir ChromaDB vektör deposunu birleştirir; critic anayasal ilkeleri ve
+opsiyonel gerçek-doğrulamayı öz-revizyonla uygular. Boru hattını middleware, bir
+event bus, bir DI container ve AIOps izleme çevreler.
+
+### Servis (`chatting_management/`, `api/`, `database/`)
+`ChattingManager`, `Cevahir.process` üzerinden oturum, konuşma ve bağlam
+inşasını yönetir. Flask API (`api/app_factory.py` composition root'tur) v3
+chat/session/user/health route'larını JWT kimlik doğrulama ve middleware
+arkasında sunar. `database/` tipli modellerle Repository + Unit-of-Work
+kalıcılığı sağlar.
 
 ---
 
 ## Kurulum
 
-Projeyi GitHub’dan indirip kendi ortamınızda çalıştırmanız gerekir. Bağımlılıklar (`requirements.txt` vb.) yaklaşık **200’e yakın kütüphane** içerebilir; kurulum ve ortam yapılandırması için Python, pip/venv ve gerekirse CUDA/PyTorch konusunda bilgi sahibi olmanız önerilir. Detaylı adımlar proje yapısına ve kullandığınız sürümlere göre değişebilir; bu konuda sorumluluk indiren geliştiricidedir.
+Depoyu klonlayıp kendi Python ortamınızda çalıştırın. Proje PyTorch ile Python'ı
+hedefler (CUDA opsiyonel ama eğitim için önerilir). Bağımlılıklar depo kökünde
+sabitlenmemiştir; PyTorch'u ve kullandığınız modüllerin import ettiği
+kütüphaneleri kurun (ör. bilişsel bellek katmanı için ChromaDB ve
+sentence-transformers, API için Flask, docx veri yükleme için `python-docx`).
+Kurulum ayrıntıları platform ve CUDA/PyTorch sürümlerinize göre değişir.
 
 ---
 
-## Hızlı Başlangıç (Kendi Modelini Eğit)
+## Hızlı başlangıç (çıkarım)
 
 ```python
 from model.cevahir import Cevahir, CevahirConfig
 
-# 1. Kendi mimarinizi tanımlayın
+# 1. Mimariyi tanımlayın (eğitilmiş checkpoint ile eşleşmeli)
 config = CevahirConfig(
     device="cuda",  # veya "cpu"
     model={
-        "vocab_size": 60000,  # Türkçe BPE ile optimize; diğer diller için yeniden eğitilebilir
-        "embed_dim": 512,    # Kendi kapasitenizi belirleyin
+        "vocab_size": 60000,   # eğitilmiş tokenizer'dan gelir
+        "embed_dim": 512,
         "num_layers": 8,
         "num_heads": 8,
-    }
+    },
 )
 
-# 2. Motoru başlatın
+# 2. Motoru kurun (varsa saved_models/cevahir_model.pth yüklenir)
 cevahir = Cevahir(config)
 
-# 3. Sohbet (cognitive katmanı ile)
+# 3. Bilişsel yanıt — CognitiveOutput döndürür
 output = cevahir.process("Merhaba, nasılsın?")
-print(output.response)
+print(output.text)          # DİKKAT: alan adı `text`
 
-# 4. Metin üretimi
+# 4. Düz metin üretimi (bilişsel katmanı atlar)
 text = cevahir.generate("Türkiye'nin başkenti", max_new_tokens=50, temperature=0.8)
 print(text)
-
-# Kendi verinizle eğitim için: training_system/ rehberine bakın.
 ```
 
----
-
-## Terminal ile test
-
-Eğitilmiş model ile sohbet ve üretim testleri **terminal** üzerinden `chat_pipeline.py` ile yapılabilir:
+### Terminal sohbet
 
 ```bash
 python model_management/chat_pipeline.py
 ```
 
-(Bu script, Cevahir + ChattingManager pipeline'ını kullanır; checkpoint veya kaydedilmiş model gerekir.)
+`Cevahir` + `ChattingManager` boru hattını kullanır; checkpoint veya kayıtlı
+model gerekir.
 
 ---
 
-## Eğitim Esnasında Elde Edilen Örnek Çıktılar - Example Generation During Training
+## Sıfırdan eğitim
 
-Eğitim sırasında veya epoch sonu testlerinde **TrainingServiceV2** ile alınan inference örnekleridir: modele verilen prompt, üretilen yanıt, token sayısı ve EOS bilgisi logda görülür. Aşağıya bu tür ekran görüntülerini ekleyebilirsiniz.
+Adımları **sırayla** çalıştırın. (Komutlar gerçek dosya konumlarını yansıtır.)
 
-### Örnek çıktı görselleri
+**1 — Tokenizer eğit** → sözlük ve merges üretir:
+```bash
+python tokenizer_management/train_bpe.py
+```
+Çıktı: `vocab.json`, `merges.txt` (veya config'te tanımlı yollar).
 
-<p align="center">
-  <img src="image/1.jpeg" style="max-width:100%;">
-</p>
-<p align="center">
-  <img src="image/2.jpeg" style="max-width:100%;">
-</p>
-<p align="center">
-  <img src="image/3.jpeg" style="max-width:100%;">
-</p>
-<p align="center">
-  <img src="image/4.jpeg" style="max-width:100%;">
-</p>
-<p align="center">
-  <img src="image/5.jpeg" style="max-width:100%;">
-</p>
-<p align="center">
-  <img src="image/6.jpeg" style="max-width:100%;">
-</p>
----
+**2 — Eğitim verisi cache'i oluştur** → ham veriyi autoregressive eğitim
+formatına çevirir (BOS/EOS/PAD/SEP + input/target dizileri, sabit token
+uzunluğunda chunk'lar + padding):
+```bash
+python training_system/prepare_cache.py
+```
+Desteklenen girdiler: `docx`, `txt` (ham metin), `json` (soru–cevap). Chunk
+uzunluğu veya padding davranışını değiştirmek için
+`training_system/prepare_cache.py` düzenleyin.
 
-## Eğitim
-
-### Eğitim verisi
-
-Model eğitimi için kullanılan veri seti **yaklaşık 680 bin örnek** içerir. Eğitim verisini kendi ortamınızda kullanmak isterseniz aşağıdaki bağlantıdan indirebilirsiniz:
-
-- **[Eğitim verisi (Google Drive)](https://drive.google.com/drive/folders/19G5uGS5YM3rf42OefjM3KsXRyn0ZEshW?usp=sharing)** — ~680k örnek (docx, txt, soru–cevap json vb.); `prepare_cache.py` ile uyumlu formata dönüştürülebilir.
-
-### Eğitilmiş model (indirme)
-
-Sıfırdan eğitim yapmadan doğrudan inference veya sohbet denemek isterseniz, hazır eğitilmiş model ağırlıklarını indirebilirsiniz:
-
-
-
-### Sıfırdan eğitim akışı
-
-Sıfırdan eğitim için adımlar **sırayla** şöyledir:
-
-1. **Tokenizer eğitimi** — Vocab ve merges dosyalarını üretir:
-   ```bash
-   python tokenizer_management/train_bpe.py
-   ```
-   Çıktı: `vocab.json`, `merges.txt` (veya config’te tanımlı yollar).
-
-2. **Eğitim verisi cache’i** — Ham veriyi autoregressive eğitim formatına çevirir:
-   ```bash
-   python tokenizer_management/prepare_cache.py
-   ```
-   Desteklenen veri: **docx**, **txt** (raw metin), **json** (soru–cevap). Çıktı: BOS, EOS, PAD, SEP ve input/target dizileriyle tam hazır, autoregressive formatta cache dosyası. Veriler ortalama **512 token** uzunluğunda chunk’lara bölünür; uzun kalanlar tekrar bölünür, kısa kalanlar **padding** ile doldurulur. Chunk uzunluğu veya padding davranışı değiştirilmek istenirse `tokenizer_management/prepare_cache.py` incelenebilir.
-
-3. **Model eğitimi** — Hazır cache ile eğitim:
-   ```bash
-   python training_system/train.py
-   ```
-   Cache’teki veri otomatik yüklenir; eğitim bu format üzerinden ilerler.
-
-Eğitim için GPU önerilir.
+**3 — Modeli eğit** (hazır cache ile):
+```bash
+python training_system/train.py
+```
+Cache otomatik yüklenir. GPU önerilir.
 
 ### Model parametrelerini değiştirme
 
-Model boyutu ve eğitim hiperparametreleri (embed_dim, num_layers, num_heads, lr, dropout vb.) değiştirilmek istenirse **iki yerde** güncelleme yapılmalı:
+Model boyutu ve hiperparametreleri (`embed_dim`, `num_layers`, `num_heads`,
+`lr`, `dropout`, …) şu an **iki yerde** tutarlı tutulmalıdır:
 
-- **`model/cevahir.py`** — CevahirConfig / model default değerleri (inference ve pipeline ile uyum için).
-- **`training_system/train.py`** — `TRAIN_CONFIG` ve model parametreleri (eğitimde kullanılan değerler).
+- `model/cevahir.py` — `CevahirConfig` / model default'ları (çıkarım + pipeline).
+- `training_system/train.py` — eğitim config'i ve model parametreleri.
 
-İkisi birbiriyle uyumlu olmalı; aksi halde eğitilen checkpoint yüklendiğinde shape veya davranış uyuşmazlığı oluşabilir.
-
----
-
-## Proje Yapısı ve Modülerlik
-
-Cevahir Engine, **SOLID** prensipleriyle **12 ana çatı modül** ve **653+** modül dosyası (.py) üzerine kuruludur:
-
-- **tokenizer_management/** — Kendi BPE tokenizer'ınızı sıfırdan eğitin (Türkçe veya başka dil).
-- **training_system/** — Kendi veri setinizle model eğitimini başlatın.
-- **cognitive_management/** — Modele karar verme yetisi kazandırın.
-- **src/** — V-4 Neural Network çekirdeğine müdahale edin.
-- **model/** — Unified API (cevahir.py).
-- **model_management/** — Model yaşam döngüsü (build, save/load, forward).
-- **chatting_management/** — Sohbet (ChattingManager, oturum, context).
-- **docs/** — Dokümantasyon, hata debugging süreçleri.
-
-```
-cevahir_sinir_sistemi/
-├── model/                 # Unified API (cevahir.py)
-├── cognitive_management/  # Bilişsel katman (strateji, bellek, critic, tools)
-├── model_management/      # Model yaşam döngüsü (build, save/load, forward)
-├── training_system/       # Eğitim pipeline (train.py, v2)
-├── tokenizer_management/  # BPE (Türkçe odaklı, dil bağımsız)
-├── src/                   # Sinir ağı (CevahirNeuralNetwork, V-4)
-├── chatting_management/   # Sohbet (ChattingManager, oturum, context)
-└── docs/                  # Dokümantasyon
-```
-
-Çatı modüller: model, cognitive_management, model_management, training_system, tokenizer_management, src, chatting_management, data_loader_management, training_management, openai-data-mining, api, data_processing.
+Farklılaşırlarsa eğitilmiş checkpoint yüklendiğinde shape/davranış uyuşmazlığı
+oluşur. (Bunu tek bir doğruluk kaynağında birleştirmek
+[geliştirme yol haritasında](docs/architecture/development-roadmap.md) izlenen
+bir maddedir.)
 
 ---
 
-## Neden Açık Kaynak?
+## Eğitim sırasında örnek çıktılar
 
-Yapay zeka geleceğin teknolojisi; ancak kaynaklar çoğu zaman büyük şirketlerin elinde veya yalnızca eğitim framework’üne indirgenmiş durumda. Cevahir AI & Engine, **full-stack** ve **end-to-end** bir AI engine olarak:
+Eğitim / epoch-sonu testlerinde alınan çıkarım örnekleri (prompt, üretilen yanıt,
+token sayısı ve EOS bilgisi eğitim logunda görülür):
 
-- **Uçtan uca** bir dil modeli motorunu (tokenizer → model → cognitive) inceleyebilir, **istediğiniz dilde** kendi modellerinizi eğitebilirsiniz; proje Türkçe ile sınırlı değildir.
-- Tokenizer eğitimi, Transformer mimarisi, model eğitimi, sohbet ve bilişsel stratejiler **tek bir projede** şeffaf biçimde yer alır.
-- Proje, Türk gençlerinin (ve tüm geliştiricilerin) yapay zekayı anlaması ve geliştirmesi için bir **eğitim kaynağı** ve **referans mimari** olarak tasarlandı.
+<p align="center"><img src="image/1.jpeg" style="max-width:100%;"></p>
+<p align="center"><img src="image/2.jpeg" style="max-width:100%;"></p>
+<p align="center"><img src="image/3.jpeg" style="max-width:100%;"></p>
+<p align="center"><img src="image/4.jpeg" style="max-width:100%;"></p>
+<p align="center"><img src="image/5.jpeg" style="max-width:100%;"></p>
+<p align="center"><img src="image/6.jpeg" style="max-width:100%;"></p>
+
+---
+
+## Eğitim verisi
+
+Referans modelin eğitiminde kullanılan veri seti ~680 bin örnek içerir
+(docx, txt, soru–cevap json); `training_system/prepare_cache.py` ile eğitim
+formatına dönüştürülebilir.
+
+- **[Eğitim verisi (Google Drive)](https://drive.google.com/drive/folders/19G5uGS5YM3rf42OefjM3KsXRyn0ZEshW?usp=sharing)**
+
+---
+
+## Depo yapısı
+
+```
+cevahir-ai/
+├── model/                 # Birleşik çıkarım motoru (cevahir.py)
+├── model_management/      # Model yaşam döngüsü (build, save/load, forward, health)
+├── src/                   # Sinir ağı (CevahirNeuralNetwork + modüller)
+├── tokenizer_management/  # BPE tokenizer (core, bpe, tokenization)
+├── training_system/       # Eğitim koşu/servis katmanı (train.py, cache, v2/v3)
+├── training_management/   # Eğitim motoru (döngü, güvenlik, müfredat, v2/v3)
+├── cognitive_management/  # Bilişsel katman (boru hattı, bellek, critic, araçlar)
+├── chatting_management/   # Oturum, konuşma, bağlam
+├── api/                   # Flask REST API (v3 route'lar, servisler, auth)
+├── database/              # Kalıcılık (repository'ler, modeller, unit of work)
+├── data_loader_management/# Eğitim-zamanı veri yükleme
+├── data_processing/       # Offline veri toplama (Wikipedia, altyazı)
+├── scripts/ · tests/      # Yardımcılar ve üst-seviye testler
+└── docs/architecture/     # Koddan çıkarılmış mimari dokümantasyonu
+```
 
 ---
 
 ## Dokümantasyon
 
-- **Mimari:** `docs/` — sistem mimarisi, katmanlar, veri akışı
-- **API referansı:** `docs/` — Cevahir, ModelManager, CognitiveManager, TokenizerCore kullanımı
-- **Modül dokümantasyonu:** `model/`, `cognitive_management/`, `model_management/`, `training_system/`, `tokenizer_management/`, `src/` altındaki modüllerde docstring ve README dosyaları
-- **Eğitim rehberi:** `training_system/train.py`, `tokenizer_management/train_bpe.py`, `prepare_cache.py` — parametreler ve akış için bu dosyalar incelenebilir
-- **Inference / sohbet:** `model_management/chat_pipeline.py`, `model/cevahir.py` — kullanım örnekleri ve config
+- **Sistem mimarisi:** [`docs/architecture/master-architecture.md`](docs/architecture/master-architecture.md)
+- **Gezinme / kavram indeksi:** [`docs/architecture/architecture-search-index.md`](docs/architecture/architecture-search-index.md)
+- **Birim-içi (kod gerçekliği):** [`docs/architecture/code-reality/`](docs/architecture/code-reality/)
+- **Geliştirme yol haritası:** [`docs/architecture/development-roadmap.md`](docs/architecture/development-roadmap.md)
 
-Proje kökünde yalnızca bu README ve kaynak kod yer alır; ek metinler (tanıtım, süreç özeti vb.) depoda ayrı tutulmaz.
-
----
-
-## Lisans ve Katkı
-
-Proje **Apache License 2.0** ile lisanslanmıştır; tam açık kaynaktır ve herkesin erişimine açıktır. Detaylar için repo kökündeki `LICENSE` dosyasına bakın. **Dünyanın her yerinden** geliştiricilerin katkısına açıktır.
-
-Katkılar memnuniyetle karşılanır. Fork, feature branch, commit ve Pull Request adımlarını izleyebilirsiniz.
+`docs/_archive/` klasörü, kod tabanını artık yansıtmayan ve referans olarak
+kullanılmaması gereken eski dokümantasyonu içerir.
 
 ---
 
-## İletişim
+## Durum
 
-- **GitHub:** [@myylogic](https://github.com/myylogic)
-- **X (Twitter):** [@myylogic](https://x.com/myylogic)
-- **Instagram:** [@myylogic](https://instagram.com/myylogic)
-- **Proje:** Cevahir AI — Türk Gençlerine Armağanımdır.
+Açık kaynak, aktif geliştirme altında. Mimari şu anda belgelenmekte ve yapılandırılmış
+bir refactor/geliştirme turuna hazırlanmaktadır; bkz.
+[geliştirme yol haritası](docs/architecture/development-roadmap.md).
 
----
+## Lisans
 
-**Geliştirici:** Muhammed Yasin Yılmaz ([@myylogic](https://github.com/myylogic)) · **Durum:** Açık Kaynak / Aktif Geliştirme · **Tarih:** 09.03.2026
+Apache License 2.0 — bkz. [`LICENSE`](LICENSE). Katkılar fork, feature branch ve
+pull request ile memnuniyetle karşılanır.
 
-<p align="center">
-  <img src="image/myy.jpeg" style="max-width:100%;">
-</p>
+## Geliştirici
 
-<p align="center">
-Cevahir AI & Engine – Creator · Turkish AI Researcher
-</p>
+Muhammed Yasin Yılmaz — [@myylogic](https://github.com/myylogic)
