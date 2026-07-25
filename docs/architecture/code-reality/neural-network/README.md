@@ -4,6 +4,9 @@
 > Transformer decoder çekirdeğinin **kodundan çıkarılmış** mimarisi.
 > Bağlam: [master-architecture](../../master-architecture.md) (L3b), [search index](../../architecture-search-index.md).
 
+> 🔧 **Eşleşen plan:** Bu research ile birlikte okunacak test+geliştirme planı →
+> [`phase-1-refactoring-plan.md`](phase-1-refactoring-plan.md)
+
 ---
 
 ## 1. Kimlik

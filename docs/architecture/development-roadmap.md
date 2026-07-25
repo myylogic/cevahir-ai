@@ -99,7 +99,23 @@ Bu tur boyunca uyulacak kurallar:
 
 ---
 
-## 4. Birim Bazlı Bulgu Dizini
+## 4. Birim Bazlı Plan ve Bulgu Dizini
+
+Her kanonik birimin **kendi Phase-1 Refactoring Plan'ı** vardır (research ile
+eşleşir; önce Test Fazı, sonra Geliştirme Fazı):
+
+| Birim | Research | Phase-1 Plan |
+|-------|----------|--------------|
+| Tokenizer | [README](code-reality/tokenizer/README.md) | [plan](code-reality/tokenizer/phase-1-refactoring-plan.md) |
+| Neural Network | [README](code-reality/neural-network/README.md) | [plan](code-reality/neural-network/phase-1-refactoring-plan.md) |
+| Model / Engine | [README](code-reality/model-engine/README.md) | [plan](code-reality/model-engine/phase-1-refactoring-plan.md) |
+| Training Management | [README](code-reality/training-management/README.md) | [plan](code-reality/training-management/phase-1-refactoring-plan.md) |
+| Training System | [README](code-reality/training-system/README.md) | [plan](code-reality/training-system/phase-1-refactoring-plan.md) |
+| Data | [README](code-reality/data/README.md) | [plan](code-reality/data/phase-1-refactoring-plan.md) |
+| Cognitive | [README](code-reality/cognitive/README.md) | [plan](code-reality/cognitive/phase-1-refactoring-plan.md) |
+| Chatting | [README](code-reality/chatting/README.md) | [plan](code-reality/chatting/phase-1-refactoring-plan.md) |
+| API | [README](code-reality/api/README.md) | [plan](code-reality/api/phase-1-refactoring-plan.md) |
+| Database | [README](code-reality/database/README.md) | [plan](code-reality/database/phase-1-refactoring-plan.md) |
 
 Her temanın kaynak bulgusu ilgili birim dokümanının §8'indedir:
 

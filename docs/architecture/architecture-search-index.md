@@ -19,17 +19,15 @@ docs/architecture/
 ├── architecture-search-index.md    ← (bu dosya) gezinme + arama
 ├── development-roadmap.md          ← Önceliklendirilmiş refactor/geliştirme planı
 └── code-reality/                   ← Kodun mimarideki birebir karşılığı
-    ├── tokenizer/
-    ├── neural-network/
-    ├── model-engine/
-    ├── training-management/
-    ├── training-system/
-    ├── data/
-    ├── cognitive/
-    ├── chatting/
-    ├── api/
-    └── database/
+    └── <birim>/                     (tokenizer, neural-network, model-engine,
+        ├── README.md                 training-management, training-system, data,
+        └── phase-1-refactoring-plan.md   cognitive, chatting, api, database)
 ```
+
+Her kanonik birim klasöründe **iki eşleşen doküman** vardır:
+- `README.md` — **research**: kodun mevcut (as-is) gerçek durumu.
+- `phase-1-refactoring-plan.md` — **plan**: önce Test Fazı, sonra Geliştirme Fazı
+  (sprintler). Bkz. [development-roadmap](development-roadmap.md).
 
 - **Master mimari:** [`master-architecture.md`](master-architecture.md)
 - **Kod gerçekliği kökü:** [`code-reality/`](code-reality/)

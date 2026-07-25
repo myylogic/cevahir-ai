@@ -4,6 +4,9 @@
 > Eğitim **servis/koşu** katmanının (giriş noktası, veri/cache, kurulum) kodundan
 > çıkarılmış mimarisi.
 > Bağlam: [master-architecture](../../master-architecture.md) (L2), [search index](../../architecture-search-index.md).
+
+> 🔧 **Eşleşen plan:** Bu research ile birlikte okunacak test+geliştirme planı →
+> [`phase-1-refactoring-plan.md`](phase-1-refactoring-plan.md)
 > Komşu birim: [training-management](../training-management/) (bu servisin çağırdığı motor).
 
 ---

@@ -3,6 +3,9 @@
 > Kanonik Birim #7 · Kaynak: `cognitive_management/` (v2)
 > Akıl yürütme / bilişsel katmanın kodundan çıkarılmış mimarisi.
 > Bağlam: [master-architecture](../../master-architecture.md) (L5), [search index](../../architecture-search-index.md).
+
+> 🔧 **Eşleşen plan:** Bu research ile birlikte okunacak test+geliştirme planı →
+> [`phase-1-refactoring-plan.md`](phase-1-refactoring-plan.md)
 >
 > ⚠️ Bu doküman **doğrudan koddan** üretilmiştir. Depodaki eski
 > `cognitive_management/docs` içeriğiyle (ör. handler listesi) **çelişebilir**;

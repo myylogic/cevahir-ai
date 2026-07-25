@@ -3,6 +3,9 @@
 > Kanonik Birim #4 · Kaynak: `training_management/` (v2 + v3)
 > Eğitim **motorunun** (döngü + güvenlik + izleme) kodundan çıkarılmış mimarisi.
 > Bağlam: [master-architecture](../../master-architecture.md) (L2), [search index](../../architecture-search-index.md).
+
+> 🔧 **Eşleşen plan:** Bu research ile birlikte okunacak test+geliştirme planı →
+> [`phase-1-refactoring-plan.md`](phase-1-refactoring-plan.md)
 > Komşu birim: [training-system](../training-system/) (bu motoru çağıran servis).
 
 ---
