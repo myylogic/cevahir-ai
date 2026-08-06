@@ -1,0 +1,10 @@
+```
+# Python compiled files
+*.pyc
+__pycache__/
+
+# Logs
+*.log
+logs/
+
+```
