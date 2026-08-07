@@ -1,10 +1,79 @@
-```
-# Python compiled files
-*.pyc
+```gitignore
+# Metrics data files
+metrics/*.json
+
+# Python specific
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py~
+*.py.class
+*.py.backup
+*.swp
+*.swo
+.Python
+*.so
+*.dylib
+*.dll
+
+# Virtual environments
+venv/
+.venv/
+env/
+.ENV
+env.bak/
+venv.bak/
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
 
 # Logs
 *.log
-logs/
 
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Environment variables
+.env
+.env.local
+.env.*
+!env.example
+!env.sample
+
+# Coverage reports
+.coverage
+coverage/
+htmlcov/
+.coverage.*
+
+# Testing
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+
+# Distribution / packaging
+dist/
+build/
+*.egg
+*.egg-info/
+*.whl
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
 ```
