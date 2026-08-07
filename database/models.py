@@ -135,7 +135,7 @@ class Session(Base):
     
     # Session Information
     title = Column(String(255), nullable=True, comment="Session title (auto-generated or user-set)")
-    metadata = Column(JSONType, nullable=True, comment="Session metadata (JSON)")
+    session_metadata = Column(JSONType, nullable=True, comment="Session metadata (JSON)")
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, comment="Session creation timestamp")
@@ -179,7 +179,7 @@ class Message(Base):
     # Message Content
     role = Column(String(20), nullable=False, comment="Message role: 'user' or 'assistant'")
     content = Column(Text, nullable=False, comment="Message content")
-    metadata = Column(JSONType, nullable=True, comment="Message metadata (token count, model params, etc.)")
+    msg_metadata = Column(JSONType, nullable=True, comment="Message metadata (token count, model params, etc.)")
     
     # Timestamp
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True, comment="Message creation timestamp")
@@ -227,7 +227,7 @@ class UserMemory(Base):
         comment="Memory type: 'fact', 'preference', 'pattern', 'relationship', 'goal'"
     )
     content = Column(Text, nullable=False, comment="Memory content")
-    metadata = Column(JSONType, nullable=True, comment="Memory metadata (JSON)")
+    msg_metadata = Column(JSONType, nullable=True, comment="Memory metadata (JSON)")
     priority = Column(
         String(20),
         nullable=False,
@@ -278,7 +278,7 @@ class ConversationSummary(Base):
     # Summary Content
     summary_text = Column(Text, nullable=False, comment="Summary text")
     message_count = Column(Integer, nullable=True, comment="Number of messages summarized")
-    metadata = Column(JSONType, nullable=True, comment="Summary metadata (JSON)")
+    msg_metadata = Column(JSONType, nullable=True, comment="Summary metadata (JSON)")
     
     # Timestamp
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, comment="Summary creation timestamp")
