@@ -152,7 +152,7 @@ class MemoryStorage:
                     memory.priority = priority
                 if metadata is not None:
                     # Merge metadata
-                    current_metadata = memory.metadata or {}
+                    current_metadata = dict(memory.metadata or {})
                     current_metadata.update(metadata)
                     memory.metadata = current_metadata
                 

@@ -54,6 +54,7 @@ import sys
 import logging
 import random
 import time
+import threading
 from pathlib import Path
 from typing import (
     Any, Dict, List, Optional, Tuple, Union, Callable, Protocol,
@@ -73,6 +74,7 @@ if BASE_DIR not in sys.path:
 # Core imports
 from tokenizer_management.core.tokenizer_core import TokenizerCore, TokenizerCoreError
 from model_management.model_manager import ModelManager
+from model_management.config_schema import normalize_model_config
 from cognitive_management.cognitive_manager import CognitiveManager, ModelAPI as CognitiveModelAPI
 from cognitive_management.config import CognitiveManagerConfig
 from cognitive_management.cognitive_types import (
@@ -393,46 +395,19 @@ class CevahirConfig:
     # Model loading configuration
     load_model_path: Optional[str] = None  # None = auto-detect, "" = don't load
     
-    # Model configuration (V-4 Architecture)
-    model: Dict[str, Any] = field(default_factory=lambda: {
-        "learning_rate": 1e-4,
-        "dropout": 0.15,
-        "vocab_size": 60000,
-        "embed_dim": 512,
-        "seq_proj_dim": 512,
-        "num_heads": 8,  #  Training ile uyumlu (8 heads - Colab crash fix)
-        "num_layers": 8,  #  Training ile uyumlu (24 layers)
-        "ffn_dim": None,  # Auto: 4x seq_proj_dim
-        "pre_norm": True,
-        "causal_mask": True,
-        # V-3 features
-        "use_flash_attention": False,
-        "pe_mode": "rope",  # V-4: RoPE default
-        "use_gradient_checkpointing": True,
-        "tie_weights": True,
-        # V-4 features
-        "use_rmsnorm": True,  # V-4: RMSNorm
-        "use_swiglu": True,  # V-4: SwiGLU
-        "use_kv_cache": True,  # V-4: KV Cache
-        "max_cache_len": 2048,
-        "use_advanced_checkpointing": False,
-        "checkpointing_strategy": "selective",
-        "quantization_type": "none",  # "none" | "int8" | "fp16" | "int8_dynamic"
-        "use_moe": False,  # V-4: MoE
-        "num_experts": 8,
-        "moe_top_k": 2,
-        # TensorBoard
-        "use_tensorboard": False,
-        "tb_log_dir": "runs/cevahir",
-    })
-    
+    # Shared typed architecture defaults; explicit legacy overrides are preserved.
+    model: Dict[str, Any] = field(default_factory=normalize_model_config)
+
+    def __post_init__(self) -> None:
+        self.model = normalize_model_config(self.model)
+
     # Cognitive configuration
     cognitive: Optional[CognitiveManagerConfig] = None
     
     def validate(self) -> None:
         """Validate configuration"""
         # Device validation
-        if self.device not in ["cpu", "cuda", "mps"]:
+        if self.device.split(":")[0] not in ["cpu", "cuda", "mps"]:
             raise CevahirConfigurationError(f"Invalid device: {self.device}")
         
         # Tokenizer validation
@@ -480,6 +455,7 @@ class CevahirModelAPI(CognitiveModelAPI):
         self.model_manager = model_manager
         self.tokenizer_core = tokenizer_core
         self._device = model_manager.device
+        self._generation_lock = threading.RLock()
         
         # Ensure model is initialized
         if not model_manager.is_initialized:
@@ -490,7 +466,13 @@ class CevahirModelAPI(CognitiveModelAPI):
             )
         model_manager.eval_mode()
     
-    def generate(
+    def generate(self, prompt: str, decoding_cfg: DecodingConfig) -> str:
+        # The current KV cache is mutable and owned by this shared model.
+        # Serialize requests until request-specific cache allocation exists.
+        with self._generation_lock:
+            return self._generate_impl(prompt, decoding_cfg)
+
+    def _generate_impl(
         self,
         prompt: str,
         decoding_cfg: DecodingConfig
@@ -505,6 +487,12 @@ class CevahirModelAPI(CognitiveModelAPI):
             # Train modunda dropout açık kalırsa çıktılar gürültülü/anlamsız olur.
             if hasattr(self.model_manager, "eval_mode"):
                 self.model_manager.eval_mode()
+
+            if getattr(decoding_cfg, "num_beams", 1) > 1:
+                return self._generate_with_beam_search(
+                    prompt, decoding_cfg.max_new_tokens, decoding_cfg.num_beams,
+                    decoding_cfg.repetition_penalty, decoding_cfg.min_new_tokens or 0,
+                )
 
             # Encode prompt
             tokens, token_ids = self.tokenizer_core.encode(
@@ -562,7 +550,7 @@ class CevahirModelAPI(CognitiveModelAPI):
         
         Endüstri Standardı: Temperature, top-p, top-k sampling
         """
-        max_new_tokens = getattr(decoding_cfg, "max_new_tokens", 128) or 128
+        max_new_tokens = getattr(decoding_cfg, "max_new_tokens", 128)
         # Ensure max_new_tokens is an integer (handle MagicMock in tests)
         if not isinstance(max_new_tokens, int):
             try:
@@ -572,7 +560,9 @@ class CevahirModelAPI(CognitiveModelAPI):
         # Ensure max_new_tokens is non-negative and reasonable
         max_new_tokens = max(0, min(max_new_tokens, 2048))  # Cap at 2048 to prevent infinite loops
         
-        temperature = getattr(decoding_cfg, "temperature", 1.0) or 1.0
+        temperature = getattr(decoding_cfg, "temperature", 1.0)
+        if not isinstance(temperature, (int, float)) or not 0 <= temperature < float("inf"):
+            raise ValueError("temperature must be finite and non-negative")
         top_p = getattr(decoding_cfg, "top_p", 1.0) or 1.0
         # Ensure top_p is in valid range
         top_p = max(0.01, min(top_p, 1.0))  # Avoid top_p=0.0 which filters all tokens
@@ -580,6 +570,9 @@ class CevahirModelAPI(CognitiveModelAPI):
         top_k = max(0, top_k)  # top_k=0 means no filtering (valid)
         repetition_penalty = getattr(decoding_cfg, "repetition_penalty", 1.0) or 1.0
         
+        min_new_tokens = getattr(decoding_cfg, "min_new_tokens", None) or 0
+        if not isinstance(min_new_tokens, int) or not 0 <= min_new_tokens <= max_new_tokens:
+            raise ValueError("min_new_tokens must be between zero and max_new_tokens")
         generated = input_tensor[0].tolist()
         initial_seq_len = input_tensor.shape[1]
         
@@ -591,7 +584,7 @@ class CevahirModelAPI(CognitiveModelAPI):
         # (önceki turun cache'i kalırsa ikinci soruda scores/mask boyut uyuşmazlığı: 18 vs 12)
         if hasattr(self.model_manager, "clear_kv_cache"):
             self.model_manager.clear_kv_cache()
-        use_cache = True  # KV Cache kullan (inference için optimize)
+        use_cache = bool(getattr(self.model_manager, "config", {}).get("use_kv_cache", True))
         cache_position = None
         
         # Get EOS token ID
@@ -626,7 +619,7 @@ class CevahirModelAPI(CognitiveModelAPI):
                     # İlk forward: tüm prompt'u işle
                     current_input = input_tensor
                     cache_position = torch.arange(initial_seq_len, device=self._device)
-                else:
+                elif use_cache:
                     # Sonraki forward'lar: sadece yeni token
                     current_input = next_token_tensor
                     cache_position = torch.tensor([initial_seq_len + step - 1], device=self._device)
@@ -645,7 +638,7 @@ class CevahirModelAPI(CognitiveModelAPI):
                 if step == 0:
                     next_logits = logits[0, -1, :]  # [vocab_size] - ilk iterasyonda son token
                 else:
-                    next_logits = logits[0, 0, :]  # [vocab_size] - sonraki iterasyonlarda tek token
+                    next_logits = logits[0, -1, :]  # Last position also supports full-prefix fallback
                 
                 # [OK] DEBUG: İlk birkaç step'te logits bilgisi
                 if step < 3:
@@ -671,7 +664,11 @@ class CevahirModelAPI(CognitiveModelAPI):
                             else:
                                 next_logits[_rid] *= repetition_penalty
 
-                # Greedy decoding (temperature == 0.0): argmax — NaN/Inf riski yok.
+                if eos_id is not None and tokens_generated < min_new_tokens:
+                    next_logits = next_logits.clone()
+                    next_logits[eos_id] = float("-inf")
+
+                # Greedy decoding (temperature == 0.0): argmax.
                 if temperature == 0.0:
                     next_token_id = int(torch.argmax(next_logits).item())
                 else:
@@ -725,8 +722,8 @@ class CevahirModelAPI(CognitiveModelAPI):
                     logger.debug(f"[GEN] Step {step}: Generated token_id={next_token_id}, token_text='{token_text}', eos_id={eos_id}, "
                                f"is_eos={next_token_id == eos_id if eos_id is not None else False}")
                 
-                # EOS gelince dur; ama minimum 5 token üretmeden durma (erken collapse önlemi)
-                if eos_id is not None and next_token_id == eos_id and tokens_generated >= 5:
+                # Honor EOS once the configured minimum has been satisfied.
+                if eos_id is not None and next_token_id == eos_id:
                     generated.append(next_token_id)
                     break
                 
@@ -741,6 +738,7 @@ class CevahirModelAPI(CognitiveModelAPI):
                 # KV Cache kullanılmıyorsa (fallback), input'u güncelle
                 if not use_cache:
                     current_input = torch.cat([current_input, next_token_tensor], dim=1)
+                    cache_position = None
         
         # [OK] DEBUG: Generation özeti
         new_tokens_count = len(generated) - initial_seq_len
@@ -752,142 +750,52 @@ class CevahirModelAPI(CognitiveModelAPI):
         return generated
     
     def _generate_with_beam_search(
-        self,
-        prompt: str,
-        max_new_tokens: int,
-        beam_width: int,
-        repetition_penalty: float = 1.0,
-        **kwargs
+        self, prompt: str, max_new_tokens: int, beam_width: int,
+        repetition_penalty: float = 1.0, min_new_tokens: int = 0,
     ) -> str:
+        """Score independent full-prefix beams with full-vocabulary log probabilities.
+
+        Cache branching is intentionally not implicit: every beam recomputes its
+        prefix, preserving correctness with the existing mutable cache API.
         """
-        Generate text using beam search algorithm.
-        
-        Phase 3: Beam search implementation for better generation quality.
-        Endüstri Standardı: GPT-4, Claude beam search pattern.
-        
-        Args:
-            prompt: Input prompt
-            max_new_tokens: Maximum tokens to generate
-            beam_width: Number of beams to maintain
-            repetition_penalty: Repetition penalty
-            **kwargs: Additional generation parameters
-        
-        Returns:
-            Generated text (best beam)
-        """
-        try:
-            # Encode prompt
-            tokens, token_ids = self.tokenizer_core.encode(prompt, mode="inference")
-            if not token_ids:
-                return ""
-            
-            input_tensor = torch.tensor([token_ids], dtype=torch.long, device=self._device)
-            initial_seq_len = input_tensor.shape[1]
-            
-            # Get EOS token ID
-            vocab = self.tokenizer_core.get_vocab()
-            eos_id = None
-            if isinstance(vocab.get("<EOS>"), dict):
-                eos_id = vocab["<EOS>"].get("id")
-            elif isinstance(vocab.get("<EOS>"), int):
-                eos_id = vocab["<EOS>"]
-            
-            # Beam search state: List of (sequence, score, finished)
-            beams = [(input_tensor[0].tolist(), 0.0, False)]
-            
-            with torch.no_grad():
-                for step in range(max_new_tokens):
-                    candidates = []
-                    
-                    # Expand all active beams
-                    for sequence, score, finished in beams:
-                        if finished:
-                            candidates.append((sequence, score, True))
-                            continue
-                        
-                        # Prepare input for this beam
-                        if step == 0:
-                            current_input = torch.tensor([sequence], dtype=torch.long, device=self._device)
-                            cache_position = torch.arange(len(sequence), device=self._device)
-                        else:
-                            # Last token only (for KV Cache)
-                            last_token = sequence[-1]
-                            current_input = torch.tensor([[last_token]], dtype=torch.long, device=self._device)
-                            cache_position = torch.tensor([initial_seq_len + step - 1], device=self._device)
-                        
-                        # Forward pass
-                        logits, _ = self.model_manager.forward(
-                            current_input,
-                            inference=True,
-                            return_aux=False,
-                            use_cache=True,
-                            cache_position=cache_position,
-                        )
-                        
-                        # Get logits for next token
-                        if step == 0:
-                            next_logits = logits[0, -1, :]
-                        else:
-                            next_logits = logits[0, 0, :]
-                        
-                        # Apply repetition penalty
-                        if repetition_penalty > 1.0:
-                            for token_id in sequence[-256:]:
-                                if 0 <= token_id < next_logits.shape[0]:
-                                    next_logits[token_id] /= repetition_penalty
-                        
-                        # Get top-k candidates for this beam
-                        top_k = min(beam_width * 2, next_logits.shape[0])  # Get more candidates
-                        top_logits, top_indices = torch.topk(next_logits, top_k)
-                        
-                        # Convert to log probabilities and add to beam score
-                        log_probs = torch.log_softmax(top_logits, dim=0)
-                        
-                        for log_prob, token_id in zip(log_probs, top_indices):
-                            new_sequence = sequence + [token_id.item()]
-                            new_score = score + log_prob.item()
-                            is_finished = (eos_id is not None and token_id.item() == eos_id)
-                            candidates.append((new_sequence, new_score, is_finished))
-                    
-                    # Select top-k beams for next iteration
-                    candidates.sort(key=lambda x: x[1], reverse=True)
-                    beams = candidates[:beam_width]
-                    
-                    # Check if all beams are finished
-                    if all(finished for _, _, finished in beams):
-                        break
-                
-                # Length normalization — Wu et al. (2016) Google NMT formülü:
-                # score / (generated_length ^ alpha).  Alpha=0.6 literature standardı.
-                # Kısa sequence'ların yüksek log-prob avantajını dengeler.
-                _LP_ALPHA = 0.6
-                best_sequence, _, _ = max(
-                    beams,
-                    key=lambda x: x[1] / max(1, len(x[0]) - initial_seq_len) ** _LP_ALPHA
-                )
-                
-                # Decode
-                generated_text = self.tokenizer_core.decode(
-                    best_sequence,
-                    method="bpe",
-                    remove_specials=True
-                )
-                
-                return generated_text
-                
-        except Exception as e:
-            logger.error(f"Beam search generation error: {e}", exc_info=True)
-            # Fallback to standard generation
-            logger.warning("Beam search failed, falling back to standard generation")
-            decoding_cfg = DecodingConfig(
-                max_new_tokens=max_new_tokens,
-                temperature=1.0,
-                top_p=1.0,
-                top_k=0,
-                repetition_penalty=repetition_penalty,
-            )
-            return self._model_api.generate(prompt, decoding_cfg)
-    
+        if beam_width < 1 or max_new_tokens < 0 or not 0 <= min_new_tokens <= max_new_tokens:
+            raise ValueError("Invalid beam width or generation length")
+        _, prompt_ids = self.tokenizer_core.encode(prompt, mode="inference")
+        if not prompt_ids or max_new_tokens == 0:
+            return ""
+        vocab = self.tokenizer_core.get_vocab()
+        eos = vocab.get("<EOS>")
+        eos_id = eos.get("id") if isinstance(eos, dict) else eos
+        beams = [(list(prompt_ids), 0.0, False)]
+        self.model_manager.eval_mode()
+        with torch.no_grad():
+            for step in range(max_new_tokens):
+                candidates = []
+                for sequence, score, finished in beams:
+                    if finished:
+                        candidates.append((sequence, score, True))
+                        continue
+                    inputs = torch.tensor([sequence], dtype=torch.long, device=self._device)
+                    logits, _ = self.model_manager.forward(inputs, inference=True, return_aux=False, use_cache=False)
+                    next_logits = logits[0, -1].float().clone()
+                    if repetition_penalty <= 0:
+                        raise ValueError("repetition_penalty must be positive")
+                    for token in set(sequence[-256:]):
+                        if 0 <= token < next_logits.numel():
+                            next_logits[token] = (next_logits[token] / repetition_penalty
+                                                  if next_logits[token] > 0 else next_logits[token] * repetition_penalty)
+                    if eos_id is not None and step < min_new_tokens:
+                        next_logits[eos_id] = float("-inf")
+                    log_probs = torch.log_softmax(next_logits, dim=-1)
+                    scores, ids = torch.topk(log_probs, min(beam_width * 2, log_probs.numel()))
+                    for value, token in zip(scores.tolist(), ids.tolist()):
+                        candidates.append((sequence + [token], score + value, token == eos_id))
+                beams = sorted(candidates, key=lambda item: item[1], reverse=True)[:beam_width]
+                if all(finished for _, _, finished in beams):
+                    break
+        best = max(beams, key=lambda item: item[1] / max(1, len(item[0]) - len(prompt_ids)) ** 0.6)
+        return self.tokenizer_core.decode(best[0][len(prompt_ids):], method="bpe", remove_specials=True)
+
     def score(self, prompt: str, candidate: str) -> float:
         """
         Score candidate text given prompt.
@@ -1263,17 +1171,13 @@ class Cevahir:
                     model_path = default_path
                     logger.info(f"Auto-detected model file: {default_path}")
             
-            if model_path and os.path.exists(model_path):
-                try:
-                    logger.info(f"Loading model from: {model_path}")
-                    model_manager.load(model_path, strict=False)
-                    logger.info("Model loaded successfully")
-                except Exception as e:
-                    logger.warning(f"Failed to load model from {model_path}: {e}")
-                    logger.info("Continuing with initialized model")
-            elif model_path:
-                logger.warning(f"Model path specified but file not found: {model_path}")
-            
+            if model_path:
+                if not os.path.isfile(model_path):
+                    raise FileNotFoundError(f"Requested model checkpoint not found: {model_path}")
+                logger.info(f"Loading model from: {model_path}")
+                model_manager.load(model_path, strict=True, weights_only=True)
+                logger.info("Model loaded successfully")
+
             return model_manager
             
         except Exception as e:
@@ -1477,6 +1381,8 @@ class Cevahir:
                         top_p=top_p,
                         top_k=top_k,
                         repetition_penalty=repetition_penalty,
+                        min_new_tokens=kwargs.get("min_new_tokens"),
+                        num_beams=kwargs.get("num_beams", 1),
                     )
                     input_msg = CognitiveInput(user_message=prompt)
                     cognitive_output = cognitive_manager.handle(
@@ -1508,6 +1414,8 @@ class Cevahir:
                 top_p=top_p,
                 top_k=top_k,
                 repetition_penalty=repetition_penalty,
+                        min_new_tokens=kwargs.get("min_new_tokens"),
+                        num_beams=kwargs.get("num_beams", 1),
             )
             result = self._model_api.generate(prompt, decoding_cfg)
 

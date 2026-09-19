@@ -76,7 +76,12 @@ class DynamicPaddingCollator:
             raise ValueError("[CollatorV3] Boş batch!")
 
         # Batch içindeki maksimum uzunluk
-        max_len = max(item[0].size(-1) for item in batch)
+        def content_length(tensor):
+            positions = torch.nonzero(tensor != self.pad_id, as_tuple=False)
+            return int(positions[-1].item()) + 1 if positions.numel() else 0
+        max_len = max(max(content_length(inp), content_length(tgt)) for inp, tgt in batch)
+        if max_len == 0:
+            raise ValueError("Batch contains only padding")
 
         # Absolut üst limit
         if self.max_seq_length is not None:

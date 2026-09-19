@@ -18,7 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def init_session_routes(session_service: SessionService):
+def init_session_routes(session_service: SessionService, blueprint=None):
     """
     Initialize session routes with service.
     
@@ -26,7 +26,8 @@ def init_session_routes(session_service: SessionService):
         session_service: SessionService instance
     """
     
-    @v3_bp.route('/sessions', methods=['POST'])
+    blueprint = blueprint if blueprint is not None else v3_bp
+    @blueprint.route('/sessions', methods=['POST'])
     @require_auth
     def create_session():
         """
@@ -87,7 +88,7 @@ def init_session_routes(session_service: SessionService):
                 status_code=500
             )
     
-    @v3_bp.route('/sessions', methods=['GET'])
+    @blueprint.route('/sessions', methods=['GET'])
     @require_auth
     def list_sessions():
         """
@@ -126,4 +127,5 @@ def init_session_routes(session_service: SessionService):
                 message="Failed to list sessions",
                 status_code=500
             )
+
 

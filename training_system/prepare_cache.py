@@ -546,7 +546,15 @@ def prepare_cache(
                 data_dir=data_dir, cache_dir=cache_dir,
                 cache_enabled=True, strict_mode=False, verify_integrity=True,
             )
-            for pkl_file in Path(cache_dir).glob("cached_data_*.pkl"):
+            current_key = cache_v3.get_cache_key(
+                "train", include_whole_words, include_syllables, include_sep,
+                max_seq_length, cache_v3._get_vocab_hash(tokenizer_core),
+            )
+            current_path = cache_v3._get_cache_path(current_key, cache_v3._get_data_dir_hash())
+            # Only attest the file produced by this run, never unrelated caches.
+            for pkl_file in [current_path]:
+                if not pkl_file.exists():
+                    raise FileNotFoundError(f"Prepared cache not found: {pkl_file}")
                 sha_path = pkl_file.with_suffix(".sha256")
                 meta_path = pkl_file.with_suffix(".meta.json")
                 if not sha_path.exists():
@@ -648,4 +656,3 @@ def main():
 
 if __name__ == "__main__":
     exit(main())
-

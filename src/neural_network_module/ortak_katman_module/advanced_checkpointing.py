@@ -9,7 +9,7 @@ Modül: src/neural_network_module/ortak_katman_module
 Görev: Advanced Checkpointing - Gradient Checkpointing'in gelişmiş versiyonu.
        Selective checkpointing (sadece belirli layer'ları checkpoint'le),
        layer-wise checkpointing (her layer için ayrı checkpoint stratejisi) ve
-       memory-efficient training için optimize edilmiş. GPT-4, Claude, Gemini
+       memory-efficient training için optimize edilmiş. Transformer
        standardı.
 
 MİMARİ:
@@ -17,7 +17,7 @@ MİMARİ:
                      Open/Closed (genişletilebilir),
                      Dependency Inversion (nn.Module abstraction'ına bağımlı)
 - Design Patterns: Checkpointing Pattern (gelişmiş checkpointing)
-- Endüstri Standartları: GPT-4, Claude, Gemini checkpointing standardı
+- Endüstri Standartları: Transformer checkpointing standardı
 
 KULLANIM:
 - Advanced checkpointing için
@@ -47,14 +47,14 @@ import logging
 class AdvancedCheckpointing:
     """
     [OK] V4: Advanced Checkpointing
-    Endüstri standardı: GPT-4, Claude, Gemini
+    Endüstri standardı: Transformer
     
     Selective ve layer-wise checkpointing stratejileri.
     
     Stratejiler:
     1. Selective: Sadece belirli layer'ları checkpoint'le
     2. Layer-wise: Her layer için ayrı strateji
-    3. Adaptive: Memory kullanımına göre otomatik seçim
+    3. Adaptive: Tarihsel ad; ilk/son ve çift indeksli katmanları seçen sabit kural
     """
     
     def __init__(
@@ -71,11 +71,17 @@ class AdvancedCheckpointing:
             checkpoint_every_n: Her N layer'da bir checkpoint (layer_wise için)
             log_level: Logging level
         """
-        self.strategy = strategy.lower()
+        if not isinstance(strategy, str):
+            raise ValueError("checkpoint strategy must be a string")
+        self.strategy = strategy.strip().lower()
         if self.strategy not in ["selective", "layer_wise", "adaptive"]:
             raise ValueError(f"Desteklenmeyen checkpointing stratejisi: {strategy}. "
                              f"Geçerli seçenekler: 'selective', 'layer_wise', 'adaptive'.")
-        self.checkpoint_layers = checkpoint_layers or []
+        if isinstance(checkpoint_every_n, bool) or not isinstance(checkpoint_every_n, int) or checkpoint_every_n <= 0:
+            raise ValueError("checkpoint_every_n must be a positive integer")
+        if checkpoint_layers is not None and any(isinstance(i, bool) or not isinstance(i, int) or i < 0 for i in checkpoint_layers):
+            raise ValueError("checkpoint_layers must contain non-negative integers")
+        self.checkpoint_layers = list(checkpoint_layers) if checkpoint_layers is not None else []
         self.checkpoint_every_n = checkpoint_every_n
         
         # Logger
@@ -171,38 +177,11 @@ def create_checkpointing_strategy(
     Returns:
         AdvancedCheckpointing instance
     """
-    if strategy == "selective":
-        # İlk ve son layer'ları checkpoint'le, ortadakileri seçici
-        checkpoint_layers = [0, num_layers - 1]
-        # Ortadaki layer'lar için her 2'de bir
-        for i in range(1, num_layers - 1, 2):
-            checkpoint_layers.append(i)
-        return AdvancedCheckpointing(
-            strategy="selective",
-            checkpoint_layers=checkpoint_layers,
-            **kwargs,
-        )
-    
-    elif strategy == "layer_wise":
-        # Her 2 layer'da bir checkpoint
-        return AdvancedCheckpointing(
-            strategy="layer_wise",
-            checkpoint_every_n=2,
-            **kwargs,
-        )
-    
-    elif strategy == "adaptive":
-        # Adaptive strateji
-        return AdvancedCheckpointing(
-            strategy="adaptive",
-            **kwargs,
-        )
-    
-    else:
-        # Default: Selective
-        return AdvancedCheckpointing(
-            strategy="selective",
-            checkpoint_layers=[0, num_layers - 1] if num_layers > 1 else [0],
-            **kwargs,
-        )
-
+    if isinstance(num_layers, bool) or not isinstance(num_layers, int) or num_layers <= 0:
+        raise ValueError("num_layers must be a positive integer")
+    policy = AdvancedCheckpointing(strategy=strategy, **kwargs)
+    if policy.strategy == "selective" and "checkpoint_layers" not in kwargs:
+        policy.checkpoint_layers = sorted({0, num_layers - 1, *range(1, num_layers - 1, 2)})
+    if any(i >= num_layers for i in policy.checkpoint_layers):
+        raise ValueError("checkpoint layer index exceeds num_layers")
+    return policy

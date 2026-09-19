@@ -19,17 +19,17 @@ MİMARİ:
 - Endüstri Standartları: LLaMA 3, Gemma 2, PaLM 2, GPT-2/3/4, T5 FFN standardı
 
 V6 DEĞİŞİKLİKLERİ:
-- Fix 5: gate * torch.sigmoid(gate) → F.silu (kernel-fused, %15-20 daha hızlı)
+- Fix 5: gate * torch.sigmoid(gate) → F.silu (birleşik aktivasyon çağrısı; hız ölçüm gerektirir)
 - V6+: use_bias=False parametresi (LLaMA/PaLM standardı — varsayılan)
 - V6+: GeGLU activation eklendi (T5, Flan-T5, Switch Transformer standardı)
-- V6+: gelu_tanh activation eklendi (GPT-2/3/4 hızlı yaklaşım)
-- V6+: Bellek-verimli SwiGLU/GeGLU forward (4 tensor → 2 tensor: ~%50 VRAM azalması)
+- V6+: gelu_tanh activation eklendi 
+- V6+: Bellek-verimli SwiGLU/GeGLU forward (ara tensör kullanımını azaltmayı amaçlar; VRAM etkisi ölçülmedi)
 - V6+: Kaiming/normal init, aktivasyona göre otomatik seçim
 - V6+: fc2 için ayrı init_std (scaled residual init ile uyumluluk)
 
 V7 DEĞİŞİKLİKLERİ:
 - Merged gate_up_proj: gate_proj + up_proj → tek Linear(embed_dim, 2*ffn_dim)
-  Tek GEMM → %10-20 GPU hızlanması (LLaMA / HuggingFace standardı)
+  Tek GEMM → GPU hız etkisi ölçülmedi (LLaMA / HuggingFace standardı)
 - chunk(2, dim=-1): Kopyasız in-memory split (view tabanlı)
 - del gate dead code kaldırıldı: Autograd tensor'larda etkisiz
 - reset_parameters() eklendi: Standart PyTorch re-init arayüzü
@@ -97,7 +97,7 @@ class FeedForwardNetwork(nn.Module):
         "swiglu"    → SiLU(gate) * up           (LLaMA, PaLM, Gemma)
         "geglu"     → GELU(gate) * up            (T5, Flan-T5, Switch)
         "gelu"      → GELU(x)                    (BERT, GPT-2, ViT)
-        "gelu_tanh" → GELU(x, approx="tanh")     (GPT-2/3/4 hızlı versiyon)
+        "gelu_tanh" → GELU(x, approx="tanh")     
         "relu"      → ReLU(x)                    (Orijinal Transformer)
         "silu"      → SiLU(x)                    (Bazı vision modeller)
         "mish"      → Mish(x)                    (Alternatif smooth activation)
@@ -172,7 +172,7 @@ class FeedForwardNetwork(nn.Module):
 
         # --- Katmanlar ---
         if self._is_gated:
-            # [V7] Merged gate_up_proj: tek GEMM → %10-20 GPU hızlanması
+            # [V7] Merged gate_up_proj: tek GEMM → GPU hız etkisi ölçülmedi
             # Bias=False: LLaMA/PaLM/Gemma standardı; gate'de bias SwiGLU'nun
             # teorik formülünü bozar (Dauphin et al. 2017 orijinal formülasyon)
             # HuggingFace LLaMA implementasyonu ile uyumlu parametre isimlendirmesi
@@ -304,7 +304,7 @@ class FeedForwardNetwork(nn.Module):
         Bellek / hız optimizasyonu (Gated path) [V7]:
             Eski: gate_proj(x) + up_proj(x) = 2 ayrı GEMM
             Yeni: gate_up_proj(x).chunk(2) = tek GEMM + kopyasız split
-            Hız:  %10-20 GPU hızlanması (bellek bant genişliği kazancı)
+            Hız:  GPU hız etkisi ölçülmedi (bellek bant genişliği kazancı)
             VRAM: chunk view tabanlıdır; ekstra tahsis yok
         """
         if self._is_gated:
@@ -317,7 +317,7 @@ class FeedForwardNetwork(nn.Module):
 
         [V7] Merged gate_up_proj: tek Linear(embed_dim, 2*ffn_dim) çağrısı,
         ardından chunk(2) ile gate ve up'a kopyasız split (view tabanlı).
-        İki ayrı GEMM yerine tek GEMM → %10-20 GPU hızlanması.
+        İki ayrı GEMM yerine tek GEMM → GPU hız etkisi ölçülmedi.
 
         SwiGLU: h = SiLU(gate) ⊙ up
         GeGLU:  h = GELU(gate) ⊙ up

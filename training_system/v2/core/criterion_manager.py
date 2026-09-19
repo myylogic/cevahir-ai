@@ -55,7 +55,8 @@ class CriterionManager:
         pad_id: int = 0,
         device: Optional[torch.device] = None,
         label_smoothing: float = 0.1,
-        eos_weight: float = 1.0
+        eos_weight: float = 1.0,
+        entropy_coeff: float = 0.0,
     ) -> nn.CrossEntropyLoss:
         """
         EOS weight ve label smoothing ile CrossEntropyLoss oluştur.
@@ -95,6 +96,9 @@ class CriterionManager:
             ignore_index=pad_id,
             reduction="mean"
         )
+        if entropy_coeff < 0:
+            raise ValueError("entropy_coeff must be nonnegative")
+        criterion.entropy_coeff = float(entropy_coeff)
         
         if self.logger:
             self.logger.info(

@@ -40,6 +40,10 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from uuid import uuid4
+from time import time
+from ..utils.request_scope import current_scope
+
 from typing import Dict, Any, List, Optional
 
 from cognitive_management.config import CognitiveManagerConfig
@@ -82,9 +86,10 @@ class MemoryServiceV2(IMemoryService):
             raise ValidationError("cfg tipi geçersiz (CognitiveManagerConfig bekleniyor).")
         self.cfg = cfg
         # Basit episodik not alanı (kalıcı kısa notlar)
-        self._notes: List[str] = []
+        self._notes: Dict[str, List[str]] = {}
         # Episodic memory: Conversation turns with metadata
         self._episodic_memory: List[Dict[str, Any]] = []
+        self.revision = 0
         # Working memory: Recent context (last N turns)
         self._working_memory_size = 10  # Keep last 10 turns
         
@@ -164,9 +169,12 @@ class MemoryServiceV2(IMemoryService):
         memory_item = {
             "role": r,
             "content": c,
-            "timestamp": len(self._episodic_memory),  # Simple index-based timestamp
+            "timestamp": time(),
+            "scope": current_scope(),
+            "id": uuid4().hex,
         }
         self._episodic_memory.append(memory_item)
+        self.revision += 1
         
         # Phase 7.1: Add to vector store if enabled
         if self._vector_memory_enabled and self._embedding_adapter and self._vector_store:
@@ -178,10 +186,11 @@ class MemoryServiceV2(IMemoryService):
                 metadata = {
                     "role": r,
                     "timestamp": memory_item["timestamp"],
+                    "scope": current_scope(),
                 }
                 
                 # Generate ID
-                item_id = f"turn_{memory_item['timestamp']}"
+                item_id = memory_item["id"]
                 
                 # Add to vector store
                 self._vector_store.add(
@@ -241,10 +250,13 @@ class MemoryServiceV2(IMemoryService):
                     query_embedding=query_embedding,
                     top_k=top_k,
                     score_threshold=self.cfg.memory.rag_score_threshold,
+                    filter_metadata={"scope": current_scope()},
                 )
                 
                 # Convert VectorStoreResult to Dict format
                 for result in vector_search_results:
+                    if result.metadata.get("scope", "local") != current_scope():
+                        continue
                     vector_results.append({
                         "role": result.metadata.get("role", "assistant"),
                         "content": result.content,
@@ -361,6 +373,8 @@ class MemoryServiceV2(IMemoryService):
         
         results = []
         for item in self._episodic_memory:
+            if item.get("scope", "local") != current_scope():
+                continue
             content = item.get("content", "")
             if not content:
                 continue
@@ -413,6 +427,8 @@ class MemoryServiceV2(IMemoryService):
         
         results = []
         for item in self._episodic_memory:
+            if item.get("scope", "local") != current_scope():
+                continue
             content = item.get("content", "")
             if not content:
                 continue
@@ -628,13 +644,15 @@ class MemoryServiceV2(IMemoryService):
 
         try:
             embedding = self._embedding_adapter.encode_single(summary_text)
-            item_id = f"summary_{turn_index}"
+            import uuid
+            item_id = f"summary_{uuid.uuid4().hex}"
             self._vector_store.add(
                 texts=[summary_text],
                 embeddings=[embedding],
-                metadata=[{"role": ROLE_SYSTEM_SUMMARY, "timestamp": turn_index}],
+                metadata=[{"role": ROLE_SYSTEM_SUMMARY, "timestamp": turn_index, "scope": current_scope()}],
                 ids=[item_id],
             )
+            self.revision += 1
         except Exception as e:
             import logging
             logging.debug(f"Session summary vector store'a yazılamadı: {e}")
@@ -665,16 +683,19 @@ class MemoryServiceV2(IMemoryService):
         t = (text or "").strip()
         if not t:
             return
-        if t not in self._notes:
-            self._notes.append(t)
+        notes = self._notes.setdefault(current_scope(), [])
+        if t not in notes:
+            notes.append(t)
+            self.revision += 1
 
     def notes(self) -> List[str]:
         """Episodik notların kopyasını döndürür."""
-        return list(self._notes)
+        return list(self._notes.get(current_scope(), []))
 
     def clear_notes(self) -> None:
         """Episodik notları temizler."""
-        self._notes.clear()
+        if self._notes.pop(current_scope(), None):
+            self.revision += 1
 
 
 __all__ = ["MemoryServiceV2"]

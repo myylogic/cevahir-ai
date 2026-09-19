@@ -71,6 +71,8 @@ class ConfigManagerV3:
         # 1. TEMEL EĞİTİM PARAMETRELERİ (V2 uyumlu)
         # ─────────────────────────────────────────────
         config = {
+            "training_backend": str(base_config.get("training_backend", "v2")),
+            "precision": str(base_config.get("precision", "auto")),
             # Model
             "vocab_size": vocab_size,
             "pad_token_id": pad_token_id,
@@ -162,7 +164,7 @@ class ConfigManagerV3:
         # ─────────────────────────────────────────────
         config.update({
             # EMA (Exponential Moving Average)
-            "use_ema": bool(base_config.get("use_ema", True)),
+            "use_ema": bool(base_config.get("use_ema", False)),
             "ema_decay": float(base_config.get("ema_decay", 0.999)),
             "ema_update_after_step": int(base_config.get("ema_update_after_step", 100)),
             "ema_update_every": int(base_config.get("ema_update_every", 10)),
@@ -193,7 +195,7 @@ class ConfigManagerV3:
         # 6. SCHEDULED SAMPLING (Bengio et al. 2015)
         # ─────────────────────────────────────────────
         config.update({
-            "use_scheduled_sampling": bool(base_config.get("use_scheduled_sampling", True)),
+            "use_scheduled_sampling": bool(base_config.get("use_scheduled_sampling", False)),
             "ss_start_epoch": int(base_config.get("ss_start_epoch", 10)),
             "ss_decay_rate": float(base_config.get("ss_decay_rate", 0.05)),
             "min_teacher_forcing": float(base_config.get("min_teacher_forcing", 0.3)),
@@ -256,6 +258,8 @@ class ConfigManagerV3:
         # Validasyon
         # ─────────────────────────────────────────────
         self._validate(config)
+        from training_management.contracts import validate_training_backend
+        validate_training_backend(config)
 
         self.logger.info(
             f"[ConfigV3] Config hazırlandı: {len(config)} parametre "

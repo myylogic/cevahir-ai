@@ -89,8 +89,10 @@ class BPEDecoder:
         use_gpu: Optional[bool] = None,
         config: Optional[Dict[str, Any]] = None
     ) -> None:
-        if not isinstance(vocab, dict) or not vocab:
-            raise TypeError("Vocab bir sözlük olmalı ve boş olmamalıdır.")
+        if not isinstance(vocab, dict):
+            raise TypeError("Vocab bir sözlük olmalıdır.")
+        if not vocab:
+            raise ValueError("Vocab boş olmamalıdır.")
         
         # Config merge
         self.config = {**DECODER_CONFIG}
@@ -134,9 +136,15 @@ class BPEDecoder:
         """Yeni vocab ata ve reverse_vocab’i yeniden kur."""
         if not isinstance(new_vocab, dict) or not new_vocab:
             raise ValueError("set_vocab: yeni vocab dict olmalı ve boş olmamalı.")
+        previous = self.vocab
         self.vocab = dict(new_vocab)
+        try:
+            reverse = self._build_reverse_vocab()
+        except Exception:
+            self.vocab = previous
+            raise
+        self.reverse_vocab = reverse
         self._ensure_special_tokens_exact()
-        self.reverse_vocab = self._build_reverse_vocab()
         logger.debug("[BPEDecoder] vocab güncellendi | size=%d", len(self.vocab))
 
     def set_merges(self, merges: Optional[List[Tuple[str, str]]]) -> None:
@@ -348,7 +356,10 @@ class BPEDecoder:
 
         # 7) Noktalama ve özel işaret çevresi boşluk kuralları
         # Sadece çoklu boşlukları tek boşluğa çevir, tek boşlukları koru
-        text = re.sub(r"\s+", " ", text)  # Çoklu boşlukları tek boşluğa çevir
+        # Pretokenizer emits spaces around these punctuation tokens. Rejoin them
+        # during text decoding without changing encoded IDs or vocabulary.
+        if self.config.get("cleanup_punctuation_spaces", True):
+            text = re.sub(r" +([.,!?])", r"\1", text)
         # 8) Normalizasyon
         # ✅ DÜZELTME: SEP token içeren text'lerde strip() yaparken dikkatli ol
         # Eğer text sadece boşluk ise (SEP token'dan geliyorsa), strip() yapma
@@ -384,7 +395,7 @@ class BPEDecoder:
                             break
 
         logger.debug("[BPEDecoder] decode çıktı: %s", text if len(text) < 200 else text[:200] + "…")
-        return text
+        return self.postprocessor.process([text])
 
 
     def reset(self) -> None:

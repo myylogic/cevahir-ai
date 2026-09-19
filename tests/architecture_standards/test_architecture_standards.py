@@ -188,7 +188,7 @@ class TestAttentionStandards:
     def test_a1_attention_weights_valid_and_sum_one(self, minimal_model, batch_minimal):
         """A1: attn_weights (varsa) NaN yok ve her satır toplamı 1'e yakın."""
         with torch.no_grad():
-            logits, attn_weights = minimal_model(batch_minimal)
+            logits, attn_weights = minimal_model(batch_minimal, return_attention_weights=True)
         if attn_weights is None:
             pytest.skip("Model returns no attention weights (e.g. Flash Attention)")
         assert not torch.isnan(attn_weights).any().item(), "Attention weights contain NaN"

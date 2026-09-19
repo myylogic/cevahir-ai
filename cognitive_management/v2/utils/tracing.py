@@ -47,6 +47,7 @@ from enum import Enum
 import uuid
 import time
 import threading
+from contextvars import ContextVar
 from collections import deque
 
 
@@ -323,20 +324,19 @@ class TraceContextManager:
     """
     
     def __init__(self):
-        self._local = threading.local()
+        self._context = ContextVar(f"trace_context_{id(self)}", default=None)
     
     def get_context(self) -> Optional[SpanContext]:
         """Get current trace context"""
-        return getattr(self._local, 'context', None)
+        return self._context.get()
     
     def set_context(self, context: SpanContext) -> None:
         """Set current trace context"""
-        self._local.context = context
+        self._context.set(context)
     
     def clear_context(self) -> None:
         """Clear current trace context"""
-        if hasattr(self._local, 'context'):
-            delattr(self._local, 'context')
+        self._context.set(None)
     
     def create_child_context(self, name: str) -> SpanContext:
         """

@@ -106,7 +106,7 @@ class User(Base):
     
     # Constraints
     __table_args__ = (
-        CheckConstraint("email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}$'", name="check_email_format"),
+        CheckConstraint("email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}$'", name="check_email_format").ddl_if(dialect="postgresql"),
     )
     
     def __repr__(self) -> str:
@@ -135,7 +135,7 @@ class Session(Base):
     
     # Session Information
     title = Column(String(255), nullable=True, comment="Session title (auto-generated or user-set)")
-    metadata = Column(JSONType, nullable=True, comment="Session metadata (JSON)")
+    metadata_json = Column("metadata", JSONType, nullable=True, comment="Session metadata (JSON)")
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, comment="Session creation timestamp")
@@ -179,7 +179,7 @@ class Message(Base):
     # Message Content
     role = Column(String(20), nullable=False, comment="Message role: 'user' or 'assistant'")
     content = Column(Text, nullable=False, comment="Message content")
-    metadata = Column(JSONType, nullable=True, comment="Message metadata (token count, model params, etc.)")
+    metadata_json = Column("metadata", JSONType, nullable=True, comment="Message metadata (token count, model params, etc.)")
     
     # Timestamp
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True, comment="Message creation timestamp")
@@ -227,7 +227,7 @@ class UserMemory(Base):
         comment="Memory type: 'fact', 'preference', 'pattern', 'relationship', 'goal'"
     )
     content = Column(Text, nullable=False, comment="Memory content")
-    metadata = Column(JSONType, nullable=True, comment="Memory metadata (JSON)")
+    metadata_json = Column("metadata", JSONType, nullable=True, comment="Memory metadata (JSON)")
     priority = Column(
         String(20),
         nullable=False,
@@ -278,7 +278,7 @@ class ConversationSummary(Base):
     # Summary Content
     summary_text = Column(Text, nullable=False, comment="Summary text")
     message_count = Column(Integer, nullable=True, comment="Number of messages summarized")
-    metadata = Column(JSONType, nullable=True, comment="Summary metadata (JSON)")
+    metadata_json = Column("metadata", JSONType, nullable=True, comment="Summary metadata (JSON)")
     
     # Timestamp
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, comment="Summary creation timestamp")
@@ -289,4 +289,19 @@ class ConversationSummary(Base):
     def __repr__(self) -> str:
         summary_preview = self.summary_text[:50] + "..." if len(self.summary_text) > 50 else self.summary_text
         return f"<ConversationSummary(summary_id={self.summary_id}, session_id={self.session_id}, summary='{summary_preview}')>"
+
+
+# SQLAlchemy reserves ``metadata`` during declarative mapping. Preserve the SQL
+# column name and legacy instance constructor/access API after mapping completes.
+# New ORM expressions should use ``metadata_json``; Base.metadata stays intact.
+def _get_record_metadata(record):
+    return record.metadata_json
+
+
+def _set_record_metadata(record, value):
+    record.metadata_json = value
+
+
+for _record_type in (Session, Message, UserMemory, ConversationSummary):
+    _record_type.metadata = property(_get_record_metadata, _set_record_metadata)
 

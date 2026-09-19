@@ -47,7 +47,8 @@ def get_current_user() -> str:
                 logger.debug(f"User authenticated via JWT: {user_id}")
                 return user_id
         except Exception as e:
-            logger.warning(f"JWT token verification failed: {e}")
+            logger.warning("JWT token verification failed")
+        raise AuthenticationError("Invalid or expired authentication token")
     
     # Fallback: X-User-ID header (development only)
     user_id = request.headers.get('X-User-ID')

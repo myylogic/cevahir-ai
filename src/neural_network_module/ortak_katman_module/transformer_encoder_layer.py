@@ -43,16 +43,17 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 import torch
 import torch.nn as nn
 import logging
+from contextlib import contextmanager, nullcontext
 from typing import Optional, Tuple, Union
 
-# [OK] V3: Gradient Checkpointing (endüstri standardı: GPT-3+, Claude, Gemini)
+# [OK] V3: Gradient Checkpointing 
 from torch.utils.checkpoint import checkpoint
 
 from .attention_manager_module.multi_head_attention import MultiHeadAttention
 from .feed_forward_network import FeedForwardNetwork
-# [OK] V4: RMSNorm (endüstri standardı: GPT-3+, LLaMA)
+# [OK] V4: RMSNorm 
 from .rms_norm import RMSNorm
-# [OK] V4: Advanced Checkpointing (endüstri standardı: GPT-4, Claude, Gemini)
+# [OK] V4: Advanced Checkpointing 
 from .advanced_checkpointing import AdvancedCheckpointing, create_checkpointing_strategy
 
 
@@ -61,7 +62,7 @@ class TransformerEncoderLayer(nn.Module):
     Transformer standardı: Self-Attention + FFN + Residual + Pre-norm/Post-norm
     Endüstri standardı: GPT-2/3/4 (Pre-norm), BERT (Post-norm), T5 (Pre-norm)
     
-    PRE-NORM AKIŞI (pre_norm=True, GPT-2/3/4 standardı):
+    PRE-NORM AKIŞI :
     ┌─────────────────────────────────────────────────────────┐
     │ Input: [B, T, embed_dim]                                │
     │   ↓                                                     │
@@ -133,23 +134,23 @@ class TransformerEncoderLayer(nn.Module):
         log_level: int = logging.INFO,
         # [OK] V3: Flash Attention 2.0 desteği (endüstri standardı)
         use_flash_attention: bool = False,
-        # [OK] V3: Gradient Checkpointing desteği (endüstri standardı: GPT-3+, Claude, Gemini)
+        # [OK] V3: Gradient Checkpointing desteği 
         use_gradient_checkpointing: bool = True,  # V4 aktif
-        # [OK] V4: Advanced Checkpointing desteği (endüstri standardı: GPT-4, Claude, Gemini)
+        # [OK] V4: Advanced Checkpointing desteği 
         use_advanced_checkpointing: bool = False,  # Advanced checkpointing kullan
         checkpointing_strategy: str = "selective",  # "selective" | "layer_wise" | "adaptive"
-        # [OK] V4: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
+        # [OK] V4: RoPE (Rotary Position Embedding) desteği 
         use_rope: bool = False,
         positional_encoding=None,  # PositionalEncoding modülü referansı (RoPE için)
-        # [OK] V4: RMSNorm desteği (endüstri standardı: GPT-3+, LLaMA)
+        # [OK] V4: RMSNorm desteği 
         use_rmsnorm: bool = False,  # True ise RMSNorm, False ise LayerNorm
-        # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
+        # [OK] V4: KV Cache desteği 
         use_kv_cache: bool = False,  # KV Cache kullan (inference için)
         max_cache_len: int = 2048,  # Maximum cache length
-        # [OK] V4: MoE (Mixture of Experts) desteği (endüstri standardı: GPT-4, Gemini)
+        # [OK] V4: MoE (Mixture of Experts) desteği 
         use_moe: bool = False,  # MoE kullan
-        num_experts: int = 8,  # Expert sayısı (GPT-4: 8, Gemini: 16)
-        moe_top_k: int = 2,  # Her token için seçilecek expert sayısı (GPT-4: 2)
+        num_experts: int = 8,  # Expert sayısı 
+        moe_top_k: int = 2,  # Her token için seçilecek expert sayısı 
         # [OK] V5: GQA (Grouped Query Attention) desteği (LLaMA-2/3, Mistral standardı)
         num_kv_heads: Optional[int] = None,  # None → standart MHA
         # [OK] V5: Sliding Window Attention (Mistral-7B standardı)
@@ -177,6 +178,8 @@ class TransformerEncoderLayer(nn.Module):
         # [V7] KV Cache eviction (StreamingLLM) — MHA'ya iletilir
         kv_eviction_strategy: str = "sliding_window",  # "none" | "sliding_window"
         kv_num_sink_tokens: int = 4,    # Attention sink token sayısı (Xiao et al. 2023)
+        moe_jitter_noise: float = 0.01,
+        moe_load_balance_alpha: float = 0.01,
         **kwargs,  # Geriye dönük uyumluluk için (artık ffn_activation buraya gelmez)
     ):
         """
@@ -191,11 +194,14 @@ class TransformerEncoderLayer(nn.Module):
             log_level: Logging level
             use_rope: RoPE (Rotary Position Embedding) kullan
             positional_encoding: PositionalEncoding modülü referansı (RoPE için gerekli)
-            use_rmsnorm: True ise RMSNorm, False ise LayerNorm kullan (GPT-3+, LLaMA standardı)
+            use_rmsnorm: True ise RMSNorm, False ise LayerNorm kullan 
             use_kv_cache: KV Cache kullan (inference için)
             max_cache_len: Maximum cache length
         """
         super().__init__()
+        if not 0.0 <= drop_path_rate < 1.0:
+            raise ValueError("drop_path_rate must be in [0,1)")
+        self._record_moe_aux = True
         
         self.embed_dim = embed_dim
         self.num_heads = num_heads
@@ -215,8 +221,8 @@ class TransformerEncoderLayer(nn.Module):
         
         # 1) Self-Attention
         # [OK] V3: Flash Attention 2.0 desteği (endüstri standardı)
-        # [OK] V4: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
-        # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
+        # [OK] V4: RoPE (Rotary Position Embedding) desteği 
+        # [OK] V4: KV Cache desteği 
         self.attn = MultiHeadAttention(
             embed_dim=embed_dim,
             num_heads=num_heads,
@@ -244,17 +250,24 @@ class TransformerEncoderLayer(nn.Module):
                 "[V6] Parallel Residual etkinleştirildi (GPT-J/PaLM standardı): "
                 "attn ve ffn aynı norm'dan besleniyor (tek norm geçişi)"
             )
-        # [OK] V4: RMSNorm veya LayerNorm seçimi (GPT-3+, LLaMA standardı)
+        # [OK] V4: RMSNorm veya LayerNorm seçimi 
         if use_rmsnorm:
             self.norm1 = RMSNorm(embed_dim, eps=1e-6, log_level=log_level)
             self.norm2 = RMSNorm(embed_dim, eps=1e-6, log_level=log_level)
         else:
-            # Endüstri standardı: LayerNorm epsilon (GPT-2/3/4: 1e-5)
+            # Endüstri standardı: LayerNorm epsilon 
             self.norm1 = nn.LayerNorm(embed_dim, eps=1e-5)
             self.norm2 = nn.LayerNorm(embed_dim, eps=1e-5)
         
         # 2) FFN veya MoE
-        # [OK] V4: MoE (Mixture of Experts) desteği (endüstri standardı: GPT-4, Gemini)
+        # Legacy attention-local normalization is retained in state_dict for old
+        # checkpoints, but residual normalization belongs to this layer.
+        # Exclude its unused parameters from optimization and trainable counts.
+        self.attn.norm.requires_grad_(False)
+        if parallel_residual and pre_norm:
+            self.norm2.requires_grad_(False)
+
+        # [OK] V4: MoE (Mixture of Experts) desteği 
         # use_moe, num_experts, moe_top_k parametreleri __init__ signature'ında tanımlı
         
         if use_moe:
@@ -266,11 +279,14 @@ class TransformerEncoderLayer(nn.Module):
                 top_k=moe_top_k,
                 dropout=dropout,
                 activation=ffn_activation,  # [V7] explicit param
+                jitter_noise=moe_jitter_noise,
+                load_balance_alpha=moe_load_balance_alpha,
+                use_bias=ffn_use_bias,
                 log_level=log_level,
             )
             self.use_moe = True
         else:
-            # [OK] V4: SwiGLU veya GELU activation seçimi (GPT-4, PaLM standardı)
+            # [OK] V4: SwiGLU veya GELU activation seçimi 
             self.ffn = FeedForwardNetwork(
                 embed_dim=embed_dim,
                 ffn_dim=ffn_dim,
@@ -284,21 +300,21 @@ class TransformerEncoderLayer(nn.Module):
         # Dropout
         self.dropout = nn.Dropout(dropout)
         
-        # [OK] V3: Gradient Checkpointing (endüstri standardı: GPT-3+, Claude, Gemini)
+        # [OK] V3: Gradient Checkpointing 
         self.use_gradient_checkpointing = use_gradient_checkpointing
         
-        # [OK] V4: Advanced Checkpointing (endüstri standardı: GPT-4, Claude, Gemini)
+        # [OK] V4: Advanced Checkpointing 
         self.use_advanced_checkpointing = use_advanced_checkpointing
         self.checkpointing_strategy = checkpointing_strategy
         self.advanced_checkpointing: Optional[AdvancedCheckpointing] = None
         if use_advanced_checkpointing:
-            from src.neural_network_module.ortak_katman_module.advanced_checkpointing import AdvancedCheckpointing
-            self.advanced_checkpointing = AdvancedCheckpointing(
+            self.advanced_checkpointing = create_checkpointing_strategy(
                 strategy=checkpointing_strategy,
+                num_layers=1,
                 log_level=log_level,
             )
             self.logger.info(
-                f"[V4] Advanced Checkpointing etkinleştirildi (endüstri standardı: GPT-4, Claude, Gemini), "
+                f"[V4] Advanced Checkpointing etkinleştirildi , "
                 f"strategy={checkpointing_strategy}"
             )
         
@@ -338,9 +354,10 @@ class TransformerEncoderLayer(nn.Module):
         x: torch.Tensor,
         mask: Optional[torch.Tensor] = None,
         causal_mask: bool = False,
-        # [OK] V4: KV Cache parametreleri (endüstri standardı: GPT-4, Claude, Gemini)
+        # [OK] V4: KV Cache parametreleri 
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
+        return_attention_weights: bool = False,
     ) -> Union[
         Tuple[torch.Tensor, Optional[torch.Tensor]],
         Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]],
@@ -352,6 +369,7 @@ class TransformerEncoderLayer(nn.Module):
             x: [B, T, embed_dim]
             mask: Optional attention mask
             causal_mask: True ise causal masking uygulanır
+            return_attention_weights: Explicit diagnostics; disables fused SDPA.
         
         Returns:
             x: [B, T, embed_dim]
@@ -380,10 +398,12 @@ class TransformerEncoderLayer(nn.Module):
         - BERT: Post-norm [OK] (orijinal)
         - T5: Pre-norm [OK] (modern)
         """
-        # [OK] V3/V4: Gradient Checkpointing (endüstri standardı: GPT-3+/4, Claude, Gemini)
+        # [OK] V3/V4: Gradient Checkpointing 
         # Memory-efficient training: activation'ları kaydetmek yerine backward'da yeniden hesapla
+        self._moe_loss_accum = None
+        self._moe_accum_steps = 0
         if self.training:
-            # [OK] V4: Advanced Checkpointing (endüstri standardı: GPT-4, Claude, Gemini)
+            # [OK] V4: Advanced Checkpointing 
             if self.use_advanced_checkpointing and self.advanced_checkpointing is not None:
                 # Advanced checkpointing: Selective veya layer-wise strateji
                 layer_idx = getattr(self, 'layer_idx', 0)
@@ -396,12 +416,13 @@ class TransformerEncoderLayer(nn.Module):
                 if should_checkpoint:
                     return self.advanced_checkpointing.checkpoint_forward(
                         self._forward_impl,
-                        x, mask, causal_mask, False, None,
+                        x, mask, causal_mask, False, None, return_attention_weights,
                         use_reentrant=False,
+                        context_fn=lambda: (nullcontext(), self._recompute_context()),
                     )
                 else:
                     # Normal forward (checkpoint yok)
-                    return self._forward_impl(x, mask, causal_mask, False, None)
+                    return self._forward_impl(x, mask, causal_mask, False, None, return_attention_weights)
             
             # [OK] V3: Standard Gradient Checkpointing
             elif self.use_gradient_checkpointing:
@@ -410,12 +431,13 @@ class TransformerEncoderLayer(nn.Module):
                 # Training modunda use_cache=False olmalı
                 return checkpoint(
                     self._forward_impl, 
-                    x, mask, causal_mask, False, None, 
-                    use_reentrant=False
+                    x, mask, causal_mask, False, None, return_attention_weights, 
+                    use_reentrant=False,
+                    context_fn=lambda: (nullcontext(), self._recompute_context()),
                 )
         
         # Normal forward pass (inference veya checkpointing yok)
-        return self._forward_impl(x, mask, causal_mask, use_cache, cache_position)
+        return self._forward_impl(x, mask, causal_mask, use_cache, cache_position, return_attention_weights)
     
     # =========================================================================
     # [V7] Stochastic Depth — Huang et al. (2016) "Deep Networks with Stochastic Depth"
@@ -482,14 +504,30 @@ class TransformerEncoderLayer(nn.Module):
         self._moe_accum_steps = 0
         return loss
 
+    @contextmanager
+    def _recompute_context(self):
+        """Checkpoint recomputation must not mutate the auxiliary-loss mailbox."""
+        previous = self._record_moe_aux
+        self._record_moe_aux = False
+        try:
+            yield
+        finally:
+            self._record_moe_aux = previous
+
+    def _store_moe_loss(self, loss: torch.Tensor) -> None:
+        if self.training and self._record_moe_aux:
+            self._moe_loss_accum = loss
+            self._moe_accum_steps = 1
+
     def _forward_impl(
         self,
         x: torch.Tensor,
         mask: Optional[torch.Tensor] = None,
         causal_mask: bool = False,
-        # [OK] V4: KV Cache parametreleri (endüstri standardı: GPT-4, Claude, Gemini)
+        # [OK] V4: KV Cache parametreleri 
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
+        return_attention_weights: bool = False,
     ) -> Union[
         Tuple[torch.Tensor, Optional[torch.Tensor]],
         Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]],
@@ -503,32 +541,34 @@ class TransformerEncoderLayer(nn.Module):
         # x = x + attn(norm(x)) + ffn(norm(x))
         # ============================================================
         if self.parallel_residual and self.pre_norm:
-            return self._parallel_forward_impl(x, mask, causal_mask, use_cache, cache_position)
+            return self._parallel_forward_impl(x, mask, causal_mask, use_cache, cache_position, return_attention_weights)
 
         # ============================================================
         # 1) SELF-ATTENTION: Pre-norm vs Post-norm Akışı
         # ============================================================
 
         if self.pre_norm:
-            # [OK] PRE-NORM AKIŞI (GPT-2/3/4, Modern Transformer'lar)
+            # [OK] PRE-NORM AKIŞI 
             # Akış: x → LayerNorm → Attention → Dropout → Residual (+)
             # 
             # Adım 1: LayerNorm önce (PRE)
             x_norm = self.norm1(x)  # [B, T, embed_dim]
             # 
             # Adım 2: Attention (normalized input ile)
-            # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
+            # [OK] V4: KV Cache desteği 
             attn_result = self.attn(
                 x_norm, x_norm, x_norm,
                 mask=mask,
                 causal_mask=causal_mask,
-                return_attention_weights=True,
+                return_attention_weights=return_attention_weights,
                 use_cache=use_cache,
                 cache_position=cache_position,
             )
             # KV Cache kullanılıyorsa: (output, attn_weights, kv_cache)
             # Normal mode: (output, attn_weights)
-            if use_cache and len(attn_result) == 3:
+            if isinstance(attn_result, torch.Tensor):
+                attn_output, attn_weights, kv_cache = attn_result, None, None
+            elif use_cache and len(attn_result) == 3:
                 attn_output, attn_weights, kv_cache = attn_result
             else:
                 attn_output, attn_weights = attn_result
@@ -544,24 +584,26 @@ class TransformerEncoderLayer(nn.Module):
             # PRE-NORM AVANTAJLARI:
             # - Daha stabil gradient flow (deep network'lerde)
             # - LayerNorm input'u normalize eder, attention daha iyi çalışır
-            # - Modern Transformer'ların standardı (GPT-2/3/4, T5)
+            # - Modern Transformer'ların standardı 
         else:
             # [OK] POST-NORM AKIŞI (Orijinal Transformer, BERT)
             # Akış: x → Attention → Dropout → Residual (+) → LayerNorm
             #
             # Adım 1: Attention (orijinal input ile)
-            # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
+            # [OK] V4: KV Cache desteği 
             attn_result = self.attn(
                 x, x, x,
                 mask=mask,
                 causal_mask=causal_mask,
-                return_attention_weights=True,
+                return_attention_weights=return_attention_weights,
                 use_cache=use_cache,
                 cache_position=cache_position,
             )
             # KV Cache kullanılıyorsa: (output, attn_weights, kv_cache)
             # Normal mode: (output, attn_weights)
-            if use_cache and len(attn_result) == 3:
+            if isinstance(attn_result, torch.Tensor):
+                attn_output, attn_weights, kv_cache = attn_result, None, None
+            elif use_cache and len(attn_result) == 3:
                 attn_output, attn_weights, kv_cache = attn_result
             else:
                 attn_output, attn_weights = attn_result
@@ -584,22 +626,18 @@ class TransformerEncoderLayer(nn.Module):
         # ============================================================
         
         if self.pre_norm:
-            # [OK] PRE-NORM AKIŞI (GPT-2/3/4, Modern Transformer'lar)
+            # [OK] PRE-NORM AKIŞI 
             # Akış: x → LayerNorm → FFN → Dropout → Residual (+)
             # 
             # Adım 1: LayerNorm önce (PRE)
             x_norm = self.norm2(x)  # [B, T, embed_dim]
             # 
             # Adım 2: FFN veya MoE (normalized input ile)
-            # [OK] V4: MoE desteği (endüstri standardı: GPT-4, Gemini)
+            # [OK] V4: MoE desteği 
             if self.use_moe:
                 ffn_output, moe_load_balancing_loss = self.ffn(x_norm)  # [B, T, embed_dim], scalar
                 # [V8 Fix] Scalar accumulation (liste değil) — memory leak yok
-                self._moe_loss_accum = (
-                    moe_load_balancing_loss if self._moe_loss_accum is None
-                    else self._moe_loss_accum + moe_load_balancing_loss
-                )
-                self._moe_accum_steps += 1
+                self._store_moe_loss(moe_load_balancing_loss)
             else:
                 ffn_output = self.ffn(x_norm)  # [B, T, embed_dim]
             #
@@ -614,15 +652,11 @@ class TransformerEncoderLayer(nn.Module):
             # Akış: x → FFN → Dropout → Residual (+) → LayerNorm
             #
             # Adım 1: FFN veya MoE (orijinal input ile)
-            # [OK] V4: MoE desteği (endüstri standardı: GPT-4, Gemini)
+            # [OK] V4: MoE desteği 
             if self.use_moe:
                 ffn_output, moe_load_balancing_loss = self.ffn(x)  # [B, T, embed_dim], scalar
                 # [V8 Fix] Scalar accumulation
-                self._moe_loss_accum = (
-                    moe_load_balancing_loss if self._moe_loss_accum is None
-                    else self._moe_loss_accum + moe_load_balancing_loss
-                )
-                self._moe_accum_steps += 1
+                self._store_moe_loss(moe_load_balancing_loss)
             else:
                 ffn_output = self.ffn(x)  # [B, T, embed_dim]
             #
@@ -645,6 +679,7 @@ class TransformerEncoderLayer(nn.Module):
         causal_mask: bool = False,
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
+        return_attention_weights: bool = False,
     ) -> Union[
         Tuple[torch.Tensor, Optional[torch.Tensor]],
         Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]],
@@ -669,11 +704,13 @@ class TransformerEncoderLayer(nn.Module):
             x_norm, x_norm, x_norm,
             mask=mask,
             causal_mask=causal_mask,
-            return_attention_weights=True,
+            return_attention_weights=return_attention_weights,
             use_cache=use_cache,
             cache_position=cache_position,
         )
-        if use_cache and len(attn_result) == 3:
+        if isinstance(attn_result, torch.Tensor):
+            attn_output, attn_weights, kv_cache = attn_result, None, None
+        elif use_cache and len(attn_result) == 3:
             attn_output, attn_weights, kv_cache = attn_result
         else:
             attn_output, attn_weights = attn_result
@@ -683,11 +720,7 @@ class TransformerEncoderLayer(nn.Module):
         if self.use_moe:
             ffn_output, moe_load_balancing_loss = self.ffn(x_norm)
             # [V8 Fix] Scalar accumulation
-            self._moe_loss_accum = (
-                moe_load_balancing_loss if self._moe_loss_accum is None
-                else self._moe_loss_accum + moe_load_balancing_loss
-            )
-            self._moe_accum_steps += 1
+            self._store_moe_loss(moe_load_balancing_loss)
         else:
             ffn_output = self.ffn(x_norm)
 

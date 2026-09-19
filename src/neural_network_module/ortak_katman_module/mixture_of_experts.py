@@ -9,7 +9,7 @@ Modül: src/neural_network_module/ortak_katman_module
 Görev: Mixture of Experts (MoE) - Büyük modeller için sparse activation sağlar.
        N adet expert (FFN), router (her token için en uygun expert'leri seçer),
        top-k routing (her token için k expert seçilir) ve load balancing
-       (expert'lerin dengeli kullanımı) işlemlerini yapar. GPT-4, Gemini, GShard
+       (expert'lerin dengeli kullanımı) işlemlerini yapar. GShard
        standardı. Referans: "Outrageously Large Neural Networks" (2017),
        "GShard: Scaling Giant Models" (2020),
        "Switch Transformer" (Fedus et al. 2021).
@@ -19,14 +19,14 @@ MİMARİ:
                      Open/Closed (genişletilebilir),
                      Dependency Inversion (nn.Module abstraction'ına bağımlı)
 - Design Patterns: Expert Pattern (mixture of experts)
-- Endüstri Standartları: GPT-4, Gemini, GShard, Switch Transformer MoE standardı
+- Endüstri Standartları: GShard, Switch Transformer MoE standardı
 
 V8 DEĞİŞİKLİKLERİ:
 - Bug Fix: Load balancing loss formülü düzeltildi (Switch Transformer standardı)
   Eski: num_experts * (p_i^2).sum()  — f_i terimi eksikti
   Yeni: alpha * N * sum(f_i * p_i)  — Fedus et al. 2021 formülü
 - load_balance_alpha parametresi eklendi (varsayılan: 0.01, Switch Transformer)
-- Router jitter noise eklendi (training stabilizasyonu için, GPT-4 standardı)
+- Router jitter noise eklendi 
 - top_k validasyonu eklendi (top_k <= num_experts kontrolü)
 - del dead code kaldırıldı (autograd tensor'larında etkisiz)
 - Dispatch loop vektörleştirildi (k-loop → tek matris çarpımı ile ağırlık hesabı)
@@ -68,7 +68,7 @@ class Router(nn.Module):
     Her token için router logit'lerinden top-k expert seçer ve
     renormalize edilmiş ağırlıklar döndürür.
 
-    Jitter Noise (Switch Transformer / GPT-4):
+    Jitter Noise :
         Eğitim sırasında router logit'lerine küçük uniform gürültü eklenir.
         Routing collapse'ı önler: başlangıçta birkaç güçlü expert'e yığılma
         riski azalır, geri kalan expert'ler de eğitilebilir hale gelir.
@@ -220,13 +220,14 @@ class MixtureOfExperts(nn.Module):
         # [V8] Router jitter noise (0.0 = kapalı; önerilen: 0.01)
         jitter_noise: float = 0.01,
         log_level: int = logging.INFO,
+        use_bias: bool = False,
     ):
         """
         Args:
             embed_dim:          Embedding boyutu (giriş/çıkış)
             ffn_dim:            Her expert FFN'nin iç boyutu
-            num_experts:        Expert sayısı (GPT-4: 8, Gemini: 16)
-            top_k:              Her token için seçilecek expert sayısı (GPT-4: 2)
+            num_experts:        Expert sayısı 
+            top_k:              Her token için seçilecek expert sayısı 
             dropout:            Expert FFN'lerdeki dropout oranı
             activation:         Expert aktivasyon fonksiyonu ("swiglu" | "geglu" | "gelu" | ...)
             load_balance_alpha: Load balancing loss katsayısı.
@@ -282,6 +283,7 @@ class MixtureOfExperts(nn.Module):
                 ffn_dim=ffn_dim,
                 dropout=dropout,
                 activation=activation,
+                use_bias=use_bias,
                 log_level=log_level,
             )
             for _ in range(num_experts)

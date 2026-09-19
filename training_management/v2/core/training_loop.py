@@ -115,15 +115,21 @@ class TrainingLoop:
         
         # Configuration
         self.grad_accum_steps = int(config.get("grad_accum_steps", 1))
+        if self.grad_accum_steps < 1:
+            raise ValueError("grad_accum_steps must be positive")
+        self.optimizer_steps = 0
         self.pad_token_id = config.get("pad_token_id")
-        self.use_amp = bool(config.get("use_amp", False))
+        from training_management.contracts import resolve_precision
+        self.precision = resolve_precision(config, device)
+        self.use_amp = self.precision != "fp32"
+        self.amp_dtype = torch.bfloat16 if self.precision == "bf16" else torch.float16
         self.use_progress_bar = bool(config.get("use_progress_bar", True))
         self.batch_size = int(config.get("batch_size", 1))
         self.seq_len = int(config.get("seq_len", 1))
         
         # AMP setup
         self._amp_device_type = "cuda" if (device.type == "cuda" and torch.cuda.is_available()) else "cpu"
-        if self.use_amp and self._amp_device_type == "cuda":
+        if self.precision == "fp16" and self._amp_device_type == "cuda":
             # ✅ FIX: torch.cuda.amp.GradScaler() deprecated, torch.amp.GradScaler('cuda') kullan
             self.scaler = torch.amp.GradScaler('cuda')
         else:
@@ -191,8 +197,8 @@ class TrainingLoop:
     
     def _autocast_ctx(self):
         """AMP autocast context (CUDA varsa), yoksa no-op."""
-        if self.use_amp and self._amp_device_type == "cuda":
-            return torch.amp.autocast("cuda", enabled=True)
+        if self.use_amp:
+            return torch.amp.autocast(self._amp_device_type, dtype=self.amp_dtype)
         return contextlib.nullcontext()
     
     def _step_scheduler_for_warmup(self):
@@ -204,6 +210,9 @@ class TrainingLoop:
         - ReduceLROnPlateau: Epoch-based (epoch sonunda, metric ile)
         """
         if self.scheduler is None:
+            return
+        if hasattr(self.scheduler, "step_batch"):
+            self.scheduler.step_batch()
             return
         
         # TrainingScheduler'un scheduler attribute'una eriş
@@ -217,11 +226,44 @@ class TrainingLoop:
         # Warmup devam ediyor mu?
         if warmup_wrapper.step_count < warmup_wrapper.warmup_steps:
             # Warmup devam ediyor → batch-based step (metric gerekmez)
-            try:
-                self.scheduler.step()
-            except Exception as e:
-                if self.logger:
-                    self.logger.log_debug(f"[Warmup] Scheduler step error (ignored): {e}")
+            self.scheduler.step()
+
+    def _finish_update(self, token_count):
+        if token_count <= 0:
+            return 0.0
+        if self.scaler is not None:
+            self.scaler.unscale_(self.optimizer)
+        for parameter in self.model.parameters():
+            if parameter.grad is not None:
+                parameter.grad.div_(token_count)
+        finite = all(torch.isfinite(p.grad).all().item() for p in self.model.parameters() if p.grad is not None)
+        if not finite:
+            self.optimizer.zero_grad(set_to_none=True)
+            if self.scaler is not None:
+                self.scaler.update()
+            raise FloatingPointError("Nonfinite gradients: optimizer update aborted")
+        grad_norm = self.gradient_manager.clip_gradients(self.model)
+        if self.scaler is not None:
+            previous_scale = self.scaler.get_scale()
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
+            did_step = self.scaler.get_scale() >= previous_scale
+        else:
+            self.optimizer.step()
+            did_step = True
+        if did_step:
+            self.optimizer_steps += 1
+            self._step_scheduler_for_warmup()
+        self.optimizer.zero_grad(set_to_none=True)
+        return float(grad_norm or 0.0)
+
+    def state_dict(self):
+        return {"optimizer_steps": self.optimizer_steps, "scaler": self.scaler.state_dict() if self.scaler else None}
+
+    def load_state_dict(self, state):
+        self.optimizer_steps = int(state.get("optimizer_steps", 0))
+        if self.scaler is not None and state.get("scaler") is not None:
+            self.scaler.load_state_dict(state["scaler"])
     
     def train_epoch(
         self,
@@ -243,9 +285,11 @@ class TrainingLoop:
         running_loss = 0.0
         running_acc = 0.0
         processed_batches = 0
+        total_tokens = 0
         total_gradient_norm = 0.0
         gradient_norm_batches = 0
         micro = 0  # Gradient accumulation counter
+        accumulation_tokens = 0
         
         total_batches = max(1, len(train_loader))
         
@@ -274,12 +318,12 @@ class TrainingLoop:
                 
                 # Parse batch
                 inputs, targets = self.batch_processor.parse_batch(batch)
-                inputs, targets = inputs.to(self.device), targets.to(self.device)
+                inputs, targets = inputs.to(self.device, non_blocking=True), targets.to(self.device, non_blocking=True)
                 
                 # Forward pass with AMP
                 with self._autocast_ctx():
                     outputs = self.model(inputs)
-                    if isinstance(outputs, tuple):
+                    if isinstance(outputs, (tuple, list)):
                         logits = outputs[0]
                     else:
                         logits = outputs
@@ -296,7 +340,7 @@ class TrainingLoop:
                     except Exception as e:
                         if self.logger:
                             self.logger.log_error(f"Validation error in batch {batch_idx}: {e}")
-                        continue  # Skip invalid batch
+                        raise ValueError("Invalid logits shape") from e
                 
                 # Compute loss (CRITICAL: Uses criterion with EOS weight, label smoothing)
                 loss, acc, ppl = self.loss_computation.compute_loss(
@@ -362,8 +406,23 @@ class TrainingLoop:
                             )
                         continue
                 
-                # Scale loss for gradient accumulation
-                scaled_loss = loss / self.grad_accum_steps
+                from training_management.contracts import consume_model_auxiliary_loss
+                auxiliary_loss = consume_model_auxiliary_loss(self.model)
+                if auxiliary_loss is not None:
+                    if not isinstance(auxiliary_loss, torch.Tensor) or auxiliary_loss.numel() != 1:
+                        raise ValueError("Model auxiliary loss must be a scalar tensor")
+                    loss = loss + auxiliary_loss
+                valid = (targets != -100)
+                if self.pad_token_id is not None:
+                    valid = valid & (targets != self.pad_token_id)
+                valid_tokens = int(valid.sum().item())
+                if valid_tokens == 0:
+                    continue
+                if not torch.isfinite(loss).item():
+                    raise FloatingPointError("Nonfinite training objective")
+                # Sum token objectives, then divide gradients by the actual group size.
+                scaled_loss = loss * valid_tokens
+                accumulation_tokens += valid_tokens
                 
                 # Backward pass with AMP
                 if self.scaler is not None:
@@ -375,53 +434,14 @@ class TrainingLoop:
                 
                 # Gradient accumulation: step only every N batches
                 if micro >= self.grad_accum_steps:
-                    # Unscale gradients (for clipping)
-                    if self.scaler is not None:
-                        self.scaler.unscale_(self.optimizer)
-                    
-                    # Clip gradients
-                    grad_norm = self.gradient_manager.clip_gradients(self.model)
-                    if grad_norm is not None and (grad_norm == grad_norm and abs(grad_norm) != float("inf")):
-                        total_gradient_norm += grad_norm
-                        gradient_norm_batches += 1
-                        
-                        # Analytics: Log gradient summary
-                        if self.training_analytics:
-                            total_grad_norm = self.training_analytics.get_total_gradient_norm()
-                            self.training_analytics.log_gradient_summary(batch_idx, total_grad_norm)
-                            self.training_analytics.log_layer_gradient_stats(batch_idx)
-                        
-                        # Gradient explosion detection (after clipping)
-                        if self.gradient_explosion_detector and grad_norm is not None:
-                            explosion_result = self.gradient_explosion_detector.detect(
-                                model=self.model,
-                                max_grad_norm=self.max_grad_norm
-                            )
-                            if explosion_result["has_explosion"]:
-                                if self.logger:
-                                    self.logger.log_warning(
-                                        f"Batch {batch_idx}: {explosion_result['recommendation']}"
-                                    )
-                    
-                    # Optimizer step with AMP
-                    if self.scaler is not None:
-                        self.scaler.step(self.optimizer)
-                        self.scaler.update()
-                    else:
-                        self.optimizer.step()
-                    
-                    # ✅ YENİ: Warmup için batch-based scheduler step
-                    # Warmup devam ediyorsa scheduler.step() çağır (batch-based)
-                    if self.scheduler is not None:
-                        self._step_scheduler_for_warmup()
-                    
-                    # Analytics: Track weight updates after optimizer step
+                    grad_norm = self._finish_update(accumulation_tokens)
+                    total_gradient_norm += grad_norm
+                    gradient_norm_batches += 1
                     if self.training_analytics:
                         self.training_analytics.track_weight_updates(batch_idx)
-                    
-                    self.optimizer.zero_grad(set_to_none=True)
                     micro = 0
-                
+                    accumulation_tokens = 0
+
                 # Performance tracking: End batch timing
                 if self.performance_tracker:
                     perf_stats = self.performance_tracker.end_batch(
@@ -434,8 +454,9 @@ class TrainingLoop:
                     self.memory_tracker.track()
                 
                 # Accumulate metrics
-                running_loss += float(loss.item())
-                running_acc += float(acc)
+                running_loss += float(loss.item()) * valid_tokens
+                running_acc += float(acc) * valid_tokens
+                total_tokens += valid_tokens
                 processed_batches += 1
                 
                 # Progress bar update — ana model LR (embedding param_groups[0] en düşük olabilir)
@@ -457,24 +478,10 @@ class TrainingLoop:
                     )
                 raise RuntimeError(f"Training stopped at batch {batch_idx}: {e}") from e
         
-        # Handle remaining gradient accumulation
         if micro > 0:
-            if self.scaler is not None:
-                self.scaler.unscale_(self.optimizer)
-            
-            grad_norm = self.gradient_manager.clip_gradients(self.model)
-            if grad_norm is not None and (grad_norm == grad_norm and abs(grad_norm) != float("inf")):
-                total_gradient_norm += grad_norm
-                gradient_norm_batches += 1
-            
-            if self.scaler is not None:
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
-            else:
-                self.optimizer.step()
-            
-            self.optimizer.zero_grad(set_to_none=True)
-        
+            total_gradient_norm += self._finish_update(accumulation_tokens)
+            gradient_norm_batches += 1
+
         # Close progress bar
         if self.use_progress_bar and TQDM_AVAILABLE:
             epoch_pbar.close()
@@ -484,7 +491,9 @@ class TrainingLoop:
             self.training_analytics.log_activation_summary(processed_batches)
         
         # Calculate averages
-        denom = max(1, processed_batches)
+        if total_tokens == 0:
+            raise ValueError("No valid tokens were processed in this epoch")
+        denom = total_tokens
         avg_loss = running_loss / denom
         avg_acc = running_acc / denom
         avg_gradient_norm = total_gradient_norm / gradient_norm_batches if gradient_norm_batches > 0 else 0.0
@@ -548,6 +557,7 @@ class TrainingLoop:
         running_loss = 0.0
         running_acc = 0.0
         processed_batches = 0
+        total_tokens = 0
         
         total_batches = max(1, len(val_loader))
         
@@ -568,12 +578,12 @@ class TrainingLoop:
                 try:
                     # Parse batch
                     inputs, targets = self.batch_processor.parse_batch(batch)
-                    inputs, targets = inputs.to(self.device), targets.to(self.device)
+                    inputs, targets = inputs.to(self.device, non_blocking=True), targets.to(self.device, non_blocking=True)
                     
                     # Forward pass with AMP
                     with self._autocast_ctx():
                         outputs = self.model(inputs)
-                        if isinstance(outputs, tuple):
+                        if isinstance(outputs, (tuple, list)):
                             logits = outputs[0]
                         else:
                             logits = outputs
@@ -590,7 +600,7 @@ class TrainingLoop:
                         except Exception as e:
                             if self.logger:
                                 self.logger.log_error(f"Validation error in val batch {batch_idx}: {e}")
-                            continue  # Skip invalid batch
+                            raise ValueError("Invalid logits shape") from e
                     
                     # Compute loss (CRITICAL: Uses criterion with EOS weight, label smoothing)
                     loss, acc, ppl = self.loss_computation.compute_loss(
@@ -667,8 +677,21 @@ class TrainingLoop:
                         )
                     
                     # Accumulate metrics
-                    running_loss += float(loss.item())
-                    running_acc += float(acc)
+                    valid = targets != -100
+                    if self.pad_token_id is not None:
+                        valid = valid & (targets != self.pad_token_id)
+                    valid_tokens = int(valid.sum().item())
+                    if not valid_tokens:
+                        continue
+                    from training_management.contracts import consume_model_auxiliary_loss
+                    auxiliary_loss = consume_model_auxiliary_loss(self.model)
+                    if auxiliary_loss is not None:
+                        loss = loss + auxiliary_loss
+                    if not torch.isfinite(loss).item():
+                        raise FloatingPointError("Nonfinite validation objective")
+                    running_loss += float(loss.item()) * valid_tokens
+                    running_acc += float(acc) * valid_tokens
+                    total_tokens += valid_tokens
                     processed_batches += 1
                     
                     # Progress bar update
@@ -692,7 +715,9 @@ class TrainingLoop:
             epoch_pbar.close()
         
         # Calculate averages
-        denom = max(1, processed_batches)
+        if total_tokens == 0:
+            raise ValueError("No valid tokens were processed in this epoch")
+        denom = total_tokens
         avg_loss = running_loss / denom
         avg_acc = running_acc / denom
         

@@ -101,37 +101,12 @@ class DataCacheV3:
     # ──────────────────────────────────────────────────────────────────────
 
     def _get_data_dir_hash(self) -> str:
-        """Eğitim verisi dizininin içerik hash'i (dosya adı + boyut)."""
-        if not self.data_dir.exists():
-            return ""
-
-        file_infos = []
-        for ext in [".json", ".txt", ".docx"]:
-            for fp in sorted(self.data_dir.rglob(f"*{ext}")):
-                if fp.is_file():
-                    try:
-                        rel = os.path.relpath(fp, self.data_dir)
-                    except ValueError:
-                        rel = fp.name
-                    file_infos.append(f"{rel}:{fp.stat().st_size}")
-
-        if not file_infos:
-            return ""
-
-        combined = "|".join(sorted(file_infos))
-        return hashlib.md5(combined.encode()).hexdigest()[:16]
+        from training_system.cache_identity import data_directory_digest
+        return data_directory_digest(self.data_dir)
 
     def _get_vocab_hash(self, tokenizer_core) -> str:
-        """Vocab hash (vocab değişirse cache invalid)."""
-        vocab = tokenizer_core.get_vocab()
-        vocab_items = []
-        for token, data in vocab.items():
-            if isinstance(data, dict):
-                vocab_items.append(f"{token}:{data.get('id', 0)}")
-            elif isinstance(data, int):
-                vocab_items.append(f"{token}:{data}")
-        vocab_str = "|".join(sorted(vocab_items))
-        return hashlib.md5(vocab_str.encode()).hexdigest()[:16]
+        from training_system.cache_identity import tokenizer_digest
+        return tokenizer_digest(tokenizer_core)
 
     def _normalize_data_dir(self) -> str:
         """data_dir'ı normalize et (relative path uyumluluğu)."""
@@ -204,7 +179,7 @@ class DataCacheV3:
         checksum_path = self._get_checksum_path(cache_path)
         if not checksum_path.exists():
             logger.debug(f"[CacheV3] Checksum dosyası yok: {checksum_path.name}")
-            return True  # Eski format — checksum yok, geç
+            return not self.strict_mode
 
         saved = checksum_path.read_text().strip()
         actual = self._compute_file_checksum(cache_path)

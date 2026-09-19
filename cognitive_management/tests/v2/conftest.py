@@ -180,7 +180,7 @@ def create_features(
 
 def assert_policy_output_valid(output: PolicyOutput) -> None:
     """Assert that policy output is valid"""
-    assert output.mode in ("direct", "think1", "debate2")
+    assert output.mode in ("direct", "think1", "debate2", "tot")
     assert output.tool in ("none", "maybe", "must")
     assert isinstance(output.decoding, DecodingConfig)
     assert isinstance(output.inner_steps, int)
@@ -190,7 +190,7 @@ def assert_policy_output_valid(output: PolicyOutput) -> None:
 def assert_cognitive_output_valid(output: CognitiveOutput) -> None:
     """Assert that cognitive output is valid"""
     assert isinstance(output.text, str)
-    assert output.used_mode in ("direct", "think1", "debate2")
+    assert output.used_mode in ("direct", "think1", "debate2", "tot")
     assert output.tool_used in (None, "none", "maybe", "must")
     assert isinstance(output.revised_by_critic, bool)
 

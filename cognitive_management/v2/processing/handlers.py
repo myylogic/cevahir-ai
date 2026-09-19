@@ -475,9 +475,25 @@ class ContextBuildingHandler(BaseProcessingHandler):
                 f"[DÜŞÜNCE ADIMI]\n{context.selected_thought.text}"
             )
 
-        # Araç isteği ekle
-        if context.tool_name:
-            context_text = f"{context_text}\n\n[ARAÇ İSTEĞİ] {context.tool_name}"
+        # Report use only after the registered executor has actually succeeded.
+        selected_tool = context.tool_name
+        context.tool_name = None
+        if selected_tool and self.tool_policy:
+            executor = getattr(self.tool_policy, "tool_executor", None)
+            if executor is not None:
+                try:
+                    explicit = context.request.metadata.get("tool_parameters", {})
+                    parameters = explicit.get(selected_tool) if isinstance(explicit, dict) else None
+                    if parameters is None:
+                        parameters = self.tool_policy.infer_tool_parameters(
+                            selected_tool, context.request.user_message, context.features,
+                        )
+                    result = executor.execute(selected_tool, parameters)
+                    context.tool_name = selected_tool
+                    context_text += f"\n\n[ARAÇ SONUCU: {selected_tool}]\n{result}"
+                except Exception as exc:
+                    context.request.metadata["tool_error"] = str(exc)
+                    logger.warning("Tool %s failed: %s", selected_tool, exc)
 
         context.context_text = context_text
         return context

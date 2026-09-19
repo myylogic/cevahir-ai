@@ -185,6 +185,10 @@ class ModelInitializer:
         Returns:
             nn.Module
         """
+        from src.neural_network import CevahirNeuralNetwork
+        if model_class is CevahirNeuralNetwork:
+            from .config_schema import normalize_model_config
+            config = normalize_model_config(config, legacy_profile="model_manager")
         _apply_seed(config)
 
         dev = device or _resolve_device(config)
@@ -204,42 +208,17 @@ class ModelInitializer:
         if "vocab_size" not in ctor_kwargs and "vocab_size" in config:
             ctor_kwargs["vocab_size"] = config["vocab_size"]
         
-        # CevahirNeuralNetwork için eksik parametreleri ekle (default değerlerle)
-        if model_class.__name__ == "CevahirNeuralNetwork":
-            required_params = {
-                "learning_rate": config.get("learning_rate", 1e-3),
-                "dropout": config.get("dropout", 0.1),
-                "embed_dim": config.get("embed_dim", config.get("d_model", 512)),
-                "seq_proj_dim": config.get("seq_proj_dim", config.get("d_model", 512)),
-                "num_heads": config.get("num_heads", config.get("n_heads", 8)),
-            }
-            for param_name, default_value in required_params.items():
-                if param_name not in ctor_kwargs:
-                    ctor_kwargs[param_name] = default_value
-                    initializer_logger.warning(
-                        f"CevahirNeuralNetwork için {param_name} bulunamadı, "
-                        f"default değer kullanılıyor: {default_value}"
-                    )
-
         try:
             initializer_logger.info(f"Model oluşturuluyor: {model_class.__name__} (device={dev})")
             model = model_class(**ctor_kwargs)
             model = model.to(dev)
 
-            # Torch 2.0+ derleme (opsiyonel)
-            if compile_model is None:
-                compile_model = bool(config.get("torch_compile", False))
-            if compile_model and hasattr(torch, "compile"):
-                compile_kwargs = {
-                    "mode": config.get("torch_compile_mode", "default"),
-                    "fullgraph": bool(config.get("torch_compile_fullgraph", False)),
-                    "dynamic": bool(config.get("torch_compile_dynamic", False)),
-                }
-                try:
-                    model = torch.compile(model, **compile_kwargs)  # type: ignore[attr-defined]
-                    initializer_logger.info(f"Model torch.compile ile derlendi: {compile_kwargs}")
-                except Exception as ce:
-                    initializer_logger.warning(f"torch.compile başarısız, derlenmemiş model kullanılacak: {ce}")
+            # Compile the existing callable without changing state_dict key names.
+            from .compilation import configure_compilation
+            compile_config = dict(config)
+            if compile_model is not None:
+                compile_config["torch_compile"] = compile_model
+            model = configure_compilation(model, compile_config)
 
             # ── Gradient Checkpointing ────────────────────────────────────────
             if config.get("use_gradient_checkpointing", False):
@@ -252,7 +231,7 @@ class ModelInitializer:
 
             # ── Quantization (INT8 / INT4) ────────────────────────────────────
             quant_type = str(config.get("quantization_type", "none")).lower()
-            if quant_type in ("int8", "int4"):
+            if model_class is not CevahirNeuralNetwork and quant_type in ("int8", "int4"):
                 model = ModelInitializer._apply_quantization(model, quant_type, config, dev)
 
             # ── DDP / FSDP Sarmalama ─────────────────────────────────────────

@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-14",
+  "passed": 353,
+  "skipped": 2,
+  "failed": 0,
+  "errors": 0,
+  "warnings_reported_by_pytest": 8,
+  "evolution_cases": 107,
+  "scope": "Expanded selected suites, not the complete repository test suite.",
+  "evidence": "benchmarks/results/debt_verification.xml",
+  "benchmark_delta": "benchmarks/results/core_cache_append_delta.json",
+  "source_manifest": "benchmarks/results/debt_source_manifest.json"
+}

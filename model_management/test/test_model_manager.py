@@ -203,7 +203,8 @@ def test_load_full_model_object(mm, tmp_path):
     # Tüm modeli kaydet (module objesi)
     torch.save(mm.model, path)
     mm2 = ModelManager(deepcopy(mm.config), model_class=CevahirNeuralNetwork).initialize()
-    mm2.load(str(path))
+    # This module pickle was created by this test; trust is explicit.
+    mm2.load(str(path), weights_only=False)
     assert isinstance(mm2.model, torch.nn.Module)
 
 

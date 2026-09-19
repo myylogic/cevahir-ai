@@ -153,14 +153,19 @@ class LossComputation:
         
         # Create padding mask
         if pad_id is None:
-            mask = torch.ones_like(targets, dtype=torch.bool)
+            mask = targets != -100
         else:
-            mask = (targets != pad_id)
+            mask = (targets != pad_id) & (targets != -100)
         
         # Apply mask and compute mean loss
         mask_flat = mask.view(-1).float()
         denom = mask_flat.sum().clamp_min(1.0)
         loss = (loss_flat * mask_flat).sum() / denom
+        entropy_coeff = float(getattr(self.criterion, "entropy_coeff", 0.0))
+        if entropy_coeff:
+            log_probs = F.log_softmax(logits_flat, dim=-1)
+            entropy = -(log_probs.exp() * log_probs).sum(dim=-1)
+            loss = loss - entropy_coeff * (entropy * mask_flat).sum() / denom
         
         # Compute accuracy (masked)
         with torch.no_grad():

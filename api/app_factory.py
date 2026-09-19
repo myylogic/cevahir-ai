@@ -10,6 +10,8 @@ Entegre edilen modüller:
 - API Routes (v3)
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import logging
@@ -25,15 +27,14 @@ BASE_DIR = Path(__file__).parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 # Config imports
-from api.api_config import get_config
-from config.parameters import DEVICE, LOGGING_PATH
+from api.api_config import get_config, DEVICE, LOGGING_PATH
+from model_management.config_schema import normalize_model_config
 
 # Database imports
 from database import DatabaseConnection, UnitOfWork
 from database.config import DatabaseConfig
 
 # Cevahir imports
-from model.cevahir import Cevahir, CevahirConfig
 
 # ChattingManagement imports
 from chatting_management import ChattingManager, ChattingConfig
@@ -44,16 +45,13 @@ from api.middleware.security import register_security_middleware
 from api.middleware.request_id import register_request_id_middleware
 from api.monitoring.health import register_health_checks
 from api.monitoring.metrics import register_metrics
-from api.routes.v3 import v3_bp
-from api.routes.v3.chat import init_chat_routes
-from api.routes.v3.sessions import init_session_routes
-from api.routes.v3.users import init_user_routes
+from api.routes.v3 import create_v3_blueprint
 from api.services import ChatService, SessionService, UserService
 
 logger = logging.getLogger(__name__)
 
 
-def create_cevahir_instance() -> Cevahir:
+def create_cevahir_instance(model_overrides=None) -> Cevahir:
     """
     Cevahir instance oluştur.
     
@@ -68,6 +66,15 @@ def create_cevahir_instance() -> Cevahir:
     logger.info("=" * 60)
     
     try:
+        from model.cevahir import Cevahir, CevahirConfig
+        profile = os.getenv("CEVAHIR_MODEL_PROFILE", "default")
+        if profile not in {"default", "legacy_api"}:
+            raise ValueError(f"Unknown CEVAHIR_MODEL_PROFILE: {profile}")
+        # The old API's dimensions remain available as an explicit compatibility preset.
+        overrides = {"embed_dim": 1024, "num_layers": 24, "num_heads": 8,
+                     "ffn_dim": 4096, "max_seq_length": 512} if profile == "legacy_api" else {}
+        overrides.update(model_overrides or {})
+        model_config = normalize_model_config(overrides)
         # Cevahir config
         cevahir_config = CevahirConfig(
             device=os.getenv("CEVAHIR_DEVICE", DEVICE),
@@ -85,25 +92,12 @@ def create_cevahir_instance() -> Cevahir:
                     "data/merges_lib/merges.txt"
                 ),
                 "data_dir": None,  # Inference için gerekli değil
-                "use_gpu": DEVICE == "cuda",
+                "use_gpu": os.getenv("CEVAHIR_DEVICE", DEVICE).startswith("cuda"),
                 "batch_size": 32,
                 "max_unk_ratio": 0.01,
             },
             
-            # Model config (training ile uyumlu olmalı: 48 layers)
-            model={
-                "vocab_size": 60000,
-                "embed_dim": 1024,
-                "num_heads": 8,  # ✅ Training ile uyumlu (8 heads - Colab crash fix)
-                "num_layers": 24,  # ✅ Training ile uyumlu (24 layers)
-                "ff_dim": 4096,
-                "max_seq_length": 512,
-                "dropout": 0.1,
-                "use_rmsnorm": True,
-                "use_swiglu": True,
-                "use_kv_cache": True,
-                "max_cache_len": 2048,
-            },
+            model=model_config,
             
             # Model loading
             load_model_path=os.getenv("CEVAHIR_MODEL_PATH", None),  # None = auto-detect
@@ -194,7 +188,7 @@ def initialize_database():
         raise
 
 
-def create_app() -> Flask:
+def create_app(config_overrides=None, *, cevahir=None, chatting_manager=None, initialize_db=True) -> Flask:
     """
     Flask uygulamasını oluştur ve tüm modülleri entegre et.
     
@@ -211,6 +205,8 @@ def create_app() -> Flask:
     # Config yükle
     config = get_config()
     app.config.from_object(config)
+    if config_overrides:
+        app.config.update(config_overrides)
     
     # CORS (config-based)
     cors_origins = app.config.get("CORS_ORIGINS", ["*"])
@@ -244,7 +240,8 @@ def create_app() -> Flask:
     # 1. DATABASE INITIALIZATION
     # ========================================================================
     try:
-        initialize_database()
+        if initialize_db:
+            initialize_database()
     except Exception as e:
         logger.warning(f"⚠️ Database initialization failed: {e}")
         logger.warning("   Continuing without database (some features may not work)")
@@ -253,7 +250,8 @@ def create_app() -> Flask:
     # 2. CEVAHIR INITIALIZATION
     # ========================================================================
     try:
-        cevahir = create_cevahir_instance()
+        if cevahir is None:
+            cevahir = create_cevahir_instance(app.config.get("CEVAHIR_MODEL_CONFIG"))
         app.cevahir = cevahir  # Flask app'e attach et
         logger.info("✅ Cevahir attached to Flask app")
     except Exception as e:
@@ -265,7 +263,8 @@ def create_app() -> Flask:
     # 3. CHATTING MANAGEMENT INITIALIZATION
     # ========================================================================
     try:
-        chatting_manager = create_chatting_manager(cevahir)
+        if chatting_manager is None:
+            chatting_manager = create_chatting_manager(cevahir)
         app.chatting_manager = chatting_manager  # Flask app'e attach et
         logger.info("✅ ChattingManager attached to Flask app")
     except Exception as e:
@@ -284,6 +283,11 @@ def create_app() -> Flask:
         app.chat_service = chat_service
         app.session_service = session_service
         app.user_service = user_service
+        app.extensions["cevahir_services"] = {
+            "chat_service": chat_service,
+            "session_service": session_service,
+            "user_service": user_service,
+        }
         
         logger.info("✅ Services initialized and attached to Flask app")
     except Exception as e:
@@ -321,13 +325,8 @@ def create_app() -> Flask:
     # 7. API ROUTES (v3)
     # ========================================================================
     try:
-        # Register v3 blueprint
-        app.register_blueprint(v3_bp)
-        
-        # Initialize routes with services
-        init_chat_routes(chat_service)
-        init_session_routes(session_service)
-        init_user_routes(user_service)
+        # Build a fresh, fully configured blueprint for every app instance.
+        app.register_blueprint(create_v3_blueprint(chat_service, session_service, user_service))
         
         logger.info("✅ API routes (v3) registered")
     except Exception as e:

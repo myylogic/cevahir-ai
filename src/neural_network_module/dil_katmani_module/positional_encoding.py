@@ -99,7 +99,7 @@ class PositionalEncoding(nn.Module):
         if not (0.0 <= dropout <= 1.0):
             raise ValueError(f"dropout 0-1 arasında olmalı; gelen={dropout}")
         mode = str(mode).lower()
-        # ✅ V3: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
+        # ✅ V3: RoPE (Rotary Position Embedding) desteği 
         if mode not in {"sinusoidal", "learned", "rope"}:
             raise ValueError("mode 'sinusoidal', 'learned' veya 'rope' olmalıdır.")
 
@@ -169,6 +169,8 @@ class PositionalEncoding(nn.Module):
                     f"head_dim = {embed_dim}/{num_heads} = {embed_dim/num_heads:.2f} (tamsayı olmalı)."
                 )
             self.rope_dim = embed_dim // num_heads  # head_dim (doğru)
+            if self.rope_dim % 2:
+                raise ValueError("RoPE requires an even head dimension")
 
             # [OK] V5: YaRN vs standart RoPE frekans hesaplama
             if rope_scaling_type == "yarn" and rope_scaling_factor > 1.0:
@@ -294,7 +296,7 @@ class PositionalEncoding(nn.Module):
     def _build_rope_freqs(max_len: int, dim: int, base: float = 10000.0) -> torch.Tensor:
         """
         ✅ V3: RoPE (Rotary Position Embedding) frequencies hesaplama
-        Endüstri standardı: GPT-3+, Claude, Gemini
+        Endüstri standardı: Transformer
         
         Args:
             max_len: Maximum sequence length
@@ -361,7 +363,7 @@ class PositionalEncoding(nn.Module):
         self.logger.info(f"PositionalEncoding kapasitesi büyütüldü: max_len={self.max_len}")
 
     # --------------------------- Forward --------------------------- #
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, positions: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         x: [B, T, D]  →  return: x + PE (aynı dtype/device).
         """
@@ -370,6 +372,13 @@ class PositionalEncoding(nn.Module):
         if x.ndim != 3:
             raise ValueError(f"[B,T,D] bekleniyor; gelen şekil={tuple(x.shape)}")
         B, T, D = x.shape
+        if positions is None:
+            positions = torch.arange(T, device=x.device)
+        positions = positions.to(device=x.device, dtype=torch.long)
+        if positions.numel() and int(positions.min()) < 0:
+            raise ValueError("positions must be nonnegative")
+        if positions.numel() and int(positions.max()) >= self.max_len:
+            self._grow_to(int(positions.max()) + 1)
         
         # ✅ JIT tracing/scripting sırasında shape kontrollerini atla (TracerWarning önleme)
         try:
@@ -388,12 +397,12 @@ class PositionalEncoding(nn.Module):
 
         # Device/dtype eşle
         if self.mode == "sinusoidal":
-            pe_slice = self.pe[:, :T, :].to(device=x.device, dtype=x.dtype)  # type: ignore[index]
+            pe_slice = self.pe[0].to(device=x.device, dtype=x.dtype)[positions]
             out = x + pe_slice
         elif self.mode == "learned":
             # learned
             # pos indekslerini doğru cihaza taşı
-            pos_idx = self.pos_idx[:, :T].to(x.device)  # [1, T]
+            pos_idx = positions
             pe_slice = self.pe_embed(pos_idx).to(dtype=x.dtype)  # [1, T, D]  # type: ignore[operator]
             out = x + pe_slice
         else:  # rope
@@ -410,7 +419,7 @@ class PositionalEncoding(nn.Module):
     def apply_rotary_pos_emb(self, x: torch.Tensor, positions: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         ✅ V3: RoPE (Rotary Position Embedding) uygulama
-        Endüstri standardı: GPT-3+, Claude, Gemini
+        Endüstri standardı: Transformer
         
         Args:
             x: [B, T, D] veya [B, H, T, D] - Input tensor (query/key/value)
@@ -422,71 +431,34 @@ class PositionalEncoding(nn.Module):
         if self.mode != "rope":
             raise ValueError(f"apply_rotary_pos_emb sadece 'rope' modunda kullanılabilir, mevcut mod: {self.mode}")
         
-        original_shape = x.shape
-        is_4d = x.ndim == 4
-        if is_4d:
-            # [B, H, T, D] -> [B*H, T, D]
-            B, H, T, D = x.shape
-            x = x.reshape(B * H, T, D)
-        else:
-            # [B, T, D]
-            B, T, D = x.shape
-            H = 1
-        
-        # Position indices
+        if x.ndim not in (3, 4) or x.size(-1) != self.rope_dim:
+            raise ValueError("RoPE input must be [B,T,D] or [B,H,T,D] with D=head_dim")
+        batch, length, dim = x.size(0), x.size(-2), x.size(-1)
         if positions is None:
-            positions = torch.arange(T, device=x.device, dtype=torch.long)  # [T]
-        elif positions.ndim == 2:
-            # [B, T] -> [T] (ilk batch'i al, tüm batch'ler için aynı positions)
-            positions = positions[0]
-        
-        # RoPE frequencies: [max_len, D//2]
-        # Sadece ihtiyacımız olan positions'ları al
-        # ✅ JIT tracing/scripting sırasında max_pos hesaplamasını optimize et (TracerWarning önleme)
-        try:
-            is_tracing = torch._C._get_tracing_state() is not None
-        except (AttributeError, RuntimeError):
-            is_tracing = False
-        
-        if torch.jit.is_scripting() or is_tracing:
-            # JIT tracing için: max_len kullan (dinamik büyütme yok)
-            max_pos = self.max_len
-        else:
-            # Normal mod: max_pos hesapla
-            max_pos = int(positions.max().item()) + 1
-            if max_pos > self.max_len:
-                self._grow_to(max_pos)
-        
-        # RoPE frequencies: [T, D//2]
-        rope_freqs = self.rope_freqs[positions].to(device=x.device, dtype=x.dtype)  # [T, D//2]
-        
-        # ✅ ENDÜSTRİ STANDARDI: RoPE rotation (GPT-3+, Claude, Gemini)
-        # Split x into pairs: [B*H, T, D] -> [B*H, T, D//2, 2]
-        # Her çift (x[2i], x[2i+1]) bir complex number temsil eder
-        x_reshaped = x.reshape(B * H, T, D // 2, 2)  # [B*H, T, D//2, 2]
-        x1, x2 = x_reshaped[..., 0], x_reshaped[..., 1]  # [B*H, T, D//2] each
-        
-        # RoPE rotation: [cos(θ), -sin(θ); sin(θ), cos(θ)] * [x1; x2]
-        # rope_freqs: [T, D//2] -> [1, T, D//2] -> [B*H, T, D//2]
-        cos_freqs = torch.cos(rope_freqs).unsqueeze(0).expand(B * H, T, D // 2)  # [B*H, T, D//2]
-        sin_freqs = torch.sin(rope_freqs).unsqueeze(0).expand(B * H, T, D // 2)  # [B*H, T, D//2]
-        
-        # Rotation matrix multiplication:
-        # [x1_rotated]   [cos(θ)  -sin(θ)] [x1]
-        # [x2_rotated] = [sin(θ)   cos(θ)] [x2]
-        x1_rotated = x1 * cos_freqs - x2 * sin_freqs  # [B*H, T, D//2]
-        x2_rotated = x1 * sin_freqs + x2 * cos_freqs  # [B*H, T, D//2]
-        
-        # Concatenate back: [B*H, T, D//2, 2] -> [B*H, T, D]
-        x_rotated = torch.stack([x1_rotated, x2_rotated], dim=-1)  # [B*H, T, D//2, 2]
-        x_rotated = x_rotated.reshape(B * H, T, D)  # [B*H, T, D]
-        
-        # Reshape back to original
-        if is_4d:
-            # [B*H, T, D] -> [B, H, T, D]
-            x_rotated = x_rotated.reshape(B, H, T, D)
-        
-        return x_rotated
+            positions = torch.arange(length, device=x.device)
+        if positions.dtype not in (torch.int32, torch.int64):
+            raise ValueError("RoPE positions must be integer")
+        positions = positions.to(device=x.device, dtype=torch.long)
+        if positions.ndim == 1:
+            if positions.shape != (length,):
+                raise ValueError("RoPE position count does not match input length")
+            positions = positions.unsqueeze(0).expand(batch, -1)
+        elif positions.shape != (batch, length):
+            raise ValueError("Batched RoPE positions must have shape [B,T]")
+        if length == 0:
+            return x
+        if int(positions.min()) < 0:
+            raise ValueError("RoPE positions must be nonnegative")
+        self._grow_to(int(positions.max()) + 1)
+        # Keep trigonometric reduction in float32 for half-precision inputs.
+        freqs = self.rope_freqs.to(x.device)[positions]
+        cos, sin = freqs.cos().to(x.dtype), freqs.sin().to(x.dtype)
+        if x.ndim == 4:
+            cos, sin = cos.unsqueeze(1), sin.unsqueeze(1)
+        pairs = x.reshape(*x.shape[:-1], dim // 2, 2)
+        first, second = pairs[..., 0], pairs[..., 1]
+        return torch.stack((first * cos - second * sin,
+                            first * sin + second * cos), dim=-1).reshape_as(x)
 
     # ------------------------- Temsil ------------------------- #
     def extra_repr(self) -> str:

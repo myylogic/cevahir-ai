@@ -7,13 +7,13 @@ CEVAHIR-AI PROJESİ
 Dosya: multi_head_attention.py
 Modül: src/neural_network_module/ortak_katman_module/attention_manager_module
 Görev: Multi-Head Attention - Çok başlıklı dikkat mekanizması. KV Cache desteği
-       (GPT-4, Claude, Gemini standardı), Flash Attention 2.0 desteği (opsiyonel),
+       , Flash Attention 2.0 desteği (opsiyonel),
        scaled dot-product attention ve multi-head attention işlemlerini yapar.
 
 MİMARİ:
 - SOLID Prensipleri: Single Responsibility (multi-head attention işlemleri)
 - Design Patterns: Attention Pattern (çok başlıklı dikkat)
-- Endüstri Standartları: GPT-4, Claude, Gemini attention standardı
+- Endüstri Standartları: Transformer attention standardı
 
 KULLANIM:
 - Multi-head attention oluşturmak için
@@ -44,7 +44,7 @@ import sys
 import os
 from typing import Optional, Tuple
 
-# [OK] V4: KV Cache (endüstri standardı: GPT-4, Claude, Gemini)
+# [OK] V4: KV Cache 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
@@ -62,7 +62,7 @@ except ImportError:
     _RMSNorm = None  # type: ignore
     _RMSNORM_AVAILABLE = False
 
-# [OK] V3: Flash Attention 2.0 desteği (endüstri standardı: GPT-4, Claude, Gemini)
+# [OK] V3: Flash Attention 2.0 desteği 
 # Flash Attention opsiyonel dependency - yoksa standard SDPA kullanılır
 try:
     import flash_attn  # type: ignore[reportMissingImports]
@@ -98,16 +98,16 @@ class MultiHeadAttention(nn.Module):
         log_level=None,
         # [OK] V3: Flash Attention 2.0 desteği (endüstri standardı)
         use_flash_attention: bool = False,
-        # [OK] V4: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
+        # [OK] V4: RoPE (Rotary Position Embedding) desteği 
         use_rope: bool = False,
         positional_encoding=None,  # PositionalEncoding modülü referansı (RoPE için)
-        # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
+        # [OK] V4: KV Cache desteği 
         use_kv_cache: bool = False,       # KV Cache kullan (inference için)
         max_cache_len: int = 2048,        # Maximum cache length
         # [V5] StreamingLLM / Attention Sink eviction parametreleri
         kv_eviction_strategy: str = "sliding_window",  # "none" | "sliding_window"
         kv_num_sink_tokens: int = 4,      # Attention sink token sayısı (Xiao et al. 2023)
-        # [OK] V5: GQA (Grouped Query Attention) desteği (endüstri standardı: LLaMA-2/3, Mistral, Gemini)
+        # [OK] V5: GQA (Grouped Query Attention) desteği 
         # num_kv_heads < num_heads: GQA (çoklu query, az KV head)
         # num_kv_heads == 1: MQA (Multi-Query Attention)
         # num_kv_heads == num_heads: standart MHA (default)
@@ -181,7 +181,7 @@ class MultiHeadAttention(nn.Module):
         self.head_dim = embed_dim // num_heads
         self.debug = debug
 
-        # [OK] V5: GQA (Grouped Query Attention) — LLaMA-2/3, Mistral, Gemini standardı
+        # [OK] V5: GQA (Grouped Query Attention) — gruplandırılmış KV başlıkları
         # num_kv_heads == num_heads → standart MHA (geriye dönük uyumluluk)
         # num_kv_heads < num_heads  → GQA (KV cache daha küçük, daha hızlı inference)
         # num_kv_heads == 1         → MQA (en az KV, maksimum hız)
@@ -256,12 +256,12 @@ class MultiHeadAttention(nn.Module):
                 "Standard SDPA kullanılacak. 'pip install flash-attn' ile yükleyebilirsiniz."
             )
         if self.use_flash_attention:
-            self.logger.info("[V3] Flash Attention 2.0 etkinleştirildi (endüstri standardı: GPT-4, Claude, Gemini)")
+            self.logger.info("[V3] Flash Attention 2.0 etkinleştirildi ")
 
         # [OK] Flash Attention dtype uyarısı için flag (sadece bir kez uyarı göster)
         self._flash_attn_dtype_warning_shown = False
 
-        # [OK] V4: RoPE (Rotary Position Embedding) desteği (endüstri standardı: GPT-3+, Claude, Gemini)
+        # [OK] V4: RoPE (Rotary Position Embedding) desteği 
         self.use_rope = use_rope
         self.positional_encoding = positional_encoding
         if use_rope:
@@ -284,9 +284,9 @@ class MultiHeadAttention(nn.Module):
                 )
                 self.use_rope = False
             else:
-                self.logger.info("[V4] RoPE etkinleştirildi (endüstri standardı: GPT-3+, Claude, Gemini)")
+                self.logger.info("[V4] RoPE etkinleştirildi ")
 
-        # [OK] V4: KV Cache desteği (endüstri standardı: GPT-4, Claude, Gemini)
+        # [OK] V4: KV Cache desteği 
         self.use_kv_cache = use_kv_cache
         self.max_cache_len = max_cache_len
         # [V5] StreamingLLM eviction parametreleri (KVCache yapıcısına iletilir)
@@ -377,7 +377,8 @@ class MultiHeadAttention(nn.Module):
           - float: additive maske (engellenen yerlere -inf eklenir)
           - {0,1} float/bool benzeri: 0=engelle -> -inf
         Şekiller:
-          - (tgt_len, src_len)
+          - (tgt_len, src_len); (batch_size, src_len) if batch_size != tgt_len
+          - For ambiguous B == T padding, use (B,1,1,S).
           - (batch_size, tgt_len, src_len)
           - (batch_size, 1/num_heads, tgt_len, src_len) -> yayınlanabilir
         Çıkış: additive float maske (B, H, T, S) ile broadcast edilebilir.
@@ -385,16 +386,20 @@ class MultiHeadAttention(nn.Module):
         m = mask.to(device)
         # (B,L,S) veya (L,S) kabul edelim; (B,1,L,S)/(B,H,L,S) zaten broadcast olur
         if m.dim() == 2:
-            if m.size(0) != tgt_len or m.size(1) != src_len:
+            if m.size(0) == batch_size and batch_size != tgt_len and m.size(1) == src_len:
+                m = m[:, None, None, :]
+            elif m.size(0) == tgt_len and m.size(1) == src_len:
+                m = m.unsqueeze(0).unsqueeze(0)
+            else:
                 raise ValueError(f"attention mask boyutu (L,S)=({tgt_len},{src_len}) beklenir, alındı {tuple(m.shape)}")
-            m = m.unsqueeze(0).unsqueeze(0)  # (1,1,L,S)
         elif m.dim() == 3:
             if m.size(0) != batch_size or m.size(1) != tgt_len or m.size(2) != src_len:
                 raise ValueError(f"attention mask (B,L,S)=({batch_size},{tgt_len},{src_len}) beklenir, alındı {tuple(m.shape)}")
             m = m.unsqueeze(1)  # (B,1,L,S)
         elif m.dim() == 4:
             # (B,1,L,S) ya da (B,H,L,S) ise olduğu gibi bırak
-            if not (m.size(0) == batch_size and m.size(2) == tgt_len and m.size(3) == src_len):
+            if not (m.size(0) in (1, batch_size) and m.size(1) in (1, self.num_heads)
+                    and m.size(2) in (1, tgt_len) and m.size(3) == src_len):
                 raise ValueError(f"attention mask (B,*,L,S) beklenir, alındı {tuple(m.shape)}")
         else:
             raise ValueError(f"attention mask 2D/3D/4D olmalı, alındı: {tuple(m.shape)}")
@@ -407,7 +412,7 @@ class MultiHeadAttention(nn.Module):
             return add
         else:
             # Eğer (0,1) aralığında ise 0 engelle -> -inf
-            if torch.isfinite(m).all() and m.min() >= 0.0 and m.max() <= 1.0:
+            if torch.isfinite(m).all() and m.min() >= 0.0 and 0.0 < m.max() <= 1.0:
                 keep = (m > 0.5)
                 add = torch.zeros_like(m, dtype=torch.float32)
                 add[~keep] = float("-inf")
@@ -446,11 +451,11 @@ class MultiHeadAttention(nn.Module):
             )
 
     # ---------------- Scaled Dot-Product Attention ---------------- #
-    def scaled_dot_product_attention(self, query, key, value, mask=None, temperature=1.0, apply_dropout=True, causal_mask=False):
+    def scaled_dot_product_attention(self, query, key, value, mask=None, temperature=1.0, apply_dropout=True, causal_mask=False, return_attention_weights=True):
         """
         Ölçeklenmiş nokta çarpımı dikkat mekanizması.
         [V6] Routing: use_pytorch_sdpa → F.sdpa → Flash/memory-efficient/math otomatik
-        [OK] V3: Flash Attention 2.0 desteği (endüstri standardı: GPT-4, Claude, Gemini)
+        [OK] V3: Flash Attention 2.0 desteği 
 
         Args:
             query, key, value: (B, H, T, D) - Multi-head format
@@ -469,6 +474,16 @@ class MultiHeadAttention(nn.Module):
 
         # [V6] Feature A: F.scaled_dot_product_attention (PyTorch 2.0+)
         # Flash/memory-efficient/math backend otomatik seçilir; harici bağımlılık yok
+        if temperature <= 0:
+            raise ValueError("attention temperature must be positive")
+        manual_mask = mask
+        if causal_mask and mask is None:
+            rows = torch.arange(query.size(-2), device=query.device)[:, None]
+            cols = torch.arange(key.size(-2), device=query.device)[None, :]
+            if return_attention_weights or not self.use_pytorch_sdpa or self.attn_logit_cap > 0:
+                manual_mask = torch.zeros_like(rows + cols, dtype=query.dtype).masked_fill(cols > rows, float('-inf'))
+        if return_attention_weights or self.attn_logit_cap > 0:
+            return self._standard_sdpa_forward(query, key, value, manual_mask, temperature, apply_dropout)
         if self.use_pytorch_sdpa:
             return self._pytorch_sdpa_forward(query, key, value, mask=mask, temperature=temperature, apply_dropout=apply_dropout, causal_mask=causal_mask)
 
@@ -477,7 +492,7 @@ class MultiHeadAttention(nn.Module):
             return self._flash_attention_forward(query, key, value, mask, temperature, apply_dropout, causal_mask)
 
         # Standard SDPA (geriye dönük uyumluluk)
-        return self._standard_sdpa_forward(query, key, value, mask, temperature, apply_dropout)
+        return self._standard_sdpa_forward(query, key, value, manual_mask, temperature, apply_dropout)
 
     def _pytorch_sdpa_forward(self, query, key, value, mask=None, temperature=1.0, apply_dropout=True, causal_mask=False):
         """
@@ -489,7 +504,7 @@ class MultiHeadAttention(nn.Module):
         """
         dropout_p = self.dropout_rate if (apply_dropout and self.training) else 0.0
         # temperature != 1.0 ise özel scale; aksi halde None → F.sdpa 1/sqrt(D) hesaplar
-        scale = (1.0 / math.sqrt(query.size(-1))) * float(temperature) if temperature != 1.0 else None
+        scale = (1.0 / math.sqrt(query.size(-1))) / float(temperature) if temperature != 1.0 else None
 
         # mask varsa: is_causal=False, attn_mask ile birleştir
         # mask yoksa + causal_mask=True: is_causal=True (Flash backend tam optimize)
@@ -516,19 +531,24 @@ class MultiHeadAttention(nn.Module):
 
     def _flash_attention_forward(self, query, key, value, mask, temperature, apply_dropout, causal_mask):
         """
-        [OK] V3: Flash Attention 2.0 forward pass (endüstri standardı: GPT-4, Claude, Gemini)
+        [OK] V3: Flash Attention 2.0 forward pass 
         Memory-efficient attention: O(n) memory complexity (vs O(n²) standard)
         """
-        # [OK] KRİTİK: Flash Attention sadece fp16/bf16 destekler, float32 desteklemez
+        fallback_mask = mask
+        if causal_mask and fallback_mask is None:
+            rows = torch.arange(query.size(-2), device=query.device)[:, None]
+            cols = torch.arange(key.size(-2), device=query.device)[None, :]
+            fallback_mask = torch.zeros_like(rows + cols, dtype=query.dtype).masked_fill(cols > rows, float('-inf'))
+        # Flash requires a compatible dtype and cannot accept arbitrary masks.
         # Eğer float32 ise, Flash Attention'ı hiç deneme, direkt standard SDPA'ya geç
-        if query.dtype == torch.float32:
+        if query.dtype == torch.float32 or mask is not None:
             if not self._flash_attn_dtype_warning_shown:
                 self.logger.debug(
                     "[V3] Flash Attention atlandı: float32 dtype desteklenmiyor "
                     "(sadece fp16/bf16 desteklenir). Standard SDPA kullanılıyor."
                 )
                 self._flash_attn_dtype_warning_shown = True
-            return self._standard_sdpa_forward(query, key, value, mask, temperature, apply_dropout)
+            return self._standard_sdpa_forward(query, key, value, fallback_mask, temperature, apply_dropout)
 
         B, H, Lq, D = query.shape
         _, _, Lk, _ = key.shape
@@ -541,7 +561,7 @@ class MultiHeadAttention(nn.Module):
 
         # Flash Attention parametreleri
         dropout_p = self.dropout_rate if (apply_dropout and self.training) else 0.0
-        softmax_scale = 1.0 / math.sqrt(D) * float(temperature)
+        softmax_scale = 1.0 / math.sqrt(D) / float(temperature)
 
         # Causal mask: Flash Attention boolean mask kullanır
         is_causal = causal_mask
@@ -588,7 +608,7 @@ class MultiHeadAttention(nn.Module):
             if not self._flash_attn_dtype_warning_shown:
                 self.logger.debug(f"[V3] Flash Attention hatası, standard SDPA'ya geçiliyor: {e}")
                 self._flash_attn_dtype_warning_shown = True
-            return self._standard_sdpa_forward(query, key, value, mask, temperature, apply_dropout)
+            return self._standard_sdpa_forward(query, key, value, fallback_mask, temperature, apply_dropout)
 
     def _standard_sdpa_forward(self, query, key, value, mask, temperature, apply_dropout):
         """
@@ -612,7 +632,9 @@ class MultiHeadAttention(nn.Module):
         scale = math.sqrt(d_k) * float(temperature)
 
         # (B,H,T,D) x (B,H,D,S) -> (B,H,T,S)
-        scores = torch.matmul(query, key.transpose(-2, -1)) / max(scale, 1e-6)
+        work_query = query.float() if query.dtype in (torch.float16, torch.bfloat16) else query
+        work_key = key.float() if key.dtype in (torch.float16, torch.bfloat16) else key
+        scores = torch.matmul(work_query, work_key.transpose(-2, -1)) / scale
 
         # [V6] Feature F: Attention Logit Soft-Cap (Gemma 2 standardı)
         # scores = tanh(scores / cap) * cap → [-cap, cap] aralığına sıkıştır
@@ -624,6 +646,9 @@ class MultiHeadAttention(nn.Module):
         if mask is not None:
             scores = scores + mask  # mask -inf içeriyorsa engeller
 
+        # Fully blocked rows have zero attention, matching PyTorch SDPA.
+        fully_masked = torch.isneginf(scores).all(dim=-1, keepdim=True)
+        scores = scores.masked_fill(fully_masked, 0.0)
         # sayısal kararlılık
         if scores.size(-1) > 0:  # Ensure sequence dimension is not zero
             max_scores, _ = scores.max(dim=-1, keepdim=True)
@@ -634,11 +659,12 @@ class MultiHeadAttention(nn.Module):
         scores = torch.nan_to_num(scores, nan=0.0, posinf=1e9, neginf=-1e9)
 
         attn_weights = F.softmax(scores, dim=-1)
+        attn_weights = attn_weights.masked_fill(fully_masked, 0.0)
 
         if apply_dropout and self.training:
             attn_weights = self.dropout(attn_weights)
 
-        output = torch.matmul(attn_weights, value)
+        output = torch.matmul(attn_weights.to(value.dtype), value)
 
         if self.debug:
             self.logger.debug(
@@ -658,7 +684,7 @@ class MultiHeadAttention(nn.Module):
         causal_mask=False,
         return_attention_weights=False,
         apply_dropout=True,
-        # [OK] V4: KV Cache parametreleri (endüstri standardı: GPT-4, Claude, Gemini)
+        # [OK] V4: KV Cache parametreleri 
         use_cache: bool = False,  # Bu forward'da cache kullan
         cache_position: Optional[torch.Tensor] = None,  # Cache pozisyonları (incremental generation için)
     ):
@@ -681,7 +707,7 @@ class MultiHeadAttention(nn.Module):
             attn_weights (torch.Tensor, optional): (B, H, L, S) - return_attention_weights=True ise
             kv_cache (tuple, optional): (key_cache, value_cache) - use_cache=True ise
         """
-        # [OK] ENDÜSTRİ STANDARDI: Self-attention desteği (GPT-2/3/4, BERT, T5)
+        # [OK] ENDÜSTRİ STANDARDI: Self-attention desteği 
         # Eğer key ve value None ise, query'yi kullan (self-attention)
         if key is None:
             key = query
@@ -714,6 +740,14 @@ class MultiHeadAttention(nn.Module):
         B, Lq, _ = query.size()
         Sk = key.size(1)
         device = query.device
+        cache_active = use_cache and self.use_kv_cache and not self.training
+        if cache_active and self.kv_cache is not None:
+            if (self.kv_cache.batch_size != B or self.kv_cache.device != device):
+                self.kv_cache = None
+        start = self.kv_cache.seen_tokens if cache_active and self.kv_cache is not None else 0
+        query_positions = (cache_position.to(device) if cache_position is not None
+                           else torch.arange(start, start + Lq, device=device))
+        key_positions = query_positions if Sk == Lq else torch.arange(Sk, device=device)
 
         self.logger.debug(
             f"[MHA FORWARD] Input shapes -> Q:{tuple(query.shape)} K:{tuple(key.shape)} V:{tuple(value.shape)}"
@@ -737,6 +771,11 @@ class MultiHeadAttention(nn.Module):
         # Value: (B, Sk, E) -> (B, num_kv_heads, Sk, head_dim)
         value_proj = self.value_proj(value)
         value_proj = value_proj.view(B, -1, self.num_kv_heads, self.head_dim).transpose(1, 2)
+        if cache_active and self.kv_cache is not None and self.kv_cache.dtype != key_proj.dtype:
+            self.kv_cache = None
+            if cache_position is None:
+                query_positions = torch.arange(Lq, device=device)
+                key_positions = torch.arange(Sk, device=device)
         if self.debug:
             self._check_tensor_values("ValueProj", value_proj)
 
@@ -757,17 +796,14 @@ class MultiHeadAttention(nn.Module):
             key_proj   = key_proj.repeat_interleave(self.num_kv_groups, dim=1)
             value_proj = value_proj.repeat_interleave(self.num_kv_groups, dim=1)
 
-        # [OK] V4: RoPE (Rotary Position Embedding) uygulama (endüstri standardı: GPT-3+, Claude, Gemini)
+        # [OK] V4: RoPE (Rotary Position Embedding) uygulama 
         # RoPE query ve key'e uygulanır (value'ya değil); QK-Norm'dan SONRA uygulanır
         if self.use_rope and self.positional_encoding is not None:
-            try:
-                # Query ve key'e RoPE uygula: [B, H, T, D] formatında
-                query_proj = self.positional_encoding.apply_rotary_pos_emb(query_proj)
-                key_proj = self.positional_encoding.apply_rotary_pos_emb(key_proj)
-                if self.debug:
-                    self.logger.debug("[V4] RoPE uygulandı: query_proj ve key_proj")
-            except Exception as e:
-                self.logger.warning(f"[V4] RoPE uygulanırken hata oluştu: {e}. RoPE atlandı.")
+            # Query ve key'e RoPE uygula: [B, H, T, D] formatında
+            query_proj = self.positional_encoding.apply_rotary_pos_emb(query_proj, query_positions)
+            key_proj = self.positional_encoding.apply_rotary_pos_emb(key_proj, key_positions)
+            if self.debug:
+                self.logger.debug("[V4] RoPE uygulandı: query_proj ve key_proj")
 
         # [OK] V4/V5: KV Cache yönetimi — GQA uyumlu (num_kv_heads boyutunda cache)
         kv_cache_output = None
@@ -781,7 +817,7 @@ class MultiHeadAttention(nn.Module):
                     head_dim=self.head_dim,
                     max_cache_len=self.max_cache_len,
                     device=device,
-                    dtype=query.dtype,
+                    dtype=key_proj.dtype,
                     log_level=self.logger.level,
                     # [V5] StreamingLLM parametreleri
                     eviction_strategy=self.kv_eviction_strategy,
@@ -797,6 +833,8 @@ class MultiHeadAttention(nn.Module):
             key_proj_cached, value_proj_cached = self.kv_cache.update(
                 key_proj, value_proj, cache_position
             )
+            key_positions = self.kv_cache.attention_positions
+            Sk = key_proj_cached.size(2)
 
             # [V5 GQA] Cache sonrası expand: num_kv_heads -> num_heads
             if self.num_kv_groups > 1:
@@ -822,31 +860,30 @@ class MultiHeadAttention(nn.Module):
         # [OK] V5: Sliding Window Attention maskesi (Mistral-7B standardı)
         # Her token yalnızca [pos - window + 1, pos] aralığına attend eder
         if self.sliding_window is not None:
-            rows = torch.arange(Lq, device=device, dtype=torch.long).unsqueeze(1)   # (Lq, 1)
-            cols = torch.arange(Sk, device=device, dtype=torch.long).unsqueeze(0)   # (1, Sk)
+            rows = query_positions.unsqueeze(1)
+            cols = key_positions.unsqueeze(0)
             outside_window = (rows - cols) >= self.sliding_window  # (Lq, Sk) bool
             sw_float = torch.where(outside_window, float("-inf"), 0.0)  # (Lq, Sk)
             sw_float = sw_float.unsqueeze(0).unsqueeze(0)  # (1, 1, Lq, Sk) — broadcast
             add_mask = sw_float
 
-        # [OK] YENİ: Causal mask ekle (GPT-2/3/4 standardı)
+        # [OK] YENİ: Causal mask ekle 
         # [V6 OOM FIX] F.sdpa path + sadece causal (padding/sliding_window yok):
         #   is_causal=True kullan → dense [B,H,T,T] tensor oluşturma (Flash backend O(1) bellek)
         #   Eski kod: [B, H, Lq, Sk] × float32 → batch_size=32, seq=512 için ~256 MB gereksiz tahsis
         _skip_dense_causal = (
-            self.use_pytorch_sdpa
+            (self.use_pytorch_sdpa or self.use_flash_attention)
             and causal_mask
             and mask is None            # padding mask yok
             and self.sliding_window is None  # sliding window yok → add_mask=None garantili
+            and not cache_active
+            and self.attn_logit_cap == 0.0
         )
         if causal_mask and not _skip_dense_causal:
             # Dense causal mask — F.sdpa olmayan path veya sliding window + causal birleştirme
             # [V6 OOM FIX] (1, 1, Lq, Sk) broadcast kullan — [B, H, Lq, Sk] materializasyonundan kaçın
             #   Bellek: [1, 1, 512, 512] × 4 bytes = 1 MB  vs.  [32, 8, 512, 512] = 256 MB (256x daha az)
-            causal_mask_tensor = torch.triu(
-                torch.ones(Lq, Sk, device=device, dtype=torch.bool),
-                diagonal=1
-            )  # (Lq, Sk) — True = engelle, False = izin ver
+            causal_mask_tensor = key_positions.unsqueeze(0) > query_positions.unsqueeze(1)
 
             # [OK] ENDÜSTRİ STANDARDI: Boolean mask'i float mask'e çevir (-inf = engelle, 0.0 = izin ver)
             # (1, 1, Lq, Sk) → F.sdpa ve manual SDPA her ikisi broadcast eder
@@ -865,6 +902,12 @@ class MultiHeadAttention(nn.Module):
 
         # Mevcut mask (padding mask vb.) ekle
         if mask is not None:
+            # Callers may pass masks over absolute history after bounded eviction.
+            if mask.size(-1) != Sk and key_positions.numel() and int(key_positions.max()) < mask.size(-1):
+                mask = mask.index_select(-1, key_positions)
+            padding_2d = mask.ndim == 2 and mask.size(0) == B and B != Lq
+            if not padding_2d and mask.size(-2) not in (1, Lq) and query_positions.numel() and int(query_positions.max()) < mask.size(-2):
+                mask = mask.index_select(-2, query_positions)
             mask_prepared = self._prepare_attention_mask(mask, B, Lq, Sk, device)
             if mask_prepared.dim() == 4 and mask_prepared.size(1) == 1:
                 mask_prepared = mask_prepared.expand(B, self.num_heads, Lq, Sk)
@@ -886,10 +929,11 @@ class MultiHeadAttention(nn.Module):
         use_causal_for_sdpa = causal_mask if (self.use_flash_attention and not self.use_pytorch_sdpa) else causal_mask
         attn_output, attn_weights = self.scaled_dot_product_attention(
             query_proj, key_proj, value_proj,
-            mask=add_mask if not (self.use_flash_attention and not self.use_pytorch_sdpa) else None,
+            mask=add_mask,
             temperature=1.0,
             apply_dropout=apply_dropout,
-            causal_mask=use_causal_for_sdpa
+            causal_mask=use_causal_for_sdpa,
+            return_attention_weights=return_attention_weights,
         )
 
         # --- Birleştir, çıkış projeksiyon ---

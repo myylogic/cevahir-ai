@@ -51,6 +51,7 @@ import re
 import time
 import shutil
 import unicodedata
+from collections import Counter
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import torch
@@ -89,6 +90,13 @@ class BPETokenError(Exception):
     pass
 
 
+class TokenizerTextLossError(BPETokenError):
+    """Pretokenization removed non-whitespace characters before UNK accounting."""
+    def __init__(self, dropped_codepoints):
+        self.dropped_codepoints = dict(dropped_codepoints)
+        super().__init__(f"Tokenizer preprocessing drops characters: {self.dropped_codepoints}")
+
+
 class BPEManager(BaseTokenizerManager):
     """
     Orkestrasyon katmanı:
@@ -108,10 +116,21 @@ class BPEManager(BaseTokenizerManager):
         return vf, mf
 
     def __new__(cls, vocab=None, vocab_file=None, merges_file=None, use_gpu=None, config=None):
-        # config parametresi __init__'e geçirilecek, __new__'de kullanılmaz
         vf, mf = cls._resolve_paths(vocab_file, merges_file)
-        # use_gpu None ise key'e None ekle (config'ten alınacak)
-        key = (vf, mf, use_gpu)  # GPU flag'i key'e ekle
+        # Reuse only an identical configuration and explicitly supplied vocabulary.
+        # Different experiments must never inherit the first instance's settings.
+        def freeze(value):
+            if isinstance(value, dict):
+                return tuple(sorted((str(k), freeze(v)) for k, v in value.items()))
+            if isinstance(value, (list, tuple)):
+                return tuple(freeze(v) for v in value)
+            if isinstance(value, (set, frozenset)):
+                return tuple(sorted((freeze(v) for v in value), key=repr))
+            return value
+
+        effective_config = {**BPE_DETAILED_CONFIG, **(config or {})}
+        effective_gpu = effective_config.get("use_gpu", False) if use_gpu is None else use_gpu
+        key = (vf, mf, effective_gpu, freeze(effective_config), freeze(vocab))
         if key in cls._instances:
             return cls._instances[key]
         inst = super().__new__(cls)
@@ -120,12 +139,10 @@ class BPEManager(BaseTokenizerManager):
 
     def __init__(self, vocab: Optional[Dict[str, Any]] = None, vocab_file: Optional[str] = None, merges_file: Optional[str] = None, use_gpu: Optional[bool] = None, config: Optional[Dict[str, Any]] = None):
         self.vocab_file, self.merges_file = self._resolve_paths(vocab_file, merges_file)
-        self._ensure_merges_file()
 
         # Singleton yeniden init edilmesin
         if getattr(self, "_initialized", False):
             return
-        self._initialized = True
         
         # ============================================================================
         # CONFIG MERGE: Detaylı config + override mekanizması
@@ -133,6 +150,12 @@ class BPEManager(BaseTokenizerManager):
         self.config = {**BPE_DETAILED_CONFIG}  # Default: Detaylı config'ten
         if config:
             self.config.update(config)  # Override: Kullanıcı config'i ile
+        if self.config.get("text_loss_policy", "warn") not in {"warn", "error", "ignore"}:
+            raise ValueError("text_loss_policy must be warn, error or ignore")
+        self.read_only = self.config.get("read_only", False)
+        if self.read_only and not os.path.isfile(self.merges_file):
+            raise FileNotFoundError(f"Read-only tokenizer merges not found: {self.merges_file}")
+        self._ensure_merges_file()
         
         # GPU support (config'ten, parametre sadece override için)
         if use_gpu is None:
@@ -142,8 +165,9 @@ class BPEManager(BaseTokenizerManager):
         # Vocab yükle/oluştur
         if vocab is not None:
             self._vocab = normalize_vocab(vocab)
-            os.makedirs(os.path.dirname(self.vocab_file), exist_ok=True)
-            write_json(self.vocab_file, self._vocab)
+            if not self.read_only:
+                os.makedirs(os.path.dirname(self.vocab_file), exist_ok=True)
+                write_json(self.vocab_file, self._vocab)
         else:
             self._ensure_vocab_file()
 
@@ -155,7 +179,7 @@ class BPEManager(BaseTokenizerManager):
         
         # Inference modu: Vocab dosyası mevcutsa VE (read_only=True VEYA vocab parametresi None ise)
         # Bu durumda vocab zaten eğitimde oluşturulmuş, inference modundasak ekleme yapma
-        is_inference_mode = vocab_file_exists and (self.read_only or vocab is None)
+        is_inference_mode = self.read_only or (vocab_file_exists and vocab is None)
         
         # Özel tokenları garantile (vocab yüklendikten sonra, bileşenler başlatılmadan önce)
         if is_inference_mode:
@@ -187,6 +211,7 @@ class BPEManager(BaseTokenizerManager):
             "BPEManager hazır | vocab_file=%s (%d token) | merges_file=%s",
             self.vocab_file, len(self._vocab), self.merges_file
         )
+        self._initialized = True
 
     # ------------------------------- I/O yardımcıları -------------------------------
 
@@ -202,6 +227,8 @@ class BPEManager(BaseTokenizerManager):
             self._vocab = normalize_vocab(raw)
             logger.info("Vocab diskten yüklendi: %s (%d tokens)", self.vocab_file, len(self._vocab))
         except (FileNotFoundError, json.JSONDecodeError):
+            if self.read_only:
+                raise
             logger.warning("Vocab bulunamadı/bozuk → oluşturuluyor: %s", self.vocab_file)
             self._vocab = default_vocab()
             self._write_json(self.vocab_file, self._vocab)
@@ -274,17 +301,17 @@ class BPEManager(BaseTokenizerManager):
     # ----------------------------- Bileşen init/sync -----------------------------
 
     def _initialize_components(self) -> None:
-        self.encoder = BPEEncoder(self._vocab, use_gpu=self.use_gpu)
-        self.decoder = BPEDecoder(self._vocab, use_gpu=self.use_gpu)
-        self.trainer = BPETrainer(self._vocab, use_gpu=self.use_gpu)
+        self.encoder = BPEEncoder(self._vocab, use_gpu=self.use_gpu, config=self.config)
+        self.decoder = BPEDecoder(self._vocab, use_gpu=self.use_gpu, config=self.config)
+        self.trainer = BPETrainer(self._vocab, use_gpu=self.use_gpu, config=self.config)
 
         # Pretokenizer: lowercase config'e göre (case-sensitive için False kullan)
         normalize_lowercase = self.config.get("normalize_lowercase", False)
         lowercase_setting = self.config.get("lowercase", False)  # Default False: büyük/küçük ayrımı korunsun
         self.pretokenizer = Pretokenizer(use_gpu=self.use_gpu, lower=lowercase_setting, config=self.config)
-        self.syllabifier = Syllabifier(use_gpu=self.use_gpu)
-        self.morphology = Morphology()
-        self.postprocessor = Postprocessor()
+        self.syllabifier = Syllabifier(use_gpu=self.use_gpu, config=self.config)
+        self.morphology = Morphology(config=self.config)
+        self.postprocessor = Postprocessor(config=self.config)
 
         logger.info("Bileşenler başlatıldı.")
 
@@ -371,6 +398,16 @@ class BPEManager(BaseTokenizerManager):
 
         # Boşlukları koruyarak tokenize et
         pretokenized = self.pretokenizer.tokenize(cleaned or "")
+        policy = self.config.get("text_loss_policy", "warn")
+        if policy != "ignore":
+            before = Counter(char for char in cleaned if not char.isspace())
+            after = Counter(char for token in pretokenized for char in token if not char.isspace())
+            missing = before - after
+            if missing:
+                codepoints = {f"U+{ord(char):04X}": count for char, count in sorted(missing.items())}
+                if policy == "error":
+                    raise TokenizerTextLossError(codepoints)
+                logger.warning("Tokenizer preprocessing removed characters %s; use text_loss_policy='error' to reject this input", codepoints)
         out: list[str] = []
         
         for i, raw in enumerate(pretokenized):
@@ -492,11 +529,7 @@ class BPEManager(BaseTokenizerManager):
             # Default davranış: Mode'a göre
             # Inference: BOS ekle (model EOS üretir)
             # Train: Ekleme (DataLoader'da eklenecek - autoregressive format için)
-            add_special_tokens = (mode.lower() == "inference")
-        
-        # Config'ten override (eğer varsa)
-        if "add_special_tokens" in self.config:
-            add_special_tokens = self.config.get("add_special_tokens", add_special_tokens)
+            add_special_tokens = self.config.get("add_special_tokens", mode.lower() == "inference")
 
         # ✅ Token listesi oluştur
         tokens: List[str] = []

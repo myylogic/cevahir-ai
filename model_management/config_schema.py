@@ -29,8 +29,14 @@ Telif Hakkı: © 2024 Muhammed Yasin Yılmaz. Tüm Hakları Saklıdır.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, asdict, fields
 from typing import Any, Dict, List, Optional
+from copy import deepcopy
+import warnings
+
+CONFIG_VERSION = 1
+ARCHITECTURE_VERSION = "cevahir-capabilities-1"
+LEGACY_PROFILES = {"model_manager": {"num_layers": 12}}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -44,13 +50,16 @@ class _SchemaBase:
         return asdict(self)  # type: ignore[arg-type]
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "_SchemaBase":
+    def from_dict(cls, d: Dict[str, Any], *, strict: bool = False) -> "_SchemaBase":
         """
         Dict'ten örnek oluşturur; bilinmeyen anahtarlar sessizce atlanır
         (geriye dönük uyumluluk için).
         """
         import dataclasses
         known = {f.name for f in dataclasses.fields(cls)}  # type: ignore[arg-type]
+        unknown = set(d) - known
+        if unknown and strict:
+            raise ValueError(f"Unknown {cls.__name__} fields: {sorted(unknown)}")
         filtered = {k: v for k, v in d.items() if k in known}
         return cls(**filtered)  # type: ignore[call-arg]
 
@@ -97,7 +106,7 @@ class ModelArchConfig(_SchemaBase):
     """Pre-norm (GPT-2/3 tarzı) vs post-norm (BERT tarzı)."""
 
     use_rmsnorm: bool = True
-    """RMSNorm: LayerNorm'a göre ~%10 hızlı, stabilite benzer."""
+    """RMSNorm: RMS tabanlı normalizasyon; hız ve stabilite ölçüm gerektirir."""
 
     use_swiglu: bool = True
     """SwiGLU aktivasyonu (LLaMA / PaLM standardı)."""
@@ -106,14 +115,14 @@ class ModelArchConfig(_SchemaBase):
     causal_mask: bool = True
     """Autoregressive (GPT) eğitimi için causal masking."""
 
-    use_flash_attention: bool = True
-    """Flash Attention 2.0 — bellek O(N) ve 2-3x hız."""
+    use_flash_attention: bool = False
+    """Opsiyonel harici Flash Attention; kullanılabilirlik donanım ve bağımlılığa bağlıdır."""
 
     num_kv_heads: Optional[int] = None
     """
     GQA (Grouped Query Attention) KV head sayısı.
     None → standart MHA (num_kv_heads = num_heads).
-    2    → %75 KV cache azalması (LLaMA-2/3 standardı).
+    num_heads=8 ve num_kv_heads=2 için KV tensörleri dörtte bir boyuttadır.
     """
 
     sliding_window: Optional[int] = None
@@ -146,12 +155,12 @@ class ModelArchConfig(_SchemaBase):
     use_gradient_checkpointing: bool = True
     """
     Gradient Checkpointing: aktivasyonları yeniden hesaplar.
-    ~%30-40 bellek tasarrufu, ~%20-30 yavaşlama.
+    Bellek ve süre etkisi model, girdi ve donanıma göre ölçülmelidir.
     """
 
     # ── Mixture of Experts ───────────────────────────────────────────────────
     use_moe: bool = False
-    """MoE FFN bloğu etkin mi? (GPT-4 / Mixtral standardı)."""
+    """MoE FFN bloğu etkin mi? ."""
 
     num_experts: int = 8
     """MoE expert sayısı. use_moe=True iken etkin."""
@@ -172,8 +181,25 @@ class ModelArchConfig(_SchemaBase):
     seq_proj_dim: Optional[int] = None
     """
     Output projeksiyon boyutu. None → embed_dim ile aynı.
-    tie_weights=True için seq_proj_dim == embed_dim zorunlu.
+    Eski uyumluluk alanı; farklıysa çekirdek weight tying seçimini kapatır.
+    Katmanlar embed_dim kullanır; bağımsız projeksiyon oluşturulmaz.
     """
+
+    # These capabilities already exist in the core; persist them in the schema.
+    use_pytorch_sdpa: bool = True
+    use_qk_norm: bool = False
+    parallel_residual: bool = False
+    logit_soft_cap: float = 30.0
+    attn_logit_cap: float = 0.0
+    drop_path_rate: float = 0.0
+    use_advanced_checkpointing: bool = False
+    checkpointing_strategy: str = "selective"
+    pe_dropout: float = 0.0
+    rope_original_max_len: int = 2048
+    kv_eviction_strategy: str = "sliding_window"
+    kv_num_sink_tokens: int = 4
+    moe_jitter_noise: float = 0.01
+    moe_load_balance_alpha: float = 0.01
 
     def validate(self) -> None:
         errors: List[str] = []
@@ -182,7 +208,7 @@ class ModelArchConfig(_SchemaBase):
             errors.append(f"embed_dim pozitif olmalı, gelen: {self.embed_dim}")
         if self.num_heads <= 0:
             errors.append(f"num_heads pozitif olmalı, gelen: {self.num_heads}")
-        if self.embed_dim % self.num_heads != 0:
+        if self.num_heads > 0 and self.embed_dim % self.num_heads != 0:
             errors.append(
                 f"embed_dim ({self.embed_dim}) % num_heads ({self.num_heads}) != 0; "
                 f"head_dim = {self.embed_dim}/{self.num_heads} tam sayı olmalı"
@@ -198,27 +224,45 @@ class ModelArchConfig(_SchemaBase):
         if self.num_kv_heads is not None:
             if self.num_kv_heads <= 0:
                 errors.append(f"num_kv_heads pozitif olmalı, gelen: {self.num_kv_heads}")
-            if self.num_heads % self.num_kv_heads != 0:
+            if self.num_kv_heads > 0 and self.num_heads % self.num_kv_heads != 0:
                 errors.append(
                     f"num_heads ({self.num_heads}) % num_kv_heads ({self.num_kv_heads}) != 0"
                 )
-        if self.tie_weights:
-            seq_proj = self.seq_proj_dim if self.seq_proj_dim is not None else self.embed_dim
-            if seq_proj != self.embed_dim:
-                errors.append(
-                    f"tie_weights=True gerektirir seq_proj_dim == embed_dim "
-                    f"({seq_proj} != {self.embed_dim})"
-                )
-        if self.use_moe and self.moe_top_k > self.num_experts:
+        # seq_proj_dim is retained for legacy config/checkpoint roundtrips.
+        # The current core projects directly from embed_dim; it does not use this
+        # historical field to size either tied or untied output weights.
+        if self.use_moe and (self.num_experts <= 0 or self.moe_top_k <= 0 or self.moe_top_k > self.num_experts):
             errors.append(
                 f"moe_top_k ({self.moe_top_k}) > num_experts ({self.num_experts})"
             )
-        if self.quantization_type not in ("none", "int8", "int4"):
+        if self.quantization_type not in ("none", "int8", "fp16", "bf16", "int8_dynamic"):
             errors.append(f"quantization_type geçersiz: {self.quantization_type!r}")
+        if self.checkpointing_strategy not in ("selective", "layer_wise", "adaptive"):
+            errors.append("Invalid checkpointing strategy")
         if self.pe_mode not in ("rope", "sinusoidal", "learned"):
             errors.append(f"pe_mode geçersiz: {self.pe_mode!r}")
         if self.rope_scaling_type not in ("none", "yarn", "linear"):
             errors.append(f"rope_scaling_type geçersiz: {self.rope_scaling_type!r}")
+        if self.max_seq_length <= 0 or self.max_cache_len <= 0:
+            errors.append("Sequence and cache lengths must be positive")
+        if self.ffn_dim is not None and self.ffn_dim <= 0:
+            errors.append("ffn_dim must be positive")
+        if self.seq_proj_dim is not None and self.seq_proj_dim <= 0:
+            errors.append("seq_proj_dim must be positive")
+        if self.sliding_window is not None and self.sliding_window <= 0:
+            errors.append("sliding_window must be positive or None")
+        if not 0 <= self.drop_path_rate < 1 or not 0 <= self.pe_dropout < 1:
+            errors.append("Drop probabilities must be in [0, 1)")
+        if self.attn_logit_cap < 0 or self.logit_soft_cap < 0:
+            errors.append("Logit caps must be non-negative")
+        if self.kv_eviction_strategy not in ("none", "sliding_window"):
+            errors.append("Invalid KV eviction strategy")
+        if not 0 <= self.kv_num_sink_tokens < self.max_cache_len:
+            errors.append("kv_num_sink_tokens must be in [0, max_cache_len)")
+        if self.num_heads > 0 and self.pe_mode == "rope" and (self.embed_dim // self.num_heads) % 2:
+            errors.append("RoPE requires an even head dimension")
+        if self.moe_jitter_noise < 0 or self.moe_load_balance_alpha < 0:
+            errors.append("MoE jitter and auxiliary loss coefficient must be non-negative")
 
         if errors:
             raise ValueError(
@@ -233,8 +277,9 @@ class ModelArchConfig(_SchemaBase):
 
     @property
     def effective_ffn_dim(self) -> int:
-        """Gerçek FFN ara boyutu (None ise 4×embed_dim)."""
-        return self.ffn_dim if self.ffn_dim is not None else 4 * self.embed_dim
+        """Decoder ile aynı etkin FFN genişliği; açık boyut korunur."""
+        from src.neural_network_module.architecture_contracts import resolve_ffn_dim
+        return resolve_ffn_dim(self.embed_dim, self.ffn_dim, gated=self.use_swiglu)
 
     @property
     def parameter_count_estimate(self) -> int:
@@ -248,12 +293,15 @@ class ModelArchConfig(_SchemaBase):
         F = self.effective_ffn_dim
 
         embedding = V * D
-        attention = L * (4 * D * D)     # Q, K, V, O projeksiyon
+        kv_dim = (self.num_kv_heads or self.num_heads) * self.head_dim
+        attention = L * (2 * D * D + 2 * D * kv_dim)
         ffn_mult = self.num_experts if self.use_moe else 1
-        ffn = L * (2 * D * F) * ffn_mult  # FFN (SwiGLU için 2 matris)
+        ffn = L * ((3 if self.use_swiglu else 2) * D * F) * ffn_mult
+        router = L * D * self.num_experts if self.use_moe else 0
         norms = L * 2 * D               # RMSNorm/LayerNorm
-        output = 0 if self.tie_weights else V * D
-        return embedding + attention + ffn + norms + output
+        tied = self.tie_weights and self.seq_proj_dim in (None, D)
+        output = 0 if tied else V * D
+        return embedding + attention + ffn + norms + output + router
 
     def __repr__(self) -> str:
         return (
@@ -282,7 +330,7 @@ class TrainingConfig(_SchemaBase):
     gradient_clip: float = 1.0
     warmup_steps: int = 1500
     warmup_epochs: int = 1
-    optimizer: str = "adamw8bit"
+    optimizer: str = "adamw"
     """'adamw' | 'adamw8bit' | 'adam' | 'radam' | 'sgd'"""
 
     scheduler_type: str = "reduce_on_plateau"
@@ -290,11 +338,12 @@ class TrainingConfig(_SchemaBase):
     lr_decay_patience: int = 15
     lr_min: float = 1e-6
     seed: int = 42
-    device: str = "cuda"
+    device: str = "cpu"
     use_amp: bool = True
     use_gradient_checkpointing: bool = True
-    use_ema: bool = True
+    use_ema: bool = False
     ema_decay: float = 0.999
+    precision: str = "auto"
 
     def validate(self) -> None:
         errors: List[str] = []
@@ -304,6 +353,8 @@ class TrainingConfig(_SchemaBase):
             errors.append(f"batch_size pozitif olmalı: {self.batch_size}")
         if self.grad_accum_steps <= 0:
             errors.append(f"grad_accum_steps pozitif olmalı: {self.grad_accum_steps}")
+        if self.precision not in ("auto", "fp32", "fp16", "bf16"):
+            errors.append(f"Unsupported precision: {self.precision}")
         if not (0.0 <= self.dropout < 1.0):
             errors.append(f"dropout [0,1) olmalı: {self.dropout}")
         if self.optimizer not in ("adamw", "adamw8bit", "adamw_8bit", "adam", "radam", "sgd", "rmsprop"):
@@ -415,10 +466,10 @@ class QuantConfig(_SchemaBase):
     """Double quantization → ek ~0.4 bit/parametre tasarrufu."""
 
     def validate(self) -> None:
-        if self.quant_type not in ("none", "int8", "int4"):
+        if self.quant_type not in ("none", "int8", "fp16", "bf16", "int8_dynamic"):
             raise ValueError(f"Geçersiz quant_type: {self.quant_type!r}")
-        if self.load_in_8bit and self.load_in_4bit:
-            raise ValueError("load_in_8bit ve load_in_4bit aynı anda True olamaz.")
+        if self.load_in_8bit or self.load_in_4bit:
+            raise ValueError("bitsandbytes loading flags are not integrated with the Cevahir core; use explicit apply_quantization().")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -440,6 +491,9 @@ class CevahirConfig(_SchemaBase):
     checkpoint: CheckpointConfig = field(default_factory=CheckpointConfig)
     distributed: DistributedConfig = field(default_factory=DistributedConfig)
     quant: QuantConfig = field(default_factory=QuantConfig)
+    config_version: int = CONFIG_VERSION
+    architecture_version: str = ARCHITECTURE_VERSION
+    extras: Dict[str, Any] = field(default_factory=dict)
 
     def validate_all(self) -> None:
         """Tüm alt konfigürasyonları doğrular. İlk hata anında durur."""
@@ -451,12 +505,33 @@ class CevahirConfig(_SchemaBase):
 
     def to_dict(self) -> Dict[str, Any]:
         return {
+            "config_version": self.config_version,
+            "architecture_version": self.architecture_version,
             "arch": self.arch.to_dict(),
             "training": self.training.to_dict(),
             "checkpoint": self.checkpoint.to_dict(),
             "distributed": self.distributed.to_dict(),
             "quant": self.quant.to_dict(),
+            "extras": deepcopy(self.extras),
         }
+
+    @classmethod
+    def from_dict(cls, d: Dict[str, Any], *, strict: bool = False) -> "CevahirConfig":
+        _check_config_version(d)
+        if "arch" not in d:
+            return cls.from_flat_dict(d)
+        known = {f.name for f in fields(cls)}
+        unknown = set(d) - known
+        if unknown and strict:
+            raise ValueError(f"Unknown configuration sections: {sorted(unknown)}")
+        return cls(
+            arch=ModelArchConfig.from_dict(d.get("arch", {}), strict=strict),
+            training=TrainingConfig.from_dict(d.get("training", {}), strict=strict),
+            checkpoint=CheckpointConfig.from_dict(d.get("checkpoint", {}), strict=strict),
+            distributed=DistributedConfig.from_dict(d.get("distributed", {}), strict=strict),
+            quant=QuantConfig.from_dict(d.get("quant", {}), strict=strict),
+            extras={**deepcopy(d.get("extras", {})), **{k: deepcopy(d[k]) for k in unknown}},
+        )
 
     @classmethod
     def from_flat_dict(cls, d: Dict[str, Any]) -> "CevahirConfig":
@@ -464,12 +539,20 @@ class CevahirConfig(_SchemaBase):
         train.py'deki düz TRAIN_CONFIG sözlüğünden CevahirConfig oluşturur.
         Bilinmeyen anahtarlar atlanır.
         """
+        d = normalize_model_config(d)
+        schema_types = (ModelArchConfig, TrainingConfig, CheckpointConfig, DistributedConfig, QuantConfig)
+        known = {f.name for t in schema_types for f in fields(t)} | {"config_version", "architecture_version"}
+        distributed = DistributedConfig.from_dict(d)
+        if "distributed_strategy" in d:
+            distributed.strategy = d["distributed_strategy"]
+            distributed.enabled = distributed.strategy != "none"
         return cls(
-            arch=ModelArchConfig.from_dict(d),    # type: ignore[return-value]
-            training=TrainingConfig.from_dict(d),  # type: ignore[return-value]
-            checkpoint=CheckpointConfig.from_dict(d),  # type: ignore[return-value]
-            distributed=DistributedConfig.from_dict(d),  # type: ignore[return-value]
-            quant=QuantConfig.from_dict(d),        # type: ignore[return-value]
+            arch=ModelArchConfig.from_dict(d),
+            training=TrainingConfig.from_dict(d),
+            checkpoint=CheckpointConfig.from_dict(d),
+            distributed=distributed,
+            quant=QuantConfig.from_dict({**d, "quant_type": d["quantization_type"]}),
+            extras={k: deepcopy(v) for k, v in d.items() if k not in known},
         )
 
     def validate(self) -> None:
@@ -484,3 +567,101 @@ class CevahirConfig(_SchemaBase):
             f"  quant={self.quant!r}\n"
             f")"
         )
+
+
+def _check_config_version(config: Dict[str, Any]) -> int:
+    version = config.get("config_version", 0)
+    if not isinstance(version, int) or isinstance(version, bool) or version not in (0, CONFIG_VERSION):
+        raise ValueError(f"Unsupported config_version {version!r}; supported versions: 0, {CONFIG_VERSION}")
+    return version
+
+
+def normalize_model_config(config: Optional[Dict[str, Any]] = None, *, strict: bool = False, legacy_profile: Optional[str] = None) -> Dict[str, Any]:
+    """Migrate legacy flat/nested settings without mutating them or dropping extras.
+
+    Explicit legacy dimensions win over defaults. Conflicting aliases raise rather
+    than silently building a checkpoint-incompatible network. Version 0 is the
+    unversioned legacy mapping; version 1 names the capability schema, not weights.
+    """
+    incoming = deepcopy(dict(config or {}))
+    _check_config_version(incoming)
+    data = deepcopy(incoming.get("extras", {}))
+    if not isinstance(data, dict):
+        raise ValueError("extras must be a mapping")
+    for section in ("arch", "model", "training", "checkpoint"):
+        if section in incoming:
+            if not isinstance(incoming[section], dict):
+                raise ValueError(f"{section} must be a mapping")
+            for key, value in incoming[section].items():
+                if key in data and data[key] != value:
+                    raise ValueError(f"Conflicting configuration value: {key}")
+                data[key] = value
+    for key, value in incoming.items():
+        if key not in ("arch", "model", "training", "checkpoint", "extras", "distributed", "quant", "compile"):
+            if key in data and data[key] != value:
+                raise ValueError(f"Conflicting flat/nested configuration value: {key}")
+            data[key] = value
+    aliases = {"d_model": "embed_dim", "n_heads": "num_heads", "n_layers": "num_layers", "ff_dim": "ffn_dim", "drop_rate": "dropout", "pe_max_len": "max_seq_length"}
+    for old, new in aliases.items():
+        if old in data:
+            if new in data and data[new] != data[old]:
+                raise ValueError(f"Conflicting aliases {old} and {new}")
+            data[new] = data.pop(old)
+    compile_cfg = incoming.get("compile", {})
+    if compile_cfg:
+        for key in ("enabled", "mode", "dynamic", "fullgraph"):
+            if key in compile_cfg:
+                target = "torch_compile" if key == "enabled" else f"torch_compile_{key}"
+                if target in data and data[target] != compile_cfg[key]:
+                    raise ValueError(f"Conflicting compile setting {key}")
+                data[target] = compile_cfg[key]
+    dist = incoming.get("distributed", {})
+    if dist:
+        strategy = dist.get("strategy", "none") if dist.get("enabled", False) else "none"
+        if "distributed_strategy" in data and data["distributed_strategy"] != strategy:
+            raise ValueError("Conflicting distributed strategy")
+        data["distributed_strategy"] = strategy
+        for key, value in dist.items():
+            if key not in ("enabled", "strategy"):
+                data["distributed_backend" if key == "backend" else key] = value
+    quant = incoming.get("quant", {})
+    if quant:
+        for key, value in quant.items():
+            target = "quantization_type" if key == "quant_type" else key
+            if target in data and data[target] != value:
+                raise ValueError(f"Conflicting quantization setting {key}")
+            data[target] = value
+    known = {f.name for t in (ModelArchConfig, TrainingConfig, CheckpointConfig, DistributedConfig, QuantConfig) for f in fields(t)}
+    if "quant_type" in data:
+        if "quantization_type" in data and data["quantization_type"] != data["quant_type"]:
+            raise ValueError("Conflicting quantization type aliases")
+        data["quantization_type"] = data.pop("quant_type")
+    if data.get("load_in_8bit") or data.get("load_in_4bit"):
+        raise ValueError("bitsandbytes loading flags are not integrated with the Cevahir core")
+    known |= {"config_version", "architecture_version", "torch_compile", "torch_compile_mode", "torch_compile_dynamic", "torch_compile_fullgraph", "distributed_strategy", "distributed_backend", "log_level", "use_tensorboard", "attention_type", "normalization_type"}
+    if strict and set(data) - known:
+        raise ValueError(f"Unknown configuration fields: {sorted(set(data) - known)}")
+    result = ModelArchConfig().to_dict()
+    if legacy_profile is not None and incoming.get("config_version", 0) == 0:
+        if legacy_profile not in LEGACY_PROFILES:
+            raise ValueError(f"Unknown legacy profile: {legacy_profile}")
+        result.update(LEGACY_PROFILES[legacy_profile])
+    result.update(data)
+    result["seq_proj_dim"] = result["embed_dim"] if result.get("seq_proj_dim") is None else result["seq_proj_dim"]
+    result["pe_max_len"] = result["max_seq_length"]
+    result.setdefault("learning_rate", TrainingConfig().learning_rate)
+    result.setdefault("precision", TrainingConfig().precision)
+    result["config_version"] = CONFIG_VERSION
+    result["architecture_version"] = ARCHITECTURE_VERSION
+    ModelArchConfig.from_dict(result).validate()
+    return result
+
+
+def tiny_model_config(**overrides: Any) -> Dict[str, Any]:
+    """CPU-sized preset for contract tests; no language-quality claim."""
+    return normalize_model_config({
+        "vocab_size": 128, "embed_dim": 32, "num_heads": 4, "num_layers": 2,
+        "ffn_dim": 64, "dropout": 0.0, "max_seq_length": 64, "max_cache_len": 64,
+        "use_gradient_checkpointing": False, "device": "cpu", "log_level": 50,
+        **overrides,
+    })

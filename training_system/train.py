@@ -268,7 +268,8 @@ def load_tokenizer_config() -> Dict[str, Any]:
         return {}
 def normalize_config(cfg: Dict[str, Any]) -> Dict[str, Any]:
     """Eğitim/Logger/TB alanlarını tek yerde normalize et."""
-    out = dict(cfg)
+    from model_management.config_schema import normalize_model_config
+    out = normalize_model_config(cfg)
     # Config'ten BPE ve tokenizer ayarlarını yükle
     tokenizer_config = load_tokenizer_config()
     if tokenizer_config:
@@ -459,7 +460,9 @@ TRAIN_CONFIG: Dict[str, Any] = {
     "skip_tb_graph_logging": False,  # A100'de açılabilir
     "skip_tb_data_dashboard": False,  # A100'de açılabilir
     # === TrainingManager Özellikleri ===
-    "use_amp": True,  # Mixed precision training - A100'de 2x hız artışı sağlar
+    "training_backend": "v2",  # Supported optimization backend; V3 handles cached data.
+    "precision": "auto",  # CUDA capability selects bf16/fp16; CPU uses fp32.
+    "use_amp": True,
     "enable_advanced_metrics": False,  #  KAPALI: Advanced metrics RAM'i patlatıyor (validation sırasında OOM)
     # NOT: Advanced metrics tüm predictions/targets'ı RAM'de topluyor, 319 batch için çok fazla memory kullanıyor
     "enable_memory_tracking": True,  # Memory usage tracking
@@ -573,13 +576,13 @@ TRAIN_CONFIG: Dict[str, Any] = {
     "aux_loss_weight": 0.01,         # MoE/MoD auxiliary loss ağırlığı (MoE aktifse devreye girer)
 
     # --- Exposure Bias: Scheduled Sampling (Bengio et al. 2015) ---
-    "use_scheduled_sampling": True,  # Teacher forcing → kendi tahminleri geçişi
+    "use_scheduled_sampling": False,  # Teacher forcing → kendi tahminleri geçişi
     "ss_start_epoch": 10,            # Kaçıncı epoch'ta scheduled sampling başlasın
     "ss_decay_rate": 0.05,           # Her epoch teacher forcing oranı bu kadar düşer
     "min_teacher_forcing": 0.3,      # Teacher forcing oranı bu değerin altına düşmez
 
     # --- EMA Ağırlıkları (Yazici et al. 2019) ---
-    "use_ema": True,                 # Exponential Moving Average ağırlıkları aktif
+    "use_ema": False,                 # Exponential Moving Average ağırlıkları aktif
     "ema_decay": 0.999,              # EMA bozunum faktörü (0.999 önerilen)
 
     # --- SAM Optimizer (Foret et al. 2021) ---
@@ -750,7 +753,7 @@ def main() -> None:
                 **effective_cfg,
                 "model_module": "src.neural_network",
                 "model_class":  "CevahirNeuralNetwork",
-                "use_v3_training": True,
+                "training_backend": "v2",
             })
 
             # Eğitim V3
@@ -770,7 +773,7 @@ def main() -> None:
                 **effective_cfg,
                 "model_module": "src.neural_network",
                 "model_class":  "CevahirNeuralNetwork",
-                "use_v3_training": _V3_AVAILABLE,
+                "training_backend": "v2",
             })
 
             # Koşu özeti (V2)

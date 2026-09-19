@@ -13,12 +13,13 @@ from api.middleware.validator import validate_request
 from api.utils import success_response, error_response
 from api.services.chat_service import ChatService
 from api.utils.exceptions import ValidationError
+from chatting_management.exceptions import SessionNotFoundError, SessionAccessDeniedError, InvalidMessageError
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def init_chat_routes(chat_service: ChatService):
+def init_chat_routes(chat_service: ChatService, blueprint=None):
     """
     Initialize chat routes with service.
     
@@ -26,7 +27,8 @@ def init_chat_routes(chat_service: ChatService):
         chat_service: ChatService instance
     """
     
-    @v3_bp.route('/chat/messages', methods=['POST'])
+    blueprint = blueprint if blueprint is not None else v3_bp
+    @blueprint.route('/chat/messages', methods=['POST'])
     @require_auth
     def send_message():
         """
@@ -81,6 +83,12 @@ def init_chat_routes(chat_service: ChatService):
                 status_code=400,
                 details=getattr(e, 'details', {})
             )
+        except SessionAccessDeniedError:
+            return error_response(error_code="ACCESS_DENIED", message="Session access denied", status_code=403)
+        except SessionNotFoundError:
+            return error_response(error_code="NOT_FOUND", message="Session not found", status_code=404)
+        except InvalidMessageError:
+            return error_response(error_code="VALIDATION_ERROR", message="Invalid message", status_code=400)
         except Exception as e:
             logger.error(f"Error in send_message: {e}", exc_info=True)
             return error_response(
@@ -89,7 +97,7 @@ def init_chat_routes(chat_service: ChatService):
                 status_code=500
             )
     
-    @v3_bp.route('/chat/messages', methods=['GET'])
+    @blueprint.route('/chat/messages', methods=['GET'])
     @require_auth
     def get_messages():
         """
@@ -131,6 +139,10 @@ def init_chat_routes(chat_service: ChatService):
                 message="Conversation history retrieved successfully"
             )
             
+        except SessionAccessDeniedError:
+            return error_response(error_code="ACCESS_DENIED", message="Session access denied", status_code=403)
+        except SessionNotFoundError:
+            return error_response(error_code="NOT_FOUND", message="Session not found", status_code=404)
         except Exception as e:
             logger.error(f"Error in get_messages: {e}", exc_info=True)
             return error_response(

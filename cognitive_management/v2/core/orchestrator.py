@@ -39,6 +39,8 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from ..utils.request_scope import scoped_request, scoped_async_request
+
 from typing import Optional, Dict, Any
 import asyncio
 
@@ -342,6 +344,7 @@ class CognitiveOrchestrator:
         # Sequential processing is more suitable for orchestrator's synchronous design
         return self._process_batch_requests(requests)
     
+    @scoped_request
     def handle(
         self,
         state: CognitiveState,
@@ -399,6 +402,10 @@ class CognitiveOrchestrator:
                 cached_response = request.metadata["_cached_response"]
                 # Ensure it's a CognitiveOutput
                 if isinstance(cached_response, CognitiveOutput):
+                    # A reused response still completes a conversational turn.
+                    self._record_cached_turn(state, request, cached_response)
+                    if self.middleware_chain:
+                        cached_response = self.middleware_chain.after(state, request, cached_response)
                     # Record cache hit in performance monitor
                     if self.performance_monitor:
                         latency = time.time() - start_time
@@ -504,6 +511,14 @@ class CognitiveOrchestrator:
                 except Exception:
                     pass
     
+    def _record_cached_turn(self, state, request, response):
+        from ..processing.handlers import MemoryUpdateHandler
+        from ..processing.pipeline import ProcessingContext
+        context = ProcessingContext(state, request)
+        context.final_text = response.text
+        MemoryUpdateHandler(self.memory_service)._process(context)
+        state.last_mode = response.used_mode
+
     def _build_async_pipeline(self) -> AsyncProcessingPipeline:
         """
         Build async processing pipeline.
@@ -628,6 +643,7 @@ class CognitiveOrchestrator:
         
         return async_middleware[0] if async_middleware else None
     
+    @scoped_async_request
     async def handle_async(
         self,
         state: CognitiveState,
@@ -687,6 +703,15 @@ class CognitiveOrchestrator:
                         return error_response
                     raise
             
+            cached_response = request.metadata.get("_cached_response")
+            if request.metadata.get("_cache_hit", False) and isinstance(cached_response, CognitiveOutput):
+                self._record_cached_turn(state, request, cached_response)
+                if self._async_middleware_chain:
+                    cached_response = await self._async_middleware_chain.after_async(state, request, cached_response)
+                if self.performance_monitor:
+                    self.performance_monitor.record_operation(operation_name, time.time() - start_time, success=True)
+                return cached_response
+
             # Publish request event (async)
             await asyncio.to_thread(
                 self.event_bus.publish,

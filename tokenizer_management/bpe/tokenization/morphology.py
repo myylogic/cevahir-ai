@@ -61,9 +61,9 @@ class Morphology:
         # Config merge (turkish + BPE detailed)
         from tokenizer_management.config import BPE_DETAILED_CONFIG
         cfg = get_turkish_config()
+        cfg.update(BPE_DETAILED_CONFIG)
         if config:
             cfg.update(config)
-        cfg.update(BPE_DETAILED_CONFIG)  # BPE parametreleri için
         self.cfg = cfg
         self.config = cfg
 

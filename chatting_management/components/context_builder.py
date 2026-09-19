@@ -104,12 +104,9 @@ class ContextBuilder:
             # 1. Get recent conversation history
             history = self._get_recent_history(session_id, max_tokens)
             
-            # 2. Add current message to history
-            history.append({
-                "role": "user",
-                "content": current_message
-            })
-            
+            # Current input is added by the cognitive pipeline after generation.
+            # Keeping it here would duplicate it in both prompt and saved history.
+
             # 3. Get user memory context (if enabled)
             if self.config.enable_user_memory and self.memory_storage:
                 memory_context = self._get_memory_context(user_id, current_message)
@@ -123,6 +120,8 @@ class ContextBuilder:
             # 4. Build CognitiveState
             state = CognitiveState(
                 history=history,
+                session_id=session_id,
+                metadata={"user_id": user_id},
                 step=len(history) // 2  # Approximate step count
             )
             
@@ -159,8 +158,8 @@ class ContextBuilder:
             history = []
             total_tokens = 0
             
-            # Process messages in reverse (oldest first)
-            for message in messages:
+            # Select the newest suffix within budget, then restore chronology.
+            for message in reversed(messages):
                 message_dict = {
                     "role": message.role,
                     "content": message.content
@@ -175,7 +174,7 @@ class ContextBuilder:
                 history.append(message_dict)
                 total_tokens += tokens
             
-            return history
+            return list(reversed(history))
             
         except Exception as e:
             logger.error(f"Error getting recent history: {e}", exc_info=True)

@@ -37,6 +37,8 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from copy import deepcopy
+
 from typing import Optional, Dict, Any
 import hashlib
 import json
@@ -111,11 +113,13 @@ class CacheMiddleware(BaseMiddleware):
         if not self.enabled:
             return state, request
         
+        for internal in ("_cache_hit", "_cached_response", "_cache_type", "_cache_similarity"):
+            request.metadata.pop(internal, None)
         # Generate cache key for response
         cache_key = self._generate_response_key(state, request)
         
         # Try exact cache first
-        cached_response = self.cache.get(cache_key)
+        cached_response = deepcopy(self.cache.get(cache_key))
         if cached_response is not None:
             # Exact cache hit - mark in metadata and store response
             request.metadata["_cache_hit"] = True
@@ -125,7 +129,7 @@ class CacheMiddleware(BaseMiddleware):
             return state, request
         
         # Phase 8: Try semantic cache if enabled
-        if self.enable_semantic_cache and self._semantic_cache is not None:
+        if self.enable_semantic_cache and self._semantic_cache is not None and not request.metadata.get("_runtime_context"):
             try:
                 query_text = request.user_message or ""
                 semantic_result = self._semantic_cache.get(query_text, exact_key=cache_key)
@@ -169,10 +173,10 @@ class CacheMiddleware(BaseMiddleware):
             cache_key = self._generate_response_key(state, request)
         
         # Cache response in exact cache
-        self.cache.set(cache_key, response, ttl=self.response_ttl)
+        self.cache.set(cache_key, deepcopy(response), ttl=self.response_ttl)
         
         # Phase 8: Also cache in semantic cache if enabled
-        if self.enable_semantic_cache and self._semantic_cache is not None:
+        if self.enable_semantic_cache and self._semantic_cache is not None and not request.metadata.get("_runtime_context"):
             try:
                 query_text = request.user_message or ""
                 if query_text:
@@ -213,18 +217,22 @@ class CacheMiddleware(BaseMiddleware):
             state_hash=state_hash,
             user_message=user_message,
             system_prompt=system_prompt,
+            runtime=request.metadata.get("_runtime_context", {}),
+            metadata={k: v for k, v in request.metadata.items() if not k.startswith("_")},
         )
     
     def _hash_state(self, state: CognitiveState) -> str:
         """Generate hash from state"""
         # Include last few turns for context
-        recent_history = state.history[-3:] if len(state.history) > 3 else state.history
+        recent_history = state.history
         state_data = {
+            "session_id": state.session_id,
+            "metadata": state.metadata,
             "step": state.step,
             "last_mode": state.last_mode,
             "recent_history": recent_history,
         }
-        state_str = json.dumps(state_data, sort_keys=True)
+        state_str = json.dumps(state_data, sort_keys=True, default=str)
         return hashlib.md5(state_str.encode()).hexdigest()[:16]
     
     def cache_context(

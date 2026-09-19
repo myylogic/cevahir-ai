@@ -81,6 +81,8 @@ class TrainingServiceV3:
 
     def __init__(self, config: Dict[str, Any]):
         self.config = dict(config)
+        from training_management.contracts import validate_training_backend
+        validate_training_backend(self.config)
         self.logger = logger
 
         # BPE yolları
@@ -135,7 +137,7 @@ class TrainingServiceV3:
         )
 
         # ModelManager
-        self.model_manager = ModelManager(self.config)
+        self.model_manager = ModelManager(self.config, tokenizer=self.tokenizer_core)
         self.model_manager.config["vocab_size"] = vocab_size
 
         self.model_manager.initialize(
@@ -297,88 +299,16 @@ class TrainingServiceV3:
 
         Eğer source_id yoksa: basit random split.
         """
-        train_ratio = float(self.config.get("train_val_split", 0.8))
-        seed = int(self.config.get("split_seed", 42))
+        from training_system.data_split import split_training_records
+        return split_training_records(data, float(self.config.get("train_val_split", .8)),
+            int(self.config.get("split_seed", 42)), int(self.config.get("pad_token_id", 0)))
 
-        # source_id var mı?
-        has_source_id = len(data[0]) == 3 if data else False
+    def _split_by_source_id(self, data, train_ratio, seed):
+        from training_system.data_split import split_training_records
+        return split_training_records(data, train_ratio, seed, int(self.config.get("pad_token_id", 0)))
 
-        if has_source_id:
-            return self._split_by_source_id(data, train_ratio, seed)
-        else:
-            self.logger.warning(
-                "[V3] source_id bulunamadı — basit random split kullanılıyor "
-                "(data leakage riski var)"
-            )
-            return self._simple_random_split(data, train_ratio, seed)
-
-    def _split_by_source_id(
-        self,
-        data: List[Tuple],
-        train_ratio: float,
-        seed: int,
-    ) -> Tuple[List[Tuple], List[Tuple]]:
-        """
-        Source-ID bazlı split.
-
-        1. Unique source_id'leri bul
-        2. Source_id'leri train/val'a dağıt
-        3. Her source_id'nin tüm chunk'ları aynı split'e gider
-        """
-        # source_id → indeksler
-        source_to_indices: Dict[Any, List[int]] = {}
-        for i, item in enumerate(data):
-            sid = item[2] if len(item) == 3 else None
-            if sid not in source_to_indices:
-                source_to_indices[sid] = []
-            source_to_indices[sid].append(i)
-
-        # Source_id'leri karıştır
-        rng = random.Random(seed)
-        source_ids = list(source_to_indices.keys())
-        rng.shuffle(source_ids)
-
-        # Train/val source_id split
-        train_size = int(train_ratio * len(source_ids))
-        train_source_ids = set(source_ids[:train_size])
-        val_source_ids = set(source_ids[train_size:])
-
-        # Chunk'ları topla
-        train_indices = []
-        for sid in train_source_ids:
-            train_indices.extend(source_to_indices[sid])
-
-        val_indices = []
-        for sid in val_source_ids:
-            val_indices.extend(source_to_indices[sid])
-
-        # Tensörlere çevir (source_id kaldır)
-        train_data = self._to_tensors([data[i] for i in train_indices])
-        val_data = self._to_tensors([data[i] for i in val_indices])
-
-        self.logger.info(
-            f"[V3] Source-ID split: "
-            f"{len(train_source_ids)} train source / {len(val_source_ids)} val source "
-            f"({len(train_data):,} train örnek / {len(val_data):,} val örnek)"
-        )
-
-        return train_data, val_data
-
-    def _simple_random_split(
-        self,
-        data: List[Tuple],
-        train_ratio: float,
-        seed: int,
-    ) -> Tuple[List[Tuple], List[Tuple]]:
-        """Basit random split (source_id yoksa fallback)."""
-        tensors = self._to_tensors(data)
-        rng = random.Random(seed)
-        indices = list(range(len(tensors)))
-        rng.shuffle(indices)
-        train_size = int(train_ratio * len(tensors))
-        train_data = [tensors[i] for i in indices[:train_size]]
-        val_data = [tensors[i] for i in indices[train_size:]]
-        return train_data, val_data
+    def _simple_random_split(self, data, train_ratio, seed):
+        return self._split_by_source_id(data, train_ratio, seed)
 
     def _to_tensors(self, data: List[Tuple]) -> List[Tuple[torch.Tensor, torch.Tensor]]:
         """Liste formatındaki veriyi tensor'a çevir, source_id'yi kaldır."""
@@ -455,6 +385,7 @@ class TrainingServiceV3:
             pin_memory=bool(self.config.get("data_loader_pin_memory", True)) if self.device == "cuda" else False,
             prefetch_factor=int(self.config.get("prefetch_factor", 2)),
             persistent_workers=bool(self.config.get("persistent_workers", True)),
+            seed=int(self.config.get("seed", 42)),
         )
 
         self.logger.info(
@@ -495,13 +426,9 @@ class TrainingServiceV3:
     ) -> Tuple[float, float]:
         """Training Management V3 veya V2 ile eğit."""
 
-        # V3 TrainingManager tercih et
-        try:
-            from training_management.v3 import TrainingManager as V3TrainingManager
-            _has_v3 = True
-        except ImportError:
-            _has_v3 = False
-            self.logger.warning("[V3] training_management.v3 bulunamadı, V2 kullanılıyor")
+        from training_management.contracts import validate_training_backend
+        validate_training_backend(training_config)
+        self.logger.info("Training backend: v2 (V3 cache and data loading)")
 
         from training_management.v2.utils.checkpoint_manager import CheckpointManager
         from training_management.v2.monitoring.tensorboard_manager import TensorBoardManager
@@ -527,11 +454,11 @@ class TrainingServiceV3:
         training_scheduler = TrainingScheduler(
             optimizer=optimizer,
             scheduler_type=training_config.get("scheduler_type", "ReduceLROnPlateau"),
-            scheduler_kwargs=training_config.get("scheduler_kwargs", {}),
             logger=training_logger,
             warmup_steps=training_config.get("warmup_steps", 0),
             warmup_start_factor=training_config.get("warmup_start_factor", 0.1),
             embedding_warmup_factor=training_config.get("embedding_warmup_factor", 1.0),
+            **training_config.get("scheduler_kwargs", {}),
         )
 
         # Test prompts
@@ -560,6 +487,13 @@ class TrainingServiceV3:
         # V2 TrainingManager (V3 entegrasyon hatası durumunda fallback)
         from training_management.v2.core.training_manager import TrainingManager as V2TrainingManager
 
+        from training_system.cache_identity import tokenizer_digest
+        training_config["tokenizer_identity"] = tokenizer_digest(self.tokenizer_core)
+        from model_management.checkpoint_contract import validate_tokenizer_identity
+        existing_identity = getattr(self.model_manager.model, "_tokenizer_identity", None)
+        if existing_identity is not None:
+            validate_tokenizer_identity(existing_identity, training_config["tokenizer_identity"])
+        self.model_manager.model._tokenizer_identity = training_config["tokenizer_identity"]
         training_manager = V2TrainingManager(
             model=self.model_manager.model,
             train_loader=train_loader,
@@ -572,6 +506,8 @@ class TrainingServiceV3:
             checkpoint_manager=checkpoint_manager,
             tensorboard_manager=tb_manager,
         )
+        if getattr(self, "_resume_checkpoint_path", None):
+            training_manager.resume_from_checkpoint(self._resume_checkpoint_path)
 
         self.logger.info("[V3] Eğitim başlıyor...")
         try:
@@ -600,19 +536,18 @@ class TrainingServiceV3:
         checkpoint_path = self._find_checkpoint(checkpoint_dir)
 
         if checkpoint_path:
-            self.logger.info(f"[V3] Checkpoint yükleniyor: {checkpoint_path}")
-            try:
-                self.model_manager.load(checkpoint_path, weights_only=True)
-            except TypeError:
-                self.model_manager.load(checkpoint_path)
-            self.logger.info("[V3] Checkpoint yüklendi")
+            self._resume_checkpoint_path = checkpoint_path
+            self.logger.info(f"[V3] Resume checkpoint selected: {checkpoint_path}")
+            # TrainingManager restores model, optimizer and runtime state together.
         else:
             self.logger.info("[V3] Checkpoint yok — model sıfırdan başlatılıyor")
 
     def _find_checkpoint(self, checkpoint_dir: str) -> Optional[str]:
         """En son checkpoint'i bul."""
         resume_from = self.config.get("resume_from_path") or self.config.get("load_checkpoint_path")
-        if resume_from and os.path.isfile(resume_from):
+        if resume_from:
+            if not os.path.isfile(resume_from):
+                raise FileNotFoundError(f"Requested checkpoint does not exist: {resume_from}")
             return os.path.abspath(resume_from)
 
         if not os.path.isdir(checkpoint_dir):

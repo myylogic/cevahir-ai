@@ -133,9 +133,9 @@ class CevahirNeuralNetwork(nn.Module):
         use_gradient_checkpointing: bool = True,  # Memory-efficient training için (V4 aktif)
         # [OK] V3: Weight Tying desteği (endüstri standardı: Transformer , BERT, T5)
         tie_weights: bool = True,  # Input embedding ve output layer weight sharing (V4 aktif)
-        # [OK] V4: RMSNorm desteği (endüstri standardı: GPT-3+, LLaMA)
+        # [OK] V4: RMSNorm desteği 
         use_rmsnorm: bool = True,  # True ise RMSNorm, False ise LayerNorm (V4 aktif)
-        # [OK] V4: SwiGLU activation desteği (endüstri standardı: GPT-4, PaLM)
+        # [OK] V4: SwiGLU activation desteği 
         use_swiglu: bool = True,  # True ise SwiGLU, False ise GELU (V4 aktif)
         # [OK] V4: KV Cache desteği (endüstri standardı: Popüler Kuzenleri Gibi)
         use_kv_cache: bool = True,  # KV Cache kullan (inference için) (V4 aktif)
@@ -145,11 +145,11 @@ class CevahirNeuralNetwork(nn.Module):
         checkpointing_strategy: str = "selective",  # "selective" | "layer_wise" | "adaptive"
         # [OK] V4: Quantization desteği (endüstri standardı: Popüler Kuzenleri Gibi)
         quantization_type: str = "none",  # "none" | "int8" | "fp16" | "int8_dynamic"
-        # [OK] V4: MoE (Mixture of Experts) desteği (endüstri standardı: GPT-4, Gemini)
+        # [OK] V4: MoE (Mixture of Experts) desteği 
         use_moe: bool = False,  # MoE kullan (büyük modeller için)
-        num_experts: int = 8,  # Expert sayısı (GPT-4: 8, Gemini: 16)
-        moe_top_k: int = 2,  # Her token için seçilecek expert sayısı (GPT-4: 2)
-        # [OK] V5: GQA (Grouped Query Attention) — LLaMA-2/3, Mistral, Gemini standardı
+        num_experts: int = 8,  # Expert sayısı 
+        moe_top_k: int = 2,  # Her token için seçilecek expert sayısı 
+        # [OK] V5: GQA (Grouped Query Attention) — gruplandırılmış KV başlıkları
         # None       → standart MHA (num_kv_heads = num_heads)
         # 1          → MQA (Multi-Query Attention, en hızlı)
         # 2..n-1     → GQA (verimli denge) — Önerilen: num_heads // 4 veya // 8
@@ -186,6 +186,13 @@ class CevahirNeuralNetwork(nn.Module):
         # Inference'ta etki yoktur; geriye dönük uyumlu (default=0.0 = kapalı).
         # Önerilen aralık: 0.05 – 0.20 (model derinliğine göre)
         drop_path_rate: float = 0.0,
+        pe_max_len: int = 2048,
+        pe_dropout: float = 0.0,
+        rope_original_max_len: int = 2048,
+        kv_eviction_strategy: str = "sliding_window",
+        kv_num_sink_tokens: int = 4,
+        moe_jitter_noise: float = 0.01,
+        moe_load_balance_alpha: float = 0.01,
         # ---- TensorBoard / Telemetri seçenekleri ----
         use_tensorboard: bool = False,
         tb_writer: Optional[_SummaryWriterLike] = None,
@@ -198,11 +205,24 @@ class CevahirNeuralNetwork(nn.Module):
         **kwargs,
     ):
         super(CevahirNeuralNetwork, self).__init__()
+        if num_layers <= 0 or not 0.0 <= drop_path_rate < 1.0:
+            raise ValueError("num_layers must be positive and drop_path_rate in [0,1)")
+        if attention_type != "multi_head":
+            raise ValueError("The decoder currently supports attention_type='multi_head' only")
+        self.vocab_size = vocab_size
+        self.use_kv_cache = use_kv_cache
 
         # --- ctor konfigini sakla (pickling için gerekli) ---
         self._ctor_cfg = {
             "learning_rate": learning_rate,
             "dropout": dropout,
+            "pe_max_len": pe_max_len,
+            "pe_dropout": pe_dropout,
+            "rope_original_max_len": rope_original_max_len,
+            "kv_eviction_strategy": kv_eviction_strategy,
+            "kv_num_sink_tokens": kv_num_sink_tokens,
+            "moe_jitter_noise": moe_jitter_noise,
+            "moe_load_balance_alpha": moe_load_balance_alpha,
             "vocab_size": vocab_size,
             "embed_dim": embed_dim,
             "seq_proj_dim": seq_proj_dim,
@@ -271,8 +291,8 @@ class CevahirNeuralNetwork(nn.Module):
             raise ValueError(f"seq_proj_dim ({seq_proj_dim}) pozitif bir tamsayı olmalıdır.")
         if not isinstance(num_heads, int) or num_heads <= 0:
             raise ValueError(f"num_heads ({num_heads}) pozitif bir tamsayı olmalıdır.")
-        if seq_proj_dim % num_heads != 0:
-            raise ValueError(f"seq_proj_dim ({seq_proj_dim}) num_heads ({num_heads}) ile tam bölünmelidir.")
+        if embed_dim % num_heads != 0:
+            raise ValueError(f"embed_dim ({embed_dim}) num_heads ({num_heads}) ile tam bölünmelidir.")
         if not isinstance(num_layers, int) or num_layers <= 0:
             raise ValueError(f"num_layers ({num_layers}) pozitif bir tamsayı olmalıdır (en az 1).")
         if not isinstance(dropout, (int, float)) or not (0.0 <= dropout <= 1.0):
@@ -326,40 +346,31 @@ class CevahirNeuralNetwork(nn.Module):
             embed_dim=embed_dim,
             init_method="xavier_normal",  # [OK] Endüstri standardı: Gradient explosion önleme
             scale_by_sqrt=False,   # [OK] Gradient explosion önleme
+            dropout=dropout,
             log_level=log_level,
         )
         
         # 2) Positional Encoding (RoPE, Sinusoidal, Learned)
         # [OK] V5: YaRN RoPE desteği — uzun context için
-        pe_max_len = kwargs.get("pe_max_len", 2048)
         self.pos_encoding = PositionalEncoding(
             embed_dim=embed_dim,
             max_len=pe_max_len,
-            dropout=kwargs.get("pe_dropout", 0.0),
+            dropout=pe_dropout,
             mode=pe_mode,
             num_heads=num_heads if pe_mode.lower() == "rope" else None,  # [OK] RoPE için num_heads
             log_level=log_level,
             # [OK] V5: YaRN RoPE ölçekleme
             rope_scaling_type=rope_scaling_type,
             rope_scaling_factor=rope_scaling_factor,
-            rope_original_max_len=kwargs.get("rope_original_max_len", 2048),
+            rope_original_max_len=rope_original_max_len,
         )
         
         # 3) Embedding Dropout (Transformer  standardı)
         self.embed_dropout = nn.Dropout(dropout)
         
-        # [V6] Fix 6: SwiGLU ffn_dim otomatik hesaplama (LLaMA standardı, parametre paritesi)
-        # SwiGLU iki gate kullanır; standart 4x FFN ile eş parametre için 2/3 oranı gerekir
-        # 256'nın katına yuvarla → tensor core optimal (A100/H100)
-        if use_swiglu and ffn_dim is None:
-            raw = int(2 / 3 * 4 * effective_dim)
-            ffn_dim = (raw + 255) // 256 * 256  # embed_dim=512 → 1536
-            self.logger.info(
-                f"[V6] SwiGLU ffn_dim otomatik hesaplandı: {ffn_dim} "
-                f"(= round_256(2/3*4*{effective_dim}), LLaMA standardı)"
-            )
-        elif ffn_dim is None:
-            ffn_dim = effective_dim * 4  # GPT standardı: 4x embed_dim
+        # Shared dimension contract preserves existing decoder geometry.
+        from src.neural_network_module.architecture_contracts import resolve_ffn_dim
+        ffn_dim = resolve_ffn_dim(effective_dim, ffn_dim, gated=use_swiglu)
 
         # [V6] Output Logit Soft-Cap (Feature D) — forward'da kullanılır
         self.logit_soft_cap = float(logit_soft_cap)
@@ -417,6 +428,11 @@ class CevahirNeuralNetwork(nn.Module):
                 parallel_residual=parallel_residual,  # [V6]: Parallel Residual (GPT-J/PaLM)
                 attn_logit_cap=attn_logit_cap,       # [V6]: Attention Logit Soft-Cap
                 drop_path_rate=_dpr[_i],             # [V7]: Stochastic Depth (lineer decay)
+                kv_eviction_strategy=kv_eviction_strategy,
+                kv_num_sink_tokens=kv_num_sink_tokens,
+                moe_jitter_noise=moe_jitter_noise,
+                moe_load_balance_alpha=moe_load_balance_alpha,
+                log_level=log_level,
             ) for _i in range(num_layers)
         ])
 
@@ -426,6 +442,11 @@ class CevahirNeuralNetwork(nn.Module):
         for _i, _layer in enumerate(self.layers):
             _layer.layer_idx = _i
             _layer.total_layers = num_layers
+            if _layer.advanced_checkpointing is not None:
+                from src.neural_network_module.ortak_katman_module.advanced_checkpointing import create_checkpointing_strategy
+                _layer.advanced_checkpointing = create_checkpointing_strategy(
+                    checkpointing_strategy, num_layers=num_layers, log_level=log_level
+                )
 
         self.logger.info(
             f"[V7] layer_idx (0..{num_layers-1}) ve total_layers={num_layers} "
@@ -462,7 +483,7 @@ class CevahirNeuralNetwork(nn.Module):
             # [OK] DÜZELTME: RMSNorm scale initialization'ı normal bırak (1.0)
             # Scale=0.1 çok küçük, gradient'leri büyütüyor (output_norm.scale gradient: 1614.67)
             # Output layer weight initialization zaten düzeltildi (gain=0.05), scale normal kalmalı
-            self.logger.info("[V4] Output layer normalization: RMSNorm (GPT-3+, LLaMA standardı)")
+            self.logger.info("[V4] Output layer normalization: RMSNorm ")
         else:
             self.output_norm = nn.LayerNorm(effective_dim, eps=1e-6)  # [OK] REFACTOR: effective_dim kullan
             self.logger.info("[V4] Output layer normalization: LayerNorm (GPT-2 standardı)")
@@ -709,6 +730,8 @@ class CevahirNeuralNetwork(nn.Module):
         # [OK] V4: KV Cache parametreleri (endüstri standardı: Popüler Kuzenleri Gibi)
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
+        return_attention_weights: bool = False,
+        collect_diagnostics: bool = False,
     ):
         """
         İleri yönlü hesaplama (Transformerstandardı - V-2).
@@ -720,7 +743,8 @@ class CevahirNeuralNetwork(nn.Module):
         
         Returns:
             final_output: [B, T, vocab_size]
-            attn_weights: Optional attention weights (son layer'dan)
+            attn_weights: Last-layer weights when return_attention_weights=True; otherwise None.
+                Explicit diagnostics also enable per-layer training entropy monitoring.
         """
         step = self._global_step
 
@@ -735,7 +759,12 @@ class CevahirNeuralNetwork(nn.Module):
             # [OK] REFACTOR: DilKatmani deprecated, doğrudan embedding ve positional encoding kullanılıyor
             # Akış: Embedding → PositionalEncoding → Dropout
             embedded = self.embedding(x)  # [B, T] → [B, T, embed_dim]
-            embedded = self.pos_encoding(embedded)  # [B, T, embed_dim] (RoPE, Sinusoidal, Learned)
+            positions = cache_position
+            if positions is None and use_cache and not self.training:
+                cache = self.layers[0].attn.kv_cache
+                start = cache.seen_tokens if cache is not None and cache.batch_size == x.size(0) else 0
+                positions = torch.arange(start, start + x.size(1), device=x.device)
+            embedded = self.pos_encoding(embedded, positions=positions)
             embedded = self.embed_dropout(embedded)  # [B, T, embed_dim]
             if not isinstance(embedded, torch.Tensor):
                 raise TypeError("Embedding çıktısı geçerli bir tensör değil!")
@@ -757,6 +786,7 @@ class CevahirNeuralNetwork(nn.Module):
                     causal_mask=use_causal,
                     use_cache=use_cache,  # [OK] V4
                     cache_position=cache_position,  # [OK] V4
+                    return_attention_weights=return_attention_weights,
                 )
                 # KV Cache kullanılıyorsa: (x, attn_weights, kv_cache)
                 # Normal mode: (x, attn_weights)
@@ -823,43 +853,52 @@ class CevahirNeuralNetwork(nn.Module):
             if not isinstance(final_output, torch.Tensor):
                 raise TypeError("Çıktı katmanı geçerli bir tensör döndürmüyor!")
 
-            # 7) Snapshot (panel için özet)
-            try:
-                self._last_snapshot = {
-                    "step": step,
-                    "input": {"shape": tuple(x.shape), "dtype": str(x.dtype)},
-                    "embedded": {
-                        "shape": tuple(embedded.shape),
-                        "stats": self._tensor_stats(embedded),
-                    },
-                    "layer_output": {
-                        "shape": tuple(x.shape),
-                        "stats": self._tensor_stats(x),
-                    },
-                    "final_output": {
-                        "shape": tuple(final_output.shape),
-                        "stats": self._tensor_stats(final_output),
-                    },
-                    "attn_weights": None if attn_weights is None else {
-                        "shape": tuple(attn_weights.shape),
-                        "min": float(attn_weights.detach().min().item()),
-                        "max": float(attn_weights.detach().max().item()),
-                        "mean": float(attn_weights.detach().mean().item()),
-                    },
-                    "attn_entropy": {
-                        "mean_normalized": self._last_attn_entropy,
-                        "collapse_threshold": 0.05,
-                        "status": (
-                            "collapse" if self._last_attn_entropy is not None and self._last_attn_entropy < 0.05
-                            else "uniform" if self._last_attn_entropy is not None and self._last_attn_entropy > 0.95
-                            else "normal" if self._last_attn_entropy is not None
-                            else "not_computed"
-                        ),
-                    },
-                }
-            except Exception:
-                # snapshot hiçbir zaman modeli düşürmesin
-                pass
+            # Scalar reductions can synchronize an accelerator and scan all logits.
+            # Ordinary inference retains only shape metadata, never tensor references.
+            self._last_snapshot = {
+                "step": step, "diagnostics_collected": False,
+                "input": {"shape": tuple(embedded.shape[:2])},
+                "final_output": {"shape": tuple(final_output.shape), "dtype": str(final_output.dtype)},
+            }
+            if collect_diagnostics or (self._tb_writer is not None and step % self._tb_log_every_n == 0):
+                try:
+                    self._last_snapshot = {
+                        "step": step,
+                        "input": {"shape": tuple(x.shape), "dtype": str(x.dtype)},
+                        "embedded": {
+                            "shape": tuple(embedded.shape),
+                            "stats": self._tensor_stats(embedded),
+                        },
+                        "layer_output": {
+                            "shape": tuple(x.shape),
+                            "stats": self._tensor_stats(x),
+                        },
+                        "final_output": {
+                            "shape": tuple(final_output.shape),
+                            "stats": self._tensor_stats(final_output),
+                        },
+                        "attn_weights": None if attn_weights is None else {
+                            "shape": tuple(attn_weights.shape),
+                            "min": float(attn_weights.detach().min().item()),
+                            "max": float(attn_weights.detach().max().item()),
+                            "mean": float(attn_weights.detach().mean().item()),
+                        },
+                        "attn_entropy": {
+                            "mean_normalized": self._last_attn_entropy,
+                            "collapse_threshold": 0.05,
+                            "status": (
+                                "collapse" if self._last_attn_entropy is not None and self._last_attn_entropy < 0.05
+                                else "uniform" if self._last_attn_entropy is not None and self._last_attn_entropy > 0.95
+                                else "normal" if self._last_attn_entropy is not None
+                                else "not_computed"
+                            ),
+                        },
+                    }
+                except Exception:
+                    # snapshot hiçbir zaman modeli düşürmesin
+                    pass
+
+                self._last_snapshot["diagnostics_collected"] = True
 
             # step'i artır
             self._global_step += 1
@@ -885,7 +924,20 @@ class CevahirNeuralNetwork(nn.Module):
                 layer.attn.kv_cache.clear()
         self.logger.debug("[V4] KV Cache tüm layer'larda temizlendi.")
 
-    def apply_quantization(self, calibration_data: list | None = None) -> None:
+    def _apply(self, fn, recurse=True):
+        # Runtime caches are not module buffers: dtype/device conversions invalidate them.
+        if hasattr(self, "layers"):
+            for layer in self.layers:
+                layer.attn.kv_cache = None
+        return super()._apply(fn, recurse=recurse)
+
+    def get_and_reset_moe_loss(self) -> Optional[torch.Tensor]:
+        """Consume the current forward's already weighted MoE auxiliary loss once."""
+        losses = [layer.get_and_reset_moe_loss() for layer in self.layers]
+        losses = [loss for loss in losses if loss is not None]
+        return sum(losses) if losses else None
+
+    def apply_quantization(self, calibration_data: list | None = None) -> "CevahirNeuralNetwork":
         """
         Eğitim tamamlandıktan sonra modeli quantize eder.
 
@@ -906,7 +958,7 @@ class CevahirNeuralNetwork(nn.Module):
         qt = self.quantization_manager.quantization_type
         if qt == "none":
             self.logger.info("[QUANTIZATION] quantization_type='none', işlem atlandı.")
-            return
+            return self
 
         if self.training:
             self.logger.warning(
@@ -921,7 +973,10 @@ class CevahirNeuralNetwork(nn.Module):
             f"model boyutu={before_mb:.1f} MB"
         )
 
-        self.quantization_manager.quantize_model(self, calibration_data=calibration_data)
+        self.clear_kv_cache()
+        converted = self.quantization_manager.quantize_model(self, calibration_data=calibration_data)
+        if converted is not self:
+            raise RuntimeError("Quantization backend must preserve the model instance")
 
         after_mb = self.quantization_manager.get_model_size_mb(self)
         savings_pct = (1.0 - after_mb / before_mb) * 100 if before_mb > 0 else 0.0
@@ -929,6 +984,7 @@ class CevahirNeuralNetwork(nn.Module):
             f"[QUANTIZATION] Tamamlandı: {before_mb:.1f} MB → {after_mb:.1f} MB "
             f"({savings_pct:.1f}% tasarruf)"
         )
+        return self
 
     def get_quantization_info(self) -> dict:
         """

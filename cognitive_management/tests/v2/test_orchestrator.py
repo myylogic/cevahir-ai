@@ -68,7 +68,7 @@ class TestCognitiveOrchestrator:
         
         assert isinstance(output, CognitiveOutput)
         assert isinstance(output.text, str)
-        assert output.used_mode in ("direct", "think1", "debate2")
+        assert output.used_mode in ("direct", "think1", "debate2", "tot")
         assert isinstance(output.revised_by_critic, bool)
     
     def test_handle_with_middleware(self, orchestrator, empty_state, simple_input):

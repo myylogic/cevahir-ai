@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "label": "repaired",
+  "environment": {
+    "python": "3.14.3",
+    "torch": "2.10.0+cpu",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "device": "cpu",
+    "threads": 1
+  },
+  "configuration": {
+    "learning_rate": 0.0002,
+    "dropout": 0.0,
+    "vocab_size": 128,
+    "embed_dim": 32,
+    "seq_proj_dim": 32,
+    "num_heads": 4,
+    "num_layers": 2,
+    "ffn_dim": 64,
+    "pe_max_len": 64,
+    "max_cache_len": 64,
+    "device": "cpu",
+    "log_level": 50,
+    "use_gradient_checkpointing": false,
+    "use_kv_cache": true,
+    "use_flash_attention": false,
+    "use_pytorch_sdpa": true,
+    "num_kv_heads": 4,
+    "use_moe": false,
+    "num_experts": 4,
+    "moe_top_k": 2
+  },
+  "seed": 42,
+  "warmup": 2,
+  "measurement_steps": 5,
+  "source_sha256": "28d99865f3d3c3f56b96218272cee7561e7e728db0bdc541c2cc01cff091518e",
+  "data": {
+    "kind": "seeded synthetic tokens",
+    "sha256": "8306e37c6cf75f322fa4348777722832d2ede71f5b4e7bbf3b77df8b78904747",
+    "language_quality_evaluation": false
+  },
+  "metrics": {
+    "total_parameters": 24928,
+    "trainable_parameters": 24800,
+    "active_parameters_per_token_estimate": 24928,
+    "forward_flops_per_token_estimate": 53248.0,
+    "gpu_allocated_bytes": null,
+    "gpu_peak_allocated_bytes": null,
+    "kv_cache_bytes_per_token": 512.0,
+    "kv_cache_allocated_bytes": 32768,
+    "prefill_tokens_per_second": 2341.2350015321886,
+    "decode_tokens_per_second": 97.43763382514258,
+    "training_tokens_per_second": 2796.0052050563954,
+    "forward_latency_ms": 2.874600002542138,
+    "backward_latency_ms": 2.257100015413016,
+    "validation_loss": 4.881231307983398,
+    "perplexity": 131.7928415979987,
+    "gradient_norm": 1.4339177846908568,
+    "nan_inf_occurrences": 0,
+    "router_expert_utilization": null,
+    "router_entropy": null,
+    "attention_entropy": 1.6273667812347412,
+    "checkpoint_bytes": 324135,
+    "cache_equivalence_max_abs_error": 1.4901161193847656e-07
+  },
+  "notes": [
+    "GPU metrics are null on CPU; router metrics null for dense FFN.",
+    "Active parameters estimate includes dense/tied weights plus top-k experts, not unique embedding row accesses.",
+    "FLOPs counts observed linear work and dense QK/AV matmuls; excludes normalization, nonlinearity, rotary and optimizer work.",
+    "Attention entropy is a separate manual diagnostic. No claim about trained language quality or GPU speed."
+  ]
+}

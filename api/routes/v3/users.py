@@ -16,7 +16,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def init_user_routes(user_service: UserService):
+def init_user_routes(user_service: UserService, blueprint=None):
     """
     Initialize user routes with service.
     
@@ -24,7 +24,8 @@ def init_user_routes(user_service: UserService):
         user_service: UserService instance
     """
     
-    @v3_bp.route('/users/me', methods=['GET'])
+    blueprint = blueprint if blueprint is not None else v3_bp
+    @blueprint.route('/users/me', methods=['GET'])
     @require_auth
     def get_current_user():
         """
@@ -60,7 +61,7 @@ def init_user_routes(user_service: UserService):
                 status_code=500
             )
     
-    @v3_bp.route('/users/me/preferences', methods=['GET'])
+    @blueprint.route('/users/me/preferences', methods=['GET'])
     @require_auth
     def get_user_preferences():
         """
@@ -94,7 +95,7 @@ def init_user_routes(user_service: UserService):
                 status_code=500
             )
     
-    @v3_bp.route('/users/me/preferences', methods=['PATCH'])
+    @blueprint.route('/users/me/preferences', methods=['PATCH'])
     @require_auth
     def update_user_preferences():
         """
@@ -144,4 +145,5 @@ def init_user_routes(user_service: UserService):
                 message="Failed to update preferences",
                 status_code=500
             )
+
 

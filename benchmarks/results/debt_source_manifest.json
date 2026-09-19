@@ -1,0 +1,334 @@
+{
+  "modified_original_files": [
+    {
+      "path": "api/api_config.py",
+      "original_sha256": "8f016dbd1ce922a81e43a2d6b3eb150efc20b18fa0a5a22db36acd671bacf7f9",
+      "current_sha256": "313479deb13501ac414ff61b9971363b0cbca7e4a2f69d8d0ce2450cbc645aa1"
+    },
+    {
+      "path": "api/app_factory.py",
+      "original_sha256": "3859f22a84c5bf472f37f66a82029c1f333a90a442da8ec63ad477dc849d6deb",
+      "current_sha256": "187b9433190bb367fbf704536726e4b1172abe47b3e71c30eafd310b90f3f4c4"
+    },
+    {
+      "path": "api/routes/__init__.py",
+      "original_sha256": "9b963eedf6bb9283b98cdd4f762e830c274c89053a8891f91dad8438fa203f58",
+      "current_sha256": "b38c323d91c90c3833d7f36a8a3a265ebf6f170ba4538e2da22b01f34d7d3b8a"
+    },
+    {
+      "path": "api/routes/v3/__init__.py",
+      "original_sha256": "adc6fc3dc6ca6730666b7127e835324131fbd15fdb97ce8f496034f1f02478bd",
+      "current_sha256": "f64caaeee953bd5a5f440022f4c95049a80008e6bc3773a4c5099ca898d3be72"
+    },
+    {
+      "path": "api/routes/v3/chat.py",
+      "original_sha256": "94637be1b2c8ccbf62eb788215c751cb74b79a98076afb655cc03ccffa0ba083",
+      "current_sha256": "f0651fd06a9e9ba0244484c61fb3481a2c72992445cb428dd794e3cc82e824db"
+    },
+    {
+      "path": "api/routes/v3/sessions.py",
+      "original_sha256": "75a04a7f5bba1086b8cae8dd3e08da298dbc754a866a69dfef5bb93116acad4b",
+      "current_sha256": "3c0f43a5b33b1c2fd6f13bd4a0a1096c23d95b1d5e98a106981d0eae56ccdefa"
+    },
+    {
+      "path": "api/routes/v3/users.py",
+      "original_sha256": "4db4b6e69464c6ac4a82f4b3273736091882d1c81402cb1ddf135a16ea409abc",
+      "current_sha256": "4c3c02e2205238401f9d416ffa8f81ca7b085793cb31aa5dd7ad148cabcaad77"
+    },
+    {
+      "path": "api/services/user_service.py",
+      "original_sha256": "8a4acd264401c8cbbaa8d1e3b36f306067c926d7228a91482e287358072e6f1c",
+      "current_sha256": "f2c8aa340bc349feef615bed689b754858f0d3f7c5c53f71f8886a7a80a938ad"
+    },
+    {
+      "path": "chatting_management/components/context_builder.py",
+      "original_sha256": "cc80a22a5d53b4f0cefa7d1d9c16714b785ceae7efff6a308675e671568b4060",
+      "current_sha256": "d53ed05daf8fc991e462ed07e8b29c7fd3c9ef7340fcc8fd1939e820e933b6f0"
+    },
+    {
+      "path": "cognitive_management/__init__.py",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_sha256": "8f65126c06f3bee7d8032f0c43134fec8fb03312f17eed655429350dd6290c7e"
+    },
+    {
+      "path": "cognitive_management/cognitive_types.py",
+      "original_sha256": "81f774e0646cade6445ea28b1be4e2de2261b57d078755375965c0e62ed96b53",
+      "current_sha256": "5ef7b3684d42372235048b843df73d56e07f1d3e0f4b431805c5ccfe6b8e64ff"
+    },
+    {
+      "path": "cognitive_management/tests/v2/conftest.py",
+      "original_sha256": "0430d1c4ab5ea16cbf8dcab2554c25a83d2ff8497940c8e932e75e7d282222e6",
+      "current_sha256": "e75391676d74b174a02bd700f79901cbafca1b00ba448339e5a0ff2403cd5401"
+    },
+    {
+      "path": "cognitive_management/tests/v2/test_orchestrator.py",
+      "original_sha256": "ffe02498db82e9fb66acef763fac709b20f43be3009cd87a70ebe33ca4f26eed",
+      "current_sha256": "0ba06f3e7edba8726568d0e2498e342ed138de6618899935e9a86df245f32c18"
+    },
+    {
+      "path": "cognitive_management/tests/v2/test_policy_router_v2.py",
+      "original_sha256": "fa9ccd512ef506e310bdbccba830308bf6b04e657f786b8cce9337e0c38be0b3",
+      "current_sha256": "8ac284da4be9c3cc2fc96e723997f3a84493aa99e8b5c8b44b3f06f549f9221e"
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "original_sha256": "2f1506b85de8a8fe670b6e0ae81322172668ffcbfc8a678d42cb1d7933c5c086",
+      "current_sha256": "d551aee8b5a3d9e44237bcca6e8771c80f26534aa504e4ff21fda83e3d6a64f2"
+    },
+    {
+      "path": "cognitive_management/v2/components/tool_executor_v2.py",
+      "original_sha256": "a84cee11d1c6c956151bd17bb53fb678ec5addf23a725205a616c1073128470c",
+      "current_sha256": "e2d5d86be1751baaf0b22fdbfc60b17ed93bbe0771953cb4f22af575a6127953"
+    },
+    {
+      "path": "cognitive_management/v2/core/orchestrator.py",
+      "original_sha256": "44d36b59b63b33d536edfae4d79ad87ccde47f2c6d8a236d5789987f2f5160df",
+      "current_sha256": "db9130df3df7806bfa38e4a4122e4771801d1653fef4ea759630c85091c9f650"
+    },
+    {
+      "path": "cognitive_management/v2/middleware/async_middleware.py",
+      "original_sha256": "57a89bd49409e5bc2239643ac3eef1f27e3a88c75c7dbf88c87fda238559d5f7",
+      "current_sha256": "5ca452e3ffef19259147d4cdb469f933a6d9d691d363304ce7c381093150bbef"
+    },
+    {
+      "path": "cognitive_management/v2/middleware/cache.py",
+      "original_sha256": "a4a3258043da52c3dd1e16bc8f3bc873b8cbd4b38407ad0f7d4022eef7dc3bb2",
+      "current_sha256": "170633a485ab2829d73b0610090d81aea65adb419d13e89c4781568186aed7a3"
+    },
+    {
+      "path": "cognitive_management/v2/middleware/tracing.py",
+      "original_sha256": "6f52dd41bad67b056ad1cb73363dc67b87c8e6eb5f7dbd982d6fba2a9496a4b9",
+      "current_sha256": "5d05ce750838cce64d3755d7620a7cc81986774a2d8e4827c8c39d7c2098b4e8"
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "original_sha256": "83f66a63c8208af7ea9f5441f40b2a18841d1d4fd2ab1c75506d4465fa4cfae3",
+      "current_sha256": "ccef9d882950ecf5e283fea0993a352fab4db845d5ba6478a99c3a68203acf12"
+    },
+    {
+      "path": "cognitive_management/v2/utils/tracing.py",
+      "original_sha256": "52b4a4eef2d2a944f42ce67d8a9fca9feea97ae6fab26c7ec5d8f05d75dcc3e7",
+      "current_sha256": "caa700c943409449fe763f763f58aabd4051f7d626206e8cc17658b72af05163"
+    },
+    {
+      "path": "database/config.py",
+      "original_sha256": "fa49303b5b35d1b460efd7a62f7bb0e76c2f8bc3610b1c3fc6079eba9c4ad830",
+      "current_sha256": "8caca3bbb298f9d235d084bed52eff224b6e0cafb5c63bf2b4a4da24a3e579c9"
+    },
+    {
+      "path": "database/connection.py",
+      "original_sha256": "fcbf57cf28e34cc89df7bbd7e2a25e437643959a64a2f830c97efa238b638397",
+      "current_sha256": "b38fda0050ec9f42b10898412f0878c7349cff954bd5f88841f1b37684105f29"
+    },
+    {
+      "path": "database/models.py",
+      "original_sha256": "0d59f65437888439d79239d62d3148738017f26887ab0c50348dace22a89a9d5",
+      "current_sha256": "2fcc9b913ac717741846ff9555a491317c214cd4632c348bf29a2dcec6caa96c"
+    },
+    {
+      "path": "model/cevahir.py",
+      "original_sha256": "20123c83f0ecbfad67ef0dd179889f593692876b5fada719aec204f153f4527a",
+      "current_sha256": "8a3cfe9648638a0753c53c62eac6543ed3c6f2989fc8ef35c4faada68bea635b"
+    },
+    {
+      "path": "model_management/config_schema.py",
+      "original_sha256": "84b90a8c5ed918b7d6bc3cdfef5397ccfb131d027f930aec3031167697cb3b0a",
+      "current_sha256": "56c7d871ead32db5e774b5b4c63a16c0f74e4b199bbc69528ac21e64cc93ad09"
+    },
+    {
+      "path": "model_management/exceptions.py",
+      "original_sha256": "dbfab63befb3d26ec0776902f2268d32f3c27193b0919063ac40f06138223303",
+      "current_sha256": "c0f77e0a5e9d2a68ce15cf53a491c9d6b2d65331ccbf2c38b88966a51a32dfcb"
+    },
+    {
+      "path": "model_management/model_initializer.py",
+      "original_sha256": "fa6058a018a42388a8c563f02fe437edf84d41f7779056841829c473212b5a5b",
+      "current_sha256": "62510f9c0d3074baee57d8d53cbdad563f6c2ae0995f869d6d22212d5cc0f5c9"
+    },
+    {
+      "path": "model_management/model_loader.py",
+      "original_sha256": "1dbb246ffa223a77ce0b474e62f9bc8f87b4be1fcb8cfcbb13e95c6352053578",
+      "current_sha256": "8a4c5fb929ef113c929f3c5eb113dc084f232f8a9a233a8e2c19faaad731781c"
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "original_sha256": "73759e4e71e86969615c3cd06548d03df9ee976515dcd369013d119373d5da18",
+      "current_sha256": "109d68c8b492c0c13faf7bb7a39d815d48ff240e3c89e4f1f33e9bc74b97e488"
+    },
+    {
+      "path": "model_management/test/test_model_manager.py",
+      "original_sha256": "baa8e4ada8de09c0846b35de34d5ea2b07384bfdc0aa58f2dbbdd13b517cef80",
+      "current_sha256": "ae52c2ebea61a36225a664217180ae1df83a6b72a126d829d267f27ca6634a24"
+    },
+    {
+      "path": "README.md",
+      "original_sha256": "6d40d69c1b209a229e211766e4fc30910cb8495003709658e35f556b3e94f902",
+      "current_sha256": "44fd2fff6d638a5da637d59d34eb2200bded40e544bff3ff67702ea09966d451"
+    },
+    {
+      "path": "src/neural_network.py",
+      "original_sha256": "37199253159a3897b3bf635f3bfb8bebd364b41d1556528fdd9d23ab2e272aba",
+      "current_sha256": "79a905ddaad1964a43822a93538d4d3f49b31e65674b39f1a5e8149e4dac4e4e"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/positional_encoding.py",
+      "original_sha256": "60e873860fc4634100d8474bc7e50cf91fae668586086c8b0b9757af261400b9",
+      "current_sha256": "a35f97f0ddbefd080b4010fbf0bfa2055e12098f87b1702e5cbc047d78e91ba9"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/advanced_checkpointing.py",
+      "original_sha256": "e2ff6c87b3add1494cff5e7404b201349d91575b1ac2a51c270cfe694ffffb2e",
+      "current_sha256": "eaff1298644ca76491d2445ebeb107c56fa73f27e01d44534dbaedbc52ddd094"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
+      "original_sha256": "1e08962ff5e755af9b7abce6ca5b576dadf4eac922e6d85a8f17b937bc67c5d7",
+      "current_sha256": "8e2c2606c3d7698e4d302ac53712ca40a16700b18a3a0b04559d49c15d3ed627"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/feed_forward_network.py",
+      "original_sha256": "9e68d53c3a5ba06a0635d2c1e2acf46fb84cda01fdb6be957e2eba6beeaa932c",
+      "current_sha256": "3cdbc08bd01a5578943bba99d12586656618ebd1446020ae236c202f3c2968f4"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/kv_cache.py",
+      "original_sha256": "790a7cd991755a7269be4bf01be596a44f25200dcef0f537d6ef7cfbd5c02c2c",
+      "current_sha256": "6a8245aa514184577a3de9e163258cc0cb350e15f5d6066868df51784f7cd43d"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/mixture_of_experts.py",
+      "original_sha256": "879753fd76aabe93eb88ce477faca11fe2aa64620c0a521725ff1434a829a03e",
+      "current_sha256": "2bd45a60e6f1f3ff935fc7eca6d261cfe9b0d544586986240cbd79408140128c"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/quantization_manager.py",
+      "original_sha256": "e03de25cb31784add589649a80ac5eb66e194eeea4bf16a4e791db922b5276d4",
+      "current_sha256": "82b409b2b94cd596ff478aa4d3b3ba2a918c6ad5787cebd609cda22b26a2a683"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "original_sha256": "06b4bae0134e9eddbf6723d3628c2ad9cbf87aa73993cf6e3d550f9de5b54362",
+      "current_sha256": "9717b62c82f34c76346cf9193c36612ec55a693b46468c770b597ac64e49eee3"
+    },
+    {
+      "path": "src/neural_network_module/test/test_multi_head_attention.py",
+      "original_sha256": "2fa20908f7ef8ccc8daf6c8572f67e2c288c5a06517f3eca60f87ae4340e74d2",
+      "current_sha256": "2b7d1acced4649abb03aa1b31886056b0759c2c63031e72bc1e3477a0acdd3ab"
+    },
+    {
+      "path": "src/neural_network_module/test/test_neural_network_architecture_validation.py",
+      "original_sha256": "69c92ee0a3ae296f1b9336c916c75b5777f28345c5d4cdd550fd4959eeca349d",
+      "current_sha256": "ac7a373ac7d722c7ee1c3ed50867bbe86908a71fb0ea58a94ad78ba94102b54f"
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_decoder.py",
+      "original_sha256": "e55a13fbb2941592210dd5a73f416ebfb6f569b0374b22d42be289f6f73239bb",
+      "current_sha256": "089d3a7b3ac375799ea198247e3f23158a468e98d7e7c0de9831a255de47cac1"
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_manager.py",
+      "original_sha256": "6fc8cc099d921ee75bb446dafb244a4fb5e540b19952865c4ebd8c274f02442b",
+      "current_sha256": "581c313b74010cfa1b4d8c26b92bbfb948a72b5b56009452970fe84907f693ff"
+    },
+    {
+      "path": "tokenizer_management/bpe/tokenization/morphology.py",
+      "original_sha256": "a5c6186e92e33d118ec15608341b741c4df714e5af3c701d9a74a1d1f55b4be1",
+      "current_sha256": "9b82884fdb05f62ec1b1ad43386e1202ef4d4320f54731afce20be306ae6614c"
+    },
+    {
+      "path": "tokenizer_management/bpe/tokenization/syllabifier.py",
+      "original_sha256": "9a63576953068f3be5b49e2a48eeab6ffa85ee61b912c64bddac36fea547eae2",
+      "current_sha256": "009001c52641f391c5a39702d96ce8b64163b90c5489567effbe47b28dde3b3f"
+    },
+    {
+      "path": "tokenizer_management/core/tokenizer_core.py",
+      "original_sha256": "753dce7f9c337c23a7689734ef215bcd3280d7986471147f8b0b958ea44d78fe",
+      "current_sha256": "f104118ba5a9c1d4abfc27d7269248fe8ef81f18250a273b0bd3010692509972"
+    },
+    {
+      "path": "tokenizer_management/tests/test_bpe_decoder.py",
+      "original_sha256": "24cc410805f0a78deaa32da21f91dada29699cf71f0ccc0f39b0a6e59be06192",
+      "current_sha256": "944a95d04442c17adab97419334b7cffb33d98f4b31b7fabd16913cf639fca3d"
+    },
+    {
+      "path": "training_management/v2/core/loss_computation.py",
+      "original_sha256": "59d34237d8632a05fdea8338e15b1ac717800591f344a00648ec67a50cae2b0d",
+      "current_sha256": "6fa67bf95f5f739a5677eaa238aa7212b4ec7e75e8f98d544ef0316c4ff25c80"
+    },
+    {
+      "path": "training_management/v2/core/training_loop.py",
+      "original_sha256": "2ee2186b82cb1ae3356eaf0e3dd60f8ebfcf722908040f0f16765862e78120a5",
+      "current_sha256": "4a25cf5a0ef7f60ddc454adf84281fbd8ae3b096e8b936f712a114b3bb13f8f4"
+    },
+    {
+      "path": "training_management/v2/core/training_manager.py",
+      "original_sha256": "0fb6b330589232c388252bb9c50418fbea9c3f9f92bce93f032b733870e6da11",
+      "current_sha256": "7eaba3c62ad2e94be3d9a68664308959359ea2ecdfd3026a79b014a534f35ef2"
+    },
+    {
+      "path": "training_management/v2/utils/training_scheduler.py",
+      "original_sha256": "4ccb3811da1c23c66062ab3d8a01e8f187d2dcb41ca421f407665296c089c67b",
+      "current_sha256": "c19c139c198b1f3dfb80401378c9c3e1de661cdf5354b589c5ff585836f38688"
+    },
+    {
+      "path": "training_system/data_cache.py",
+      "original_sha256": "4ea0391309da6ff5d0b078cc3191f8fa2b439042c5175918675ccda8c749b87c",
+      "current_sha256": "c7b36a18b4baf171d752e33dcdee0bb52fc289bcde4bdb8b81b169307326a886"
+    },
+    {
+      "path": "training_system/prepare_cache.py",
+      "original_sha256": "49873a2c254b2fb4a38b912bb355b9f59fc0f847ee83a0ee2127f416771aabca",
+      "current_sha256": "a7c597bb1ff6eea7b3f8ca3dc0bb0fd344ff1986519cb234b4b7b285089d87e3"
+    },
+    {
+      "path": "training_system/train.py",
+      "original_sha256": "8d804cabb7f0cdb1bd157a8f8f95b25a1dd9ac29af26270bf283c998c794add9",
+      "current_sha256": "2308bd8b7f0d56a3876f3b21fd32e1d26e85dc025d7f0fa2f328bfff65a35829"
+    },
+    {
+      "path": "training_system/v2/core/config_manager.py",
+      "original_sha256": "0e292d5a89ff035933f9d5402f815a13134e1bf3c7118fcc4e9a478e47380bb3",
+      "current_sha256": "30b4ce5a24eb96015c2366c01d2392d9d67c4225f31ed9114cf61889a75f3962"
+    },
+    {
+      "path": "training_system/v2/core/criterion_manager.py",
+      "original_sha256": "7633f9be6cafa45ec4b52b5523c5dcfe36ca724c3d0d089934670c5e3d8157b1",
+      "current_sha256": "7e6441f3b5d472feefe7585e57602d1b5c1e6f7619ea089acac691fed0171d7b"
+    },
+    {
+      "path": "training_system/v2/core/training_service.py",
+      "original_sha256": "2cddace257e83d72f336d924d7feabc69fab755a92e8d0a243e545bfb267329e",
+      "current_sha256": "efe334993ac1a1e64c3802148d45587005406e7a8329b9fd3324fd6fad5017ef"
+    },
+    {
+      "path": "training_system/v3/core/config_manager_v3.py",
+      "original_sha256": "12b30b38e6665c9d78619542f424b8e17c6b5890a44d14150bb7dbe5fade87db",
+      "current_sha256": "da0c12625765d0810a2fbb0916fd5d6e872a717da803163ffef91cfb701a4b67"
+    },
+    {
+      "path": "training_system/v3/core/training_service_v3.py",
+      "original_sha256": "c63c9f481c43281214253b8ab4e5aed37bf0cfd4f3715ce3fb2f0daf1b3da125",
+      "current_sha256": "f4ca24602bcb6332b0cff6b92073a6a8a8428d8b678ff031f48cf3720d5308c6"
+    },
+    {
+      "path": "training_system/v3/data/cache_v3.py",
+      "original_sha256": "96315781a5184b03dfdb5e91b5df1683c5bef0af1d5c3f86edc44705fc0dbf18",
+      "current_sha256": "45b1f9e14d1e0746a7add35b3b1ca5542b70ee040d993afcf06b73b0f60b3c92"
+    },
+    {
+      "path": "training_system/v3/data/collator_v3.py",
+      "original_sha256": "2a0a3ea21e33e37ffd231da18797005722774c50991d094e0d2daf6cdd0f1df9",
+      "current_sha256": "1420f2322ccd40dc519c0b24067f20d470cf5fb8fe3cec19a23b2fae9aae0624"
+    },
+    {
+      "path": "training_system/v3/data/dataset_v3.py",
+      "original_sha256": "8afe11af3bfdb6bdb17c54f5d1e9b909b23dcdb578e81adb301f630f585702cc",
+      "current_sha256": "d35b84825b7f3d023d6d0a22322a84be48571be7200520a41719b2a134db9bbc"
+    }
+  ],
+  "syntax_errors": [],
+  "tokenizer_assets_unchanged": {
+    "vocab": true,
+    "merges": true
+  }
+}

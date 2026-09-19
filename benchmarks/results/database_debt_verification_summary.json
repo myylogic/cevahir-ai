@@ -1,0 +1,17 @@
+{
+  "passed": 116,
+  "failed": 0,
+  "warnings": 18,
+  "seconds": 17.12,
+  "scope": "tests/evolution; real file-backed SQLite ownership, JSON persistence and recent context selection",
+  "changed_python_files": [
+    "api/routes/v3/chat.py",
+    "chatting_management/components/session_manager.py",
+    "chatting_management/components/context_builder.py",
+    "chatting_management/storage/session_storage.py",
+    "chatting_management/storage/user_storage.py",
+    "chatting_management/storage/memory_storage.py",
+    "tests/evolution/test_api_contracts.py"
+  ],
+  "syntax_errors": []
+}

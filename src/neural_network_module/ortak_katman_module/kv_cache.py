@@ -26,7 +26,7 @@ MİMARİ:
                      Open/Closed (genişletilebilir),
                      Dependency Inversion (nn.Module abstraction'ına bağımlı)
 - Design Patterns: Cache Pattern (key-value cache)
-- Endüstri Standartları: GPT-4, Claude, Gemini KV cache standardı
+- Endüstri Standartları: Transformer KV cache standardı
 
 KULLANIM:
 - KV cache oluşturmak için
@@ -109,6 +109,10 @@ class KVCache:
         self.max_cache_len = max_cache_len
         self.device = device or torch.device("cpu")
         self.dtype = dtype or torch.float32
+        if max_cache_len <= 0:
+            raise ValueError("max_cache_len must be positive")
+        self.positions = torch.empty(0, dtype=torch.long, device=self.device)
+        self.attention_positions = self.positions
 
         # Eviction
         _valid_strategies = {"none", "sliding_window"}
@@ -188,87 +192,89 @@ class KVCache:
             key_out:   [B, H, cache_len, D] — Cached + yeni key.
             value_out: [B, H, cache_len, D] — Cached + yeni value.
         """
+        if key.ndim != 4 or key.shape != value.shape:
+            raise ValueError("key and value must have identical [B,H,T,D] shapes")
         B, H, new_len, D = key.shape
-
-        # Dinamik batch size: ilk çağrıda belirlenir
-        if not self._initialized:
-            self.batch_size = B
-            self._initialized = True
-        elif B != self.batch_size:
-            # Batch size değişti → buffer geçersiz, sıfırdan başla
-            self.logger.warning(
-                f"[V5] KVCache: batch_size değişti ({self.batch_size} → {B}), "
-                f"buffer yeniden oluşturuluyor."
-            )
-            self.key_cache = None
-            self.value_cache = None
-            self.cache_len = 0
-            self.batch_size = B
-
-        # Buffer'ı ilk çağrıda tahsis et (lazy allocation)
-        if self.key_cache is None:
-            self.key_cache = torch.zeros(
-                self.batch_size, H, self.max_cache_len, D,
-                device=self.device, dtype=self.dtype,
-            )
-            self.value_cache = torch.zeros(
-                self.batch_size, H, self.max_cache_len, D,
-                device=self.device, dtype=self.dtype,
-            )
-            self.cache_len = 0
-
-        # Toplam token sayacı
-        self._seen_tokens += new_len
-
-        if cache_position is not None:
-            # --- Pozisyon bazlı yazma (incremental generation) ---
-            # [V5] Bounds validation: sessiz OOB yazmaları önle
-            if cache_position.numel() > 0:
-                pos_min = int(cache_position.min().item())
-                pos_max = int(cache_position.max().item())
-                if pos_min < 0 or pos_max >= self.max_cache_len:
-                    raise ValueError(
-                        f"cache_position sınır dışı: [{pos_min}, {pos_max}] "
-                        f"— geçerli aralık [0, {self.max_cache_len - 1}]."
-                    )
-                max_pos = pos_max + 1
-                if max_pos > self.cache_len:
-                    self.cache_len = max_pos
-
-            self.key_cache[:, :, cache_position] = key.to(device=self.device, dtype=self.dtype)
-            self.value_cache[:, :, cache_position] = value.to(device=self.device, dtype=self.dtype)
-
+        if H != self.num_heads or D != self.head_dim:
+            raise ValueError("KV head shape differs from cache configuration")
+        if key.device != value.device or key.dtype != value.dtype:
+            raise ValueError("key/value dtype and device must match")
+        if (B != self.batch_size or key.device != self.device or key.dtype != self.dtype):
+            self.clear()
+            self.key_cache = self.value_cache = None
+            self.batch_size, self.device, self.dtype = B, key.device, key.dtype
+            self.positions = torch.empty(0, device=key.device, dtype=torch.long)
+        if cache_position is None:
+            positions = torch.arange(self._seen_tokens, self._seen_tokens + new_len,
+                                     device=key.device, dtype=torch.long)
         else:
-            # --- Append modu ---
-            new_cache_len = self.cache_len + new_len
+            if cache_position.ndim != 1 or cache_position.numel() != new_len:
+                raise ValueError("cache_position must contain one absolute position per input token")
+            if cache_position.dtype not in (torch.int32, torch.int64):
+                raise ValueError("cache_position must be integer")
+            positions = cache_position.to(device=key.device, dtype=torch.long)
+            if positions.numel() and (positions.min() < 0 or (positions[1:] <= positions[:-1]).any()):
+                raise ValueError("cache_position must be nonnegative and strictly increasing")
 
-            if new_cache_len > self.max_cache_len:
-                if self.eviction_strategy == "sliding_window":
-                    # [V5] StreamingLLM: yer aç, sonra yaz
-                    self._evict_sliding_window(new_len)
-                    new_cache_len = self.cache_len + new_len
-                else:
-                    raise RuntimeError(
-                        f"KVCache kapasitesi doldu: cache_len={self.cache_len}, "
-                        f"new_len={new_len}, max_cache_len={self.max_cache_len}. "
-                        f"Sonsuz generation için eviction_strategy='sliding_window' kullanın."
-                    )
+        # The usual decoding path only appends positions. Avoid sorting and
+        # copying all retained K/V tensors while there is spare capacity.
+        appending = not self.positions.numel() or not positions.numel() or int(positions[0]) > int(self.positions[-1])
+        if appending and self.cache_len + new_len <= self.max_cache_len and not torch.is_grad_enabled():
+            if self.key_cache is None:
+                shape = (B, H, self.max_cache_len, D)
+                self.key_cache = torch.zeros(shape, device=key.device, dtype=key.dtype)
+                self.value_cache = torch.zeros_like(self.key_cache)
+            end = self.cache_len + new_len
+            self.key_cache[:, :, self.cache_len:end].copy_(key)
+            self.value_cache[:, :, self.cache_len:end].copy_(value)
+            self.cache_len = end
+            self.positions = torch.cat((self.positions, positions))
+            self.attention_positions = self.positions
+            if positions.numel():
+                self._seen_tokens = max(self._seen_tokens, int(positions[-1]) + 1)
+            self._initialized = True
+            return self.get()
 
-            self.key_cache[:, :, self.cache_len:new_cache_len] = key.to(
-                device=self.device, dtype=self.dtype
-            )
-            self.value_cache[:, :, self.cache_len:new_cache_len] = value.to(
-                device=self.device, dtype=self.dtype
-            )
-            self.cache_len = new_cache_len
+        old_k, old_v = self.get()
+        old_positions = self.positions
+        if old_k is not None and len(old_positions):
+            # Explicit writes may replace retained positions, but never create
+            # zero-filled holes that would be mistaken for real context.
+            keep_old = ~torch.isin(old_positions, positions)
+            all_positions = torch.cat((old_positions[keep_old], positions))
+            all_key = torch.cat((old_k[:, :, keep_old], key), dim=2)
+            all_value = torch.cat((old_v[:, :, keep_old], value), dim=2)
+            order = torch.argsort(all_positions)
+            all_positions = all_positions[order]
+            all_key, all_value = all_key[:, :, order], all_value[:, :, order]
+        else:
+            all_positions, all_key, all_value = positions, key, value
 
-        self.logger.debug(
-            f"[V5] KVCache updated: cache_len={self.cache_len}, seen_tokens={self._seen_tokens}"
-        )
-        return (
-            self.key_cache[:, :, :self.cache_len],
-            self.value_cache[:, :, :self.cache_len],
-        )
+        total = all_positions.numel()
+        if total > self.max_cache_len and self.eviction_strategy == "none":
+            raise RuntimeError("KVCache capacity exceeded with eviction disabled")
+        if total > self.max_cache_len:
+            sinks = min(self.num_sink_tokens, total)
+            selected = torch.cat((torch.arange(sinks, device=key.device),
+                                  torch.arange(total - (self.max_cache_len - sinks), total,
+                                               device=key.device)))
+        else:
+            selected = torch.arange(total, device=key.device)
+        if self.key_cache is None:
+            shape = (B, H, self.max_cache_len, D)
+            self.key_cache = torch.zeros(shape, device=key.device, dtype=key.dtype)
+            self.value_cache = torch.zeros_like(self.key_cache)
+        self.cache_len = selected.numel()
+        self.key_cache[:, :, :self.cache_len].copy_(all_key[:, :, selected].detach())
+        self.value_cache[:, :, :self.cache_len].copy_(all_value[:, :, selected].detach())
+        self.positions = all_positions[selected].clone()
+        self.attention_positions = all_positions
+        if positions.numel():
+            self._seen_tokens = max(self._seen_tokens, int(positions[-1]) + 1)
+        self._initialized = True
+        # Attend to the complete incoming chunk before retaining bounded state.
+        # This preserves chunked prefill causality even if the chunk is oversized.
+        return all_key, all_value
 
     def get(self) -> Tuple[Optional[torch.Tensor], Optional[torch.Tensor]]:
         """Mevcut cache içeriğini döndür."""
@@ -292,6 +298,8 @@ class KVCache:
             self.value_cache.zero_()
         self.cache_len = 0
         self._seen_tokens = 0
+        self.positions = torch.empty(0, dtype=torch.long, device=self.device)
+        self.attention_positions = self.positions
         self.logger.debug("[V5] KVCache: Sıfırlandı (buffer yeniden kullanım için korundu).")
 
     def reset(self) -> None:
@@ -366,10 +374,10 @@ class KVCache:
             src_start = S + needed
             src_end   = self.cache_len
             self.key_cache[:, :, S : S + new_non_sink_len].copy_(
-                self.key_cache[:, :, src_start:src_end]
+                self.key_cache[:, :, src_start:src_end].clone()
             )
             self.value_cache[:, :, S : S + new_non_sink_len].copy_(
-                self.value_cache[:, :, src_start:src_end]
+                self.value_cache[:, :, src_start:src_end].clone()
             )
 
         old_cache_len = self.cache_len

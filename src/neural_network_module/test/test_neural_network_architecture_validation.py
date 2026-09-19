@@ -236,7 +236,7 @@ class TestModelArchitectureValidation:
         """
         ✅ KRİTİK TEST: Output layer normalization'ın doğru çalıştığını kontrol et
         
-        Output layer'dan önce normalization olmalı (GPT-2/3/4, LLaMA standardı).
+        Output layer'dan önce normalization olmalı .
         Bu, logits aralığını kontrol altına alır.
         """
         model = CevahirNeuralNetwork(
@@ -253,7 +253,7 @@ class TestModelArchitectureValidation:
         
         # ✅ ASSERT: Output normalization var
         assert hasattr(model, 'output_norm'), (
-            "Output layer normalization eksik! (GPT-2/3/4, LLaMA standardı)"
+            "Output layer normalization eksik! "
         )
         assert model.output_norm is not None, (
             "Output layer normalization None!"

@@ -107,6 +107,8 @@ class TrainingService:
             config: Config dictionary
         """
         self.config = dict(config)
+        from training_management.contracts import validate_training_backend
+        validate_training_backend(self.config)
         self.logger = service_logger
         
         # BPE yolları
@@ -166,7 +168,7 @@ class TrainingService:
             self.config["vocab_size"] = vocab_size  # Tekrar override et
             self.logger.info(f"[OK] Vocab size tekrar override edildi: {vocab_size}")
         
-        self.model_manager = ModelManager(self.config)
+        self.model_manager = ModelManager(self.config, tokenizer=self.tokenizer_core)
         
         # [OK] KRİTİK: ModelManager'ın config'ini açıkça güncelle (initialize() öncesi)
         mm_vocab_size = self.model_manager.config.get("vocab_size")
@@ -390,6 +392,13 @@ class TrainingService:
             self.logger.info("=" * 60)
         
         # V2 TrainingManager oluştur
+        from training_system.cache_identity import tokenizer_digest
+        training_config["tokenizer_identity"] = tokenizer_digest(self.tokenizer_core)
+        from model_management.checkpoint_contract import validate_tokenizer_identity
+        existing_identity = getattr(model_to_pass, "_tokenizer_identity", None)
+        if existing_identity is not None:
+            validate_tokenizer_identity(existing_identity, training_config["tokenizer_identity"])
+        model_to_pass._tokenizer_identity = training_config["tokenizer_identity"]
         training_manager = V2TrainingManager(
             model=model_to_pass,
             train_loader=train_loader,
@@ -729,7 +738,7 @@ class TrainingService:
                 searched_dirs = checkpoint_dirs_to_check + [os.path.dirname(old_model_path)]
                 self.logger.info(f"   Aranan dizinler: {', '.join(searched_dirs)}")
         except Exception as e:
-            self.logger.warning(f" Model yükleme hatası (devam ediliyor): {e}")
+            raise RuntimeError(f"Training checkpoint could not be restored: {checkpoint_path}") from e
     
     def prepare_from_cache(
         self,
@@ -876,43 +885,10 @@ class TrainingService:
             if self.logger:
                 self.logger.warning(f" [Veri doğrulama atlandı: {e}]")
         
-        # Cache'den gelen veri List formatında, Tensor'a çevir ve source_id kaldır
-        formatted_tensors = []
-        for item in formatted_data:
-            if len(item) == 3:
-                inp_list, tgt_list, _ = item  # source_id'yi kaldır
-            elif len(item) == 2:
-                inp_list, tgt_list = item
-            else:
-                if self.logger:
-                    self.logger.warning(f"[!] Geçersiz örnek formatı atlandı: len={len(item)}")
-                continue
-            
-            inp_tensor = torch.tensor(inp_list, dtype=torch.long, device="cpu")
-            tgt_tensor = torch.tensor(tgt_list, dtype=torch.long, device="cpu")
-            formatted_tensors.append((inp_tensor, tgt_tensor))
-        
-        # Basit train/val split
-        import random
-        split_seed = config.get("split_seed", 42)
-        train_ratio = config.get("train_val_split", 0.8)
-        
-        random.seed(split_seed)
-        indices = list(range(len(formatted_tensors)))
-        random.shuffle(indices)
-        
-        train_size = int(train_ratio * len(formatted_tensors))
-        train_indices = indices[:train_size]
-        val_indices = indices[train_size:]
-        
-        train_data = [formatted_tensors[i] for i in train_indices]
-        val_data = [formatted_tensors[i] for i in val_indices]
-        
-        if self.logger:
-            self.logger.info(
-                f" [3] Data prepared → Total: {len(formatted_tensors)}, "
-                f"Train: {len(train_data)}, Val: {len(val_data)}"
-            )
-        
+        from training_system.data_split import split_training_records
+        train_data, val_data = split_training_records(formatted_data,
+            float(config.get("train_val_split", .8)), int(config.get("split_seed", 42)),
+            int(config.get("pad_token_id", 0)))
+
         return train_data, val_data, vocab_size
 

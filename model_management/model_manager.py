@@ -143,8 +143,11 @@ class ModelManager:
         audio_processor: Optional[Any] = None,
         vision_processor: Optional[Any] = None,
     ) -> None:
-        self.config = dict(config)  # koruyucu kopya
         self.model_class = model_class or CevahirNeuralNetwork
+        # Preserve the public legacy mapping. Resolve defaults only when building
+        # the core, and expose that complete mapping separately.
+        self.config = dict(config)
+        self.effective_config = None
 
         # cihaz - Colab için güçlendirilmiş kontrol
         if device is not None:
@@ -222,7 +225,14 @@ class ModelManager:
         """
         if self.model_class is None:
             raise RuntimeError("model_class belirtilmeli veya src.neural_network import edilebilir olmalı.")
-        model = self._Initializer.build_model(self.model_class, {**self.config, "device": str(self._device)})
+        build_config = {**self.config, "device": str(self._device)}
+        if self.model_class is CevahirNeuralNetwork:
+            from .config_schema import normalize_model_config
+            if not any("vocab_size" in part for part in (self.config, self.config.get("arch", {}), self.config.get("model", {}))):
+                raise ValueError("vocab_size is required when building a model without a tokenizer")
+            build_config = normalize_model_config(build_config, legacy_profile="model_manager")
+        self.effective_config = build_config
+        model = self._Initializer.build_model(self.model_class, build_config)
         self.model = model
 
         # Model oluşturulur oluşturulmaz TB writer bağlı ise modele enjekte edelim
@@ -485,6 +495,8 @@ class ModelManager:
         # [OK] V4: KV Cache parametreleri (endüstri standardı: GPT-4, Claude, Gemini)
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
+        return_attention_weights: bool = False,
+        collect_diagnostics: bool = False,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
         model = _ensure(self.model, "model")
 
@@ -497,7 +509,7 @@ class ModelManager:
         use_no_grad = (inference is True)
 
         try:
-            with torch.set_grad_enabled(not use_no_grad):
+            with torch.set_grad_enabled(torch.is_grad_enabled() and not use_no_grad):
                 # Input'u device'a taşı
                 inputs_device = inputs.to(self.device)
                 # Mask varsa device'a taşı ve shape'i düzelt
@@ -510,18 +522,8 @@ class ModelManager:
                         # Padding mask: True = valid token, False = padding token
                         # Attention mask: True = mask (engelle), False = allow
                         # Her batch için: padding token'lara attention verilmemeli
-                        attention_mask = torch.zeros(batch_size, seq_len, seq_len, device=mask.device, dtype=torch.bool)
-                        for i in range(batch_size):
-                            # Valid token sayısını bul
-                            if mask.dtype == torch.bool:
-                                valid_len = int(mask[i].sum().item())
-                            else:
-                                valid_len = int((mask[i] > 0.5).sum().item())
-                            # Valid positions'da attention allow (False), padding'de mask (True)
-                            # Her query position için, padding key positions'ı mask'le
-                            attention_mask[i, :, :valid_len] = False  # Valid keys: allow
-                            if valid_len < seq_len:
-                                attention_mask[i, :, valid_len:] = True  # Padding keys: mask
+                        valid_keys = mask if mask.dtype == torch.bool else mask > 0.5
+                        attention_mask = (~valid_keys).unsqueeze(1).expand(batch_size, inputs_device.shape[1], seq_len)
                         mask = attention_mask
                 # Model forward (mask, causal_mask ve KV Cache parametreleri)
                 # [OK] V4: KV Cache desteği eklendi
@@ -529,34 +531,20 @@ class ModelManager:
                 # Neural Network.forward() imzası:
                 #   forward(x, mask=None, causal_mask=None, use_cache=False, cache_position=None)
                 
-                forward_params = {}
-                
-                # Mask parametresi - Neural Network'te var, her zaman geçir
-                if hasattr(model, "forward") and "mask" in model.forward.__code__.co_varnames:
-                    forward_params["mask"] = mask  # None olsa bile geçir (default None)
-                
-                # Causal mask parametresi - Neural Network'te var, her zaman geçir
-                if hasattr(model, "forward") and "causal_mask" in model.forward.__code__.co_varnames:
-                    forward_params["causal_mask"] = causal_mask  # None olsa bile geçir (default None)
-                
-                # [OK] V4: KV Cache parametreleri - Neural Network'te var, her zaman geçir
-                if hasattr(model, "forward") and "use_cache" in model.forward.__code__.co_varnames:
-                    forward_params["use_cache"] = use_cache  # False default, ama her zaman geçir
-                
-                if hasattr(model, "forward") and "cache_position" in model.forward.__code__.co_varnames:
-                    # Cache position'ı device'a taşı (None olsa bile)
-                    if cache_position is not None:
-                        cache_position = cache_position.to(self.device)
-                    forward_params["cache_position"] = cache_position  # None olsa bile geçir (default None)
-                
-                # Forward çağrısı - Tüm parametreleri geçir
-                # Neural Network'un forward metodunda default değerler var, bu yüzden
-                # tüm parametreleri geçirmek güvenli (None olsa bile)
-                if forward_params:
-                    outputs = model(inputs_device, **forward_params)
-                else:
-                    # Fallback: Eğer model.forward() parametreleri desteklemiyorsa
-                    outputs = model(inputs_device)
+                import inspect
+                signature = inspect.signature(model.forward)
+                accepts_kwargs = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in signature.parameters.values())
+                if cache_position is not None:
+                    cache_position = cache_position.to(self.device)
+                candidates = {
+                    "mask": mask, "causal_mask": causal_mask, "use_cache": use_cache,
+                    "cache_position": cache_position,
+                    "return_attention_weights": return_attention_weights,
+                    "collect_diagnostics": collect_diagnostics,
+                }
+                forward_params = {k: v for k, v in candidates.items()
+                    if accepts_kwargs or k in signature.parameters}
+                outputs = model(inputs_device, **forward_params)
 
             logits: torch.Tensor
             aux: Optional[torch.Tensor] = None
@@ -669,13 +657,20 @@ class ModelManager:
             epoch = int(self.config.get("current_epoch", 0))
 
         self.config["current_epoch"] = epoch
+        save_path = os.path.abspath(save_path)
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
+        from .checkpoint_contract import tokenizer_identity, validate_tokenizer_identity
+        current_identity = tokenizer_identity(self.tokenizer)
+        saved_identity = getattr(model, "_tokenizer_identity", None)
+        if saved_identity is not None:
+            validate_tokenizer_identity(saved_identity, current_identity)
+        model._tokenizer_identity = current_identity
         ModelSaver.save_model(
             model=model,
             optimizer=optimizer,
             scheduler=scheduler,
-            additional_info={**(additional_info or {}), "config": self.config, "epoch": epoch},
+            additional_info={**(additional_info or {}), "config": {**(self.effective_config or {}), **self.config}, "epoch": epoch, "tokenizer_identity": current_identity},
             save_dir=os.path.dirname(save_path),
             model_name=os.path.basename(save_path),
         )
@@ -695,102 +690,53 @@ class ModelManager:
         if map_location is None:
             map_location = self.device
 
-        if self.model is None:
-            self.build_model()
-        if self.optimizer is None:
-            self.build_optimizer()
-        if self.scheduler is None:
-            try:
-                self.build_scheduler()
-            except Exception:
-                pass
-
-        # PyTorch sürümlerinde weights_only opsiyonel olabilir
-        load_kwargs = {"map_location": map_location}
+        from .model_loader import _torch_load
+        from .checkpoint_contract import unpack_checkpoint, validate_model_identity, validate_state_shapes
+        checkpoint = _torch_load(load_path, torch.device(map_location), weights_only=weights_only)
         try:
-            if weights_only is not None:
-                checkpoint = torch.load(load_path, weights_only=bool(weights_only), **load_kwargs)  # type: ignore
-            else:
-                checkpoint = torch.load(load_path, **load_kwargs)
-        except TypeError:
-            checkpoint = torch.load(load_path, **load_kwargs)
-
-        try:
-            if isinstance(checkpoint, dict) and "state_dict" in checkpoint:
-                self.model.load_state_dict(checkpoint["state_dict"], strict=strict)
-
-                if self.optimizer is not None and checkpoint.get("optimizer_state") is not None and not weights_only:
-                    self.optimizer.load_state_dict(checkpoint["optimizer_state"])
-                    # [OK] Learning rate'i config'ten güncelle (checkpoint'teki eski LR'yi override et)
-                    new_lr = self.config.get("learning_rate")
-                    if new_lr is not None:
-                        for param_group in self.optimizer.param_groups:
-                            param_group["lr"] = float(new_lr)
-                        manager_logger.info(f"Learning rate güncellendi: {new_lr} (checkpoint'teki eski LR override edildi)")
-
-                if self.scheduler is not None and checkpoint.get("scheduler_state") is not None and not weights_only:
-                    try:
-                        self.scheduler.load_state_dict(checkpoint["scheduler_state"])  # type: ignore
-                    except Exception as e:
-                        manager_logger.warning(f"Scheduler state yüklenemedi: {e}")
-
-                add_info = checkpoint.get("additional_info") or {}
-                if isinstance(add_info, dict):
-                    self.config.update(add_info.get("config", {}))
-                    # [OK] Epoch bilgisini additional_info'dan veya direkt checkpoint'ten al
-                    epoch_from_add_info = add_info.get("epoch")
-                    if epoch_from_add_info is not None:
-                        self.config["current_epoch"] = int(epoch_from_add_info)
-                    else:
-                        self.config["current_epoch"] = int(self.config.get("current_epoch", 0))
-
-            elif isinstance(checkpoint, dict):
-                state = checkpoint.get("model_state_dict", checkpoint.get("state_dict", None))
-                if state is None:
-                    raise ValueError("Checkpoint içinde model ağırlıkları bulunamadı (state_dict/model_state_dict).")
-                self.model.load_state_dict(state, strict=strict)
-
-                if self.optimizer is not None and "optimizer_state_dict" in checkpoint and not weights_only:
-                    try:
-                        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-                        # [OK] Learning rate'i config'ten güncelle (checkpoint'teki eski LR'yi override et)
-                        new_lr = self.config.get("learning_rate")
-                        if new_lr is not None:
-                            for param_group in self.optimizer.param_groups:
-                                param_group["lr"] = float(new_lr)
-                            manager_logger.info(f"Learning rate güncellendi: {new_lr} (checkpoint'teki eski LR override edildi)")
-                    except (ValueError, KeyError, RuntimeError) as e:
-                        manager_logger.warning(f"⚠️ Optimizer state dict yüklenemedi: {e}")
-                        manager_logger.warning("⚠️ Model weights yüklendi, ancak optimizer state atlandı (yeniden eğitim gerekebilir)")
-                        # Optimizer state dict yüklenemese bile model weights yüklendi, devam et
-                if self.scheduler is not None and "scheduler_state_dict" in checkpoint and not weights_only:
-                    try:
-                        self.scheduler.load_state_dict(checkpoint["scheduler_state_dict"])  # type: ignore
-                    except Exception as e:
-                        manager_logger.warning(f"Scheduler state yüklenemedi: {e}")
-
-                if "config" in checkpoint:
-                    self.config.update(checkpoint["config"])
-                # [OK] Epoch bilgisini checkpoint'ten al (metadata veya direkt)
-                epoch_value = checkpoint.get("epoch")
-                if epoch_value is not None:
-                    self.config["current_epoch"] = int(epoch_value)
-                else:
-                    self.config["current_epoch"] = int(self.config.get("current_epoch", 0))
-
-            elif isinstance(checkpoint, nn.Module):
+            if isinstance(checkpoint, nn.Module):
+                from .checkpoint_contract import validate_tokenizer_identity, tokenizer_identity
+                validate_tokenizer_identity(getattr(checkpoint, "_tokenizer_identity", None), tokenizer_identity(self.tokenizer))
                 self.model = checkpoint.to(self.device)
-            else:
-                raise RuntimeError("Desteklenmeyen checkpoint formatı.")
-
-            manager_logger.info(f"Model yüklendi: {load_path} (epoch={self.config.get('current_epoch', 0)})")
-
-        except FileNotFoundError:
-            manager_logger.error(f"Model dosyası bulunamadı: {load_path}")
-            raise
-        except Exception as e:
-            manager_logger.error(f"Model yüklenemedi: {e}", exc_info=True)
-            raise RuntimeError("Model yükleme işlemi sırasında hata oluştu.") from e
+                self.optimizer = self.scheduler = None
+                self.clear_kv_cache()
+                return
+            state, opt_state, sched_state, meta = unpack_checkpoint(checkpoint)
+            from .checkpoint_contract import validate_tokenizer_identity, tokenizer_identity
+            validate_tokenizer_identity(meta.get("tokenizer_identity"), tokenizer_identity(self.tokenizer))
+            if self.model is None:
+                # Saved construction is authoritative for a new model. Existing
+                # models must match it before any live parameter is overwritten.
+                self.config = {**self.config, **(meta.get("config") or {})}
+                self.build_model()
+            validate_model_identity(self.model, meta.get("config"))
+            validate_state_shapes(self.model, state, strict)
+            if not weights_only:
+                if self.optimizer is None:
+                    self.build_optimizer()
+                if self.scheduler is None and sched_state is not None:
+                    self.build_scheduler()
+                # Validate optimizer/scheduler restore on isolated state first.
+                import copy
+                if opt_state is not None:
+                    copy.deepcopy(self.optimizer).load_state_dict(opt_state)
+                if sched_state is not None:
+                    if self.scheduler is None:
+                        raise ValueError("Checkpoint scheduler has no configured counterpart")
+                    copy.deepcopy(self.scheduler).load_state_dict(sched_state)
+            self.model.load_state_dict(state, strict=strict)
+            self.model._tokenizer_identity = meta.get("tokenizer_identity")
+            self.clear_kv_cache()
+            if not weights_only:
+                if opt_state is not None:
+                    self.optimizer.load_state_dict(opt_state)
+                if sched_state is not None:
+                    self.scheduler.load_state_dict(sched_state)
+            if meta.get("epoch") is not None:
+                self.config["current_epoch"] = int(meta["epoch"])
+            manager_logger.info(f"Model yüklendi: {load_path}")
+        except Exception as exc:
+            raise RuntimeError("Model yükleme işlemi sırasında hata oluştu.") from exc
 
 
     # ---------------------------------------------------------------------

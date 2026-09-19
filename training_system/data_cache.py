@@ -107,36 +107,9 @@ class DataCache:
         return hashlib.md5(key_string.encode()).hexdigest()
     
     def _get_data_dir_hash(self) -> str:
-        """Education klasöründeki dosyaların hash'ini hesapla - değişiklik kontrolü için"""
-        if not self.data_dir.exists():
-            return ""
-        
-        file_hashes = []
-        file_count = 0
-        
-        # Tüm dosyaları tara (JSON, TXT, DOCX)
-        for ext in [".json", ".txt", ".docx"]:
-            for file_path in self.data_dir.rglob(f"*{ext}"):
-                if file_path.is_file():
-                    file_count += 1
-                    # Dosya adı + boyut (mtime'i çıkardık - Colab upload'da değişebilir)
-                    # Sadece dosya adı ve boyutu kullan - taşınma/upload'da mtime değişir
-                    stat = file_path.stat()
-                    # Relative path kullan (absolute path platform farklılıkları yaratabilir)
-                    try:
-                        rel_path = os.path.relpath(file_path, self.data_dir)
-                    except ValueError:
-                        rel_path = file_path.name
-                    file_info = f"{rel_path}:{stat.st_size}"
-                    file_hashes.append(file_info)
-        
-        if not file_hashes:
-            return ""
-        
-        # Tüm hash'leri birleştir
-        combined = "|".join(sorted(file_hashes))
-        return hashlib.md5(combined.encode()).hexdigest()[:16]  # İlk 16 karakter yeterli
-    
+        from training_system.cache_identity import data_directory_digest
+        return data_directory_digest(self.data_dir)
+
     def _get_cache_path(self, cache_key: str, data_hash: str) -> Path:
         """Cache dosya yolu"""
         cache_filename = f"cached_data_{cache_key}_{data_hash}.pkl"
@@ -146,8 +119,8 @@ class DataCache:
         self,
         cache_key: str,
         data_hash: str,
-        allow_data_hash_mismatch: bool = True,  # [OK] YENİ: Drive'dan indirme durumunda data_hash farklı olabilir
-        allow_cache_key_mismatch: bool = True  # ✅ YENİ: Eğitim sırasında cache key uyuşmasa bile cache kullan (fallback)
+        allow_data_hash_mismatch: bool = False,
+        allow_cache_key_mismatch: bool = False
     ) -> Optional[List[Tuple[List[int], List[int]]]]:
         """Cache'den veri yükle"""
         if not self.cache_enabled:
@@ -155,124 +128,11 @@ class DataCache:
         
         cache_path = self._get_cache_path(cache_key, data_hash)
         
+        if allow_data_hash_mismatch or allow_cache_key_mismatch:
+            raise ValueError("Cache identity bypass is unsupported; regenerate data with the current tokenizer and configuration")
         if not cache_path.exists():
-            logger.info(f"[DataCache] Cache bulunamadı: {cache_path.name}")
-            # Debug: Mevcut cache dosyalarını listele ve neden eşleşmediğini göster
-            if self.cache_dir.exists():
-                existing_caches = list(self.cache_dir.glob("cached_data_*.pkl"))
-                if existing_caches:
-                    logger.info(f"[DataCache] Mevcut cache dosyaları ({len(existing_caches)} adet):")
-                    matched_cache = None
-                    for cache_file in existing_caches:
-                        # Cache dosya adı formatı: cached_data_{cache_key}_{data_hash}.pkl
-                        # cache_key = 32 karakter (MD5 hash), data_hash = 16 karakter
-                        name_without_ext = cache_file.stem  # cached_data_{cache_key}_{data_hash}
-                        if name_without_ext.startswith("cached_data_"):
-                            rest = name_without_ext[12:]  # {cache_key}_{data_hash}
-                            # Son 16 karakter data_hash (son _'dan sonra)
-                            # Önceki 32 karakter cache_key (eğer varsa)
-                            if "_" in rest:
-                                parts = rest.rsplit("_", 1)  # Son _'dan split
-                                if len(parts) == 2:
-                                    file_cache_key = parts[0]
-                                    file_data_hash = parts[1]
-                                    
-                                    # İlk 3'ünü göster
-                                    if len([c for c in existing_caches if c.stem.startswith("cached_data_")]) <= 3 or cache_file == existing_caches[0]:
-                                        logger.info(
-                                            f"  📁 {cache_file.name}\n"
-                                            f"     - Cache key: {file_cache_key[:16]}... (beklenen: {cache_key[:16]}...)\n"
-                                            f"     - Data hash: {file_data_hash} (beklenen: {data_hash})"
-                                        )
-                                    
-                                    # [OK] FALLBACK: Cache key eşleşiyorsa ama data_hash farklıysa
-                                    if file_cache_key == cache_key:
-                                        if file_data_hash == data_hash:
-                                            # Tam eşleşme - bu olmamalı çünkü zaten kontrol ettik
-                                            matched_cache = cache_file
-                                            break
-                                        elif allow_data_hash_mismatch:
-                                            # Cache key eşleşiyor, data_hash farklı (Drive'dan indirme durumu)
-                                            logger.warning(
-                                                f"[DataCache] ⚠️ Cache key eşleşiyor ama data_hash farklı!\n"
-                                                f"  - Cache key: [OK] Eşleşiyor\n"
-                                                f"  - Data hash: {file_data_hash} (beklenen: {data_hash})\n"
-                                                f"  - Bu durum Drive'dan indirme sırasında normal olabilir (dosya boyutu/metadata farklılıkları)\n"
-                                                f"  - Cache kullanılıyor: {cache_file.name}"
-                                            )
-                                            matched_cache = cache_file
-                                            break
-                                else:
-                                    if cache_file == existing_caches[0]:
-                                        logger.info(f"  📁 {cache_file.name}")
-                            else:
-                                if cache_file == existing_caches[0]:
-                                    logger.info(f"  📁 {cache_file.name} (eski format?)")
-                        else:
-                            if cache_file == existing_caches[0]:
-                                logger.info(f"  📁 {cache_file.name}")
-                    
-                    if len(existing_caches) > 3:
-                        logger.info(f"  ... ve {len(existing_caches) - 3} dosya daha")
-                    
-                    # Eğer cache key'e göre eşleşen cache bulunduysa, onu kullan
-                    if matched_cache:
-                        try:
-                            logger.info(f"[DataCache] Cache'den yükleniyor (data_hash mismatch): {matched_cache.name}")
-                            start_time = time.time()
-                            
-                            with open(matched_cache, "rb") as f:
-                                cached_data = pickle.load(f)
-                            
-                            load_time = time.time() - start_time
-                            logger.info(f"[DataCache] [OK] Cache yüklendi: {len(cached_data):,} örnek, {load_time:.2f}s")
-                            
-                            return cached_data
-                        except Exception as e:
-                            logger.warning(f"[DataCache] Cache yükleme hatası: {e}")
-                            return None
-                    
-                    # Cache key eşleşmedi - parametreler farklı
-                    # ✅ YENİ: Eğitim sırasında cache silmek yerine, mevcut cache'i kullanmayı dene (fallback)
-                    if allow_cache_key_mismatch:
-                        # En son oluşturulan cache'i kullan (en büyük dosya veya en yeni)
-                        fallback_cache = max(existing_caches, key=lambda p: p.stat().st_mtime)  # En son değiştirilmiş
-                        logger.warning(
-                            f"[DataCache] ⚠️ Cache key uyuşmuyor, ama fallback aktif. "
-                            f"En son cache kullanılıyor: {fallback_cache.name}\n"
-                            f"Uyarı: Parametreler farklı olabilir (max_seq_length, vocab_hash, vs.)\n"
-                            f"       Eğer sorun yaşarsan: python training_system/prepare_cache.py ile cache'i yeniden oluştur."
-                        )
-                        try:
-                            logger.info(f"[DataCache] Fallback cache yükleniyor: {fallback_cache.name}")
-                            start_time = time.time()
-                            
-                            with open(fallback_cache, "rb") as f:
-                                cached_data = pickle.load(f)
-                            
-                            load_time = time.time() - start_time
-                            logger.info(f"[DataCache] [OK] Fallback cache yüklendi: {len(cached_data):,} örnek, {load_time:.2f}s")
-                            
-                            return cached_data
-                        except Exception as e:
-                            logger.warning(f"[DataCache] Fallback cache yükleme hatası: {e}")
-                            return None
-                    else:
-                        # Fallback kapalı - strict mode
-                        logger.warning(
-                            "[DataCache] ⚠️ Cache key uyuşmuyor! "
-                            "Bu durum şu sebeplerden olabilir:\n"
-                            "  1. alignment_format parametresi değişti\n"
-                            "  2. vocab_hash değişti (vocab dosyası güncellendi)\n"
-                            "  3. max_seq_length veya diğer encoding parametreleri değişti\n"
-                            "  4. data_dir path'i farklı (absolute vs relative)\n"
-                            f"  5. {len(existing_caches)} cache dosyası var, hangisini kullanacağı belirsiz\n"
-                            "Çözüm: Cache'yi manuel olarak hazırla: python training_system/prepare_cache.py"
-                        )
-                else:
-                    logger.debug("[DataCache] Cache dizininde hiç cache dosyası yok")
             return None
-        
+
         try:
             logger.info(f"[DataCache] Cache'den yükleniyor: {cache_path.name}")
             start_time = time.time()
@@ -305,8 +165,10 @@ class DataCache:
             start_time = time.time()
             
             # Geçici dosya ile atomic write
-            temp_path = cache_path.with_suffix(".tmp")
-            with open(temp_path, "wb") as f:
+            import tempfile
+            fd, temporary = tempfile.mkstemp(prefix=cache_path.name, suffix=".tmp", dir=self.cache_dir)
+            temp_path = Path(temporary)
+            with os.fdopen(fd, "wb") as f:
                 pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
             
             # Atomic rename
@@ -319,6 +181,8 @@ class DataCache:
             return True
         except Exception as e:
             logger.error(f"[DataCache] Cache kaydetme hatası: {e}")
+            if "temp_path" in locals():
+                temp_path.unlink(missing_ok=True)
             return False
     
     def get_or_process(
@@ -349,20 +213,9 @@ class DataCache:
         Returns:
             (processed_data, from_cache)
         """
-        # Vocab hash (vocab değişirse cache invalid)
-        # Tüm vocab'ı hash'le - sadece ilk 1000 token yeterli değil!
-        vocab = tokenizer_core.get_vocab()
-        # Vocab'ın key'lerini ve ID'lerini hash'le (daha güvenilir)
-        vocab_items = []
-        for token, data in vocab.items():
-            if isinstance(data, dict):
-                token_id = data.get('id', 0)
-                vocab_items.append(f"{token}:{token_id}")
-            elif isinstance(data, int):
-                vocab_items.append(f"{token}:{data}")
-        vocab_str = "|".join(sorted(vocab_items))
-        vocab_hash = hashlib.md5(vocab_str.encode()).hexdigest()[:16]
-        
+        from training_system.cache_identity import tokenizer_digest
+        vocab_hash = tokenizer_digest(tokenizer_core)
+
         # Data dir hash (dosyalar değişirse cache invalid)
         data_hash = self._get_data_dir_hash()
         
@@ -396,7 +249,7 @@ class DataCache:
         
         # Cache'den yüklemeyi dene
         # ✅ YENİ: Eğitim sırasında cache key uyuşmasa bile cache kullan (fallback)
-        cached_data = self.get_cached_data(cache_key, data_hash, allow_cache_key_mismatch=True)
+        cached_data = self.get_cached_data(cache_key, data_hash)
         if cached_data is not None:
             return cached_data, True
         
@@ -617,8 +470,10 @@ class DataCache:
             start_time = time.time()
             
             # Geçici dosya ile atomic write
-            temp_path = cache_path.with_suffix(".tmp")
-            with open(temp_path, "wb") as f:
+            import tempfile
+            fd, temporary = tempfile.mkstemp(prefix=cache_path.name, suffix=".tmp", dir=self.cache_dir)
+            temp_path = Path(temporary)
+            with os.fdopen(fd, "wb") as f:
                 pickle.dump(corpus, f, protocol=pickle.HIGHEST_PROTOCOL)
             
             # Atomic rename
@@ -677,4 +532,3 @@ class DataCache:
         )
         
         return corpus, False
-

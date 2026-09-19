@@ -115,6 +115,8 @@ class TrainingManager:
         self.optimizer = optimizer
         self.criterion = criterion
         self.config = config
+        from training_management.contracts import validate_training_backend
+        validate_training_backend(config)
         self.start_epoch = int(start_epoch)
         
         # Device setup
@@ -267,6 +269,64 @@ class TrainingManager:
             "accuracy": [],
         }
         self.global_step = 0  # For TensorBoard step tracking
+        self.early_stopping_counter = 0
+
+    def _checkpoint_extra_state(self):
+        import random
+        import numpy as np
+        numpy_state = np.random.get_state()
+        return {
+            "format_version": 1,
+            "tokenizer_identity": self.config.get("tokenizer_identity"),
+            "scheduler": self.scheduler.state_dict() if self.scheduler is not None else None,
+            "loop": self.training_loop.state_dict(),
+            "best_val_loss": self.best_val_loss,
+            "early_stopping_counter": self.early_stopping_counter,
+            "rng": {
+                "python": random.getstate(),
+                "numpy": [numpy_state[0], numpy_state[1].tolist(), *numpy_state[2:]],
+                "torch": torch.get_rng_state(),
+                "cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],
+            },
+        }
+
+    def resume_from_checkpoint(self, path):
+        """Resume at the next epoch; legacy weights remain usable with an explicit warning."""
+        import random
+        import numpy as np
+        state = torch.load(path, map_location=self.device, weights_only=True)
+        from model_management.checkpoint_contract import unpack_checkpoint, validate_model_identity, validate_state_shapes
+        model_state, _, _, metadata = unpack_checkpoint(state)
+        from model_management.checkpoint_contract import validate_tokenizer_identity
+        validate_tokenizer_identity(metadata.get("tokenizer_identity"), self.config.get("tokenizer_identity"))
+        validate_model_identity(self.model, metadata.get("config"))
+        validate_state_shapes(self.model, model_state)
+        self.model.load_state_dict(model_state, strict=True)
+        if hasattr(self.model, "clear_kv_cache"):
+            self.model.clear_kv_cache()
+        if "optimizer_state_dict" in state:
+            self.optimizer.load_state_dict(state["optimizer_state_dict"])
+        self.start_epoch = int(state.get("epoch", 0)) + 1
+        self.training_history = state.get("training_history", self.training_history)
+        extra = state.get("extra_state", {})
+        if not extra:
+            self.logger.log_warning("Legacy checkpoint has no RNG/scheduler/scaler state; exact resume is unavailable")
+            return self.start_epoch
+        if self.scheduler is not None and extra.get("scheduler") is not None:
+            self.scheduler.load_state_dict(extra["scheduler"])
+        self.training_loop.load_state_dict(extra.get("loop", {}))
+        self.global_step = self.training_loop.optimizer_steps
+        self.best_val_loss = float(extra.get("best_val_loss", float("inf")))
+        self.early_stopping_counter = int(extra.get("early_stopping_counter", 0))
+        rng = extra.get("rng", {})
+        if rng:
+            random.setstate(rng["python"])
+            ns = rng["numpy"]
+            np.random.set_state((ns[0], np.asarray(ns[1], dtype=np.uint32), *ns[2:]))
+            torch.set_rng_state(rng["torch"].cpu())
+            if rng.get("cuda") and torch.cuda.is_available():
+                torch.cuda.set_rng_state_all([r.cpu() for r in rng["cuda"]])
+        return self.start_epoch
     
     def _is_warmup_finished(self) -> bool:
         """
@@ -329,11 +389,16 @@ class TrainingManager:
         # Training state
         train_loss = val_loss = None
         val_accuracy = None
-        early_stopping_counter = 0
+        early_stopping_counter = self.early_stopping_counter
         
         # Main training loop
         for epoch in range(self.start_epoch, self.start_epoch + self.epochs):
             self.current_epoch = epoch
+            sampler = getattr(self.train_loader, "batch_sampler", None)
+            if not hasattr(sampler, "set_epoch"):
+                sampler = getattr(self.train_loader, "sampler", None)
+            if hasattr(sampler, "set_epoch"):
+                sampler.set_epoch(epoch)
             
             self.logger.log_info(f"Epoch {epoch}/{self.start_epoch + self.epochs - 1} başladı.")
             
@@ -383,10 +448,7 @@ class TrainingManager:
             
             except Exception as e:
                 self.logger.log_error(f"[Epoch {epoch}] Eğitim/validasyon adımında hata: {e}", exc_info=True)
-                train_loss = float("inf")
-                val_loss = float("inf")
-                val_accuracy = 0.0
-                break
+                raise RuntimeError(f"Training failed at epoch {epoch}") from e
             
             # Analytics: Log epoch summary
             if self.training_analytics:
@@ -464,7 +526,10 @@ class TrainingManager:
                     if warmup_finished:
                         # Warmup bitmiş → ReduceLROnPlateau için metric-based step (epoch-based)
                         grad_norm_for_scheduler = avg_gradient_norm if math.isfinite(avg_gradient_norm) else None
-                        self.scheduler.step(metric=val_loss, gradient_norm=grad_norm_for_scheduler)
+                        if hasattr(self.scheduler, "step_epoch"):
+                            self.scheduler.step_epoch(metric=val_loss)
+                        else:
+                            self.scheduler.step(metric=val_loss, gradient_norm=grad_norm_for_scheduler)
                         all_lrs = [pg.get("lr", 0.0) for pg in self.optimizer.param_groups]
                         lr_value = max(all_lrs) if all_lrs else 0.0
                         self.logger.log_info(f"LR güncellendi (main): {float(lr_value):.8f} (AvgGradNorm={avg_gradient_norm:.4f})")
@@ -478,7 +543,7 @@ class TrainingManager:
                     if self.tensorboard_manager.enabled:
                         self.tensorboard_manager.log_scalar("LR", lr_value, epoch)
                 except Exception as e:
-                    self.logger.log_warning(f"[Epoch {epoch}] LR güncellenemedi: {e}")
+                    raise RuntimeError(f"Scheduler failed at epoch {epoch}") from e
             if lr_value is None and self.tensorboard_manager.enabled:
                 all_lrs = [pg.get("lr", 0.0) for pg in self.optimizer.param_groups]
                 lr_value = max(all_lrs) if all_lrs else 0.0
@@ -525,53 +590,28 @@ class TrainingManager:
                 except Exception as e:
                     self.logger.log_warning(f"[Epoch {epoch}] Epoch callback hatası: {e}")
             
-            # Checkpointing and early stopping
-            if val_loss < self.best_val_loss:
+            # Save the completed epoch, including the state needed by the next epoch.
+            is_best = val_loss < self.best_val_loss
+            if is_best:
                 self.best_val_loss = val_loss
-                try:
-                    # [DEBUG] Checkpoint kaydetmeden önce model instance kontrolü
-                    if self.model is not None:
-                        model_state_dict = self.model.state_dict()
-                        model_keys = list(model_state_dict.keys())
-                        model_type = type(self.model).__name__
-                        is_simple_model = (
-                            len(model_keys) == 3 and 
-                            all(k in model_keys for k in ["embed.weight", "proj.weight", "proj.bias"])
-                        )
-                        self.logger.log_info("=" * 60)
-                        self.logger.log_info(f"[CHECKPOINT DEBUG] [Epoch {epoch}] Checkpoint kaydetme öncesi model kontrolü:")
-                        self.logger.log_info(f"  Model Type: {model_type}")
-                        self.logger.log_info(f"  State Dict Keys: {len(model_keys)}")
-                        self.logger.log_info(f"  İlk 10 Key: {model_keys[:10]}")
-                        self.logger.log_info(f"  SimpleModel mi? {is_simple_model}")
-                        if is_simple_model:
-                            self.logger.log_error("  ⚠️ KRİTİK UYARI: SimpleModel instance'ı kaydediliyor!")
-                        else:
-                            self.logger.log_info("  ✅ CevahirNeuralNetwork instance'ı kaydediliyor")
-                        self.logger.log_info("=" * 60)
-                    
-                    # Save best model
-                    self.checkpoint_manager.save(
-                        model=self.model,
-                        optimizer=self.optimizer,
-                        epoch=epoch,
-                        training_history=self.training_history,
-                        metric=val_loss,
-                        is_best=True
-                    )
-                    self.logger.log_info(f"[Epoch {epoch}] [OK] Yeni en iyi val loss: {val_loss:.6f}. Model kaydedildi.")
-                    early_stopping_counter = 0
-                except Exception as e:
-                    self.logger.log_error(f"[Epoch {epoch}] Model kaydedilemedi: {e}")
+                early_stopping_counter = 0
             else:
                 early_stopping_counter += 1
-                self.logger.log_info(f"[Epoch {epoch}] Early stopping counter: {early_stopping_counter}/{self.early_stopping_patience}")
-                
-                if early_stopping_counter >= self.early_stopping_patience:
-                    stop_msg = f"[Epoch {epoch}] Erken durdurma: {self.early_stopping_patience} epoch boyunca gelişme yok."
-                    self.logger.log_info(stop_msg)
-                    break
-        
+            self.early_stopping_counter = early_stopping_counter
+            self.global_step = self.training_loop.optimizer_steps
+            self.checkpoint_manager.save(
+                model=self.model,
+                optimizer=self.optimizer,
+                epoch=epoch,
+                training_history=self.training_history,
+                metric=val_loss,
+                is_best=is_best,
+                extra_state=self._checkpoint_extra_state(),
+            )
+            if early_stopping_counter >= self.early_stopping_patience:
+                self.logger.log_info(f"Early stopping after epoch {epoch}")
+                break
+
         # Close TensorBoard
         if self.tensorboard_manager.enabled:
             self.tensorboard_manager.close()

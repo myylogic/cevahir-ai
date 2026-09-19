@@ -1,0 +1,12 @@
+{
+  "date": "2026-09-20",
+  "scope": "tests/evolution",
+  "command": "python -m pytest tests/evolution -q",
+  "tests": 158,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "warnings": 18,
+  "result": "passed",
+  "note": "Selected core and lifecycle regressions; not the entire historical repository suite. Original local machine paths and hostname are omitted from published evidence."
+}

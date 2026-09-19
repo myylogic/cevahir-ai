@@ -41,7 +41,7 @@ class DatabaseConfig:
     pool_recycle: int = field(default_factory=lambda: int(os.getenv("DB_POOL_RECYCLE", "3600")))  # 1 hour
     
     # SQLite Configuration (Development only)
-    sqlite_path: Optional[Path] = field(default_factory=lambda: Path("data/cevahir.db") if os.getenv("DB_TYPE", "").lower() == "sqlite" else Path("data/cevahir.db"))
+    sqlite_path: Optional[Path] = field(default_factory=lambda: Path(os.getenv("DB_SQLITE_PATH", "data/cevahir.db")))
     
     # Connection String Options
     echo: bool = field(default_factory=lambda: os.getenv("DB_ECHO", "False").lower() == "true")

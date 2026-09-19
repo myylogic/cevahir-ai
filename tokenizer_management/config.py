@@ -706,6 +706,9 @@ ROOT_OVERRIDES = {
 # Hardcoded değerler yerine buradan alınmalıdır
 
 BPE_DETAILED_CONFIG: Dict = {
+    # Preserve legacy token IDs, but expose characters lost before encoding.
+    # "error" rejects lossy input; "ignore" explicitly requests legacy silence.
+    "text_loss_policy": "warn",
     # ============================================================================
     # VOCAB STRATEJİSİ (SABİT VOCAB) - KRİTİK!
     # ============================================================================

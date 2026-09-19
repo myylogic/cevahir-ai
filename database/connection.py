@@ -58,12 +58,24 @@ class DatabaseConnection:
         if hasattr(self, '_initialized') and self._initialized:
             return
         
-        self.config = DatabaseConfig()
+        # Validate connection settings when a database is actually requested.
+        # Importing ORM models or an app factory must not require credentials.
+        self._config = None
         self._engine = None
         self._session_factory = None
         self._initialized = True
         
-        logger.info(f"DatabaseConnection initialized (type: {self.config.db_type})")
+        logger.debug("DatabaseConnection created; initialization is lazy")
+
+    @property
+    def config(self):
+        if self._config is None:
+            self._config = DatabaseConfig()
+        return self._config
+
+    @config.setter
+    def config(self, value):
+        self._config = value
     
     def initialize(self) -> None:
         """

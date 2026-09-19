@@ -72,6 +72,8 @@ class ConfigManager:
         unk_token_id = special_ids.get("<UNK>", 3)
         
         config = {
+            "training_backend": str(base_config.get("training_backend", "v2")),
+            "precision": str(base_config.get("precision", "auto")),
             "vocab_size": vocab_size,
             "epochs": int(base_config.get("epochs", 10)),
             "batch_size": int(base_config.get("batch_size", 8)),
@@ -105,4 +107,3 @@ class ConfigManager:
             self.logger.debug(f"V2 TrainingManager config hazırlandı: {len(config)} parametre")
         
         return config
-

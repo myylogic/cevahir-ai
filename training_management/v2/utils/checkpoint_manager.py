@@ -39,6 +39,8 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 
 from __future__ import annotations
 
+from model_management.checkpoint_contract import model_config
+
 import os
 import io
 import json
@@ -173,6 +175,8 @@ class CheckpointManager:
         payload: Dict[str, Any] = {
             "epoch": int(epoch),
             "model_state_dict": model.state_dict(),
+                "model_config": model_config(model),
+                "tokenizer_identity": getattr(model, "_tokenizer_identity", None),
             "training_history": training_history or {},
             "metric": metric,
             "saved_at": _now_ts(),
@@ -236,6 +240,7 @@ class CheckpointManager:
         map_location: Optional[str] = None,
         load_optimizer: bool = True,
         strict: bool = True,
+        tokenizer=None,
     ) -> Tuple[Optional[int], Dict[str, Any]]:
         """
         Checkpoint yükle.
@@ -259,7 +264,15 @@ class CheckpointManager:
         # doğrulama
         self._validate_payload(ckpt, required_keys=["model_state_dict", "epoch"])
 
-        model.load_state_dict(ckpt["model_state_dict"], strict=strict)
+        from model_management.checkpoint_contract import unpack_checkpoint, validate_model_identity, validate_state_shapes
+        state, _, _, metadata = unpack_checkpoint(ckpt)
+        from model_management.checkpoint_contract import validate_tokenizer_identity, tokenizer_identity
+        validate_tokenizer_identity(metadata.get("tokenizer_identity"), tokenizer_identity(tokenizer))
+        validate_model_identity(model, metadata.get("config"))
+        validate_state_shapes(model, state, strict)
+        model.load_state_dict(state, strict=strict)
+        if hasattr(model, "clear_kv_cache"):
+            model.clear_kv_cache()
         if load_optimizer and optimizer is not None and "optimizer_state_dict" in ckpt:
             try:
                 optimizer.load_state_dict(ckpt["optimizer_state_dict"])

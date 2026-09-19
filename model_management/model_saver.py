@@ -39,6 +39,8 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 
 from __future__ import annotations
 
+from model_management.checkpoint_contract import model_config
+
 import hashlib
 import io
 import json
@@ -92,48 +94,19 @@ def _atomic_write_bytes(path: str, data: bytes) -> None:
 
 
 def _torch_save_atomic(obj: Any, path: str) -> None:
-    """torch.save'i atomik şekilde uygular."""
-    # torch.save doğrudan dosyaya yazar; biz önce bytelara serileştiriyoruz
-    # Not: Bu yaklaşım büyük checkpointlerde RAM kullanır; çok büyük dosyalar için
-    # doğrudan torch.save(path) tercih edilebilir. İhtiyaca göre flag eklenebilir.
-    import io
-    
-    #  CUDA ASSERT FIX: CUDA context bozulmuşsa CPU'ya taşıyarak kaydet
+    """Stream to a unique sibling file and publish only a complete checkpoint."""
+    directory = os.path.dirname(os.path.abspath(path))
+    os.makedirs(directory, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=".checkpoint-", suffix=".tmp", dir=directory)
     try:
-        buf = io.BytesIO()
-        torch.save(obj, buf)
-        _atomic_write_bytes(path, buf.getvalue())
-    except (RuntimeError, torch.cuda.CudaError) as e:
-        if "CUDA" in str(e) or "cuda" in str(e).lower():
-            # CUDA hatası: obj'deki tensor'ları CPU'ya taşı
-            saver_logger.warning(f"CUDA hatası tespit edildi, CPU'ya taşıyarak kaydediliyor: {e}")
-            try:
-                # Obj bir dict ise, içindeki tensor'ları CPU'ya taşı
-                if isinstance(obj, dict):
-                    cpu_obj = {}
-                    for key, value in obj.items():
-                        if isinstance(value, torch.Tensor):
-                            cpu_obj[key] = value.cpu()
-                        elif isinstance(value, dict):
-                            # Nested dict (state_dict gibi)
-                            cpu_obj[key] = {k: v.cpu() if isinstance(v, torch.Tensor) else v for k, v in value.items()}
-                        else:
-                            cpu_obj[key] = value
-                    obj = cpu_obj
-                elif isinstance(obj, torch.nn.Module):
-                    # Model ise state_dict'i CPU'ya taşı
-                    obj = {k: v.cpu() if isinstance(v, torch.Tensor) else v for k, v in obj.state_dict().items()}
-                
-                # CPU'da tekrar dene
-                buf = io.BytesIO()
-                torch.save(obj, buf)
-                _atomic_write_bytes(path, buf.getvalue())
-                saver_logger.info(f"Model CPU'ya taşındıktan sonra başarıyla kaydedildi: {path}")
-            except Exception as e2:
-                saver_logger.error(f"CPU'ya taşıma sonrası kayıt başarısız: {e2}", exc_info=True)
-                raise RuntimeError("Model kaydedilemedi (CUDA hatası ve CPU fallback başarısız).") from e2
-        else:
-            raise
+        with os.fdopen(fd, "wb") as stream:
+            torch.save(obj, stream)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def _generate_filename(epoch: Optional[int], template: str) -> str:
@@ -284,6 +257,8 @@ class ModelSaver:
             # Checkpoint objesi
             ckpt = {
                 "model_state_dict": model.state_dict(),
+                "model_config": model_config(model),
+                "tokenizer_identity": getattr(model, "_tokenizer_identity", None),
                 "optimizer_state_dict": optimizer.state_dict() if optimizer else None,
                 "scheduler_state_dict": scheduler.state_dict() if scheduler else None,
                 "epoch": epoch,
@@ -414,13 +389,18 @@ class ModelSaver:
         try:
             _ensure_dir(save_dir)
             path = os.path.join(save_dir, model_name)
+            model_state = model.state_dict()
+            optimizer_state = optimizer.state_dict() if optimizer else None
+            scheduler_state = scheduler.state_dict() if scheduler else None
             ckpt = {
-                "state_dict": model.state_dict(),  # Geriye dönük uyumluluk için
-                "model_state_dict": model.state_dict(),
-                "optimizer_state": optimizer.state_dict() if optimizer else None,  # Geriye dönük uyumluluk için
-                "optimizer_state_dict": optimizer.state_dict() if optimizer else None,
-                "scheduler_state": scheduler.state_dict() if scheduler else None,  # Geriye dönük uyumluluk için
-                "scheduler_state_dict": scheduler.state_dict() if scheduler else None,
+                "state_dict": model_state,  # Geriye dönük uyumluluk için
+                "model_state_dict": model_state,
+                "model_config": model_config(model),
+                "tokenizer_identity": getattr(model, "_tokenizer_identity", None),
+                "optimizer_state": optimizer_state,  # Geriye dönük uyumluluk için
+                "optimizer_state_dict": optimizer_state,
+                "scheduler_state": scheduler_state,  # Geriye dönük uyumluluk için
+                "scheduler_state_dict": scheduler_state,
                 "epoch": additional_info.get("epoch") if additional_info else None,
                 "config": additional_info.get("config") if additional_info else None,
                 "additional_info": additional_info,  # Test'lerde additional_info olarak bekleniyor

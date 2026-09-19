@@ -182,7 +182,20 @@ class ToolExecutorV2(ToolExecutor):
             if not isinstance(parameters, dict):
                 raise ValidationError("parameters must be a dictionary.")
             
-            # Execute tool
+            # Python signature validation catches missing and unknown arguments.
+            import inspect
+            inspect.signature(tool_func).bind(**parameters)
+            schema = self._tool_schemas.get(tool_name, {}).get("parameters", {})
+            properties = schema.get("properties", schema)
+            types = {"string": str, "integer": int, "number": (int, float), "boolean": bool, "object": dict, "array": list}
+            for key, value in parameters.items():
+                definition = properties.get(key, {})
+                expected = types.get(definition.get("type")) if isinstance(definition, dict) else None
+                if expected and (not isinstance(value, expected) or isinstance(value, bool) and definition.get("type") in ("integer", "number")):
+                    raise ValidationError(f"Invalid type for tool parameter {key}")
+            for required in schema.get("required", []):
+                if required not in parameters:
+                    raise ValidationError(f"Missing tool parameter {required}")
             result = tool_func(**parameters)
             
             # Record success
@@ -281,45 +294,25 @@ class ToolExecutorV2(ToolExecutor):
             Returns:
                 Calculation result as string
             """
-            try:
-                # Basic safety: only allow simple math operations
-                allowed_chars = set("0123456789+-*/.() ")
-                if not all(c in allowed_chars for c in operation):
-                    raise ValueError("Invalid characters in operation")
-                
-                result = eval(operation)  # Safe for simple math
-                return str(result)
-            except Exception as e:
-                return f"Error: {e}"
-        
-        # Search tool (placeholder)
-        def search(query: str, **kwargs) -> str:
-            """
-            Search tool (placeholder).
-            
-            Args:
-                query: Search query
-                
-            Returns:
-                Search results as string
-            """
-            # Placeholder - in real implementation, this would call a search API
-            return f"Search results for '{query}' (placeholder)"
-        
-        # File tool (placeholder)
-        def file_read(path: str, **kwargs) -> str:
-            """
-            File read tool (placeholder).
-            
-            Args:
-                path: File path
-                
-            Returns:
-                File contents as string
-            """
-            # Placeholder - in real implementation, this would read a file
-            return f"File contents for '{path}' (placeholder)"
-        
+            import ast
+            import operator
+            if not isinstance(operation, str) or len(operation) > 200:
+                raise ValueError("Calculator expression must be at most 200 characters")
+            tree = ast.parse(operation, mode="eval")
+            if sum(1 for _ in ast.walk(tree)) > 64:
+                raise ValueError("Calculator expression is too complex")
+            binary = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv}
+            def evaluate(node):
+                if isinstance(node, ast.Constant) and type(node.value) in (int, float):
+                    return node.value
+                if isinstance(node, ast.BinOp) and type(node.op) in binary:
+                    return binary[type(node.op)](evaluate(node.left), evaluate(node.right))
+                if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.USub, ast.UAdd)):
+                    value = evaluate(node.operand)
+                    return -value if isinstance(node.op, ast.USub) else value
+                raise ValueError("Only numbers and + - * / are supported")
+            return str(evaluate(tree.body))
+
         # Register tools
         if "calculator" in (self.cfg.tools.allow or []):
             self.register_tool(
@@ -336,35 +329,8 @@ class ToolExecutorV2(ToolExecutor):
                 }
             )
         
-        if "search" in (self.cfg.tools.allow or []):
-            self.register_tool(
-                "search",
-                search,
-                schema={
-                    "description": "Search tool for finding information",
-                    "parameters": {
-                        "query": {
-                            "type": "string",
-                            "description": "Search query"
-                        }
-                    }
-                }
-            )
-        
-        if "file" in (self.cfg.tools.allow or []):
-            self.register_tool(
-                "file",
-                file_read,
-                schema={
-                    "description": "File read tool",
-                    "parameters": {
-                        "path": {
-                            "type": "string",
-                            "description": "File path to read"
-                        }
-                    }
-                }
-            )
+        # Search/file are supplied by callers through register_tool. Advertising
+        # placeholder results as successful tool execution is not supported.
 
 
 __all__ = ["ToolExecutorV2", "ToolMetrics"]

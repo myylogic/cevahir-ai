@@ -680,7 +680,7 @@ class TestForwardReturnStructure:
     def test_attn_weights_sum_near_one_per_query(self, minimal_model, batch_minimal):
         """attn_weights (varsa) her (b,h,t) için son eksende toplam ≈ 1 (softmax); bazı implarda ölçekli dönebilir."""
         with torch.no_grad():
-            _, attn_weights = minimal_model(batch_minimal)
+            _, attn_weights = minimal_model(batch_minimal, return_attention_weights=True)
         if attn_weights is None:
             pytest.skip("Model attention weights döndürmüyor (örn. Flash Attention)")
         row_sums = attn_weights.sum(dim=-1)
@@ -1111,7 +1111,7 @@ class TestAttentionWeightsValidity:
     def test_attention_weights_no_nan_inf(self, minimal_model, batch_minimal):
         """Dönen attn_weights (varsa) NaN/Inf içermemeli."""
         with torch.no_grad():
-            _, attn_weights = minimal_model(batch_minimal)
+            _, attn_weights = minimal_model(batch_minimal, return_attention_weights=True)
         if attn_weights is None:
             pytest.skip("Model attention weights döndürmüyor")
         assert not torch.isnan(attn_weights).any().item(), "Attention weights NaN"
@@ -1120,7 +1120,7 @@ class TestAttentionWeightsValidity:
     def test_attention_weights_non_negative(self, minimal_model, batch_minimal):
         """Attention weights (varsa) negatif olmamalı (softmax çıkışı)."""
         with torch.no_grad():
-            _, attn_weights = minimal_model(batch_minimal)
+            _, attn_weights = minimal_model(batch_minimal, return_attention_weights=True)
         if attn_weights is None:
             pytest.skip("Model attention weights döndürmüyor")
         assert (attn_weights >= -1e-6).all().item(), "Attention weights negatif"
@@ -1201,7 +1201,7 @@ class TestCausalAttentionWeightsStructure:
         if not getattr(minimal_model, "causal_mask", True):
             pytest.skip("Causal mask kapalı")
         with torch.no_grad():
-            _, attn_weights = minimal_model(batch_minimal)
+            _, attn_weights = minimal_model(batch_minimal, return_attention_weights=True)
         if attn_weights is None:
             pytest.skip("Model attention weights döndürmüyor")
         B, H, T, _ = attn_weights.shape
@@ -1473,7 +1473,7 @@ class TestAttentionWeightsNotDegenerate:
     def test_attention_weights_not_all_uniform(self, minimal_model, batch_minimal):
         """En az bir (b,h,t) pozisyonunda max attn ağırlığı > 1.2/T (uniform değil)."""
         with torch.no_grad():
-            _, attn_weights = minimal_model(batch_minimal)
+            _, attn_weights = minimal_model(batch_minimal, return_attention_weights=True)
         if attn_weights is None:
             pytest.skip("Attention weights döndürülmüyor")
         B, H, T, S = attn_weights.shape

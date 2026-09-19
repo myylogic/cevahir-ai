@@ -37,6 +37,8 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from contextvars import ContextVar
+
 from typing import Optional, Dict, Any
 import time
 
@@ -94,9 +96,25 @@ class TracingMiddleware(BaseMiddleware):
         self.sample_rate = sample_rate
         
         # Current trace per request
-        self._current_trace: Optional[Trace] = None
-        self._current_span: Optional[Span] = None
+        self._trace_var = ContextVar(f"trace_{id(self)}", default=None)
+        self._span_var = ContextVar(f"span_{id(self)}", default=None)
     
+    @property
+    def _current_trace(self):
+        return self._trace_var.get()
+
+    @_current_trace.setter
+    def _current_trace(self, value):
+        self._trace_var.set(value)
+
+    @property
+    def _current_span(self):
+        return self._span_var.get()
+
+    @_current_span.setter
+    def _current_span(self, value):
+        self._span_var.set(value)
+
     def _should_sample(self) -> bool:
         """Determine if request should be sampled"""
         if not self.enabled:
@@ -110,6 +128,8 @@ class TracingMiddleware(BaseMiddleware):
         request: CognitiveInput,
     ) -> tuple[CognitiveState, CognitiveInput]:
         """Start trace before processing"""
+        self._current_trace = None
+        self._current_span = None
         if not self._should_sample():
             return state, request
         
@@ -191,6 +211,8 @@ class TracingMiddleware(BaseMiddleware):
         response.metadata["_trace_id"] = self._current_trace.trace_id
         response.metadata["_span_id"] = self._current_span.context.span_id
         
+        self._current_trace = None
+        self._current_span = None
         return response
     
     def _on_error(
@@ -223,7 +245,8 @@ class TracingMiddleware(BaseMiddleware):
         
         # Clear context
         clear_trace_context()
-        
+        self._current_trace = None
+        self._current_span = None
         return None
     
     def create_child_span(

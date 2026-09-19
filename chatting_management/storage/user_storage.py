@@ -170,7 +170,7 @@ class UserStorage:
                     raise UserNotFoundError(f"User not found: {user_id}")
                 
                 # Merge preferences
-                current_prefs = user.preferences or {}
+                current_prefs = dict(user.preferences or {})
                 current_prefs.update(preferences)
                 user.preferences = current_prefs
                 

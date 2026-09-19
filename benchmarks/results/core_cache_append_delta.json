@@ -1,0 +1,257 @@
+{
+  "BASELINE": {
+    "schema_version": 1,
+    "label": "repaired",
+    "environment": {
+      "python": "3.14.3",
+      "torch": "2.10.0+cpu",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "device": "cpu",
+      "threads": 1
+    },
+    "configuration": {
+      "learning_rate": 0.0002,
+      "dropout": 0.0,
+      "vocab_size": 128,
+      "embed_dim": 32,
+      "seq_proj_dim": 32,
+      "num_heads": 4,
+      "num_layers": 2,
+      "ffn_dim": 64,
+      "pe_max_len": 64,
+      "max_cache_len": 64,
+      "device": "cpu",
+      "log_level": 50,
+      "use_gradient_checkpointing": false,
+      "use_kv_cache": true,
+      "use_flash_attention": false,
+      "use_pytorch_sdpa": true,
+      "num_kv_heads": 4,
+      "use_moe": false,
+      "num_experts": 4,
+      "moe_top_k": 2
+    },
+    "seed": 42,
+    "warmup": 2,
+    "measurement_steps": 5,
+    "source_sha256": "28d99865f3d3c3f56b96218272cee7561e7e728db0bdc541c2cc01cff091518e",
+    "data": {
+      "kind": "seeded synthetic tokens",
+      "sha256": "8306e37c6cf75f322fa4348777722832d2ede71f5b4e7bbf3b77df8b78904747",
+      "language_quality_evaluation": false
+    },
+    "metrics": {
+      "total_parameters": 24928,
+      "trainable_parameters": 24800,
+      "active_parameters_per_token_estimate": 24928,
+      "forward_flops_per_token_estimate": 53248.0,
+      "gpu_allocated_bytes": null,
+      "gpu_peak_allocated_bytes": null,
+      "kv_cache_bytes_per_token": 512.0,
+      "kv_cache_allocated_bytes": 32768,
+      "prefill_tokens_per_second": 2341.2350015321886,
+      "decode_tokens_per_second": 97.43763382514258,
+      "training_tokens_per_second": 2796.0052050563954,
+      "forward_latency_ms": 2.874600002542138,
+      "backward_latency_ms": 2.257100015413016,
+      "validation_loss": 4.881231307983398,
+      "perplexity": 131.7928415979987,
+      "gradient_norm": 1.4339177846908568,
+      "nan_inf_occurrences": 0,
+      "router_expert_utilization": null,
+      "router_entropy": null,
+      "attention_entropy": 1.6273667812347412,
+      "checkpoint_bytes": 324135,
+      "cache_equivalence_max_abs_error": 1.4901161193847656e-07
+    },
+    "notes": [
+      "GPU metrics are null on CPU; router metrics null for dense FFN.",
+      "Active parameters estimate includes dense/tied weights plus top-k experts, not unique embedding row accesses.",
+      "FLOPs counts observed linear work and dense QK/AV matmuls; excludes normalization, nonlinearity, rotary and optimizer work.",
+      "Attention entropy is a separate manual diagnostic. No claim about trained language quality or GPU speed."
+    ]
+  },
+  "EXPERIMENT": {
+    "schema_version": 1,
+    "label": "cache_append_repaired",
+    "environment": {
+      "python": "3.14.3",
+      "torch": "2.10.0+cpu",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "device": "cpu",
+      "threads": 1
+    },
+    "configuration": {
+      "learning_rate": 0.0002,
+      "dropout": 0.0,
+      "vocab_size": 128,
+      "embed_dim": 32,
+      "seq_proj_dim": 32,
+      "num_heads": 4,
+      "num_layers": 2,
+      "ffn_dim": 64,
+      "pe_max_len": 64,
+      "max_cache_len": 64,
+      "device": "cpu",
+      "log_level": 50,
+      "use_gradient_checkpointing": false,
+      "use_kv_cache": true,
+      "use_flash_attention": false,
+      "use_pytorch_sdpa": true,
+      "num_kv_heads": 4,
+      "use_moe": false,
+      "num_experts": 4,
+      "moe_top_k": 2
+    },
+    "seed": 42,
+    "warmup": 2,
+    "measurement_steps": 5,
+    "source_sha256": "fc1f9615b6524e00406409e36a7eca3a4e63b978fb407cec0baa5707d0fb0e0b",
+    "data": {
+      "kind": "seeded synthetic tokens",
+      "sha256": "8306e37c6cf75f322fa4348777722832d2ede71f5b4e7bbf3b77df8b78904747",
+      "language_quality_evaluation": false
+    },
+    "metrics": {
+      "total_parameters": 24928,
+      "trainable_parameters": 24800,
+      "active_parameters_per_token_estimate": 24928,
+      "forward_flops_per_token_estimate": 53248.0,
+      "gpu_allocated_bytes": null,
+      "gpu_peak_allocated_bytes": null,
+      "kv_cache_bytes_per_token": 512.0,
+      "kv_cache_allocated_bytes": 32768,
+      "prefill_tokens_per_second": 5024.49444969915,
+      "decode_tokens_per_second": 366.94386216492535,
+      "training_tokens_per_second": 2737.2653035505123,
+      "forward_latency_ms": 3.8923000101931393,
+      "backward_latency_ms": 4.024900001240894,
+      "validation_loss": 4.881231307983398,
+      "perplexity": 131.7928415979987,
+      "gradient_norm": 1.4339178085327149,
+      "nan_inf_occurrences": 0,
+      "router_expert_utilization": null,
+      "router_entropy": null,
+      "attention_entropy": 1.6273667812347412,
+      "checkpoint_bytes": 324135,
+      "cache_equivalence_max_abs_error": 1.7881393432617188e-07
+    },
+    "notes": [
+      "GPU metrics are null on CPU; router metrics null for dense FFN.",
+      "Active parameters estimate includes dense/tied weights plus top-k experts, not unique embedding row accesses.",
+      "FLOPs counts observed linear work and dense QK/AV matmuls; excludes normalization, nonlinearity, rotary and optimizer work.",
+      "Attention entropy is a separate manual diagnostic. No claim about trained language quality or GPU speed."
+    ]
+  },
+  "DELTA": {
+    "total_parameters": {
+      "baseline": 24928,
+      "experiment": 24928,
+      "delta": 0,
+      "percent": 0.0
+    },
+    "trainable_parameters": {
+      "baseline": 24800,
+      "experiment": 24800,
+      "delta": 0,
+      "percent": 0.0
+    },
+    "active_parameters_per_token_estimate": {
+      "baseline": 24928,
+      "experiment": 24928,
+      "delta": 0,
+      "percent": 0.0
+    },
+    "forward_flops_per_token_estimate": {
+      "baseline": 53248.0,
+      "experiment": 53248.0,
+      "delta": 0.0,
+      "percent": 0.0
+    },
+    "kv_cache_bytes_per_token": {
+      "baseline": 512.0,
+      "experiment": 512.0,
+      "delta": 0.0,
+      "percent": 0.0
+    },
+    "kv_cache_allocated_bytes": {
+      "baseline": 32768,
+      "experiment": 32768,
+      "delta": 0,
+      "percent": 0.0
+    },
+    "prefill_tokens_per_second": {
+      "baseline": 2341.2350015321886,
+      "experiment": 5024.49444969915,
+      "delta": 2683.2594481669616,
+      "percent": 114.60871917645773
+    },
+    "decode_tokens_per_second": {
+      "baseline": 97.43763382514258,
+      "experiment": 366.94386216492535,
+      "delta": 269.50622833978275,
+      "percent": 276.5935683777247
+    },
+    "training_tokens_per_second": {
+      "baseline": 2796.0052050563954,
+      "experiment": 2737.2653035505123,
+      "delta": -58.739901505883154,
+      "percent": -2.1008509354580536
+    },
+    "forward_latency_ms": {
+      "baseline": 2.874600002542138,
+      "experiment": 3.8923000101931393,
+      "delta": 1.0177000076510012,
+      "percent": 35.403186765150046
+    },
+    "backward_latency_ms": {
+      "baseline": 2.257100015413016,
+      "experiment": 4.024900001240894,
+      "delta": 1.7677999858278781,
+      "percent": 78.32173912348304
+    },
+    "validation_loss": {
+      "baseline": 4.881231307983398,
+      "experiment": 4.881231307983398,
+      "delta": 0.0,
+      "percent": 0.0
+    },
+    "perplexity": {
+      "baseline": 131.7928415979987,
+      "experiment": 131.7928415979987,
+      "delta": 0.0,
+      "percent": 0.0
+    },
+    "gradient_norm": {
+      "baseline": 1.4339177846908568,
+      "experiment": 1.4339178085327149,
+      "delta": 2.3841858043383013e-08,
+      "percent": 1.6627074646767952e-06
+    },
+    "nan_inf_occurrences": {
+      "baseline": 0,
+      "experiment": 0,
+      "delta": 0,
+      "percent": null
+    },
+    "attention_entropy": {
+      "baseline": 1.6273667812347412,
+      "experiment": 1.6273667812347412,
+      "delta": 0.0,
+      "percent": 0.0
+    },
+    "checkpoint_bytes": {
+      "baseline": 324135,
+      "experiment": 324135,
+      "delta": 0,
+      "percent": 0.0
+    },
+    "cache_equivalence_max_abs_error": {
+      "baseline": 1.4901161193847656e-07,
+      "experiment": 1.7881393432617188e-07,
+      "delta": 2.9802322387695312e-08,
+      "percent": 20.0
+    }
+  },
+  "interpretation": "Single-host tiny synthetic run. Timing is noisy; architectural correctness and quality are separate."
+}

@@ -1655,7 +1655,8 @@ class TestNeuralNetworkDetails:
                 # V4: SwiGLU default olarak kullanılıyor (use_swiglu=True)
                 # SwiGLU'da activation attribute yok, forward'da uygulanıyor
                 # Test: FFN'in çalıştığını doğrula
-                assert hasattr(layer.ffn, "gate_proj") or hasattr(layer.ffn, "fc1")
+                assert layer.ffn.gate_up_proj is not None
+                assert layer.ffn.gate_up_proj.out_features == 2 * layer.ffn.ffn_dim
                 # V4: SwiGLU kullanılıyor (activation forward'da uygulanıyor, attribute yok)
                 # Eğer activation attribute varsa eski mimari (GELU/ReLU)
                 if hasattr(layer.ffn, "activation") and layer.ffn.activation is not None:
@@ -1678,26 +1679,18 @@ class TestNeuralNetworkDetails:
         """Neural network embedding layer"""
         manager = ModelManager(base_config)
         manager.initialize()
-        # Embedding layer vocab_size ve embed_dim kontrolü
-        if hasattr(manager.model, "dil_katmani"):
-            dil_katmani = manager.model.dil_katmani
-            if hasattr(dil_katmani, "language_embedding"):
-                embed = dil_katmani.language_embedding
-                assert embed.num_embeddings == base_config["vocab_size"]
-                # LanguageEmbedding'de embed_dim attribute'u var, embedding.embedding_dim de kullanılabilir
-                assert embed.embed_dim == base_config["embed_dim"] or embed.embedding.embedding_dim == base_config["embed_dim"]
-    
+        embed = manager.model.embedding.embedding
+        assert embed.num_embeddings == base_config["vocab_size"]
+        assert embed.embedding_dim == base_config["embed_dim"]
+        assert manager.model.embedding(sample_input).shape == (*sample_input.shape, base_config["embed_dim"])
+
     def test_neural_network_positional_encoding(self, base_config, sample_input):
         """Neural network positional encoding"""
         manager = ModelManager(base_config)
         manager.initialize()
-        # Positional encoding çalışmalı
-        if hasattr(manager.model, "dil_katmani"):
-            dil_katmani = manager.model.dil_katmani
-            if hasattr(dil_katmani, "positional_encoding"):
-                # Positional encoding mevcut
-                assert dil_katmani.positional_encoding is not None
-    
+        assert manager.model.pos_encoding.mode == "rope"
+        assert all(layer.attn.positional_encoding is manager.model.pos_encoding for layer in manager.model.layers)
+
     def test_neural_network_dropout_training(self, base_config, sample_input):
         """Neural network dropout in training mode"""
         manager = ModelManager(base_config)
@@ -1839,11 +1832,13 @@ class TestNeuralNetworkDetails:
         """Neural network memory manager"""
         manager = ModelManager(base_config)
         manager.initialize()
-        # Memory manager mevcut olmalı
-        assert hasattr(manager.model, "memory_manager")
-        # Memory manager opsiyonel kullanım için hazır
-        logits, _ = manager.forward(sample_input)
-        assert logits is not None
+        manager.eval_mode()
+        with torch.no_grad():
+            logits, _ = manager.forward(sample_input, use_cache=True)
+        assert logits.shape[:2] == sample_input.shape
+        assert all(layer.attn.kv_cache.seen_tokens == sample_input.shape[1] for layer in manager.model.layers)
+        manager.clear_kv_cache()
+        assert all(layer.attn.kv_cache is None or layer.attn.kv_cache.seen_tokens == 0 for layer in manager.model.layers)
     
     def test_neural_network_device_consistency(self, base_config, sample_input):
         """Neural network device consistency"""
@@ -1876,7 +1871,7 @@ class TestNeuralNetworkDetails:
         manager = ModelManager(v2_config)
         manager.initialize()
         # Her layer'ın output shape'i doğru olmalı
-        embedded = manager.model.dil_katmani(sample_input)
+        embedded = manager.model.embedding(sample_input)
         assert embedded.shape == (sample_input.shape[0], sample_input.shape[1], v2_config["seq_proj_dim"])
         
         # Layer stacking
@@ -1921,7 +1916,8 @@ class TestNeuralNetworkDetails:
         trainable_params = sum(p.numel() for p in manager.model.parameters() if p.requires_grad)
         assert total_params > 0
         assert trainable_params > 0
-        assert trainable_params == total_params  # Tüm parametreler trainable
+        frozen = sum(p.numel() for layer in manager.model.layers for p in layer.attn.norm.parameters())
+        assert total_params - trainable_params == frozen
     
     def test_neural_network_gradient_clipping(self, base_config, sample_input):
         """Neural network gradient clipping"""
@@ -1946,9 +1942,8 @@ class TestNeuralNetworkDetails:
         manager = ModelManager(base_config)
         manager.initialize()
         # V4: RoPE default olarak aktif (pe_mode="rope")
-        assert hasattr(manager.model, "dil_katmani")
-        assert hasattr(manager.model.dil_katmani, "positional_encoding")
-        pe = manager.model.dil_katmani.positional_encoding
+        assert all(layer.attn.positional_encoding is manager.model.pos_encoding for layer in manager.model.layers)
+        pe = manager.model.pos_encoding
         assert pe.mode == "rope"  # V4 default: rope
     
     def test_v4_rmsnorm_enabled(self, base_config):
@@ -1972,8 +1967,8 @@ class TestNeuralNetworkDetails:
             layer = manager.model.layers[0]
             if hasattr(layer, "ffn"):
                 # SwiGLU'da gate_proj ve up_proj var
-                assert hasattr(layer.ffn, "gate_proj"), "SwiGLU için gate_proj gerekli"
-                assert hasattr(layer.ffn, "up_proj"), "SwiGLU için up_proj gerekli"
+                assert layer.ffn.gate_up_proj.out_features == 2 * layer.ffn.ffn_dim
+                assert layer.ffn.gate_up_proj.in_features == base_config["embed_dim"]
     
     def test_v4_gradient_checkpointing_enabled(self, base_config):
         """V4: Gradient Checkpointing aktif mi?"""
@@ -1994,7 +1989,7 @@ class TestNeuralNetworkDetails:
         assert hasattr(manager.model, "tie_weights")
         assert manager.model.tie_weights == True
         # Weight sharing kontrolü
-        assert manager.model.output_layer.weight is manager.model.dil_katmani.language_embedding.embedding.weight
+        assert manager.model.output_layer.weight is manager.model.embedding.embedding.weight
     
     def test_v4_kv_cache_enabled(self, base_config):
         """V4: KV Cache aktif mi?"""
@@ -2017,7 +2012,7 @@ class TestNeuralNetworkDetails:
         # V4 özelliklerini kontrol et
         # use_rmsnorm attribute'u model'de olmayabilir, layer'larda kontrol et
         assert hasattr(model, "tie_weights") and model.tie_weights == True
-        assert model.dil_katmani.positional_encoding.mode == "rope"
+        assert model.pos_encoding.mode == "rope"
         
         # Layer'larda V4 özellikleri
         if hasattr(model, "layers") and len(model.layers) > 0:
@@ -2034,8 +2029,8 @@ class TestNeuralNetworkDetails:
                 assert layer.attn.use_kv_cache == True
             # SwiGLU
             if hasattr(layer, "ffn"):
-                assert hasattr(layer.ffn, "gate_proj"), "SwiGLU için gate_proj gerekli"
-                assert hasattr(layer.ffn, "up_proj"), "SwiGLU için up_proj gerekli"
+                assert layer.ffn.gate_up_proj.out_features == 2 * layer.ffn.ffn_dim
+                assert layer.ffn.gate_up_proj.in_features == base_config["embed_dim"]
 
 
 # ============================================================================

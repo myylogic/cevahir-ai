@@ -77,7 +77,9 @@ def _resolve_device(device: Optional[Union[str, torch.device]]) -> torch.device:
         return torch.device("cuda")
     if d == "mps" and hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
         return torch.device("mps")
-    if d == "cpu" or not d:
+    if d == "cpu":
+        return torch.device("cpu")
+    if not d:
         if torch.cuda.is_available():
             return torch.device("cuda")
         if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
@@ -203,26 +205,8 @@ def _extract_state_dicts(ckpt: Any) -> Tuple[Dict[str, Any], Optional[Dict[str, 
     Checkpoint tipini belirle ve state_dict'leri çıkar.
     Döndürür: (model_sd, optimizer_sd, scheduler_sd, meta)
     """
-    # Doğrudan OrderedDict (model state_dict'i)
-    if isinstance(ckpt, dict) and all(isinstance(k, str) for k in ckpt.keys()):
-        keys = set(ckpt.keys())
-        # Tam checkpoint
-        if "model_state_dict" in keys:
-            model_sd = ckpt["model_state_dict"]
-            opt_sd = ckpt.get("optimizer_state_dict")
-            sch_sd = ckpt.get("scheduler_state_dict")
-            meta = {
-                "epoch": ckpt.get("epoch"),
-                "config": ckpt.get("config"),
-            }
-            return model_sd, opt_sd, sch_sd, meta
-        # Bazı framework'lerde 'state_dict' anahtarı olur
-        if "state_dict" in keys and isinstance(ckpt["state_dict"], dict):
-            return ckpt["state_dict"], None, None, {}
-        # Düz state_dict gibi davran
-        return ckpt, None, None, {}
-    # Farklı tipte ise kullanıcıya bırak
-    raise ValueError("Beklenmeyen checkpoint biçimi: model state_dict anahtarları bulunamadı.")
+    from .checkpoint_contract import unpack_checkpoint
+    return unpack_checkpoint(ckpt)
 
 
 # ----------------------------- Ana Sınıf ----------------------------- #
@@ -244,6 +228,7 @@ class ModelLoader:
         extra_model_kwargs: Optional[Dict[str, Any]] = None,
         strict: bool = True,
         weights_only: Optional[bool] = None,
+        tokenizer: Optional[Any] = None,
     ) -> nn.Module:
         """
         Kaydedilmiş model dosyasını yükler (düz state_dict veya tam checkpoint destekler).
@@ -283,12 +268,18 @@ class ModelLoader:
                 )
 
         # 2) state_dict'leri ayıkla
-        model_sd, _, _, _ = _extract_state_dicts(ckpt)
+        model_sd, _, _, meta = _extract_state_dicts(ckpt)
+        from .checkpoint_contract import validate_tokenizer_identity, tokenizer_identity
+        validate_tokenizer_identity(meta.get("tokenizer_identity"), tokenizer_identity(tokenizer))
 
         # 3) Model örneği oluştur
-        ctor_cfg = _with_aliases(config or {}, {"learning_rate": "lr", "n_heads": "num_heads"})
+        ctor_cfg = _with_aliases({**(meta.get("config") or {}), **(config or {})}, {"learning_rate": "lr", "n_heads": "num_heads"})
         if extra_model_kwargs:
             ctor_cfg.update(extra_model_kwargs)
+        if model_class.__name__ == "CevahirNeuralNetwork":
+            from .config_schema import normalize_model_config
+            ctor_cfg = normalize_model_config(ctor_cfg, legacy_profile="model_manager")
+        ctor_cfg["device"] = str(dev)
         ctor_kwargs = _filter_kwargs_for_ctor(model_class, ctor_cfg)
 
         # 'vocab_size' gibi kritik değer config'te varsa garanti et
@@ -300,6 +291,10 @@ class ModelLoader:
         except TypeError as e:
             loader_logger.error(f"Model ctor argümanları hatalı: {ctor_kwargs}")
             raise
+
+        from .checkpoint_contract import validate_model_identity, validate_state_shapes
+        validate_model_identity(model, meta.get("config"))
+        validate_state_shapes(model, model_sd, strict)
 
         # 4) Vocab boyutu kontrolü (erken hata → daha net mesaj)
         if "embedding.weight" in model_sd:
@@ -326,6 +321,7 @@ class ModelLoader:
         if unexpected:
             loader_logger.warning(f"[Loader] Beklenmeyen anahtarlar ({len(unexpected)}): {unexpected[:5]}{'...' if len(unexpected) > 5 else ''}")
 
+        model._tokenizer_identity = meta.get("tokenizer_identity")
         loader_logger.info("Model başarıyla yüklendi ve cihaza taşındı.")
         return model
 
@@ -439,6 +435,7 @@ class ModelLoader:
         strict: bool = True,
         weights_only: Optional[bool] = None,
         extra_model_kwargs: Optional[Dict[str, Any]] = None,
+        tokenizer: Optional[Any] = None,
     ) -> Tuple[nn.Module, Optional[Dict[str, Any]], Optional[Dict[str, Any]], Dict[str, Any]]:
         """
         Tek çağrıda model + optimizer_state_dict + scheduler_state_dict + meta (epoch/config) döndürür.
@@ -448,19 +445,29 @@ class ModelLoader:
 
         ckpt = _torch_load(ckpt_path, map_location=dev, weights_only=weights_only)
         model_sd, opt_sd, sch_sd, meta = _extract_state_dicts(ckpt)
+        from .checkpoint_contract import validate_tokenizer_identity, tokenizer_identity
+        validate_tokenizer_identity(meta.get("tokenizer_identity"), tokenizer_identity(tokenizer))
 
         # Modeli kur ve yükle
-        ctor_cfg = _with_aliases(config or {}, {"learning_rate": "lr", "n_heads": "num_heads"})
+        ctor_cfg = _with_aliases({**(meta.get("config") or {}), **(config or {})}, {"learning_rate": "lr", "n_heads": "num_heads"})
         if extra_model_kwargs:
             ctor_cfg.update(extra_model_kwargs)
+        if model_class.__name__ == "CevahirNeuralNetwork":
+            from .config_schema import normalize_model_config
+            ctor_cfg = normalize_model_config(ctor_cfg, legacy_profile="model_manager")
+        ctor_cfg["device"] = str(dev)
         ctor_kwargs = _filter_kwargs_for_ctor(model_class, ctor_cfg)
         if "vocab_size" not in ctor_kwargs and config and "vocab_size" in config:
             ctor_kwargs["vocab_size"] = config["vocab_size"]
 
         model = model_class(**ctor_kwargs).to(dev)
+        from .checkpoint_contract import validate_model_identity, validate_state_shapes
+        validate_model_identity(model, meta.get("config"))
+        validate_state_shapes(model, model_sd, strict)
         missing, unexpected = model.load_state_dict(model_sd, strict=strict)
         if missing or unexpected:
             loader_logger.warning(f"state_dict uyuşmazlıkları: missing={missing or []}, unexpected={unexpected or []}")
 
+        model._tokenizer_identity = meta.get("tokenizer_identity")
         loader_logger.info("Checkpoint yükleme tamamlandı.")
         return model, opt_sd, sch_sd, meta

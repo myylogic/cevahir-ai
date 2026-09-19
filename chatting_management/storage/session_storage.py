@@ -150,7 +150,7 @@ class SessionStorage:
                     raise SessionNotFoundError(f"Session not found: {session_id}")
                 
                 # Merge metadata
-                current_metadata = session.metadata or {}
+                current_metadata = dict(session.metadata or {})
                 current_metadata.update(metadata)
                 session.metadata = current_metadata
                 

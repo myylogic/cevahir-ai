@@ -58,14 +58,14 @@ class TestPolicyRouterV2:
     def test_route_think_mode(self, config_with_think_mode, empty_state):
         """Test routing to think mode for high entropy input"""
         router = PolicyRouterV2(config_with_think_mode)
-        features = create_features(entropy=1.5, input_length=50)
+        features = create_features(entropy=1.0, input_length=50)
         
         output = router.route(features, empty_state)
         
         assert_policy_output_valid(output)
-        # Should route to think1 if entropy is high enough
-        if config_with_think_mode.policy.allow_inner_steps:
-            assert output.mode in ("direct", "think1")
+        # Entropy lies between this fixture's think=.8 and debate=1.2 gates.
+        assert output.mode == "think1"
+        assert output.inner_steps == 1
     
     def test_route_debate_mode(self, config_with_think_mode, empty_state):
         """Test routing to debate mode for very high entropy"""

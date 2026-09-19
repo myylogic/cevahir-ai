@@ -46,7 +46,7 @@ class UserService:
                     "email": user.email,
                     "name": user.name,
                     "created_at": user.created_at.isoformat() if user.created_at else None,
-                    "metadata": user.metadata or {}
+                    "metadata": user.preferences or {}
                 }
                 
         except UserNotFoundError:
@@ -80,16 +80,16 @@ class UserService:
                     raise UserNotFoundError(f"User not found: {user_id}")
                 
                 # Update preferences
-                current_metadata = user.metadata or {}
+                current_metadata = dict(user.preferences or {})
                 current_metadata.update(preferences)
                 
-                user.metadata = current_metadata
+                user.preferences = current_metadata
                 uow.commit()
                 
                 logger.info(f"User preferences updated: user={user_id}")
                 return {
                     "user_id": user.user_id,
-                    "preferences": user.metadata
+                    "preferences": user.preferences
                 }
                 
         except UserNotFoundError:

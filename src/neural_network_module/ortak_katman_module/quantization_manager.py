@@ -159,6 +159,7 @@ class QuantizationManager:
                 "Model quantize edilmedi.",
                 exc_info=True,
             )
+            raise RuntimeError(f"Quantization {self.quantization_type!r} failed") from exc
 
         return model
 
@@ -301,6 +302,7 @@ class QuantizationManager:
             model,
             {nn.Linear},
             dtype=torch.qint8,
+            inplace=True,
         )
         self.logger.info(
             "[QuantizationManager] INT8 dinamik quantization uygulandı "

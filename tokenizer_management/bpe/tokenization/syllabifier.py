@@ -79,13 +79,18 @@ class Syllabifier:
         """
         # Config'i al (turkish config + BPE detailed config merge)
         from tokenizer_management.config import BPE_DETAILED_CONFIG
-        cfg = config if config is not None else get_turkish_config()
+        cfg = get_turkish_config()
+        if config is not None and not isinstance(config, dict):
+            raise TypeError(f"Config bir dict olmalı, got {type(config)}")
         if not isinstance(cfg, dict):
             raise TypeError(f"Config bir dict olmalı, got {type(cfg)}")
         
         # BPE_DETAILED_CONFIG ile merge et (GPU gibi genel parametreler için)
         merged_config = {**cfg}
         merged_config.update(BPE_DETAILED_CONFIG)
+        if config:
+            merged_config.update(config)
+        cfg = merged_config
         self.config = merged_config
         
         # GPU desteği (config'ten veya parametre)

@@ -76,7 +76,7 @@ class SessionManager:
         if session is None:
             raise SessionNotFoundError(f"Session not found: {session_id}")
         
-        if user_id and session.user_id != user_id:
+        if user_id is not None and session.user_id != user_id:
             raise SessionAccessDeniedError(f"User {user_id} does not have access to session {session_id}")
         
         return session

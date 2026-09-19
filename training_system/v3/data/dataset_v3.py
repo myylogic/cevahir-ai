@@ -54,6 +54,8 @@ class CevahirDataset(Dataset):
             precompute_lengths: True ise başlangıçta tüm uzunlukları hesapla
         """
         self.data = data
+        if not data:
+            raise ValueError("Dataset must contain at least one sample")
         self.pad_id = pad_id
         self._lengths: Optional[List[int]] = None
 
@@ -100,7 +102,7 @@ class CevahirDataset(Dataset):
                 else:
                     inp_list = list(inp)
                 # Son PAD olmayan pozisyonu bul
-                real_len = len(inp_list)
+                real_len = 0
                 for i in range(len(inp_list) - 1, -1, -1):
                     if inp_list[i] != self.pad_id:
                         real_len = i + 1

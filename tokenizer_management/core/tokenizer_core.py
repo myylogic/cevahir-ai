@@ -207,7 +207,12 @@ class TokenizerCore:
 
         # BPEManager - GPU desteği ile
         # Read-only mode: Eğer vocab dosyası mevcutsa ve test modunda ise, vocab'a ekleme yapma
-        bpe_config = {}
+        from tokenizer_management.config import BPE_DETAILED_CONFIG
+        bpe_config = {key: config[key] for key in BPE_DETAILED_CONFIG if key in config}
+        nested_bpe = config.get("bpe_config", {})
+        if not isinstance(nested_bpe, dict):
+            raise ValueError("bpe_config must be a mapping")
+        bpe_config.update(nested_bpe)
         if config.get("read_only", False):
             bpe_config["read_only"] = True
         
@@ -1179,6 +1184,10 @@ class TokenizerCore:
         Returns:
             Bölünmüş chunk'lar listesi
         """
+        if max_length <= 0:
+            raise ValueError("max_length must be positive")
+        if overlap < 0 or overlap >= max_length:
+            raise ValueError("overlap must satisfy 0 <= overlap < max_length")
         if not token_ids or len(token_ids) <= max_length:
             return [token_ids] if token_ids else []
         

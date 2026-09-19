@@ -109,6 +109,7 @@ class DecodingConfig:
         top_k:               Top-k sampling; 0 → devre dışı.
         repetition_penalty:  Tekrar cezası (>1.0 → tekrarı azaltır).
     """
+    num_beams: int = 1
     max_new_tokens: int = 256
     min_new_tokens: Optional[int] = None
     temperature: float = 0.7

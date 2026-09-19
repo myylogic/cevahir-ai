@@ -206,11 +206,10 @@ class SyncToAsyncMiddlewareAdapter(BaseAsyncMiddleware):
         request: CognitiveInput,
     ) -> tuple[CognitiveState, CognitiveInput]:
         """Wrap sync before in async"""
-        return await asyncio.to_thread(
-            self.sync_middleware.before,
-            state,
-            request,
-        )
+        # Adapt one hook, not its existing sync chain (which would run later
+        # middleware twice). Keep ContextVar bindings in this request's task.
+        hook = getattr(self.sync_middleware, "_before", self.sync_middleware.before)
+        return hook(state, request)
     
     async def _after_async(
         self,
@@ -219,12 +218,8 @@ class SyncToAsyncMiddlewareAdapter(BaseAsyncMiddleware):
         response: CognitiveOutput,
     ) -> CognitiveOutput:
         """Wrap sync after in async"""
-        return await asyncio.to_thread(
-            self.sync_middleware.after,
-            state,
-            request,
-            response,
-        )
+        hook = getattr(self.sync_middleware, "_after", self.sync_middleware.after)
+        return hook(state, request, response)
     
     async def _on_error_async(
         self,
@@ -233,12 +228,8 @@ class SyncToAsyncMiddlewareAdapter(BaseAsyncMiddleware):
         error: Exception,
     ) -> Optional[CognitiveOutput]:
         """Wrap sync on_error in async"""
-        return await asyncio.to_thread(
-            self.sync_middleware.on_error,
-            state,
-            request,
-            error,
-        )
+        hook = getattr(self.sync_middleware, "_on_error", self.sync_middleware.on_error)
+        return hook(state, request, error)
 
 
 __all__ = [

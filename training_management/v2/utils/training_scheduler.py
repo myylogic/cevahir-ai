@@ -231,6 +231,11 @@ class TrainingScheduler:
         self.optimizer = optimizer
         self.scheduler_type = scheduler_type
 
+        nested = kwargs.pop("scheduler_kwargs", {})
+        kwargs = {**nested, **kwargs}
+        self.step_per_batch = scheduler_type.strip().lower() in {"onecyclelr", "onecycle"}
+        if self.step_per_batch and warmup_steps:
+            raise ValueError("OneCycleLR includes its own warmup; set warmup_steps=0")
         base_scheduler = self._initialize_scheduler(optimizer, scheduler_type, **kwargs)
 
         # Opsiyonel warmup wrapper
@@ -349,6 +354,16 @@ class TrainingScheduler:
             return _NoOp(optimizer)
 
         raise ValueError(f"Bilinmeyen scheduler türü: {scheduler_type}")
+
+    def step_batch(self):
+        warming_up = isinstance(self.scheduler, _LinearWarmupWrapper) and self.scheduler.step_count < self.scheduler.warmup_steps
+        if warming_up or self.step_per_batch:
+            self.step()
+
+    def step_epoch(self, metric=None):
+        warming_up = isinstance(self.scheduler, _LinearWarmupWrapper) and self.scheduler.step_count < self.scheduler.warmup_steps
+        if not warming_up and not self.step_per_batch:
+            self.step(metric=metric)
 
     # --------------------------------------------------------------------- stepping
 

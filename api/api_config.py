@@ -20,7 +20,11 @@ import os
 import logging
 from pathlib import Path
 from typing import Optional
-from config.parameters import LOGGING_PATH, MODEL_SAVE_PATH, DEVICE
+
+_ROOT = Path(__file__).resolve().parents[1]
+LOGGING_PATH = os.getenv("LOGGING_PATH", str(_ROOT / "logs"))
+MODEL_SAVE_PATH = os.getenv("MODEL_SAVE_PATH", str(_ROOT / "model" / "checkpoints"))
+DEVICE = os.getenv("CEVAHIR_DEVICE", "cpu")
 
 
 class Config:
@@ -246,6 +250,5 @@ def get_config():
     else:
         return DevelopmentConfig()
 
-# Uygulama başlatıldığında yapılandırmayı başlat
+# Importing configuration must not create log files or reset application logging.
 config = get_config()
-config.init_logging()

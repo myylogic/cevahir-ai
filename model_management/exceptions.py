@@ -70,7 +70,7 @@ class CevahirModelError(Exception):
 # Başlatma / Model Oluşturma Hataları
 # ══════════════════════════════════════════════════════════════════════════════
 
-class ModelNotInitializedError(CevahirModelError):
+class ModelNotInitializedError(CevahirModelError, RuntimeError):
     """
     Model, optimizer veya başka bir bileşen initialize() çağrılmadan kullanılmaya
     çalışıldığında fırlatılır.
@@ -128,7 +128,7 @@ class CheckpointError(CevahirModelError):
         self.path = path
 
 
-class CheckpointNotFoundError(CheckpointError):
+class CheckpointNotFoundError(CheckpointError, FileNotFoundError):
     """Belirtilen dosya yolunda checkpoint bulunamadığında fırlatılır."""
 
     def __init__(self, path: str) -> None:
