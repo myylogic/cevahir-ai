@@ -1,0 +1,40 @@
+{
+  "environment": {
+    "torch": "2.10.0+cpu",
+    "cuda": false
+  },
+  "existing_tests": {
+    "passed": 101,
+    "skipped": 6
+  },
+  "cache_sdpa_False_kv_4": {
+    "max_abs_error": 0.2638222575187683,
+    "equivalent": false
+  },
+  "cache_sdpa_False_kv_2": {
+    "max_abs_error": 0.15488001704216003,
+    "equivalent": false
+  },
+  "cache_sdpa_False_kv_1": {
+    "max_abs_error": 0.2602190673351288,
+    "equivalent": false
+  },
+  "cache_sdpa_True_kv_4": {
+    "max_abs_error": 0.4603090286254883,
+    "equivalent": false
+  },
+  "cache_sdpa_True_kv_2": {
+    "max_abs_error": 0.45171093940734863,
+    "equivalent": false
+  },
+  "cache_sdpa_True_kv_1": {
+    "max_abs_error": 0.4763353168964386,
+    "equivalent": false
+  },
+  "cache_eviction": {
+    "error": "RuntimeError('unsupported operation: some elements of the input tensor and the written-to tensor refer to a single memory location. Please clone() the tensor before performing the operation.')"
+  },
+  "zero_heads_validation": {
+    "error": "ZeroDivisionError('division by zero')"
+  }
+}

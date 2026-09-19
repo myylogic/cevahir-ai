@@ -1,425 +1,118 @@
-# Cognitive Management Modülü
+# Cognitive Management
 
-**Versiyon:** V2 (Enterprise)
-**Son Güncelleme:** 2026-03-16
-**Durum:** Production-Ready
+[English](README-en.md) · [Mimari sözleşme](../../architecture/CEVAHIR_ARCHITECTURE_SPEC.md) · [Geliştirme yol haritası](../../architecture/NEXT_DEVELOPMENT_ROADMAP.md)
 
----
+Cognitive Management, Cevahir'in dil modeli üzerine kurduğu yanıt işleme katmanıdır.
+Sorguya göre üretim stratejisini seçer; konuşma belleğini, kayıtlı araçları,
+aday üretimini ve yanıt revizyonunu aynı akışta birleştirir.
+Üretilen yanıtın niteliği bağlı modelin eğitimi ve sağlanan bağlamla birlikte değerlendirilmelidir.
 
-## İçindekiler
+Aktif giriş `CognitiveManager`, koordinatör ise `v2/core/CognitiveOrchestrator` sınıfıdır.
+Dosyalardaki V2, V3 ve Phase etiketleri bu modülün gelişim geçmişini anlatır;
+sinir ağı çekirdeğinin V7/V8 etiketleriyle aynı sürüm ekseninde değildir.
+Bu rehber 20 Eylül 2026 tarihindeki kod akışını esas alır.
 
-1. [Genel Bakış](#genel-bakış)
-2. [Dizin Yapısı](#dizin-yapısı)
-3. [Ne İş Yapar?](#ne-i̇ş-yapar)
-4. [Temel Veri Tipleri](#temel-veri-tipleri)
-5. [Bilişsel Modlar](#bilişsel-modlar)
-6. [Hızlı Başlangıç](#hızlı-başlangıç)
-7. [Bağımlılıklar](#bağımlılıklar)
+## Çalışma akışı
 
----
-
-## Genel Bakış
-
-**Cognitive Management**, Cevahir Sinir Sistemi'nin üst-bilişsel (meta-cognitive) katmanıdır. Modelin ham metin üretiminin ötesine geçerek:
-
-- Sorunun ne tür bir sorgu olduğunu sınıflandırır
-- En uygun akıl yürütme stratejisini seçer (doğrudan yanıt, zincir düşünce, ağaç düşünce vb.)
-- Gerekirse araçları (hesap makinesi, arama, dosya) kullanır
-- Üretilen yanıtı eleştirel gözle değerlendirir ve gerekirse revize eder
-- Oturum geçmişini vektör tabanlı bellekte saklar, ilgili geçmiş bağlamı otomatik olarak geri çeker
-
-Sistem, akademik LLM araştırmalarından (CoT, ToT, Self-Consistency, Self-Refine, Constitutional AI) esinlenen bileşenleri endüstriyel enterprise desenleriyle (Dependency Injection, Chain of Responsibility, Event Bus, Middleware) birleştirir.
-
-### Tasarım Felsefesi
-
-```
-Kullanıcı Mesajı
-       │
-       ▼
-┌──────────────────────────────────────┐
-│          CognitiveManager            │  ← Giriş noktası (facade)
-│  ┌────────────────────────────────┐  │
-│  │      CognitiveOrchestrator     │  │  ← İç koordinatör
-│  │                                │  │
-│  │  Middleware → Pipeline         │  │  ← İşleme zinciri
-│  │     ↓                          │  │
-│  │  PolicyRouter (strateji seç)   │  │
-│  │     ↓                          │  │
-│  │  DeliberationEngine (düşün)    │  │
-│  │     ↓                          │  │
-│  │  MemoryService (bellek yönet)  │  │
-│  │     ↓                          │  │
-│  │  CriticV2 (değerlendir/revize) │  │
-│  └────────────────────────────────┘  │
-└──────────────────────────────────────┘
-       │
-       ▼
-  CognitiveOutput
+```text
+Cevahir.process / CognitiveManager.handle
+  → istek kapsamı ve middleware (doğrulama, cache, izleme)
+  → özellik çıkarımı ve PolicyRouterV2
+  → isteğe bağlı deliberation / Tree of Thoughts
+  → geçmiş, RAG ve araç sonucuyla bağlam oluşturma
+  → model üzerinden yanıt üretimi
+  → isteğe bağlı self-consistency ve critic revizyonu
+  → bellek, oturum durumu ve CognitiveOutput
 ```
 
----
+`handle_async` de vardır; mevcut uygulama model içeren adımları thread üzerinden yürütür.
+Async ToT bağlantısındaki fark aşağıdaki açık işler arasında yer alır.
+Orchestrator içinde request batcher etkin değildir; async arayüz toplu model üretimi anlamına gelmez.
 
-## Dizin Yapısı
+| Bileşen | Gerçekte yaptığı iş |
+|---|---|
+| PolicyRouterV2 | Sorgu türü, kelime işaretleri, karmaşıklık ve eşiklerle mod/üretim ayarı seçer. |
+| DeliberationEngineV2 | Modelin `generate` çağrısıyla adaylar üretir, `score` ile sıralar; hata durumunda sezgisel puan kullanabilir. |
+| TreeOfThoughts | Aday yolları model çağrılarıyla genişletip puanlayarak arar. |
+| SelfConsistencyHandler | Birden fazla üretimi metin benzerliği veya model puanıyla seçer. |
+| CriticV2 | Görev uyumu, ilgi, tutarlılık ve içerik işaretlerini değerlendirir; gerektiğinde modele revizyon yaptırır. |
+| MemoryServiceV2 | Oturum geçmişini ve kapsamlı episodik belleği yönetir; ilgili kayıtları bağlama ekler. |
 
-```
-cognitive_management/
-│
-├── cognitive_manager.py          # Ana giriş noktası — CognitiveManager sınıfı
-├── cognitive_types.py            # Tüm veri tipleri (dataclass + Literal)
-├── config.py                     # CognitiveManagerConfig ve alt config'ler
-├── exceptions.py                 # Exception hiyerarşisi
-│
-├── utils/
-│   ├── logging.py                # Loglama yardımcıları
-│   └── timers.py                 # Zamanlama yardımcıları
-│
-└── v2/                           # Enterprise V2 mimarisi
-    │
-    ├── adapters/
-    │   └── backend_adapter.py    # Model backend'ini soyutlayan adaptör
-    │
-    ├── components/               # Temel bilişsel bileşenler
-    │   ├── critic_v2.py          # CriticV2 — Self-Refine döngüsü
-    │   ├── constitutional_critic.py  # Constitutional AI kontrol katmanı
-    │   ├── deliberation_engine_v2.py # CoT / ToT / debate üretimi
-    │   ├── embedding_adapter.py  # Embedding sağlayıcı adaptörü
-    │   ├── memory_service_v2.py  # Oturum belleği + vektör RAG
-    │   ├── policy_router_v2.py   # Strateji seçim motorou
-    │   ├── rag_enhancer.py       # RAG bağlam zenginleştirici
-    │   ├── tool_executor_v2.py   # Araç çalıştırıcı
-    │   ├── tool_policy_v2.py     # Araç kullanım politikası
-    │   ├── tree_of_thoughts.py   # ToT arama algoritması
-    │   │
-    │   ├── fact_checkers/        # Dış kaynaklı gerçek doğrulama
-    │   │   ├── base.py           # FactChecker arayüzü
-    │   │   └── wikipedia_checker.py
-    │   │
-    │   └── vector_store/         # Vektör veritabanı katmanı
-    │       ├── base.py           # VectorStore arayüzü
-    │       ├── chroma_vector_store.py   # ChromaDB implementasyonu
-    │       └── memory_vector_store.py   # In-memory implementasyonu
-    │
-    ├── config/
-    │   ├── config_manager.py     # Çalışma zamanı config yöneticisi
-    │   └── constitutional_principles.py  # Varsayılan anayasal ilkeler
-    │
-    ├── container/
-    │   └── dependency_container.py  # DI Container — bağımlılık enjeksiyonu
-    │
-    ├── core/
-    │   └── orchestrator.py       # CognitiveOrchestrator — merkezi koordinatör
-    │
-    ├── events/
-    │   ├── event_bus.py          # EventBus — asenkron/senkron event yönetimi
-    │   └── event_handlers.py     # Yerleşik event dinleyicileri
-    │
-    ├── interfaces/
-    │   ├── backend_protocols.py  # Model backend Protocol tanımları
-    │   └── component_protocols.py  # Bileşen Protocol tanımları
-    │
-    ├── middleware/
-    │   ├── metrics.py            # Metrik toplama middleware
-    │   ├── tracing.py            # Dağıtık izleme middleware
-    │   └── validation.py         # Girdi doğrulama middleware
-    │
-    ├── monitoring/               # AIOps izleme alt sistemi
-    │   ├── alerting.py           # Uyarı yöneticisi
-    │   ├── anomaly_detector.py   # Anomali tespiti
-    │   ├── health_check.py       # Sağlık kontrol API'si
-    │   ├── performance_monitor.py # Performans izleyici
-    │   ├── predictive_analytics.py # Tahminsel analitik
-    │   └── trend_analyzer.py     # Trend analizi
-    │
-    ├── processing/
-    │   ├── handlers.py           # Chain of Responsibility handler'ları
-    │   ├── pipeline.py           # Senkron işleme pipeline'ı
-    │   ├── async_handlers.py     # Asenkron handler versiyonları
-    │   └── async_pipeline.py     # Asenkron pipeline
-    │
-    └── utils/
-        ├── cache.py              # In-memory LRU cache
-        ├── cache_warming.py      # Cache ön ısıtma
-        ├── claim_extraction.py   # İddia çıkarımı (fact-checking için)
-        ├── connection_pool.py    # Bağlantı havuzu
-        ├── context_pruning.py    # Bağlam budama
-        ├── heuristics.py         # build_features — sorgu özelliği çıkarımı
-        ├── performance_profiler.py # Performans profiler
-        ├── request_batcher.py    # Toplu istek işleyici
-        ├── selectors.py          # Self-Consistency aday seçici
-        ├── semantic_cache.py     # Anlamsal benzerlik cache'i
-        └── tracing.py            # İzleme yardımcıları
-```
+`direct`, `think1`, `debate2` ve `tot` üretim stratejileridir.
+`debate2` iki farklı bakış açısından aday üretip seçim yapar.
+Self-consistency ayrıca etkinleştirilen bir seçim adımıdır.
+Politika ve critic puanlarının çoğu kurallara dayanır; öğrenilmiş ayrı bir yargıç model değildir.
+Temel factuality kontrolü iddia/belirsizlik kelimelerine bakar, doğruluğu kanıtlamaz.
 
----
+## Uygulamaya bağlama
 
-## Ne İş Yapar?
-
-### 1. Sorgu Sınıflandırma
-
-Her kullanıcı mesajı işlenmeden önce `FeatureExtractionHandler` tarafından analiz edilir:
-
-- **QueryType**: `factual`, `reasoning`, `creative`, `conversational`, `math`, `code`, `unknown`
-- **DomainType**: `math`, `science`, `law`, `medical`, `technology`, `history`, `creative`, `general`
-- **Karmaşıklık skoru** (0.0–1.0): Mesaj uzunluğu, kelime çeşitliliği, soru işareti yoğunluğuna göre
-- **Entropi tahmini**: Model logit belirsizliği — hangi akıl yürütme moduna geçileceğini belirler
-
-### 2. Strateji Seçimi (PolicyRouter)
-
-Entropi ve uzunluk eşiklerine göre mod seçilir:
-
-| Entropi | Uzunluk | Seçilen Mod | Akademik Kaynak |
-|---------|---------|-------------|-----------------|
-| < 1.5 | — | `direct` | — |
-| 1.5–2.5 | — | `think1` (CoT) | Wei et al. 2022 |
-| 2.5–3.0 | > 200 tok. | `debate2` / `self_consistency` | Wang et al. 2022 |
-| > 3.0 | > 300 tok. | `tot` | Yao et al. 2023 |
-
-Ayrıca domain'e göre sıcaklık otomatik ayarlanır:
-- `math` / `code` → temperature ≈ 0.45–0.50
-- `creative` → temperature ≈ 0.85
-
-### 3. Deliberation (Akıl Yürütme)
-
-`DeliberationEngineV2` seçilen moda göre iç düşünce adımları üretir:
-- **think1**: Tek CoT adımı — önce düşün, sonra yanıtla
-- **debate2**: İki paralel aday üretimi, kazanan seçilir
-- **tot**: Ağaç arama — genişletme → değerlendirme → budama
-- **self_consistency**: N örneklem (varsayılan 3), çoğunluk/hibrit seçim
-
-### 4. Bellek Yönetimi (MemoryService)
-
-İki katmanlı bellek:
-- **Oturum geçmişi** (kısa dönem): Son N mesaj, token sınırına göre budanır
-- **Epizodik vektör belleği** (uzun dönem): ChromaDB ile disk'e kalıcı olarak yazılır
-
-Her 6 turda oturum özeti üretilir ve vektör store'a kayıt edilir. Yeni sorgularda cosine benzerliği ile ilgili geçmiş otomatik geri çekilir (RAG).
-
-### 5. Eleştiri ve Revizyon (CriticV2)
-
-Üretilen yanıt şu aşamalardan geçer:
-
-1. **Constitutional AI kontrolü** — Anayasal ilkelere uygunluk
-2. **Güvenlik/risk kontrolü** — Hassas alan tespiti
-3. **Görev uyumu kontrolü** — Yanıt soruyu yanıtlıyor mu?
-4. **İddia yoğunluğu** — Sayısal/istatistiksel iddia varsa dış doğrulama tetiklenir
-5. **Dış gerçek doğrulama** — Wikipedia (ve opsiyonel Google/Wolfram)
-6. **Self-Refine revizyonu** — Revizyon gerekliyse model yeniden üretim yapar
-
-### 6. Araç Kullanımı
-
-`ToolPolicyV2` heuristik kurallara göre araç kararı verir:
-
-| Tetikleyici | Araç |
-|-------------|------|
-| "bugün", "güncel", "son haber" | `search` |
-| "hesapla", "toplam", "oran", "%" | `calculator` |
-| "dosya", "oku", "kaydet" | `file` |
-
----
-
-## Temel Veri Tipleri
-
-### Giriş / Çıkış Tipleri
-
-```python
-@dataclass
-class CognitiveInput:
-    user_message: str          # Kullanıcı mesajı (zorunlu)
-    system_prompt: str | None  # Sistem davranış yönergesi (opsiyonel)
-    metadata: dict             # Ek sinyaller, risk bayrakları
-
-@dataclass
-class CognitiveOutput:
-    text: str                        # Üretilen yanıt
-    used_mode: Mode                  # Kullanılan bilişsel mod
-    tool_used: str | None            # Kullanılan araç adı
-    revised_by_critic: bool          # Critic revizyonu yapıldı mı?
-    reasoning_chain: list[ReasoningTrace]  # Akıl yürütme adımları
-    critic_passes: int               # Kaç Self-Refine turu yapıldı
-    critic_feedback: list[CriticFeedback] | None  # Yapılandırılmış feedback
-    memory_hits: int                 # RAG'dan çekilen bellek öğesi sayısı
-    latency_ms: float                # Toplam işlem süresi (ms)
-    query_type: QueryType | None     # Algılanan sorgu tipi
-    domain: DomainType | None        # Algılanan alan
-    self_consistency_result: SelfConsistencyResult | None
-    context_sources: list[str]       # "vector", "history" vb.
-    metadata: dict                   # İzleme verileri
-```
-
-### Oturum Durumu
-
-```python
-@dataclass
-class CognitiveState:
-    history: list[dict]            # {"role": ..., "content": ...} listesi
-    step: int                      # Kaçıncı bilişsel tur
-    last_entropy: float | None     # Son belirsizlik kestirimi
-    last_mode: Mode | None         # Son kullanılan mod
-    session_id: str                # 8 karakter UUID tabanlı oturum ID
-    turn_count: int                # Toplam kullanıcı-asistan tur sayısı
-    query_type: QueryType | None
-    domain: DomainType | None
-    reasoning_traces: list[ReasoningTrace]
-    metadata: dict
-```
-
-### Akıl Yürütme İzleme
-
-```python
-@dataclass
-class ReasoningTrace:
-    step: int       # Adım numarası
-    content: str    # Bu adımın içeriği
-    score: float    # Kalite skoru (0.0–1.0)
-    source: str     # "cot" | "tot" | "debate" | "direct" | "react"
-
-@dataclass
-class CriticFeedback:
-    aspect: str           # "coherence", "relevance", "safety" vb.
-    score: float          # 0.0–1.0
-    message: str          # İnsan-okunabilir mesaj
-    needs_revision: bool
-    constitutional: bool  # Constitutional AI ihlali mi?
-
-@dataclass
-class SelfConsistencyResult:
-    candidates: list[str]   # N aday yanıt
-    selected: str           # Seçilen en iyi yanıt
-    agreement_score: float  # Adaylar arası uyum (0.0–1.0)
-    method: str             # "majority" | "score" | "hybrid"
-
-@dataclass
-class ThoughtCandidate:
-    text: str          # Düşünce metni
-    score: float       # Değerlendirme skoru
-    depth: int         # ToT ağaç derinliği
-    path: list[str]    # Bu noktaya gelen düşünceler zinciri
-```
-
----
-
-## Bilişsel Modlar
-
-| Mod | Açıklama | Akademik Kaynak |
-|-----|----------|-----------------|
-| `direct` | Tek geçişli hızlı üretim — düşünme adımı yok | — |
-| `think1` | Chain-of-Thought — önce iç düşünce, sonra yanıt | Wei et al. 2022 |
-| `debate2` | İki aday üretimi, kazanan seçilir | Wang et al. 2022 |
-| `tot` | Tree of Thoughts — ağaç tabanlı arama | Yao et al. 2023 |
-| `react` | Reason+Act — düşünce ve eylem iç içe | Yao et al. 2022 |
-| `self_consistency` | N örneklem, çoğunluk/hibrit oylama | Wang et al. 2022 |
-
----
-
-## Hızlı Başlangıç
-
-### Temel Kullanım
+[CognitiveManager](../../../cognitive_management/cognitive_manager.py) bir ModelAPI alır:
+`generate(prompt, decoding_cfg)` ve `score(prompt, candidate)` metotları gereklidir.
+Cevahir facade bu bağlantıyı `CevahirModelAPI` ile kurar.
+Aşağıdaki fonksiyon önceden hazırlanmış bir model adaptörünü kullanır; model eğitmez veya ağırlık indirmez.
 
 ```python
 from cognitive_management.cognitive_manager import CognitiveManager
+from cognitive_management.cognitive_types import CognitiveInput, CognitiveState
 from cognitive_management.config import CognitiveManagerConfig
 
-# Varsayılan config ile başlat
-config = CognitiveManagerConfig()
-manager = CognitiveManager(model_manager=model, config=config)
+def create_conversation(model_api):
+    cfg = CognitiveManagerConfig()
+    cfg.memory.enable_vector_memory = False
+    cfg.memory.enable_rag = False
+    cfg.policy.allow_inner_steps = False
+    cfg.policy.self_consistency_enabled = False
+    cfg.critic.enabled = False
+    cfg.tools.enable_tools = False
+    return CognitiveManager(model_manager=model_api, cfg=cfg), CognitiveState()
 
-# Yanıt al
-output = manager.handle(
-    user_message="Türkiye'nin en büyük şehri hangisidir?",
-    system_prompt="Sen Cevahir, Türkçe konuşan bir asistansın.",
-)
-
-print(output.text)          # → "İstanbul, Türkiye'nin en büyük şehridir."
-print(output.used_mode)     # → "direct"
-print(output.latency_ms)    # → 124.5
+# model_api: uygulamanın önceden başlattığı generate/score adaptörü
+# manager, state = create_conversation(model_api)
+# output = manager.handle(state, CognitiveInput(user_message="Merhaba"))
+# print(output.text)
 ```
 
-### Özel Config ile Kullanım
+Bu ayarlar tek üretim yoluyla entegrasyona başlamak içindir.
+İhtiyaç duyulan strateji, araç, RAG ve critic seçenekleri [yapılandırmadan](../../../cognitive_management/config.py) açılır.
+Varsayılan yapılandırma daha fazla bileşeni etkinleştirir; ek model çağrıları ve bağımlılıklar doğurabilir.
+`CognitiveOutput` yanıtı, kullanılan modu, başarılı araç kullanımını ve değerlendirme bilgilerini taşır.
 
-```python
-from cognitive_management.config import (
-    CognitiveManagerConfig, PolicyConfig, MemoryConfig
-)
+## Bellek, araçlar ve cache
 
-config = CognitiveManagerConfig()
+- **Bellek kapsamı:** Oturum kimliği ile uygulamanın doğruladığı `state.metadata["user_id"]` kullanılır.
+  Aynı konuşmada state korunmalı; farklı kullanıcılar için aynı state paylaşılmamalıdır.
+  Notlar, özetler ve episodik geri çağırma bu kapsamı izler.
+- **Vektör bellek:** Mevcut store uygulamaları `memory` ve `chroma`dır.
+  Embedding adaptörleri isteğe bağlıdır; yükleme başarısız olursa keyword aramasına düşülür.
+  Pinecone, Weaviate, Qdrant ve Milvus seçeneklerinin uygulaması henüz yoktur.
+- **Araçlar:** Yerleşik araç sınırlı AST hesap makinesidir; `+`, `-`, `*`, `/` destekler.
+  Arama ve dosya araçlarını uygulama `register_tool` ile sağlamalı ve izin listesine eklemelidir.
+  Araç adı ancak gerçek yürütme başarılı olunca sonuçta bildirilir.
+- **Cache:** Tam eşleşmeli yanıt cache'i kimlik, geçmiş, üretim ayarı, yapılandırma ve bellek revizyonunu içerir.
+  Semantic cache sınıfı vardır; normal kapsamlı orchestrator isteklerinde bu yol devre dışıdır.
+  Cache, KV cache'den farklıdır; tekrar kullanılan metin yanıtlarını saklar.
 
-# Tree of Thoughts'u daha erken devreye al
-config.policy.entropy_gate_tot = 2.0
-config.policy.tot_max_depth = 4
+## Sıradaki geliştirme sınırları
 
-# Vektör belleği disk'e kaydet
-config.memory.vector_store_path = "./my_episodic_memory"
-config.memory.enable_rag = True
+Kod incelemesi ve küçük bağımlılık kontrollü denemeler şu beş açık davranışı gösterdi:
 
-# Konfigürasyonu doğrula
-config.validate()
+1. **Entropi:** `CevahirModelAPI.entropy_estimate` ID yerine metin tokenlarını kullanıyor;
+   model forward'ına ulaşmadan token çeşitliliği sezgisine düşebiliyor.
+2. **Sistem talimatı:** İstek ve varsayılan sistem talimatı final üretim bağlamından düşüyor.
+3. **Hesap makinesi girdisi:** Otomatik çıkarım `2+3*4` ifadesini `2+3` olarak kesebiliyor;
+   tam ifade yürütücüsü ile doğal dil parametre çıkarımı hizalanmalı.
+4. **Async ToT:** Async handler'a ToT nesnesi bağlanmadığından `tot` seçimi tek aday yoluna düşüyor.
+5. **Critic eşzamanlılığı:** Ortak `_last_feedback` ve `_last_passes` alanları istekler arasında karışabiliyor.
 
-manager = CognitiveManager(model_manager=model, config=config)
-```
+Ayrıntılı öncelikler ve kabul ölçütleri [geliştirme yol haritasındadır](../../architecture/NEXT_DEVELOPMENT_ROADMAP.md).
+Bu maddeler bu belge turunda düzeltilmiş sayılmaz.
 
-### Ortam Değişkeni ile Yükleme
+## Kod ve diğer belgeler
 
-```bash
-export CM_CRITIC_ENABLED=true
-export CM_TOOLS_ENABLE=true
-export CM_DEBATE_ENABLED=false
-export CM_MAX_NEW_TOKENS_LO=32
-export CM_MAX_NEW_TOKENS_HI=512
-```
+- [Orchestrator](../../../cognitive_management/v2/core/orchestrator.py) ve [işlem adımları](../../../cognitive_management/v2/processing/handlers.py)
+- [Model adaptörü](../../../model/cevahir.py), [critic](../../../cognitive_management/v2/components/critic_v2.py) ve [araç politikası](../../../cognitive_management/v2/components/tool_policy_v2.py)
+- [Bellek](../../../cognitive_management/v2/components/memory_service_v2.py), [store factory](../../../cognitive_management/v2/components/vector_store/__init__.py) ve [cache](../../../cognitive_management/v2/middleware/cache.py)
 
-```python
-config = CognitiveManagerConfig.from_env()
-```
-
-### Oturum Durumuna Erişim
-
-```python
-# CognitiveManager, state'i dahili olarak tutar
-output = manager.handle("Merhaba!")
-output2 = manager.handle("Peki ya İzmir?")  # Önceki bağlamı hatırlar
-
-# Oturum geçmişi
-state = manager.state
-print(state.turn_count)   # → 2
-print(state.session_id)   # → "a3f8b21c"
-```
-
----
-
-## Bağımlılıklar
-
-### Zorunlu
-
-| Paket | Kullanım |
-|-------|---------|
-| `torch` | Model inference backend |
-| `dataclasses` | Tip tanımları |
-
-### Opsiyonel
-
-| Paket | Kullanım | Aktif Eden Config |
-|-------|---------|-------------------|
-| `chromadb` | Epizodik vektör belleği | `memory.vector_store_provider = "chroma"` |
-| `sentence-transformers` | Embedding üretimi | `memory.embedding_provider = "sentence-transformers"` |
-| `wikipedia` | Dış gerçek doğrulama | `critic.enable_wikipedia = True` |
-| `openai` | OpenAI embedding/fact-check | `memory.embedding_provider = "openai"` |
-
-### Kurulum
-
-```bash
-# Temel kurulum
-pip install chromadb sentence-transformers
-
-# Wikipedia fact-checking için
-pip install wikipedia-api
-
-# Tüm opsiyonel özellikler
-pip install chromadb sentence-transformers wikipedia-api
-```
-
----
-
-Daha fazla bilgi için:
-- [Mimari Detayları →](architecture/README.md)
-- [API Referansı →](api/README.md)
-- [Kullanım Kılavuzları →](guides/README.md)
+Bu klasörün `architecture`, `guides`, `api` ve `development` altındaki eski belgeleri
+tasarım geçmişi ve örnekler içerir; güncel doğrulanmış sözleşme olarak kabul edilmemelidir.
+Çelişki olduğunda bu rehber, mimari sözleşme ve aktif kod akışı birlikte esas alınır.

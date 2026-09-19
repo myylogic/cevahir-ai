@@ -1,298 +1,266 @@
 # 🇹🇷 Cevahir AI & Engine
 
-**Full-stack open-source AI engine.**
+[English](README.md) · [Türkçe](README-TR.md)
 
-An **end-to-end** language model infrastructure spanning from tokenizer training to the cognitive reasoning layer — all within a single repository. Born as a Turkish LLM project, its language-agnostic architecture allows you to train models in any language you choose.
+**An AI engine combining tokenizer infrastructure developed specifically for Turkish, a trainable language-model core and cognitive systems.**
 
-*"A freedom manifesto shaped by the vision of Turkish youth, challenging global tech giants with limited resources. This is not just a model — it is a complete factory designed for you to build your own AI world."*
+Developed by Muhammed Yasin Yılmaz, Cevahir brings data preparation, model learning and the use of a trained model in conversation into one codebase. It includes its own BPE pipeline, a configurable PyTorch Transformer decoder, training and checkpoint management, generation, cognitive workflows, conversational memory, and application services.
 
-**A Gift to Turkish Youth.** · Open Source · Full-Stack AI Engine · End-to-End
+The project gives developers—and especially young people in Türkiye—a foundation they can inspect, train on their own data and extend with new capabilities. Its implemented modules, completed model training runs and shared outputs form a growing body of engineering work.
 
-*Cevahir AI & Engine is a full-stack open-source AI engine that provides an end-to-end infrastructure for building and deploying language models — from tokenizer training to cognitive reasoning layers.*
+**Created by Muhammed Yasin Yılmaz · “A Gift to Turkish Youth.”**
 
 <p align="center">
-  <img src="image/87E09A64-4E1F-41D5-84AF-7D7C56F6C229.png" style="max-width:100%;">
+  <img src="image/87E09A64-4E1F-41D5-84AF-7D7C56F6C229.png" alt="Cevahir AI & Engine" style="max-width:100%;">
 </p>
 
----
+## The architectural value of Cevahir
 
-## Vision & Manifesto
+Cevahir brings **language representation, model learning and model use into one extensible system.** Developers can follow and modify the path from splitting text into tokens, through learning from those tokens, to generating responses that use conversation history and tool results.
 
-Cevahir advocates for the democratization of knowledge in an era dominated by massive GPU farms and closed-box algorithms.
+**A place to develop language representations.** The BPE infrastructure developed specifically for Turkish connects normalization, vocabulary, merge rules, optional syllabification and morphology components to data preparation. Work on how language is represented can then reach model training through the same token identities.
 
-- **Limited Resources, Unlimited Innovation:** Proof that world-class results can be achieved not with big budgets, but with optimized, intelligent architecture.
-- **A Gift to Turkish Youth:** A reference architecture for a generation that shapes technology rather than merely consuming it.
-- **Complete AI Infrastructure:** One of the **rare** open-source projects that provides a full AI infrastructure — from tokenizer training to the cognitive layer — in a single repository; every cell is open source.
+**Infrastructure that turns architectural choices into trainable models.** Attention head layouts, positional encoding, normalization, residual structure and dense/expert FFN options feed into model construction. The training service connects that model to data; the training manager handles loss, gradients and optimization. Checkpoints and tokenizer identity provide the basis for using the resulting model with the same meaning later.
 
-Cevahir **is not limited to Turkish.** While the engine was first optimized for Turkish, it offers a **language-agnostic** infrastructure; you can train your own models in any language and with any dataset.
+**A cognitive layer that uses the learned model.** Cevahir connects generation and candidate scoring to strategy selection, multiple candidate generation, tool use, memory retrieval and critic revision. This creates room to study and improve response construction without retraining the weights.
 
----
+**A path from inspectable internals to conversational applications.** Model profiling, gradient/weight health checks and cognitive traces expose internal behavior. The unified `Cevahir` interface, conversation manager and application services connect the same engine to applications with users, sessions and history.
 
-## Features
+Together, these parts provide a foundation for Turkish language modeling and further model and cognitive-system experiments. The [system overview](docs/architecture/SYSTEM_OVERVIEW.md) explains their connections; the [architecture contract](docs/architecture/CEVAHIR_ARCHITECTURE_SPEC.md) describes implementation behavior.
 
-- **Turkish BPE Tokenizer** — End-to-end training, vocab/merges, encode-decode pipeline (Unicode, İ/ı rules, syllabification, morphology support)
-- **Transformer Decoder** — RoPE, RMSNorm, SwiGLU, causal mask, weight tying, KV cache, Flash Attention infrastructure
-- **Model Management** — Build, training components, save/load, forward/predict, TensorBoard
-- **Cognitive Management** — Strategy (direct/think/debate/tot), memory (RAG, vector DB), critic, tool use, middleware, monitoring
-- **Chat Pipeline** — ChattingManager, session/history, chat assistant flow via Cevahir unified API
+## System architecture
 
----
-
-## Cevahir Engine: Not Just a Model — An Ecosystem
-
-**Cevahir AI & Engine** is a **full-stack open-source AI engine** that provides **end-to-end** infrastructure for building language models. Many open-source projects offer only a *training framework* (tokenizer → model → training → inference). Cevahir additionally includes a **chat system**, **cognitive management** (strategy layers: think / debate / ToT), a **unified engine API**, **tool use**, and **RAG memory** — all within a single repository; this structure places the project in the *AI engine / full-stack AI* category.
-
-Using this infrastructure — the heart of Cevahir — you can train your own custom AI models **in any language** and with any dataset.
-
-### 1. Turkish-Focused Hybrid Tokenizer (BPE)
-
-Cevahir Engine approaches the Turkish language with a native perspective, while the same infrastructure offers a **language-agnostic** architecture:
-
-- **Byte Pair Encoding (BPE):** A custom encoding process that recognizes Turkish agglutinative morphology, Unicode characters (İ/ı, Ş/ş, etc.), and morphological features. Vocab/merges can be retrained for other languages as well.
-- **Language-Agnostic Architecture:** Although the infrastructure is optimized for Turkish, the engine has the capacity to produce high-performance models in **any language worldwide**; the project is not limited to Turkish.
-- **GPU-Accelerated Batch Tokenization:** The ability to process millions of lines of data in seconds.
-
-### 2. Flexible Model Architecture (Transformer V-4)
-
-- **Modular Design:** Define your own neural network configuration (number of layers, heads, dimensions) in seconds using modern components such as RoPE, RMSNorm, SwiGLU, and Flash Attention.
-- **Unlimited Model Production:** Train your own vertical specialty models (Law, Medicine, Software, etc.) from scratch, or continue from existing weights.
-
-### 3. Cognitive Management
-
-Enables the model not only to generate text but to **think**:
-
-- **Strategy Layers:** Solve complex problems with Direct, Think, Debate, and Tree of Thoughts (ToT) strategies.
-- **Dynamic Memory:** The infrastructure for RAG and Vector DB integration — allowing the model to converse with up-to-date data — is ready out of the box.
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Cevahir (Unified API)                 │
-│                     model/cevahir.py                     │
-└─────────────────────────────────────────────────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        │               │               │
-        ▼               ▼               ▼
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│ TokenizerCore│ │ ModelManager  │ │CognitiveMgr  │
-│ (Turkish BPE)│ │ (V-4 NN)     │ │ (Cognitive)  │
-└──────────────┘ └──────────────┘ └──────────────┘
-        │               │               │
-        ▼               ▼               ▼
-  vocab/merges    Neural Network   Memory/Tools
-                  (RoPE, RMSNorm,  (RAG, Critic,
-                   SwiGLU, …)       Tools)
+```mermaid
+flowchart TD
+    Sources[Text, document and question-answer data] --> Tokens[TokenizerCore / BPE]
+    Tokens --> Cache[Prepared training data]
+    Cache --> Training[TrainingService / TrainingManager]
+    Training --> Core[CevahirNeuralNetwork]
+    Core --> Checkpoint[Weights, architecture and tokenizer identity]
+    Checkpoint --> Manager[ModelManager]
+    Manager --> Generation[Generation and candidate scoring]
+    Tokens --> Generation
+    User[User message] --> Chat[Cevahir / ChattingManager]
+    Chat --> Cognitive[Cognitive strategy and response processing]
+    Cognitive <--> Generation
+    Cognitive <--> Memory[Conversation memory and retrieval]
+    Cognitive --> Tools[Registered tools]
+    Tools --> Cognitive
+    Chat <--> Services[HTTP services and persistent sessions]
 ```
 
-- **Cevahir** — encode/decode, generate, process (cognitive), generate_batch, process_batch
-- **TokenizerCore** — BPE (Turkish-focused, language-agnostic), GPU batch, OOV syllable fallback
-- **ModelManager** — Model lifecycle, checkpoint, TensorBoard
-- **CognitiveManager** — handle(), strategy selection, memory, critic, register_tool(), get_metrics()
+The main model path is `Cevahir → ModelManager → CevahirNeuralNetwork`. The training launcher selects the V3 training service when available, using the active **V2 TrainingManager** with `training_backend="v2"`; it retains a V2 service fallback. Names such as V4, V7 and V8 in older comments describe development history. The current model is a configurable core whose capabilities are selected through configuration.
 
----
+### Neural network core
 
-## Installation
+[The decoder](src/neural_network.py) combines embeddings, stacked Transformer layers, output normalization and vocabulary projection. Its configurable components include:
 
-The project must be cloned from GitHub and run in your own environment. Dependencies (`requirements.txt` etc.) may include approximately **200 libraries**; it is recommended that you have knowledge of Python, pip/venv, and if necessary CUDA/PyTorch for setup and environment configuration. Detailed steps may vary depending on the project structure and the versions you use; responsibility for setup rests with the developer.
+- **MHA, MQA and GQA:** the number of query and key/value heads can be configured separately.
+- **Position and attention:** RoPE, linear/YaRN scaling options, causal attention, sliding-window masks, QK normalization and attention/output logit soft-caps.
+- **Feed-forward layers:** dense FFN or top-k Mixture of Experts, with SwiGLU/GELU and router auxiliary loss in the training objective.
+- **Layer structure:** RMSNorm/LayerNorm, pre/post normalization, parallel residuals, weight tying and stochastic depth.
+- **Memory and execution:** incremental KV caching, bounded cache eviction with sink tokens, PyTorch SDPA, optional external Flash Attention, and gradient checkpointing.
 
----
+Normal forward calls can use SDPA without materializing attention weights. `return_attention_weights=True` requests the diagnostic weights; `collect_diagnostics=True` requests detailed tensor statistics. Standard calls return `(logits, attention_or_none)`; cached core calls include a third cache value. External Flash Attention and long-context configurations depend on the target hardware and need their own evaluation.
 
-## Quick Start (Train Your Own Model)
+### Tokenizer, data and training
+
+[TokenizerCore](tokenizer_management/core/tokenizer_core.py) is the shared entry point to **tokenizer infrastructure developed specifically for Turkish**. BPE training, vocabulary/merge management, encoding and decoding use the same components. Turkish `I/İ` handling, syllabification, rule-based stem/suffix helpers and special-token management are part of this infrastructure. Syllabification and morphology are configurable; they do not run unconditionally on every inference call.
+
+A tokenizer developed for Turkish does not necessarily need to be replaced to work with another language. The same vocabulary and merge rules can serve different languages within their text coverage. The tokenizer represents text; the model learns language through training data and weights. Cevahir's current character filters and coverage checks are described in the [tokenizer guide](docs/modules/tokenizer_management/README-en.md).
+
+[The data loader](data_loader_management/data_loader_manager.py) carries documents and question-answer records into training with source information. [Collection/conversion tools](data_processing) and [subtitle processing](dataset_subtitle/subtitle_processor.py) help prepare text; their outputs enter through the selected data directory.
+
+[Training preparation](training_system/prepare_cache.py) reads supported TXT, DOCX and question-answer JSON data and builds tokenized input/target records. Prepared data can be reused across epochs. Cache identities include source content, the vocabulary, merge rules and encoding settings; V3 consumption also checks cache integrity.
+
+The training system includes source-aware train/validation splitting, grouping of exact duplicate records, length-based batching, dynamic padding, gradient accumulation, precision selection, optimizer/scheduler integration, validation and checkpoint rotation. The active training manager records optimizer, scheduler, scaler, RNG and loop state for resuming at epoch boundaries. MoE auxiliary loss participates in optimization rather than being returned as unused metadata.
+
+### Generation, cognition and conversations
+
+[The unified interface](model/cevahir.py) exposes encoding, decoding, generation and cognitive processing. Generation includes temperature sampling, greedy decoding, top-k/top-p controls, repetition handling, EOS limits, beam search and incremental KV caching.
+
+[The cognitive system](cognitive_management) provides direct, think, debate and Tree of Thoughts workflows; context assembly, tool execution, critic stages, vector-memory integration, response caching and tracing. These are orchestration components whose response quality depends on the trained model, tools and retrieval setup. The built-in calculator executes restricted arithmetic; external tools can be registered through the tool interface.
+
+The [cognitive module guide](docs/modules/cognitive_management/README-en.md) explains strategy execution, synchronous/asynchronous differences and open development boundaries.
+
+[ChattingManager](chatting_management) manages conversation history and context. Memory entries, notes and summaries are scoped to users/sessions in the scoped cognitive flow. [API services](api) and [database repositories](database) connect the engine to authenticated sessions, stored conversations and user data.
+
+## Real training outputs
+
+**The following screenshots come from the author's actual model-training runs and generation checks during training.** They show work already carried out with Cevahir, including prompts, generated responses and training-time output. They are retained here as examples of the project's training history.
+
+<p align="center">
+  <img src="image/1.jpeg" alt="Cevahir actual training output 1" style="max-width:100%;">
+  <img src="image/2.jpeg" alt="Cevahir actual training output 2" style="max-width:100%;">
+  <img src="image/3.jpeg" alt="Cevahir actual training output 3" style="max-width:100%;">
+  <img src="image/4.jpeg" alt="Cevahir actual training output 4" style="max-width:100%;">
+  <img src="image/5.jpeg" alt="Cevahir actual training output 5" style="max-width:100%;">
+  <img src="image/6.jpeg" alt="Cevahir actual training output 6" style="max-width:100%;">
+</p>
+
+The author has also shared a [training-data collection](https://drive.google.com/drive/folders/19G5uGS5YM3rf42OefjM3KsXRyn0ZEshW?usp=sharing). Configure the data path and preparation settings for your own run. For inference, use a trained checkpoint together with the vocabulary, merges and BPE settings used for that checkpoint.
+
+## Development beyond V4
+
+The model did not stop at V4. Version notes in the source describe successive additions to the same core:
+
+| Source label | Implementation present in the current code |
+|---|---|
+| V4 | RMSNorm, SwiGLU, KV caching, advanced checkpointing, quantization and MoE integration |
+| V5 | GQA/MQA head layouts, sliding-window attention and YaRN RoPE scaling |
+| V6 | PyTorch SDPA, QK-Norm, parallel residuals, attention/output logit soft-caps and scaled residual initialization |
+| V7 | Stochastic depth, merged SwiGLU gate/up projection and KV management with sink tokens |
+| V8 lower-layer notes | Fixes to boundaries such as KV capacity and MoE auxiliary-loss accounting |
+
+These labels do not identify separately installed model packages. The **V3** training service, active **V2** training manager and **V2** cognitive infrastructure each have their own development history. `config_version=1` and `architecture_version="cevahir-capabilities-1"` identify configuration compatibility. See the [neural core guide](docs/modules/neural_network/README-en.md) and [architecture contract](docs/architecture/CEVAHIR_ARCHITECTURE_SPEC.md) for the distinction.
+
+## Inspecting and developing the system
+
+[Model profiling](model_management/profiler.py) exposes parameter distribution, memory usage and computational-cost estimates; [health checks](model_management/health_monitor.py) inspect gradients, weights and attention statistics. Cognitive trace and metrics interfaces expose the stages a response passes through. These tools help examine the effect of an architectural choice or cognitive processing step.
+
+Recent infrastructure work has strengthened the connections between these parts: shared model configuration, MoE loss in the training objective, incremental attention caching, tokenizer/checkpoint identity and user/session-scoped memory. Implementation details are recorded in the [lower-core contracts](docs/architecture/LOWER_CORE_CONTRACTS.md) and [lifecycle document](docs/architecture/LIFECYCLE_CONSOLIDATION.md). Open work is tracked in the [next development round](docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md).
+
+## Getting started
+
+Run commands from the repository root. The recorded lightweight verification environment is **Windows, Python 3.14.3 and PyTorch 2.10.0+cpu**. The repository currently has no root-level `requirements.txt` or `pyproject.toml`; [database/requirements.txt](database/requirements.txt) covers only the database module.
+
+For the small core example below, create an environment and install the core dependencies. PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install torch numpy
+```
+
+On Linux/macOS, activate it with `source .venv/bin/activate`. Additional dependencies depend on the subsystem: tokenizer/document paths use packages such as `tqdm`, `regex` and `python-docx`; training monitoring uses packages such as `psutil`, `matplotlib` and `tensorboard`; HTTP services use Flask, Flask-Cors, Flask-Limiter, SQLAlchemy and PyJWT. These groups are an orientation, not a complete locked installation manifest.
+
+### Run a small model on CPU
+
+This example constructs a small model and performs one forward pass. It uses synthetic token IDs and needs no dataset or checkpoint; it is a convenient starting point for exploring the core.
 
 ```python
-from model.cevahir import Cevahir, CevahirConfig
+import torch
+from model_management.config_schema import tiny_model_config
+from model_management.model_manager import ModelManager
 
-# 1. Define your own architecture
-config = CevahirConfig(
-    device="cuda",  # or "cpu"
-    model={
-        "vocab_size": 60000,  # Optimized with Turkish BPE; can be retrained for other languages
-        "embed_dim": 512,     # Define your own capacity
-        "num_layers": 8,
-        "num_heads": 8,
-    }
+torch.set_num_threads(1)
+torch.manual_seed(42)
+manager = ModelManager(tiny_model_config())
+manager.initialize(
+    build_optimizer=False, build_criterion=False, build_scheduler=False
 )
-
-# 2. Start the engine
-cevahir = Cevahir(config)
-
-# 3. Chat (with cognitive layer)
-output = cevahir.process("Hello, how are you?")
-print(output.response)
-
-# 4. Text generation
-text = cevahir.generate("The capital of Turkey is", max_new_tokens=50, temperature=0.8)
-print(text)
-
-# For training with your own data: see the training_system/ guide.
+logits, attention = manager.forward(
+    torch.tensor([[1, 5, 8, 2]]), inference=True
+)
+print(logits.shape)  # torch.Size([1, 4, 128])
+print(torch.isfinite(logits).all().item())  # True
 ```
 
----
+### Load your trained model
 
-## Terminal Testing
+Use the exact tokenizer files and BPE settings from training. Modern checkpoints contain construction metadata, so an unbuilt `ModelManager` can build the model from the saved configuration:
 
-Chat and generation tests with a trained model can be done via **terminal** using `chat_pipeline.py`:
+```python
+from tokenizer_management.core.tokenizer_core import TokenizerCore
+from model_management.model_manager import ModelManager
 
-```bash
-python model_management/chat_pipeline.py
+tokenizer = TokenizerCore({
+    "vocab_path": "data/vocab_lib/vocab.json",
+    "merges_path": "data/merges_lib/merges.txt",
+    "use_gpu": False,
+    # Supply bpe_config here if training used custom BPE settings.
+})
+manager = ModelManager({"device": "cpu"}, tokenizer=tokenizer)
+manager.load("saved_models/checkpoints/last.pth", weights_only=True)
+manager.eval_mode()
 ```
 
-*(This script uses the Cevahir + ChattingManager pipeline; a checkpoint or saved model is required.)*
+Replace the checkpoint path with your own. Raw/older weight files without construction metadata require an explicit matching model configuration. Legacy checkpoints without tokenizer identity emit a warning when a tokenizer is supplied; their token semantics cannot be verified automatically.
 
----
+For the full interface, pass settings through `CevahirConfig(model={...}, tokenizer={...}, load_model_path=...)`. A `Cevahir` instance builds its model before loading, so those architecture settings must match the checkpoint. `load_model_path=None` enables default-path auto-detection; `load_model_path=""` explicitly starts a new model. A selected missing or incompatible checkpoint raises an error. The terminal chat entry point is [chat_pipeline.py](model_management/chat_pipeline.py), whose configuration must likewise match the trained model.
 
-## Sample Outputs During Training — Example Generation During Training
+## Train with your data
 
-These are inference samples obtained with **TrainingServiceV2** during training or epoch-end tests: the prompt given to the model, the generated response, token count, and EOS information are visible in the log. You can add screenshots of this kind below.
+1. **Choose the tokenizer.** Reuse matching vocab/merges for an existing model. If creating a new tokenizer, set its paths and training options in [tokenizer configuration](tokenizer_management/config.py), then run:
 
-### Sample output images
-
-<p align="center">
-  <img src="image/1.jpeg" style="max-width:100%;">
-</p>
-<p align="center">
-  <img src="image/2.jpeg" style="max-width:100%;">
-</p>
-<p align="center">
-  <img src="image/3.jpeg" style="max-width:100%;">
-</p>
-<p align="center">
-  <img src="image/4.jpeg" style="max-width:100%;">
-</p>
-<p align="center">
-  <img src="image/5.jpeg" style="max-width:100%;">
-</p>
-<p align="center">
-  <img src="image/6.jpeg" style="max-width:100%;">
-</p>
-
----
-
-## Training
-
-### Training Data
-
-The dataset used for model training contains **approximately 680,000 examples**. If you want to use the training data in your own environment, you can download it from the link below:
-
-- **[Training data (Google Drive)](https://drive.google.com/drive/folders/19G5uGS5YM3rf42OefjM3KsXRyn0ZEshW?usp=sharing)** — ~680k examples (docx, txt, question–answer json, etc.); can be converted to a compatible format via `prepare_cache.py`.
-
-### Pre-trained Model (Download)
-
-If you want to try inference or chat without training from scratch, you can download the ready-made trained model weights:
-
-### From-Scratch Training Flow
-
-The steps for training from scratch must be followed **in order**:
-
-1. **Tokenizer training** — Generates vocab and merges files:
-   ```bash
-   python tokenizer_management/train_bpe.py
+   ```powershell
+   python tokenizer_management/train_bpe.py education
    ```
-   Output: `vocab.json`, `merges.txt` (or paths defined in config).
 
-2. **Training data cache** — Converts raw data into autoregressive training format:
-   ```bash
-   python tokenizer_management/prepare_cache.py
+   Retraining the tokenizer can change token IDs; existing model weights and prepared caches must remain paired with their original tokenizer.
+
+2. **Prepare the cache.** Match the tokenizer options and `max_seq_length` to your training configuration:
+
+   ```powershell
+   python training_system/prepare_cache.py --data-dir education --no-clear-cache
    ```
-   Supported data: **docx**, **txt** (raw text), **json** (question–answer). Output: A fully prepared cache file in autoregressive format with BOS, EOS, PAD, SEP and input/target sequences. Data is split into chunks of approximately **512 tokens**; longer segments are split again, shorter ones are filled with **padding**. To change chunk length or padding behavior, see `tokenizer_management/prepare_cache.py`.
 
-3. **Model training** — Training with the prepared cache:
-   ```bash
+   `--no-clear-cache` preserves existing cache files; the script otherwise clears old caches. Use `--help` for sequence-length and encoding options. V3 training requires a compatible prepared cache.
+
+3. **Configure and run training.** Set paths, model dimensions, optimizer, batch size, epochs and device in `TRAIN_CONFIG` in [training_system/train.py](training_system/train.py):
+
+   ```powershell
    python training_system/train.py
    ```
-   The cached data is loaded automatically; training proceeds on this format.
 
-A GPU is recommended for training.
+   The checked-in preset is a substantial training configuration, including 100 epochs, batch size 64 and an eight-layer, 512-dimensional model. Adjust it for your hardware before running. The CPU example above is the lightweight entry point.
 
-### Changing Model Parameters
+Architecture configuration is normalized by [config_schema.py](model_management/config_schema.py). Change the configuration supplied to the system; editing the default class definitions in `model/cevahir.py` is not required. Cache preparation and training still have separate entry-point settings, which must agree.
 
-If you want to change the model size and training hyperparameters (embed_dim, num_layers, num_heads, lr, dropout, etc.), updates must be made in **two places**:
+## Application integration
 
-- **`model/cevahir.py`** — CevahirConfig / model default values (for compatibility with inference and pipeline).
-- **`training_system/train.py`** — `TRAIN_CONFIG` and model parameters (values used during training).
+The integrated Flask entry point is [api.app_factory.create_app](api/app_factory.py). It wires the model, ChattingManager, services, authentication, health checks and database access. Configure the database, an explicit `JWT_SECRET_KEY`, model path and matching tokenizer before starting the application. Model overrides can be supplied through `CEVAHIR_MODEL_CONFIG` in the factory configuration. The older `api/app.py` retains an obsolete configuration import and is not the recommended entry point.
 
-Both must be consistent with each other; otherwise, a shape or behavior mismatch will occur when the trained checkpoint is loaded.
+## Repository map
 
----
+| Directory | Responsibility |
+|---|---|
+| [src/](src) | Neural decoder, attention, FFN/MoE, normalization and KV cache |
+| [tokenizer_management/](tokenizer_management) | BPE training, encoding/decoding, vocabulary and merge management |
+| [data_loader_management/](data_loader_management) | Document and question-answer loading, chunking and source identity |
+| [data_processing/](data_processing), [dataset_subtitle/](dataset_subtitle) | Data collection, document conversion and subtitle-to-text tools |
+| [training_system/](training_system) | Data preparation, cache, batching and training service |
+| [training_management/](training_management) | Training loop, optimization, monitoring and checkpoints |
+| [model_management/](model_management) | Configuration, construction, loading, saving, profiling and inference |
+| [model/](model) | Unified Cevahir interface and generation adapter |
+| [cognitive_management/](cognitive_management) | Strategies, tools, critic, scoped memory and middleware |
+| [chatting_management/](chatting_management) | Sessions, conversation history and context |
+| [api/](api), [database/](database) | HTTP services, authentication and persistence |
+| [benchmarks/](benchmarks), [tests/](tests), [scripts/](scripts) | Measurements, behavior verification and standalone diagnostic tools |
+| [docs/](docs) | Architecture, module guides and development history |
 
-## Project Structure & Modularity
+## Verification and development status
 
-Cevahir Engine is built on **SOLID** principles with **12 main framework modules** and **653+** module files (.py):
+Past model training is illustrated above. Current engineering checks additionally use small CPU models to compare cached/full-sequence results, gradients, save/load behavior, tokenizer identity and state isolation. Their synthetic loss or timing measurements do not measure the language quality of the trained model.
 
-- **tokenizer_management/** — Train your own BPE tokenizer from scratch (Turkish or any other language).
-- **training_system/** — Start model training with your own dataset.
-- **cognitive_management/** — Give the model decision-making capability.
-- **src/** — Interact with the V-4 Neural Network core.
-- **model/** — Unified API (cevahir.py).
-- **model_management/** — Model lifecycle (build, save/load, forward).
-- **chatting_management/** — Chat (ChattingManager, session, context).
-- **docs/** — Documentation, error debugging processes.
+For a small lifecycle verification group and a separate core measurement:
 
+```powershell
+python -m pip install pytest
+python -m pytest tests/evolution/test_lower_layer_contracts.py tests/evolution/test_checkpoint_lifecycle.py -q
+python benchmarks/core.py --label local --output benchmarks/results/core_local.json
 ```
-cevahir_sinir_sistemi/
-├── model/                 # Unified API (cevahir.py)
-├── cognitive_management/  # Cognitive layer (strategy, memory, critic, tools)
-├── model_management/      # Model lifecycle (build, save/load, forward)
-├── training_system/       # Training pipeline (train.py, v2, v3)
-├── tokenizer_management/  # BPE (Turkish-focused, language-agnostic)
-├── src/                   # Neural network (CevahirNeuralNetwork, V-4)
-├── chatting_management/   # Chat (ChattingManager, session, context)
-└── docs/                  # Documentation
-```
 
-Framework modules: model, cognitive_management, model_management, training_system, tokenizer_management, src, chatting_management, data_loader_management, training_management, openai-data-mining, api, data_processing.
+See [benchmark instructions](benchmarks/README.md) for dependencies and broader verification. The entire historical test suite is not claimed to pass. Remaining development areas include lossless Unicode tokenization, full-record training alignment checks, near-duplicate data separation, concurrent model replacement/generation, and retrieval/critic/ToT quality evaluation. GPU execution, distributed training, long-context quality and real compilation performance require separate validation; the presence of helper modules does not imply integration into the active training path.
 
----
+## Documentation, contribution and contact
 
-## Why Open Source?
+- [How the modules form a system](docs/architecture/SYSTEM_OVERVIEW.md)
+- [Architecture and supported behavior](docs/architecture/CEVAHIR_ARCHITECTURE_SPEC.md)
+- [Next major development round: findings and sequence](docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md)
+- [Lower-core contracts](docs/architecture/LOWER_CORE_CONTRACTS.md)
+- [Checkpoint, data and runtime lifecycle](docs/architecture/LIFECYCLE_CONSOLIDATION.md)
+- [Development log](docs/development/EVOLUTION_LOG.md)
+- [Module documentation](docs/modules)
 
-AI is the technology of the future; yet resources are often in the hands of large corporations or reduced to only a training framework. As a **full-stack** and **end-to-end** AI engine, Cevahir AI & Engine allows you to:
+Contributions can improve the core, data and tokenizer pipeline, model lifecycle, application integration or evaluations. Describe the affected flow, the resulting behavior and the verification appropriate to the change.
 
-- **Examine** a complete language model engine (tokenizer → model → cognitive) end-to-end and train your own models **in any language**; the project is not limited to Turkish.
-- Tokenizer training, Transformer architecture, model training, chat, and cognitive strategies are all present **transparently in a single project**.
-- The project was designed as an **educational resource** and **reference architecture** for Turkish youth (and all developers) to understand and advance artificial intelligence.
+The root [LICENSE](LICENSE) contains Apache License 2.0.
 
----
-
-## Documentation
-
-- **Architecture:** `docs/` — system architecture, layers, data flow
-- **API Reference:** `docs/` — Usage of Cevahir, ModelManager, CognitiveManager, TokenizerCore
-- **Module Documentation:** Docstrings and README files under `model/`, `cognitive_management/`, `model_management/`, `training_system/`, `tokenizer_management/`, `src/`
-- **Training Guide:** `training_system/train.py`, `tokenizer_management/train_bpe.py`, `prepare_cache.py` — examine these files for parameters and flow
-- **Inference / Chat:** `model_management/chat_pipeline.py`, `model/cevahir.py` — usage examples and config
-
-Only this README and source code are in the project root; additional texts (introductions, process summaries, etc.) are not kept separately in the repository.
-
----
-
-## License & Contributing
-
-The project is licensed under **Apache License 2.0**; it is fully open-source and accessible to everyone. See the `LICENSE` file in the repo root for details. Contributions are welcome from developers **anywhere in the world**.
-
-Contributions are warmly welcomed. You can follow the fork, feature branch, commit, and Pull Request steps.
-
----
-
-## Contact
-
-- **GitHub:** [@myylogic](https://github.com/myylogic)
-- **X (Twitter):** [@myylogic](https://x.com/myylogic)
-- **Instagram:** [@myylogic](https://instagram.com/myylogic)
-- **Project:** Cevahir AI — A Gift to Turkish Youth.
-
----
-
-**Developer:** Muhammed Yasin Yılmaz ([@myylogic](https://github.com/myylogic)) · **Status:** Open Source / Active Development · **Date:** 09.03.2026
+**Developer:** Muhammed Yasin Yılmaz · [GitHub](https://github.com/myylogic) · [X](https://x.com/myylogic) · [Instagram](https://instagram.com/myylogic)
 
 <p align="center">
-  <img src="image/myy.jpeg" style="max-width:100%;">
+  <img src="image/myy.jpeg" alt="Muhammed Yasin Yılmaz, Cevahir creator" style="max-width:100%;">
 </p>
 
-<p align="center">
-Cevahir AI & Engine – Creator · Turkish AI Researcher
-</p>
+*Documentation aligned with the repository on 20 September 2026.*
