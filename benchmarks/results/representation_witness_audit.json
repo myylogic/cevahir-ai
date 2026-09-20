@@ -1,0 +1,1382 @@
+{
+  "schema_version": 1,
+  "kind": "synthetic_representation_search_equivalence_audit",
+  "limits": {
+    "candidates": 64,
+    "observations": 256,
+    "history": 8,
+    "search_steps": 100000,
+    "total_steps": 1000000,
+    "seconds": 10.0,
+    "traced_bytes": 16777216
+  },
+  "worlds": [
+    {
+      "world": "independent",
+      "train_objects": 3,
+      "heldout_objects": 5,
+      "prefixes": [
+        {
+          "training_observations": 3,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 366,
+              "candidates_considered": 25,
+              "representation_calls": 75,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 75
+            },
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 105,
+              "abstentions": 50,
+              "accuracy_including_abstentions": 0.6774193548387096,
+              "coverage": 0.6774193548387096
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 372,
+              "candidates_considered": 25,
+              "representation_calls": 75,
+              "witness_rows": 3,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 75
+            },
+            "witness_count": 0,
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 105,
+              "abstentions": 50,
+              "accuracy_including_abstentions": 0.6774193548387096,
+              "coverage": 0.6774193548387096
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 6,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 879,
+              "candidates_considered": 25,
+              "representation_calls": 150,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 150
+            },
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 894,
+              "candidates_considered": 25,
+              "representation_calls": 150,
+              "witness_rows": 6,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 150
+            },
+            "witness_count": 0,
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 12,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 1905,
+              "candidates_considered": 25,
+              "representation_calls": 300,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 300
+            },
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 1938,
+              "candidates_considered": 25,
+              "representation_calls": 300,
+              "witness_rows": 12,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 300
+            },
+            "witness_count": 0,
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 24,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 4545,
+              "candidates_considered": 25,
+              "representation_calls": 600,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 600
+            },
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 4626,
+              "candidates_considered": 25,
+              "representation_calls": 600,
+              "witness_rows": 24,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 600
+            },
+            "witness_count": 0,
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 39,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 7845,
+              "candidates_considered": 25,
+              "representation_calls": 975,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 975
+            },
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 7986,
+              "candidates_considered": 25,
+              "representation_calls": 975,
+              "witness_rows": 39,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 975
+            },
+            "witness_count": 0,
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        }
+      ]
+    },
+    {
+      "world": "shared_capacity_1",
+      "train_objects": 3,
+      "heldout_objects": 5,
+      "prefixes": [
+        {
+          "training_observations": 3,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 366,
+              "candidates_considered": 25,
+              "representation_calls": 75,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 75
+            },
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 5,
+              "abstentions": 30,
+              "accuracy_including_abstentions": 0.03225806451612903,
+              "coverage": 0.8064516129032258
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 372,
+              "candidates_considered": 25,
+              "representation_calls": 75,
+              "witness_rows": 3,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 75
+            },
+            "witness_count": 0,
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 5,
+              "abstentions": 30,
+              "accuracy_including_abstentions": 0.03225806451612903,
+              "coverage": 0.8064516129032258
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 6,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 771,
+              "candidates_considered": 25,
+              "representation_calls": 134,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 134
+            },
+            "compatible_representations": [
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)"
+            ],
+            "selected": "target_active+(active_count lt 1)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 607,
+              "candidates_considered": 25,
+              "representation_calls": 104,
+              "witness_rows": 6,
+              "witness_pairs_checked": 25,
+              "witness_rejected": 16,
+              "consistency_rows": 54
+            },
+            "witness_count": 1,
+            "compatible_representations": [
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)"
+            ],
+            "selected": "target_active+(active_count lt 1)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 12,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 1149,
+              "candidates_considered": 25,
+              "representation_calls": 188,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 188
+            },
+            "compatible_representations": [
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)"
+            ],
+            "selected": "target_active+(active_count lt 1)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 1003,
+              "candidates_considered": 25,
+              "representation_calls": 158,
+              "witness_rows": 12,
+              "witness_pairs_checked": 25,
+              "witness_rejected": 16,
+              "consistency_rows": 108
+            },
+            "witness_count": 1,
+            "compatible_representations": [
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)"
+            ],
+            "selected": "target_active+(active_count lt 1)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 24,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 2031,
+              "candidates_considered": 25,
+              "representation_calls": 286,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 286
+            },
+            "compatible_representations": [
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count eq 0)"
+            ],
+            "selected": "target_active+(active_count lt 1)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 1933,
+              "candidates_considered": 25,
+              "representation_calls": 256,
+              "witness_rows": 24,
+              "witness_pairs_checked": 25,
+              "witness_rejected": 16,
+              "consistency_rows": 206
+            },
+            "witness_count": 1,
+            "compatible_representations": [
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count eq 0)"
+            ],
+            "selected": "target_active+(active_count lt 1)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 39,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 3111,
+              "candidates_considered": 25,
+              "representation_calls": 406,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 406
+            },
+            "compatible_representations": [
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count eq 0)"
+            ],
+            "selected": "target_active+(active_count lt 1)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 3073,
+              "candidates_considered": 25,
+              "representation_calls": 376,
+              "witness_rows": 39,
+              "witness_pairs_checked": 25,
+              "witness_rejected": 16,
+              "consistency_rows": 326
+            },
+            "witness_count": 1,
+            "compatible_representations": [
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count eq 0)"
+            ],
+            "selected": "target_active+(active_count lt 1)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        }
+      ]
+    },
+    {
+      "world": "shared_capacity_2",
+      "train_objects": 3,
+      "heldout_objects": 5,
+      "prefixes": [
+        {
+          "training_observations": 3,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 366,
+              "candidates_considered": 25,
+              "representation_calls": 75,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 75
+            },
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 45,
+              "abstentions": 50,
+              "accuracy_including_abstentions": 0.2903225806451613,
+              "coverage": 0.6774193548387096
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 372,
+              "candidates_considered": 25,
+              "representation_calls": 75,
+              "witness_rows": 3,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 75
+            },
+            "witness_count": 0,
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 45,
+              "abstentions": 50,
+              "accuracy_including_abstentions": 0.2903225806451613,
+              "coverage": 0.6774193548387096
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 6,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 879,
+              "candidates_considered": 25,
+              "representation_calls": 150,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 150
+            },
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 95,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 0.6129032258064516,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 894,
+              "candidates_considered": 25,
+              "representation_calls": 150,
+              "witness_rows": 6,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 150
+            },
+            "witness_count": 0,
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 95,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 0.6129032258064516,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 12,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 1905,
+              "candidates_considered": 25,
+              "representation_calls": 300,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 300
+            },
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 95,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 0.6129032258064516,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 1938,
+              "candidates_considered": 25,
+              "representation_calls": 300,
+              "witness_rows": 12,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 300
+            },
+            "witness_count": 0,
+            "compatible_representations": [
+              "target_active",
+              "target_active+(active_count lt 0)",
+              "target_active+(active_count lt 1)",
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 0)",
+              "target_active+(active_count eq 1)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 0)",
+              "target_active+(success_count lt 1)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 0)",
+              "target_active+(success_count eq 1)",
+              "target_active+(success_count eq 2)",
+              "target_active+(failure_count lt 0)",
+              "target_active+(failure_count lt 1)",
+              "target_active+(failure_count lt 2)",
+              "target_active+(failure_count eq 0)",
+              "target_active+(failure_count eq 1)",
+              "target_active+(failure_count eq 2)",
+              "target_active+(attempt_count lt 0)",
+              "target_active+(attempt_count lt 1)",
+              "target_active+(attempt_count lt 2)",
+              "target_active+(attempt_count eq 0)",
+              "target_active+(attempt_count eq 1)",
+              "target_active+(attempt_count eq 2)"
+            ],
+            "selected": "target_active",
+            "heldout": {
+              "observations": 155,
+              "correct": 95,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 0.6129032258064516,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 24,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 3441,
+              "candidates_considered": 25,
+              "representation_calls": 474,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 474
+            },
+            "compatible_representations": [
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 2)"
+            ],
+            "selected": "target_active+(active_count lt 2)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 2198,
+              "candidates_considered": 25,
+              "representation_calls": 290,
+              "witness_rows": 24,
+              "witness_pairs_checked": 25,
+              "witness_rejected": 13,
+              "consistency_rows": 240
+            },
+            "witness_count": 1,
+            "compatible_representations": [
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 2)"
+            ],
+            "selected": "target_active+(active_count lt 2)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        },
+        {
+          "training_observations": 39,
+          "generic": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 3981,
+              "candidates_considered": 25,
+              "representation_calls": 534,
+              "witness_rows": 0,
+              "witness_pairs_checked": 0,
+              "witness_rejected": 0,
+              "consistency_rows": 534
+            },
+            "compatible_representations": [
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 2)"
+            ],
+            "selected": "target_active+(active_count lt 2)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "gated": {
+            "status": "complete",
+            "limit": null,
+            "costs": {
+              "steps": 2798,
+              "candidates_considered": 25,
+              "representation_calls": 350,
+              "witness_rows": 39,
+              "witness_pairs_checked": 25,
+              "witness_rejected": 13,
+              "consistency_rows": 300
+            },
+            "witness_count": 1,
+            "compatible_representations": [
+              "target_active+(active_count lt 2)",
+              "target_active+(active_count eq 2)",
+              "target_active+(success_count lt 2)",
+              "target_active+(success_count eq 2)"
+            ],
+            "selected": "target_active+(active_count lt 2)",
+            "heldout": {
+              "observations": 155,
+              "correct": 155,
+              "abstentions": 0,
+              "accuracy_including_abstentions": 1.0,
+              "coverage": 1.0
+            }
+          },
+          "compatible_sets_and_tables_equal": true,
+          "predictions_and_abstentions_equal": true,
+          "comparison": "equivalent"
+        }
+      ]
+    }
+  ],
+  "candidate_count": 25,
+  "empirical_model_quality_validated": false,
+  "scientific_novelty_established": false,
+  "training_or_model_execution": false,
+  "scope": "Fixed 25-candidate language; deterministic claim worlds; no active query policy.",
+  "memory_measure": "Peak traced Python allocations; not total process RAM or an OS cap.",
+  "tracing_scope": "this_audit",
+  "cost_scope": "Each prefix is independently refitted. Steps count representation work and row/pair checks; they are not CPU instructions or measured speed. The shared total/time guard is an audit watchdog, not a per-method performance budget. Limited comparisons cannot establish a method advantage.",
+  "observation_scope": "Counts labeled query contexts, including supplied past action outcomes; not physical environment interactions.",
+  "status": "equivalent",
+  "coverage_complete": true,
+  "resources": {
+    "seconds": 0.17048279999289662,
+    "accounted_steps": 86324,
+    "peak_traced_python_bytes": 162972
+  },
+  "interpretation": "No observational advantage in this completed-search formulation. A necessary-condition witness filter preserves the compatible set. Costs include witness construction."
+}

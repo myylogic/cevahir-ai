@@ -732,6 +732,8 @@ class CevahirNeuralNetwork(nn.Module):
         cache_position: Optional[torch.Tensor] = None,
         return_attention_weights: bool = False,
         collect_diagnostics: bool = False,
+        routing_bias: Optional[torch.Tensor] = None,
+        valid_token_mask: Optional[torch.Tensor] = None,
     ):
         """
         İleri yönlü hesaplama (Transformerstandardı - V-2).
@@ -753,6 +755,10 @@ class CevahirNeuralNetwork(nn.Module):
             if not isinstance(x, torch.Tensor):
                 self.logger.error(f"[FORWARD] Hatalı giriş türü: {type(x)}. torch.Tensor bekleniyordu.")
                 raise TypeError(f"Beklenen giriş türü torch.Tensor, ancak {type(x)} alındı.")
+            from src.neural_network_module.ortak_katman_module.mixture_of_experts import validate_token_mask
+            routing_bias = self._prepare_routing_bias(x, routing_bias, use_cache=use_cache)
+            valid_token_mask = validate_token_mask(valid_token_mask,
+                batch_size=x.shape[0], seq_len=x.shape[1], device=x.device)
             self.logger.debug(f"[FORWARD] Giriş -> shape={x.shape}, dtype={x.dtype}, device={x.device}")
 
             # 2) Embedding + Positional Encoding (ENDÜSTRİ STANDARDI: Transformer Yakın Kuzenlerine Benzer)
@@ -787,6 +793,8 @@ class CevahirNeuralNetwork(nn.Module):
                     use_cache=use_cache,  # [OK] V4
                     cache_position=cache_position,  # [OK] V4
                     return_attention_weights=return_attention_weights,
+                    routing_bias=routing_bias,
+                    valid_token_mask=valid_token_mask,
                 )
                 # KV Cache kullanılıyorsa: (x, attn_weights, kv_cache)
                 # Normal mode: (x, attn_weights)
@@ -913,6 +921,32 @@ class CevahirNeuralNetwork(nn.Module):
             self.logger.error(f"[FORWARD] Hata oluştu: {e}", exc_info=True)
             raise
 
+    @property
+    def supports_routing_bias(self) -> bool:
+        """The same request prior can address every layer only in an MoE stack."""
+        return bool(self.layers) and all(layer.use_moe for layer in self.layers)
+
+    def _prepare_routing_bias(self, x, routing_bias, *, use_cache):
+        if routing_bias is not None:
+            if not self.supports_routing_bias:
+                raise ValueError("routing_bias requires use_moe=True")
+            from src.neural_network_module.ortak_katman_module.mixture_of_experts import validate_routing_bias
+            routing_bias = validate_routing_bias(routing_bias, batch_size=x.shape[0],
+                num_experts=self.layers[0].ffn.num_experts, device=x.device)
+        if use_cache and not self.training:
+            populated = any(getattr(getattr(layer.attn, 'kv_cache', None), 'cache_len', 0) > 0
+                            for layer in self.layers)
+            previous = getattr(self, '_routing_cache_bias', None)
+            if populated:
+                equal = previous is None and routing_bias is None
+                if previous is not None and routing_bias is not None:
+                    equal = torch.equal(previous, routing_bias.detach().to(previous.device))
+                if not equal:
+                    raise ValueError("routing_bias changed while KV cache is populated; clear_kv_cache() first")
+            else:
+                self._routing_cache_bias = None if routing_bias is None else routing_bias.detach().clone()
+        return routing_bias
+
     def clear_kv_cache(self) -> None:
         """
         Tüm layer'lardaki KV cache'i temizler.
@@ -922,10 +956,12 @@ class CevahirNeuralNetwork(nn.Module):
         for layer in self.layers:
             if hasattr(layer, "attn") and getattr(layer.attn, "kv_cache", None) is not None:
                 layer.attn.kv_cache.clear()
+        self._routing_cache_bias = None
         self.logger.debug("[V4] KV Cache tüm layer'larda temizlendi.")
 
     def _apply(self, fn, recurse=True):
         # Runtime caches are not module buffers: dtype/device conversions invalidate them.
+        self._routing_cache_bias = None
         if hasattr(self, "layers"):
             for layer in self.layers:
                 layer.attn.kv_cache = None

@@ -37,6 +37,7 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from cognitive_management.research.runtime import BudgetExhausted
 from typing import List, Optional, Protocol, Dict, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
@@ -319,6 +320,8 @@ class TreeOfThoughts:
                 if thought_text:
                     child = ThoughtNode(thought=thought_text, parent=node)
                     children.append(child)
+            except BudgetExhausted:
+                raise
             except Exception:
                 # Generation failed - skip this child
                 continue
@@ -411,6 +414,8 @@ Next step:"""
             
             return score
             
+        except BudgetExhausted:
+            raise
         except Exception:
             # Scoring failed - use heuristic
             return self._heuristic_evaluate(node, problem)

@@ -161,7 +161,10 @@ class CognitiveManager:
         self.multimodal_enabled = all(hasattr(model_manager, method) for method in 
                                     ["process_audio", "process_image", "process_multimodal"])
         
-        self.mm: ModelAPI = model_manager  # somut sınıf değil, arayüz
+        if cfg.research.mode != "off":
+            from .research.runtime import BudgetedModelAPI
+            model_manager = BudgetedModelAPI(model_manager)
+        self.mm: ModelAPI = model_manager  # shared boundary for every model caller
 
         # V2 Container kullanarak DI Pattern uygula
         container = CognitiveContainer()
@@ -595,6 +598,23 @@ class CognitiveManager:
     # Multimodal API
     # --------------------------------------------------------------------- #
     
+    def record_experience_feedback(self, state, experience_id, *, value, source, event_id):
+        """Attach explicit user/evaluator evidence; critic output is not a label."""
+        return self._orchestrator.research.feedback(
+            state, experience_id, value=value, source=source, event_id=event_id)
+
+    def forget_experience(self, state, experience_id=None):
+        """Retract retained evidence and all policy statistics derived from it."""
+        return self._orchestrator.research.forget(state, experience_id)
+
+    def save_experience(self, path):
+        """Save bounded route experience independently of neural checkpoints."""
+        return self._orchestrator.research.save(path)
+
+    def load_experience(self, path):
+        """Restore only matching model/tokenizer and experiment profiles."""
+        return self._orchestrator.research.load(path)
+
     def handle_multimodal(
         self,
         state: CognitiveState,

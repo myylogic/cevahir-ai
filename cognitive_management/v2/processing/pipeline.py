@@ -39,6 +39,8 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 from __future__ import annotations
 from typing import Optional, List, Protocol
 from dataclasses import dataclass, field
+from cognitive_management.research.pipeline_support import processing_stage
+from cognitive_management.research.runtime import current_runtime
 
 # V1'den import
 import sys
@@ -78,6 +80,7 @@ class ProcessingContext:
     state: CognitiveState
     request: CognitiveInput
     decoding_config: Optional[DecodingConfig] = None
+    runtime: object = field(default_factory=current_runtime)
 
     # Pipeline boyunca değişen veriler
     features: dict = field(default_factory=dict)
@@ -168,7 +171,8 @@ class BaseProcessingHandler:
             Updated context
         """
         # Process this step
-        context = self._process(context)
+        with processing_stage(context, self.name):
+            context = self._process(context)
         
         # Add to processing steps
         if context:
@@ -251,60 +255,66 @@ class ProcessingPipeline:
         # Process through chain
         result_context = self._first_handler.handle(context)
 
-        if not result_context:
-            # Pipeline failed
-            return CognitiveOutput(
-                text="İşleme sırasında bir hata oluştu.",
-                used_mode="direct",
-                tool_used=None,
-                revised_by_critic=False,
-            )
+        return build_output(result_context)
 
-        # --- Latency ---
-        import time as _time
-        latency_ms = (_time.time() - result_context.start_time) * 1000.0
 
-        # --- reasoning_chain: sıralı ReasoningTrace listesi ---
-        reasoning_chain = list(result_context.reasoning_traces)  # kopya, orijinalini koru
-
-        # --- critic_passes: CriticHandler'ın set ettiği Self-Refine geçiş sayısı ---
-        critic_passes = result_context.critic_passes
-
-        # --- query_type / domain: policy_output veya features'dan ---
-        po = result_context.policy_output
-        query_type = (
-            po.query_type if po and hasattr(po, "query_type") else
-            result_context.features.get("query_type")
-        )
-        domain = (
-            po.domain if po and hasattr(po, "domain") else
-            result_context.features.get("domain")
-        )
-
-        # --- context_sources: retrieved belge başlıkları ---
-        context_sources = [
-            ctx.get("title", ctx.get("id", ""))
-            for ctx in result_context.retrieved_contexts
-            if ctx
-        ]
-
-        # Build full output
+def build_output(result_context):
+    if not result_context:
+        # Pipeline failed
         return CognitiveOutput(
-            text=result_context.final_text or result_context.draft_text or "",
-            used_mode=po.mode if po else "direct",
-            tool_used=result_context.tool_name,
-            revised_by_critic=result_context.revised,
-            # V3 zengin alanlar
-            reasoning_chain=reasoning_chain,
-            critic_passes=critic_passes,
-            critic_feedback=result_context.critic_feedback,
-            memory_hits=result_context.memory_hit_count,
-            latency_ms=round(latency_ms, 2),
-            query_type=query_type,
-            domain=domain,
-            self_consistency_result=result_context.self_consistency_result,
-            context_sources=context_sources,
+            text="İşleme sırasında bir hata oluştu.",
+            used_mode="direct",
+            tool_used=None,
+            revised_by_critic=False,
         )
+
+    # --- Latency ---
+    import time as _time
+    latency_ms = (_time.time() - result_context.start_time) * 1000.0
+
+    # --- reasoning_chain: sıralı ReasoningTrace listesi ---
+    reasoning_chain = list(result_context.reasoning_traces)  # kopya, orijinalini koru
+
+    # --- critic_passes: CriticHandler'ın set ettiği Self-Refine geçiş sayısı ---
+    critic_passes = result_context.critic_passes
+
+    # --- query_type / domain: policy_output veya features'dan ---
+    po = result_context.policy_output
+    query_type = (
+        po.query_type if po and hasattr(po, "query_type") else
+        result_context.features.get("query_type")
+    )
+    domain = (
+        po.domain if po and hasattr(po, "domain") else
+        result_context.features.get("domain")
+    )
+
+    # --- context_sources: retrieved belge başlıkları ---
+    context_sources = [
+        ctx.get("title", ctx.get("id", ""))
+        for ctx in result_context.retrieved_contexts
+        if ctx
+    ]
+
+    # Build full output
+    return CognitiveOutput(
+        text=result_context.final_text or result_context.draft_text or "",
+        used_mode=po.mode if po else "direct",
+        tool_used=result_context.tool_name,
+        revised_by_critic=result_context.revised,
+        # V3 zengin alanlar
+        reasoning_chain=reasoning_chain,
+        critic_passes=critic_passes,
+        critic_feedback=result_context.critic_feedback,
+        memory_hits=result_context.memory_hit_count,
+        latency_ms=round(latency_ms, 2),
+        query_type=query_type,
+        domain=domain,
+        self_consistency_result=result_context.self_consistency_result,
+        context_sources=context_sources,
+        metadata={"processing_errors": list(result_context.errors),
+                  "processing_steps": list(result_context.processing_steps)},
+    )
 
 
 __all__ = [

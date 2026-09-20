@@ -57,8 +57,36 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import logging
-from typing import Tuple
+from typing import Optional, Tuple
 import math
+
+
+def validate_routing_bias(routing_bias, *, batch_size, num_experts, device):
+    """Validate an optional bounded additive prior [B,E], preserving autograd.
+
+    This is an experiment input, not a declaration of expert specialization.
+    None leaves the original router computation unchanged.
+    """
+    if routing_bias is None:
+        return None
+    if not isinstance(routing_bias, torch.Tensor) or not routing_bias.is_floating_point():
+        raise TypeError("routing_bias must be a floating-point tensor [B, num_experts]")
+    if tuple(routing_bias.shape) != (batch_size, num_experts):
+        raise ValueError(f"routing_bias must have shape {(batch_size, num_experts)}")
+    if not torch.isfinite(routing_bias).all().item() or (routing_bias.abs() > 1).any().item():
+        raise ValueError("routing_bias values must be finite and in [-1, 1]")
+    return routing_bias.to(device=device)
+
+
+def validate_token_mask(valid_token_mask, *, batch_size, seq_len, device):
+    """MoE objective mask: bool [B,T], True means a valid objective token."""
+    if valid_token_mask is None:
+        return None
+    if not isinstance(valid_token_mask, torch.Tensor) or valid_token_mask.dtype != torch.bool:
+        raise TypeError("valid_token_mask must be a boolean tensor [B,T]")
+    if tuple(valid_token_mask.shape) != (batch_size, seq_len):
+        raise ValueError(f"valid_token_mask must have shape {(batch_size, seq_len)}")
+    return valid_token_mask.to(device=device)
 
 
 class Router(nn.Module):
@@ -145,6 +173,7 @@ class Router(nn.Module):
     def forward(
         self,
         x: torch.Tensor,
+        routing_bias: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Router forward pass.
@@ -159,6 +188,10 @@ class Router(nn.Module):
         """
         # Router logitler: [B, T, num_experts]
         router_logits = self.router(x)
+        bias = validate_routing_bias(routing_bias, batch_size=x.shape[0],
+            num_experts=self.num_experts, device=router_logits.device)
+        if bias is not None:
+            router_logits = router_logits + bias.to(dtype=router_logits.dtype).unsqueeze(1)
 
         # [V8] Jitter noise — eğitimde routing collapse önlemi (Switch Transformer)
         # Gürültü logit uzayında eklenir (softmax öncesi) → etkili pertürbasyon
@@ -316,6 +349,8 @@ class MixtureOfExperts(nn.Module):
     def forward(
         self,
         x: torch.Tensor,
+        routing_bias: Optional[torch.Tensor] = None,
+        valid_token_mask: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         MoE forward pass.
@@ -330,9 +365,11 @@ class MixtureOfExperts(nn.Module):
                                    zaten içinde alpha çarpılmış; direkt total_loss += aux_loss)
         """
         B, T, D = x.shape
+        valid_token_mask = validate_token_mask(valid_token_mask,
+            batch_size=B, seq_len=T, device=x.device)
 
         # 1) Router — expert seçimi
-        expert_weights, expert_indices, router_logits = self.router(x)
+        expert_weights, expert_indices, router_logits = self.router(x, routing_bias=routing_bias)
         # expert_weights: [B, T, top_k]
         # expert_indices: [B, T, top_k]
         # router_logits:  [B, T, num_experts]
@@ -342,6 +379,7 @@ class MixtureOfExperts(nn.Module):
             router_logits=router_logits,
             expert_indices=expert_indices,
             total_tokens=B * T,
+            valid_token_mask=valid_token_mask,
         )
 
         # 3) Sparse dispatch
@@ -392,6 +430,7 @@ class MixtureOfExperts(nn.Module):
         router_logits: torch.Tensor,
         expert_indices: torch.Tensor,
         total_tokens: int,
+        valid_token_mask: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         """
         [V8] Switch Transformer auxiliary load balancing loss.
@@ -422,7 +461,12 @@ class MixtureOfExperts(nn.Module):
         router_probs = F.softmax(
             router_logits.view(total_tokens, N), dim=-1
         )  # [BT, N]
-        P = router_probs.mean(dim=0)  # [N]
+        if valid_token_mask is None:
+            P = router_probs.mean(dim=0)  # [N]
+        else:
+            valid = valid_token_mask.reshape(total_tokens, 1).to(router_probs.dtype)
+            denominator = valid.sum().clamp_min(1)
+            P = (router_probs * valid).sum(dim=0) / denominator
 
         # f_i: Hard dispatch count — gradient yok (count-based)
         flat = expert_indices.view(total_tokens, self.top_k)  # [BT, top_k]
@@ -436,7 +480,10 @@ class MixtureOfExperts(nn.Module):
         # topk unique garantisi sayesinde clamp gerekmez ama savunmacı programlama:
         dispatch = dispatch.clamp(max=1.0)
 
-        f = dispatch.mean(dim=0).detach()  # [N] — gradient kesildi
+        if valid_token_mask is None:
+            f = dispatch.mean(dim=0).detach()  # [N] — gradient kesildi
+        else:
+            f = ((dispatch * valid).sum(dim=0) / denominator).detach()
 
         # Switch Transformer formülü: alpha × N × Σ(f_i × P_i)
         return self.load_balance_alpha * N * (f * P).sum()

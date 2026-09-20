@@ -35,6 +35,7 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from cognitive_management.research.runtime import BudgetExhausted, request_model_api
 from typing import Protocol
 
 # V1'den import
@@ -89,6 +90,8 @@ class ModelAPIAdapter(FullModelBackend):
                     max_size=getattr(cfg.runtime, 'connection_pool_size', 10),
                     min_size=2,
                 )
+            except BudgetExhausted:
+                raise
             except Exception as e:
                 import logging
                 logging.warning(f"ConnectionPool initialization başarısız: {e}")
@@ -107,15 +110,17 @@ class ModelAPIAdapter(FullModelBackend):
             try:
                 conn = self._connection_pool.acquire()
                 try:
-                    return conn.generate(prompt, decoding_config)
+                    return request_model_api(conn).generate(prompt, decoding_config, **kwargs)
                 finally:
                     self._connection_pool.release(conn)
+            except BudgetExhausted:
+                raise
             except Exception:
                 # Fallback to direct call if pool fails
                 pass
         
         # Direct call (no pooling or pool disabled)
-        return self._v1_api.generate(prompt, decoding_config)
+        return request_model_api(self._v1_api).generate(prompt, decoding_config, **kwargs)
     
     # ScoringBackend
     def score(
@@ -130,13 +135,15 @@ class ModelAPIAdapter(FullModelBackend):
             try:
                 conn = self._connection_pool.acquire()
                 try:
-                    return conn.score(prompt, candidate)
+                    return request_model_api(conn).score(prompt, candidate, **kwargs)
                 finally:
                     self._connection_pool.release(conn)
+            except BudgetExhausted:
+                raise
             except Exception:
                 # Fallback to direct call if pool fails
                 pass
-        return self._v1_api.score(prompt, candidate)
+        return request_model_api(self._v1_api).score(prompt, candidate, **kwargs)
     
     # EntropyBackend
     def estimate_entropy(
@@ -150,16 +157,23 @@ class ModelAPIAdapter(FullModelBackend):
             try:
                 conn = self._connection_pool.acquire()
                 try:
-                    return conn.entropy_estimate(text)
+                    return request_model_api(conn).entropy_estimate(text, **kwargs)
                 finally:
                     self._connection_pool.release(conn)
+            except BudgetExhausted:
+                raise
             except Exception:
                 # Fallback to direct call if pool fails
                 pass
         try:
-            return self._v1_api.entropy_estimate(text)
+            return request_model_api(self._v1_api).entropy_estimate(text, **kwargs)
+        except BudgetExhausted:
+            raise
         except Exception:
             # Fallback
+            from cognitive_management.research.runtime import current_runtime
+            if current_runtime() is not None:
+                raise
             return 0.8
     
     # Optional: Multimodal support
@@ -174,6 +188,8 @@ class ModelAPIAdapter(FullModelBackend):
                         return conn.process_audio(audio_data)
                 finally:
                     self._connection_pool.release(conn)
+            except BudgetExhausted:
+                raise
             except Exception:
                 # Fallback to direct call if pool fails
                 pass
@@ -192,6 +208,8 @@ class ModelAPIAdapter(FullModelBackend):
                         return conn.process_image(image_data)
                 finally:
                     self._connection_pool.release(conn)
+            except BudgetExhausted:
+                raise
             except Exception:
                 # Fallback to direct call if pool fails
                 pass
@@ -215,6 +233,8 @@ class ModelAPIAdapter(FullModelBackend):
                         return conn.process_multimodal(text=text, audio=audio, image=image)
                 finally:
                     self._connection_pool.release(conn)
+            except BudgetExhausted:
+                raise
             except Exception:
                 # Fallback to direct call if pool fails
                 pass

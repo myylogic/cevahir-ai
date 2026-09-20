@@ -101,10 +101,10 @@ class AsyncPolicyRoutingHandler(BaseAsyncProcessingHandler):
     SOLID: SRP - Sadece policy routing yapar (async).
     """
     
-    def __init__(self, policy_router):
+    def __init__(self, policy_router, research=None):
         super().__init__("AsyncPolicyRouting")
         self.policy_router = policy_router
-        self._sync_handler = PolicyRoutingHandler(policy_router)
+        self._sync_handler = PolicyRoutingHandler(policy_router, research=research)
     
     async def _process_async(self, context: ProcessingContext) -> ProcessingContext:
         """Route to appropriate policy (async)"""

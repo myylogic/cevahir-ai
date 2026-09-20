@@ -119,6 +119,22 @@ class CognitiveOrchestrator:
         self.deliberation_engine = deliberation_engine
         self.event_bus = event_bus or EventBus()
         self.tool_executor = tool_executor  # Phase 6.1: Tool Policy Implementation
+        from cognitive_management.config import CognitiveManagerConfig
+        from cognitive_management.research.controller import ResearchController
+        cfg = getattr(policy_router, "cfg", None) or CognitiveManagerConfig()
+        self.research = ResearchController(cfg, allow_deliberation=deliberation_engine is not None,
+                                          allow_tot=deliberation_engine is not None and cfg.policy.tot_enabled)
+        if self.research.enabled:
+            from cognitive_management.research.runtime import BudgetedModelAPI
+            from ..adapters.backend_adapter import ModelAPIAdapter
+            # Direct orchestrator construction must obey the same boundary as
+            # CognitiveManager. The adapter accounts each pooled connection.
+            if not isinstance(self.backend, (BudgetedModelAPI, ModelAPIAdapter)):
+                self.backend = BudgetedModelAPI(self.backend)
+            for component in (self.critic, self.deliberation_engine):
+                api = getattr(component, "mm", None)
+                if api is not None and not isinstance(api, (BudgetedModelAPI, ModelAPIAdapter)):
+                    component.mm = BudgetedModelAPI(api)
         
         # Build middleware chain
         self.middleware_chain = self._build_middleware_chain(middleware or [])
@@ -180,29 +196,13 @@ class CognitiveOrchestrator:
             ),
             PolicyRoutingHandler(
                 policy_router=self.policy_router,
+                research=self.research,
             ),
         ]
         
         # Optional: Deliberation
         if self.deliberation_engine:
-            # Phase 4: Tree of Thoughts support (lazy initialization)
-            tree_of_thoughts = None
-            if hasattr(self.policy_router, 'cfg') and self.policy_router.cfg.policy.tot_enabled:
-                try:
-                    from ..components.tree_of_thoughts import TreeOfThoughts
-                    # Use backend as ModelAPI for ToT
-                    tree_of_thoughts = TreeOfThoughts(
-                        cfg=self.policy_router.cfg,
-                        model_api=self.backend,  # Backend implements ModelAPI
-                        max_depth=self.policy_router.cfg.policy.tot_max_depth,
-                        branching_factor=self.policy_router.cfg.policy.tot_branching_factor,
-                        top_k=self.policy_router.cfg.policy.tot_top_k,
-                    )
-                except Exception as e:
-                    import logging
-                    logging.warning(f"TreeOfThoughts initialization failed: {e}")
-                    tree_of_thoughts = None
-            
+            tree_of_thoughts = self._make_tree_of_thoughts()
             handlers.append(
                 DeliberationHandler(
                     engine=self.deliberation_engine,
@@ -267,6 +267,28 @@ class CognitiveOrchestrator:
         
         return ProcessingPipeline(handlers)
     
+
+    def _make_tree_of_thoughts(self):
+        # Phase 4: Tree of Thoughts support (lazy initialization)
+        tree_of_thoughts = None
+        if hasattr(self.policy_router, 'cfg') and self.policy_router.cfg.policy.tot_enabled:
+            try:
+                from ..components.tree_of_thoughts import TreeOfThoughts
+                # Use backend as ModelAPI for ToT
+                tree_of_thoughts = TreeOfThoughts(
+                    cfg=self.policy_router.cfg,
+                    model_api=self.backend,  # Backend implements ModelAPI
+                    max_depth=self.policy_router.cfg.policy.tot_max_depth,
+                    branching_factor=self.policy_router.cfg.policy.tot_branching_factor,
+                    top_k=self.policy_router.cfg.policy.tot_top_k,
+                )
+            except Exception as e:
+                import logging
+                logging.warning(f"TreeOfThoughts initialization failed: {e}")
+                tree_of_thoughts = None
+
+        return tree_of_thoughts
+
     def _build_middleware_chain(
         self,
         middleware: list[Middleware]
@@ -546,6 +568,7 @@ class CognitiveOrchestrator:
             ),
             AsyncPolicyRoutingHandler(
                 policy_router=self.policy_router,
+                research=self.research,
             ),
         ]
         
@@ -555,6 +578,8 @@ class CognitiveOrchestrator:
                 AsyncDeliberationHandler(
                     engine=self.deliberation_engine,
                     backend=self.backend,
+                    cfg=getattr(self.policy_router, "cfg", None),
+                    tree_of_thoughts=self._make_tree_of_thoughts(),
                 )
             )
         

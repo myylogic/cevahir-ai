@@ -37,6 +37,7 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from cognitive_management.research.runtime import BudgetExhausted
 from typing import List, Optional, Protocol
 
 from cognitive_management.cognitive_types import ThoughtCandidate, DecodingConfig
@@ -130,6 +131,8 @@ class DeliberationEngineV2(IDeliberationEngine):
                 # Score the thought
                 try:
                     score = float(self.mm.score(prompt_text, text))
+                except BudgetExhausted:
+                    raise
                 except Exception:
                     # Score metodu yoksa/başarısızsa, heuristik scoring
                     score = self._heuristic_score(text, prompt)
@@ -138,6 +141,8 @@ class DeliberationEngineV2(IDeliberationEngine):
 
             return out
 
+        except BudgetExhausted:
+            raise
         except Exception as e:
             raise DeliberationError("İç düşünce üretimi sırasında hata.", cause=e)
     

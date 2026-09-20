@@ -33,6 +33,7 @@ Telif Hakkı: © 2024 Muhammed Yasin Yılmaz. Tüm Hakları Saklıdır.
 """
 
 from __future__ import annotations
+from cognitive_management.research.runtime import BudgetExhausted, current_runtime
 
 import logging
 import time
@@ -133,6 +134,8 @@ def _score_select(
     for c in candidates:
         try:
             s = float(backend.score(user_message, c))
+        except BudgetExhausted:
+            raise
         except Exception:
             s = 0.0
         scores.append(s)
@@ -174,10 +177,12 @@ class FeatureExtractionHandler(BaseProcessingHandler):
 
         # --- Entropy Tahmini ---
         entropy_raw = 0.8
+        uncertainty_source = "unavailable"
         try:
             if self._backend is not None and hasattr(self._backend, "estimate_entropy"):
                 logit_entropy = self._backend.estimate_entropy(user_msg)
                 entropy_raw = float(logit_entropy) * 3.0
+                uncertainty_source = "backend_estimate_uncalibrated"
             else:
                 # Heuristik yedek: soru işareti + belirsizlik belirteçleri
                 q_count = user_msg.count("?")
@@ -185,6 +190,9 @@ class FeatureExtractionHandler(BaseProcessingHandler):
                              "maybe", "perhaps", "possibly", "not sure"]
                 u_count = sum(1 for w in unc_words if w in user_msg.lower())
                 entropy_raw = (q_count * 0.5) + (u_count * 0.3)
+                uncertainty_source = "text_heuristic"
+        except BudgetExhausted:
+            uncertainty_source = "budget_denied"
         except Exception:
             entropy_raw = 0.8
 
@@ -198,11 +206,14 @@ class FeatureExtractionHandler(BaseProcessingHandler):
                 top_k=cfg.memory.rag_top_k if hasattr(cfg.memory, "rag_top_k") else 3,
             )
             context.retrieved_contexts = retrieved
+        except BudgetExhausted:
+            raise
         except Exception:
             context.retrieved_contexts = []
 
         # --- Özellik Vektörü (V3 zenginleştirilmiş) ---
         features = build_features(cfg, user_message=user_msg, entropy_est=entropy)
+        features["uncertainty_source"] = uncertainty_source
 
         # Bellek geri çağırma özeti
         if retrieved:
@@ -217,6 +228,7 @@ class FeatureExtractionHandler(BaseProcessingHandler):
             features["memory_hit_count"] = 0
 
         context.features = features
+        context.memory_hit_count = len(retrieved)
 
         # --- ReasoningTrace Başlatma ---
         # FeatureExtraction aşaması ilk adımdır (step=0)
@@ -246,9 +258,10 @@ class PolicyRoutingHandler(BaseProcessingHandler):
     SOLID: SRP — yalnızca politika yönlendirmesi.
     """
 
-    def __init__(self, policy_router):
+    def __init__(self, policy_router, research=None):
         super().__init__("PolicyRouting")
         self.policy_router = policy_router
+        self.research = research
 
     def _process(self, context: ProcessingContext) -> ProcessingContext:
         policy_output: PolicyOutput = self.policy_router.route(
@@ -260,6 +273,8 @@ class PolicyRoutingHandler(BaseProcessingHandler):
         if context.decoding_config:
             policy_output.decoding = context.decoding_config
 
+        if self.research is not None:
+            policy_output = self.research.route(context, policy_output)
         context.policy_output = policy_output
 
         # Trace ekle
@@ -340,8 +355,11 @@ class DeliberationHandler(BaseProcessingHandler):
                         score=getattr(context.selected_thought, "score", 0.5),
                         source=policy.mode,
                     ))
+        except BudgetExhausted:
+            raise
         except Exception as e:
             logger.warning(f"DeliberationHandler hata: {e}")
+            context.errors.append(f"Deliberation:{type(e).__name__}")
             context.selected_thought = None
 
         return context
@@ -350,6 +368,9 @@ class DeliberationHandler(BaseProcessingHandler):
         """Tree of Thoughts (Yao et al. 2023) işlemcisi."""
         if not self.tree_of_thoughts:
             logger.warning("TreeOfThoughts başlatılmadı, think1 moduna geçiliyor")
+            policy.mode = "think1"
+            if current_runtime() is not None:
+                current_runtime().plan["executed_strategy"] = "think1"
             try:
                 thoughts = self.engine.generate_thoughts(
                     prompt=context.request.user_message,
@@ -359,6 +380,8 @@ class DeliberationHandler(BaseProcessingHandler):
                 if thoughts:
                     from cognitive_management.v2.utils.selectors import pick_best_by_score
                     context.selected_thought = pick_best_by_score(thoughts)
+            except BudgetExhausted:
+                raise
             except Exception:
                 context.selected_thought = None
             return context
@@ -389,8 +412,14 @@ class DeliberationHandler(BaseProcessingHandler):
                         score=path_score,
                         source="tot",
                     ))
+        except BudgetExhausted:
+            raise
         except Exception as e:
             logger.warning(f"ToT hata, think1'e geçiliyor: {e}")
+            context.errors.append(f"ToT:{type(e).__name__}")
+            policy.mode = "think1"
+            if current_runtime() is not None:
+                current_runtime().plan["executed_strategy"] = "think1"
             try:
                 thoughts = self.engine.generate_thoughts(
                     prompt=context.request.user_message,
@@ -400,6 +429,8 @@ class DeliberationHandler(BaseProcessingHandler):
                 if thoughts:
                     from cognitive_management.v2.utils.selectors import pick_best_by_score
                     context.selected_thought = pick_best_by_score(thoughts)
+            except BudgetExhausted:
+                raise
             except Exception:
                 context.selected_thought = None
 
@@ -436,6 +467,8 @@ class ContextBuildingHandler(BaseProcessingHandler):
         if self.tool_policy:
             try:
                 context.tool_name = self.tool_policy.choose_tool(context.features)
+            except BudgetExhausted:
+                raise
             except Exception:
                 context.tool_name = None
 
@@ -447,7 +480,7 @@ class ContextBuildingHandler(BaseProcessingHandler):
         context_text = self.memory_service.build_context(
             user_message=context.request.user_message,
             history=history,
-            system_prompt=None,
+            system_prompt=context.request.system_prompt,
         )
 
         # RAG zenginleştirme (lazy)
@@ -460,7 +493,10 @@ class ContextBuildingHandler(BaseProcessingHandler):
                 context_text = self._rag_enhancer.enhance_context(
                     user_message=context.request.user_message,
                     existing_context=context_text,
+                    retrieved_items=context.retrieved_contexts,
                 )
+        except BudgetExhausted:
+            raise
         except Exception as e:
             logger.warning(f"RAG zenginleştirme başarısız: {e}")
 
@@ -491,6 +527,8 @@ class ContextBuildingHandler(BaseProcessingHandler):
                     result = executor.execute(selected_tool, parameters)
                     context.tool_name = selected_tool
                     context_text += f"\n\n[ARAÇ SONUCU: {selected_tool}]\n{result}"
+                except BudgetExhausted:
+                    raise
                 except Exception as exc:
                     context.request.metadata["tool_error"] = str(exc)
                     logger.warning("Tool %s failed: %s", selected_tool, exc)
@@ -531,6 +569,8 @@ class GenerationHandler(BaseProcessingHandler):
                 decoding_config=policy.decoding,
             )
             context.draft_text = (draft or "").strip()
+        except BudgetExhausted:
+            raise
         except Exception as e:
             context.errors.append(f"Generation hatası: {e}")
             context.draft_text = ""
@@ -602,6 +642,8 @@ class SelfConsistencyHandler(BaseProcessingHandler):
                 )
                 if text and text.strip():
                     candidates.append(text.strip())
+            except BudgetExhausted:
+                raise
             except Exception as e:
                 logger.debug(f"SC örnekleme {i+1} başarısız: {e}")
 
@@ -688,34 +730,43 @@ class CriticHandler(BaseProcessingHandler):
             return context
 
         try:
-            final_text, revised = self.critic.review(
-                user_message=context.request.user_message,
-                draft_text=context.draft_text,
-                context=context.context_text,
-            )
+            detailed_review = getattr(self.critic, "review_detailed", None)
+            if callable(detailed_review):
+                result = detailed_review(context.request.user_message, context.draft_text, context.context_text)
+                final_text, revised = result.text, result.revised
+                feedback_list, passes = list(result.feedback), result.passes
+            else:
+                final_text, revised = self.critic.review(
+                    user_message=context.request.user_message,
+                    draft_text=context.draft_text,
+                    context=context.context_text,
+                )
+                feedback_list, passes = [], 0
             context.final_text = final_text
             context.revised = revised
 
             # CriticFeedback listesini critic'ten al (varsa)
-            feedback_list = getattr(self.critic, "_last_feedback", None)
             if feedback_list:
                 context.critic_feedback = feedback_list
 
             # Self-Refine geçiş sayısını kaydet
             if hasattr(context, "critic_passes"):
-                context.critic_passes = int(getattr(self.critic, "_last_passes", 1))
+                context.critic_passes = passes
 
             if hasattr(context, "reasoning_traces"):
                 context.reasoning_traces.append(ReasoningTrace(
                     step=len(context.reasoning_traces),
                     content=f"[Critic] revize={'evet' if revised else 'hayır'} "
-                            f"geçiş={getattr(self.critic, '_last_passes', 1)}",
+                            f"geçiş={passes}",
                     score=1.0 if not revised else 0.7,
                     source="critic",
                 ))
 
+        except BudgetExhausted:
+            raise
         except Exception as e:
             logger.warning(f"CriticHandler hata: {e}")
+            context.errors.append(f"Critic:{type(e).__name__}")
             context.final_text = context.draft_text
             context.revised = False
 
@@ -763,6 +814,8 @@ class MemoryUpdateHandler(BaseProcessingHandler):
         # Oturum özeti enjeksiyonu
         try:
             self.memory_service.inject_session_summary_if_needed(context.state.history)
+        except BudgetExhausted:
+            raise
         except Exception:
             pass
 

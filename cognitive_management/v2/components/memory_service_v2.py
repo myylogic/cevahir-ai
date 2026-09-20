@@ -258,6 +258,8 @@ class MemoryServiceV2(IMemoryService):
                     if result.metadata.get("scope", "local") != current_scope():
                         continue
                     vector_results.append({
+                        "id": result.id,
+                        "metadata": dict(result.metadata),
                         "role": result.metadata.get("role", "assistant"),
                         "content": result.content,
                         "score": result.score,
@@ -403,7 +405,8 @@ class MemoryServiceV2(IMemoryService):
                     "role": item.get("role", "assistant"),
                     "content": content,
                     "score": score,
-                    "source": "episodic_memory"
+                    "source": "episodic_memory",
+                    "id": item.get("id", ""),
                 })
         
         return results
@@ -456,7 +459,8 @@ class MemoryServiceV2(IMemoryService):
                     "role": item.get("role", "assistant"),
                     "content": content,
                     "score": score,
-                    "source": "keyword_search"
+                    "source": "keyword_search",
+                    "id": item.get("id", ""),
                 })
         
         return results

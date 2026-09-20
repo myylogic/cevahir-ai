@@ -358,6 +358,8 @@ class TransformerEncoderLayer(nn.Module):
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
         return_attention_weights: bool = False,
+        routing_bias: Optional[torch.Tensor] = None,
+        valid_token_mask: Optional[torch.Tensor] = None,
     ) -> Union[
         Tuple[torch.Tensor, Optional[torch.Tensor]],
         Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]],
@@ -398,6 +400,14 @@ class TransformerEncoderLayer(nn.Module):
         - BERT: Post-norm [OK] (orijinal)
         - T5: Pre-norm [OK] (modern)
         """
+        if routing_bias is not None and not self.use_moe:
+            raise ValueError("routing_bias requires an MoE layer")
+        from .mixture_of_experts import validate_routing_bias, validate_token_mask
+        if routing_bias is not None:
+            routing_bias = validate_routing_bias(routing_bias, batch_size=x.shape[0],
+                num_experts=self.ffn.num_experts, device=x.device)
+        valid_token_mask = validate_token_mask(valid_token_mask,
+            batch_size=x.shape[0], seq_len=x.shape[1], device=x.device)
         # [OK] V3/V4: Gradient Checkpointing 
         # Memory-efficient training: activation'ları kaydetmek yerine backward'da yeniden hesapla
         self._moe_loss_accum = None
@@ -416,13 +426,13 @@ class TransformerEncoderLayer(nn.Module):
                 if should_checkpoint:
                     return self.advanced_checkpointing.checkpoint_forward(
                         self._forward_impl,
-                        x, mask, causal_mask, False, None, return_attention_weights,
+                        x, mask, causal_mask, False, None, return_attention_weights, routing_bias, valid_token_mask,
                         use_reentrant=False,
                         context_fn=lambda: (nullcontext(), self._recompute_context()),
                     )
                 else:
                     # Normal forward (checkpoint yok)
-                    return self._forward_impl(x, mask, causal_mask, False, None, return_attention_weights)
+                    return self._forward_impl(x, mask, causal_mask, False, None, return_attention_weights, routing_bias, valid_token_mask)
             
             # [OK] V3: Standard Gradient Checkpointing
             elif self.use_gradient_checkpointing:
@@ -431,13 +441,13 @@ class TransformerEncoderLayer(nn.Module):
                 # Training modunda use_cache=False olmalı
                 return checkpoint(
                     self._forward_impl, 
-                    x, mask, causal_mask, False, None, return_attention_weights, 
+                    x, mask, causal_mask, False, None, return_attention_weights, routing_bias, valid_token_mask,
                     use_reentrant=False,
                     context_fn=lambda: (nullcontext(), self._recompute_context()),
                 )
         
         # Normal forward pass (inference veya checkpointing yok)
-        return self._forward_impl(x, mask, causal_mask, use_cache, cache_position, return_attention_weights)
+        return self._forward_impl(x, mask, causal_mask, use_cache, cache_position, return_attention_weights, routing_bias, valid_token_mask)
     
     # =========================================================================
     # [V7] Stochastic Depth — Huang et al. (2016) "Deep Networks with Stochastic Depth"
@@ -528,6 +538,8 @@ class TransformerEncoderLayer(nn.Module):
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
         return_attention_weights: bool = False,
+        routing_bias: Optional[torch.Tensor] = None,
+        valid_token_mask: Optional[torch.Tensor] = None,
     ) -> Union[
         Tuple[torch.Tensor, Optional[torch.Tensor]],
         Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]],
@@ -541,7 +553,7 @@ class TransformerEncoderLayer(nn.Module):
         # x = x + attn(norm(x)) + ffn(norm(x))
         # ============================================================
         if self.parallel_residual and self.pre_norm:
-            return self._parallel_forward_impl(x, mask, causal_mask, use_cache, cache_position, return_attention_weights)
+            return self._parallel_forward_impl(x, mask, causal_mask, use_cache, cache_position, return_attention_weights, routing_bias, valid_token_mask)
 
         # ============================================================
         # 1) SELF-ATTENTION: Pre-norm vs Post-norm Akışı
@@ -635,7 +647,7 @@ class TransformerEncoderLayer(nn.Module):
             # Adım 2: FFN veya MoE (normalized input ile)
             # [OK] V4: MoE desteği 
             if self.use_moe:
-                ffn_output, moe_load_balancing_loss = self.ffn(x_norm)  # [B, T, embed_dim], scalar
+                ffn_output, moe_load_balancing_loss = self.ffn(x_norm, routing_bias=routing_bias, valid_token_mask=valid_token_mask)  # [B, T, embed_dim], scalar
                 # [V8 Fix] Scalar accumulation (liste değil) — memory leak yok
                 self._store_moe_loss(moe_load_balancing_loss)
             else:
@@ -654,7 +666,7 @@ class TransformerEncoderLayer(nn.Module):
             # Adım 1: FFN veya MoE (orijinal input ile)
             # [OK] V4: MoE desteği 
             if self.use_moe:
-                ffn_output, moe_load_balancing_loss = self.ffn(x)  # [B, T, embed_dim], scalar
+                ffn_output, moe_load_balancing_loss = self.ffn(x, routing_bias=routing_bias, valid_token_mask=valid_token_mask)  # [B, T, embed_dim], scalar
                 # [V8 Fix] Scalar accumulation
                 self._store_moe_loss(moe_load_balancing_loss)
             else:
@@ -680,6 +692,8 @@ class TransformerEncoderLayer(nn.Module):
         use_cache: bool = False,
         cache_position: Optional[torch.Tensor] = None,
         return_attention_weights: bool = False,
+        routing_bias: Optional[torch.Tensor] = None,
+        valid_token_mask: Optional[torch.Tensor] = None,
     ) -> Union[
         Tuple[torch.Tensor, Optional[torch.Tensor]],
         Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple]],
@@ -718,7 +732,7 @@ class TransformerEncoderLayer(nn.Module):
 
         # FFN branch (aynı x_norm'dan)
         if self.use_moe:
-            ffn_output, moe_load_balancing_loss = self.ffn(x_norm)
+            ffn_output, moe_load_balancing_loss = self.ffn(x_norm, routing_bias=routing_bias, valid_token_mask=valid_token_mask)
             # [V8 Fix] Scalar accumulation
             self._store_moe_loss(moe_load_balancing_loss)
         else:

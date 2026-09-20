@@ -105,6 +105,14 @@ class TrainingLoop:
             performance_tracker: Optional PerformanceTracker instance
         """
         self.model = model
+        # Resolve this optional core capability once, not for every micro-batch.
+        import inspect
+        try:
+            parameters = inspect.signature(model.forward).parameters
+            self._supports_valid_token_mask = "valid_token_mask" in parameters or any(
+                p.kind == inspect.Parameter.VAR_KEYWORD for p in parameters.values())
+        except (TypeError, ValueError):
+            self._supports_valid_token_mask = False
         self.optimizer = optimizer
         self.loss_computation = loss_computation
         self.gradient_manager = gradient_manager
@@ -195,6 +203,13 @@ class TrainingLoop:
         # Scheduler: For batch-based warmup
         self.scheduler = scheduler
     
+    def _forward_inputs(self, inputs):
+        # Input validity belongs to the router objective. Shifted target PAD/-100
+        # masks belong to the language loss and must not erase a valid input EOS.
+        if self._supports_valid_token_mask and self.pad_token_id is not None:
+            return self.model(inputs, valid_token_mask=inputs.ne(self.pad_token_id))
+        return self.model(inputs)
+
     def _autocast_ctx(self):
         """AMP autocast context (CUDA varsa), yoksa no-op."""
         if self.use_amp:
@@ -322,7 +337,7 @@ class TrainingLoop:
                 
                 # Forward pass with AMP
                 with self._autocast_ctx():
-                    outputs = self.model(inputs)
+                    outputs = self._forward_inputs(inputs)
                     if isinstance(outputs, (tuple, list)):
                         logits = outputs[0]
                     else:
@@ -582,7 +597,7 @@ class TrainingLoop:
                     
                     # Forward pass with AMP
                     with self._autocast_ctx():
-                        outputs = self.model(inputs)
+                        outputs = self._forward_inputs(inputs)
                         if isinstance(outputs, (tuple, list)):
                             logits = outputs[0]
                         else:

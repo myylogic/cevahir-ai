@@ -75,7 +75,8 @@ class RAGEnhancer:
         self,
         user_message: str,
         existing_context: Optional[str] = None,
-        top_k: Optional[int] = None
+        top_k: Optional[int] = None,
+        retrieved_items: Optional[List[Dict[str, Any]]] = None,
     ) -> str:
         """
         Enhance context with retrieved information from memory.
@@ -105,10 +106,11 @@ class RAGEnhancer:
         top_k = top_k or self.cfg.memory.rag_top_k
         
         # Retrieve relevant context from memory
-        retrieved_items = self.memory_service.retrieve_context(
-            query=user_message,
-            top_k=top_k
-        )
+        if retrieved_items is None:
+            retrieved_items = self.memory_service.retrieve_context(
+                query=user_message,
+                top_k=top_k
+            )
         
         # If no retrieved items, return existing context
         if not retrieved_items:

@@ -38,6 +38,7 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from cognitive_management.research.runtime import BudgetExhausted
 from typing import List, Dict, Any, Optional, Tuple, Protocol
 from dataclasses import dataclass
 
@@ -227,6 +228,8 @@ class ConstitutionalCritic:
             violation_score = self._parse_violation_score(response)
             return violation_score
             
+        except BudgetExhausted:
+            raise
         except Exception as e:
             # Evaluation failed - use heuristic fallback
             import logging
@@ -376,6 +379,8 @@ Sadece düzeltme önerisini kısa ve net bir şekilde yaz:"""
             
             return suggestion.strip()
             
+        except BudgetExhausted:
+            raise
         except Exception:
             # Fallback to generic suggestion
             return f"Metni '{principle}' prensibine uygun hale getir."
@@ -436,6 +441,8 @@ Metni bu prensiplere uygun şekilde düzelt, ama cevabın içeriğini ve anlamı
             
             return revised.strip()
             
+        except BudgetExhausted:
+            raise
         except Exception as e:
             # Revision failed - return original with warning
             import logging

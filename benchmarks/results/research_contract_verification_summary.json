@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-20",
+  "scope": "local research contracts, not repository-wide validation",
+  "status": [
+    "IMPLEMENTED",
+    "STATICALLY VERIFIED",
+    "CHEAP-TEST VERIFIED",
+    "EXPERIMENT READY"
+  ],
+  "empirical_model_quality_validated": false,
+  "training_run": false,
+  "pretrained_weights_loaded": false,
+  "syntax_verified_python_files": 35,
+  "checks": [
+    {
+      "scope": "five new research test files",
+      "passed": 93,
+      "subtests_passed": 73,
+      "seconds": 5.77,
+      "note": "before three additional integration cases"
+    },
+    {
+      "scope": "integration plus selected existing async/cache regressions",
+      "passed": 18,
+      "deselected": 6,
+      "seconds": 2.8
+    },
+    {
+      "scope": "final integration/runtime after direct-orchestrator and pool-retry fixes",
+      "passed": 34,
+      "subtests_passed": 24,
+      "seconds": 0.66
+    }
+  ],
+  "unique_new_test_cases_verified": 96,
+  "existing_async_cache_regressions_verified": 3,
+  "neural_fixture": {
+    "device": "cpu",
+    "layers": 2,
+    "embedding_width": 8,
+    "vocabulary": 16,
+    "max_cache_length": 8
+  },
+  "offline_fixture": {
+    "train_rows": 4,
+    "eval_rows": 2,
+    "source_groups": 6,
+    "kind": "synthetic fully observed table",
+    "eval_feedback_events": 0
+  },
+  "limits": [
+    "No full suite, large model, training, dataset sweep or performance benchmark executed.",
+    "Token usage is reserved upper bounds, not measured generated tokens or FLOPs.",
+    "Real quality, cost, generalization and retention gains remain unvalidated."
+  ]
+}

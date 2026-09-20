@@ -1,0 +1,6 @@
+{"sample_id":"synthetic-train-0","source_group":"synthetic-source-0","task_key":"synthetic-known","split":"train","baseline":"direct","outcomes":{"direct":{"quality":0.05,"cost":0.1},"think1":{"quality":0.95,"cost":0.5}}}
+{"sample_id":"synthetic-train-1","source_group":"synthetic-source-1","task_key":"synthetic-known","split":"train","baseline":"direct","outcomes":{"direct":{"quality":0.05,"cost":0.1},"think1":{"quality":0.95,"cost":0.5}}}
+{"sample_id":"synthetic-train-2","source_group":"synthetic-source-2","task_key":"synthetic-known","split":"train","baseline":"direct","outcomes":{"direct":{"quality":0.05,"cost":0.1},"think1":{"quality":0.95,"cost":0.5}}}
+{"sample_id":"synthetic-train-3","source_group":"synthetic-source-3","task_key":"synthetic-known","split":"train","baseline":"direct","outcomes":{"direct":{"quality":0.05,"cost":0.1},"think1":{"quality":0.95,"cost":0.5}}}
+{"sample_id":"synthetic-eval-known","source_group":"synthetic-heldout-1","task_key":"synthetic-known","split":"eval","baseline":"direct","outcomes":{"direct":{"quality":0.1,"cost":0.1},"think1":{"quality":0.9,"cost":0.5}}}
+{"sample_id":"synthetic-eval-new","source_group":"synthetic-heldout-2","task_key":"synthetic-new","split":"eval","baseline":"direct","outcomes":{"direct":{"quality":0.6,"cost":0.1},"think1":{"quality":0.8,"cost":0.5}}}

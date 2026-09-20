@@ -124,7 +124,9 @@ class BaseAsyncProcessingHandler:
             Updated context
         """
         # Process this step
-        context = await self._process_async(context)
+        from cognitive_management.research.pipeline_support import processing_stage
+        with processing_stage(context, self.name):
+            context = await self._process_async(context)
         
         # Add to processing steps
         if context:
@@ -207,22 +209,9 @@ class AsyncProcessingPipeline:
         # Process through async chain
         result_context = await self._first_handler.handle_async(context)
         
-        if not result_context:
-            # Pipeline failed
-            return CognitiveOutput(
-                text="İşleme sırasında bir hata oluştu.",
-                used_mode="direct",
-                tool_used=None,
-                revised_by_critic=False,
-            )
-        
-        # Build output
-        return CognitiveOutput(
-            text=result_context.final_text or result_context.draft_text or "",
-            used_mode=result_context.policy_output.mode if result_context.policy_output else "direct",
-            tool_used=result_context.tool_name,
-            revised_by_critic=result_context.revised,
-        )
+        from .pipeline import build_output
+        return build_output(result_context)
+
 
 
 __all__ = [

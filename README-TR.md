@@ -4,19 +4,19 @@
 
 **Türkçeye özel geliştirilmiş tokenizer altyapısı, eğitilebilir dil modeli çekirdeği ve bilişsel sistemleri birleştiren yapay zekâ motoru.**
 
-Cevahir, Muhammed Yasin Yılmaz tarafından geliştirilen; verinin hazırlanmasını, modelin öğrenmesini ve öğrenilen modelin konuşma içinde kullanılmasını aynı kod tabanında bir araya getiren bir yapay zekâ altyapısıdır. Kendi BPE hattını, yapılandırılabilir PyTorch Transformer decoder çekirdeğini, eğitim ve checkpoint yönetimini, metin üretimini, bilişsel iş akışlarını, konuşma belleğini ve uygulama servislerini içerir.
+Ben Muhammed Yasin Yılmaz. Cevahir'i, verinin hazırlanmasından modelin öğrenmesine ve konuşma içinde kullanılmasına kadar bütün sürecini geliştirebildiğim bir yapay zekâ altyapısı olarak kurdum. Kendi BPE hattını, yapılandırılabilir PyTorch Transformer decoder çekirdeğini, eğitim ve checkpoint yönetimini, metin üretimini, bilişsel iş akışlarını, konuşma belleğini ve uygulama servislerini aynı kod tabanında bir araya getirdim.
 
-Proje, geliştiricilere ve özellikle Türkiye'deki gençlere bir dil modelinin iç işleyişini inceleyebilecekleri, kendi verileriyle eğitebilecekleri ve yeni yeteneklerle genişletebilecekleri bir temel sunar. Geliştirilmiş modülleri, gerçekleştirilen model eğitimleri ve paylaşılan çıktılarıyla birlikte ilerleyen bir mühendislik birikimidir.
+Bu projeyle özellikle Türkiye'deki gençlerin bir dil modelinin iç işleyişini inceleyebilmesini, kendi verileriyle eğitim yapabilmesini ve kendi fikirlerini çalışan mekanizmalara dönüştürebilmesini istiyorum. Cevahir'i geliştiriyor, modeller eğitiyor ve elde ettiğim çıktıları burada paylaşıyorum. Kaynak kodunu, deneylerimi ve öğrendiklerimi aynı yerde erişilebilir tutmak benim için bu çalışmanın önemli bir parçası.
 
-**Geliştirici: Muhammed Yasin Yılmaz · “Türk Gençlerine Armağanımdır.”**
+**Cevahir, Türk Gençlerine Armağanımdır. — Muhammed Yasin Yılmaz**
 
 <p align="center">
   <img src="image/87E09A64-4E1F-41D5-84AF-7D7C56F6C229.png" alt="Cevahir AI & Engine" style="max-width:100%;">
 </p>
 
-## Cevahir'in mimari değeri
+## Cevahir'de neyi bir araya getiriyorum?
 
-Cevahir'in değeri, **dil modelinin temsilini, öğrenmesini ve kullanımını aynı geliştirilebilir sistemde birleştirmesidir.** Bir metnin nasıl tokenlara ayrıldığından bu tokenların nasıl öğrenildiğine, modelin nasıl cevap ürettiğinden geçmişi ve araç sonuçlarını nasıl kullandığına kadar akışın her katmanı kaynak kodunda izlenebilir ve değiştirilebilir.
+Cevahir'de en çok önemsediğim şey, **dil modelinin temsilini, öğrenmesini ve kullanımını aynı geliştirilebilir sistemde birleştirmek.** Bir metnin nasıl tokenlara ayrıldığını, modelin bu tokenlardan nasıl öğrendiğini, nasıl cevap ürettiğini ve geçmişi ya da araç sonuçlarını nasıl kullandığını birlikte inceleyebilmek istiyorum. Bu nedenle akışın her katmanını kaynak kodunda izlenebilir ve değiştirilebilir biçimde geliştiriyorum.
 
 **Dil temsili üzerinde çalışma alanı.** Türkçeye özel geliştirilmiş BPE altyapısı; normalizasyonu, sözlüğü, birleşim kurallarını, isteğe bağlı heceleme ve morfoloji bileşenlerini veri hazırlama ile buluşturur. Böylece dilin nasıl temsil edildiği üzerine yapılan çalışma, model eğitimine aynı token kimlikleriyle taşınabilir.
 
@@ -26,7 +26,7 @@ Cevahir'in değeri, **dil modelinin temsilini, öğrenmesini ve kullanımını a
 
 **İncelenebilir bir sistemden konuşma uygulamasına geçiş.** Model profilleme, gradyan/ağırlık sağlık kontrolleri ve bilişsel izler sistemin iç davranışını görünür kılar. Birleşik `Cevahir` arayüzü, konuşma yöneticisi ve uygulama servisleri aynı motoru kullanıcı ve oturum geçmişi taşıyan uygulamalara bağlar.
 
-Bu bütünlük, Türkçe dil modelleme çalışmalarından farklı model ve bilişsel sistem denemelerine uzanan bir geliştirme zemini sunar. Parçaların birbirini nasıl tamamladığı [sistem bütünlüğü rehberinde](docs/architecture/SYSTEM_OVERVIEW.md), uygulama sözleşmeleri [mimari belgede](docs/architecture/CEVAHIR_ARCHITECTURE_SPEC.md) açıklanır.
+Bu altyapı üzerinde Türkçe dil modelleme çalışmalarımı sürdürüyor, farklı model ve bilişsel sistem fikirlerini araştırıyorum. Parçaların birlikte nasıl çalıştığını [sistem bütünlüğü rehberinde](docs/architecture/SYSTEM_OVERVIEW.md), uygulama sözleşmelerini [mimari belgede](docs/architecture/CEVAHIR_ARCHITECTURE_SPEC.md) anlattım.
 
 ## Sistem mimarisi
 
@@ -85,9 +85,9 @@ Stratejilerin gerçek çalışma biçimi, senkron/asenkron farklar ve açık gel
 
 [ChattingManager](chatting_management) konuşma geçmişini ve bağlamı yönetir. Kapsamlandırılmış bilişsel akışta bellek kayıtları, notlar ve özetler kullanıcı/oturumla ilişkilendirilir. [API servisleri](api) ve [veritabanı repository'leri](database), motoru kimlik doğrulanmış oturumlara, saklanan konuşmalara ve kullanıcı verilerine bağlar.
 
-## Gerçek eğitim çıktıları
+## Yaptığım eğitimlerden çıktılar
 
-**Aşağıdaki ekran görüntüleri, geliştiricinin Cevahir ile yaptığı gerçek model eğitimlerinden ve eğitim sırasında gerçekleştirdiği üretim kontrollerinden alınmıştır.** Prompt'ları, üretilen yanıtları ve eğitim sırasındaki çıktıları gösterir. Projenin gerçekleştirilmiş eğitim çalışmalarının örnekleri olarak burada korunmaktadır.
+**Aşağıdaki ekran görüntüleri, Cevahir ile yaptığım gerçek model eğitimlerinden ve eğitim sırasında gerçekleştirdiğim üretim kontrollerinden alınmıştır.** Kullandığım prompt'ları, modelin ürettiği yanıtları ve eğitim sırasında aldığım çıktıları burada paylaşıyorum. Bunlar Cevahir'i geliştirirken yürüttüğüm eğitim çalışmalarının bir parçası.
 
 <p align="center">
   <img src="image/1.jpeg" alt="Cevahir gerçek eğitim çıktısı 1" style="max-width:100%;">
@@ -98,11 +98,11 @@ Stratejilerin gerçek çalışma biçimi, senkron/asenkron farklar ve açık gel
   <img src="image/6.jpeg" alt="Cevahir gerçek eğitim çıktısı 6" style="max-width:100%;">
 </p>
 
-Geliştiricinin paylaştığı [eğitim verisi koleksiyonuna](https://drive.google.com/drive/folders/19G5uGS5YM3rf42OefjM3KsXRyn0ZEshW?usp=sharing) da ulaşabilirsiniz. Kendi çalışmanız için veri yolunu ve hazırlama ayarlarını belirleyin. Çıkarımda eğitilmiş checkpoint'i, o checkpoint'in eğitildiği sözlük, merges ve BPE ayarlarıyla birlikte kullanın.
+Paylaştığım [eğitim verisi koleksiyonuna](https://drive.google.com/drive/folders/19G5uGS5YM3rf42OefjM3KsXRyn0ZEshW?usp=sharing) da ulaşabilirsiniz. Kendi çalışmanız için veri yolunu ve hazırlama ayarlarını belirleyin. Çıkarımda eğitilmiş checkpoint'i, o checkpoint'in eğitildiği sözlük, merges ve BPE ayarlarıyla birlikte kullanın.
 
 ## V4'ten sonraki gelişim
 
-Model V4'te kalmadı. Kaynak kodundaki sürüm notları, aynı çekirdeğin üzerine gelen şu geliştirmeleri gösterir:
+Çekirdeği V4'ten sonra da geliştirmeye devam ettim. Kaynak kodundaki sürüm notlarında aynı çekirdeğin üzerine eklenen şu yetenekleri görebilirsiniz:
 
 | Kaynaktaki etiket | Güncel koddaki karşılığı |
 |---|---|
@@ -118,7 +118,19 @@ Bu etiketler ayrı ayrı kurulması gereken model paketleri değildir. Eğitim s
 
 Modelin [profil araçları](model_management/profiler.py) parametre dağılımını, bellek kullanımını ve hesap maliyeti tahminlerini; [sağlık kontrolleri](model_management/health_monitor.py) gradyan, ağırlık ve dikkat istatistiklerini incelemek için kullanılır. Bilişsel katmanın trace ve metrik arayüzleri ise yanıtın hangi aşamalardan geçtiğini gösterir. Bu araçlar, mimari bir tercihin veya bilişsel adımın etkisini gözlemlemeyi sağlar.
 
-Son altyapı geliştirmeleri bu parçaların birlikte çalışmasına odaklanmıştır: ortak model yapılandırması, gerçek eğitim hedefine katılan MoE kaybı, artımlı dikkat önbelleği, tokenizer ile checkpoint kimliğinin korunması ve kullanıcı/oturum kapsamlı bellek. Teknik ayrıntılar [alt çekirdek sözleşmelerinde](docs/architecture/LOWER_CORE_CONTRACTS.md) ve [yaşam döngüsü belgesinde](docs/architecture/LIFECYCLE_CONSOLIDATION.md) bulunur. Açık geliştirme işleri [bir sonraki tur planında](docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md) izlenir.
+Son altyapı çalışmalarımda bu parçaların birlikte çalışmasını güçlendirdim: ortak model yapılandırması, eğitim hedefine katılan MoE kaybı, artımlı dikkat önbelleği, tokenizer ile checkpoint kimliğinin korunması ve kullanıcı/oturum kapsamlı bellek. Teknik ayrıntıları [alt çekirdek sözleşmelerinde](docs/architecture/LOWER_CORE_CONTRACTS.md) ve [yaşam döngüsü belgesinde](docs/architecture/LIFECYCLE_CONSOLIDATION.md) bulabilirsiniz. Açık geliştirme işlerini [bir sonraki tur planında](docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md) takip ediyorum.
+
+### Güncel araştırma çalışmalarım
+
+Cevahir'in bir isteğe ne kadar hesap ayırdığını, dışarıdan doğrulanmış geri bildirimleri nasıl kullandığını ve bilişsel bağlamın sinir ağına nasıl taşındığını deneyebilmek için isteğe bağlı bir araştırma altyapısı ekledim:
+
+- **Ortak istek bütçesi:** Üretim, aday puanlama ve entropi çağrıları aynı sınırları paylaşır; ana yanıt için kaynak ayrılır. Token muhasebesi, ayrılan üst sınırları izler; gerçek token veya FLOP ölçümü değildir.
+- **Geri bildirime dayalı strateji tercihi:** Kayıtları kullanıcı/oturum, model ve tokenizer kimliğine göre ayırıyorum. Yeterli dış doğrulama varsa strateji tercihi değişebilir; değerlendirmeler düzeltilebilir, kayıtlar silinebilir ve deneyim ayrı bir dosyada saklanabilir.
+- **MoE için açık bağlam girdisi:** Uzman yönlendirmesine sınırlandırılmış bir öncelik tensörü ekledim. Mevcut bağlantı yapılandırılmış alan profillerini kullanır; deneyimden uzman anlamı veya önceliği öğrenmeyi henüz uygulamadım.
+
+Bu araştırma davranışları varsayılan olarak kapalıdır (`research.mode="off"`); MoE önceliği ayrıca etkinleştirilir. Küçük CPU testleri ve sentetik tablo karşılaştırmalarıyla uygulamanın davranışını kontrol ettim. Gerçek görevlerde kalite, hesap tasarrufu ve aktarım kazancını henüz ölçmedim. Mekanizmaları ve deney düzenini [araştırma kaydında](docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md) paylaşıyorum.
+
+Mevcut mimarinin dışına çıkan yetenek sorularını da araştırıyorum. Son keşifte, sistemin kullandığı temsili karşı örneklerle değiştirmesi fikrini inceledim. Küçük karşılaştırmada tanıklarla filtrelenen arama, aynı adayları tamamen inceleyen aramayla aynı temsilleri ve tahminleri buldu. Bazı durumlarda daha az hesap yaptı; bu biçimiyle daha az gözlemle öğrenme iddiasını eledim. [Keşif gerekçelerini](docs/research/FRONTIER_DISCOVERY_2026_09_20.md) ve [tekrar çalıştırılabilir deneyin sonucunu](docs/research/REPRESENTATION_WITNESS_AUDIT.md) birlikte yayımlıyorum.
 
 ## Başlangıç
 
@@ -226,12 +238,13 @@ Birleşik Flask giriş noktası [api.app_factory.create_app](api/app_factory.py)
 | [cognitive_management/](cognitive_management) | Stratejiler, araçlar, critic, kapsamlandırılmış bellek ve middleware |
 | [chatting_management/](chatting_management) | Oturumlar, konuşma geçmişi ve bağlam |
 | [api/](api), [database/](database) | HTTP servisleri, kimlik doğrulama ve kalıcı saklama |
+| [research/](research) | Ana çalışma akışından bağımsız, küçük araştırma ve yanlışlama deneyleri |
 | [benchmarks/](benchmarks), [tests/](tests), [scripts/](scripts) | Ölçümler, davranış doğrulaması ve ayrı teşhis araçları |
 | [docs/](docs) | Mimari, modül rehberleri ve geliştirme geçmişi |
 
 ## Doğrulama ve geliştirme durumu
 
-Geçmiş model eğitimleri yukarıdaki örneklerde yer alır. Güncel mühendislik kontrolleri ayrıca küçük CPU modelleriyle önbellekli/tam dizi sonuçlarını, gradyanları, kayıt/yükleme davranışını, tokenizer kimliğini ve durum izolasyonunu karşılaştırır. Bu kontrollerin sentetik kayıp veya süre ölçümleri, eğitilmiş modelin dil kalitesini ölçmez.
+Yaptığım model eğitimlerinden örnekleri yukarıda paylaştım. Güncel mühendislik kontrollerinde ayrıca küçük CPU modelleriyle önbellekli/tam dizi sonuçlarını, gradyanları, kayıt/yükleme davranışını, tokenizer kimliğini ve durum izolasyonunu karşılaştırıyorum. Bu kontrollerin sentetik kayıp veya süre ölçümleri, eğittiğim modelin dil kalitesini ölçmez.
 
 Küçük bir yaşam döngüsü doğrulama grubu ve ayrı çekirdek ölçümü için:
 
@@ -241,7 +254,7 @@ python -m pytest tests/evolution/test_lower_layer_contracts.py tests/evolution/t
 python benchmarks/core.py --label local --output benchmarks/results/core_local.json
 ```
 
-Bağımlılıklar ve daha geniş doğrulama için [benchmark rehberine](benchmarks/README.md) bakın. Tarihsel test paketinin tamamının geçtiği iddia edilmez. Geliştirme alanları arasında kayıpsız Unicode tokenizasyonu, tüm eğitim kayıtlarının hizalama kontrolü, yakın tekrar verilerin ayrılması, eşzamanlı model değiştirme/üretim ve retrieval/critic/ToT kalite değerlendirmesi bulunur. GPU çalışması, dağıtık eğitim, uzun bağlam kalitesi ve gerçek derleme performansı ayrı doğrulama gerektirir; yardımcı modüllerin bulunması etkin eğitim yoluna bağlandıkları anlamına gelmez.
+Bağımlılıkları ve daha geniş doğrulama yollarını [benchmark rehberinde](benchmarks/README.md) bulabilirsiniz. Paylaştığım sonuçlar hedefli kontrol gruplarına aittir; tarihsel test paketinin tamamı için geçer sonucu vermiyorum. Kayıpsız Unicode tokenizasyonu, tüm eğitim kayıtlarının hizalama kontrolü, yakın tekrar verilerin ayrılması, eşzamanlı model değiştirme/üretim ve retrieval/critic/ToT kalite değerlendirmesi üzerinde açık işlerim var. GPU çalışmasını, dağıtık eğitimi, uzun bağlam kalitesini ve gerçek derleme performansını ayrıca doğrulamak gerekiyor; yardımcı modüllerin bulunması etkin eğitim yoluna bağlandıkları anlamına gelmez.
 
 ## Dokümantasyon, katkı ve iletişim
 
@@ -252,15 +265,18 @@ Bağımlılıklar ve daha geniş doğrulama için [benchmark rehberine](benchmar
 - [Checkpoint, veri ve çalışma yaşam döngüsü](docs/architecture/LIFECYCLE_CONSOLIDATION.md)
 - [Geliştirme günlüğü](docs/development/EVOLUTION_LOG.md)
 - [Modül dokümantasyonu](docs/modules)
+- [Deneyimle koşullanan hesaplama araştırması](docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md)
+- [Bağımsız yetenek keşfi](docs/research/FRONTIER_DISCOVERY_2026_09_20.md)
+- [Temsil değişimi hipotezinin ilk yanlışlama deneyi](docs/research/REPRESENTATION_WITNESS_AUDIT.md)
 
-Çekirdek, veri ve tokenizer hattı, model yaşam döngüsü, uygulama bağlantıları veya değerlendirmeler üzerinde katkı sunabilirsiniz. Etkilenen akışı, elde edilen davranışı ve değişikliğe uygun doğrulamayı açıklayın.
+Çekirdek, veri ve tokenizer hattı, model yaşam döngüsü, uygulama bağlantıları veya değerlendirmeler üzerinde birlikte çalışmak isteyenlerin katkılarını bekliyorum. Bir değişiklik önerirken etkilenen akışı, elde edilen davranışı ve nasıl doğruladığınızı paylaşmanız incelememi kolaylaştırır.
 
-Kökteki [LICENSE](LICENSE) dosyası Apache License 2.0 metnini içerir.
+Projeyi [Apache License 2.0](LICENSE) ile paylaşıyorum.
 
-**Geliştirici:** Muhammed Yasin Yılmaz · [GitHub](https://github.com/myylogic) · [X](https://x.com/myylogic) · [Instagram](https://instagram.com/myylogic)
+**Bana ulaşın:** [GitHub](https://github.com/myylogic) · [X](https://x.com/myylogic) · [Instagram](https://instagram.com/myylogic)
 
 <p align="center">
   <img src="image/myy.jpeg" alt="Muhammed Yasin Yılmaz, Cevahir'in geliştiricisi" style="max-width:100%;">
 </p>
 
-*Dokümantasyon 20 Eylül 2026 tarihinde repo ile eşleştirildi.*
+*Bu belgeyi 20 Eylül 2026 tarihinde güncel kaynak koduyla eşleştirdim.*

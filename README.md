@@ -4,19 +4,19 @@
 
 **An AI engine combining tokenizer infrastructure developed specifically for Turkish, a trainable language-model core and cognitive systems.**
 
-Developed by Muhammed Yasin Yılmaz, Cevahir brings data preparation, model learning and the use of a trained model in conversation into one codebase. It includes its own BPE pipeline, a configurable PyTorch Transformer decoder, training and checkpoint management, generation, cognitive workflows, conversational memory, and application services.
+I'm Muhammed Yasin Yılmaz. I built Cevahir to bring data preparation, model learning and the use of a trained model in conversation into one codebase. It includes its own BPE pipeline, a configurable PyTorch Transformer decoder, training and checkpoint management, generation, cognitive workflows, conversational memory, and application services.
 
-The project gives developers—and especially young people in Türkiye—a foundation they can inspect, train on their own data and extend with new capabilities. Its implemented modules, completed model training runs and shared outputs form a growing body of engineering work.
+I want developers, especially young people in Türkiye, to have a foundation they can inspect, train on their own data and extend with new capabilities. I share the implemented modules, my completed model training runs and their outputs as this work develops.
 
-**Created by Muhammed Yasin Yılmaz · “A Gift to Turkish Youth.”**
+**My gift to Turkish youth. — Muhammed Yasin Yılmaz**
 
 <p align="center">
   <img src="image/87E09A64-4E1F-41D5-84AF-7D7C56F6C229.png" alt="Cevahir AI & Engine" style="max-width:100%;">
 </p>
 
-## The architectural value of Cevahir
+## What I'm building with Cevahir
 
-Cevahir brings **language representation, model learning and model use into one extensible system.** Developers can follow and modify the path from splitting text into tokens, through learning from those tokens, to generating responses that use conversation history and tool results.
+With Cevahir, I want to bring **language representation, model learning and model use into one extensible system.** I want to understand and develop the whole path: how text becomes tokens, how a model learns from them, and how its responses use conversation history and tool results. I keep these stages open to inspection and modification in the source code.
 
 **A place to develop language representations.** The BPE infrastructure developed specifically for Turkish connects normalization, vocabulary, merge rules, optional syllabification and morphology components to data preparation. Work on how language is represented can then reach model training through the same token identities.
 
@@ -26,7 +26,7 @@ Cevahir brings **language representation, model learning and model use into one 
 
 **A path from inspectable internals to conversational applications.** Model profiling, gradient/weight health checks and cognitive traces expose internal behavior. The unified `Cevahir` interface, conversation manager and application services connect the same engine to applications with users, sessions and history.
 
-Together, these parts provide a foundation for Turkish language modeling and further model and cognitive-system experiments. The [system overview](docs/architecture/SYSTEM_OVERVIEW.md) explains their connections; the [architecture contract](docs/architecture/CEVAHIR_ARCHITECTURE_SPEC.md) describes implementation behavior.
+I use this foundation to develop Turkish language modeling and explore model and cognitive-system ideas. I've described how the parts work together in the [system overview](docs/architecture/SYSTEM_OVERVIEW.md) and their implementation behavior in the [architecture contract](docs/architecture/CEVAHIR_ARCHITECTURE_SPEC.md).
 
 ## System architecture
 
@@ -85,9 +85,9 @@ The [cognitive module guide](docs/modules/cognitive_management/README-en.md) exp
 
 [ChattingManager](chatting_management) manages conversation history and context. Memory entries, notes and summaries are scoped to users/sessions in the scoped cognitive flow. [API services](api) and [database repositories](database) connect the engine to authenticated sessions, stored conversations and user data.
 
-## Real training outputs
+## Outputs from my training runs
 
-**The following screenshots come from the author's actual model-training runs and generation checks during training.** They show work already carried out with Cevahir, including prompts, generated responses and training-time output. They are retained here as examples of the project's training history.
+**The following screenshots come from my actual model-training runs and generation checks during training.** They include prompts, generated responses and training-time output. I keep them here as a record of the training I have carried out with Cevahir.
 
 <p align="center">
   <img src="image/1.jpeg" alt="Cevahir actual training output 1" style="max-width:100%;">
@@ -98,11 +98,11 @@ The [cognitive module guide](docs/modules/cognitive_management/README-en.md) exp
   <img src="image/6.jpeg" alt="Cevahir actual training output 6" style="max-width:100%;">
 </p>
 
-The author has also shared a [training-data collection](https://drive.google.com/drive/folders/19G5uGS5YM3rf42OefjM3KsXRyn0ZEshW?usp=sharing). Configure the data path and preparation settings for your own run. For inference, use a trained checkpoint together with the vocabulary, merges and BPE settings used for that checkpoint.
+I've also shared a [training-data collection](https://drive.google.com/drive/folders/19G5uGS5YM3rf42OefjM3KsXRyn0ZEshW?usp=sharing). Configure the data path and preparation settings for your own run. For inference, use a trained checkpoint together with the vocabulary, merges and BPE settings used for that checkpoint.
 
 ## Development beyond V4
 
-The model did not stop at V4. Version notes in the source describe successive additions to the same core:
+I continued developing the core beyond V4. Version notes in the source record these successive additions:
 
 | Source label | Implementation present in the current code |
 |---|---|
@@ -118,7 +118,19 @@ These labels do not identify separately installed model packages. The **V3** tra
 
 [Model profiling](model_management/profiler.py) exposes parameter distribution, memory usage and computational-cost estimates; [health checks](model_management/health_monitor.py) inspect gradients, weights and attention statistics. Cognitive trace and metrics interfaces expose the stages a response passes through. These tools help examine the effect of an architectural choice or cognitive processing step.
 
-Recent infrastructure work has strengthened the connections between these parts: shared model configuration, MoE loss in the training objective, incremental attention caching, tokenizer/checkpoint identity and user/session-scoped memory. Implementation details are recorded in the [lower-core contracts](docs/architecture/LOWER_CORE_CONTRACTS.md) and [lifecycle document](docs/architecture/LIFECYCLE_CONSOLIDATION.md). Open work is tracked in the [next development round](docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md).
+My recent infrastructure work has strengthened the connections between these parts: shared model configuration, MoE loss in the training objective, incremental attention caching, tokenizer/checkpoint identity and user/session-scoped memory. I've recorded the details in the [lower-core contracts](docs/architecture/LOWER_CORE_CONTRACTS.md) and [lifecycle document](docs/architecture/LIFECYCLE_CONSOLIDATION.md). I track open work in the [next development round](docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md).
+
+## Current research
+
+I'm testing whether externally verified experience can help Cevahir choose how to spend computation on a request. The [experience-conditioned computation record](docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md) describes three optional mechanisms:
+
+- **Scoped feedback and strategy support:** experience stays within the same user/session, model and tokenizer identity. Strategy preferences require support from distinct, externally evaluated examples; corrections and forgetting update that support. `research.mode="off"` is the default. Budget, shadow and adaptive modes can be enabled explicitly.
+- **Shared request compute caps:** generation, scoring and entropy calls share limits on calls, reserved output tokens and input characters. These are execution limits, not measurements of actual token use or FLOPs.
+- **An explicit contextual MoE prior:** a separately enabled, bounded routing bias can influence the existing router. It remains fixed while a KV cache is populated. The current connection selects researcher-defined profiles; it does not learn expert meanings from experience.
+
+Small contract tests and a synthetic offline replay exercise these mechanisms without running a trained model. I have not established real task-quality, transfer or computation savings from them. The training screenshots above come from my earlier model runs, not these research checks.
+
+The latest [representation witness audit](docs/research/REPRESENTATION_WITNESS_AUDIT.md) produced a **negative result for the proposed learning advantage**: when both deterministic searches receive the same ordered candidate language and observations, filtering by training contradictions before the same full consistency check preserves the answer. All 15 completed synthetic comparisons returned the same compatible representations, fitted tables and predictions. Filtering sometimes changed the counted search work, but supplied no new learning advantage in this formulation. I have set aside that claim; the small audit remains separate from the main engine in [research/](research).
 
 ## Getting started
 
@@ -227,11 +239,12 @@ The integrated Flask entry point is [api.app_factory.create_app](api/app_factory
 | [chatting_management/](chatting_management) | Sessions, conversation history and context |
 | [api/](api), [database/](database) | HTTP services, authentication and persistence |
 | [benchmarks/](benchmarks), [tests/](tests), [scripts/](scripts) | Measurements, behavior verification and standalone diagnostic tools |
+| [research/](research) | Isolated research experiments, including the deterministic representation witness audit |
 | [docs/](docs) | Architecture, module guides and development history |
 
 ## Verification and development status
 
-Past model training is illustrated above. Current engineering checks additionally use small CPU models to compare cached/full-sequence results, gradients, save/load behavior, tokenizer identity and state isolation. Their synthetic loss or timing measurements do not measure the language quality of the trained model.
+I've shared examples from my model training above. In current engineering checks, I also use small CPU models to compare cached/full-sequence results, gradients, save/load behavior, tokenizer identity and state isolation. These synthetic loss or timing measurements do not measure the language quality of my trained model.
 
 For a small lifecycle verification group and a separate core measurement:
 
@@ -241,7 +254,7 @@ python -m pytest tests/evolution/test_lower_layer_contracts.py tests/evolution/t
 python benchmarks/core.py --label local --output benchmarks/results/core_local.json
 ```
 
-See [benchmark instructions](benchmarks/README.md) for dependencies and broader verification. The entire historical test suite is not claimed to pass. Remaining development areas include lossless Unicode tokenization, full-record training alignment checks, near-duplicate data separation, concurrent model replacement/generation, and retrieval/critic/ToT quality evaluation. GPU execution, distributed training, long-context quality and real compilation performance require separate validation; the presence of helper modules does not imply integration into the active training path.
+See [benchmark instructions](benchmarks/README.md) for dependencies and broader verification. My reported results cover targeted checks; I have not established that the entire historical test suite passes. I still have open work on lossless Unicode tokenization, full-record training alignment checks, near-duplicate data separation, concurrent model replacement/generation, and retrieval/critic/ToT quality evaluation. GPU execution, distributed training, long-context quality and real compilation performance require separate validation; the presence of helper modules does not imply integration into the active training path.
 
 ## Documentation, contribution and contact
 
@@ -250,17 +263,20 @@ See [benchmark instructions](benchmarks/README.md) for dependencies and broader 
 - [Next major development round: findings and sequence](docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md)
 - [Lower-core contracts](docs/architecture/LOWER_CORE_CONTRACTS.md)
 - [Checkpoint, data and runtime lifecycle](docs/architecture/LIFECYCLE_CONSOLIDATION.md)
+- [Experience-conditioned computation: mechanisms, evaluation and limits](docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md)
+- [Independent capability discovery](docs/research/FRONTIER_DISCOVERY_2026_09_20.md)
+- [Representation witness audit: equivalence and the rejected learning claim](docs/research/REPRESENTATION_WITNESS_AUDIT.md)
 - [Development log](docs/development/EVOLUTION_LOG.md)
 - [Module documentation](docs/modules)
 
-Contributions can improve the core, data and tokenizer pipeline, model lifecycle, application integration or evaluations. Describe the affected flow, the resulting behavior and the verification appropriate to the change.
+I welcome contributions to the core, data and tokenizer pipeline, model lifecycle, application integration and evaluations. Describe the affected flow, the resulting behavior and the verification appropriate to the change.
 
-The root [LICENSE](LICENSE) contains Apache License 2.0.
+I share Cevahir under the [Apache License 2.0](LICENSE).
 
-**Developer:** Muhammed Yasin Yılmaz · [GitHub](https://github.com/myylogic) · [X](https://x.com/myylogic) · [Instagram](https://instagram.com/myylogic)
+**Find me online:** [GitHub](https://github.com/myylogic) · [X](https://x.com/myylogic) · [Instagram](https://instagram.com/myylogic)
 
 <p align="center">
   <img src="image/myy.jpeg" alt="Muhammed Yasin Yılmaz, Cevahir creator" style="max-width:100%;">
 </p>
 
-*Documentation aligned with the repository on 20 September 2026.*
+*I updated this document to match the current source code on 20 September 2026.*

@@ -204,21 +204,23 @@ def build_context(
         picked = select_salient(head, topk=max(0, cfg.memory.salient_topk - len(tail)), query_text=user_message)
         sel = picked + tail
 
-    # 3) Parçaları oluştur - sistem promptu gizle
-    parts: List[str] = []
-    # Sistem promptu artık context'e dahil edilmiyor - modelin "düşüncesi" olarak kalacak
-    
-    for item in sel:
-        parts.append(_render_turn(item.get("role", ""), item.get("content", "")))
-
-    parts.append(_render_turn(ROLE_USER, user_message))
-
-    # 4) Token bütçesi uygulama
-    budget = max(128, int(cfg.memory.max_history_tokens))  # güvenli alt sınır
-    try:
-        pruned = truncate_to_budget(parts, max_tokens=budget)
-    except Exception as e:
-        raise ContextBuildError("Token bütçesine göre kırpma başarısız.") from e
+    # Keep the actual instructions and current question; prune history first.
+    system = _render_turn("system", system_prompt) if system_prompt else ""
+    question = _render_turn(ROLE_USER, user_message)
+    budget = max(128, int(cfg.memory.max_history_tokens))
+    mandatory = estimate_tokens(system) + estimate_tokens(question)
+    if mandatory > budget:
+        raise ContextBuildError("Sistem talimatı ve güncel soru bağlam bütçesini aşıyor.")
+    history_parts = [_render_turn(item.get("role", ""), item.get("content", "")) for item in sel]
+    # Retain complete recent turns; never truncate away the current question.
+    kept, used = [], mandatory
+    for part in reversed(history_parts):
+        size = estimate_tokens(part)
+        if used + size > budget:
+            break
+        kept.append(part)
+        used += size
+    pruned = ([system] if system else []) + list(reversed(kept)) + [question]
 
     # 5) Nihai metin
     context = "\n\n".join(pruned).strip()

@@ -52,6 +52,7 @@ from __future__ import annotations
 import os
 import sys
 import logging
+import math
 import random
 import time
 import threading
@@ -466,16 +467,40 @@ class CevahirModelAPI(CognitiveModelAPI):
             )
         model_manager.eval_mode()
     
-    def generate(self, prompt: str, decoding_cfg: DecodingConfig) -> str:
+    @property
+    def supports_routing_bias(self) -> bool:
+        return bool(getattr(self.model_manager.model, "supports_routing_bias", False))
+
+    def _prepare_routing_bias(self, routing_bias):
+        if routing_bias is None:
+            return None
+        if not self.supports_routing_bias:
+            raise ValueError("routing_bias requires an MoE model with routing support")
+        from src.neural_network_module.ortak_katman_module.mixture_of_experts import validate_routing_bias
+        bias = torch.as_tensor(routing_bias, device=self._device, dtype=torch.float32)
+        if bias.ndim == 1:
+            bias = bias.unsqueeze(0)
+        bias = validate_routing_bias(bias, batch_size=1,
+            num_experts=self.model_manager.model.layers[0].ffn.num_experts, device=self._device)
+        # Own the request's immutable content; never store it on a global context.
+        return bias.clone()
+
+    def generate(self, prompt: str, decoding_cfg: DecodingConfig, *, routing_bias=None) -> str:
         # The current KV cache is mutable and owned by this shared model.
         # Serialize requests until request-specific cache allocation exists.
         with self._generation_lock:
-            return self._generate_impl(prompt, decoding_cfg)
+            if routing_bias is None:
+                return self._generate_impl(prompt, decoding_cfg)
+            prior = self._prepare_routing_bias(routing_bias)
+            if getattr(decoding_cfg, "num_beams", 1) > 1:
+                raise ValueError("routing_bias is not supported with beam search")
+            return self._generate_impl(prompt, decoding_cfg, routing_bias=prior)
 
     def _generate_impl(
         self,
         prompt: str,
-        decoding_cfg: DecodingConfig
+        decoding_cfg: DecodingConfig,
+        *, routing_bias=None,
     ) -> str:
         """
         Generate text using ModelManager.
@@ -510,7 +535,8 @@ class CevahirModelAPI(CognitiveModelAPI):
             # Generate using autoregressive decoding
             generated_ids = self._autoregressive_generate(
                 input_tensor,
-                decoding_cfg
+                decoding_cfg,
+                **({"routing_bias": routing_bias} if routing_bias is not None else {}),
             )
             
             # [OK] DÜZELTME: Sadece yeni üretilen token'ları decode et (prompt hariç)
@@ -543,7 +569,8 @@ class CevahirModelAPI(CognitiveModelAPI):
     def _autoregressive_generate(
         self,
         input_tensor: torch.Tensor,
-        decoding_cfg: DecodingConfig
+        decoding_cfg: DecodingConfig,
+        *, routing_bias=None,
     ) -> List[int]:
         """
         Autoregressive generation with proper decoding.
@@ -631,6 +658,7 @@ class CevahirModelAPI(CognitiveModelAPI):
                     return_aux=False,
                     use_cache=use_cache,  # [OK] V4: KV Cache aktif
                     cache_position=cache_position,  # [OK] V4: Cache position
+                    **({"routing_bias": routing_bias} if routing_bias is not None else {}),
                 )
                 
                 # Get next token logits
@@ -796,7 +824,12 @@ class CevahirModelAPI(CognitiveModelAPI):
         best = max(beams, key=lambda item: item[1] / max(1, len(item[0]) - len(prompt_ids)) ** 0.6)
         return self.tokenizer_core.decode(best[0][len(prompt_ids):], method="bpe", remove_specials=True)
 
-    def score(self, prompt: str, candidate: str) -> float:
+    def score(self, prompt: str, candidate: str, *, routing_bias=None) -> float:
+        with self._generation_lock:
+            prior = self._prepare_routing_bias(routing_bias)
+            return self._score_impl(prompt, candidate, routing_bias=prior)
+
+    def _score_impl(self, prompt: str, candidate: str, *, routing_bias=None) -> float:
         """
         Score candidate text given prompt.
         
@@ -819,7 +852,8 @@ class CevahirModelAPI(CognitiveModelAPI):
                 logits, _ = self.model_manager.forward(
                     input_tensor,
                     inference=True,
-                    return_aux=False
+                    return_aux=False,
+                    **({"routing_bias": routing_bias} if routing_bias is not None else {}),
                 )
                 
                 # Calculate average log probability for candidate
@@ -849,75 +883,46 @@ class CevahirModelAPI(CognitiveModelAPI):
                 
         except Exception as e:
             logger.warning(f"Scoring error: {e}")
+            if routing_bias is not None:
+                raise CevahirProcessingError(f"Scoring with routing_bias failed: {e}") from e
             # Fallback: length-based score
             return float(len(candidate)) / max(1, len(prompt))
     
     def entropy_estimate(self, text: str) -> float:
+        """Normalized next-token entropy, or neutral 0.5 when unavailable.
+
+        This is model distribution entropy, not calibrated factual confidence.
+        Use entropy_details() when the caller needs availability/provenance.
         """
-        Estimate uncertainty as Shannon entropy of next-token logit distribution.
+        return self.entropy_details(text)["value"]
 
-        Uses the model's own probability distribution over the vocabulary to
-        compute H = -sum(p_i * log(p_i)) for the last token position.
-        High entropy → model is uncertain (many plausible next tokens).
-        Low entropy → model is confident (one dominant next token).
-
-        This is the academically correct uncertainty metric used in active
-        learning and LLM calibration research (Kuhn et al. 2023).
-
-        Returns:
-            Normalized entropy in [0, 1] (0=certain, 1=maximally uncertain)
-        """
+    def entropy_details(self, text: str) -> Dict[str, Any]:
+        result = {"value": 0.5, "available": False, "kind": "next_token_entropy",
+                  "calibrated": False}
         if not text:
-            return 0.5
-
-        try:
-            # Encode text to token IDs
-            tokens, _ = self.tokenizer_core.encode(text, mode="inference")
-            if not tokens:
-                return 0.5
-
-            # Build input tensor (batch_size=1, seq_len=T)
-            token_tensor = torch.tensor(
-                [tokens], dtype=torch.long, device=self._device
-            )
-
-            # Forward pass to get logits [1, T, vocab_size] with no gradient
-            with torch.no_grad():
-                logits, _ = self.model_manager.forward(
-                    token_tensor, inference=True, return_aux=False
-                )
-
-            # Take last token position: [vocab_size]
-            last_logits = logits[0, -1, :]
-
-            # Softmax → probability distribution
-            probs = torch.softmax(last_logits.float(), dim=-1)
-
-            # Shannon entropy: H = -sum(p * log(p))
-            # Clamp to avoid log(0)
-            log_probs = torch.log(probs.clamp(min=1e-10))
-            entropy = -(probs * log_probs).sum().item()
-
-            # Max entropy for a uniform distribution over vocab_size
-            vocab_size = probs.shape[0]
-            max_entropy = torch.log(torch.tensor(float(vocab_size))).item()
-
-            # Normalize to [0, 1]
-            normalized = entropy / max_entropy if max_entropy > 0 else 0.5
-            return float(max(0.0, min(1.0, normalized)))
-
-        except Exception as e:
-            logger.debug(f"Logit entropy estimation failed, falling back to heuristic: {e}")
-            # Heuristic fallback: token type-token ratio as diversity proxy
+            return result
+        with self._generation_lock:
             try:
-                tokens, _ = self.tokenizer_core.encode(text, mode="inference")
-                if tokens:
-                    ttr = len(set(tokens)) / len(tokens)
-                    return float(max(0.1, min(1.0, ttr)))
-            except Exception:
-                pass
-            return 0.5
-    
+                _, token_ids = self.tokenizer_core.encode(text, mode="inference")
+                if not token_ids:
+                    return result
+                token_tensor = torch.tensor([token_ids], dtype=torch.long, device=self._device)
+                with torch.no_grad():
+                    logits, _ = self.model_manager.forward(
+                        token_tensor, inference=True, return_aux=False, use_cache=False)
+                last_logits = logits[0, -1, :].float()
+                if not torch.isfinite(last_logits).all().item():
+                    raise ValueError("Nonfinite logits in entropy estimation")
+                log_probs = torch.log_softmax(last_logits, dim=-1)
+                entropy = -(log_probs.exp() * log_probs).sum().item()
+                max_entropy = math.log(last_logits.numel()) if last_logits.numel() > 1 else 0.0
+                normalized = entropy / max_entropy if max_entropy else 0.0
+                result.update(value=float(max(0.0, min(1.0, normalized))), available=True)
+            except Exception as exc:
+                result["error"] = type(exc).__name__
+                logger.debug("Logit entropy unavailable: %s", exc)
+        return result
+
     # Multimodal support
     def process_audio(self, audio_data: bytes) -> str:
         """Process audio data"""

@@ -36,6 +36,7 @@ Telif Hakkı: © 2024 Muhammed Yasin Yılmaz. Tüm Hakları Saklıdır.
 """
 
 from __future__ import annotations
+from cognitive_management.research.runtime import BudgetExhausted
 
 import logging
 import math
@@ -161,6 +162,18 @@ def _tf_idf_sim(text_a: str, text_b: str) -> float:
 # CriticV2 — V3 Çok-Boyutlu Critic
 # =============================================================================
 
+from dataclasses import dataclass
+from contextvars import ContextVar
+
+
+@dataclass(frozen=True)
+class ReviewResult:
+    text: str
+    revised: bool
+    feedback: tuple = ()
+    passes: int = 0
+
+
 class CriticV2(ICritic):
     """
     V3 Critic: Akademik standartlarda çok-boyutlu yanıt değerlendirmesi.
@@ -206,6 +219,8 @@ class CriticV2(ICritic):
         if cfg.critic.enable_external_fact_checking:
             try:
                 self._fact_checkers = create_fact_checkers(cfg)
+            except BudgetExhausted:
+                raise
             except Exception as e:
                 logger.warning(f"Fact checker başlatılamadı: {e}")
 
@@ -213,19 +228,31 @@ class CriticV2(ICritic):
         self._constitutional_critic = None
 
         # Handler entegrasyonu için izleme
-        self._last_feedback: Optional[List[CriticFeedback]] = None
-        self._last_passes: int = 0
+        self._review_result = ContextVar("critic_review_result", default=ReviewResult("", False))
 
     # =========================================================================
     # Ana Giriş Noktası — review()
     # =========================================================================
 
-    def review(
+    @property
+    def _last_feedback(self):
+        return list(self._review_result.get().feedback)
+
+    @property
+    def _last_passes(self):
+        return self._review_result.get().passes
+
+    def review(self, user_message, draft_text, context=None):
+        result = self.review_detailed(user_message, draft_text, context)
+        self._review_result.set(result)
+        return result.text, result.revised
+
+    def review_detailed(
         self,
         user_message: str,
         draft_text: str,
         context: Optional[str] = None,
-    ) -> Tuple[str, bool]:
+    ) -> ReviewResult:
         """
         Self-Refine döngüsü (Madaan et al. 2023).
 
@@ -244,15 +271,15 @@ class CriticV2(ICritic):
             (final_text, was_revised)
         """
         if not self.cfg.critic.enabled:
-            return draft_text, False
+            return ReviewResult(draft_text, False)
 
         if not draft_text or not draft_text.strip():
-            return draft_text, False
+            return ReviewResult(draft_text, False)
 
         current_text = draft_text
         was_revised   = False
-        self._last_feedback = None
-        self._last_passes   = 0
+        feedback_list = []
+        passes = 0
 
         # --- Adım 1: Constitutional AI ---
         if self.cfg.critic.enable_constitutional_ai:
@@ -269,6 +296,8 @@ class CriticV2(ICritic):
                     current_text = constitutional_result
                     was_revised  = True
                     logger.debug("Constitutional revision uygulandı.")
+            except BudgetExhausted:
+                raise
             except Exception as e:
                 logger.warning(f"Constitutional review başarısız: {e}")
 
@@ -277,8 +306,7 @@ class CriticV2(ICritic):
 
         for iteration in range(max_iters):
             feedback_list = self._evaluate_all(user_message, current_text, context)
-            self._last_feedback = feedback_list
-            self._last_passes   = iteration + 1
+            passes = iteration + 1
 
             needs_revision = self._should_revise(feedback_list)
 
@@ -295,7 +323,7 @@ class CriticV2(ICritic):
             else:
                 break  # Değişim yok → dur
 
-        return current_text, was_revised
+        return ReviewResult(current_text, was_revised, tuple(feedback_list), passes)
 
     # =========================================================================
     # Çok-Boyutlu Değerlendirme
@@ -581,6 +609,8 @@ class CriticV2(ICritic):
                     if result and result.is_verified is True:
                         verified_count += 1
                         break
+                except BudgetExhausted:
+                    raise
                 except Exception:
                     continue
 
@@ -623,6 +653,8 @@ class CriticV2(ICritic):
             if "yanlış" in rl or "false" in rl or "incorrect" in rl:
                 return 0.20
             return 0.60
+        except BudgetExhausted:
+            raise
         except Exception as e:
             logger.debug(f"LLM fact verification başarısız: {e}")
             return 0.60
@@ -742,6 +774,8 @@ class CriticV2(ICritic):
             revised = (revised or "").strip()
             if revised:
                 return revised
+        except BudgetExhausted:
+            raise
         except Exception as e:
             logger.debug(f"Self-Refine model revizyonu başarısız: {e}")
 

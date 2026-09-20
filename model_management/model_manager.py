@@ -497,10 +497,13 @@ class ModelManager:
         cache_position: Optional[torch.Tensor] = None,
         return_attention_weights: bool = False,
         collect_diagnostics: bool = False,
+        routing_bias: Optional[torch.Tensor] = None,
+        valid_token_mask: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
         model = _ensure(self.model, "model")
 
         prev_mode = model.training
+        explicit_token_mask = valid_token_mask is not None
         if inference is True:
             model.train(False)
         elif inference is False:
@@ -523,6 +526,8 @@ class ModelManager:
                         # Attention mask: True = mask (engelle), False = allow
                         # Her batch için: padding token'lara attention verilmemeli
                         valid_keys = mask if mask.dtype == torch.bool else mask > 0.5
+                        if valid_token_mask is None and tuple(valid_keys.shape) == tuple(inputs_device.shape):
+                            valid_token_mask = valid_keys
                         attention_mask = (~valid_keys).unsqueeze(1).expand(batch_size, inputs_device.shape[1], seq_len)
                         mask = attention_mask
                 # Model forward (mask, causal_mask ve KV Cache parametreleri)
@@ -542,6 +547,15 @@ class ModelManager:
                     "return_attention_weights": return_attention_weights,
                     "collect_diagnostics": collect_diagnostics,
                 }
+                if routing_bias is not None:
+                    if not accepts_kwargs and "routing_bias" not in signature.parameters:
+                        raise ValueError("Model forward does not support routing_bias")
+                    candidates["routing_bias"] = routing_bias
+                if valid_token_mask is not None:
+                    if explicit_token_mask and not accepts_kwargs and "valid_token_mask" not in signature.parameters:
+                        raise ValueError("Model forward does not support valid_token_mask")
+                    if accepts_kwargs or "valid_token_mask" in signature.parameters:
+                        candidates["valid_token_mask"] = valid_token_mask.to(self.device)
                 forward_params = {k: v for k, v in candidates.items()
                     if accepts_kwargs or k in signature.parameters}
                 outputs = model(inputs_device, **forward_params)

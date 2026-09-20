@@ -42,6 +42,8 @@ from typing import Dict, Any, Optional, Tuple
 
 # Yerel tipler
 from .cognitive_types import DecodingConfig
+from .research.config import ResearchConfig
+from .research.runtime import BudgetLimits
 
 # =========================
 # Alt-Konfigürasyon Sınıfları
@@ -273,6 +275,8 @@ class CognitiveManagerConfig:
     safety: SafetyConfig = field(default_factory=SafetyConfig)
     features: FeatureRules = field(default_factory=FeatureRules)
     runtime: RuntimeToggles = field(default_factory=RuntimeToggles)
+    # Experimental behavior is opt-in and requires artifact identities.
+    research: "ResearchConfig" = field(default_factory=lambda: ResearchConfig())
 
     # Varsayılan decoding ayarları (policy bunu güncelleyebilir)
     default_decoding: DecodingConfig = field(
@@ -309,7 +313,10 @@ class CognitiveManagerConfig:
                     continue
                 cur = getattr(dc_obj, f)
                 new = upd[f]
-                if hasattr(cur, "__dataclass_fields__") and isinstance(new, dict):
+                if isinstance(cur, BudgetLimits) and isinstance(new, dict):
+                    from dataclasses import replace
+                    setattr(dc_obj, f, replace(cur, **new))
+                elif hasattr(cur, "__dataclass_fields__") and isinstance(new, dict):
                     _merge(cur, new)
                 else:
                     setattr(dc_obj, f, new)
@@ -323,6 +330,7 @@ class CognitiveManagerConfig:
 
     # Basit geçerlilik kontrolleri
     def validate(self) -> None:
+        self.research.validate()
         lo, hi = self.decoding_bounds.max_new_tokens_bounds
         if not (1 <= lo < hi):
             raise ValueError(f"max_new_tokens_bounds geçersiz: {lo}, {hi}")

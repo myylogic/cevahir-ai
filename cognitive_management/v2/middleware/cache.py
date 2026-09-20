@@ -110,7 +110,7 @@ class CacheMiddleware(BaseMiddleware):
         request: CognitiveInput,
     ) -> tuple[CognitiveState, CognitiveInput]:
         """Check cache before processing"""
-        if not self.enabled:
+        if not self.enabled or request.metadata.get("_research_run"):
             return state, request
         
         for internal in ("_cache_hit", "_cached_response", "_cache_type", "_cache_similarity"):
@@ -160,7 +160,7 @@ class CacheMiddleware(BaseMiddleware):
         response: CognitiveOutput,
     ) -> CognitiveOutput:
         """Cache response after processing"""
-        if not self.enabled:
+        if not self.enabled or request.metadata.get("_research_run"):
             return response
         
         # Skip if cache hit
