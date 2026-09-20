@@ -1,0 +1,69 @@
+{
+  "old_research": {
+    "preserved_files": 30,
+    "changed": []
+  },
+  "reproductions": [
+    {
+      "experiment": "representation_growth",
+      "scientific_results_equal": true,
+      "recorded_source_matches": true,
+      "canonical_sha256": "9c62ab304940cfed420db75d1f29a8484bf5c5bad480bfff1e54c558da1c991b",
+      "elapsed_seconds": 10.604836200014688,
+      "excluded_environment_fields": [
+        "elapsed_seconds",
+        "platform",
+        "python",
+        "traced_python_peak_bytes"
+      ],
+      "original_output_overwritten": false,
+      "subprocess_exit_code": 0
+    },
+    {
+      "experiment": "credit_assignment",
+      "scientific_results_equal": true,
+      "recorded_source_matches": true,
+      "independent_reproduction_reused": {
+        "command": "python -m research.living_learning_reassessment.credit_assignment --output TEMP/repeat.json",
+        "exact_full_json_match": true,
+        "scientific_sha256": "59527e290fda7b35721a807d638c0b37285a3d1fe754a0e237f00926a4b29528",
+        "source_sha256": "6ec63c67b38597d54f21355f4ba644202a046f777a2c7ecb1c38993d4d75d217",
+        "seed_count": 32,
+        "regime_count": 5,
+        "methods_per_seed": 7,
+        "repeated_run_seconds": 7.875108200008981,
+        "checks": [
+          "Full result JSON identical in fresh Python process",
+          "Exact gradient-budget matching is asserted within every run",
+          "Current-context and anchored weights identical in immediate-feedback regime",
+          "Serialized predictor reconstruction exact for all regime/seed/method combinations"
+        ],
+        "source_file_unchanged": true
+      },
+      "original_output_overwritten": false
+    },
+    {
+      "experiment": "state_transport",
+      "scientific_results_equal": true,
+      "recorded_source_matches": true,
+      "canonical_sha256": "96ef5305a291740f186ccb50bc880f5eccd29b9f62d617cc8ba0fffe17c8cd8b",
+      "elapsed_seconds": 35.54123750003055,
+      "excluded_environment_fields": [
+        "elapsed_seconds",
+        "platform",
+        "python",
+        "traced_python_peak_bytes"
+      ],
+      "original_output_overwritten": false,
+      "subprocess_exit_code": 0
+    }
+  ],
+  "analytical_mean_witnesses_exact": true,
+  "local_links": {
+    "checked": 28,
+    "missing": []
+  },
+  "tracked_changes_relative_to_HEAD": [],
+  "scope": "Preservation, source provenance and reproducibility. Not independent evidence of generality or novelty.",
+  "passed": true
+}

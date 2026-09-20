@@ -10,6 +10,16 @@ I want developers, especially young people in Türkiye, to have a foundation the
 
 **My gift to Turkish youth. — Muhammed Yasin Yılmaz**
 
+I am continuing Cevahir as an **open-source research and educational legacy**, with productization no longer its goal. The engineering work and research on learning throughout a system's operating life continue together.
+
+## Read the engine as a book
+
+**[Cevahir AI — Anatomy of an AI Engine: table of contents](docs/book/README.md)**
+
+The modular Turkish book connects AI fundamentals to the real Cevahir implementation: tokenization, neural computation, Transformer blocks, training, checkpoints, generation, memory, cognition, tools and open research. Each chapter follows actual callers, inputs, outputs, configuration gates and evidence. [English reading guide](docs/book/README-en.md) · [Source map](docs/book/KAYNAK_HARITASI.md) · [Keeping code and documentation aligned](docs/book/BAKIM.md).
+
+The [research laboratory](docs/book/tr/11-arastirma-laboratuvari.md) preserves successful and negative experiments. The [latest correction-state study](docs/research/living_learning_correction_2026_09_20/REPORT_TR.md) distinguishes current prediction from the ability to revise past experience. These bounded results do not solve the general living-learning problem.
+
 <p align="center">
   <img src="image/87E09A64-4E1F-41D5-84AF-7D7C56F6C229.png" alt="Cevahir AI & Engine" style="max-width:100%;">
 </p>
@@ -122,6 +132,8 @@ My recent infrastructure work has strengthened the connections between these par
 
 ## Current research
 
+The broader question is how operating experience can persistently, controllably and generally change a system's future computation and behavior. The [book's research laboratory](docs/book/tr/11-arastirma-laboratuvari.md) connects the subsequent work on acquired rules, representation growth, interference, state transport, learned update behavior and recurrent state discovery. The [new correction-state experiment](docs/research/living_learning_correction_2026_09_20/REPORT_TR.md) examines what must survive to revise earlier experience. The general problem remains open; retesting and computation routing are parts of that inquiry.
+
 I'm testing whether externally verified experience can help Cevahir choose how to spend computation on a request. The [experience-conditioned computation record](docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md) describes three optional mechanisms:
 
 - **Scoped feedback and strategy support:** experience stays within the same user/session, model and tokenizer identity. Strategy preferences require support from distinct, externally evaluated examples; corrections and forgetting update that support. `research.mode="off"` is the default. Budget, shadow and adaptive modes can be enabled explicitly.
@@ -130,7 +142,7 @@ I'm testing whether externally verified experience can help Cevahir choose how t
 
 Small contract tests and a synthetic offline replay exercise these mechanisms without running a trained model. I have not established real task-quality, transfer or computation savings from them. The training screenshots above come from my earlier model runs, not these research checks.
 
-The latest [representation witness audit](docs/research/REPRESENTATION_WITNESS_AUDIT.md) produced a **negative result for the proposed learning advantage**: when both deterministic searches receive the same ordered candidate language and observations, filtering by training contradictions before the same full consistency check preserves the answer. All 15 completed synthetic comparisons returned the same compatible representations, fitted tables and predictions. Filtering sometimes changed the counted search work, but supplied no new learning advantage in this formulation. I have set aside that claim; the small audit remains separate from the main engine in [research/](research).
+The earlier [representation witness audit](docs/research/REPRESENTATION_WITNESS_AUDIT.md) produced a **negative result for the proposed learning advantage**: when both deterministic searches receive the same ordered candidate language and observations, filtering by training contradictions before the same full consistency check preserves the answer. All 15 completed synthetic comparisons returned the same compatible representations, fitted tables and predictions. Filtering sometimes changed the counted search work, but supplied no new learning advantage in this formulation. I have set aside that claim; the small audit remains separate from the main engine in [research/](research).
 
 ## Getting started
 

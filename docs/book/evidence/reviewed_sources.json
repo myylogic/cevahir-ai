@@ -1,0 +1,1026 @@
+{
+  "format_version": 1,
+  "files": {
+    "README-TR.md": {
+      "sha256": "882ff6725bcad8b2eb585fe3411a4e5524be7f47e4fe8833719373f79a8f2f19",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "README.md",
+        "tr/01-motor-ve-ogrenme.md"
+      ]
+    },
+    "README.md": {
+      "sha256": "86b81e843022a8e704bdfdec50277e69a615a19c62a28ab95ef42419522d349b",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "README-en.md"
+      ]
+    },
+    "api/app_factory.py": {
+      "sha256": "c76d929f6b93d3913f53f9eccfcc7ece33796a0bda09d557ccc2bfef43a78ac1",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "api/routes/v3/chat.py": {
+      "sha256": "760347bbe6b4b6892d4c6d6950df650ecfe93d6b8b24edc32b6567a7fac7c37c",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "api/services/chat_service.py": {
+      "sha256": "ee6f30f2b913360d673c4cbc8d7e9bbede97b93e9c719c540a50a7ae9ad0fbf9",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "benchmarks/README.md": {
+      "sha256": "856421a55534f4b81bdbd200abb8ac3051fcff52468af350154ad50d623f6f46",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "benchmarks/research/experience_replay.py": {
+      "sha256": "a26ac4ccc7adcec58e55e4ee64d8cb206f4fddc8644264f1574d923a7290b696",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "benchmarks/tokenizer_benchmark.py": {
+      "sha256": "feb00db4a1bef6d5006dc10f7b7ed9bff70b20d01a8dd74c381f3a185ec4d5c8",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "chatting_management/chatting_manager.py": {
+      "sha256": "d42c11ee99d2de4fa9af5ca17080a4a2d68a42050dba3f7c78e83ff3f7199f8b",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "chatting_management/components/context_builder.py": {
+      "sha256": "8c26e6c89bcbf6a306d2c7f9a932757dc9d51b40e5bbffd8b79e7127408dfde8",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "cognitive_management/cognitive_manager.py": {
+      "sha256": "6989c16b746e6edb001b800cee42cc2cc50af5a0ed31f5b5beb6aff9a41abc9d",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/config.py": {
+      "sha256": "c42ae0c693719d5db885b76111124aa1eb54e4d866e44d5f3d97fc62dbb9316f",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/research/controller.py": {
+      "sha256": "78c046c45e0fa8cdff2250cd1136ef49b45d0da96bd460d65e633fede3bfd403",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "cognitive_management/research/experience.py": {
+      "sha256": "15cea2d72440dc8e1c1db8e08621b706c3bd4c92e2b682bead5632ce388ae5e0",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "cognitive_management/v2/adapters/backend_adapter.py": {
+      "sha256": "520d1903ccba867a2ac2306796cbcce1f81a920b07a2d474de6e02a8878fd054",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/components/critic_v2.py": {
+      "sha256": "2946e5d36d7f5ee02bba6f3ad8869674814e02e3a77f1d1c6440a09fadc80a68",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/components/memory_service_v2.py": {
+      "sha256": "6cf29d14e9915b05bffd9855990b1c555b0d2b08bdc3f9d1e2865e711e816583",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/components/policy_router_v2.py": {
+      "sha256": "59d063bfe09df3f6c673fc9f128f67f9c0775cd4231f6771d38164c466ab2f64",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/components/tool_executor_v2.py": {
+      "sha256": "f3e435972d03825ae95ab3ffcb9e9708ff643b5d0c3edd6839ca8f7c57952193",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/components/tool_policy_v2.py": {
+      "sha256": "73bf570cada8f6635b1674611c5766987b4449e797767772059b48399c96cae4",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/components/tree_of_thoughts.py": {
+      "sha256": "833b617e4c1ef6a5f138cf7ead184d44e37ce002a8c24942fc81f89747cd3b5a",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/components/vector_store/__init__.py": {
+      "sha256": "5e60bcd8a22030aa2950165af18ebb63b3e7255f1d2162c8ad088b20d16bf3fc",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/components/vector_store/memory_vector_store.py": {
+      "sha256": "ed64078b1cfa76c392a56b9efd39fc4c6d2057e2db01152ea86eba6cd84a1c82",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/core/orchestrator.py": {
+      "sha256": "33026bf0d847368c8f1bbbc9c0d594ba258f3ec0e8025e15f18e19b120405021",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/processing/async_handlers.py": {
+      "sha256": "210ef465ec9d112dd8662f22fbd00fe102f90467f2103c2949a6ec3540f459b3",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/processing/handlers.py": {
+      "sha256": "d21a54f4352c0f842cce677d9e92387d7656dde71d82a18b59da5269280a4f7e",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/processing/pipeline.py": {
+      "sha256": "0efdff7a4252822fc4f1ef7af163e7f90f2f739c4d0271a4705f7b646f6e7577",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "cognitive_management/v2/utils/request_scope.py": {
+      "sha256": "8e7fbf84b57b4511ceff0155969df3ae74f43a80e300cab1b9e091315c7a8401",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md",
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "docs/architecture/CEVAHIR_ARCHITECTURE_SPEC.md": {
+      "sha256": "c8f5762775edfdd588a5e12135a9a3c2e16a075d27b7433f48ec0502f4d9c4c3",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README.md"
+      ]
+    },
+    "docs/architecture/LIFECYCLE_CONSOLIDATION.md": {
+      "sha256": "c096e2e937e6f4f8489d92108a67e2bb052081b3619f938484a21909ace3f4ca",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README.md",
+        "tr/07-model-yasam-dongusu.md",
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "docs/architecture/LOWER_CORE_CONTRACTS.md": {
+      "sha256": "8aa5fc2779a334f1b66bdca62db9868fb933ccc4c0869869e6296866eec40c96",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README.md",
+        "tr/07-model-yasam-dongusu.md",
+        "tr/08-uretim.md"
+      ]
+    },
+    "docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md": {
+      "sha256": "1f533523a1ab8449c9f33e8355b6e00bc3c834294ebd6d7c4949bcf1998ce3f5",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md"
+      ]
+    },
+    "docs/architecture/SYSTEM_OVERVIEW.md": {
+      "sha256": "6b7b48af0c35b25d67b4c8faabcac0b6ad706ba68f266a92a39aa05bcec3b099",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README.md"
+      ]
+    },
+    "docs/development/EVOLUTION_LOG.md": {
+      "sha256": "1451ca95e0fd299df9207ff4b6aee3be4d2a32ad88edbde7d9609c73ed0fb9ad",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md"
+      ]
+    },
+    "docs/module_audits/4_attention_audit.md": {
+      "sha256": "1d29ddf488bf5ddc6eefd78a448009be42ea50191267c2c7eef8fa8d2979797d",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/04-attention.md"
+      ]
+    },
+    "docs/modules/README.md": {
+      "sha256": "04fce6b197e5bb3c024063386f2b2cb585d9ba9fdf85c2ae6ef1ba93592f6d82",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README-en.md",
+        "README.md",
+        "tr/01-motor-ve-ogrenme.md"
+      ]
+    },
+    "docs/modules/cognitive_management/README-en.md": {
+      "sha256": "8480e0acd67d6a3a4dc8c89d183a2138bafdd8c8ae7a35f1cce97ef3f1f996ad",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README-en.md"
+      ]
+    },
+    "docs/modules/cognitive_management/README.md": {
+      "sha256": "e4cdec5525b8b00e9a6cbb03a39b902906f1686ee857171422a4e622cc9b70d7",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md"
+      ]
+    },
+    "docs/modules/cognitive_management/architecture/README.md": {
+      "sha256": "3ff9f9c4607a75cda9c6d62ae17a9ca6c789b409dc563cedb5dd6d55a0d5b393",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "docs/modules/model_management/README-en.md": {
+      "sha256": "2e85e1c0bf9e53b2efff5d763bf8a0a777553e0051b7ffe723ed89018b99f7b4",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README-en.md"
+      ]
+    },
+    "docs/modules/model_management/README.md": {
+      "sha256": "e19099fc9698d980965c9542c4a87a2a4150f0f3519a3f9d0d4d562ef5fc66c8",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "docs/modules/neural_network/README-en.md": {
+      "sha256": "8ef82a1f91d0fc3bd86e03136668a0d67159f467a52bffec622e0b3af6473478",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README-en.md"
+      ]
+    },
+    "docs/modules/neural_network/README.md": {
+      "sha256": "41494413cbc985ad63a76aca23908dff3c316da61a7e722594e6ea247bd55f17",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/03-sinir-aglari.md",
+        "tr/04-attention.md",
+        "tr/05-transformer.md"
+      ]
+    },
+    "docs/modules/tokenizer_management/README-en.md": {
+      "sha256": "f6865d2b00a8002042ff0a2f9c10eaf6ffb32af9015fe2bec7036dfdc4338788",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README-en.md"
+      ]
+    },
+    "docs/modules/tokenizer_management/README.md": {
+      "sha256": "981a90af4018d94a501cf0c9c6ebf03005893176f61145302d3fd1657cf7916e",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "docs/modules/training_management/README-en.md": {
+      "sha256": "abede21dd433aa95ecf1c5e3e2037c76295dd7b0998162bbe88323b67d10e03f",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README-en.md"
+      ]
+    },
+    "docs/modules/training_management/README.md": {
+      "sha256": "ffdf3c80605b2b13f2063827ea290f45ff36402f3ff20a43b1f3f57599da9d06",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/06-egitim.md"
+      ]
+    },
+    "docs/modules/training_system/README-en.md": {
+      "sha256": "2514b007ccca1f349a3dbeee902f9175c43498b435410e2927cbd23135105e55",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "README-en.md"
+      ]
+    },
+    "docs/modules/training_system/README.md": {
+      "sha256": "ff19dc3113b0e391896d935ed3d272d75f1aac3c8b4b6cd10cd644390c11bd23",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/06-egitim.md"
+      ]
+    },
+    "docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md": {
+      "sha256": "b943b9d4e7595de76100143250551f0611426949c9def6d87e3cac41de1d0c60",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/REPRESENTATION_WITNESS_AUDIT.md": {
+      "sha256": "121406c5acd679d75ff76a87c0c1106abd208fc7167cd9346cc038d85db85926",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_2026_09_20/AFFINE_EXPERIMENT.md": {
+      "sha256": "cc04ac21fd127498d3721fa77c66d9a9f3205ebb3325959d72e4a6f3d043e908",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_2026_09_20/REPORT_TR.md": {
+      "sha256": "336760e0157ca7a76d4eec6eb73cc6c938740def3725dfd8821be65f0d8f4384",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_2026_09_20/UNKNOWN_CHANGE.md": {
+      "sha256": "16b677a08c5dc6957a1b00f983a28662011fbe8fd0a0cd74235afd608f43928c",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_correction_2026_09_20/REPORT_TR.md": {
+      "sha256": "a4b812eb06ffdf03e38679e97c5934f1b5b8aefb746a6e7ed2b601b3a01224bd",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/12-acik-sorular.md"
+      ]
+    },
+    "docs/research/living_learning_joint_2026_09_20/JOINT_STREAM.md": {
+      "sha256": "7ef2491d3bb7b7161e3df794e5059f08cbfe3a5e989aac48a8ad5fb18059f9fe",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_joint_2026_09_20/REPORT_TR.md": {
+      "sha256": "d4331132892dd9d634ac16a8c08efc33ec5ff7040995a375e58afcf951ab07bf",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_joint_2026_09_20/TEMPORAL_RELATION.md": {
+      "sha256": "e4f88a4720996ede9ee4b20828708bad6d8651e435d2dcee15b2f98f50be3800",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_reassessment_2026_09_20/CREDIT_ASSIGNMENT.md": {
+      "sha256": "884f4f7cbccdda8ae36b056e574e1c6a34ab09655ed6b3e5d948fac36befeef6",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_reassessment_2026_09_20/REPORT_TR.md": {
+      "sha256": "711ed33f3f445dd0c722f0528d08be8064e820717cfac9baa2650ccc1eb912cf",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_reassessment_2026_09_20/REPRESENTATION_GROWTH.md": {
+      "sha256": "a79baf2b7147de50e97d22c388dfcfb65a9ea9bc736f38676670b3ffc5cb6947",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_reassessment_2026_09_20/STATE_TRANSPORT.md": {
+      "sha256": "475b28de07edd47e63614cc2b3acdcce114cf80997f8092fb9eaf0c0a7f2755c",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_state_2026_09_20/EXPERIMENT.md": {
+      "sha256": "b06ffdf88b758da38cc29d3812ec8ca8cde1acffe4a06368c41cf04dff9d66f4",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_state_2026_09_20/FAILURE_IDENTIFIABILITY.md": {
+      "sha256": "d6c6fb17ce925f5c3dff93e2c71523017003aeffb7f158e52c0ccb1e5300c39b",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md",
+        "tr/12-acik-sorular.md"
+      ]
+    },
+    "docs/research/living_learning_state_2026_09_20/REPORT_TR.md": {
+      "sha256": "8c24fb204959603fd07ff3e309614897b8f71922d9f3145480c392a6c70c0ca5",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/07-model-yasam-dongusu.md",
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_state_2026_09_20/STATE_DISCOVERY_LITERATURE.md": {
+      "sha256": "ddb63f8389dcdf432f41f8ab142a7ca85c4b5581cdcf3be6aa26a45281759b9f",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_update_2026_09_20/EXPERIMENT.md": {
+      "sha256": "19ce0937349384207e92b51bc72f33211c14f190b0eeaaf3d01d68340ec2a77c",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_update_2026_09_20/REPORT_TR.md": {
+      "sha256": "838e9c07c17125a57fb65398155e6d4b669d103a1be17b110d1b91558c6f2195",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "model/cevahir.py": {
+      "sha256": "3e563ca2921426ccb54dbc6b8181f0f504e9fa5a3a184191bf083216cf619c80",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/01-motor-ve-ogrenme.md",
+        "tr/08-uretim.md",
+        "tr/09-bellek-bilis-araclar.md",
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "model_management/checkpoint_contract.py": {
+      "sha256": "5b9e3996afcc5493162423e75c7859a7dad188efd688d59b3f255ddc6e9c5e8b",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "model_management/config_schema.py": {
+      "sha256": "51b8e183341340e7216048f518128bbabbdbf2d07476f430a8d97f19889cd696",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/01-motor-ve-ogrenme.md",
+        "tr/05-transformer.md",
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "model_management/model_initializer.py": {
+      "sha256": "7ac9c6f217f1b1f1bcb8dd5b15430a1ffbbff6a19246df7b9707288ea0dc400e",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/06-egitim.md"
+      ]
+    },
+    "model_management/model_manager.py": {
+      "sha256": "aefc2e9c60cdfa4e6a0cd4ef8fc18b1cb91648733ab0ac45eb5b861745a5f8af",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/01-motor-ve-ogrenme.md",
+        "tr/02-metin-tokenizer.md",
+        "tr/03-sinir-aglari.md",
+        "tr/06-egitim.md",
+        "tr/07-model-yasam-dongusu.md",
+        "tr/08-uretim.md",
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "model_management/model_saver.py": {
+      "sha256": "8acc4eff540ea9fa49be4f820f5d4710794d575d3fd7c1a9e4275ee9a28709ed",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "research/living_learning/affine_lifecycle.py": {
+      "sha256": "70188c7cb9d68506bb7e945c5f09f755fe77c74d86369361dfe99834037e919a",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning/closed_loop_experiment.py": {
+      "sha256": "eac76cc3020c7f1786ecf2fea877be45143162a197991e376490fab32f8b5901",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning/results/verification.json": {
+      "sha256": "356a74d09b69bbba0aaa1abcd40971d8541274ec76255dceff770e06dfa31528",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning/unknown_change_experiment.py": {
+      "sha256": "69d6ab972594ec54ef70880d71b207919ca3dc2f1f2ad2d9eb2ae50189132fc0",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_correction_2026_09_20/correction_state.py": {
+      "sha256": "51949032376dd8057ac241c6ca766a1f7ee4c2b8529be9ac2de04faa0750095c",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/12-acik-sorular.md"
+      ]
+    },
+    "research/living_learning_correction_2026_09_20/results/correction_state.json": {
+      "sha256": "6fa7c31a656de0c8205cdc5e4ce92e41672e8a33f3c3b860957e3e9ce942e51e",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/12-acik-sorular.md"
+      ]
+    },
+    "research/living_learning_joint_2026_09_20/joint_stream.py": {
+      "sha256": "783ea7dcc17f2923a957bb7874955a452a6444bd3cf96be3bc815aa22672a9fc",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_joint_2026_09_20/results/verification.json": {
+      "sha256": "f27d93fe43274098abdade7b158a604714489a43e16454ef833f6718e63d6985",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_joint_2026_09_20/temporal_relation.py": {
+      "sha256": "3b3d45ee98f8e768d338676e4130e131c7519021ee6523fc34264c1f97a57345",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_reassessment/credit_assignment.py": {
+      "sha256": "6ec63c67b38597d54f21355f4ba644202a046f777a2c7ecb1c38993d4d75d217",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_reassessment/representation_growth.py": {
+      "sha256": "3571357d334d13e808ed4c3d31ff8562de1a6e84708a047cf5c765f6732cb1bf",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_reassessment/results/verification.json": {
+      "sha256": "5c7ec3a1a3f885a0eb8feb9c837633913a9157bd690306ec7a7ae5f5207a3658",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_reassessment/state_transport.py": {
+      "sha256": "b8f48c93aa0ae2ff69ed02f872d9c54459ea5e2c1116f5219e435228acffd8bd",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_state_2026_09_20/evidence_audit.py": {
+      "sha256": "56c6bca7965cc2d9d302c13e37105e010c58e31718f85a8e00b9f7895607b170",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_state_2026_09_20/recurrent_state.py": {
+      "sha256": "a3effab9dcea5cfbd75de29d9aadba8b46e2e8734b46eb015016eb1ade65e681",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_state_2026_09_20/results/verification.json": {
+      "sha256": "3b6657cd73466692d7e1d1541049f19f01d5e4bcdec5e977ffeb590faa86aec7",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_state_2026_09_20/state_merging.py": {
+      "sha256": "d01c289047c2b65c1c7c16bd926e24b719deccbcc084a37a85f244bb964c1280",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_update_2026_09_20/analytic_risk.py": {
+      "sha256": "b60a2c1ca0846dbbea632bca7d28fb686ab79112aacb987fe2649e4edbce33f8",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_update_2026_09_20/learned_update.py": {
+      "sha256": "544258d4815c64d150bf00e44fbe8cdd6fbb68988a822b8d5ca110363dfa304e",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_update_2026_09_20/results/verification.json": {
+      "sha256": "74fa4d920910706672d0fc013185dae4347ed759c3d1ae278aa3f337e34e72fa",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/representation_discovery/witness_audit.py": {
+      "sha256": "8ea98b0e840d5ba1451998eec3028a89ee1d601517b780c41b281274377d9e30",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "src/neural_network.py": {
+      "sha256": "cb28041badce4b6c126af255996fa581d45e304abf2e6acbd2d20e993a4e1c2e",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/01-motor-ve-ogrenme.md",
+        "tr/03-sinir-aglari.md",
+        "tr/05-transformer.md"
+      ]
+    },
+    "src/neural_network_module/architecture_contracts.py": {
+      "sha256": "7cc14c8f9eebfaf7db49da09bd3a959b18153326118bb46b10273d890bd4cc75",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/05-transformer.md"
+      ]
+    },
+    "src/neural_network_module/dil_katmani_module/language_embedding.py": {
+      "sha256": "f9e1857708b276bbcd42032999068dc4566a97019f5c7bddb7c566520bf04188",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/03-sinir-aglari.md"
+      ]
+    },
+    "src/neural_network_module/dil_katmani_module/positional_encoding.py": {
+      "sha256": "ca7098381696e61a601d81302d2b9424c9e0875f6b33460f0dbc23909425ae16",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/05-transformer.md"
+      ]
+    },
+    "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py": {
+      "sha256": "8c0fce2354a4520b7dadacb1340c8e23f8ebe3490b1cffc23d4d2a2e377a2688",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/03-sinir-aglari.md",
+        "tr/04-attention.md"
+      ]
+    },
+    "src/neural_network_module/ortak_katman_module/feed_forward_network.py": {
+      "sha256": "762bb5f56f36737f371961ed8e4b4f1ca008ce39ab1a5d4873e9825c55ddba84",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/03-sinir-aglari.md",
+        "tr/05-transformer.md"
+      ]
+    },
+    "src/neural_network_module/ortak_katman_module/kv_cache.py": {
+      "sha256": "1428e9dc65eaf1477330658db2c4627733dc095860efce511022fc4c2750d74a",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/08-uretim.md"
+      ]
+    },
+    "src/neural_network_module/ortak_katman_module/mixture_of_experts.py": {
+      "sha256": "9f2cd371bb77702d0e0948f1e472b2f6aec1779edfe589e66705766a9f53c937",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/05-transformer.md"
+      ]
+    },
+    "src/neural_network_module/ortak_katman_module/rms_norm.py": {
+      "sha256": "b2a7dc5c4810024079d9555dbb029f97fb2e0488d17a89c31ec46947cf94281e",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/05-transformer.md"
+      ]
+    },
+    "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py": {
+      "sha256": "71578eeb58c709dbb59e8bca3f0215f036c7004ba558b00f860d2e5f1d7aa7f7",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/04-attention.md",
+        "tr/05-transformer.md"
+      ]
+    },
+    "tests/evolution/test_agent_contracts.py": {
+      "sha256": "73604a78d286e8696c0011c6666049d78c0d0666d575f33434fbe6b6bb254e5e",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md",
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "tests/evolution/test_api_contracts.py": {
+      "sha256": "d30ec275a45757d3293ffea6d90d3b1d6a22ed677cacb21ebe368a10e9f276a5",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "tests/evolution/test_attention_cache.py": {
+      "sha256": "1ff0d41e45ddbba2e2830c058dda8136bc1bc18c4ed71efdc6cf08374a0ebd1c",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/04-attention.md",
+        "tr/05-transformer.md",
+        "tr/08-uretim.md"
+      ]
+    },
+    "tests/evolution/test_checkpoint_lifecycle.py": {
+      "sha256": "5753551502c1c631c43e445b924d47525119a776f0cac49b364ac78e33d88e22",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "tests/evolution/test_config_generation.py": {
+      "sha256": "5a2da7662d48b1de1a44fe936f7b83643340f5e9ce41c1bc31628db630dc5132",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/03-sinir-aglari.md",
+        "tr/08-uretim.md"
+      ]
+    },
+    "tests/evolution/test_contextual_moe_routing.py": {
+      "sha256": "a8e841160606311d961073aece7975231125285657bf952dad8ff0d74660c1e8",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/05-transformer.md"
+      ]
+    },
+    "tests/evolution/test_data_cache_contracts.py": {
+      "sha256": "da6a449bcb0e707226af5f3c894071ef3d1bdd1a479c16bdb406ccb4600f7f95",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/06-egitim.md"
+      ]
+    },
+    "tests/evolution/test_lower_layer_contracts.py": {
+      "sha256": "5d9eaf368f4c093b1e8e0699d0e5b09b9b873f97294b70c688a444ab0a5c55e4",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/03-sinir-aglari.md",
+        "tr/05-transformer.md"
+      ]
+    },
+    "tests/evolution/test_research_experience.py": {
+      "sha256": "f93440ca260e794529fc8b0ce557f4ebc13f972c8049a949d4636620572623d2",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "tests/evolution/test_runtime_lifecycle.py": {
+      "sha256": "d6d82475865705e3ee9d5ad8e93140ecd5e387a36f84b48c34e92997b7bca430",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/07-model-yasam-dongusu.md",
+        "tr/09-bellek-bilis-araclar.md",
+        "tr/10-uctan-uca-sistem.md"
+      ]
+    },
+    "tests/evolution/test_tokenizer_contracts.py": {
+      "sha256": "74ccf5bd98baef15e79fc5e5e6110032111f881cf00d2bea8acb4c247de7a7b0",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "tests/evolution/test_training_contracts.py": {
+      "sha256": "b456cb429fb345903cab3d0ff925a817e130a5e49cb4c4c0fdac5f863f66b38e",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/06-egitim.md",
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "tokenizer_management/bpe/bpe_encoder.py": {
+      "sha256": "72eec68dab5593c80c4e7413aa7a540af97c2b6f5364825b866aca95aa6b705a",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "tokenizer_management/bpe/bpe_manager.py": {
+      "sha256": "aa66f05a74421b83662582257ddeeddf4a9fe88e8d1541c0ffbd77eb7379826f",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "tokenizer_management/bpe/bpe_trainer.py": {
+      "sha256": "bd5c181e6a2b5a3600eb2552b5bbac8cfa9300c4c6679f17b6e389e3b03c6897",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "tokenizer_management/bpe/tokenization/pretokenizer.py": {
+      "sha256": "437b12d1709fc9cfe9883d649201c23f5a11d41e6e02ea30029b73f0961a7fc8",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "tokenizer_management/core/tokenizer_core.py": {
+      "sha256": "161d660bf20d88586b55b394885271a6d2bdfd7ab0d07f5bfd5bc33eb7d43244",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/01-motor-ve-ogrenme.md",
+        "tr/02-metin-tokenizer.md",
+        "tr/06-egitim.md"
+      ]
+    },
+    "tokenizer_management/train_bpe.py": {
+      "sha256": "afe4b31cbb79fd985e0d01c5bfb23ed5e70c98055209310f16d3a9fa912f75c7",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "training_management/contracts.py": {
+      "sha256": "96db2236dd8dbaacccdf97b345b771318ac2f01c9c0e933126e61dce4732b3bc",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/06-egitim.md"
+      ]
+    },
+    "training_management/v2/core/loss_computation.py": {
+      "sha256": "227e2f3cfb6b75a07f136a9aac3481d08643c0f5f86827a7639c5f63a7519e56",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/03-sinir-aglari.md",
+        "tr/06-egitim.md"
+      ]
+    },
+    "training_management/v2/core/training_loop.py": {
+      "sha256": "41c09119cd82476ec79aa1baabe2537a1bd53b78bc6193c5b3248743e8f95ff2",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/06-egitim.md"
+      ]
+    },
+    "training_management/v2/core/training_manager.py": {
+      "sha256": "9dfe0406cb840b2bede26beaabd25ed6d19e6a620fa2d1e8d06fb575d52b475b",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "training_management/v2/utils/checkpoint_manager.py": {
+      "sha256": "da89ac970978f74592ae4fc2b45ed7c872962f40389af56ec447ea0c91eff44d",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "training_system/cache_identity.py": {
+      "sha256": "909f78d16c7a33e536a8979dcd0c0cef23e0e68aade346c50932032d8f8793a0",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md",
+        "tr/06-egitim.md"
+      ]
+    },
+    "training_system/data_split.py": {
+      "sha256": "19204111a63c4a31433f8e659aa2c1bcf1eb912ba770edb422341be74582bfe3",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/06-egitim.md"
+      ]
+    },
+    "training_system/prepare_cache.py": {
+      "sha256": "a7c597bb1ff6eea7b3f8ca3dc0bb0fd344ff1986519cb234b4b7b285089d87e3",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/02-metin-tokenizer.md",
+        "tr/06-egitim.md"
+      ]
+    },
+    "training_system/train.py": {
+      "sha256": "03ae15ddf91ad1730b5e557776800ed710544aecb2f2e23b66bb06d384ed44fe",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/06-egitim.md"
+      ]
+    },
+    "training_system/v3/core/training_service_v3.py": {
+      "sha256": "6cff7b5e8b2f32e0b12f9c47cebc8950eff7f77e7acd76eba2b7141e9a52b50a",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/06-egitim.md",
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "training_system/v3/data/dataloader_v3.py": {
+      "sha256": "ad4f9610985276a0fa72c07c19ece07b039c835ca44e04992cff64293db1fffa",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/06-egitim.md"
+      ]
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "prior_files": {
+    "preserved_files": 46,
+    "changed": []
+  },
+  "reproductions": [
+    {
+      "script": "joint_stream",
+      "result": "joint_stream",
+      "entire_json_equal_in_completed_reproduction_stage": true,
+      "source_matches_current_file": true,
+      "source_sha256": "783ea7dcc17f2923a957bb7874955a452a6444bd3cf96be3bc815aa22672a9fc",
+      "result_file_sha256": "fdb1fad75ddedc70b7950d49a600a1400f4d07c164ba629e11c8c327b2c48db1"
+    },
+    {
+      "script": "temporal_relation",
+      "result": "temporal_relation",
+      "entire_json_equal_in_completed_reproduction_stage": true,
+      "source_matches_current_file": true,
+      "source_sha256": "3b3d45ee98f8e768d338676e4130e131c7519021ee6523fc34264c1f97a57345",
+      "result_file_sha256": "6a563998bfa77f9a980a3f4a313245547875365ec4f3660ba80d2c176e9924dd"
+    },
+    {
+      "script": "joint_ablation",
+      "result": "joint_no_burst",
+      "entire_json_equal_in_completed_reproduction_stage": true,
+      "source_matches_current_file": true,
+      "source_sha256": "4b505466cff80871d83f74a8d7a38607edb02e0bf83f43f6c6e238bdbd7a3531",
+      "result_file_sha256": "3bfc3ebf59217770d657d47bec29a45dedf6d2fe08ca5a6dab40ebd5179bf86d"
+    }
+  ],
+  "reproduction_evidence": "Two full verifier invocations completed all three fresh-output JSON equality and source assertions. First then failed at a shared-fixture bug in a separate semantic check. The corrected second invocation passed semantic checks and failed only at a self-link to this not-yet-written report. This finalization reuses those successful reproduction stages, checks source/result hashes, and reruns only semantic and link checks. Experiment outputs were never overwritten.",
+  "semantic_checks": {
+    "rls_vs_independent_batch_solve_max_error": 3.3306690738754696e-16,
+    "joint_state_checks": {
+      "growth_coverage": {
+        "fresh_process_64_update_continuation_equal": true,
+        "inference_without_raw_records_equal": true,
+        "risk_evaluation_did_not_modify_state": true
+      },
+      "expanded_coverage": {
+        "fresh_process_64_update_continuation_equal": true,
+        "inference_without_raw_records_equal": true,
+        "risk_evaluation_did_not_modify_state": true
+      },
+      "expanded_rolling": {
+        "fresh_process_64_update_continuation_equal": true,
+        "inference_without_raw_records_equal": true,
+        "risk_evaluation_did_not_modify_state": true
+      },
+      "expanded_allhistory": {
+        "fresh_process_64_update_continuation_equal": true,
+        "inference_without_raw_records_equal": true,
+        "risk_evaluation_did_not_modify_state": true
+      },
+      "base_coverage": {
+        "fresh_process_64_update_continuation_equal": true,
+        "inference_without_raw_records_equal": true,
+        "risk_evaluation_did_not_modify_state": true
+      }
+    },
+    "deterministic_lag_design_rank": 8,
+    "separate_update_joint_failure_exact": true,
+    "inspection_limit": "Source audit establishes signature; no universal isolation or security proof."
+  },
+  "local_links": {
+    "checked": 21,
+    "missing": []
+  },
+  "tracked_changes": [],
+  "passed": true,
+  "scope": "Reproducibility and bounded semantic checks. Neither generality nor novelty is established."
+}

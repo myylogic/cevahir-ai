@@ -1,0 +1,471 @@
+{
+  "analysis": "post_result_evidence_audit",
+  "input_sha256": "e0adf482cdec2da241c54d0330397365f10c82cd437ea117338d2c9fb69cfdf8",
+  "source_sha256": "56c6bca7965cc2d9d302c13e37105e010c58e31718f85a8e00b9f7895607b170",
+  "enumeration": {
+    "all_labelled_descriptions": 5898,
+    "distinct_languages": 1054,
+    "independent_table_filling_equals_enumerated_library": true
+  },
+  "lives": [
+    {
+      "regime": "random_three_state",
+      "seed": 0,
+      "full_language_exact": false,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 2,
+      "posthoc_empty_query_diagnostic": {
+        "supplied_extra_label": 1,
+        "exact_after_extra_label": true,
+        "scope": "Previously excluded zero-length episode supplied by evaluator; not part of original experiment or a discovery by the learner."
+      }
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 1,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 2
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 2,
+      "full_language_exact": false,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 2,
+      "posthoc_empty_query_diagnostic": {
+        "supplied_extra_label": 1,
+        "exact_after_extra_label": true,
+        "scope": "Previously excluded zero-length episode supplied by evaluator; not part of original experiment or a discovery by the learner."
+      }
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 3,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 4,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 5,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 6,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 7,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 8,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 9,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 10,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 11,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 12,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 2
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 13,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 14,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "random_three_state",
+      "seed": 15,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 1
+    },
+    {
+      "regime": "parity",
+      "seed": 0,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 2
+    },
+    {
+      "regime": "parity",
+      "seed": 1,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 2
+    },
+    {
+      "regime": "parity",
+      "seed": 2,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 2
+    },
+    {
+      "regime": "parity",
+      "seed": 3,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": true,
+      "version_space_size": 2
+    },
+    {
+      "regime": "outside_three_state_bound",
+      "seed": 0,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0
+    },
+    {
+      "regime": "outside_three_state_bound",
+      "seed": 1,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0
+    },
+    {
+      "regime": "outside_three_state_bound",
+      "seed": 2,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0
+    },
+    {
+      "regime": "outside_three_state_bound",
+      "seed": 3,
+      "full_language_exact": true,
+      "nonempty_language_exact": true,
+      "nonempty_counterexample": null,
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0
+    },
+    {
+      "regime": "corrupted_unique_labels",
+      "seed": 0,
+      "full_language_exact": false,
+      "nonempty_language_exact": false,
+      "nonempty_counterexample": [
+        0,
+        0
+      ],
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0,
+      "trusted_correction_nonempty_exact": true
+    },
+    {
+      "regime": "corrupted_unique_labels",
+      "seed": 1,
+      "full_language_exact": false,
+      "nonempty_language_exact": false,
+      "nonempty_counterexample": [
+        1,
+        0,
+        0
+      ],
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0,
+      "trusted_correction_nonempty_exact": true
+    },
+    {
+      "regime": "corrupted_unique_labels",
+      "seed": 2,
+      "full_language_exact": false,
+      "nonempty_language_exact": false,
+      "nonempty_counterexample": [
+        0,
+        0,
+        0
+      ],
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0,
+      "trusted_correction_nonempty_exact": true
+    },
+    {
+      "regime": "corrupted_unique_labels",
+      "seed": 3,
+      "full_language_exact": false,
+      "nonempty_language_exact": false,
+      "nonempty_counterexample": [
+        0,
+        0,
+        0
+      ],
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0,
+      "trusted_correction_nonempty_exact": true
+    },
+    {
+      "regime": "corrupted_unique_labels",
+      "seed": 4,
+      "full_language_exact": false,
+      "nonempty_language_exact": false,
+      "nonempty_counterexample": [
+        1
+      ],
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0,
+      "trusted_correction_nonempty_exact": true
+    },
+    {
+      "regime": "corrupted_unique_labels",
+      "seed": 5,
+      "full_language_exact": false,
+      "nonempty_language_exact": false,
+      "nonempty_counterexample": [
+        1,
+        1,
+        0,
+        1
+      ],
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0,
+      "trusted_correction_nonempty_exact": true
+    },
+    {
+      "regime": "corrupted_unique_labels",
+      "seed": 6,
+      "full_language_exact": false,
+      "nonempty_language_exact": false,
+      "nonempty_counterexample": [
+        0
+      ],
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0,
+      "trusted_correction_nonempty_exact": true
+    },
+    {
+      "regime": "corrupted_unique_labels",
+      "seed": 7,
+      "full_language_exact": false,
+      "nonempty_language_exact": false,
+      "nonempty_counterexample": [
+        0
+      ],
+      "all_remaining_bounded_candidates_agree_on_nonempty_language": false,
+      "version_space_size": 0,
+      "trusted_correction_nonempty_exact": true
+    }
+  ],
+  "erasure": {
+    "learned_graph_predictions": [
+      0,
+      1
+    ],
+    "graph_erased_predictions": [
+      0,
+      0
+    ],
+    "runtime_state_erased_after_first_symbol": [
+      0,
+      0
+    ],
+    "graph_and_state_preserved": [
+      0,
+      1
+    ],
+    "same_128_symbol_suffix": true,
+    "statement": "Erasing graph loses the learned rule; erasing current state loses this episode distinction. Keeping the graph permits fresh complete episodes without retraining."
+  },
+  "unseen_regular_alternative": {
+    "exception": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "alternative_graph": {
+      "transitions": [
+        [
+          1,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          5,
+          2
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          6,
+          2
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          8,
+          2
+        ],
+        [
+          9,
+          2
+        ],
+        [
+          10,
+          2
+        ],
+        [
+          11,
+          2
+        ],
+        [
+          12,
+          2
+        ],
+        [
+          13,
+          2
+        ],
+        [
+          14,
+          2
+        ],
+        [
+          15,
+          2
+        ],
+        [
+          4,
+          2
+        ]
+      ],
+      "outputs": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    "all_original_training_labels_equal": true,
+    "exception_labels_differ": true,
+    "scope": "Finite data cannot certify arbitrary regular targets without further restrictions; this is not an impossibility of useful generalization."
+  },
+  "correction_to_initial_interpretation": "The two full-language mismatches are exclusively the empty word, excluded from all service/train/test episodes. All 16 main learned graphs are exact on the actual nonempty episode domain. This must not be reported as long-sequence failure."
+}

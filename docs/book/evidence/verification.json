@@ -1,0 +1,71 @@
+{
+  "date": "2026-09-20",
+  "scope": "Initial twelve-chapter book and correction-state research continuation",
+  "environment": {
+    "os": "Windows",
+    "python": "3.14.3",
+    "torch": "2.10.0+cpu",
+    "device": "cpu"
+  },
+  "targeted_tests": [
+    {
+      "command": "python -m pytest tests/evolution/test_attention_cache.py tests/evolution/test_lower_layer_contracts.py tests/evolution/test_contextual_moe_routing.py -q",
+      "passed": 82,
+      "warnings": 5,
+      "seconds": 14.64
+    },
+    {
+      "command": "python -m pytest tests/evolution/test_training_contracts.py tests/evolution/test_data_cache_contracts.py tests/evolution/test_checkpoint_lifecycle.py tests/evolution/test_tokenizer_contracts.py tests/evolution/test_runtime_lifecycle.py -q",
+      "passed": 67,
+      "warnings": 1,
+      "seconds": 58.68
+    }
+  ],
+  "chapter_01_example": {
+    "executed": true,
+    "logits_shape": [
+      1,
+      4,
+      128
+    ],
+    "all_finite": true,
+    "uses_random_initial_weights": true
+  },
+  "new_research": {
+    "verification": "research/living_learning_correction_2026_09_20/results/verification.json",
+    "exact_rerun_equal": true,
+    "class_correction_cases": 1507050,
+    "repeated_edit_intermediate_states": 18378,
+    "fresh_process_continuation": true,
+    "prior_chain_files_unchanged": 88
+  },
+  "limits": [
+    "The complete repository test suite was not run or declared clean.",
+    "Tests do not measure trained language quality or GPU performance.",
+    "Earlier research results are cited from preserved dated records, not claimed rerun during book writing.",
+    "Book link and symbol checks cannot establish semantic correctness.",
+    "The local CI command is exercised; the GitHub workflow has not been dispatched.",
+    "No GitHub push or core-engine integration was performed."
+  ],
+  "checker_probes": {
+    "valid_symbols_links_unicode_heading": true,
+    "missing_target_bad_line_bad_heading_path_escape_rejected": true,
+    "crlf_lf_fingerprints_equal": true,
+    "renamed_symbol_and_changed_source_detected": true,
+    "python_fenced_snippets_parsed": 11,
+    "scope": "Synthetic checker boundaries; only chapter_01 example executed as an application snippet"
+  },
+  "book_checker": {
+    "command": "python scripts/check_book.py",
+    "status": "passed",
+    "markdown_files": 16,
+    "local_links": 414,
+    "symbol_references": 180,
+    "referenced_files": 134,
+    "reviewed_text_fingerprints": "UTF-8 with LF normalization"
+  },
+  "readme_checks": {
+    "all_inline_local_links_valid": true,
+    "original_image_inventory_preserved": true
+  }
+}

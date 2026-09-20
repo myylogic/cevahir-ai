@@ -1,0 +1,151 @@
+{
+  "references": [
+    {
+      "path": "cognitive_management/research/controller.py",
+      "symbol": "ResearchController.route",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 82
+    },
+    {
+      "path": "cognitive_management/research/experience.py",
+      "symbol": "ExperienceStore.recommend",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 262
+    },
+    {
+      "path": "research/representation_discovery/witness_audit.py",
+      "symbol": "search",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 234
+    },
+    {
+      "path": "research/living_learning/affine_lifecycle.py",
+      "symbol": "Learner.observe",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 46
+    },
+    {
+      "path": "research/living_learning/affine_lifecycle.py",
+      "symbol": "Learner.predict",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 82
+    },
+    {
+      "path": "research/living_learning/affine_lifecycle.py",
+      "symbol": "Learner.consolidate",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 98
+    },
+    {
+      "path": "research/living_learning/closed_loop_experiment.py",
+      "symbol": "simulate",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 48
+    },
+    {
+      "path": "research/living_learning/unknown_change_experiment.py",
+      "symbol": "posterior",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 28
+    },
+    {
+      "path": "research/living_learning_reassessment/representation_growth.py",
+      "symbol": "Learner.candidates",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 91
+    },
+    {
+      "path": "research/living_learning_reassessment/credit_assignment.py",
+      "symbol": "Model.receive",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 82
+    },
+    {
+      "path": "research/living_learning_reassessment/state_transport.py",
+      "symbol": "coordinate_run",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 59
+    },
+    {
+      "path": "research/living_learning_reassessment/state_transport.py",
+      "symbol": "lossy_migration_witness",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 120
+    },
+    {
+      "path": "research/living_learning_joint_2026_09_20/joint_stream.py",
+      "symbol": "Learner.observe",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 164
+    },
+    {
+      "path": "research/living_learning_joint_2026_09_20/temporal_relation.py",
+      "symbol": "RLS.phi",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 41
+    },
+    {
+      "path": "research/living_learning_update_2026_09_20/learned_update.py",
+      "symbol": "Learner.observe",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 77
+    },
+    {
+      "path": "research/living_learning_update_2026_09_20/analytic_risk.py",
+      "symbol": "finite_risk",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 80
+    },
+    {
+      "path": "research/living_learning_state_2026_09_20/recurrent_state.py",
+      "symbol": "LearningState.predictions",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 101
+    },
+    {
+      "path": "research/living_learning_state_2026_09_20/recurrent_state.py",
+      "symbol": "LearningState.observe",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 110
+    },
+    {
+      "path": "research/living_learning_state_2026_09_20/state_merging.py",
+      "symbol": "fit",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 122
+    },
+    {
+      "path": "research/living_learning_state_2026_09_20/evidence_audit.py",
+      "symbol": "nonempty_witness",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 19
+    },
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "CorrectionSummary.append",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 46
+    },
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "CorrectionSummary.replace_label",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 51
+    },
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "replay_counts",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 29
+    },
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "ObservationHistogram",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 72
+    }
+  ],
+  "notes": [
+    "Source symbols selected from inspected chapter call paths and checked using Python AST. Behavior requires separate source review."
+  ]
+}

@@ -1,0 +1,419 @@
+{
+  "references": [
+    {
+      "path": "model/cevahir.py",
+      "symbol": "CevahirModelAPI.generate",
+      "chapter": "tr/08-uretim.md",
+      "line": 488
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "CevahirModelAPI._generate_impl",
+      "chapter": "tr/08-uretim.md",
+      "line": 499
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "CevahirModelAPI._autoregressive_generate",
+      "chapter": "tr/08-uretim.md",
+      "line": 569
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "CevahirModelAPI._generate_with_beam_search",
+      "chapter": "tr/08-uretim.md",
+      "line": 780
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "Cevahir.generate",
+      "chapter": "tr/08-uretim.md",
+      "line": 1340
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.forward",
+      "chapter": "tr/08-uretim.md",
+      "line": 486
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.clear_kv_cache",
+      "chapter": "tr/08-uretim.md",
+      "line": 621
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.generate",
+      "chapter": "tr/08-uretim.md",
+      "line": 882
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/kv_cache.py",
+      "symbol": "KVCache.update",
+      "chapter": "tr/08-uretim.md",
+      "line": 177
+    },
+    {
+      "path": "tests/evolution/test_config_generation.py",
+      "symbol": "test_zero_temperature_is_greedy_without_sampling",
+      "chapter": "tr/08-uretim.md",
+      "line": 131
+    },
+    {
+      "path": "tests/evolution/test_config_generation.py",
+      "symbol": "test_beam_search_dispatch_uses_independent_full_prefixes",
+      "chapter": "tr/08-uretim.md",
+      "line": 152
+    },
+    {
+      "path": "tests/evolution/test_attention_cache.py",
+      "symbol": "test_cached_matches_full",
+      "chapter": "tr/08-uretim.md",
+      "line": 34
+    },
+    {
+      "path": "tests/evolution/test_attention_cache.py",
+      "symbol": "test_eviction_preserves_sinks_and_absolute_positions",
+      "chapter": "tr/08-uretim.md",
+      "line": 47
+    },
+    {
+      "path": "cognitive_management/cognitive_manager.py",
+      "symbol": "CognitiveManager.handle",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 512
+    },
+    {
+      "path": "cognitive_management/config.py",
+      "symbol": "CognitiveManagerConfig",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 265
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2.add_turn",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 135
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2.retrieve_context",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 215
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2._semantic_search",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 356
+    },
+    {
+      "path": "cognitive_management/v2/components/vector_store/memory_vector_store.py",
+      "symbol": "MemoryVectorStore",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 49
+    },
+    {
+      "path": "cognitive_management/v2/components/vector_store/__init__.py",
+      "symbol": "create_vector_store",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 27
+    },
+    {
+      "path": "cognitive_management/v2/core/orchestrator.py",
+      "symbol": "CognitiveOrchestrator._build_pipeline",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 172
+    },
+    {
+      "path": "cognitive_management/v2/core/orchestrator.py",
+      "symbol": "CognitiveOrchestrator._build_async_pipeline",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 544
+    },
+    {
+      "path": "cognitive_management/v2/components/policy_router_v2.py",
+      "symbol": "PolicyRouterV2.route",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 82
+    },
+    {
+      "path": "cognitive_management/v2/components/policy_router_v2.py",
+      "symbol": "PolicyRouterV2._select_mode",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 126
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "DeliberationHandler._process",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 317
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "ContextBuildingHandler._process",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 463
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "GenerationHandler._process",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 558
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "CriticHandler._process",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 728
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "MemoryUpdateHandler._process",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 796
+    },
+    {
+      "path": "cognitive_management/v2/components/tree_of_thoughts.py",
+      "symbol": "TreeOfThoughts.solve",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 145
+    },
+    {
+      "path": "cognitive_management/v2/components/tool_executor_v2.py",
+      "symbol": "ToolExecutorV2.execute",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 139
+    },
+    {
+      "path": "cognitive_management/v2/components/tool_executor_v2.py",
+      "symbol": "ToolExecutorV2._register_default_tools",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 281
+    },
+    {
+      "path": "cognitive_management/v2/components/critic_v2.py",
+      "symbol": "CriticV2.review_detailed",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 250
+    },
+    {
+      "path": "cognitive_management/v2/adapters/backend_adapter.py",
+      "symbol": "ModelAPIAdapter.generate",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 101
+    },
+    {
+      "path": "cognitive_management/v2/processing/async_handlers.py",
+      "symbol": "AsyncGenerationHandler._process_async",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 181
+    },
+    {
+      "path": "cognitive_management/v2/utils/request_scope.py",
+      "symbol": "current_scope",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 13
+    },
+    {
+      "path": "cognitive_management/v2/utils/request_scope.py",
+      "symbol": "_prepare",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 26
+    },
+    {
+      "path": "tests/evolution/test_agent_contracts.py",
+      "symbol": "test_tool_handler_calls_executor_and_adds_actual_result",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 43
+    },
+    {
+      "path": "tests/evolution/test_agent_contracts.py",
+      "symbol": "test_failed_tool_is_not_reported_as_used",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 56
+    },
+    {
+      "path": "tests/evolution/test_agent_contracts.py",
+      "symbol": "test_vector_scope_is_filtered_before_top_k",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 110
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "Cevahir.__init__",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 1006
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "Cevahir._init_model",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 1142
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "Cevahir._init_cognitive",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 1191
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "Cevahir.process",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 1621
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "Cevahir.generate",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 1340
+    },
+    {
+      "path": "api/app_factory.py",
+      "symbol": "create_app",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 191
+    },
+    {
+      "path": "api/app_factory.py",
+      "symbol": "create_cevahir_instance",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 54
+    },
+    {
+      "path": "api/routes/v3/chat.py",
+      "symbol": "init_chat_routes",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 22
+    },
+    {
+      "path": "api/services/chat_service.py",
+      "symbol": "ChatService.send_message",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 39
+    },
+    {
+      "path": "chatting_management/chatting_manager.py",
+      "symbol": "ChattingManager.send_message",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 111
+    },
+    {
+      "path": "chatting_management/components/context_builder.py",
+      "symbol": "ContextBuilder.build_context",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 79
+    },
+    {
+      "path": "chatting_management/components/context_builder.py",
+      "symbol": "ContextBuilder._get_recent_history",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 135
+    },
+    {
+      "path": "chatting_management/components/context_builder.py",
+      "symbol": "ContextBuilder._get_memory_context",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 183
+    },
+    {
+      "path": "chatting_management/components/context_builder.py",
+      "symbol": "ContextBuilder._estimate_tokens",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 220
+    },
+    {
+      "path": "cognitive_management/v2/processing/pipeline.py",
+      "symbol": "build_output",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 261
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.save",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 657
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.load",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 694
+    },
+    {
+      "path": "cognitive_management/v2/utils/request_scope.py",
+      "symbol": "_prepare",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 26
+    },
+    {
+      "path": "tests/evolution/test_api_contracts.py",
+      "symbol": "test_two_app_factories_have_independent_registered_routes",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 20
+    },
+    {
+      "path": "tests/evolution/test_api_contracts.py",
+      "symbol": "test_real_sqlite_session_ownership_and_metadata_persistence",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 83
+    },
+    {
+      "path": "tests/evolution/test_runtime_lifecycle.py",
+      "symbol": "test_manager_checkpoint_formats_roundtrip",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 62
+    },
+    {
+      "path": "tests/evolution/test_runtime_lifecycle.py",
+      "symbol": "test_cached_response_updates_history_and_runs_after_hooks",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 113
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2.summarize_if_needed",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 521
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2.prune",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 664
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2.build_context",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 498
+    },
+    {
+      "path": "cognitive_management/v2/components/tool_policy_v2.py",
+      "symbol": "ToolPolicyV2.infer_tool_parameters",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 184
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "CevahirModelAPI.entropy_details",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 899
+    }
+  ],
+  "reused_docs": [
+    "docs/architecture/LOWER_CORE_CONTRACTS.md",
+    "docs/architecture/LIFECYCLE_CONSOLIDATION.md",
+    "docs/modules/cognitive_management/architecture/README.md"
+  ],
+  "notes": [
+    "Chapter 08 distinguishes actual CevahirModelAPI autoregressive loop from legacy ModelManager.generate one-pass argmax.",
+    "Chapter 09 labels SQL priority retrieval versus cognitive vector retrieval, config-advertised unimplemented vector providers and critic versus independent experience feedback.",
+    "Chapter 10 maps HTTP -> ChattingManager -> Cevahir, not fictitious reversed ownership; generation lock does not cover all model mutation paths.",
+    "Primary literature consulted 2026-09-20: arxiv.org/abs/1904.09751;2309.17453;2005.11401;2305.10601. Code is authoritative for implemented mechanisms.",
+    "Existing module architecture doc is linked as design history, not treated as current executable truth.",
+    "AST verification checks referenced symbol existence; this documentation edit does not claim runtime tests were rerun."
+  ]
+}

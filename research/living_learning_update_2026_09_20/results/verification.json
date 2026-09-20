@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "python": "3.14.3",
+  "complete_experiment_json_reproduced": true,
+  "complete_independent_analysis_json_reproduced": true,
+  "source_hashes_match": true,
+  "independent_analytic_symmetry_max_error": 2.220446049250313e-16,
+  "mathematical_checks": {
+    "block_gradient_finite_difference_max_error": 4.938743858318162e-12,
+    "full_problem_rotation_max_difference": 1.942890293094024e-16,
+    "rotation_test_steps": 512,
+    "finite_difference_block_length": 23,
+    "claim": "Block-local exact derivative; not differentiation through all past changing gains."
+  },
+  "independent_moment_checks": {
+    "unit_circle_quadrature_max_error": 5.551115123125783e-17,
+    "scalar_reduction_equal": true
+  },
+  "persistence": {
+    "fresh_process_full_state_equal": true,
+    "checkpoint": 91,
+    "continued_steps": 149,
+    "checkpoint_inside_meta_block": true
+  },
+  "prior_files": {
+    "preserved_files": 61,
+    "changed": []
+  },
+  "local_links": {
+    "checked_local_links": 15,
+    "missing": [],
+    "verification_self_link": "Checked after writing this output."
+  },
+  "tracked_diff_files": [],
+  "result_sha256": {
+    "learned_update.json": "5e1606d7b3c7f073d241d7e153129f6fb41082f98192d8074a680486ef2dfc9a",
+    "analytic_risk.json": "e750866dbd0b155fafbdb5185b8c5f4bd9bd0f3f42be42cf057d0d832a1da871"
+  },
+  "scope": "Reproducibility, implementation checks and prior-file preservation; not proof of a general living-learning principle."
+}

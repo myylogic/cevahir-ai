@@ -1,0 +1,129 @@
+{
+  "status": "passed",
+  "python": "3.14.3",
+  "complete_experiment_json_reproduced": true,
+  "complete_evidence_audit_json_reproduced": true,
+  "source_hashes_match": true,
+  "state_merger_self_tests": {
+    "checks": [
+      "exact DFA equivalence",
+      "exhaustive words through length 10",
+      "sample order invariance",
+      "duplicate label invariance",
+      "JSON round trip",
+      "empty-data default",
+      "missing-edge sink"
+    ],
+    "contradictory_duplicate_checks": 2,
+    "known_languages": [
+      {
+        "exact_equivalence": true,
+        "name": "odd_number_of_ones",
+        "states": 2
+      },
+      {
+        "exact_equivalence": true,
+        "name": "ends_in_01",
+        "states": 3
+      },
+      {
+        "exact_equivalence": true,
+        "name": "ones_modulo_three",
+        "states": 3
+      },
+      {
+        "exact_equivalence": true,
+        "name": "reject_everything",
+        "states": 1
+      },
+      {
+        "exact_equivalence": true,
+        "name": "accept_everything",
+        "states": 1
+      }
+    ],
+    "random_maximum_word_length": 12,
+    "random_samples_per_case": 400,
+    "random_training_consistency_cases": 6,
+    "status": "passed"
+  },
+  "independent_candidate_library_check": {
+    "all_labelled_descriptions": 5898,
+    "distinct_languages": 1054,
+    "independent_table_filling_equals_enumerated_library": true
+  },
+  "mathematical_checks": {
+    "finite_window_aliases": [
+      {
+        "window": 1,
+        "same_length": true,
+        "opposite_labels": true,
+        "balanced_pair_min_error": 0.5,
+        "balanced_pair_min_brier": 0.25
+      },
+      {
+        "window": 8,
+        "same_length": true,
+        "opposite_labels": true,
+        "balanced_pair_min_error": 0.5,
+        "balanced_pair_min_brier": 0.25
+      },
+      {
+        "window": 32,
+        "same_length": true,
+        "opposite_labels": true,
+        "balanced_pair_min_error": 0.5,
+        "balanced_pair_min_brier": 0.25
+      },
+      {
+        "window": 128,
+        "same_length": true,
+        "opposite_labels": true,
+        "balanced_pair_min_error": 0.5,
+        "balanced_pair_min_brier": 0.25
+      }
+    ],
+    "contradiction_rejected": true,
+    "contradiction_empties_any_deterministic_version_space": true,
+    "numeric_state_migration_counterexample": {
+      "old_id": 1,
+      "correct_new_id": 2,
+      "wrong_continuation_output": 1,
+      "correct_continuation_output": 0
+    }
+  },
+  "theory_counterexamples_checked": [
+    "same feedback different true target",
+    "same unordered observations different lag statistic"
+  ],
+  "domain_audit": {
+    "main_nonempty_exact": 16,
+    "main_including_empty_exact": 14,
+    "corrupted_nonempty_exact": 0,
+    "trusted_correction_nonempty_exact": 8
+  },
+  "persistence": {
+    "fresh_process_learning_continuation_equal": true,
+    "checkpoint_episodes": 37,
+    "continued_episodes": 53,
+    "continuation_includes_refit_at_64": true,
+    "runtime_mid_episode_equal_without_raw_prefix": true,
+    "prefix_symbols_not_serialized": 127,
+    "continued_runtime_symbols": 385,
+    "scope": "Learning resumption keeps retained words and rebuilds lookup indices. Runtime resumption keeps graph and current state only."
+  },
+  "prior_files": {
+    "preserved_files": 74,
+    "changed": []
+  },
+  "local_links": {
+    "checked": 14,
+    "missing": []
+  },
+  "tracked_diff_files": [],
+  "result_sha256": {
+    "recurrent_state.json": "e0adf482cdec2da241c54d0330397365f10c82cd437ea117338d2c9fb69cfdf8",
+    "evidence_audit.json": "db51cd105bbfb316c000297267ed7b4629da116273269f1b2971a705ad6abb85"
+  },
+  "scope": "Reproducibility and declared implementation checks, not validation of a general living-learning principle."
+}

@@ -1,0 +1,265 @@
+{
+  "references": [
+    {
+      "path": "model/cevahir.py",
+      "symbol": "Cevahir",
+      "chapter": "tr/01-motor-ve-ogrenme.md",
+      "line": 963
+    },
+    {
+      "path": "src/neural_network.py",
+      "symbol": "CevahirNeuralNetwork",
+      "chapter": "tr/01-motor-ve-ogrenme.md",
+      "line": 85
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "Cevahir.forward",
+      "chapter": "tr/01-motor-ve-ogrenme.md",
+      "line": 1291
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.forward",
+      "chapter": "tr/01-motor-ve-ogrenme.md",
+      "line": 486
+    },
+    {
+      "path": "model_management/config_schema.py",
+      "symbol": "tiny_model_config",
+      "chapter": "tr/01-motor-ve-ogrenme.md",
+      "line": 660
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_trainer.py",
+      "symbol": "BPETrainer.train",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 142
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_trainer.py",
+      "symbol": "BPETrainer._train_cpu_sequential",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 776
+    },
+    {
+      "path": "tokenizer_management/core/tokenizer_core.py",
+      "symbol": "TokenizerCore.train_model",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 247
+    },
+    {
+      "path": "tokenizer_management/core/tokenizer_core.py",
+      "symbol": "TokenizerCore.encode",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 429
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_manager.py",
+      "symbol": "BPEManager._tokenize_with_punct",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 388
+    },
+    {
+      "path": "tokenizer_management/bpe/tokenization/pretokenizer.py",
+      "symbol": "Pretokenizer.tokenize",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 273
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_encoder.py",
+      "symbol": "BPEEncoder._encode_token_to_ids",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 294
+    },
+    {
+      "path": "tokenizer_management/core/tokenizer_core.py",
+      "symbol": "TokenizerCore.load_training_data",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 720
+    },
+    {
+      "path": "training_system/prepare_cache.py",
+      "symbol": "prepare_cache",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 62
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.generate",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 882
+    },
+    {
+      "path": "tokenizer_management/core/tokenizer_core.py",
+      "symbol": "TokenizerCore.decode",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 615
+    },
+    {
+      "path": "training_system/cache_identity.py",
+      "symbol": "tokenizer_digest",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 27
+    },
+    {
+      "path": "tokenizer_management/core/tokenizer_core.py",
+      "symbol": "TokenizerCore.load_training_data",
+      "chapter": "tr/06-egitim.md",
+      "line": 720
+    },
+    {
+      "path": "training_system/prepare_cache.py",
+      "symbol": "prepare_cache",
+      "chapter": "tr/06-egitim.md",
+      "line": 62
+    },
+    {
+      "path": "training_system/data_split.py",
+      "symbol": "split_training_records",
+      "chapter": "tr/06-egitim.md",
+      "line": 6
+    },
+    {
+      "path": "training_system/v3/core/training_service_v3.py",
+      "symbol": "TrainingServiceV3._run_training",
+      "chapter": "tr/06-egitim.md",
+      "line": 420
+    },
+    {
+      "path": "training_system/v3/data/dataloader_v3.py",
+      "symbol": "create_dataloaders_v3",
+      "chapter": "tr/06-egitim.md",
+      "line": 178
+    },
+    {
+      "path": "training_management/v2/core/training_loop.py",
+      "symbol": "TrainingLoop.train_epoch",
+      "chapter": "tr/06-egitim.md",
+      "line": 283
+    },
+    {
+      "path": "training_management/v2/core/loss_computation.py",
+      "symbol": "LossComputation.compute_loss",
+      "chapter": "tr/06-egitim.md",
+      "line": 76
+    },
+    {
+      "path": "training_system/v3/data/dataloader_v3.py",
+      "symbol": "create_dataloader_v3",
+      "chapter": "tr/06-egitim.md",
+      "line": 45
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.build_optimizer",
+      "chapter": "tr/06-egitim.md",
+      "line": 298
+    },
+    {
+      "path": "model_management/model_initializer.py",
+      "symbol": "ModelInitializer.initialize_optimizer",
+      "chapter": "tr/06-egitim.md",
+      "line": 251
+    },
+    {
+      "path": "training_management/v2/core/training_loop.py",
+      "symbol": "TrainingLoop._finish_update",
+      "chapter": "tr/06-egitim.md",
+      "line": 246
+    },
+    {
+      "path": "training_management/contracts.py",
+      "symbol": "consume_model_auxiliary_loss",
+      "chapter": "tr/06-egitim.md",
+      "line": 35
+    },
+    {
+      "path": "training_management/contracts.py",
+      "symbol": "resolve_precision",
+      "chapter": "tr/06-egitim.md",
+      "line": 20
+    },
+    {
+      "path": "training_management/contracts.py",
+      "symbol": "validate_training_backend",
+      "chapter": "tr/06-egitim.md",
+      "line": 5
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.initialize",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 312
+    },
+    {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "model_config",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 27
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.save",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 657
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.load",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 694
+    },
+    {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "unpack_checkpoint",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 7
+    },
+    {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "validate_tokenizer_identity",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 67
+    },
+    {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "validate_model_identity",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 36
+    },
+    {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "validate_state_shapes",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 56
+    },
+    {
+      "path": "training_management/v2/core/training_manager.py",
+      "symbol": "TrainingManager._checkpoint_extra_state",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 274
+    },
+    {
+      "path": "training_management/v2/core/training_manager.py",
+      "symbol": "TrainingManager.resume_from_checkpoint",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 293
+    },
+    {
+      "path": "training_system/v3/core/training_service_v3.py",
+      "symbol": "TrainingServiceV3._find_checkpoint",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 545
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.forward",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 486
+    }
+  ],
+  "notes": [
+    "Source symbols selected from inspected chapter call paths and checked using Python AST. Behavior requires separate source review."
+  ]
+}

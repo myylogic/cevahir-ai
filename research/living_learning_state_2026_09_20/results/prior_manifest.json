@@ -1,0 +1,300 @@
+{
+  "files": {
+    "docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md": {
+      "bytes": 15305,
+      "sha256": "b943b9d4e7595de76100143250551f0611426949c9def6d87e3cac41de1d0c60"
+    },
+    "docs/research/FRONTIER_DISCOVERY_2026_09_20.md": {
+      "bytes": 22404,
+      "sha256": "ac0d6de9bf3680cf68abea5c76b18e01011d3f14698d58c4d959e4e4730ee42b"
+    },
+    "docs/research/living_learning_2026_09_20/ADAPTATION_EXPERIMENT.md": {
+      "bytes": 17052,
+      "sha256": "6cbe0e9c77e87c12fc55a4cbd3f8af8f432af40c24ab1a91523cb63f1c5907e2"
+    },
+    "docs/research/living_learning_2026_09_20/AFFINE_EXPERIMENT.md": {
+      "bytes": 9746,
+      "sha256": "cc04ac21fd127498d3721fa77c66d9a9f3205ebb3325959d72e4a6f3d043e908"
+    },
+    "docs/research/living_learning_2026_09_20/CLOSED_LOOP.md": {
+      "bytes": 17423,
+      "sha256": "180b443c11290cb9608216fd6348483b6c5a3c978e84ae8e67518f9f0c7f341d"
+    },
+    "docs/research/living_learning_2026_09_20/FOUNDATIONS.md": {
+      "bytes": 16023,
+      "sha256": "3435c773bc5b94d339f95e62dd1b281a8ed12fe209796313fff20eb2e9bc0754"
+    },
+    "docs/research/living_learning_2026_09_20/OBSERVATION_INTERNAL_STATE_TR.md": {
+      "bytes": 1277,
+      "sha256": "c6c78fa1dd1bde387dc3a666176f00bbe194ab09c01a1794aa156acfa6eb617c"
+    },
+    "docs/research/living_learning_2026_09_20/OBSERVATIONS_01_15_TR.md": {
+      "bytes": 12879,
+      "sha256": "56eb8cea639d77cc3dd9826f67542639044b6dc3af08af0c59acd1f2ac12adab"
+    },
+    "docs/research/living_learning_2026_09_20/OBSERVATIONS_16_22_TR.md": {
+      "bytes": 7834,
+      "sha256": "752bc1309dcfbd7d0b08265354a7f0ce5fc94684bc7922862038399693d10e6b"
+    },
+    "docs/research/living_learning_2026_09_20/PHENOMENA_AND_LITERATURE.md": {
+      "bytes": 30591,
+      "sha256": "27c6ebe5764af096a8881b037f9ea688f59f3a88149127268f45b37e99f530c7"
+    },
+    "docs/research/living_learning_2026_09_20/REPORT_TR.md": {
+      "bytes": 17788,
+      "sha256": "336760e0157ca7a76d4eec6eb73cc6c938740def3725dfd8821be65f0d8f4384"
+    },
+    "docs/research/living_learning_2026_09_20/REQUEST_ORIGINAL_TR.md": {
+      "bytes": 18572,
+      "sha256": "360cbed530304af3d84bfb265d4c696835cd551f0622e24142e0e6b6ecd63155"
+    },
+    "docs/research/living_learning_2026_09_20/RESEARCH_LOG.md": {
+      "bytes": 10021,
+      "sha256": "4896b787b4ae71233bbd5b29a272400357ce8ff65374612e0c12d0b62e2c74d2"
+    },
+    "docs/research/living_learning_2026_09_20/SOURCES.md": {
+      "bytes": 8675,
+      "sha256": "39fb33592de30ba53d70f32478adb142b77d08e2dba42d68a2ece342a69aeb03"
+    },
+    "docs/research/living_learning_2026_09_20/UNKNOWN_CHANGE.md": {
+      "bytes": 11438,
+      "sha256": "16b677a08c5dc6957a1b00f983a28662011fbe8fd0a0cd74235afd608f43928c"
+    },
+    "docs/research/living_learning_2026_09_20/UNKNOWN_CHANGE_AUDIT.md": {
+      "bytes": 20377,
+      "sha256": "dd8e68bc1b1d411c9e586d0864e9a370b57ff62a9a83d92ad48b8563eca559da"
+    },
+    "docs/research/living_learning_joint_2026_09_20/ADVERSARIAL_REVIEW.md": {
+      "bytes": 4218,
+      "sha256": "5db0d1c6433e55a887380623d118a5c0aa985a38ec12bf95d68a344335c59278"
+    },
+    "docs/research/living_learning_joint_2026_09_20/JOINT_STREAM.md": {
+      "bytes": 11580,
+      "sha256": "7ef2491d3bb7b7161e3df794e5059f08cbfe3a5e989aac48a8ad5fb18059f9fe"
+    },
+    "docs/research/living_learning_joint_2026_09_20/PRINCIPLE_AUDIT.md": {
+      "bytes": 19492,
+      "sha256": "908528cedc6ee1689ebb9fa6c2b11b5ea07a612be1523a67759da76aaf6e240f"
+    },
+    "docs/research/living_learning_joint_2026_09_20/REPORT_TR.md": {
+      "bytes": 14144,
+      "sha256": "d4331132892dd9d634ac16a8c08efc33ec5ff7040995a375e58afcf951ab07bf"
+    },
+    "docs/research/living_learning_joint_2026_09_20/TEMPORAL_RELATION.md": {
+      "bytes": 9900,
+      "sha256": "e4f88a4720996ede9ee4b20828708bad6d8651e435d2dcee15b2f98f50be3800"
+    },
+    "docs/research/living_learning_reassessment_2026_09_20/CREDIT_ASSIGNMENT.md": {
+      "bytes": 15642,
+      "sha256": "884f4f7cbccdda8ae36b056e574e1c6a34ab09655ed6b3e5d948fac36befeef6"
+    },
+    "docs/research/living_learning_reassessment_2026_09_20/REPORT_TR.md": {
+      "bytes": 15593,
+      "sha256": "711ed33f3f445dd0c722f0528d08be8064e820717cfac9baa2650ccc1eb912cf"
+    },
+    "docs/research/living_learning_reassessment_2026_09_20/REPRESENTATION_GROWTH.md": {
+      "bytes": 15736,
+      "sha256": "a79baf2b7147de50e97d22c388dfcfb65a9ea9bc736f38676670b3ffc5cb6947"
+    },
+    "docs/research/living_learning_reassessment_2026_09_20/SCOPE_AND_FOUNDATIONS.md": {
+      "bytes": 22383,
+      "sha256": "9df41cb588773c8c430ad56f35343794228a953dcbb1378dcda11183c42bc5a9"
+    },
+    "docs/research/living_learning_reassessment_2026_09_20/STATE_TRANSPORT.md": {
+      "bytes": 9086,
+      "sha256": "475b28de07edd47e63614cc2b3acdcce114cf80997f8092fb9eaf0c0a7f2755c"
+    },
+    "docs/research/living_learning_update_2026_09_20/EXPERIMENT.md": {
+      "bytes": 14229,
+      "sha256": "19ce0937349384207e92b51bc72f33211c14f190b0eeaaf3d01d68340ec2a77c"
+    },
+    "docs/research/living_learning_update_2026_09_20/MEMORY_AND_SCOPE_AUDIT.md": {
+      "bytes": 16665,
+      "sha256": "78da7eebef9944f29d46e9e44dd236b0a161438789cdbd9271be5569f61ccdfe"
+    },
+    "docs/research/living_learning_update_2026_09_20/REPORT_TR.md": {
+      "bytes": 12758,
+      "sha256": "838e9c07c17125a57fb65398155e6d4b669d103a1be17b110d1b91558c6f2195"
+    },
+    "docs/research/living_learning_update_2026_09_20/REVIEW.md": {
+      "bytes": 9953,
+      "sha256": "b513d9c741317d0211fd16a72691da42274d27b6b5ffc1c73cf8b35b98b3dd20"
+    },
+    "docs/research/living_learning_update_2026_09_20/UPDATE_THEORY.md": {
+      "bytes": 13558,
+      "sha256": "29ce02e046da7ef7e0d8a73e6d8ac571cbe55d84a08e2c9b3894dcb92d2585c6"
+    },
+    "docs/research/REPRESENTATION_WITNESS_AUDIT.md": {
+      "bytes": 9551,
+      "sha256": "121406c5acd679d75ff76a87c0c1106abd208fc7167cd9346cc038d85db85926"
+    },
+    "docs/research/RESEARCH_LEDGER.md": {
+      "bytes": 2759,
+      "sha256": "1342d6049636e4de497fbefb36743371d63624eb975184132925525822eefabb"
+    },
+    "research/living_learning/adaptation_experiment.py": {
+      "bytes": 14522,
+      "sha256": "429bda2fed3fd61e2794c5ed4225d5210fedd612ae1eb06c67c11172dd2e3e18"
+    },
+    "research/living_learning/affine_lifecycle.py": {
+      "bytes": 16513,
+      "sha256": "70188c7cb9d68506bb7e945c5f09f755fe77c74d86369361dfe99834037e919a"
+    },
+    "research/living_learning/closed_loop_experiment.py": {
+      "bytes": 15323,
+      "sha256": "eac76cc3020c7f1786ecf2fea877be45143162a197991e376490fab32f8b5901"
+    },
+    "research/living_learning/results/adaptation_results.json": {
+      "bytes": 3442714,
+      "sha256": "465b943d4369715700c8a0835d2e6fba4439aab04f4631e547a2b8d5daf70867"
+    },
+    "research/living_learning/results/affine_lifecycle.json": {
+      "bytes": 25852,
+      "sha256": "a3ba27008740ab4db67695cf65d612bb22e531f7d685f6aa89fe16100f9c3c72"
+    },
+    "research/living_learning/results/closed_loop.json": {
+      "bytes": 3160413,
+      "sha256": "952aba483ebccd989195bc413eaf8c5cb22b5170282d2bca18677cbb79563ccc"
+    },
+    "research/living_learning/results/unknown_change.json": {
+      "bytes": 115857,
+      "sha256": "30130887eae7b68f7b8d0d855b1ce77c5a6ee5c9269a5aadcdcc2625cc51174d"
+    },
+    "research/living_learning/results/verification.json": {
+      "bytes": 1870,
+      "sha256": "522cca9079d0b97290b0293cccbfeafee8cc79317ac876957bbbd7121fc3d316"
+    },
+    "research/living_learning/unknown_change_experiment.py": {
+      "bytes": 9351,
+      "sha256": "69d6ab972594ec54ef70880d71b207919ca3dc2f1f2ad2d9eb2ae50189132fc0"
+    },
+    "research/living_learning/verify_experiments.py": {
+      "bytes": 3957,
+      "sha256": "2cb96138c05a5798a62cdc4d374380da802d4f37096516338491d71124fcf5e8"
+    },
+    "research/living_learning_joint_2026_09_20/joint_ablation.py": {
+      "bytes": 3679,
+      "sha256": "4b505466cff80871d83f74a8d7a38607edb02e0bf83f43f6c6e238bdbd7a3531"
+    },
+    "research/living_learning_joint_2026_09_20/joint_stream.py": {
+      "bytes": 19596,
+      "sha256": "783ea7dcc17f2923a957bb7874955a452a6444bd3cf96be3bc815aa22672a9fc"
+    },
+    "research/living_learning_joint_2026_09_20/preserve_prior.py": {
+      "bytes": 1765,
+      "sha256": "62abbac0c41e1bb31788ba069a43991c38ff2a5d77ddb32dd31b38fa05316f6d"
+    },
+    "research/living_learning_joint_2026_09_20/results/joint_no_burst.json": {
+      "bytes": 986179,
+      "sha256": "3bfc3ebf59217770d657d47bec29a45dedf6d2fe08ca5a6dab40ebd5179bf86d"
+    },
+    "research/living_learning_joint_2026_09_20/results/joint_stream.json": {
+      "bytes": 978470,
+      "sha256": "fdb1fad75ddedc70b7950d49a600a1400f4d07c164ba629e11c8c327b2c48db1"
+    },
+    "research/living_learning_joint_2026_09_20/results/prior_manifest.json": {
+      "bytes": 8515,
+      "sha256": "6450c3fd6d9116803d0f88e5bfae22668e4b16cb83485fd472776ce086fead2e"
+    },
+    "research/living_learning_joint_2026_09_20/results/temporal_relation.json": {
+      "bytes": 726914,
+      "sha256": "6a563998bfa77f9a980a3f4a313245547875365ec4f3660ba80d2c176e9924dd"
+    },
+    "research/living_learning_joint_2026_09_20/results/verification.json": {
+      "bytes": 3346,
+      "sha256": "71b11fa1e672b864576aa28d53e030237ddd4982961de3ed4a88789abf3de222"
+    },
+    "research/living_learning_joint_2026_09_20/temporal_relation.py": {
+      "bytes": 12340,
+      "sha256": "3b3d45ee98f8e768d338676e4130e131c7519021ee6523fc34264c1f97a57345"
+    },
+    "research/living_learning_joint_2026_09_20/verify_joint.py": {
+      "bytes": 7826,
+      "sha256": "71862e2aa0fc81253c7d5ab41c8a9c770716edfb1af36cee17fe8e179d256f10"
+    },
+    "research/living_learning_reassessment/credit_assignment.py": {
+      "bytes": 12625,
+      "sha256": "6ec63c67b38597d54f21355f4ba644202a046f777a2c7ecb1c38993d4d75d217"
+    },
+    "research/living_learning_reassessment/preserve_prior.py": {
+      "bytes": 1776,
+      "sha256": "594994ed9ed3f2c154428d1e95077fc4b3aaf67781901681b00aa682cab92e35"
+    },
+    "research/living_learning_reassessment/representation_growth.py": {
+      "bytes": 18082,
+      "sha256": "3571357d334d13e808ed4c3d31ff8562de1a6e84708a047cf5c765f6732cb1bf"
+    },
+    "research/living_learning_reassessment/results/credit_assignment.json": {
+      "bytes": 866456,
+      "sha256": "d7a089653de06bfd77d7114bd1db7e58bb0ec801cb150814b493747b1337f85e"
+    },
+    "research/living_learning_reassessment/results/credit_assignment_verification.json": {
+      "bytes": 798,
+      "sha256": "78983b6ad01dddb6fec593e6f3eaf8293956df498332541ecf552e733fc104af"
+    },
+    "research/living_learning_reassessment/results/prior_preservation_manifest.json": {
+      "bytes": 5488,
+      "sha256": "c0a9fddea6c9c3a7a1110a936a1a85aafad7ff5de307d08edac9b555e29d87a3"
+    },
+    "research/living_learning_reassessment/results/representation_growth.json": {
+      "bytes": 315676,
+      "sha256": "e90870be6e1892731314cbd87fac3c8e824e4badbaae052294097f91ab84073c"
+    },
+    "research/living_learning_reassessment/results/state_transport.json": {
+      "bytes": 165356,
+      "sha256": "8ca2fd43ea312a06c81aa3be133b7b1b2e418a8d484da32eb91927158f65db04"
+    },
+    "research/living_learning_reassessment/results/verification.json": {
+      "bytes": 2537,
+      "sha256": "1e6866b62bb86f90b6269bf9782a9d8f8ed247f3e344f33269d7fffdaec2d797"
+    },
+    "research/living_learning_reassessment/state_transport.py": {
+      "bytes": 9607,
+      "sha256": "b8f48c93aa0ae2ff69ed02f872d9c54459ea5e2c1116f5219e435228acffd8bd"
+    },
+    "research/living_learning_reassessment/verify_reassessment.py": {
+      "bytes": 5039,
+      "sha256": "332332668b25ca4343ff062502727f2fc5502666d62b157fe74740260e83b3e1"
+    },
+    "research/living_learning_update_2026_09_20/analytic_risk.py": {
+      "bytes": 7059,
+      "sha256": "b60a2c1ca0846dbbea632bca7d28fb686ab79112aacb987fe2649e4edbce33f8"
+    },
+    "research/living_learning_update_2026_09_20/learned_update.py": {
+      "bytes": 16425,
+      "sha256": "544258d4815c64d150bf00e44fbe8cdd6fbb68988a822b8d5ca110363dfa304e"
+    },
+    "research/living_learning_update_2026_09_20/preserve_prior.py": {
+      "bytes": 1673,
+      "sha256": "2363e50ac183ce733c9c1e7f86d7fcb26dd5045dbe51b1365a98830e97144708"
+    },
+    "research/living_learning_update_2026_09_20/results/analytic_risk.json": {
+      "bytes": 229663,
+      "sha256": "e750866dbd0b155fafbdb5185b8c5f4bd9bd0f3f42be42cf057d0d832a1da871"
+    },
+    "research/living_learning_update_2026_09_20/results/learned_update.json": {
+      "bytes": 2854327,
+      "sha256": "5e1606d7b3c7f073d241d7e153129f6fb41082f98192d8074a680486ef2dfc9a"
+    },
+    "research/living_learning_update_2026_09_20/results/prior_manifest.json": {
+      "bytes": 11360,
+      "sha256": "95268b985b489bd7550cdc9c6db5b47400a49e71b1999eecff2a4419b166fc8d"
+    },
+    "research/living_learning_update_2026_09_20/results/verification.json": {
+      "bytes": 1513,
+      "sha256": "21e5599a9f4d21596bcb34fabab7a75187d27a792a5513e4a0518708474c8438"
+    },
+    "research/living_learning_update_2026_09_20/verify_update.py": {
+      "bytes": 5068,
+      "sha256": "1fa88e13920b376d69cef4a985bfdbb78f76dd9445d2ad1edf8b14ea845de0fe"
+    },
+    "research/representation_discovery/__init__.py": {
+      "bytes": 75,
+      "sha256": "d11dd9846e7c26c8bd540ba74c1c732ce43c390f5b9ce98cb1ba891cb456cd5a"
+    },
+    "research/representation_discovery/witness_audit.py": {
+      "bytes": 18617,
+      "sha256": "8ea98b0e840d5ba1451998eec3028a89ee1d601517b780c41b281274377d9e30"
+    }
+  }
+}

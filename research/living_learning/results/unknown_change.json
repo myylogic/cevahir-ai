@@ -1,0 +1,3312 @@
+{
+  "experiment": "closed_loop_unknown_hazard_mixture",
+  "python": "3.14.3",
+  "protocol": {
+    "horizon": 240,
+    "hazard_hypotheses": [
+      0.0,
+      0.002,
+      0.02
+    ],
+    "initial_weights": [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.3333333333333333
+    ],
+    "costs": [
+      1,
+      20
+    ],
+    "matched_hazards": [
+      0.0,
+      0.002,
+      0.02
+    ],
+    "out_of_support_hazard": 0.08,
+    "exact_integration": "all opening dates 1..240 plus survival tail, no Monte Carlo intervals needed",
+    "cost_scope": "environment rewards only; DP compute and common initial t=0 failure excluded",
+    "given_bias": "known hazard candidate set, noiseless probes, absorbing opening, known reward/cost/horizon",
+    "pre_specification": "hypotheses, costs, controls fixed before first run; no external preregistration"
+  },
+  "cost_conditions": {
+    "1": {
+      "dp_optimal_prior_value": 69.52795858448096,
+      "hazard_conditions": {
+        "0.0": {
+          "updated_mixture": {
+            "utility": -8.0,
+            "failures": 8.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.0,
+            "detection_given_open": null,
+            "no_opening_by_horizon": {
+              "utility": -8,
+              "failures": 8,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 199,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5919467000500713,
+                0.39742970101736375,
+                0.010623598932564995
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 16,
+                  "feedback": 0,
+                  "last_failure": 16,
+                  "posterior_hazard_weights": [
+                    0.37143332042163624,
+                    0.3597240889050814,
+                    0.26884259067328237
+                  ]
+                },
+                {
+                  "time": 33,
+                  "feedback": 0,
+                  "last_failure": 33,
+                  "posterior_hazard_weights": [
+                    0.40825083482295277,
+                    0.38215095037348507,
+                    0.20959821480356214
+                  ]
+                },
+                {
+                  "time": 52,
+                  "feedback": 0,
+                  "last_failure": 52,
+                  "posterior_hazard_weights": [
+                    0.4442706831755949,
+                    0.4003462847978039,
+                    0.1553830320266012
+                  ]
+                },
+                {
+                  "time": 74,
+                  "feedback": 0,
+                  "last_failure": 74,
+                  "posterior_hazard_weights": [
+                    0.4792595993638343,
+                    0.4132671408768524,
+                    0.10747325975931327
+                  ]
+                },
+                {
+                  "time": 99,
+                  "feedback": 0,
+                  "last_failure": 99,
+                  "posterior_hazard_weights": [
+                    0.5113694569935682,
+                    0.4194289202670155,
+                    0.06920162273941631
+                  ]
+                },
+                {
+                  "time": 128,
+                  "feedback": 0,
+                  "last_failure": 128,
+                  "posterior_hazard_weights": [
+                    0.5407544169633232,
+                    0.41851339273368626,
+                    0.040732190302990495
+                  ]
+                },
+                {
+                  "time": 161,
+                  "feedback": 0,
+                  "last_failure": 161,
+                  "posterior_hazard_weights": [
+                    0.5671709963964591,
+                    0.41089528837632305,
+                    0.021933715227217793
+                  ]
+                },
+                {
+                  "time": 199,
+                  "feedback": 0,
+                  "last_failure": 199,
+                  "posterior_hazard_weights": [
+                    0.5919467000500713,
+                    0.39742970101736375,
+                    0.010623598932564995
+                  ]
+                }
+              ]
+            }
+          },
+          "frozen_hyperprior": {
+            "utility": -18.0,
+            "failures": 18.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.0,
+            "detection_given_open": null,
+            "no_opening_by_horizon": {
+              "utility": -18,
+              "failures": 18,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 223,
+              "posterior_hazard_weights_given_last_failure": [
+                0.6057121302864581,
+                0.38759393995948027,
+                0.006693929754061704
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 11,
+                  "feedback": 0,
+                  "last_failure": 11,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 22,
+                  "feedback": 0,
+                  "last_failure": 22,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 33,
+                  "feedback": 0,
+                  "last_failure": 33,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 44,
+                  "feedback": 0,
+                  "last_failure": 44,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 55,
+                  "feedback": 0,
+                  "last_failure": 55,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 66,
+                  "feedback": 0,
+                  "last_failure": 66,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 78,
+                  "feedback": 0,
+                  "last_failure": 78,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 90,
+                  "feedback": 0,
+                  "last_failure": 90,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 102,
+                  "feedback": 0,
+                  "last_failure": 102,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 114,
+                  "feedback": 0,
+                  "last_failure": 114,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 126,
+                  "feedback": 0,
+                  "last_failure": 126,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 138,
+                  "feedback": 0,
+                  "last_failure": 138,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 151,
+                  "feedback": 0,
+                  "last_failure": 151,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 164,
+                  "feedback": 0,
+                  "last_failure": 164,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 178,
+                  "feedback": 0,
+                  "last_failure": 178,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 192,
+                  "feedback": 0,
+                  "last_failure": 192,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 207,
+                  "feedback": 0,
+                  "last_failure": 207,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 223,
+                  "feedback": 0,
+                  "last_failure": 223,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                }
+              ]
+            }
+          },
+          "fixed_hazard_001": {
+            "utility": -16.0,
+            "failures": 16.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.0,
+            "detection_given_open": null,
+            "no_opening_by_horizon": {
+              "utility": -16,
+              "failures": 16,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 226,
+              "posterior_hazard_weights_given_last_failure": [
+                0.6073608552001277,
+                0.38632172256780445,
+                0.006317422232067768
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 14,
+                  "feedback": 0,
+                  "last_failure": 14,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 28,
+                  "feedback": 0,
+                  "last_failure": 28,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 42,
+                  "feedback": 0,
+                  "last_failure": 42,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 56,
+                  "feedback": 0,
+                  "last_failure": 56,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 70,
+                  "feedback": 0,
+                  "last_failure": 70,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 84,
+                  "feedback": 0,
+                  "last_failure": 84,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 98,
+                  "feedback": 0,
+                  "last_failure": 98,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 112,
+                  "feedback": 0,
+                  "last_failure": 112,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 126,
+                  "feedback": 0,
+                  "last_failure": 126,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 140,
+                  "feedback": 0,
+                  "last_failure": 140,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 154,
+                  "feedback": 0,
+                  "last_failure": 154,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 168,
+                  "feedback": 0,
+                  "last_failure": 168,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 182,
+                  "feedback": 0,
+                  "last_failure": 182,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 196,
+                  "feedback": 0,
+                  "last_failure": 196,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 211,
+                  "feedback": 0,
+                  "last_failure": 211,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 226,
+                  "feedback": 0,
+                  "last_failure": 226,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          },
+          "never_probe": {
+            "utility": 0.0,
+            "failures": 0.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.0,
+            "detection_given_open": null,
+            "no_opening_by_horizon": {
+              "utility": 0,
+              "failures": 0,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 0,
+              "posterior_hazard_weights_given_last_failure": [
+                0.3333333333333333,
+                0.3333333333333333,
+                0.3333333333333333
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": []
+            }
+          },
+          "oracle_hazard": {
+            "utility": 0.0,
+            "failures": 0.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.0,
+            "detection_given_open": null,
+            "no_opening_by_horizon": {
+              "utility": 0,
+              "failures": 0,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 0,
+              "posterior_hazard_weights_given_last_failure": [
+                0.3333333333333333,
+                0.3333333333333333,
+                0.3333333333333333
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": []
+            }
+          }
+        },
+        "0.002": {
+          "updated_mixture": {
+            "utility": 37.655776085780666,
+            "failures": 6.65798904654798,
+            "successes": 44.31376513232865,
+            "probability_open_by_horizon": 0.3815139493753813,
+            "detection_given_open": 0.861320006765383,
+            "no_opening_by_horizon": {
+              "utility": -8,
+              "failures": 8,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 199,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5919467000500713,
+                0.39742970101736375,
+                0.010623598932564995
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 16,
+                  "feedback": 0,
+                  "last_failure": 16,
+                  "posterior_hazard_weights": [
+                    0.37143332042163624,
+                    0.3597240889050814,
+                    0.26884259067328237
+                  ]
+                },
+                {
+                  "time": 33,
+                  "feedback": 0,
+                  "last_failure": 33,
+                  "posterior_hazard_weights": [
+                    0.40825083482295277,
+                    0.38215095037348507,
+                    0.20959821480356214
+                  ]
+                },
+                {
+                  "time": 52,
+                  "feedback": 0,
+                  "last_failure": 52,
+                  "posterior_hazard_weights": [
+                    0.4442706831755949,
+                    0.4003462847978039,
+                    0.1553830320266012
+                  ]
+                },
+                {
+                  "time": 74,
+                  "feedback": 0,
+                  "last_failure": 74,
+                  "posterior_hazard_weights": [
+                    0.4792595993638343,
+                    0.4132671408768524,
+                    0.10747325975931327
+                  ]
+                },
+                {
+                  "time": 99,
+                  "feedback": 0,
+                  "last_failure": 99,
+                  "posterior_hazard_weights": [
+                    0.5113694569935682,
+                    0.4194289202670155,
+                    0.06920162273941631
+                  ]
+                },
+                {
+                  "time": 128,
+                  "feedback": 0,
+                  "last_failure": 128,
+                  "posterior_hazard_weights": [
+                    0.5407544169633232,
+                    0.41851339273368626,
+                    0.040732190302990495
+                  ]
+                },
+                {
+                  "time": 161,
+                  "feedback": 0,
+                  "last_failure": 161,
+                  "posterior_hazard_weights": [
+                    0.5671709963964591,
+                    0.41089528837632305,
+                    0.021933715227217793
+                  ]
+                },
+                {
+                  "time": 199,
+                  "feedback": 0,
+                  "last_failure": 199,
+                  "posterior_hazard_weights": [
+                    0.5919467000500713,
+                    0.39742970101736375,
+                    0.010623598932564995
+                  ]
+                }
+              ]
+            }
+          },
+          "frozen_hyperprior": {
+            "utility": 32.83524969952585,
+            "failures": 14.537234195448486,
+            "successes": 47.37248389497434,
+            "probability_open_by_horizon": 0.3815139493753813,
+            "detection_given_open": 0.943876542197501,
+            "no_opening_by_horizon": {
+              "utility": -18,
+              "failures": 18,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 223,
+              "posterior_hazard_weights_given_last_failure": [
+                0.6057121302864581,
+                0.38759393995948027,
+                0.006693929754061704
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 11,
+                  "feedback": 0,
+                  "last_failure": 11,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 22,
+                  "feedback": 0,
+                  "last_failure": 22,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 33,
+                  "feedback": 0,
+                  "last_failure": 33,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 44,
+                  "feedback": 0,
+                  "last_failure": 44,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 55,
+                  "feedback": 0,
+                  "last_failure": 55,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 66,
+                  "feedback": 0,
+                  "last_failure": 66,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 78,
+                  "feedback": 0,
+                  "last_failure": 78,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 90,
+                  "feedback": 0,
+                  "last_failure": 90,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 102,
+                  "feedback": 0,
+                  "last_failure": 102,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 114,
+                  "feedback": 0,
+                  "last_failure": 114,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 126,
+                  "feedback": 0,
+                  "last_failure": 126,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 138,
+                  "feedback": 0,
+                  "last_failure": 138,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 151,
+                  "feedback": 0,
+                  "last_failure": 151,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 164,
+                  "feedback": 0,
+                  "last_failure": 164,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 178,
+                  "feedback": 0,
+                  "last_failure": 178,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 192,
+                  "feedback": 0,
+                  "last_failure": 192,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 207,
+                  "feedback": 0,
+                  "last_failure": 207,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 223,
+                  "feedback": 0,
+                  "last_failure": 223,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                }
+              ]
+            }
+          },
+          "fixed_hazard_001": {
+            "utility": 34.38495814176947,
+            "failures": 12.709871979637303,
+            "successes": 47.094830121406765,
+            "probability_open_by_horizon": 0.3815139493753813,
+            "detection_given_open": 0.9539199860774574,
+            "no_opening_by_horizon": {
+              "utility": -16,
+              "failures": 16,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 226,
+              "posterior_hazard_weights_given_last_failure": [
+                0.6073608552001277,
+                0.38632172256780445,
+                0.006317422232067768
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 14,
+                  "feedback": 0,
+                  "last_failure": 14,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 28,
+                  "feedback": 0,
+                  "last_failure": 28,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 42,
+                  "feedback": 0,
+                  "last_failure": 42,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 56,
+                  "feedback": 0,
+                  "last_failure": 56,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 70,
+                  "feedback": 0,
+                  "last_failure": 70,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 84,
+                  "feedback": 0,
+                  "last_failure": 84,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 98,
+                  "feedback": 0,
+                  "last_failure": 98,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 112,
+                  "feedback": 0,
+                  "last_failure": 112,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 126,
+                  "feedback": 0,
+                  "last_failure": 126,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 140,
+                  "feedback": 0,
+                  "last_failure": 140,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 154,
+                  "feedback": 0,
+                  "last_failure": 154,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 168,
+                  "feedback": 0,
+                  "last_failure": 168,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 182,
+                  "feedback": 0,
+                  "last_failure": 182,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 196,
+                  "feedback": 0,
+                  "last_failure": 196,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 211,
+                  "feedback": 0,
+                  "last_failure": 211,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 226,
+                  "feedback": 0,
+                  "last_failure": 226,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          },
+          "never_probe": {
+            "utility": 0.0,
+            "failures": 0.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.3815139493753813,
+            "detection_given_open": 0.0,
+            "no_opening_by_horizon": {
+              "utility": 0,
+              "failures": 0,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 0,
+              "posterior_hazard_weights_given_last_failure": [
+                0.3333333333333333,
+                0.3333333333333333,
+                0.3333333333333333
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": []
+            }
+          },
+          "oracle_hazard": {
+            "utility": 38.45276629967417,
+            "failures": 5.533781732268572,
+            "successes": 43.98654803194274,
+            "probability_open_by_horizon": 0.3815139493753813,
+            "detection_given_open": 0.9030940858482903,
+            "no_opening_by_horizon": {
+              "utility": -7,
+              "failures": 7,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 211,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5989672981183968,
+                0.3925973135041379,
+                0.00843538837746532
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 31,
+                  "feedback": 0,
+                  "last_failure": 31,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 61,
+                  "feedback": 0,
+                  "last_failure": 61,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 91,
+                  "feedback": 0,
+                  "last_failure": 91,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 121,
+                  "feedback": 0,
+                  "last_failure": 121,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 151,
+                  "feedback": 0,
+                  "last_failure": 151,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 181,
+                  "feedback": 0,
+                  "last_failure": 181,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 211,
+                  "feedback": 0,
+                  "last_failure": 211,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          }
+        },
+        "0.02": {
+          "updated_mixture": {
+            "utility": 178.92809966766202,
+            "failures": 2.078470135301417,
+            "successes": 181.00656980296344,
+            "probability_open_by_horizon": 0.9921610450931622,
+            "detection_given_open": 0.9898122089808853,
+            "no_opening_by_horizon": {
+              "utility": -8,
+              "failures": 8,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 199,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5919467000500713,
+                0.39742970101736375,
+                0.010623598932564995
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 16,
+                  "feedback": 0,
+                  "last_failure": 16,
+                  "posterior_hazard_weights": [
+                    0.37143332042163624,
+                    0.3597240889050814,
+                    0.26884259067328237
+                  ]
+                },
+                {
+                  "time": 33,
+                  "feedback": 0,
+                  "last_failure": 33,
+                  "posterior_hazard_weights": [
+                    0.40825083482295277,
+                    0.38215095037348507,
+                    0.20959821480356214
+                  ]
+                },
+                {
+                  "time": 52,
+                  "feedback": 0,
+                  "last_failure": 52,
+                  "posterior_hazard_weights": [
+                    0.4442706831755949,
+                    0.4003462847978039,
+                    0.1553830320266012
+                  ]
+                },
+                {
+                  "time": 74,
+                  "feedback": 0,
+                  "last_failure": 74,
+                  "posterior_hazard_weights": [
+                    0.4792595993638343,
+                    0.4132671408768524,
+                    0.10747325975931327
+                  ]
+                },
+                {
+                  "time": 99,
+                  "feedback": 0,
+                  "last_failure": 99,
+                  "posterior_hazard_weights": [
+                    0.5113694569935682,
+                    0.4194289202670155,
+                    0.06920162273941631
+                  ]
+                },
+                {
+                  "time": 128,
+                  "feedback": 0,
+                  "last_failure": 128,
+                  "posterior_hazard_weights": [
+                    0.5407544169633232,
+                    0.41851339273368626,
+                    0.040732190302990495
+                  ]
+                },
+                {
+                  "time": 161,
+                  "feedback": 0,
+                  "last_failure": 161,
+                  "posterior_hazard_weights": [
+                    0.5671709963964591,
+                    0.41089528837632305,
+                    0.021933715227217793
+                  ]
+                },
+                {
+                  "time": 199,
+                  "feedback": 0,
+                  "last_failure": 199,
+                  "posterior_hazard_weights": [
+                    0.5919467000500713,
+                    0.39742970101736375,
+                    0.010623598932564995
+                  ]
+                }
+              ]
+            }
+          },
+          "frozen_hyperprior": {
+            "utility": 182.17067764452815,
+            "failures": 3.8537673035269626,
+            "successes": 186.0244449480551,
+            "probability_open_by_horizon": 0.9921610450931622,
+            "detection_given_open": 0.9967622357707028,
+            "no_opening_by_horizon": {
+              "utility": -18,
+              "failures": 18,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 223,
+              "posterior_hazard_weights_given_last_failure": [
+                0.6057121302864581,
+                0.38759393995948027,
+                0.006693929754061704
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 11,
+                  "feedback": 0,
+                  "last_failure": 11,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 22,
+                  "feedback": 0,
+                  "last_failure": 22,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 33,
+                  "feedback": 0,
+                  "last_failure": 33,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 44,
+                  "feedback": 0,
+                  "last_failure": 44,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 55,
+                  "feedback": 0,
+                  "last_failure": 55,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 66,
+                  "feedback": 0,
+                  "last_failure": 66,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 78,
+                  "feedback": 0,
+                  "last_failure": 78,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 90,
+                  "feedback": 0,
+                  "last_failure": 90,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 102,
+                  "feedback": 0,
+                  "last_failure": 102,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 114,
+                  "feedback": 0,
+                  "last_failure": 114,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 126,
+                  "feedback": 0,
+                  "last_failure": 126,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 138,
+                  "feedback": 0,
+                  "last_failure": 138,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 151,
+                  "feedback": 0,
+                  "last_failure": 151,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 164,
+                  "feedback": 0,
+                  "last_failure": 164,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 178,
+                  "feedback": 0,
+                  "last_failure": 178,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 192,
+                  "feedback": 0,
+                  "last_failure": 192,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 207,
+                  "feedback": 0,
+                  "last_failure": 207,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 223,
+                  "feedback": 0,
+                  "last_failure": 223,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                }
+              ]
+            }
+          },
+          "fixed_hazard_001": {
+            "utility": 181.57717449036903,
+            "failures": 3.025284840541182,
+            "successes": 184.60245933091022,
+            "probability_open_by_horizon": 0.9921610450931622,
+            "detection_given_open": 0.9974172777265267,
+            "no_opening_by_horizon": {
+              "utility": -16,
+              "failures": 16,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 226,
+              "posterior_hazard_weights_given_last_failure": [
+                0.6073608552001277,
+                0.38632172256780445,
+                0.006317422232067768
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 14,
+                  "feedback": 0,
+                  "last_failure": 14,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 28,
+                  "feedback": 0,
+                  "last_failure": 28,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 42,
+                  "feedback": 0,
+                  "last_failure": 42,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 56,
+                  "feedback": 0,
+                  "last_failure": 56,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 70,
+                  "feedback": 0,
+                  "last_failure": 70,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 84,
+                  "feedback": 0,
+                  "last_failure": 84,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 98,
+                  "feedback": 0,
+                  "last_failure": 98,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 112,
+                  "feedback": 0,
+                  "last_failure": 112,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 126,
+                  "feedback": 0,
+                  "last_failure": 126,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 140,
+                  "feedback": 0,
+                  "last_failure": 140,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 154,
+                  "feedback": 0,
+                  "last_failure": 154,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 168,
+                  "feedback": 0,
+                  "last_failure": 168,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 182,
+                  "feedback": 0,
+                  "last_failure": 182,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 196,
+                  "feedback": 0,
+                  "last_failure": 196,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 211,
+                  "feedback": 0,
+                  "last_failure": 211,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 226,
+                  "feedback": 0,
+                  "last_failure": 226,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          },
+          "never_probe": {
+            "utility": 0.0,
+            "failures": 0.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.9921610450931622,
+            "detection_given_open": 0.0,
+            "no_opening_by_horizon": {
+              "utility": 0,
+              "failures": 0,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 0,
+              "posterior_hazard_weights_given_last_failure": [
+                0.3333333333333333,
+                0.3333333333333333,
+                0.3333333333333333
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": []
+            }
+          },
+          "oracle_hazard": {
+            "utility": 182.32857387424468,
+            "failures": 4.423802925151961,
+            "successes": 186.75237679939664,
+            "probability_open_by_horizon": 0.9921610450931622,
+            "detection_given_open": 0.9982311398079987,
+            "no_opening_by_horizon": {
+              "utility": -23,
+              "failures": 23,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 230,
+              "posterior_hazard_weights_given_last_failure": [
+                0.609537970940598,
+                0.38461415280170336,
+                0.005847876257698522
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 10,
+                  "feedback": 0,
+                  "last_failure": 10,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 20,
+                  "feedback": 0,
+                  "last_failure": 20,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 30,
+                  "feedback": 0,
+                  "last_failure": 30,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 40,
+                  "feedback": 0,
+                  "last_failure": 40,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 50,
+                  "feedback": 0,
+                  "last_failure": 50,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 60,
+                  "feedback": 0,
+                  "last_failure": 60,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 70,
+                  "feedback": 0,
+                  "last_failure": 70,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 80,
+                  "feedback": 0,
+                  "last_failure": 80,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 90,
+                  "feedback": 0,
+                  "last_failure": 90,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 100,
+                  "feedback": 0,
+                  "last_failure": 100,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 110,
+                  "feedback": 0,
+                  "last_failure": 110,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 120,
+                  "feedback": 0,
+                  "last_failure": 120,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 130,
+                  "feedback": 0,
+                  "last_failure": 130,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 140,
+                  "feedback": 0,
+                  "last_failure": 140,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 150,
+                  "feedback": 0,
+                  "last_failure": 150,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 160,
+                  "feedback": 0,
+                  "last_failure": 160,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 170,
+                  "feedback": 0,
+                  "last_failure": 170,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 180,
+                  "feedback": 0,
+                  "last_failure": 180,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 190,
+                  "feedback": 0,
+                  "last_failure": 190,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 200,
+                  "feedback": 0,
+                  "last_failure": 200,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 210,
+                  "feedback": 0,
+                  "last_failure": 210,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 220,
+                  "feedback": 0,
+                  "last_failure": 220,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 230,
+                  "feedback": 0,
+                  "last_failure": 230,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          }
+        },
+        "0.08": {
+          "updated_mixture": {
+            "utility": 218.61829653522923,
+            "failures": 0.3426859913276653,
+            "successes": 218.96098252655688,
+            "probability_open_by_horizon": 0.9999999979625894,
+            "detection_given_open": 0.999999939839236,
+            "no_opening_by_horizon": {
+              "utility": -8,
+              "failures": 8,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 199,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5919467000500713,
+                0.39742970101736375,
+                0.010623598932564995
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 16,
+                  "feedback": 0,
+                  "last_failure": 16,
+                  "posterior_hazard_weights": [
+                    0.37143332042163624,
+                    0.3597240889050814,
+                    0.26884259067328237
+                  ]
+                },
+                {
+                  "time": 33,
+                  "feedback": 0,
+                  "last_failure": 33,
+                  "posterior_hazard_weights": [
+                    0.40825083482295277,
+                    0.38215095037348507,
+                    0.20959821480356214
+                  ]
+                },
+                {
+                  "time": 52,
+                  "feedback": 0,
+                  "last_failure": 52,
+                  "posterior_hazard_weights": [
+                    0.4442706831755949,
+                    0.4003462847978039,
+                    0.1553830320266012
+                  ]
+                },
+                {
+                  "time": 74,
+                  "feedback": 0,
+                  "last_failure": 74,
+                  "posterior_hazard_weights": [
+                    0.4792595993638343,
+                    0.4132671408768524,
+                    0.10747325975931327
+                  ]
+                },
+                {
+                  "time": 99,
+                  "feedback": 0,
+                  "last_failure": 99,
+                  "posterior_hazard_weights": [
+                    0.5113694569935682,
+                    0.4194289202670155,
+                    0.06920162273941631
+                  ]
+                },
+                {
+                  "time": 128,
+                  "feedback": 0,
+                  "last_failure": 128,
+                  "posterior_hazard_weights": [
+                    0.5407544169633232,
+                    0.41851339273368626,
+                    0.040732190302990495
+                  ]
+                },
+                {
+                  "time": 161,
+                  "feedback": 0,
+                  "last_failure": 161,
+                  "posterior_hazard_weights": [
+                    0.5671709963964591,
+                    0.41089528837632305,
+                    0.021933715227217793
+                  ]
+                },
+                {
+                  "time": 199,
+                  "feedback": 0,
+                  "last_failure": 199,
+                  "posterior_hazard_weights": [
+                    0.5919467000500713,
+                    0.39742970101736375,
+                    0.010623598932564995
+                  ]
+                }
+              ]
+            }
+          },
+          "frozen_hyperprior": {
+            "utility": 222.00974781477714,
+            "failures": 0.6653161277611578,
+            "successes": 222.67506394253832,
+            "probability_open_by_horizon": 0.9999999979625894,
+            "detection_given_open": 0.9999999936295506,
+            "no_opening_by_horizon": {
+              "utility": -18,
+              "failures": 18,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 223,
+              "posterior_hazard_weights_given_last_failure": [
+                0.6057121302864581,
+                0.38759393995948027,
+                0.006693929754061704
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 11,
+                  "feedback": 0,
+                  "last_failure": 11,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 22,
+                  "feedback": 0,
+                  "last_failure": 22,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 33,
+                  "feedback": 0,
+                  "last_failure": 33,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 44,
+                  "feedback": 0,
+                  "last_failure": 44,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 55,
+                  "feedback": 0,
+                  "last_failure": 55,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 66,
+                  "feedback": 0,
+                  "last_failure": 66,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 78,
+                  "feedback": 0,
+                  "last_failure": 78,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 90,
+                  "feedback": 0,
+                  "last_failure": 90,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 102,
+                  "feedback": 0,
+                  "last_failure": 102,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 114,
+                  "feedback": 0,
+                  "last_failure": 114,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 126,
+                  "feedback": 0,
+                  "last_failure": 126,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 138,
+                  "feedback": 0,
+                  "last_failure": 138,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 151,
+                  "feedback": 0,
+                  "last_failure": 151,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 164,
+                  "feedback": 0,
+                  "last_failure": 164,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 178,
+                  "feedback": 0,
+                  "last_failure": 178,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 192,
+                  "feedback": 0,
+                  "last_failure": 192,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 207,
+                  "feedback": 0,
+                  "last_failure": 207,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 223,
+                  "feedback": 0,
+                  "last_failure": 223,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                }
+              ]
+            }
+          },
+          "fixed_hazard_001": {
+            "utility": 220.2232231736477,
+            "failures": 0.451785114470768,
+            "successes": 220.67500828811848,
+            "probability_open_by_horizon": 0.9999999979625894,
+            "detection_given_open": 0.999999995490311,
+            "no_opening_by_horizon": {
+              "utility": -16,
+              "failures": 16,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 226,
+              "posterior_hazard_weights_given_last_failure": [
+                0.6073608552001277,
+                0.38632172256780445,
+                0.006317422232067768
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 14,
+                  "feedback": 0,
+                  "last_failure": 14,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 28,
+                  "feedback": 0,
+                  "last_failure": 28,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 42,
+                  "feedback": 0,
+                  "last_failure": 42,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 56,
+                  "feedback": 0,
+                  "last_failure": 56,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 70,
+                  "feedback": 0,
+                  "last_failure": 70,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 84,
+                  "feedback": 0,
+                  "last_failure": 84,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 98,
+                  "feedback": 0,
+                  "last_failure": 98,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 112,
+                  "feedback": 0,
+                  "last_failure": 112,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 126,
+                  "feedback": 0,
+                  "last_failure": 126,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 140,
+                  "feedback": 0,
+                  "last_failure": 140,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 154,
+                  "feedback": 0,
+                  "last_failure": 154,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 168,
+                  "feedback": 0,
+                  "last_failure": 168,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 182,
+                  "feedback": 0,
+                  "last_failure": 182,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 196,
+                  "feedback": 0,
+                  "last_failure": 196,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 211,
+                  "feedback": 0,
+                  "last_failure": 211,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 226,
+                  "feedback": 0,
+                  "last_failure": 226,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          },
+          "never_probe": {
+            "utility": 0.0,
+            "failures": 0.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.9999999979625894,
+            "detection_given_open": 0.0,
+            "no_opening_by_horizon": {
+              "utility": 0,
+              "failures": 0,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 0,
+              "posterior_hazard_weights_given_last_failure": [
+                0.3333333333333333,
+                0.3333333333333333,
+                0.3333333333333333
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": []
+            }
+          },
+          "oracle_hazard": {
+            "utility": 224.40048458174977,
+            "failures": 1.9332525727889436,
+            "successes": 226.3337371545387,
+            "probability_open_by_horizon": 0.9999999979625894,
+            "detection_given_open": 0.9999999994209452,
+            "no_opening_by_horizon": {
+              "utility": -48,
+              "failures": 48,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 237,
+              "posterior_hazard_weights_given_last_failure": [
+                0.6132935251070105,
+                0.38159850511852317,
+                0.005107969774466281
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 5,
+                  "feedback": 0,
+                  "last_failure": 5,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 10,
+                  "feedback": 0,
+                  "last_failure": 10,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 15,
+                  "feedback": 0,
+                  "last_failure": 15,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 20,
+                  "feedback": 0,
+                  "last_failure": 20,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 25,
+                  "feedback": 0,
+                  "last_failure": 25,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 30,
+                  "feedback": 0,
+                  "last_failure": 30,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 35,
+                  "feedback": 0,
+                  "last_failure": 35,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 40,
+                  "feedback": 0,
+                  "last_failure": 40,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 45,
+                  "feedback": 0,
+                  "last_failure": 45,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 50,
+                  "feedback": 0,
+                  "last_failure": 50,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 55,
+                  "feedback": 0,
+                  "last_failure": 55,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 60,
+                  "feedback": 0,
+                  "last_failure": 60,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 65,
+                  "feedback": 0,
+                  "last_failure": 65,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 70,
+                  "feedback": 0,
+                  "last_failure": 70,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 75,
+                  "feedback": 0,
+                  "last_failure": 75,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 80,
+                  "feedback": 0,
+                  "last_failure": 80,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 85,
+                  "feedback": 0,
+                  "last_failure": 85,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 90,
+                  "feedback": 0,
+                  "last_failure": 90,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 95,
+                  "feedback": 0,
+                  "last_failure": 95,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 100,
+                  "feedback": 0,
+                  "last_failure": 100,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 105,
+                  "feedback": 0,
+                  "last_failure": 105,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 110,
+                  "feedback": 0,
+                  "last_failure": 110,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 115,
+                  "feedback": 0,
+                  "last_failure": 115,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 120,
+                  "feedback": 0,
+                  "last_failure": 120,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 125,
+                  "feedback": 0,
+                  "last_failure": 125,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 130,
+                  "feedback": 0,
+                  "last_failure": 130,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 135,
+                  "feedback": 0,
+                  "last_failure": 135,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 140,
+                  "feedback": 0,
+                  "last_failure": 140,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 145,
+                  "feedback": 0,
+                  "last_failure": 145,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 150,
+                  "feedback": 0,
+                  "last_failure": 150,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 155,
+                  "feedback": 0,
+                  "last_failure": 155,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 160,
+                  "feedback": 0,
+                  "last_failure": 160,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 165,
+                  "feedback": 0,
+                  "last_failure": 165,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 170,
+                  "feedback": 0,
+                  "last_failure": 170,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 175,
+                  "feedback": 0,
+                  "last_failure": 175,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 180,
+                  "feedback": 0,
+                  "last_failure": 180,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 185,
+                  "feedback": 0,
+                  "last_failure": 185,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 190,
+                  "feedback": 0,
+                  "last_failure": 190,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 195,
+                  "feedback": 0,
+                  "last_failure": 195,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 200,
+                  "feedback": 0,
+                  "last_failure": 200,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 205,
+                  "feedback": 0,
+                  "last_failure": 205,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 210,
+                  "feedback": 0,
+                  "last_failure": 210,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 215,
+                  "feedback": 0,
+                  "last_failure": 215,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 220,
+                  "feedback": 0,
+                  "last_failure": 220,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 225,
+                  "feedback": 0,
+                  "last_failure": 225,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 229,
+                  "feedback": 0,
+                  "last_failure": 229,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 233,
+                  "feedback": 0,
+                  "last_failure": 233,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 237,
+                  "feedback": 0,
+                  "last_failure": 237,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          }
+        }
+      },
+      "exact_prior_average_utility": {
+        "updated_mixture": 69.5279585844809,
+        "frozen_hyperprior": 65.668642448018,
+        "fixed_hazard_001": 66.65404421071283,
+        "never_probe": 0.0,
+        "oracle_hazard": 73.59378005797295
+      },
+      "no_change_attempt_times": {
+        "updated_mixture": [
+          16,
+          33,
+          52,
+          74,
+          99,
+          128,
+          161,
+          199
+        ],
+        "frozen_hyperprior": [
+          11,
+          22,
+          33,
+          44,
+          55,
+          66,
+          78,
+          90,
+          102,
+          114,
+          126,
+          138,
+          151,
+          164,
+          178,
+          192,
+          207,
+          223
+        ],
+        "fixed_hazard_001": [
+          14,
+          28,
+          42,
+          56,
+          70,
+          84,
+          98,
+          112,
+          126,
+          140,
+          154,
+          168,
+          182,
+          196,
+          211,
+          226
+        ],
+        "never_probe": []
+      }
+    },
+    "20": {
+      "dp_optimal_prior_value": 37.3235853536564,
+      "hazard_conditions": {
+        "0.0": {
+          "updated_mixture": {
+            "utility": -20.0,
+            "failures": 1.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.0,
+            "detection_given_open": null,
+            "no_opening_by_horizon": {
+              "utility": -20,
+              "failures": 1,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 83,
+              "posterior_hazard_weights_given_last_failure": [
+                0.49167298769371487,
+                0.4164005321356757,
+                0.09192648017060945
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 83,
+                  "feedback": 0,
+                  "last_failure": 83,
+                  "posterior_hazard_weights": [
+                    0.49167298769371487,
+                    0.4164005321356757,
+                    0.09192648017060945
+                  ]
+                }
+              ]
+            }
+          },
+          "frozen_hyperprior": {
+            "utility": -60.0,
+            "failures": 3.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.0,
+            "detection_given_open": null,
+            "no_opening_by_horizon": {
+              "utility": -60,
+              "failures": 3,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 160,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5664510007556488,
+                0.4111960691870021,
+                0.022352930057349143
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 49,
+                  "feedback": 0,
+                  "last_failure": 49,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 101,
+                  "feedback": 0,
+                  "last_failure": 101,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 160,
+                  "feedback": 0,
+                  "last_failure": 160,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                }
+              ]
+            }
+          },
+          "fixed_hazard_001": {
+            "utility": -60.0,
+            "failures": 3.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.0,
+            "detection_given_open": null,
+            "no_opening_by_horizon": {
+              "utility": -60,
+              "failures": 3,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 178,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5788196173725454,
+                0.4053027878043687,
+                0.015877594823085935
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 58,
+                  "feedback": 0,
+                  "last_failure": 58,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 117,
+                  "feedback": 0,
+                  "last_failure": 117,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 178,
+                  "feedback": 0,
+                  "last_failure": 178,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          },
+          "never_probe": {
+            "utility": 0.0,
+            "failures": 0.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.0,
+            "detection_given_open": null,
+            "no_opening_by_horizon": {
+              "utility": 0,
+              "failures": 0,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 0,
+              "posterior_hazard_weights_given_last_failure": [
+                0.3333333333333333,
+                0.3333333333333333,
+                0.3333333333333333
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": []
+            }
+          },
+          "oracle_hazard": {
+            "utility": 0.0,
+            "failures": 0.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.0,
+            "detection_given_open": null,
+            "no_opening_by_horizon": {
+              "utility": 0,
+              "failures": 0,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 0,
+              "posterior_hazard_weights_given_last_failure": [
+                0.3333333333333333,
+                0.3333333333333333,
+                0.3333333333333333
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": []
+            }
+          }
+        },
+        "0.002": {
+          "updated_mixture": {
+            "utility": 7.250830175111195,
+            "failures": 0.8469054484544312,
+            "successes": 24.188939144199818,
+            "probability_open_by_horizon": 0.3815139493753813,
+            "detection_given_open": 0.40128166164360835,
+            "no_opening_by_horizon": {
+              "utility": -20,
+              "failures": 1,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 83,
+              "posterior_hazard_weights_given_last_failure": [
+                0.49167298769371487,
+                0.4164005321356757,
+                0.09192648017060945
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 83,
+                  "feedback": 0,
+                  "last_failure": 83,
+                  "posterior_hazard_weights": [
+                    0.49167298769371487,
+                    0.4164005321356757,
+                    0.09192648017060945
+                  ]
+                }
+              ]
+            }
+          },
+          "frozen_hyperprior": {
+            "utility": -11.12731557565386,
+            "failures": 2.4494060053258115,
+            "successes": 37.860804530862374,
+            "probability_open_by_horizon": 0.3815139493753813,
+            "detection_given_open": 0.7184104384171703,
+            "no_opening_by_horizon": {
+              "utility": -60,
+              "failures": 3,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 160,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5664510007556488,
+                0.4111960691870021,
+                0.022352930057349143
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 49,
+                  "feedback": 0,
+                  "last_failure": 49,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 101,
+                  "feedback": 0,
+                  "last_failure": 101,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 160,
+                  "feedback": 0,
+                  "last_failure": 160,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                }
+              ]
+            }
+          },
+          "fixed_hazard_001": {
+            "utility": -9.543167219065715,
+            "failures": 2.3817711714144383,
+            "successes": 38.09225620922305,
+            "probability_open_by_horizon": 0.3815139493753813,
+            "detection_given_open": 0.7857564238424419,
+            "no_opening_by_horizon": {
+              "utility": -60,
+              "failures": 3,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 178,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5788196173725454,
+                0.4053027878043687,
+                0.015877594823085935
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 58,
+                  "feedback": 0,
+                  "last_failure": 58,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 117,
+                  "feedback": 0,
+                  "last_failure": 117,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 178,
+                  "feedback": 0,
+                  "last_failure": 178,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          },
+          "never_probe": {
+            "utility": 0.0,
+            "failures": 0.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.3815139493753813,
+            "detection_given_open": 0.0,
+            "no_opening_by_horizon": {
+              "utility": 0,
+              "failures": 0,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 0,
+              "posterior_hazard_weights_given_last_failure": [
+                0.3333333333333333,
+                0.3333333333333333,
+                0.3333333333333333
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": []
+            }
+          },
+          "oracle_hazard": {
+            "utility": 10.121823837375365,
+            "failures": 0.7832962313857885,
+            "successes": 25.787748465091134,
+            "probability_open_by_horizon": 0.3815139493753813,
+            "detection_given_open": 0.5680100792356372,
+            "no_opening_by_horizon": {
+              "utility": -20,
+              "failures": 1,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 122,
+              "posterior_hazard_weights_given_last_failure": [
+                0.535237922715258,
+                0.41924984775761964,
+                0.04551222952712234
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 122,
+                  "feedback": 0,
+                  "last_failure": 122,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          }
+        },
+        "0.02": {
+          "updated_mixture": {
+            "utility": 124.71992588585785,
+            "failures": 0.18696670850641584,
+            "successes": 128.45926005598616,
+            "probability_open_by_horizon": 0.9921610450931622,
+            "detection_given_open": 0.8194569777905772,
+            "no_opening_by_horizon": {
+              "utility": -20,
+              "failures": 1,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 83,
+              "posterior_hazard_weights_given_last_failure": [
+                0.49167298769371487,
+                0.4164005321356757,
+                0.09192648017060945
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 83,
+                  "feedback": 0,
+                  "last_failure": 83,
+                  "posterior_hazard_weights": [
+                    0.49167298769371487,
+                    0.4164005321356757,
+                    0.09192648017060945
+                  ]
+                }
+              ]
+            }
+          },
+          "frozen_hyperprior": {
+            "utility": 150.99167261812562,
+            "failures": 0.5410302447903834,
+            "successes": 161.8122775139333,
+            "probability_open_by_horizon": 0.9921610450931622,
+            "detection_given_open": 0.9681277440910706,
+            "no_opening_by_horizon": {
+              "utility": -60,
+              "failures": 3,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 160,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5664510007556488,
+                0.4111960691870021,
+                0.022352930057349143
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 49,
+                  "feedback": 0,
+                  "last_failure": 49,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 101,
+                  "feedback": 0,
+                  "last_failure": 101,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 160,
+                  "feedback": 0,
+                  "last_failure": 160,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                }
+              ]
+            }
+          },
+          "fixed_hazard_001": {
+            "utility": 148.62761720453602,
+            "failures": 0.4313230248403949,
+            "successes": 157.2540777013439,
+            "probability_open_by_horizon": 0.9921610450931622,
+            "detection_given_open": 0.9802531709448417,
+            "no_opening_by_horizon": {
+              "utility": -60,
+              "failures": 3,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 178,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5788196173725454,
+                0.4053027878043687,
+                0.015877594823085935
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 58,
+                  "feedback": 0,
+                  "last_failure": 58,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 117,
+                  "feedback": 0,
+                  "last_failure": 117,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 178,
+                  "feedback": 0,
+                  "last_failure": 178,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          },
+          "never_probe": {
+            "utility": 0.0,
+            "failures": 0.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.9921610450931622,
+            "detection_given_open": 0.0,
+            "no_opening_by_horizon": {
+              "utility": 0,
+              "failures": 0,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 0,
+              "posterior_hazard_weights_given_last_failure": [
+                0.3333333333333333,
+                0.3333333333333333,
+                0.3333333333333333
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": []
+            }
+          },
+          "oracle_hazard": {
+            "utility": 153.60800196768838,
+            "failures": 0.8159461269043657,
+            "successes": 169.9269245057757,
+            "probability_open_by_horizon": 0.9921610450931622,
+            "detection_given_open": 0.98944305223306,
+            "no_opening_by_horizon": {
+              "utility": -100,
+              "failures": 5,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 198,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5913475110060693,
+                0.39782305495706993,
+                0.010829434036860739
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 39,
+                  "feedback": 0,
+                  "last_failure": 39,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 78,
+                  "feedback": 0,
+                  "last_failure": 78,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 117,
+                  "feedback": 0,
+                  "last_failure": 117,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 157,
+                  "feedback": 0,
+                  "last_failure": 157,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 198,
+                  "feedback": 0,
+                  "last_failure": 198,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          }
+        },
+        "0.08": {
+          "updated_mixture": {
+            "utility": 157.82428466210166,
+            "failures": 0.0009871648196540235,
+            "successes": 157.84402795849473,
+            "probability_open_by_horizon": 0.9999999979625894,
+            "detection_given_open": 0.9990128372157457,
+            "no_opening_by_horizon": {
+              "utility": -20,
+              "failures": 1,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 83,
+              "posterior_hazard_weights_given_last_failure": [
+                0.49167298769371487,
+                0.4164005321356757,
+                0.09192648017060945
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 83,
+                  "feedback": 0,
+                  "last_failure": 83,
+                  "posterior_hazard_weights": [
+                    0.49167298769371487,
+                    0.4164005321356757,
+                    0.09192648017060945
+                  ]
+                }
+              ]
+            }
+          },
+          "frozen_hyperprior": {
+            "utility": 190.77203191259952,
+            "failures": 0.017033068833486886,
+            "successes": 191.11269328926926,
+            "probability_open_by_horizon": 0.9999999979625894,
+            "detection_given_open": 0.9999983949023483,
+            "no_opening_by_horizon": {
+              "utility": -60,
+              "failures": 3,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 160,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5664510007556488,
+                0.4111960691870021,
+                0.022352930057349143
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 49,
+                  "feedback": 0,
+                  "last_failure": 49,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 101,
+                  "feedback": 0,
+                  "last_failure": 101,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                },
+                {
+                  "time": 160,
+                  "feedback": 0,
+                  "last_failure": 160,
+                  "posterior_hazard_weights": [
+                    0.3333333333333333,
+                    0.3333333333333333,
+                    0.3333333333333333
+                  ]
+                }
+              ]
+            }
+          },
+          "fixed_hazard_001": {
+            "utility": 182.36819769282826,
+            "failures": 0.007996011915924025,
+            "successes": 182.52811793114674,
+            "probability_open_by_horizon": 0.9999999979625894,
+            "detection_given_open": 0.9999996437485814,
+            "no_opening_by_horizon": {
+              "utility": -60,
+              "failures": 3,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 178,
+              "posterior_hazard_weights_given_last_failure": [
+                0.5788196173725454,
+                0.4053027878043687,
+                0.015877594823085935
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 58,
+                  "feedback": 0,
+                  "last_failure": 58,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 117,
+                  "feedback": 0,
+                  "last_failure": 117,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 178,
+                  "feedback": 0,
+                  "last_failure": 178,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          },
+          "never_probe": {
+            "utility": 0.0,
+            "failures": 0.0,
+            "successes": 0.0,
+            "probability_open_by_horizon": 0.9999999979625894,
+            "detection_given_open": 0.0,
+            "no_opening_by_horizon": {
+              "utility": 0,
+              "failures": 0,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 0,
+              "posterior_hazard_weights_given_last_failure": [
+                0.3333333333333333,
+                0.3333333333333333,
+                0.3333333333333333
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": []
+            }
+          },
+          "oracle_hazard": {
+            "utility": 212.1665827297297,
+            "failures": 0.31982208758025377,
+            "successes": 218.5630244813348,
+            "probability_open_by_horizon": 0.9999999979625894,
+            "detection_given_open": 0.9999999921037385,
+            "no_opening_by_horizon": {
+              "utility": -260,
+              "failures": 13,
+              "successes": 0,
+              "first_success": null,
+              "detected": false,
+              "last_failure": 221,
+              "posterior_hazard_weights_given_last_failure": [
+                0.6046050688284185,
+                0.3884377307933997,
+                0.0069572003781817925
+              ],
+              "posterior_diagnostic_scope": "conditional on last failure only; after success this is NOT the full-history posterior; policy does not use it after success",
+              "failure_events": [
+                {
+                  "time": 17,
+                  "feedback": 0,
+                  "last_failure": 17,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 34,
+                  "feedback": 0,
+                  "last_failure": 34,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 51,
+                  "feedback": 0,
+                  "last_failure": 51,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 68,
+                  "feedback": 0,
+                  "last_failure": 68,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 85,
+                  "feedback": 0,
+                  "last_failure": 85,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 102,
+                  "feedback": 0,
+                  "last_failure": 102,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 119,
+                  "feedback": 0,
+                  "last_failure": 119,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 136,
+                  "feedback": 0,
+                  "last_failure": 136,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 153,
+                  "feedback": 0,
+                  "last_failure": 153,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 170,
+                  "feedback": 0,
+                  "last_failure": 170,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 187,
+                  "feedback": 0,
+                  "last_failure": 187,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 204,
+                  "feedback": 0,
+                  "last_failure": 204,
+                  "posterior_hazard_weights": null
+                },
+                {
+                  "time": 221,
+                  "feedback": 0,
+                  "last_failure": 221,
+                  "posterior_hazard_weights": null
+                }
+              ]
+            }
+          }
+        }
+      },
+      "exact_prior_average_utility": {
+        "updated_mixture": 37.32358535365635,
+        "frozen_hyperprior": 26.621452347490585,
+        "fixed_hazard_001": 26.3614833284901,
+        "never_probe": 0.0,
+        "oracle_hazard": 54.57660860168791
+      },
+      "no_change_attempt_times": {
+        "updated_mixture": [
+          83
+        ],
+        "frozen_hyperprior": [
+          49,
+          101,
+          160
+        ],
+        "fixed_hazard_001": [
+          58,
+          117,
+          178
+        ],
+        "never_probe": []
+      }
+    }
+  },
+  "controls": {
+    "failure_times": [
+      10,
+      35,
+      90,
+      150
+    ],
+    "sequential_posterior_equals_latest_failure_sufficient_statistic": true,
+    "posterior_after_only_a_failure_at_150": [
+      0.559005322397019,
+      0.4139969446772717,
+      0.026997732925709107
+    ],
+    "posterior_after_failures_at_10_35_90_150": [
+      0.5590053223970192,
+      0.4139969446772717,
+      0.026997732925709114
+    ],
+    "finite_failure_does_not_prove_zero_hazard": true,
+    "waiting_without_feedback_keeps_model_weights_at_last_failure": true,
+    "failure_count_is_not_independent_evidence_count": true
+  },
+  "elapsed_seconds": 0.7294362001121044,
+  "source_sha256": "69d6ab972594ec54ef70880d71b207919ca3dc2f1f2ad2d9eb2ae50189132fc0"
+}

@@ -1,0 +1,5562 @@
+{
+  "experiment": "state_transport_and_future_sufficiency",
+  "source_sha256": "b8f48c93aa0ae2ff69ed02f872d9c54459ea5e2c1116f5219e435228acffd8bd",
+  "protocol": {
+    "seeds_per_regime": 32,
+    "pre_migration_experiences": 96,
+    "post_migration_experiences": 192,
+    "heldout_queries": 256,
+    "label_noise_sigma": 0.02,
+    "step_size": 0.04,
+    "A": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        3.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.25
+      ]
+    ],
+    "A_inverse": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.3333333333333333,
+        -1.3333333333333333
+      ],
+      [
+        0.0,
+        0.0,
+        4.0
+      ]
+    ],
+    "transported_metric": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.1111111111111111,
+        -0.4444444444444444
+      ],
+      [
+        0.0,
+        -0.4444444444444444,
+        17.77777777777778
+      ]
+    ],
+    "paired_random_streams": true,
+    "claim": "Equivalence of future update dynamics under reparameterization, not superiority of any optimizer.",
+    "resources": "All methods have 3 trainable weights. Full metric stores 9 numbers and uses dense 3x3 matvec; identity baseline does not need metric storage. Transform is supplied."
+  },
+  "regimes": {
+    "stationary_target": {
+      "runs": [
+        {
+          "seed": 0,
+          "before": {
+            "reference_mse": 0.03706307817505154,
+            "weights_transported_mse": 0.03706307817505157,
+            "unmapped_mse": 1.55108085369726,
+            "max_prediction_difference_after_transport": 4.440892098500626e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.379778343828551,
+            "weights_and_metric": 1.3322676295501878e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.03705613737657433,
+              "weights_only_mse": 0.03750772655228376,
+              "weights_and_metric_mse": 0.037056137376574344
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.02483276248216076,
+              "weights_only_mse": 0.021917334151476387,
+              "weights_and_metric_mse": 0.024832762482160813
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.009021960189894946,
+              "weights_only_mse": 0.024254757087808363,
+              "weights_and_metric_mse": 0.009021960189894982
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00013022112347462627,
+              "weights_only_mse": 0.016763234061639095,
+              "weights_and_metric_mse": 0.00013022112347462695
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              0.29534981648244096,
+              0.395558698357666,
+              -4.73155045981494
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 1,
+          "before": {
+            "reference_mse": 0.050712446086037026,
+            "weights_transported_mse": 0.050712446086037026,
+            "unmapped_mse": 1.3464331012161381,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.4814927060598384,
+            "weights_and_metric": 1.1102230246251565e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.05036706069721385,
+              "weights_only_mse": 0.05256179703097392,
+              "weights_and_metric_mse": 0.05036706069721385
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.032252902841720034,
+              "weights_only_mse": 0.035932085668728686,
+              "weights_and_metric_mse": 0.032252902841720055
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.01268206845568357,
+              "weights_only_mse": 0.03534673561929445,
+              "weights_and_metric_mse": 0.012682068455683627
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00031990671596948987,
+              "weights_only_mse": 0.0267923101830714,
+              "weights_and_metric_mse": 0.00031990671596948683
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              0.2946140844978647,
+              0.391328063964274,
+              -4.711359451620501
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 2,
+          "before": {
+            "reference_mse": 0.06806164078630246,
+            "weights_transported_mse": 0.06806164078630246,
+            "unmapped_mse": 1.469599529194754,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.5711039978852107,
+            "weights_and_metric": 1.5543122344752192e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.06746203054301289,
+              "weights_only_mse": 0.0687213260587699,
+              "weights_and_metric_mse": 0.06746203054301286
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.0373920006759012,
+              "weights_only_mse": 0.050560370941996405,
+              "weights_and_metric_mse": 0.03739200067590121
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.009135772729975648,
+              "weights_only_mse": 0.05050884104432929,
+              "weights_and_metric_mse": 0.009135772729975608
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00011620391006726457,
+              "weights_only_mse": 0.036099264062483594,
+              "weights_and_metric_mse": 0.00011620391006725845
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              0.2966424125261079,
+              0.3967476129418302,
+              -4.725285486263411
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 3,
+          "before": {
+            "reference_mse": 0.044274590745237714,
+            "weights_transported_mse": 0.044274590745237714,
+            "unmapped_mse": 1.43906065549005,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.4007029042212913,
+            "weights_and_metric": 1.2212453270876722e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.04406126046652159,
+              "weights_only_mse": 0.047916086312006,
+              "weights_and_metric_mse": 0.04406126046652159
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.029180441347227394,
+              "weights_only_mse": 0.028615295156627824,
+              "weights_and_metric_mse": 0.029180441347227384
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.00763417898592349,
+              "weights_only_mse": 0.023779316754844168,
+              "weights_and_metric_mse": 0.007634178985923448
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00018940342981913283,
+              "weights_only_mse": 0.02096319304036036,
+              "weights_and_metric_mse": 0.00018940342981913795
+            }
+          ],
+          "json_restored_next_update_max_difference": 6.661338147750939e-16,
+          "persisted_state": {
+            "weights": [
+              0.3000458723495698,
+              0.3946499432353542,
+              -4.719669857301013
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 4,
+          "before": {
+            "reference_mse": 0.051798216434914925,
+            "weights_transported_mse": 0.051798216434914945,
+            "unmapped_mse": 1.386215111084689,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.3587602412265647,
+            "weights_and_metric": 1.6653345369377348e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.05176598649906499,
+              "weights_only_mse": 0.05097095138897395,
+              "weights_and_metric_mse": 0.051765986499065
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.031941112927882556,
+              "weights_only_mse": 0.026133447403186755,
+              "weights_and_metric_mse": 0.031941112927882466
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.010681928563546567,
+              "weights_only_mse": 0.031976081542568625,
+              "weights_and_metric_mse": 0.01068192856354658
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0005458458293823598,
+              "weights_only_mse": 0.025516266156997217,
+              "weights_and_metric_mse": 0.0005458458293823553
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.996003610813204e-16,
+          "persisted_state": {
+            "weights": [
+              0.29616828639955056,
+              0.3896138148682565,
+              -4.665418369003251
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 5,
+          "before": {
+            "reference_mse": 0.09026684768720887,
+            "weights_transported_mse": 0.09026684768720891,
+            "unmapped_mse": 1.2080235883001702,
+            "max_prediction_difference_after_transport": 2.7755575615628914e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.6108278210055431,
+            "weights_and_metric": 1.3322676295501878e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.08955376867420561,
+              "weights_only_mse": 0.09069047327963284,
+              "weights_and_metric_mse": 0.08955376867420563
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.07347409539415015,
+              "weights_only_mse": 0.06780278853053653,
+              "weights_and_metric_mse": 0.0734740953941502
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.014564287124645676,
+              "weights_only_mse": 0.06133692361915621,
+              "weights_and_metric_mse": 0.014564287124645773
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0004459453520655648,
+              "weights_only_mse": 0.052702159429458856,
+              "weights_and_metric_mse": 0.00044594535206557347
+            }
+          ],
+          "json_restored_next_update_max_difference": 6.661338147750939e-16,
+          "persisted_state": {
+            "weights": [
+              0.2930084710072305,
+              0.39137120903049544,
+              -4.6852466247477365
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 6,
+          "before": {
+            "reference_mse": 0.049507585845590514,
+            "weights_transported_mse": 0.049507585845590535,
+            "unmapped_mse": 1.3917810036251927,
+            "max_prediction_difference_after_transport": 2.7755575615628914e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.4732033005808831,
+            "weights_and_metric": 1.3322676295501878e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.04946248215417756,
+              "weights_only_mse": 0.05156617024773141,
+              "weights_and_metric_mse": 0.04946248215417759
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.03410059288366071,
+              "weights_only_mse": 0.034696820181297494,
+              "weights_and_metric_mse": 0.034100592883660755
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.010395210046907351,
+              "weights_only_mse": 0.029873622154925745,
+              "weights_and_metric_mse": 0.010395210046907341
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0003076381069063179,
+              "weights_only_mse": 0.028459529544429298,
+              "weights_and_metric_mse": 0.00030763810690632933
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              0.29389733248789196,
+              0.3929967868850678,
+              -4.696553982175407
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 7,
+          "before": {
+            "reference_mse": 0.04293879422041115,
+            "weights_transported_mse": 0.04293879422041114,
+            "unmapped_mse": 1.4076775988689807,
+            "max_prediction_difference_after_transport": 2.7755575615628914e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.3400533859642261,
+            "weights_and_metric": 1.7763568394002505e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.04288022733866744,
+              "weights_only_mse": 0.042299696078201096,
+              "weights_and_metric_mse": 0.04288022733866744
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.025489664313211365,
+              "weights_only_mse": 0.027958441975967592,
+              "weights_and_metric_mse": 0.02548966431321129
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.0065211643723152215,
+              "weights_only_mse": 0.024846660896481576,
+              "weights_and_metric_mse": 0.006521164372315241
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00012195121538323243,
+              "weights_only_mse": 0.02212063468243898,
+              "weights_and_metric_mse": 0.00012195121538322659
+            }
+          ],
+          "json_restored_next_update_max_difference": 6.661338147750939e-16,
+          "persisted_state": {
+            "weights": [
+              0.30115614928831996,
+              0.39530211780181634,
+              -4.729238222875499
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 8,
+          "before": {
+            "reference_mse": 0.06317502693317739,
+            "weights_transported_mse": 0.0631750269331774,
+            "unmapped_mse": 1.4185231818852284,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.6777289323463274,
+            "weights_and_metric": 1.3322676295501878e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.06312147494569835,
+              "weights_only_mse": 0.06181485443644523,
+              "weights_and_metric_mse": 0.06312147494569835
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.030394775851447012,
+              "weights_only_mse": 0.046913234707793815,
+              "weights_and_metric_mse": 0.03039477585144705
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.006703467623151069,
+              "weights_only_mse": 0.03866811197202657,
+              "weights_and_metric_mse": 0.0067034676231510154
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0002897373992602583,
+              "weights_only_mse": 0.03126820682234321,
+              "weights_and_metric_mse": 0.00028973739926025206
+            }
+          ],
+          "json_restored_next_update_max_difference": 7.771561172376096e-16,
+          "persisted_state": {
+            "weights": [
+              0.3056079074128504,
+              0.39241818211451474,
+              -4.715243021125497
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 9,
+          "before": {
+            "reference_mse": 0.052505539248964804,
+            "weights_transported_mse": 0.05250553924896483,
+            "unmapped_mse": 1.4097716185951992,
+            "max_prediction_difference_after_transport": 4.440892098500626e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.4680445064517029,
+            "weights_and_metric": 1.1102230246251565e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.052272461155149975,
+              "weights_only_mse": 0.04650546888335343,
+              "weights_and_metric_mse": 0.05227246115515
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.04116029705264996,
+              "weights_only_mse": 0.038251014030171594,
+              "weights_and_metric_mse": 0.04116029705265003
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.010750353621037585,
+              "weights_only_mse": 0.03446645622066541,
+              "weights_and_metric_mse": 0.010750353621037555
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0005444082986054171,
+              "weights_only_mse": 0.030117474252300658,
+              "weights_and_metric_mse": 0.0005444082986054056
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              0.29860082582438935,
+              0.3884460357998216,
+              -4.683630430803331
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 10,
+          "before": {
+            "reference_mse": 0.03836094369142012,
+            "weights_transported_mse": 0.03836094369142014,
+            "unmapped_mse": 1.780229846771169,
+            "max_prediction_difference_after_transport": 3.885780586188048e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.334072813561482,
+            "weights_and_metric": 1.3322676295501878e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.0382603908593868,
+              "weights_only_mse": 0.03953083282889665,
+              "weights_and_metric_mse": 0.038260390859386824
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.02835753584255516,
+              "weights_only_mse": 0.02774686834711308,
+              "weights_and_metric_mse": 0.028357535842555192
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.008721733966820392,
+              "weights_only_mse": 0.02591832633101752,
+              "weights_and_metric_mse": 0.008721733966820413
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0003742689573995479,
+              "weights_only_mse": 0.021820946096720948,
+              "weights_and_metric_mse": 0.0003742689573995525
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.996003610813204e-16,
+          "persisted_state": {
+            "weights": [
+              0.29969118064296957,
+              0.39140627854632304,
+              -4.6765312242043136
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 11,
+          "before": {
+            "reference_mse": 0.03700472889384686,
+            "weights_transported_mse": 0.03700472889384686,
+            "unmapped_mse": 1.6635714943293332,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.2871744059162768,
+            "weights_and_metric": 1.5543122344752192e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.03491680962226697,
+              "weights_only_mse": 0.03407787250834631,
+              "weights_and_metric_mse": 0.034916809622266974
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.024214621243764597,
+              "weights_only_mse": 0.013056890999389288,
+              "weights_and_metric_mse": 0.024214621243764573
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.008491571351176827,
+              "weights_only_mse": 0.012088323197762922,
+              "weights_and_metric_mse": 0.008491571351176746
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00032595443281994676,
+              "weights_only_mse": 0.010724365874144647,
+              "weights_and_metric_mse": 0.0003259544328199468
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              0.29953339746932295,
+              0.39014279692608755,
+              -4.72755418434132
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 12,
+          "before": {
+            "reference_mse": 0.07122855857682217,
+            "weights_transported_mse": 0.07122855857682217,
+            "unmapped_mse": 1.4079900821246203,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.4614917914879799,
+            "weights_and_metric": 1.7763568394002505e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.06776120196141913,
+              "weights_only_mse": 0.058790046659510056,
+              "weights_and_metric_mse": 0.06776120196141915
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.04958151261779651,
+              "weights_only_mse": 0.05516120189304221,
+              "weights_and_metric_mse": 0.04958151261779651
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.014283773959512799,
+              "weights_only_mse": 0.050298023421948855,
+              "weights_and_metric_mse": 0.014283773959512852
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.000513191832059515,
+              "weights_only_mse": 0.04315184118336793,
+              "weights_and_metric_mse": 0.0005131918320595396
+            }
+          ],
+          "json_restored_next_update_max_difference": 1.3322676295501878e-15,
+          "persisted_state": {
+            "weights": [
+              0.29412016510120703,
+              0.38962464894611776,
+              -4.674862946585639
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 13,
+          "before": {
+            "reference_mse": 0.05405130126447589,
+            "weights_transported_mse": 0.0540513012644759,
+            "unmapped_mse": 1.637534471749694,
+            "max_prediction_difference_after_transport": 2.7755575615628914e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.5019919589281967,
+            "weights_and_metric": 2.220446049250313e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.05180752867206875,
+              "weights_only_mse": 0.042394917730869106,
+              "weights_and_metric_mse": 0.05180752867206873
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.03963591562326425,
+              "weights_only_mse": 0.03860701558388228,
+              "weights_and_metric_mse": 0.039635915623264205
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.012016490188209078,
+              "weights_only_mse": 0.036883344739227414,
+              "weights_and_metric_mse": 0.01201649018820904
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00047780070033251915,
+              "weights_only_mse": 0.033557880259813745,
+              "weights_and_metric_mse": 0.0004778007003325369
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              0.29791613835577624,
+              0.3915203722224755,
+              -4.655616096967445
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 14,
+          "before": {
+            "reference_mse": 0.04086989444776009,
+            "weights_transported_mse": 0.0408698944477601,
+            "unmapped_mse": 1.4602953760401212,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.42807380946848755,
+            "weights_and_metric": 1.0547118733938987e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.03915227374458474,
+              "weights_only_mse": 0.02669218484297296,
+              "weights_and_metric_mse": 0.039152273744584756
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.025051766800056337,
+              "weights_only_mse": 0.0178984740429854,
+              "weights_and_metric_mse": 0.025051766800056354
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.0053102696329098385,
+              "weights_only_mse": 0.017426527933555595,
+              "weights_and_metric_mse": 0.0053102696329098125
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00021989155927325596,
+              "weights_only_mse": 0.014742168537378211,
+              "weights_and_metric_mse": 0.00021989155927325667
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              0.29948478046354654,
+              0.3921514890957205,
+              -4.736270445711285
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 15,
+          "before": {
+            "reference_mse": 0.04271405118667692,
+            "weights_transported_mse": 0.04271405118667692,
+            "unmapped_mse": 1.624046949527734,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.41659449086229866,
+            "weights_and_metric": 1.7763568394002505e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.04237661020583025,
+              "weights_only_mse": 0.0373060745182709,
+              "weights_and_metric_mse": 0.042376610205830244
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.021277443582641522,
+              "weights_only_mse": 0.02504862024686909,
+              "weights_and_metric_mse": 0.02127744358264156
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.006752709348637468,
+              "weights_only_mse": 0.02412778265036949,
+              "weights_and_metric_mse": 0.006752709348637508
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0001823869860434419,
+              "weights_only_mse": 0.021883043870878093,
+              "weights_and_metric_mse": 0.0001823869860434558
+            }
+          ],
+          "json_restored_next_update_max_difference": 1.3322676295501878e-15,
+          "persisted_state": {
+            "weights": [
+              0.30782801083330924,
+              0.39358072972303254,
+              -4.735552275527984
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 16,
+          "before": {
+            "reference_mse": 0.052324658001368776,
+            "weights_transported_mse": 0.052324658001368776,
+            "unmapped_mse": 1.5107464835308941,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.39092223634900797,
+            "weights_and_metric": 1.5543122344752192e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.0522827614135779,
+              "weights_only_mse": 0.052168357961156264,
+              "weights_and_metric_mse": 0.05228276141357789
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.030142137476223005,
+              "weights_only_mse": 0.03241930134400896,
+              "weights_and_metric_mse": 0.030142137476223078
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.010913317118597216,
+              "weights_only_mse": 0.03199138642185273,
+              "weights_and_metric_mse": 0.010913317118597256
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0004010394121869365,
+              "weights_only_mse": 0.025967700090595337,
+              "weights_and_metric_mse": 0.0004010394121869475
+            }
+          ],
+          "json_restored_next_update_max_difference": 1.1102230246251565e-15,
+          "persisted_state": {
+            "weights": [
+              0.29028437310604827,
+              0.3931865865239588,
+              -4.6853246711204966
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 17,
+          "before": {
+            "reference_mse": 0.051356078771598423,
+            "weights_transported_mse": 0.051356078771598444,
+            "unmapped_mse": 1.3640315328681696,
+            "max_prediction_difference_after_transport": 4.440892098500626e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.4266956708673892,
+            "weights_and_metric": 1.7763568394002505e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.05052525858375057,
+              "weights_only_mse": 0.050199865791624755,
+              "weights_and_metric_mse": 0.05052525858375059
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.03509879058880753,
+              "weights_only_mse": 0.04357474893622376,
+              "weights_and_metric_mse": 0.03509879058880752
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.010468510984332838,
+              "weights_only_mse": 0.029916993151072317,
+              "weights_and_metric_mse": 0.010468510984332862
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0004558506624881849,
+              "weights_only_mse": 0.03136657000496153,
+              "weights_and_metric_mse": 0.00045585066248821906
+            }
+          ],
+          "json_restored_next_update_max_difference": 1.9984014443252818e-15,
+          "persisted_state": {
+            "weights": [
+              0.29621931259012463,
+              0.39018932069253937,
+              -4.689327611750838
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 18,
+          "before": {
+            "reference_mse": 0.029316491218843412,
+            "weights_transported_mse": 0.02931649121884343,
+            "unmapped_mse": 1.9642230778760514,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.33000578663066743,
+            "weights_and_metric": 1.6653345369377348e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.027204245754586118,
+              "weights_only_mse": 0.02469839173582556,
+              "weights_and_metric_mse": 0.02720424575458613
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.020323423578383525,
+              "weights_only_mse": 0.026628636250597054,
+              "weights_and_metric_mse": 0.020323423578383584
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.005887754723666774,
+              "weights_only_mse": 0.02098115783977928,
+              "weights_and_metric_mse": 0.005887754723666817
+            },
+            {
+              "step": 192,
+              "reference_mse": 7.378382887749741e-05,
+              "weights_only_mse": 0.017341477933667016,
+              "weights_and_metric_mse": 7.378382887750264e-05
+            }
+          ],
+          "json_restored_next_update_max_difference": 1.1102230246251565e-15,
+          "persisted_state": {
+            "weights": [
+              0.30182003142921615,
+              0.39583905210029996,
+              -4.750737341110194
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 19,
+          "before": {
+            "reference_mse": 0.08845742548710228,
+            "weights_transported_mse": 0.08845742548710227,
+            "unmapped_mse": 1.115779869211721,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.5172038403610487,
+            "weights_and_metric": 1.5543122344752192e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.0803961614786764,
+              "weights_only_mse": 0.06681646773024412,
+              "weights_and_metric_mse": 0.0803961614786764
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.0561804235419265,
+              "weights_only_mse": 0.056133598815617296,
+              "weights_and_metric_mse": 0.05618042354192639
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.014215218943578077,
+              "weights_only_mse": 0.05044948986882848,
+              "weights_and_metric_mse": 0.014215218943578056
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0005359727495863693,
+              "weights_only_mse": 0.04381973212531343,
+              "weights_and_metric_mse": 0.0005359727495863699
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              0.2990099109676223,
+              0.3904419153570337,
+              -4.665254930845256
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 20,
+          "before": {
+            "reference_mse": 0.06151466935173979,
+            "weights_transported_mse": 0.06151466935173979,
+            "unmapped_mse": 1.3969792712166187,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.42221535545811456,
+            "weights_and_metric": 1.3322676295501878e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.05968282175056007,
+              "weights_only_mse": 0.04902775500566798,
+              "weights_and_metric_mse": 0.05968282175056005
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.04843009656692965,
+              "weights_only_mse": 0.03318350896791376,
+              "weights_and_metric_mse": 0.04843009656692966
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.013072860086749034,
+              "weights_only_mse": 0.02580547629056483,
+              "weights_and_metric_mse": 0.013072860086748959
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00047046076990459664,
+              "weights_only_mse": 0.019413049140870706,
+              "weights_and_metric_mse": 0.0004704607699046028
+            }
+          ],
+          "json_restored_next_update_max_difference": 6.661338147750939e-16,
+          "persisted_state": {
+            "weights": [
+              0.30971091733182937,
+              0.3894690606786981,
+              -4.716987171079125
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 21,
+          "before": {
+            "reference_mse": 0.0528559695902983,
+            "weights_transported_mse": 0.05285596959029833,
+            "unmapped_mse": 1.2574078438498346,
+            "max_prediction_difference_after_transport": 4.440892098500626e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.39594278751505707,
+            "weights_and_metric": 2.1094237467877974e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.051689784723183065,
+              "weights_only_mse": 0.053706788713901374,
+              "weights_and_metric_mse": 0.05168978472318311
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.03578635753642021,
+              "weights_only_mse": 0.026995838777055265,
+              "weights_and_metric_mse": 0.03578635753642025
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.010128647413267742,
+              "weights_only_mse": 0.025591849282041196,
+              "weights_and_metric_mse": 0.010128647413267803
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00026036096756952207,
+              "weights_only_mse": 0.022620705723640444,
+              "weights_and_metric_mse": 0.0002603609675695363
+            }
+          ],
+          "json_restored_next_update_max_difference": 1.887379141862766e-15,
+          "persisted_state": {
+            "weights": [
+              0.2942307404723165,
+              0.39367085852129,
+              -4.707076301169412
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 22,
+          "before": {
+            "reference_mse": 0.040454888668004854,
+            "weights_transported_mse": 0.040454888668004875,
+            "unmapped_mse": 1.5058444612807327,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.2868566678625968,
+            "weights_and_metric": 1.7763568394002505e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.03893147971619254,
+              "weights_only_mse": 0.03892406415836682,
+              "weights_and_metric_mse": 0.03893147971619256
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.030849638090501383,
+              "weights_only_mse": 0.020206737318758067,
+              "weights_and_metric_mse": 0.030849638090501355
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.012215443962684007,
+              "weights_only_mse": 0.018325075445026883,
+              "weights_and_metric_mse": 0.012215443962684073
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0006451141945232234,
+              "weights_only_mse": 0.01459160489039507,
+              "weights_and_metric_mse": 0.0006451141945232193
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              0.30567096326219284,
+              0.38963285545701626,
+              -4.643258197951586
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 23,
+          "before": {
+            "reference_mse": 0.07204711396827004,
+            "weights_transported_mse": 0.07204711396827004,
+            "unmapped_mse": 1.240887766859039,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.6709134622075902,
+            "weights_and_metric": 2.1094237467877974e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.07093343449630637,
+              "weights_only_mse": 0.07758789148724209,
+              "weights_and_metric_mse": 0.0709334344963064
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.05273329558561806,
+              "weights_only_mse": 0.04376753761127042,
+              "weights_and_metric_mse": 0.05273329558561813
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.010474995513410969,
+              "weights_only_mse": 0.033250275462132634,
+              "weights_and_metric_mse": 0.010474995513410917
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00022444188291373515,
+              "weights_only_mse": 0.026082720584613247,
+              "weights_and_metric_mse": 0.00022444188291375342
+            }
+          ],
+          "json_restored_next_update_max_difference": 2.3314683517128287e-15,
+          "persisted_state": {
+            "weights": [
+              0.299457195666377,
+              0.3919412592273202,
+              -4.752913148943242
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 24,
+          "before": {
+            "reference_mse": 0.07882991267878757,
+            "weights_transported_mse": 0.07882991267878758,
+            "unmapped_mse": 1.443639317461162,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.5013825560576621,
+            "weights_and_metric": 1.6653345369377348e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.0787364642080812,
+              "weights_only_mse": 0.07165175346669049,
+              "weights_and_metric_mse": 0.07873646420808121
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.05288256390650019,
+              "weights_only_mse": 0.05688863470968224,
+              "weights_and_metric_mse": 0.052882563906500195
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.01528969423057646,
+              "weights_only_mse": 0.05265284005248544,
+              "weights_and_metric_mse": 0.015289694230576396
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0007441015735880432,
+              "weights_only_mse": 0.044895408927168964,
+              "weights_and_metric_mse": 0.0007441015735880374
+            }
+          ],
+          "json_restored_next_update_max_difference": 7.771561172376096e-16,
+          "persisted_state": {
+            "weights": [
+              0.29542063575333044,
+              0.390219046802051,
+              -4.616696985702205
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 25,
+          "before": {
+            "reference_mse": 0.05298982533219065,
+            "weights_transported_mse": 0.05298982533219067,
+            "unmapped_mse": 1.5935562312961815,
+            "max_prediction_difference_after_transport": 3.3306690738754696e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.3701679886714379,
+            "weights_and_metric": 1.4988010832439613e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.05289266390462955,
+              "weights_only_mse": 0.05233297320322215,
+              "weights_and_metric_mse": 0.05289266390462959
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.03545088342852629,
+              "weights_only_mse": 0.034130003546375236,
+              "weights_and_metric_mse": 0.035450883428526356
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.012780216703285658,
+              "weights_only_mse": 0.028814795765231306,
+              "weights_and_metric_mse": 0.012780216703285722
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0001960183717476638,
+              "weights_only_mse": 0.025548614136230854,
+              "weights_and_metric_mse": 0.00019601837174767017
+            }
+          ],
+          "json_restored_next_update_max_difference": 1.3322676295501878e-15,
+          "persisted_state": {
+            "weights": [
+              0.2988187877725938,
+              0.39376246646762,
+              -4.718389592041551
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 26,
+          "before": {
+            "reference_mse": 0.04845033385974114,
+            "weights_transported_mse": 0.048450333859741165,
+            "unmapped_mse": 1.4961296983767212,
+            "max_prediction_difference_after_transport": 3.3306690738754696e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.3503673475493527,
+            "weights_and_metric": 1.1102230246251565e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.04647509226717013,
+              "weights_only_mse": 0.04586091907671774,
+              "weights_and_metric_mse": 0.046475092267170136
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.036672203307563864,
+              "weights_only_mse": 0.02875093447659787,
+              "weights_and_metric_mse": 0.03667220330756381
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.009847528177260666,
+              "weights_only_mse": 0.02369028054628819,
+              "weights_and_metric_mse": 0.009847528177260697
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0004177215009658144,
+              "weights_only_mse": 0.023981193393013744,
+              "weights_and_metric_mse": 0.00041772150096581264
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              0.3054074326216056,
+              0.39175073155083506,
+              -4.678947397656388
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 27,
+          "before": {
+            "reference_mse": 0.053763946213512305,
+            "weights_transported_mse": 0.053763946213512305,
+            "unmapped_mse": 1.564653998569513,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.5070435236673678,
+            "weights_and_metric": 1.3322676295501878e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.05329805933382357,
+              "weights_only_mse": 0.05141146487206836,
+              "weights_and_metric_mse": 0.05329805933382358
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.046621996200452244,
+              "weights_only_mse": 0.052574760717853164,
+              "weights_and_metric_mse": 0.04662199620045228
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.013325842222602712,
+              "weights_only_mse": 0.04047219804498614,
+              "weights_and_metric_mse": 0.013325842222602736
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00024101474994736526,
+              "weights_only_mse": 0.03260856431542073,
+              "weights_and_metric_mse": 0.0002410147499473661
+            }
+          ],
+          "json_restored_next_update_max_difference": 7.216449660063518e-16,
+          "persisted_state": {
+            "weights": [
+              0.302517591301199,
+              0.3942279483609084,
+              -4.690558858757729
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 28,
+          "before": {
+            "reference_mse": 0.04789953832366089,
+            "weights_transported_mse": 0.047899538323660916,
+            "unmapped_mse": 1.4278330177019736,
+            "max_prediction_difference_after_transport": 2.7755575615628914e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.4474944130930674,
+            "weights_and_metric": 1.8318679906315083e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.04509804332255887,
+              "weights_only_mse": 0.03754980287642055,
+              "weights_and_metric_mse": 0.045098043322558894
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.03399660509462989,
+              "weights_only_mse": 0.025169935138499754,
+              "weights_and_metric_mse": 0.033996605094629935
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.007353060598783534,
+              "weights_only_mse": 0.02512078210667578,
+              "weights_and_metric_mse": 0.007353060598783581
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0001926814030676578,
+              "weights_only_mse": 0.018179574507870434,
+              "weights_and_metric_mse": 0.00019268140306765645
+            }
+          ],
+          "json_restored_next_update_max_difference": 6.661338147750939e-16,
+          "persisted_state": {
+            "weights": [
+              0.30538709807358183,
+              0.3930379411138313,
+              -4.7327149659148064
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 29,
+          "before": {
+            "reference_mse": 0.09863685625086824,
+            "weights_transported_mse": 0.09863685625086828,
+            "unmapped_mse": 1.128084640519128,
+            "max_prediction_difference_after_transport": 3.3306690738754696e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.5160403979275752,
+            "weights_and_metric": 1.7763568394002505e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.08736228794383376,
+              "weights_only_mse": 0.08521795874741239,
+              "weights_and_metric_mse": 0.0873622879438338
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.06601407435813385,
+              "weights_only_mse": 0.07086403400217237,
+              "weights_and_metric_mse": 0.06601407435813379
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.017621509405858108,
+              "weights_only_mse": 0.05990789905171112,
+              "weights_and_metric_mse": 0.017621509405858098
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.000546554472228089,
+              "weights_only_mse": 0.055200005950489,
+              "weights_and_metric_mse": 0.000546554472228083
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              0.30156200965481395,
+              0.3893681480500751,
+              -4.668054808298055
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 30,
+          "before": {
+            "reference_mse": 0.054528365024745805,
+            "weights_transported_mse": 0.054528365024745826,
+            "unmapped_mse": 1.5303210295304221,
+            "max_prediction_difference_after_transport": 4.440892098500626e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.4342914049083889,
+            "weights_and_metric": 1.2212453270876722e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.049817760181931806,
+              "weights_only_mse": 0.045413052611722904,
+              "weights_and_metric_mse": 0.04981776018193184
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.041240124030531816,
+              "weights_only_mse": 0.045354198779727094,
+              "weights_and_metric_mse": 0.04124012403053185
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.008460979075914477,
+              "weights_only_mse": 0.034208023566255664,
+              "weights_and_metric_mse": 0.00846097907591446
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.000344669595340626,
+              "weights_only_mse": 0.028350592884399367,
+              "weights_and_metric_mse": 0.00034466959534062714
+            }
+          ],
+          "json_restored_next_update_max_difference": 1.2212453270876722e-15,
+          "persisted_state": {
+            "weights": [
+              0.30278335183017646,
+              0.3910578990858677,
+              -4.6960856994405615
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 31,
+          "before": {
+            "reference_mse": 0.039378325871390306,
+            "weights_transported_mse": 0.03937832587139032,
+            "unmapped_mse": 1.4036778724163275,
+            "max_prediction_difference_after_transport": 3.3306690738754696e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 0.34913862583516764,
+            "weights_and_metric": 1.6653345369377348e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 0.03914547324663723,
+              "weights_only_mse": 0.04144599141421933,
+              "weights_and_metric_mse": 0.03914547324663723
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.02908302987255911,
+              "weights_only_mse": 0.023591968683133565,
+              "weights_and_metric_mse": 0.029083029872559125
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.007326801812818998,
+              "weights_only_mse": 0.018642865357084194,
+              "weights_and_metric_mse": 0.007326801812819035
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.00038848740625929885,
+              "weights_only_mse": 0.01735251861380177,
+              "weights_and_metric_mse": 0.00038848740625930123
+            }
+          ],
+          "json_restored_next_update_max_difference": 9.43689570931383e-16,
+          "persisted_state": {
+            "weights": [
+              0.29622952349021675,
+              0.39293994419461564,
+              -4.672993785177116
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        }
+      ],
+      "summary": {
+        "initial_prediction_difference": {
+          "mean": 2.8449465006019636e-16,
+          "min": 2.220446049250313e-16,
+          "max": 4.440892098500626e-16,
+          "paired_seed_mean_normal_ci95": [
+            2.5569595085772115e-16,
+            3.132933492626716e-16
+          ]
+        },
+        "weight_only_trajectory_max_difference": {
+          "mean": 0.440868046086136,
+          "min": 0.2868566678625968,
+          "max": 0.6777289323463274,
+          "paired_seed_mean_normal_ci95": [
+            0.40662572368444255,
+            0.47511036848782945
+          ]
+        },
+        "full_transport_trajectory_max_difference": {
+          "mean": 1.5456386170953351e-15,
+          "min": 1.0547118733938987e-15,
+          "max": 2.220446049250313e-15,
+          "paired_seed_mean_normal_ci95": [
+            1.4398272018003094e-15,
+            1.6514500323903608e-15
+          ]
+        },
+        "final_mse_reference": {
+          "mean": 0.0003513446684392661,
+          "min": 7.378382887749741e-05,
+          "max": 0.0007441015735880432,
+          "paired_seed_mean_normal_ci95": [
+            0.00029323294531306463,
+            0.00040945639156546754
+          ]
+        },
+        "final_mse_weights_only": {
+          "mean": 0.027625079727508686,
+          "min": 0.010724365874144647,
+          "max": 0.055200005950489,
+          "paired_seed_mean_normal_ci95": [
+            0.023860791164154512,
+            0.03138936829086286
+          ]
+        },
+        "final_mse_difference_weights_only_minus_reference": {
+          "mean": 0.027273735059069416,
+          "min": 0.0103984114413247,
+          "max": 0.054653451478260916,
+          "paired_seed_mean_normal_ci95": [
+            0.023535826242220014,
+            0.03101164387591882
+          ]
+        }
+      }
+    },
+    "changed_target": {
+      "runs": [
+        {
+          "seed": 0,
+          "before": {
+            "reference_mse": 0.03706307817505154,
+            "weights_transported_mse": 0.03706307817505157,
+            "unmapped_mse": 1.55108085369726,
+            "max_prediction_difference_after_transport": 4.440892098500626e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.8362777971418485,
+            "weights_and_metric": 9.992007221626409e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6620923016356606,
+              "weights_only_mse": 1.6813667760446533,
+              "weights_and_metric_mse": 1.6620923016356604
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.2470305239606285,
+              "weights_only_mse": 1.5613758849772974,
+              "weights_and_metric_mse": 1.2470305239606285
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.4445461788536413,
+              "weights_only_mse": 1.5401263365212319,
+              "weights_and_metric_mse": 0.4445461788536412
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.008188126994933117,
+              "weights_only_mse": 1.1024092237704954,
+              "weights_and_metric_mse": 0.008188126994933036
+            }
+          ],
+          "json_restored_next_update_max_difference": 1.1102230246251565e-15,
+          "persisted_state": {
+            "weights": [
+              -0.11110006528553294,
+              -0.1209172158948572,
+              4.279634389318012
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 1,
+          "before": {
+            "reference_mse": 0.050712446086037026,
+            "weights_transported_mse": 0.050712446086037026,
+            "unmapped_mse": 1.3464331012161381,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.606920128896585,
+            "weights_and_metric": 1.1102230246251565e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6239576946641874,
+              "weights_only_mse": 1.6965933378813838,
+              "weights_and_metric_mse": 1.6239576946641874
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.9745561016787156,
+              "weights_only_mse": 1.326341170579585,
+              "weights_and_metric_mse": 0.9745561016787155
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.37347349552032805,
+              "weights_only_mse": 1.2954219898953174,
+              "weights_and_metric_mse": 0.37347349552032805
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.008280348424862248,
+              "weights_only_mse": 0.9863487876565309,
+              "weights_and_metric_mse": 0.008280348424862234
+            }
+          ],
+          "json_restored_next_update_max_difference": 5.551115123125783e-16,
+          "persisted_state": {
+            "weights": [
+              -0.10389317691388503,
+              -0.09768798937304818,
+              4.347006041938863
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 2,
+          "before": {
+            "reference_mse": 0.06806164078630246,
+            "weights_transported_mse": 0.06806164078630246,
+            "unmapped_mse": 1.469599529194754,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.567063024598091,
+            "weights_and_metric": 7.771561172376096e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.4002934108832483,
+              "weights_only_mse": 1.4279266783203555,
+              "weights_and_metric_mse": 1.4002934108832485
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.7729534865926555,
+              "weights_only_mse": 1.2259366949830097,
+              "weights_and_metric_mse": 0.7729534865926555
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.1954537649597512,
+              "weights_only_mse": 1.2794503508415462,
+              "weights_and_metric_mse": 0.19545376495975128
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0029003282168365216,
+              "weights_only_mse": 0.8804744513329206,
+              "weights_and_metric_mse": 0.0029003282168365394
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.09670899063599626,
+              -0.11845926089183717,
+              4.537873360533268
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 3,
+          "before": {
+            "reference_mse": 0.044274590745237714,
+            "weights_transported_mse": 0.044274590745237714,
+            "unmapped_mse": 1.43906065549005,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.4855729150426047,
+            "weights_and_metric": 1.1102230246251565e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.9802967810032297,
+              "weights_only_mse": 2.2754893283018887,
+              "weights_and_metric_mse": 1.98029678100323
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.3987556964285723,
+              "weights_only_mse": 1.9302126969155984,
+              "weights_and_metric_mse": 1.3987556964285723
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.30065508429973264,
+              "weights_only_mse": 1.4298890103791035,
+              "weights_and_metric_mse": 0.30065508429973264
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.010581890672863746,
+              "weights_only_mse": 1.25874893353251,
+              "weights_and_metric_mse": 0.01058189067286381
+            }
+          ],
+          "json_restored_next_update_max_difference": 6.661338147750939e-16,
+          "persisted_state": {
+            "weights": [
+              -0.08624494684427653,
+              -0.10730227346746164,
+              4.265605078579234
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 4,
+          "before": {
+            "reference_mse": 0.051798216434914925,
+            "weights_transported_mse": 0.051798216434914945,
+            "unmapped_mse": 1.386215111084689,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.497758877990877,
+            "weights_and_metric": 4.996003610813204e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.682517610802191,
+              "weights_only_mse": 1.9366404812897366,
+              "weights_and_metric_mse": 1.6825176108021909
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.0329535289333884,
+              "weights_only_mse": 1.3908686246302255,
+              "weights_and_metric_mse": 1.0329535289333882
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.34801468226350113,
+              "weights_only_mse": 1.5187328019239943,
+              "weights_and_metric_mse": 0.3480146822635011
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.015905600353426537,
+              "weights_only_mse": 1.404231302728858,
+              "weights_and_metric_mse": 0.015905600353426558
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.07413101275835182,
+              -0.08715556555002679,
+              4.116026716036709
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 5,
+          "before": {
+            "reference_mse": 0.09026684768720887,
+            "weights_transported_mse": 0.09026684768720891,
+            "unmapped_mse": 1.2080235883001702,
+            "max_prediction_difference_after_transport": 2.7755575615628914e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.7885956289206266,
+            "weights_and_metric": 6.661338147750939e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.5872431692852487,
+              "weights_only_mse": 1.6129010774600103,
+              "weights_and_metric_mse": 1.5872431692852487
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.2714191546480358,
+              "weights_only_mse": 1.371022464771621,
+              "weights_and_metric_mse": 1.2714191546480358
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.23260016844586578,
+              "weights_only_mse": 1.2284455510061167,
+              "weights_and_metric_mse": 0.2326001684458658
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.006816911032891848,
+              "weights_only_mse": 1.0881734763697075,
+              "weights_and_metric_mse": 0.006816911032891832
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.06271103523357088,
+              -0.10791662955048123,
+              4.458056009104829
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 6,
+          "before": {
+            "reference_mse": 0.049507585845590514,
+            "weights_transported_mse": 0.049507585845590535,
+            "unmapped_mse": 1.3917810036251927,
+            "max_prediction_difference_after_transport": 2.7755575615628914e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.974012067666578,
+            "weights_and_metric": 1.1102230246251565e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6590420331780242,
+              "weights_only_mse": 1.7335045203926387,
+              "weights_and_metric_mse": 1.6590420331780242
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.0756767627134833,
+              "weights_only_mse": 1.4752973423154463,
+              "weights_and_metric_mse": 1.0756767627134836
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.3301338203381619,
+              "weights_only_mse": 1.2147228676358084,
+              "weights_and_metric_mse": 0.3301338203381621
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.005995532899854972,
+              "weights_only_mse": 1.169934703838738,
+              "weights_and_metric_mse": 0.005995532899855025
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              -0.10108039488981216,
+              -0.1139568239005951,
+              4.372603376847454
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 7,
+          "before": {
+            "reference_mse": 0.04293879422041115,
+            "weights_transported_mse": 0.04293879422041114,
+            "unmapped_mse": 1.4076775988689807,
+            "max_prediction_difference_after_transport": 2.7755575615628914e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.289786607184262,
+            "weights_and_metric": 6.661338147750939e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6760764211223684,
+              "weights_only_mse": 1.7886563034470122,
+              "weights_and_metric_mse": 1.6760764211223684
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.3431424194592998,
+              "weights_only_mse": 1.7262783072719423,
+              "weights_and_metric_mse": 1.3431424194592998
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.33268683606178934,
+              "weights_only_mse": 1.2694098046459223,
+              "weights_and_metric_mse": 0.3326868360617893
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.006770096684801969,
+              "weights_only_mse": 1.1222661905113436,
+              "weights_and_metric_mse": 0.006770096684801937
+            }
+          ],
+          "json_restored_next_update_max_difference": 6.661338147750939e-16,
+          "persisted_state": {
+            "weights": [
+              -0.08133657314156223,
+              -0.1119573970718548,
+              4.350715308385721
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 8,
+          "before": {
+            "reference_mse": 0.06317502693317739,
+            "weights_transported_mse": 0.0631750269331774,
+            "unmapped_mse": 1.4185231818852284,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 3.2652267529984567,
+            "weights_and_metric": 9.992007221626409e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6614781857694374,
+              "weights_only_mse": 1.752068934856302,
+              "weights_and_metric_mse": 1.6614781857694372
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.7918674981703413,
+              "weights_only_mse": 1.6989334368335032,
+              "weights_and_metric_mse": 0.7918674981703411
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.1619883251037276,
+              "weights_only_mse": 1.3334403701248498,
+              "weights_and_metric_mse": 0.16198832510372752
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.007004040510192221,
+              "weights_only_mse": 1.065623327269647,
+              "weights_and_metric_mse": 0.007004040510192204
+            }
+          ],
+          "json_restored_next_update_max_difference": 2.220446049250313e-16,
+          "persisted_state": {
+            "weights": [
+              -0.10495450640397762,
+              -0.11117517639794143,
+              4.357369052903323
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 9,
+          "before": {
+            "reference_mse": 0.052505539248964804,
+            "weights_transported_mse": 0.05250553924896483,
+            "unmapped_mse": 1.4097716185951992,
+            "max_prediction_difference_after_transport": 4.440892098500626e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.835071535671729,
+            "weights_and_metric": 6.661338147750939e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.912116015182797,
+              "weights_only_mse": 1.7814816034949168,
+              "weights_and_metric_mse": 1.9121160151827967
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.3021040496281309,
+              "weights_only_mse": 1.6073106189822246,
+              "weights_and_metric_mse": 1.3021040496281304
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.34347999518379163,
+              "weights_only_mse": 1.4222721623088532,
+              "weights_and_metric_mse": 0.3434799951837916
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.013759371105577404,
+              "weights_only_mse": 1.2044625104936126,
+              "weights_and_metric_mse": 0.013759371105577387
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.10790584960352063,
+              -0.08817938076984443,
+              4.211325001008408
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 10,
+          "before": {
+            "reference_mse": 0.03836094369142012,
+            "weights_transported_mse": 0.03836094369142014,
+            "unmapped_mse": 1.780229846771169,
+            "max_prediction_difference_after_transport": 3.885780586188048e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.2094592347076114,
+            "weights_and_metric": 6.661338147750939e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6273584208854919,
+              "weights_only_mse": 1.6530499700129306,
+              "weights_and_metric_mse": 1.6273584208854917
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.0880463718958504,
+              "weights_only_mse": 1.263558372090173,
+              "weights_and_metric_mse": 1.0880463718958502
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.3095617145015469,
+              "weights_only_mse": 1.1868351882881998,
+              "weights_and_metric_mse": 0.30956171450154685
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.009077869896694743,
+              "weights_only_mse": 0.9806831938357186,
+              "weights_and_metric_mse": 0.00907786989669475
+            }
+          ],
+          "json_restored_next_update_max_difference": 3.3306690738754696e-16,
+          "persisted_state": {
+            "weights": [
+              -0.08821029765082367,
+              -0.09816100794269124,
+              4.272800368566607
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 11,
+          "before": {
+            "reference_mse": 0.03700472889384686,
+            "weights_transported_mse": 0.03700472889384686,
+            "unmapped_mse": 1.6635714943293332,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.5554794381087387,
+            "weights_and_metric": 8.881784197001252e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.634915841488366,
+              "weights_only_mse": 1.7113641010864984,
+              "weights_and_metric_mse": 1.6349158414883658
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.1291475050951787,
+              "weights_only_mse": 1.5997497529492972,
+              "weights_and_metric_mse": 1.129147505095179
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.3777046387612882,
+              "weights_only_mse": 1.468482080643329,
+              "weights_and_metric_mse": 0.37770463876128835
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.015494796726599681,
+              "weights_only_mse": 1.340531264939186,
+              "weights_and_metric_mse": 0.0154947967265996
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              -0.06618695654953416,
+              -0.09361825211047396,
+              4.108366548725992
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 12,
+          "before": {
+            "reference_mse": 0.07122855857682217,
+            "weights_transported_mse": 0.07122855857682217,
+            "unmapped_mse": 1.4079900821246203,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.098554625566793,
+            "weights_and_metric": 6.661338147750939e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6520640826270945,
+              "weights_only_mse": 1.602455035109127,
+              "weights_and_metric_mse": 1.6520640826270945
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.2337211550160394,
+              "weights_only_mse": 1.4010786377829176,
+              "weights_and_metric_mse": 1.2337211550160396
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.2967113144345211,
+              "weights_only_mse": 1.0551379144156454,
+              "weights_and_metric_mse": 0.29671131443452115
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.010001062410749911,
+              "weights_only_mse": 0.8826125892325436,
+              "weights_and_metric_mse": 0.010001062410749915
+            }
+          ],
+          "json_restored_next_update_max_difference": 2.220446049250313e-16,
+          "persisted_state": {
+            "weights": [
+              -0.09227924460982428,
+              -0.09418628756319346,
+              4.258191514700329
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 13,
+          "before": {
+            "reference_mse": 0.05405130126447589,
+            "weights_transported_mse": 0.0540513012644759,
+            "unmapped_mse": 1.637534471749694,
+            "max_prediction_difference_after_transport": 2.7755575615628914e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 3.0450963104389177,
+            "weights_and_metric": 7.771561172376096e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6184382994605304,
+              "weights_only_mse": 1.5596795030397343,
+              "weights_and_metric_mse": 1.6184382994605304
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.233537358305706,
+              "weights_only_mse": 1.4490255190631576,
+              "weights_and_metric_mse": 1.2335373583057059
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.37979112853687935,
+              "weights_only_mse": 1.3234839361165518,
+              "weights_and_metric_mse": 0.3797911285368793
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.012040876720222369,
+              "weights_only_mse": 1.1873253001455004,
+              "weights_and_metric_mse": 0.012040876720222343
+            }
+          ],
+          "json_restored_next_update_max_difference": 7.771561172376096e-16,
+          "persisted_state": {
+            "weights": [
+              -0.07829827744693271,
+              -0.10090381320373472,
+              4.1772814262596425
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 14,
+          "before": {
+            "reference_mse": 0.04086989444776009,
+            "weights_transported_mse": 0.0408698944477601,
+            "unmapped_mse": 1.4602953760401212,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 3.0561911596340043,
+            "weights_and_metric": 8.881784197001252e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.8550722866965028,
+              "weights_only_mse": 1.8458298635747137,
+              "weights_and_metric_mse": 1.8550722866965028
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.211969676274609,
+              "weights_only_mse": 1.5518950310952002,
+              "weights_and_metric_mse": 1.2119696762746088
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.26898428956974946,
+              "weights_only_mse": 1.4844896944510246,
+              "weights_and_metric_mse": 0.2689842895697494
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.006470157371474203,
+              "weights_only_mse": 1.1551915402437252,
+              "weights_and_metric_mse": 0.006470157371474143
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              -0.09172799961094863,
+              -0.1083418455268189,
+              4.379541066370599
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 15,
+          "before": {
+            "reference_mse": 0.04271405118667692,
+            "weights_transported_mse": 0.04271405118667692,
+            "unmapped_mse": 1.624046949527734,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.4639230763864797,
+            "weights_and_metric": 9.992007221626409e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.7123990411748222,
+              "weights_only_mse": 1.6712099033413206,
+              "weights_and_metric_mse": 1.7123990411748222
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.6879603961538899,
+              "weights_only_mse": 1.2713117575127293,
+              "weights_and_metric_mse": 0.6879603961538899
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.18633078335266132,
+              "weights_only_mse": 1.2428004511103605,
+              "weights_and_metric_mse": 0.18633078335266137
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.006297643565890188,
+              "weights_only_mse": 1.0849314549772697,
+              "weights_and_metric_mse": 0.006297643565890194
+            }
+          ],
+          "json_restored_next_update_max_difference": 2.220446049250313e-16,
+          "persisted_state": {
+            "weights": [
+              -0.11810377920953513,
+              -0.10366472746313173,
+              4.375595052947724
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 16,
+          "before": {
+            "reference_mse": 0.052324658001368776,
+            "weights_transported_mse": 0.052324658001368776,
+            "unmapped_mse": 1.5107464835308941,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.360686518856604,
+            "weights_and_metric": 4.996003610813204e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6531340672014396,
+              "weights_only_mse": 1.6767458129046788,
+              "weights_and_metric_mse": 1.6531340672014394
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.7531196887448169,
+              "weights_only_mse": 1.2319771727369937,
+              "weights_and_metric_mse": 0.7531196887448169
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.2802287723073983,
+              "weights_only_mse": 1.3342601797753095,
+              "weights_and_metric_mse": 0.2802287723073983
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.012119893106835165,
+              "weights_only_mse": 1.0341098662770833,
+              "weights_and_metric_mse": 0.01211989310683519
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.07361222805839995,
+              -0.09688752188041488,
+              4.1819932792637715
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 17,
+          "before": {
+            "reference_mse": 0.051356078771598423,
+            "weights_transported_mse": 0.051356078771598444,
+            "unmapped_mse": 1.3640315328681696,
+            "max_prediction_difference_after_transport": 4.440892098500626e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.5840696931368297,
+            "weights_and_metric": 6.661338147750939e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.9428682169638944,
+              "weights_only_mse": 1.9451682905178813,
+              "weights_and_metric_mse": 1.9428682169638944
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.1736577610015533,
+              "weights_only_mse": 2.135923367707741,
+              "weights_and_metric_mse": 1.173657761001553
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.31043959094316553,
+              "weights_only_mse": 1.3352491651756542,
+              "weights_and_metric_mse": 0.3104395909431654
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.014822888752901045,
+              "weights_only_mse": 1.3637826867123393,
+              "weights_and_metric_mse": 0.014822888752901026
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.06580367430743635,
+              -0.08902071490655881,
+              4.2246017724991
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 18,
+          "before": {
+            "reference_mse": 0.029316491218843412,
+            "weights_transported_mse": 0.02931649121884343,
+            "unmapped_mse": 1.9642230778760514,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.408742273401658,
+            "weights_and_metric": 7.771561172376096e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.564903163057244,
+              "weights_only_mse": 1.5207442742616857,
+              "weights_and_metric_mse": 1.5649031630572443
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.2044124361570445,
+              "weights_only_mse": 1.8100951076155054,
+              "weights_and_metric_mse": 1.2044124361570447
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.33815890051005265,
+              "weights_only_mse": 1.3619250540747005,
+              "weights_and_metric_mse": 0.33815890051005276
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.005895507912837012,
+              "weights_only_mse": 1.0906021068471488,
+              "weights_and_metric_mse": 0.005895507912837035
+            }
+          ],
+          "json_restored_next_update_max_difference": 5.551115123125783e-16,
+          "persisted_state": {
+            "weights": [
+              -0.10230769755920274,
+              -0.09749012209872707,
+              4.4626838583457245
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 19,
+          "before": {
+            "reference_mse": 0.08845742548710228,
+            "weights_transported_mse": 0.08845742548710227,
+            "unmapped_mse": 1.115779869211721,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.1770160908355525,
+            "weights_and_metric": 1.1102230246251565e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6113513520992728,
+              "weights_only_mse": 1.544347263346795,
+              "weights_and_metric_mse": 1.6113513520992728
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.279264917617723,
+              "weights_only_mse": 1.5359555846116446,
+              "weights_and_metric_mse": 1.2792649176177229
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.27469909357762323,
+              "weights_only_mse": 1.2271135957541472,
+              "weights_and_metric_mse": 0.2746990935776232
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0132927516700082,
+              "weights_only_mse": 1.055193866420715,
+              "weights_and_metric_mse": 0.013292751670008205
+            }
+          ],
+          "json_restored_next_update_max_difference": 2.220446049250313e-16,
+          "persisted_state": {
+            "weights": [
+              -0.10096032685026189,
+              -0.1080285184447874,
+              4.141296673789864
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 20,
+          "before": {
+            "reference_mse": 0.06151466935173979,
+            "weights_transported_mse": 0.06151466935173979,
+            "unmapped_mse": 1.3969792712166187,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.462459129001754,
+            "weights_and_metric": 6.661338147750939e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.8654897356076068,
+              "weights_only_mse": 1.8699594928086645,
+              "weights_and_metric_mse": 1.8654897356076068
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.4086684052328684,
+              "weights_only_mse": 1.6421386891228962,
+              "weights_and_metric_mse": 1.4086684052328686
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.3728776479451674,
+              "weights_only_mse": 1.445099796439858,
+              "weights_and_metric_mse": 0.3728776479451675
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.009536020206364813,
+              "weights_only_mse": 1.1045485233913148,
+              "weights_and_metric_mse": 0.009536020206364812
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.13302273855921504,
+              -0.09771335016285082,
+              4.321827157395516
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 21,
+          "before": {
+            "reference_mse": 0.0528559695902983,
+            "weights_transported_mse": 0.05285596959029833,
+            "unmapped_mse": 1.2574078438498346,
+            "max_prediction_difference_after_transport": 4.440892098500626e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.4698347790651773,
+            "weights_and_metric": 8.881784197001252e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.5840754213347732,
+              "weights_only_mse": 1.704245256433987,
+              "weights_and_metric_mse": 1.5840754213347732
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.111593183438546,
+              "weights_only_mse": 1.4358427693670957,
+              "weights_and_metric_mse": 1.1115931834385455
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.29259800156073307,
+              "weights_only_mse": 1.2869232609813974,
+              "weights_and_metric_mse": 0.292598001560733
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.009289342248098133,
+              "weights_only_mse": 1.1609258523753858,
+              "weights_and_metric_mse": 0.009289342248098091
+            }
+          ],
+          "json_restored_next_update_max_difference": 6.661338147750939e-16,
+          "persisted_state": {
+            "weights": [
+              -0.09471771038764484,
+              -0.09985374269058808,
+              4.278441894322093
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 22,
+          "before": {
+            "reference_mse": 0.040454888668004854,
+            "weights_transported_mse": 0.040454888668004875,
+            "unmapped_mse": 1.5058444612807327,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.3944799865783355,
+            "weights_and_metric": 5.551115123125783e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.764765954160583,
+              "weights_only_mse": 1.8002909531220248,
+              "weights_and_metric_mse": 1.7647659541605827
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.3581582552457894,
+              "weights_only_mse": 1.553893979266873,
+              "weights_and_metric_mse": 1.3581582552457894
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.49733155758221836,
+              "weights_only_mse": 1.4075173170568782,
+              "weights_and_metric_mse": 0.4973315575822186
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0273618907495366,
+              "weights_only_mse": 1.1420747276086116,
+              "weights_and_metric_mse": 0.02736189074953655
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.11975167263032498,
+              -0.07043365335335143,
+              3.8455274969026783
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 23,
+          "before": {
+            "reference_mse": 0.07204711396827004,
+            "weights_transported_mse": 0.07204711396827004,
+            "unmapped_mse": 1.240887766859039,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 3.0557114396040417,
+            "weights_and_metric": 6.661338147750939e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.552664270228948,
+              "weights_only_mse": 1.7698044513986153,
+              "weights_and_metric_mse": 1.552664270228948
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.0978245762310361,
+              "weights_only_mse": 1.4582468545609273,
+              "weights_and_metric_mse": 1.0978245762310361
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.18862216369956072,
+              "weights_only_mse": 1.211007998903964,
+              "weights_and_metric_mse": 0.18862216369956078
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.002606422654377872,
+              "weights_only_mse": 0.9525376546089758,
+              "weights_and_metric_mse": 0.0026064226543778607
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.1049481295876736,
+              -0.11638573864834319,
+              4.596059587395964
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 24,
+          "before": {
+            "reference_mse": 0.07882991267878757,
+            "weights_transported_mse": 0.07882991267878758,
+            "unmapped_mse": 1.443639317461162,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.133394048829388,
+            "weights_and_metric": 5.551115123125783e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.4780641475865897,
+              "weights_only_mse": 1.5899201244201804,
+              "weights_and_metric_mse": 1.4780641475865894
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.9028787051887532,
+              "weights_only_mse": 1.2291463304739372,
+              "weights_and_metric_mse": 0.9028787051887533
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.2635352512217206,
+              "weights_only_mse": 1.1353583026678757,
+              "weights_and_metric_mse": 0.2635352512217206
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.011714484305833025,
+              "weights_only_mse": 0.9664341379168034,
+              "weights_and_metric_mse": 0.011714484305833005
+            }
+          ],
+          "json_restored_next_update_max_difference": 2.220446049250313e-16,
+          "persisted_state": {
+            "weights": [
+              -0.08262141885747211,
+              -0.09608695535581294,
+              4.1972651968968995
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 25,
+          "before": {
+            "reference_mse": 0.05298982533219065,
+            "weights_transported_mse": 0.05298982533219067,
+            "unmapped_mse": 1.5935562312961815,
+            "max_prediction_difference_after_transport": 3.3306690738754696e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.4391665658518074,
+            "weights_and_metric": 8.881784197001252e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.6862084882120418,
+              "weights_only_mse": 1.8413935827789745,
+              "weights_and_metric_mse": 1.6862084882120416
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.1541192248922507,
+              "weights_only_mse": 1.6299313026277162,
+              "weights_and_metric_mse": 1.1541192248922503
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.3954336044803493,
+              "weights_only_mse": 1.264046716789639,
+              "weights_and_metric_mse": 0.3954336044803491
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.014070117737531022,
+              "weights_only_mse": 1.112998053347338,
+              "weights_and_metric_mse": 0.014070117737530976
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.12421246228888647,
+              -0.08572353441571234,
+              4.2371632196867415
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 26,
+          "before": {
+            "reference_mse": 0.04845033385974114,
+            "weights_transported_mse": 0.048450333859741165,
+            "unmapped_mse": 1.4961296983767212,
+            "max_prediction_difference_after_transport": 3.3306690738754696e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.464576296366999,
+            "weights_and_metric": 7.771561172376096e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.7196569462175557,
+              "weights_only_mse": 1.7476715075300353,
+              "weights_and_metric_mse": 1.7196569462175557
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.0641785690800043,
+              "weights_only_mse": 1.3482455206483455,
+              "weights_and_metric_mse": 1.064178569080004
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.28948727064499,
+              "weights_only_mse": 1.2275859809988523,
+              "weights_and_metric_mse": 0.28948727064499
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.01255867390290982,
+              "weights_only_mse": 1.2034018331968588,
+              "weights_and_metric_mse": 0.012558673902909817
+            }
+          ],
+          "json_restored_next_update_max_difference": 3.3306690738754696e-16,
+          "persisted_state": {
+            "weights": [
+              -0.1079416469294395,
+              -0.0933263450066424,
+              4.185698115192344
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 27,
+          "before": {
+            "reference_mse": 0.053763946213512305,
+            "weights_transported_mse": 0.053763946213512305,
+            "unmapped_mse": 1.564653998569513,
+            "max_prediction_difference_after_transport": 2.220446049250313e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.583469456149178,
+            "weights_and_metric": 7.771561172376096e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.581013820119715,
+              "weights_only_mse": 1.5791192417451243,
+              "weights_and_metric_mse": 1.581013820119715
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.1788328893656435,
+              "weights_only_mse": 1.5658299115662042,
+              "weights_and_metric_mse": 1.178832889365644
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.30659053772709477,
+              "weights_only_mse": 1.1799189648139567,
+              "weights_and_metric_mse": 0.30659053772709477
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.0071688839897404225,
+              "weights_only_mse": 0.9245615974716885,
+              "weights_and_metric_mse": 0.007168883989740427
+            }
+          ],
+          "json_restored_next_update_max_difference": 3.3306690738754696e-16,
+          "persisted_state": {
+            "weights": [
+              -0.10586009258310997,
+              -0.10768297855827967,
+              4.312202922265368
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 28,
+          "before": {
+            "reference_mse": 0.04789953832366089,
+            "weights_transported_mse": 0.047899538323660916,
+            "unmapped_mse": 1.4278330177019736,
+            "max_prediction_difference_after_transport": 2.7755575615628914e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 3.1586073877415632,
+            "weights_and_metric": 8.881784197001252e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.7377235028326141,
+              "weights_only_mse": 1.7608070496659296,
+              "weights_and_metric_mse": 1.7377235028326141
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.3045275615197083,
+              "weights_only_mse": 1.590326696418172,
+              "weights_and_metric_mse": 1.3045275615197083
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.29038955432585223,
+              "weights_only_mse": 1.5262745763389702,
+              "weights_and_metric_mse": 0.2903895543258522
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.005347373612302681,
+              "weights_only_mse": 1.1345618874569823,
+              "weights_and_metric_mse": 0.005347373612302694
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.1136298665190707,
+              -0.10612250583887911,
+              4.4448997054597825
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 29,
+          "before": {
+            "reference_mse": 0.09863685625086824,
+            "weights_transported_mse": 0.09863685625086828,
+            "unmapped_mse": 1.128084640519128,
+            "max_prediction_difference_after_transport": 3.3306690738754696e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.1551870791900876,
+            "weights_and_metric": 1.1102230246251565e-15
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.3061067320016748,
+              "weights_only_mse": 1.336185948427229,
+              "weights_and_metric_mse": 1.3061067320016746
+            },
+            {
+              "step": 16,
+              "reference_mse": 0.9647373156330762,
+              "weights_only_mse": 1.2818069210687977,
+              "weights_and_metric_mse": 0.9647373156330762
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.24331429151873826,
+              "weights_only_mse": 1.0644497351792055,
+              "weights_and_metric_mse": 0.24331429151873826
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.006186248262080516,
+              "weights_only_mse": 0.9924340639645545,
+              "weights_and_metric_mse": 0.006186248262080482
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              -0.09473801891624424,
+              -0.10299949253917419,
+              4.436126616933261
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 30,
+          "before": {
+            "reference_mse": 0.054528365024745805,
+            "weights_transported_mse": 0.054528365024745826,
+            "unmapped_mse": 1.5303210295304221,
+            "max_prediction_difference_after_transport": 4.440892098500626e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.349475318130307,
+            "weights_and_metric": 6.661338147750939e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.550649060985767,
+              "weights_only_mse": 1.5429289675250746,
+              "weights_and_metric_mse": 1.550649060985767
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.1948199157455968,
+              "weights_only_mse": 1.8025118005110823,
+              "weights_and_metric_mse": 1.194819915745597
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.24793555401075532,
+              "weights_only_mse": 1.121175351084077,
+              "weights_and_metric_mse": 0.24793555401075537
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.010032152923294194,
+              "weights_only_mse": 0.9412826728922367,
+              "weights_and_metric_mse": 0.010032152923294175
+            }
+          ],
+          "json_restored_next_update_max_difference": 4.440892098500626e-16,
+          "persisted_state": {
+            "weights": [
+              -0.10122071060171828,
+              -0.09281579565443226,
+              4.259182440704619
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        },
+        {
+          "seed": 31,
+          "before": {
+            "reference_mse": 0.039378325871390306,
+            "weights_transported_mse": 0.03937832587139032,
+            "unmapped_mse": 1.4036778724163275,
+            "max_prediction_difference_after_transport": 3.3306690738754696e-16
+          },
+          "trajectory_max_difference": {
+            "weights_only": 2.4123677626401188,
+            "weights_and_metric": 8.881784197001252e-16
+          },
+          "checkpoints": [
+            {
+              "step": 1,
+              "reference_mse": 1.7261541726146594,
+              "weights_only_mse": 2.0077156324329706,
+              "weights_and_metric_mse": 1.7261541726146594
+            },
+            {
+              "step": 16,
+              "reference_mse": 1.1821661633060063,
+              "weights_only_mse": 1.7764141535339688,
+              "weights_and_metric_mse": 1.1821661633060059
+            },
+            {
+              "step": 64,
+              "reference_mse": 0.4025577704228398,
+              "weights_only_mse": 1.5129846941408998,
+              "weights_and_metric_mse": 0.40255777042283963
+            },
+            {
+              "step": 192,
+              "reference_mse": 0.023246629952779856,
+              "weights_only_mse": 1.4305020723777822,
+              "weights_and_metric_mse": 0.02324662995277997
+            }
+          ],
+          "json_restored_next_update_max_difference": 8.881784197001252e-16,
+          "persisted_state": {
+            "weights": [
+              -0.06772321016523639,
+              -0.0997481210892296,
+              3.876923567608621
+            ],
+            "metric": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.1111111111111111,
+                -0.4444444444444444
+              ],
+              [
+                0.0,
+                -0.4444444444444444,
+                17.77777777777778
+              ]
+            ],
+            "features": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                3.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.25
+              ]
+            ]
+          }
+        }
+      ],
+      "summary": {
+        "initial_prediction_difference": {
+          "mean": 2.8449465006019636e-16,
+          "min": 2.220446049250313e-16,
+          "max": 4.440892098500626e-16,
+          "paired_seed_mean_normal_ci95": [
+            2.5569595085772115e-16,
+            3.132933492626716e-16
+          ]
+        },
+        "weight_only_trajectory_max_difference": {
+          "mean": 2.568257281447925,
+          "min": 2.098554625566793,
+          "max": 3.2652267529984567,
+          "paired_seed_mean_normal_ci95": [
+            2.4590920903026814,
+            2.6774224725931686
+          ]
+        },
+        "full_transport_trajectory_max_difference": {
+          "mean": 8.083811398051921e-16,
+          "min": 4.996003610813204e-16,
+          "max": 1.1102230246251565e-15,
+          "paired_seed_mean_normal_ci95": [
+            7.428487043590763e-16,
+            8.739135752513079e-16
+          ]
+        },
+        "final_mse_reference": {
+          "mean": 0.010338560486728189,
+          "min": 0.002606422654377872,
+          "max": 0.0273618907495366,
+          "paired_seed_mean_normal_ci95": [
+            0.008505915803914351,
+            0.012171205169542027
+          ]
+        },
+        "final_mse_weights_only": {
+          "mean": 1.110121870429504,
+          "min": 0.8804744513329206,
+          "max": 1.4305020723777822,
+          "paired_seed_mean_normal_ci95": [
+            1.0605953464600508,
+            1.159648394398957
+          ]
+        },
+        "final_mse_difference_weights_only_minus_reference": {
+          "mean": 1.0997833099427758,
+          "min": 0.8726115268217937,
+          "max": 1.4072554424250023,
+          "paired_seed_mean_normal_ci95": [
+            1.051264284141533,
+            1.1483023357440187
+          ]
+        }
+      }
+    }
+  },
+  "lossy_migration": {
+    "positive_history": [
+      [
+        -1,
+        -1,
+        1
+      ],
+      [
+        -1,
+        1,
+        -1
+      ],
+      [
+        1,
+        -1,
+        -1
+      ],
+      [
+        1,
+        1,
+        1
+      ]
+    ],
+    "negative_history": [
+      [
+        -1,
+        -1,
+        -1
+      ],
+      [
+        -1,
+        1,
+        1
+      ],
+      [
+        1,
+        -1,
+        1
+      ],
+      [
+        1,
+        1,
+        -1
+      ]
+    ],
+    "old_summaries_equal": true,
+    "common_old_summary": {
+      "count": 4,
+      "G": [
+        [
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          4
+        ]
+      ],
+      "b": [
+        0,
+        0,
+        0
+      ],
+      "sum_y_squared": 4
+    },
+    "new_positive_summary": {
+      "count": 4,
+      "G": [
+        [
+          4,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          4
+        ]
+      ],
+      "b": [
+        0,
+        0,
+        0,
+        4
+      ],
+      "sum_y_squared": 4
+    },
+    "new_negative_summary": {
+      "count": 4,
+      "G": [
+        [
+          4,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          4
+        ]
+      ],
+      "b": [
+        0,
+        0,
+        0,
+        -4
+      ],
+      "sum_y_squared": 4
+    },
+    "old_least_squares_weights": [
+      0,
+      0,
+      0
+    ],
+    "new_positive_weights": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "new_negative_weights": [
+      0,
+      0,
+      0,
+      -1
+    ],
+    "old_model_mse_both_histories": 1,
+    "raw_replay_expanded_fit_mse_both_histories": 0,
+    "retaining_missing_cross_moment_expanded_fit_mse_both_histories": 0,
+    "minimum_worst_world_mse_without_extra_information": 1,
+    "scope": "Exact integer witness. The missing interaction was not retained; future new labels can repair it."
+  },
+  "fresh_process_one_seed": {
+    "expected": {
+      "prediction": -0.5918158947328603,
+      "after_update": [
+        0.3550224522717554,
+        0.39058597870855644,
+        -4.532641673850559
+      ]
+    },
+    "observed": {
+      "prediction": -0.5918158947328603,
+      "after_update": [
+        0.3550224522717554,
+        0.39058597870855644,
+        -4.532641673850559
+      ]
+    },
+    "equal": true
+  },
+  "checks": {
+    "full_transport_largest_error": 2.220446049250313e-15,
+    "passed": true
+  }
+}

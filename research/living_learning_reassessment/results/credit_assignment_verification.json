@@ -1,0 +1,17 @@
+{
+  "command": "python -m research.living_learning_reassessment.credit_assignment --output TEMP/repeat.json",
+  "exact_full_json_match": true,
+  "scientific_sha256": "59527e290fda7b35721a807d638c0b37285a3d1fe754a0e237f00926a4b29528",
+  "source_sha256": "6ec63c67b38597d54f21355f4ba644202a046f777a2c7ecb1c38993d4d75d217",
+  "seed_count": 32,
+  "regime_count": 5,
+  "methods_per_seed": 7,
+  "repeated_run_seconds": 7.875108200008981,
+  "checks": [
+    "Full result JSON identical in fresh Python process",
+    "Exact gradient-budget matching is asserted within every run",
+    "Current-context and anchored weights identical in immediate-feedback regime",
+    "Serialized predictor reconstruction exact for all regime/seed/method combinations"
+  ],
+  "source_file_unchanged": true
+}

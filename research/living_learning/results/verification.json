@@ -1,0 +1,42 @@
+{
+  "python": "3.14.3",
+  "experiments": [
+    {
+      "module": "affine_lifecycle",
+      "source_sha256": "70188c7cb9d68506bb7e945c5f09f755fe77c74d86369361dfe99834037e919a",
+      "recorded_result_sha256": "a3ba27008740ab4db67695cf65d612bb22e531f7d685f6aa89fe16100f9c3c72",
+      "scientific_output_equal": true,
+      "byte_identical": false,
+      "elapsed_seconds": 0.7685853000730276
+    },
+    {
+      "module": "adaptation_experiment",
+      "source_sha256": "429bda2fed3fd61e2794c5ed4225d5210fedd612ae1eb06c67c11172dd2e3e18",
+      "recorded_result_sha256": "465b943d4369715700c8a0835d2e6fba4439aab04f4631e547a2b8d5daf70867",
+      "scientific_output_equal": true,
+      "byte_identical": true,
+      "elapsed_seconds": 5.661005900008604
+    },
+    {
+      "module": "closed_loop_experiment",
+      "source_sha256": "eac76cc3020c7f1786ecf2fea877be45143162a197991e376490fab32f8b5901",
+      "recorded_result_sha256": "952aba483ebccd989195bc413eaf8c5cb22b5170282d2bca18677cbb79563ccc",
+      "scientific_output_equal": true,
+      "byte_identical": false,
+      "elapsed_seconds": 0.6914185000350699
+    },
+    {
+      "module": "unknown_change_experiment",
+      "source_sha256": "69d6ab972594ec54ef70880d71b207919ca3dc2f1f2ad2d9eb2ae50189132fc0",
+      "recorded_result_sha256": "30130887eae7b68f7b8d0d855b1ce77c5a6ee5c9269a5aadcdcc2625cc51174d",
+      "scientific_output_equal": true,
+      "byte_identical": false,
+      "elapsed_seconds": 0.8292186000617221
+    }
+  ],
+  "local_document_links_checked": 33,
+  "missing_local_links": [],
+  "tracked_files_changed_relative_to_head": [],
+  "scope": "Four reproducible finite simulations; not a general solution, biological model or main-engine capability evaluation.",
+  "verification_source_sha256": "2cb96138c05a5798a62cdc4d374380da802d4f37096516338491d71124fcf5e8"
+}

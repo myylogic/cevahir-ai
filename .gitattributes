@@ -1,0 +1,4 @@
+# Scientific records contain byte-level preservation and source fingerprints.
+# Keep their original bytes in clones and release archives on every platform.
+/research/** -text
+/docs/research/** -text

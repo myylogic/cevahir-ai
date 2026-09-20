@@ -10,6 +10,16 @@ Bu projeyle özellikle Türkiye'deki gençlerin bir dil modelinin iç işleyişi
 
 **Cevahir, Türk Gençlerine Armağanımdır. — Muhammed Yasin Yılmaz**
 
+Cevahir'i bundan sonra **açık kaynak bir araştırma ve eğitim mirası** olarak sürdürüyorum; ürünleşme artık projenin hedefi değil. Mühendislik çalışmalarıyla sistemin çalıştığı süre boyunca öğrenmesine yönelik araştırma birlikte devam ediyor.
+
+## Yapay zeka motorunu kitap olarak okuyun
+
+**[Cevahir AI — Bir Yapay Zeka Motorunun Anatomisi: İçindekiler](docs/book/README.md)**
+
+Modüler kitap, yapay zekanın temellerini gerçek Cevahir koduna bağlar: tokenizer, sinir ağı, Transformer, eğitim, checkpoint, üretim, bellek, bilişsel iş akışları, araçlar ve açık araştırma. Her bölümde çağıran bileşen, girdi/çıktı, yapılandırma ve kanıt zinciri izlenir. [English reading guide](docs/book/README-en.md) · [Kaynak haritası](docs/book/KAYNAK_HARITASI.md) · [Kodla kitabı birlikte güncel tutmak](docs/book/BAKIM.md).
+
+[Araştırma laboratuvarı](docs/book/tr/11-arastirma-laboratuvari.md), başarılı ve olumsuz deneyleri birlikte korur. [Son düzeltme durumu deneyi](docs/research/living_learning_correction_2026_09_20/REPORT_TR.md), bugünkü tahmin yeteneğiyle geçmiş deneyimi düzelterek yeniden öğrenebilme kapasitesini ayırır. Bu sınırlı sonuçlar genel yaşarken öğrenme probleminin çözümü değildir.
+
 <p align="center">
   <img src="image/87E09A64-4E1F-41D5-84AF-7D7C56F6C229.png" alt="Cevahir AI & Engine" style="max-width:100%;">
 </p>
@@ -121,6 +131,8 @@ Modelin [profil araçları](model_management/profiler.py) parametre dağılımı
 Son altyapı çalışmalarımda bu parçaların birlikte çalışmasını güçlendirdim: ortak model yapılandırması, eğitim hedefine katılan MoE kaybı, artımlı dikkat önbelleği, tokenizer ile checkpoint kimliğinin korunması ve kullanıcı/oturum kapsamlı bellek. Teknik ayrıntıları [alt çekirdek sözleşmelerinde](docs/architecture/LOWER_CORE_CONTRACTS.md) ve [yaşam döngüsü belgesinde](docs/architecture/LIFECYCLE_CONSOLIDATION.md) bulabilirsiniz. Açık geliştirme işlerini [bir sonraki tur planında](docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md) takip ediyorum.
 
 ### Güncel araştırma çalışmalarım
+
+Ana soru, sistemin çalışırken yaşadığı deneyimlerle gelecekteki hesaplama ve davranış kapasitesini nasıl kalıcı, kontrollü ve genellenebilir biçimde değiştirebileceği. [Kitabın araştırma laboratuvarı](docs/book/tr/11-arastirma-laboratuvari.md), sonraki kural edinimi, temsil büyümesi, interference, durum taşıma, öğrenilmiş güncelleme ve yinelemeli durum araştırmalarını bir araya getiriyor. [Yeni düzeltme durumu deneyi](docs/research/living_learning_correction_2026_09_20/REPORT_TR.md), önceki deneyimleri düzelterek öğrenmeye devam edebilmek için neyin korunması gerektiğini inceliyor. Genel problem hâlâ açık; yeniden sınama ve hesap yönlendirmesi onun alt problemleri.
 
 Cevahir'in bir isteğe ne kadar hesap ayırdığını, dışarıdan doğrulanmış geri bildirimleri nasıl kullandığını ve bilişsel bağlamın sinir ağına nasıl taşındığını deneyebilmek için isteğe bağlı bir araştırma altyapısı ekledim:
 

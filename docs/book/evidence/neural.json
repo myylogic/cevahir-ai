@@ -1,0 +1,249 @@
+{
+  "references": [
+    {
+      "path": "src/neural_network.py",
+      "symbol": "CevahirNeuralNetwork",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "src/neural_network.py",
+      "symbol": "CevahirNeuralNetwork.__init__",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "src/neural_network.py",
+      "symbol": "CevahirNeuralNetwork.forward",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/language_embedding.py",
+      "symbol": "LanguageEmbedding.__init__",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/language_embedding.py",
+      "symbol": "LanguageEmbedding.forward",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/language_embedding.py",
+      "symbol": "LanguageEmbedding._initialize_weights",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
+      "symbol": "MultiHeadAttention._standard_sdpa_forward",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/feed_forward_network.py",
+      "symbol": "FeedForwardNetwork.forward",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.build_model",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.forward",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "training_management/v2/core/loss_computation.py",
+      "symbol": "LossComputation.compute_loss",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "tests/evolution/test_lower_layer_contracts.py",
+      "symbol": "test_model_sdpa_and_explicit_diagnostics_match_outputs_and_gradients",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "tests/evolution/test_config_generation.py",
+      "symbol": "test_facade_and_manager_share_model_dimensions_and_state_roundtrip",
+      "chapter": "tr/03-sinir-aglari.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
+      "symbol": "MultiHeadAttention.__init__",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
+      "symbol": "MultiHeadAttention.forward",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
+      "symbol": "MultiHeadAttention._prepare_attention_mask",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
+      "symbol": "MultiHeadAttention._standard_sdpa_forward",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
+      "symbol": "MultiHeadAttention.scaled_dot_product_attention",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
+      "symbol": "MultiHeadAttention._pytorch_sdpa_forward",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
+      "symbol": "MultiHeadAttention._flash_attention_forward",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer._forward_impl",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "tests/evolution/test_attention_cache.py",
+      "symbol": "test_cached_matches_full",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "tests/evolution/test_attention_cache.py",
+      "symbol": "test_causal_prefix_and_masked_rows",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "tests/evolution/test_attention_cache.py",
+      "symbol": "test_softcap_effective_with_default_backend",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "tests/evolution/test_attention_cache.py",
+      "symbol": "test_external_flash_failure_is_causal",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer.__init__",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer._forward_impl",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer._parallel_forward_impl",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer._stochastic_depth",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer.forward",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/rms_norm.py",
+      "symbol": "RMSNorm.forward",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/positional_encoding.py",
+      "symbol": "PositionalEncoding",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/positional_encoding.py",
+      "symbol": "PositionalEncoding.apply_rotary_pos_emb",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/positional_encoding.py",
+      "symbol": "PositionalEncoding._build_yarn_rope_freqs",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/feed_forward_network.py",
+      "symbol": "FeedForwardNetwork._gated_forward",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/architecture_contracts.py",
+      "symbol": "resolve_ffn_dim",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/mixture_of_experts.py",
+      "symbol": "MixtureOfExperts",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/mixture_of_experts.py",
+      "symbol": "Router.forward",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/mixture_of_experts.py",
+      "symbol": "MixtureOfExperts.forward",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network.py",
+      "symbol": "CevahirNeuralNetwork.get_and_reset_moe_loss",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network.py",
+      "symbol": "CevahirNeuralNetwork.__init__",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "model_management/config_schema.py",
+      "symbol": "ModelArchConfig",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "tests/evolution/test_lower_layer_contracts.py",
+      "symbol": "test_schema_ffn_width_matches_dense_and_expert_weights",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "tests/evolution/test_lower_layer_contracts.py",
+      "symbol": "test_parallel_flag_freezes_only_the_actually_unused_norm",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "tests/evolution/test_contextual_moe_routing.py",
+      "symbol": "test_checkpoint_recompute_preserves_prior_gradients_and_consumes_aux_once",
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "tests/evolution/test_attention_cache.py",
+      "symbol": "test_batched_rope_positions_are_independent",
+      "chapter": "tr/05-transformer.md"
+    }
+  ],
+  "reused_docs": [
+    "docs/modules/neural_network/README.md",
+    "docs/modules/neural_network/README-en.md",
+    "docs/module_audits/4_attention_audit.md"
+  ],
+  "notes": [
+    "Source reading distinguishes schema defaults, direct-constructor defaults, and legacy normalization profiles.",
+    "Older attention audit preserved but outdated temperature formula and unconditional unit row-sum claim are not copied.",
+    "Cache third return is the final layer K/V output; actual per-layer caches live on attention modules.",
+    "No benchmark or model-quality claim inferred from configuration flags. External Flash fallback test uses monkeypatch, not actual GPU kernel coverage.",
+    "Source YaRN-named function implements piecewise frequency scaling; the book does not assert full reproduction of the cited YaRN training recipe.",
+    "No production source, existing documentation, research files, or English documents edited by this subtask.",
+    "Chapter 03: embedding/logits/loss and call chain. Chapter 04: QKV shapes, mask semantics, MHA/MQA/GQA, execution routes. Chapter 05: actual residual/norm/position/FFN/MoE/stochastic-depth/checkpoint paths.",
+    "Technical primary sources verified on 2026-09-20: https://arxiv.org/abs/1706.03762 ; https://arxiv.org/abs/2305.13245 ; https://docs.pytorch.org/docs/main/generated/torch.nn.functional.scaled_dot_product_attention.html ; https://arxiv.org/abs/1910.07467 ; https://arxiv.org/abs/2104.09864 ; https://arxiv.org/abs/2309.00071 ; https://arxiv.org/abs/2002.05202"
+  ]
+}

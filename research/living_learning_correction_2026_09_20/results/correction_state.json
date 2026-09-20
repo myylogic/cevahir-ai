@@ -1,0 +1,305 @@
+{
+  "experiment": "correction_sufficient_state",
+  "date": "2026-09-20",
+  "scope": "fixed finite H; trusted identity-aware binary label corrections",
+  "counterexamples": {
+    "same_predictions_different_corrections": {
+      "hypotheses_as_truth_tables": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          1
+        ]
+      ],
+      "histories": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            0
+          ],
+          [
+            2,
+            0
+          ]
+        ]
+      ],
+      "event_id": 0,
+      "same_old_event": [
+        0,
+        0
+      ],
+      "same_new_label": 1,
+      "before_hypothesis_ids": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "after_hypothesis_ids": [
+        [
+          5
+        ],
+        [
+          3
+        ]
+      ],
+      "after_predictions": [
+        [
+          1,
+          0,
+          1
+        ],
+        [
+          1,
+          1,
+          0
+        ]
+      ]
+    },
+    "id_without_old_content_is_insufficient": {
+      "histories": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      ],
+      "same_full_counts": [
+        0,
+        1,
+        1,
+        2,
+        0,
+        1,
+        1,
+        2
+      ],
+      "same_event_id": 0,
+      "same_new_label": 1,
+      "after_hypothesis_ids": [
+        [
+          1,
+          5
+        ],
+        [
+          2,
+          6
+        ]
+      ]
+    },
+    "new_hypothesis_can_need_discarded_information": {
+      "old_hypotheses": [
+        0,
+        7
+      ],
+      "histories": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ]
+      ],
+      "same_old_counts": [
+        0,
+        3
+      ],
+      "new_hypothesis_truth_table": [
+        0,
+        1,
+        0
+      ],
+      "new_hypothesis_mismatch_counts": [
+        0,
+        2
+      ]
+    }
+  },
+  "exhaustive": {
+    "domain_size": 3,
+    "all_boolean_hypotheses": 8,
+    "nonempty_hypothesis_classes": 255,
+    "history_lengths": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "histories": 1554,
+    "full_universe_corrections": 5910,
+    "class_correction_cases": 1507050,
+    "by_history_length": [
+      {
+        "length": 1,
+        "histories": 6,
+        "class_cases": 1530,
+        "exact_counter_mismatches": 0,
+        "histogram_mismatches": 0,
+        "survivors_only_mismatches": 1440,
+        "binary_violation_mismatches": 0,
+        "nonempty_before": 1440,
+        "nonempty_after": 1440,
+        "nonempty_both": 1350,
+        "empty_before_nonempty_after": 90,
+        "survivors_only_mismatches_nonempty_both": 1350,
+        "binary_false_admission_class_cases": 0
+      },
+      {
+        "length": 2,
+        "histories": 36,
+        "class_cases": 18360,
+        "exact_counter_mismatches": 0,
+        "histogram_mismatches": 0,
+        "survivors_only_mismatches": 12096,
+        "binary_violation_mismatches": 12096,
+        "nonempty_before": 12096,
+        "nonempty_after": 12096,
+        "nonempty_both": 6912,
+        "empty_before_nonempty_after": 5184,
+        "survivors_only_mismatches_nonempty_both": 6912,
+        "binary_false_admission_class_cases": 12096
+      },
+      {
+        "length": 3,
+        "histories": 216,
+        "class_cases": 165240,
+        "exact_counter_mismatches": 0,
+        "histogram_mismatches": 0,
+        "survivors_only_mismatches": 64224,
+        "binary_violation_mismatches": 138528,
+        "nonempty_before": 64224,
+        "nonempty_after": 64224,
+        "nonempty_both": 19584,
+        "empty_before_nonempty_after": 44640,
+        "survivors_only_mismatches_nonempty_both": 19584,
+        "binary_false_admission_class_cases": 138528
+      },
+      {
+        "length": 4,
+        "histories": 1296,
+        "class_cases": 1321920,
+        "exact_counter_mismatches": 0,
+        "histogram_mismatches": 0,
+        "survivors_only_mismatches": 282240,
+        "binary_violation_mismatches": 1187712,
+        "nonempty_before": 282240,
+        "nonempty_after": 282240,
+        "nonempty_both": 50688,
+        "empty_before_nonempty_after": 231552,
+        "survivors_only_mismatches_nonempty_both": 50688,
+        "binary_false_admission_class_cases": 1187712
+      }
+    ],
+    "totals": {
+      "class_cases": 1507050,
+      "exact_counter_mismatches": 0,
+      "histogram_mismatches": 0,
+      "survivors_only_mismatches": 360000,
+      "binary_violation_mismatches": 1338336,
+      "nonempty_before": 360000,
+      "nonempty_after": 360000,
+      "nonempty_both": 78534,
+      "empty_before_nonempty_after": 281466,
+      "survivors_only_mismatches_nonempty_both": 78534,
+      "binary_false_admission_class_cases": 1338336
+    }
+  },
+  "repeated_edits": {
+    "all_three_edit_sequences": 6126,
+    "intermediate_states_checked_against_replay": 18378,
+    "exact_mismatches": 0
+  },
+  "persistence": {
+    "initial_events": 80,
+    "future_corrections": 50,
+    "fresh_process_exact": true,
+    "checkpoint_contains": [
+      "hypotheses",
+      "counts",
+      "events"
+    ],
+    "continuation_supplies": [
+      "old_x",
+      "old_y",
+      "new_y"
+    ],
+    "final_counts": [
+      33,
+      37,
+      36,
+      40,
+      40,
+      44,
+      43,
+      47
+    ]
+  },
+  "preservation_before": {
+    "files_checked": 82,
+    "changed": []
+  },
+  "preservation_after": {
+    "files_checked": 82,
+    "changed": []
+  },
+  "source_sha256": "51949032376dd8057ac241c6ca766a1f7ee4c2b8529be9ac2de04faa0750095c"
+}

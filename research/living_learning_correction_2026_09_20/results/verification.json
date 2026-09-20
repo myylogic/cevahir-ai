@@ -1,0 +1,18 @@
+{
+  "exact_rerun_equal": true,
+  "experiment_source_sha256": "51949032376dd8057ac241c6ca766a1f7ee4c2b8529be9ac2de04faa0750095c",
+  "verifier_source_sha256": "868c7a5a8e09d1cfc34a2bb434e1877eb9f3b1b6dcb698a9d1d546ae5b9c1483",
+  "class_correction_cases": 1507050,
+  "intermediate_states": 18378,
+  "fresh_process_continuation": true,
+  "empty_history_edit_rejected": true,
+  "no_op_edit_unchanged": true,
+  "wrong_provenance_can_pass_count_guard": true,
+  "prior_chain_files_checked": 88,
+  "prior_files_changed": [],
+  "limits": [
+    "Fixed finite H and trusted old event contents",
+    "Enumeration reuses projected subsets, not independent trials",
+    "No general learning, automatic error diagnosis, or performance superiority claim"
+  ]
+}

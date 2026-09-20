@@ -1,0 +1,1099 @@
+{
+  "schema": 1,
+  "experiment": "finite affine lifecycle witness",
+  "python": "3.14.3",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+  ],
+  "prime": 101,
+  "operator_count": 4,
+  "bias": "nonzero-slope affine maps over F_101; composition, tool IDs and trusted feedback are supplied",
+  "trials": [
+    {
+      "seed": 0,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 20,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1940,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 184
+    },
+    {
+      "seed": 1,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 20,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1940,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 184
+    },
+    {
+      "seed": 2,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 184
+    },
+    {
+      "seed": 3,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 18,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1942,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 4,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 20,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1940,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 5,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 6,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 18,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1942,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 183
+    },
+    {
+      "seed": 7,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 20,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1940,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 183
+    },
+    {
+      "seed": 8,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 184
+    },
+    {
+      "seed": 9,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 184
+    },
+    {
+      "seed": 10,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 20,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1940,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 183
+    },
+    {
+      "seed": 11,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 186
+    },
+    {
+      "seed": 12,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 13,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 18,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1942,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 14,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 20,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1940,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 15,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 20,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1940,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 182
+    },
+    {
+      "seed": 16,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 20,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1940,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 184
+    },
+    {
+      "seed": 17,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 18,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1942,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 18,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 19,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 17,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1943,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 184
+    },
+    {
+      "seed": 20,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 21,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 22,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 184
+    },
+    {
+      "seed": 23,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    },
+    {
+      "seed": 24,
+      "a_on_a": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_b": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "b_on_a": {
+        "correct": 19,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "reset": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_exact_lookup": {
+        "correct": 0,
+        "abstentions": 1960,
+        "n": 1960
+      },
+      "raw_plus_same_induction": {
+        "correct": 1960,
+        "abstentions": 0,
+        "n": 1960
+      },
+      "history_dependent_disagreements": 1941,
+      "state_transplant_equal": true,
+      "initial_rules": 0,
+      "final_rules": 4,
+      "feedback_count": 12,
+      "early_first_eight_predictions_abstain": true,
+      "learned_state_bytes_json": 185
+    }
+  ],
+  "fresh_process_restart": {
+    "equal_predictions": true,
+    "query_count": 1960,
+    "pending_count": 0,
+    "event_count": 0,
+    "state_sha256": "ade7a104bce8d41cbc6f743372b63dcf8818ffb0846cca97f12d422bc9cf1f97"
+  },
+  "offline_and_revision": {
+    "seed": 7001,
+    "external_feedback_during_consolidation": 0,
+    "historical_sequence_count": 12,
+    "sequence_length": 8,
+    "learned_coefficients_unchanged": true,
+    "compile_work": 84,
+    "no_compilation_budget_1": {
+      "correct": 0,
+      "abstentions": 1176,
+      "n": 1176
+    },
+    "offline_compilation_budget_1": {
+      "correct": 1176,
+      "abstentions": 0,
+      "n": 1176
+    },
+    "no_compilation_budget_8": {
+      "correct": 1176,
+      "abstentions": 0,
+      "n": 1176
+    },
+    "sleep_total_work": 1260,
+    "lazy_total_work": 1260,
+    "interpret_total_work": 9408,
+    "cost_model": "one affine evaluation or affine composition = one work unit; indexing, bookkeeping and historical requests excluded equally; not FLOPs",
+    "revision": {
+      "feedback_count": 3,
+      "revoked_on_first_contradiction": true,
+      "dependent_macros_invalidated": true,
+      "dependent_requests_abstain_until_revalidated": true,
+      "other_three_rules_exactly_preserved": true,
+      "after_revalidation": {
+        "correct": 1176,
+        "abstentions": 0,
+        "n": 1176
+      }
+    }
+  },
+  "counterexamples": {
+    "out_of_family_agrees_on_all_three_observations": true,
+    "out_of_family_heldout": {
+      "correct": 0,
+      "abstentions": 0,
+      "n": 98
+    },
+    "visible_third_point_inconsistency_rejected": true,
+    "one_false_trusted_feedback_revokes_valid_rule": true,
+    "repeated_identical_input_does_not_identify_slope": true,
+    "offline_compute_cannot_resolve_missing_slope": true,
+    "interpretation": "finite validation neither proves universal generalization nor handles arbitrary corruption"
+  },
+  "elapsed_seconds": 0.747007199912332,
+  "source_sha256": "70188c7cb9d68506bb7e945c5f09f755fe77c74d86369361dfe99834037e919a",
+  "claim_scope": "known finite rule induction + ordinary compilation; no novel architecture, open-world guarantee or Cevahir integration"
+}
