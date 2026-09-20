@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-21",
+  "python": "3.14.3",
+  "verifier_source_sha256": "d6b62b08fb54ed07566f56ef15ac5cd3d2675560e54e0efc6a7abfa73d97845c",
+  "prior_baseline_commit": "58cf9a2cb3808ac9c9c1bcc81ff12885e2362300",
+  "prior_files_checked_byte_exact": 94,
+  "prior_files_changed": [],
+  "query_state_exact_rerun_equal": true,
+  "query_state_totals": {
+    "histories": 61575,
+    "content_edits_checked": 712632,
+    "appends_checked": 358020,
+    "query_mismatches": 0,
+    "formula_count_mismatches": 0
+  },
+  "query_state_source_sha256": "29f90345b9a9ba37ab4c28d22822edf570e3188f84f6f1b284438a168b2c99f1",
+  "correction_exact_rerun_equal": true,
+  "correction_class_cases": 1507050,
+  "correction_fresh_process_continuation": true,
+  "witness_unittest_returncode": 0,
+  "witness_unittest_output": "...............\n----------------------------------------------------------------------\nRan 15 tests in 0.071s\n\nOK",
+  "historical_evidence": {
+    "all_previous_experiments_rerun_in_this_publication_audit": false,
+    "prior_reports_and_results_preserved": true,
+    "book_previous_validation": "docs/book/evidence/verification.json"
+  },
+  "limits": [
+    "Selected exact reruns plus witness tests; not a complete repository or GPU test suite",
+    "Prior byte preservation is not independent scientific replication",
+    "Internal automated verification, no external peer review or novelty certification"
+  ]
+}

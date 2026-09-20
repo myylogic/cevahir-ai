@@ -1,0 +1,99 @@
+{
+  "version": "2026.09.21",
+  "release_tag": "research-2026.09.21-v1",
+  "author": "Muhammed Yasin Yılmaz",
+  "date": "2026-09-21",
+  "status": "Research reports / preprints; not peer reviewed",
+  "papers": [
+    {
+      "id": "CEV-2026-01",
+      "file": "01-experience-conditioned-computation.md",
+      "title": "Deneyimle koşullanan hesaplama: kaynaklı geri bildirim ve yürütme sınırları",
+      "source": "docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md",
+      "abstract": "Çalışma sırasında edinilen dış geri bildirimin daha sonraki hesaplama stratejisini değiştirmesi için kaynaklı deneyim, ortak istek bütçesi ve strateji tercihi uygulanmıştır. Kalıcı deneyim istatistikleri ağırlık eğitiminden ayrılır. Sentetik tablo replay'i mekanizmayı sınar; gerçek model kalitesi veya maliyet kazancı gösterilmiş değildir. Görev, model ve tokenizer kimlikleri ile geri bildirim düzeltmeleri deneyim karşılaştırmasının sınırını belirler.",
+      "abstract_en": "We implement provenance-aware feedback, a shared request budget, and experience-conditioned strategy selection. Persistent experience statistics are distinct from weight training. Synthetic table replay tests mechanism behavior, not real-model quality or efficiency. Model, tokenizer, task and feedback identities constrain admissible comparisons.",
+      "finding": "Deneyim gelecekteki hesaplama seçimini kalıcı bir kayıt üzerinden etkileyebilir. Bu etkiyi genel öğrenme veya gerçek görev başarımı artışı olarak sunmak için kanıt yoktur.",
+      "limit": "Yönlendirme grupları sezgiseldir; denenmemiş eylemlerin sonuçları seçilmiş eylem loglarından çıkarılamaz. Sabit MoE prior'ı öğrenilmiş uzman anlamı değildir."
+    },
+    {
+      "id": "CEV-2026-02",
+      "file": "02-representation-witness-negative.md",
+      "title": "Temsil aramasında yetersizlik tanıkları: deterministik eşdeğerlik ve negatif sonuç",
+      "source": "docs/research/REPRESENTATION_WITNESS_AUDIT.md",
+      "abstract": "Aynı aday dili, aday sırası ve tam tutarlılık ölçütü altında yetersizlik tanığıyla filtrelenen temsil araması ile doğrudan arama karşılaştırılır. Tutarlılık tanık koşulunu zaten gerektirdiğinden, tamamlanan aramalar aynı çözümü seçer. On beş sonlu karşılaştırmanın tamamı bu eşdeğerliği doğrulamıştır. Bazı hesap maliyetleri değişse de yeni bilgi veya gözlem tasarrufu gösterilmemiştir.",
+      "abstract_en": "Witness filtering and direct representation search are equivalent when they share candidate language, order and complete deterministic consistency checking. All 15 finite comparisons yield identical selected representations, predictions and abstentions. Filtering changes some search costs but provides no additional learning information under this contract.",
+      "finding": "Tanıkla filtrelemenin bu koşullarda yeni öğrenme avantajı sağladığı hipotezi elendi; negatif sonuç korunmuştur.",
+      "limit": "Sonuç, farklı bilgi erişimi, açık uçlu ifade üretimi, yaklaşık tutarlılık veya kesilen hesap bütçeleri için aynı üstünlük/eşdeğerlik iddiasını kurmaz."
+    },
+    {
+      "id": "CEV-2026-03",
+      "file": "03-persistence-transfer-retesting.md",
+      "title": "Kalıcı yordam, aktarım ve yeniden sınama: yaşarken öğrenmenin ilk ayrıştırmaları",
+      "source": "docs/research/living_learning_2026_09_20/REPORT_TR.md",
+      "abstract": "Sonlu affine dünyalarda deneyimden edinilen yordamın kalıcılığı, yeni girdilere aktarımı ve hesap bütçesi altında kullanımı araştırılır. Aynı çıkarım yeteneğine sahip güçlü ham-kayıt rakibi temel doğrulukta eşleşir. Önceki yaşamlardan taşınan güncelleme bilgisi aynı ailede yarar, değişen ailede zarar verebilir. Kapalı döngü deneyleri kalıcı ve geçici çevre değişimini ayırır; yeniden sınama genel yaşarken öğrenme probleminin yalnız bir alt alanıdır.",
+      "abstract_en": "Finite affine worlds separate persistence, transfer and budgeted execution of experience-derived procedures. A strong raw-history baseline with the same inference capability matches accuracy. Transferred adaptation knowledge helps within a family and can hurt under shift. Closed-loop retesting is examined as one subproblem rather than a general solution to lifelong learning.",
+      "finding": "Kalıcı doğru cevap, çıkarım maliyeti, güncelleme aktarımı ve değişim altında fayda aynı ölçü değildir; güçlü rakipler birçok ilk üstünlük yorumunu sınırlar.",
+      "limit": "Fonksiyon dili ve ortam aileleri verilmiştir. Beklenen faydalı yeniden sınama, yeni hesaplama dilini edinmeyi veya genel kontrollü öğrenmeyi çözmez."
+    },
+    {
+      "id": "CEV-2026-04",
+      "file": "04-representation-credit-state-transport.md",
+      "title": "Temsil büyümesi, geçmişe kredi atama ve öğrenme durumunun taşınması",
+      "source": "docs/research/living_learning_reassessment_2026_09_20/REPORT_TR.md",
+      "abstract": "Araştırma yeniden sınama dışına açılarak temsil büyütme, gecikmeli geri bildirim ve koordinat değişimi altında güncelleme durumunu inceler. Ürün dilindeki büyüme 6.000 örnekte doğru sonuç verir; baştan genişletilmiş güçlü temsil aynı sonucu bulur. Eski bilgiyi koruyan tekrar veya toplu istatistikler değişen hedeflerde zararlı olabilir. Bugünkü tahmini koruyan parametre dönüşümünün gelecekteki öğrenme dinamiğini koruması için ek durum taşınması gerekir.",
+      "abstract_en": "We investigate representation growth, delayed credit assignment and transport of learning state across coordinate changes. A fixed expanded representation matches growth on 6,000 cases. Replay and sufficient statistics can preserve obsolete targets. Preserving current predictions under reparameterization does not by itself preserve subsequent learning dynamics.",
+      "finding": "Yürütme eşdeğerliği ile gelecekteki güncelleme eşdeğerliği ayrıdır; büyümenin yararı verilen ifade dili ve toplam maliyetle değerlendirilmelidir.",
+      "limit": "Üretim grameri ve geri bildirim kimlikleri dışarıdan verilir. Eski özet yeni özelliğin ayrımlarını kaybetmişse evrensel bir durum taşıma dönüşümü yoktur."
+    },
+    {
+      "id": "CEV-2026-05",
+      "file": "05-joint-lifetime-temporal-relations.md",
+      "title": "Tek yaşam akışında temsil, bellek ve zamansal ilişkiler",
+      "source": "docs/research/living_learning_joint_2026_09_20/REPORT_TR.md",
+      "abstract": "Temsil genişletme, bölgesel bellek ve değişen hedefler tek yaşam akışında birleştirilir. Yirmi dört yaşamda incelenen yöntem sabit geniş temsilin doğruluğuyla eşleşirken daha az yeniden çözüm yapar; bu genel maliyet üstünlüğü değildir. Hatalı etiket patlaması ve eski istatistiklerin korunması olumsuz kontrollerdir. Ayrı zamansal görevde hazır gecikme özellikleri uygun dağılımda başarılı, ayırt etmeyen akıştan yeni dağılıma geçişte başarısızdır.",
+      "abstract_en": "A joint stream combines representation expansion, regional memory and target change across 24 lives. A fixed expanded baseline matches final accuracy; fewer solves do not establish total efficiency. Label corruption and stale statistics remain negative controls. Temporal prediction with supplied lag features succeeds on informative input but fails after an uninformative training stream shifts.",
+      "finding": "Bileşenlerin ayrı ayrı çalışması tek bir yaşamın bütün koşullarında güvenilir öğrenme garantisi sağlamaz; veri akışının ayırt ediciliği belirleyicidir.",
+      "limit": "Hazır gecikmelerde iyi tahmin, zamansal ilişkinin veya nedensel yapının genel keşfi değildir. Sonradan hatalı veri patlamasının çıkarıldığı koşul ayrı tutulmuştur."
+    },
+    {
+      "id": "CEV-2026-06",
+      "file": "06-learned-update-transfer.md",
+      "title": "Deneyimden edinilen güncelleme davranışı: aktarımın yararı ve tersine dönmesi",
+      "source": "docs/research/living_learning_update_2026_09_20/REPORT_TR.md",
+      "abstract": "Kaynak yaşamlardan öğrenilen küçük bir güncelleme matrisi, tahmin parametreleri sıfırlanmış yeni yaşamlara taşınır. Böylece başlangıç tahminleri aynıyken gelecekteki öğrenme eğrilerinin değişmesi sınanır. Aynı geometride taşınan matris yararlıdır; ters geometride yeni öğrenmeye göre belirgin zarar verir. Güncellemeyi sürdürmek bu zararı azaltır fakat ortadan kaldırmaz. Moment hesabına dayalı ayrı analitik risk denetimi sayısal yorumu kontrol eder.",
+      "abstract_en": "An update matrix learned across source lives is transferred while prediction weights are reset. Identical initial predictions can therefore lead to different future learning curves. Transfer helps in the same geometry and hurts under reversal; continued adaptation only partly repairs the damage. A separate moment-based risk calculation checks the interpretation.",
+      "finding": "Deneyim gelecekte nasıl öğrenileceğini değiştirebilir; bu kapasite sabit başlangıç cevabından ölçülemez ve dağılım değişiminde kendi zararını da taşıyabilir.",
+      "limit": "Küçük doğrusal geometri ve dışarıdan verilmiş üst güncelleme ailesi kullanılır. IDBD ve ilgili literatürle eşleşme nedeniyle yeni genel öğrenme ilkesi iddiası yoktur."
+    },
+    {
+      "id": "CEV-2026-07",
+      "file": "07-acquired-recurrent-state.md",
+      "title": "Deneyimden edinilen yinelemeli durum yordamı ve yeniden öğrenme belleği",
+      "source": "docs/research/living_learning_state_2026_09_20/REPORT_TR.md",
+      "abstract": "İkili dizilerden sonlu geçiş grafikleri edinilerek görülmemiş uzun dizilerde yürütme, ayrı süreçte devam ve sonradan öğrenme ayrıştırılır. Temiz koşullarda uzun dizilere aktarım gerçekleşir; aynı küçük model ailesindeki güçlü sayımlı rakip çevrimiçi hatada daha iyidir. Bozuk etiketler büyük ve kötü genelleyen grafikler oluşturur. Küçük yürütme grafiğiyle devam etmek, yeni etiketlerden yeniden öğrenmek için tutulan örnek arşivinin gereksiz olduğunu göstermez.",
+      "abstract_en": "Finite transition graphs acquired from binary strings are tested on long unseen strings, fresh-process continuation and later relearning. Clean conditions generalize, while a strong bounded enumeration baseline has fewer online errors. Corrupted labels induce larger, poorly generalizing graphs. Compact execution state does not remove the archive used for subsequent learning.",
+      "finding": "Deneyimden yürütülebilir bir durum yordamı edinilebilir; yürütme belleği, öğrenme belleği ve hatayı teşhis etme bilgisi birbirinden farklıdır.",
+      "limit": "Boş dizi değerlendirmesi ile boş olmayan dillerin değerlendirmesi ayrı raporlanmıştır. Gerçek etiketlerin dışarıdan verilerek düzeltilmesi kendi kendine hata teşhisi sayılmaz."
+    },
+    {
+      "id": "CEV-2026-08",
+      "file": "08-correctable-learning-state.md",
+      "title": "Düzeltilebilir öğrenme durumu: bugünkü tam aday kümesinin sınırı",
+      "source": "docs/research/living_learning_correction_2026_09_20/REPORT_TR.md",
+      "abstract": "Aynı bugünkü tutarlı aday kümesini veren iki geçmiş, aynı geçerli etiket düzeltmesinden sonra farklı ve boş olmayan kümeler gerektirir. Bütün adayların ihlal çokluklarını koruyan özet, doğru eski içerik verildiğinde tam replay ile eşleşir. 1.507.050 sınıf–düzeltme durumunda sıfır uyuşmazlık bulunmuştur; gözlem histogramı da eşleşir. Yalnız olay kimliği veya sonradan genişleyen aday dili, daha dar özetlerin yeterliliğini bozabilir.",
+      "abstract_en": "Two histories with the same complete current version space can require different nonempty spaces after the same valid correction. Violation multiplicities match replay when truthful old contents are supplied, with zero mismatches over 1,507,050 projected class-correction cases. Histograms also match. ID-only edits and expanding hypothesis languages expose additional information requirements.",
+      "finding": "Bugünkü bütün doğru adayları korumak, yarın geçmiş deneyimi doğru düzeltmeye yetmez; korunacak durum izinli gelecekteki işlemlere bağlıdır.",
+      "limit": "Düzeltmenin doğruluğu dış varsayımdır. Sayaçlar sabit sayıda olsa bile bit belleği geçmiş uzunluğuyla büyür. Alt sınıf projeksiyonları bağımsız deney dünyaları değildir."
+    },
+    {
+      "id": "CEV-2026-09",
+      "file": "09-future-query-state-classes.md",
+      "title": "Gelecekteki öğrenme işlemlerine göre gerekli durum: kesin sonlu bir denetim",
+      "source": "docs/research/living_learning_query_state_2026_09_21/REPORT_TR.md",
+      "abstract": "Aynı sonlu geçmişlerde bütün Boolean ihlal sorguları, bütün gözlem çoklukları ve kimlikli etiket düzeltmeleri için gereken durum sınıfları karşılaştırılır. Toplam uzunluk ve işaretli etiket farkları bütün gelecekteki Boolean ihlal sorgularına yeterken, kimlikli düzeltme ayrı bir doğrusal bilgi alt sınırı getirir. 61.575 geçmiş, 712.632 etiket yazımı ve 358.020 ekleme tam sayılarla denetlenmiştir. Üç sınıf sayısı formülünde veya replay eşitliğinde uyuşmazlık bulunmamıştır.",
+      "abstract_en": "We compare state classes for all Boolean loss queries, observation counts and identity-only label edits on the same finite histories. Length plus signed label differences suffices for all future Boolean loss queries; identity edits impose a separate linear information bound. Exact enumeration checks 61,575 histories, 712,632 label writes and 358,020 appends with no count-formula or replay mismatches.",
+      "finding": "Bilinmeyen gelecekteki hipotezler her zaman tam histogram gerektirmez. Gerekli bilgi, hipotezlerin bilinip bilinmemesinden önce hangi sorgu ve işlemlerin destekleneceğine bağlıdır.",
+      "limit": "Sabit sonlu alan, bütün Boolean riskleri ve tam doğruluk kullanılır. Sınıf sayısı verimli kodlayıcı veya gerçek dünya öğrenme başarımı değildir; genel living-learning sorusu açık kalır."
+    }
+  ]
+}

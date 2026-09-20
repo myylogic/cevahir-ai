@@ -17,3 +17,5 @@ jobs:
           python-version: '3.14'
       - name: Check book links, symbols and reviewed sources
         run: python scripts/check_book.py
+      - name: Check research editions, preserved evidence and citation metadata
+        run: python scripts/check_publications.py

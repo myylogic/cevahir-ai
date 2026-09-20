@@ -59,6 +59,38 @@ Bu tur iki yeni sınırı açık tuttu. Sadece “olay 7 düzeltildi” denirse,
 
 Bu sonuç, [truth maintenance](https://www.sciencedirect.com/science/article/pii/0004370279900080) ve [artan veri değişiklikleri altında türetilmiş bilgiyi koruma](https://doi.org/10.1145/170036.170066) çalışmalarına yakın bilinen bir yapıdır. Deneyin katkısı yeni bir temel yasa ilan etmek değil, Cevahir araştırmasındaki çalışma durumu–öğrenme durumu farkını düzeltme açısından kesinleştirmektir.
 
+## 21 Eylül devamı: gelecekteki hangi işlem için yeterli?
+
+Önceki altı kutulu histogram doğru bir rakipti; her görev için en küçük bellek
+olduğu gösterilmemişti. [Yeni tam sayım](../../research/living_learning_query_state_2026_09_21/REPORT_TR.md),
+üç farklı talebi ayırıyor: bütün hipotezlerin hata sayısı, bütün gözlemlerin sayısı
+ve yalnız kimliği verilen geçmiş olayın düzeltilmesi.
+
+Bir girdideki sıfır ve bir etiketlerinin farkını `d_x`, toplam kayıt sayısını `N`
+tutarsak, her Boolean hipotezin ihlali
+`c_h=(N−Σd_x)/2+Σh(x)d_x` ile bulunur. [`signed`](../../../research/living_learning_query_state_2026_09_21/query_state.py)
+geçmişten bu durumu kurar; aynı dosyadaki `query` gelecek hipotezi cevaplar,
+`replay` ise bağımsız olarak ham kaydı tarar. Gerçek eski içerik verilen düzeltme
+bir fark sayacını değiştirir. Gelecekte hangi Boolean hipotezin ekleneceği önceden
+bilinmese bile bu sabit girdi alanında tam histogram gerekmez.
+
+Ama hangi olayın hangi kimlikte bulunduğu atılırsa, yalnız “ilk olayın etiketini
+değiştir” komutu doğru yerine getirilemeyebilir. Üç girdi ve dört kayıt için tam
+sayım, hata sorgularında 85, histogramda 126, kimlikli düzeltme sözleşmesinde
+1.296 ayrı durum buldu. İdeal sabit kod alt sınırı 7, 7 ve 11 bittir. Sınıf sayısı,
+Python belleği veya çalışma süresi değildir. Yeni deney 61.575 geçmiş, 712.632
+etiket yazımı ve 358.020 eklemede formüllerle tam taramayı karşılaştırdı; fark
+bulmadı. Yanlış eski içeriğin fark özetinden doğrulanamayacağı negatif kontrol
+olarak kaldı.
+
+Burada öğrenilen ders **gelecek hipotezlerin bilinmemesi ile gelecek işlem
+ailesinin sınırsız olması aynı şey değildir**. Girdi alanı veya istenen sorgu
+değişince bu küçük özet yetersiz olabilir. Ana soru hâlâ bundan daha geniştir:
+hangi ayrımların korunacağı, hangilerinin yeniden edinileceği ve edinilen durumun
+nasıl güvenilir yeni hesaplama kapasitesine dönüşeceği birlikte araştırılmalıdır.
+[Yayın dizisi](../../publications/README.md) önceki sekiz çalışmayla bu yeni
+sonucu aynı arşivde, açık kapsam ve yazar künyeleriyle sunar.
+
 ## Henüz araştırılmamış veya birleşmemiş yönler
 
 **Deneyimin temsilini edinmek.** Çoğu deney `x`, doğru etiket, bölüm sınırı veya hazır özellik dilini verdi. Oysa sistem hangi olayları aynı tür sayacağını, hangi ayrımın önemli olduğunu, yeni algısal özellikleri nasıl kuracağını da öğrenmek zorunda kalabilir. Hazır çarpma özelliklerini açmak veya üç sembolde histogram tutmak bu işi genel olarak çözmez.

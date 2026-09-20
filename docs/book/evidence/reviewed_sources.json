@@ -2,7 +2,7 @@
   "format_version": 1,
   "files": {
     "README-TR.md": {
-      "sha256": "882ff6725bcad8b2eb585fe3411a4e5524be7f47e4fe8833719373f79a8f2f19",
+      "sha256": "a650a9d46eedc0a19266d0df713bf5f50fe9bc8d39ad4e864cc05cd0c141dedf",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README.md",
@@ -10,7 +10,7 @@
       ]
     },
     "README.md": {
-      "sha256": "86b81e843022a8e704bdfdec50277e69a615a19c62a28ab95ef42419522d349b",
+      "sha256": "22501ed609df891698ffa02af68667c30974f1bd80edc6a9e90ee48b74fc651c",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README-en.md"
@@ -248,7 +248,7 @@
       ]
     },
     "docs/development/EVOLUTION_LOG.md": {
-      "sha256": "1451ca95e0fd299df9207ff4b6aee3be4d2a32ad88edbde7d9609c73ed0fb9ad",
+      "sha256": "a4ef41df02f0aac1e6280f9f2d92742673a9e071186cad47c694d4367df41b22",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md"
@@ -377,6 +377,21 @@
         "tr/06-egitim.md"
       ]
     },
+    "docs/publications/PUBLISHING.md": {
+      "sha256": "ae2d2d3021be6030ce7508cade2335fece797b55592474d460bb5b4047bbe9bd",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "BAKIM.md"
+      ]
+    },
+    "docs/publications/README.md": {
+      "sha256": "076c081ba098f54a7759a1642c2b811b0eb7df446d85c0e78a97747aa0611542",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "BAKIM.md",
+        "tr/12-acik-sorular.md"
+      ]
+    },
     "docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md": {
       "sha256": "b943b9d4e7595de76100143250551f0611426949c9def6d87e3cac41de1d0c60",
       "fingerprint_mode": "utf8-lf",
@@ -439,6 +454,13 @@
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "docs/research/living_learning_query_state_2026_09_21/REPORT_TR.md": {
+      "sha256": "2fd46be3ff567f719a932d2b04eb84c8cfa6b8fe25b0c7203ee2f3ab038f874f",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/12-acik-sorular.md"
       ]
     },
     "docs/research/living_learning_reassessment_2026_09_20/CREDIT_ASSIGNMENT.md": {
@@ -630,6 +652,13 @@
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/11-arastirma-laboratuvari.md"
+      ]
+    },
+    "research/living_learning_query_state_2026_09_21/query_state.py": {
+      "sha256": "29f90345b9a9ba37ab4c28d22822edf570e3188f84f6f1b284438a168b2c99f1",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/12-acik-sorular.md"
       ]
     },
     "research/living_learning_reassessment/credit_assignment.py": {

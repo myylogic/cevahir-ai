@@ -1,0 +1,562 @@
+{
+  "experiment": "future_query_state_classes",
+  "date": "2026-09-21",
+  "source_sha256": "29f90345b9a9ba37ab4c28d22822edf570e3188f84f6f1b284438a168b2c99f1",
+  "contracts": [
+    "all Boolean 0-1 loss counts on a fixed finite X",
+    "all observation indicator counts",
+    "all Boolean loss counts before/after every ID-only set-label command"
+  ],
+  "cells": [
+    {
+      "m": 1,
+      "N": 0,
+      "histories": 1,
+      "risk_classes": 1,
+      "histogram_classes": 1,
+      "id_classes": 1,
+      "ideal_fixed_bits": {
+        "risk": 0,
+        "histogram": 0,
+        "id": 0
+      },
+      "content_edits_checked": 0,
+      "appends_checked": 2,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 5.0,
+        "signed": 7.0,
+        "histogram": 5.0,
+        "id_records": 2.0
+      }
+    },
+    {
+      "m": 1,
+      "N": 1,
+      "histories": 2,
+      "risk_classes": 2,
+      "histogram_classes": 2,
+      "id_classes": 2,
+      "ideal_fixed_bits": {
+        "risk": 1,
+        "histogram": 1,
+        "id": 1
+      },
+      "content_edits_checked": 4,
+      "appends_checked": 4,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 5.0,
+        "signed": 7.5,
+        "histogram": 5.0,
+        "id_records": 7.0
+      }
+    },
+    {
+      "m": 1,
+      "N": 2,
+      "histories": 4,
+      "risk_classes": 3,
+      "histogram_classes": 3,
+      "id_classes": 4,
+      "ideal_fixed_bits": {
+        "risk": 2,
+        "histogram": 2,
+        "id": 2
+      },
+      "content_edits_checked": 16,
+      "appends_checked": 8,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 5.0,
+        "signed": 7.25,
+        "histogram": 5.0,
+        "id_records": 13.0
+      }
+    },
+    {
+      "m": 1,
+      "N": 3,
+      "histories": 8,
+      "risk_classes": 4,
+      "histogram_classes": 4,
+      "id_classes": 8,
+      "ideal_fixed_bits": {
+        "risk": 2,
+        "histogram": 2,
+        "id": 3
+      },
+      "content_edits_checked": 48,
+      "appends_checked": 16,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 5.0,
+        "signed": 7.5,
+        "histogram": 5.0,
+        "id_records": 19.0
+      }
+    },
+    {
+      "m": 1,
+      "N": 4,
+      "histories": 16,
+      "risk_classes": 5,
+      "histogram_classes": 5,
+      "id_classes": 16,
+      "ideal_fixed_bits": {
+        "risk": 3,
+        "histogram": 3,
+        "id": 4
+      },
+      "content_edits_checked": 128,
+      "appends_checked": 32,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 5.0,
+        "signed": 7.3125,
+        "histogram": 5.0,
+        "id_records": 25.0
+      }
+    },
+    {
+      "m": 1,
+      "N": 5,
+      "histories": 32,
+      "risk_classes": 6,
+      "histogram_classes": 6,
+      "id_classes": 32,
+      "ideal_fixed_bits": {
+        "risk": 3,
+        "histogram": 3,
+        "id": 5
+      },
+      "content_edits_checked": 320,
+      "appends_checked": 64,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 5.0,
+        "signed": 7.5,
+        "histogram": 5.0,
+        "id_records": 31.0
+      }
+    },
+    {
+      "m": 1,
+      "N": 6,
+      "histories": 64,
+      "risk_classes": 7,
+      "histogram_classes": 7,
+      "id_classes": 64,
+      "ideal_fixed_bits": {
+        "risk": 3,
+        "histogram": 3,
+        "id": 6
+      },
+      "content_edits_checked": 768,
+      "appends_checked": 128,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 5.0,
+        "signed": 7.34375,
+        "histogram": 5.0,
+        "id_records": 37.0
+      }
+    },
+    {
+      "m": 2,
+      "N": 0,
+      "histories": 1,
+      "risk_classes": 1,
+      "histogram_classes": 1,
+      "id_classes": 1,
+      "ideal_fixed_bits": {
+        "risk": 0,
+        "histogram": 0,
+        "id": 0
+      },
+      "content_edits_checked": 0,
+      "appends_checked": 4,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 9.0,
+        "signed": 9.0,
+        "histogram": 9.0,
+        "id_records": 2.0
+      }
+    },
+    {
+      "m": 2,
+      "N": 1,
+      "histories": 4,
+      "risk_classes": 4,
+      "histogram_classes": 4,
+      "id_classes": 4,
+      "ideal_fixed_bits": {
+        "risk": 2,
+        "histogram": 2,
+        "id": 2
+      },
+      "content_edits_checked": 8,
+      "appends_checked": 16,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 9.0,
+        "signed": 9.5,
+        "histogram": 9.0,
+        "id_records": 7.0
+      }
+    },
+    {
+      "m": 2,
+      "N": 2,
+      "histories": 16,
+      "risk_classes": 9,
+      "histogram_classes": 10,
+      "id_classes": 16,
+      "ideal_fixed_bits": {
+        "risk": 4,
+        "histogram": 4,
+        "id": 4
+      },
+      "content_edits_checked": 64,
+      "appends_checked": 64,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 9.0,
+        "signed": 9.625,
+        "histogram": 9.0,
+        "id_records": 13.0
+      }
+    },
+    {
+      "m": 2,
+      "N": 3,
+      "histories": 64,
+      "risk_classes": 16,
+      "histogram_classes": 20,
+      "id_classes": 64,
+      "ideal_fixed_bits": {
+        "risk": 4,
+        "histogram": 5,
+        "id": 6
+      },
+      "content_edits_checked": 384,
+      "appends_checked": 256,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 9.0,
+        "signed": 9.6875,
+        "histogram": 9.0,
+        "id_records": 19.0
+      }
+    },
+    {
+      "m": 2,
+      "N": 4,
+      "histories": 256,
+      "risk_classes": 25,
+      "histogram_classes": 35,
+      "id_classes": 256,
+      "ideal_fixed_bits": {
+        "risk": 5,
+        "histogram": 6,
+        "id": 8
+      },
+      "content_edits_checked": 2048,
+      "appends_checked": 1024,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 9.0,
+        "signed": 9.7265625,
+        "histogram": 9.0,
+        "id_records": 25.0
+      }
+    },
+    {
+      "m": 2,
+      "N": 5,
+      "histories": 1024,
+      "risk_classes": 36,
+      "histogram_classes": 56,
+      "id_classes": 1024,
+      "ideal_fixed_bits": {
+        "risk": 6,
+        "histogram": 6,
+        "id": 10
+      },
+      "content_edits_checked": 10240,
+      "appends_checked": 4096,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 9.0,
+        "signed": 9.75390625,
+        "histogram": 9.0,
+        "id_records": 31.0
+      }
+    },
+    {
+      "m": 2,
+      "N": 6,
+      "histories": 4096,
+      "risk_classes": 49,
+      "histogram_classes": 84,
+      "id_classes": 4096,
+      "ideal_fixed_bits": {
+        "risk": 6,
+        "histogram": 7,
+        "id": 12
+      },
+      "content_edits_checked": 49152,
+      "appends_checked": 16384,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 9.0,
+        "signed": 9.7744140625,
+        "histogram": 9.0,
+        "id_records": 37.0
+      }
+    },
+    {
+      "m": 3,
+      "N": 0,
+      "histories": 1,
+      "risk_classes": 1,
+      "histogram_classes": 1,
+      "id_classes": 1,
+      "ideal_fixed_bits": {
+        "risk": 0,
+        "histogram": 0,
+        "id": 0
+      },
+      "content_edits_checked": 0,
+      "appends_checked": 6,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 17.0,
+        "signed": 11.0,
+        "histogram": 13.0,
+        "id_records": 2.0
+      }
+    },
+    {
+      "m": 3,
+      "N": 1,
+      "histories": 6,
+      "risk_classes": 6,
+      "histogram_classes": 6,
+      "id_classes": 6,
+      "ideal_fixed_bits": {
+        "risk": 3,
+        "histogram": 3,
+        "id": 3
+      },
+      "content_edits_checked": 12,
+      "appends_checked": 36,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 17.0,
+        "signed": 11.5,
+        "histogram": 13.0,
+        "id_records": 7.0
+      }
+    },
+    {
+      "m": 3,
+      "N": 2,
+      "histories": 36,
+      "risk_classes": 19,
+      "histogram_classes": 21,
+      "id_classes": 36,
+      "ideal_fixed_bits": {
+        "risk": 5,
+        "histogram": 5,
+        "id": 6
+      },
+      "content_edits_checked": 144,
+      "appends_checked": 216,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 17.0,
+        "signed": 11.75,
+        "histogram": 13.0,
+        "id_records": 13.0
+      }
+    },
+    {
+      "m": 3,
+      "N": 3,
+      "histories": 216,
+      "risk_classes": 44,
+      "histogram_classes": 56,
+      "id_classes": 216,
+      "ideal_fixed_bits": {
+        "risk": 6,
+        "histogram": 6,
+        "id": 8
+      },
+      "content_edits_checked": 1296,
+      "appends_checked": 1296,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 17.0,
+        "signed": 11.88888888888889,
+        "histogram": 13.0,
+        "id_records": 19.0
+      }
+    },
+    {
+      "m": 3,
+      "N": 4,
+      "histories": 1296,
+      "risk_classes": 85,
+      "histogram_classes": 126,
+      "id_classes": 1296,
+      "ideal_fixed_bits": {
+        "risk": 7,
+        "histogram": 7,
+        "id": 11
+      },
+      "content_edits_checked": 10368,
+      "appends_checked": 7776,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 17.0,
+        "signed": 11.974537037037036,
+        "histogram": 13.0,
+        "id_records": 25.0
+      }
+    },
+    {
+      "m": 3,
+      "N": 5,
+      "histories": 7776,
+      "risk_classes": 146,
+      "histogram_classes": 252,
+      "id_classes": 7776,
+      "ideal_fixed_bits": {
+        "risk": 8,
+        "histogram": 8,
+        "id": 13
+      },
+      "content_edits_checked": 77760,
+      "appends_checked": 46656,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 17.0,
+        "signed": 12.032407407407407,
+        "histogram": 13.0,
+        "id_records": 31.0
+      }
+    },
+    {
+      "m": 3,
+      "N": 6,
+      "histories": 46656,
+      "risk_classes": 231,
+      "histogram_classes": 462,
+      "id_classes": 46656,
+      "ideal_fixed_bits": {
+        "risk": 8,
+        "histogram": 9,
+        "id": 16
+      },
+      "content_edits_checked": 559872,
+      "appends_checked": 279936,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 17.0,
+        "signed": 12.07445987654321,
+        "histogram": 13.0,
+        "id_records": 37.0
+      }
+    }
+  ],
+  "negative_controls": {
+    "signed_collision": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    ],
+    "indicator_query_counts": [
+      1,
+      0
+    ],
+    "nonexistent_old_content_can_pass_numeric_bounds": true,
+    "histogram_id_collision": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    ],
+    "same_id_set_label_produces_distinct_risks": true
+  },
+  "totals": {
+    "histories": 61575,
+    "content_edits_checked": 712632,
+    "appends_checked": 358020,
+    "query_mismatches": 0,
+    "formula_count_mismatches": 0
+  },
+  "limits": [
+    "Finite exact enumeration is not a learning-quality benchmark",
+    "ID commands include setting the already present label",
+    "Content edits assume truthful old contents supplied externally",
+    "JSON payloads exclude schema, code, hypothesis definitions and allocator overhead",
+    "Class-count bounds do not supply an efficient encoder",
+    "No novelty or universal living-learning solution claim"
+  ]
+}

@@ -143,6 +143,26 @@
       "symbol": "ObservationHistogram",
       "chapter": "tr/12-acik-sorular.md",
       "line": 72
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "signed",
+      "chapter": "tr/12-acik-sorular.md"
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "query",
+      "chapter": "tr/12-acik-sorular.md"
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "replay",
+      "chapter": "tr/12-acik-sorular.md"
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "audit_cell",
+      "chapter": "tr/12-acik-sorular.md"
     }
   ],
   "notes": [

@@ -18,7 +18,7 @@ Cevahir'i bundan sonra **açık kaynak bir araştırma ve eğitim mirası** olar
 
 Modüler kitap, yapay zekanın temellerini gerçek Cevahir koduna bağlar: tokenizer, sinir ağı, Transformer, eğitim, checkpoint, üretim, bellek, bilişsel iş akışları, araçlar ve açık araştırma. Her bölümde çağıran bileşen, girdi/çıktı, yapılandırma ve kanıt zinciri izlenir. [English reading guide](docs/book/README-en.md) · [Kaynak haritası](docs/book/KAYNAK_HARITASI.md) · [Kodla kitabı birlikte güncel tutmak](docs/book/BAKIM.md).
 
-[Araştırma laboratuvarı](docs/book/tr/11-arastirma-laboratuvari.md), başarılı ve olumsuz deneyleri birlikte korur. [Son düzeltme durumu deneyi](docs/research/living_learning_correction_2026_09_20/REPORT_TR.md), bugünkü tahmin yeteneğiyle geçmiş deneyimi düzelterek yeniden öğrenebilme kapasitesini ayırır. Bu sınırlı sonuçlar genel yaşarken öğrenme probleminin çözümü değildir.
+[Araştırma laboratuvarı](docs/book/tr/11-arastirma-laboratuvari.md), başarılı ve olumsuz deneyleri birlikte korur. **[Araştırma yayın dizisi](docs/publications/README.md)**, Muhammed Yasin Yılmaz imzalı dokuz araştırma raporunu özetleri, yöntemleri, kanıtları ve sınırlarıyla sunar. [Son sorgu-durumu deneyi](docs/research/living_learning_query_state_2026_09_21/REPORT_TR.md), gelecekteki sorgu ve düzeltmeler için gereken bilgiyi ayırır. Bu sınırlı sonuçlar genel yaşarken öğrenme probleminin çözümü değildir. [Sürüm ve DOI kaydı](docs/publications/release.json).
 
 <p align="center">
   <img src="image/87E09A64-4E1F-41D5-84AF-7D7C56F6C229.png" alt="Cevahir AI & Engine" style="max-width:100%;">

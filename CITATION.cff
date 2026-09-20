@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "Please cite this versioned research archive and identify the individual report when applicable."
+type: software
+title: "Cevahir AI: Living-Learning Research Reports and Technical Book"
+authors:
+  - family-names: "Yılmaz"
+    given-names: "Muhammed Yasin"
+version: "2026.09.21"
+date-released: 2026-09-21
+repository-code: "https://github.com/myylogic/cevahir-ai"
+url: "https://github.com/myylogic/cevahir-ai/tree/main/docs/publications"
+license: Apache-2.0
+keywords:
+  - lifelong learning
+  - living-learning
+  - reproducible research
+  - negative results
+  - artificial intelligence education
+abstract: >-
+  A versioned open-source research archive containing nine research reports,
+  reproducible finite experiments, preserved negative results, and a technical
+  book grounded in the Cevahir implementation. The broad problem of persistent,
+  controlled, generalizable learning during operation remains open. Reports are
+  not peer reviewed. AI assistance was used in code, experiments and drafting.

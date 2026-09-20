@@ -18,7 +18,7 @@ I am continuing Cevahir as an **open-source research and educational legacy**, w
 
 The modular Turkish book connects AI fundamentals to the real Cevahir implementation: tokenization, neural computation, Transformer blocks, training, checkpoints, generation, memory, cognition, tools and open research. Each chapter follows actual callers, inputs, outputs, configuration gates and evidence. [English reading guide](docs/book/README-en.md) · [Source map](docs/book/KAYNAK_HARITASI.md) · [Keeping code and documentation aligned](docs/book/BAKIM.md).
 
-The [research laboratory](docs/book/tr/11-arastirma-laboratuvari.md) preserves successful and negative experiments. The [latest correction-state study](docs/research/living_learning_correction_2026_09_20/REPORT_TR.md) distinguishes current prediction from the ability to revise past experience. These bounded results do not solve the general living-learning problem.
+The [research laboratory](docs/book/tr/11-arastirma-laboratuvari.md) preserves successful and negative experiments. The [research publication series](docs/publications/README.md) presents nine reports by Muhammed Yasin Yılmaz, with English abstracts, full methods, evidence and limitations. The [latest future-query study](docs/research/living_learning_query_state_2026_09_21/REPORT_TR.md) distinguishes the information needed for future queries and corrections. These bounded results do not solve the general living-learning problem. [Version and DOI record](docs/publications/release.json).
 
 <p align="center">
   <img src="image/87E09A64-4E1F-41D5-84AF-7D7C56F6C229.png" alt="Cevahir AI & Engine" style="max-width:100%;">

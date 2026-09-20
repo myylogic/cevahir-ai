@@ -41,6 +41,15 @@ Bir kavramı tanımak için gerekli matematiği, çözdüğü problemi ve en yak
 
 Araştırma bölümünde buna hipotez, bilgi erişimi, güçlü baseline, ayırıcı negatif, tekrar üretim komutu ve hangi sonucun hâlâ açık kaldığı eklenir. Var olmayan bir özellik için tahmini sınıf adı yazılmaz. Hazır özellik dili veya ayrıcalıklı doğrulama verisi varsa saklanmaz. Tek bir küçük başarılı deney ana sorunun çözümü diye sunulmaz.
 
+## Araştırma yayınları
+
+Anlamlı araştırma değişikliklerinde ayrıca [yayın dizisini](../publications/README.md)
+ve [yayın sürecini](../publications/PUBLISHING.md) izleyin. Yeni deneyin raporu,
+makale edisyonu ve kitap açıklaması aynı kapsamı taşımalıdır. Önceki raporların
+üzerine yazılmaz; yeni sürüm DOI'si gerçek arşiv kaydından doğrulandıktan sonra
+eklenir. `python scripts/check_publications.py` edisyon, kaynak koruması ve
+atıf bilgilerinin yapısal eşleşmesini denetler.
+
 ## English maintenance note
 
 Keep the Turkish book, its English reading guide, existing bilingual module documentation and relevant tests aligned with meaningful changes. Source code determines current behavior; historical research records remain intact. Run `python scripts/check_book.py`. After reviewing the affected chapters against the source, explicitly record reviewed fingerprints with `--record-reviewed-sources`, then check again. The CI workflow only checks; it never refreshes evidence automatically. A passing structural check does not prove semantic correctness or research generality.
