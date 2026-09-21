@@ -2,7 +2,7 @@
 
 [English](README.md) · [Türkçe](README-TR.md)
 
-[Research archive DOI: 10.5281/zenodo.22864661](https://doi.org/10.5281/zenodo.22864661) · [Research reports](docs/publications/README.md)
+[Research archive DOI: 10.5281/zenodo.22874751](https://doi.org/10.5281/zenodo.22874751) · [Research reports](docs/publications/README.md)
 
 **An AI engine combining tokenizer infrastructure developed specifically for Turkish, a trainable language-model core and cognitive systems.**
 

@@ -3,9 +3,13 @@
   "tag": "research-2026.09.21-v2",
   "author": "Muhammed Yasin Yılmaz",
   "github_url": "https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.09.21-v2",
-  "status": "prepared",
-  "doi": null,
+  "status": "published",
+  "doi": "10.5281/zenodo.22874751",
   "concept_doi": "10.5281/zenodo.22864660",
   "previous_release": "releases/research-2026.09.21-v1.json",
-  "scope": "Academic book expansion; nine preserved report editions and code in one archive. Not separate paper DOIs."
+  "scope": "Academic book expansion; nine preserved report editions and code in one archive. Not separate paper DOIs.",
+  "zenodo_url": "https://zenodo.org/records/22874751",
+  "source_commit": "0a13c2889c7005aed850071f9964cded67997f1f",
+  "archive_verification": "evidence/zenodo_archive_verification_v2.json",
+  "doi_resolution": "evidence/doi_resolution_v2.json"
 }

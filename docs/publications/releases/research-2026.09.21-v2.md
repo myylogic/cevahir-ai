@@ -17,3 +17,5 @@ This edition expands the Turkish technical book's neural-network, embedding, att
 The DOI applies to the combined code, research reports and book archive, not separate registrations for individual chapters or reports. AI assistance was used for code inspection, literature review, computational examples and drafting. DOI registration establishes a versioned deposit, not scientific correctness, personal identity verification or novelty.
 
 Zenodo's confirmed DOI and archive verification are added to the main branch after publication; this release tag remains immutable. The preceding archive is [version 2026.09.21](https://doi.org/10.5281/zenodo.22864661).
+
+Publication confirmed: [version DOI 10.5281/zenodo.22874751](https://doi.org/10.5281/zenodo.22874751). All 841 archived file paths and contents match the release tag byte for byte. [Zenodo record](https://zenodo.org/records/22874751). This confirmation was added after the immutable tag was published.

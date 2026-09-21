@@ -2,7 +2,7 @@
   "format_version": 1,
   "files": {
     "README-TR.md": {
-      "sha256": "7c23c49b259bd60f412f79a126dd3327d62d3b3c8e21361e9f4030522b68c19b",
+      "sha256": "1fda61f3ce29ada5bec4929b556dcfefca409c374f4307c58a36822ed9e10c8f",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README.md",
@@ -10,7 +10,7 @@
       ]
     },
     "README.md": {
-      "sha256": "9d9b77916477e6c430ff48430ab81797552003fd447cbd12f580b067ee7eb464",
+      "sha256": "8e062399b778dcb0051101de899fee02b265d52cb7f6c80ef05128ec7a8a1334",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README-en.md"
@@ -262,7 +262,7 @@
       ]
     },
     "docs/development/EVOLUTION_LOG.md": {
-      "sha256": "75f5f59c04e9c735a47070546a1b208ff5651ee28313e0b10cc2d43663570a25",
+      "sha256": "7cd0ef2eb537f90b8816d9b515a59a15c1ec9f1590cd73de0dec279fb6de5527",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md"
@@ -399,7 +399,7 @@
       ]
     },
     "docs/publications/README.md": {
-      "sha256": "038e0bfcc69af14731df3179371b7c02af583e5b20f8da6324bee410cd136d12",
+      "sha256": "a2a4fce54089401366f7656f2df219e0c2bb9c1fe14394cff3e7b11254bab019",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "AKADEMIK_OKUMA.md",
