@@ -2,7 +2,7 @@
 
 **Gerçek kaynak kodundan, açık araştırma sorularına uzanan teknik kitap.**
 
-[Repository ana sayfası](../../README-TR.md) · [English reading guide](README-en.md) · [Kaynak haritası](KAYNAK_HARITASI.md) · [Kitabı güncel tutmak](BAKIM.md)
+[Repository ana sayfası](../../README-TR.md) · [English reading guide](README-en.md) · [Kaynak haritası](KAYNAK_HARITASI.md) · [Akademik okuma ve yeniden üretim](AKADEMIK_OKUMA.md) · [Kitabı güncel tutmak](BAKIM.md)
 
 Cevahir'in yönü açık kaynak araştırma ve eğitimdir. Bu kitap, ürün geliştirme hedefinin yerine yeni bir basitleştirilmiş uygulama koymaz. Aynı mühendislik kodunu, testleri ve araştırma kayıtlarını birbirine bağlar. Okuyucu bir kavramı öğrendikten sonra onun gerçek bir sistemde hangi girdiyi aldığını, hangi hesabı yaptığını ve çıktısını kimin kullandığını izleyebilmelidir.
 
@@ -29,6 +29,8 @@ Kitabın ana dili Türkçedir. Teknik terimlerin İngilizce karşılıkları ger
 | **V — Bilinen sistemden açık araştırmaya** | |
 | [11. Yaşarken öğrenme laboratuvarı](tr/11-arastirma-laboratuvari.md) | Hipotez → mekanizma → kod → karşılaştırma → sonuç → sınırlılık. |
 | [12. Bilmediklerimiz ve araştırmanın devamı](tr/12-acik-sorular.md) | Kalıcılık, düzeltme, temsil, öğrenme biçimi ve birleşik yaşamın açık sorunları. |
+
+21 Eylül genişletmesinde 3–6. bölümlere sinir ağı ve temsilin temelleri, ayrıntılı matematik, yöntemlerin özgün kaynakları, tarihli endüstri karşılaştırmaları, dosya/metot haritaları ve çözümlü alıştırmalar eklendi. Gerçek Cevahir bileşenleriyle yedi küçük CPU örnek grubu çalıştırıldı. Bu, kitabın bütün bölümlerinin aynı ayrıntı düzeyinde tamamlandığı anlamına gelmez; güncel kapsam [akademik okuma rehberinde](AKADEMIK_OKUMA.md) açıklanır.
 
 ## Nasıl okunmalı?
 

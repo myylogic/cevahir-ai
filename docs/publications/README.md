@@ -2,7 +2,7 @@
 
 **Muhammed Yasin Yılmaz** · Araştırma raporları ve ön baskılar · 21 Eylül 2026
 
-**Yayımlanmış sürüm DOI'si: [10.5281/zenodo.22864661](https://doi.org/10.5281/zenodo.22864661)**
+**İlk arşiv sürümünün DOI'si: [10.5281/zenodo.22864661](https://doi.org/10.5281/zenodo.22864661)**
 · [Zenodo arşivi](https://zenodo.org/records/22864661)
 · [Bütün sürümlerin DOI'si](https://doi.org/10.5281/zenodo.22864660)
 
@@ -49,27 +49,29 @@ Tam öğrenme yaşam döngüsü için [teknik kitap](../book/README.md),
 
 ## Atıf ve sürüm arşivi
 
-Sürüm: **2026.09.21**. Git etiketi: `research-2026.09.21-v1`.
-[GitHub sürümü](https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.09.21-v1),
+Yeni paket: **2026.09.21.2**. Git etiketi: `research-2026.09.21-v2`. Yeni DOI kaydı henüz doğrulanmadı; yukarıdaki bağlantı ilk arşiv sürümüdür.
+[GitHub sürümü](https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.09.21-v2),
 metinleri, kaynak kodu, deney kayıtlarını ve kitabı birlikte arşivler.
 [DOI yayın kaydı](release.json), dış hizmetten doğrulanmış kimliği ve yayın
 durumunu taşır. Zenodo kaydı yazılım/araştırma arşivi türündedir; dizideki her
 metne ayrı DOI atanmış olduğu ileri sürülmez.
 
-Atıf biçimi: **Yılmaz, M. Y. (2026). Çalışma başlığı (CEV-2026-XX). Cevahir AI:
+İlk arşiv için atıf biçimi: **Yılmaz, M. Y. (2026). Çalışma başlığı (CEV-2026-XX). Cevahir AI:
 Living-Learning Research Reports and Technical Book, sürüm 2026.09.21.**
 [https://doi.org/10.5281/zenodo.22864661](https://doi.org/10.5281/zenodo.22864661).
 Makinece kullanılabilir koleksiyon künyesi [CITATION.cff](../../CITATION.cff)
 dosyasındadır. DOI, içeriğin belirli arşiv sürümünü tanımlar; bilimsel doğruluk,
 özgünlük, kişisel kimlik belgesi veya kriptografik imza onayı değildir.
 
-[Arşiv denetiminde](evidence/zenodo_archive_verification.json) Zenodo ZIP'indeki
+[İlk arşivin denetiminde](evidence/zenodo_archive_verification.json) Zenodo ZIP'indeki
 829 dosyanın etiketlenmiş Git sürümüyle bayt bayt aynı olduğu doğrulandı.
 [DOI yönlendirmesi](evidence/doi_resolution.json) yayımlanmış kayda ulaşıyor.
 Türkiye'de 21 Eylül olan yayın anı UTC'de 20 Eylül olduğu için Zenodo tarih
 alanında 20 Eylül görünür; sürüm ve makale tarihi 21 Eylül'dür. Etiket içindeki
 yayın durumu dosyası yayın öncesi hazırlık kaydıdır; bu doğrulama kayıtları
 yayından sonra ana dala eklenmiştir. Arşiv etiketi değiştirilmemiştir.
+
+İlk sürümün [yayın kaydı](releases/research-2026.09.21-v1.json) korunmuştur. İkinci paket, 3–6. kitap bölümlerinin akademik genişletmesini ve [yeni yürütme kanıtlarını](../book/evidence/academic_expansion_verification.json) ekler. Dokuz raporun özgün araştırma sonuçları değişmemiştir; edisyon başlıkları koleksiyonun yeni sürümünü gösterir.
 
 ## Katkı açıklaması ve devamlılık
 

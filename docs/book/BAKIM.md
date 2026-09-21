@@ -55,3 +55,7 @@ atıf bilgilerinin yapısal eşleşmesini denetler.
 ## English maintenance note
 
 Keep the Turkish book, its English reading guide, existing bilingual module documentation and relevant tests aligned with meaningful changes. Source code determines current behavior; historical research records remain intact. Run `python scripts/check_book.py`. After reviewing the affected chapters against the source, explicitly record reviewed fingerprints with `--record-reviewed-sources`, then check again. The CI workflow only checks; it never refreshes evidence automatically. A passing structural check does not prove semantic correctness or research generality.
+
+## Sinirsel hesap örnekleri
+
+3–6. bölümleri etkileyen bir değişiklikte `python scripts/book_neural_walkthrough.py` komutunu çalıştırın. Yeni bir ölçümü kayıtlı sonucun yerine koymadan önce matematiksel iddiayı, gerçek çağrı yolunu ve toleransı inceleyin. Kaynakçadaki yöntem kökeni ile uygulama iddiası ayrı güncellenmelidir. [Akademik okuma rehberi](AKADEMIK_OKUMA.md) bu kapsamı açıklar.

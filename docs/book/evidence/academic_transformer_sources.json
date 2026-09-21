@@ -1,0 +1,207 @@
+{
+  "chapter": "tr/05-transformer.md",
+  "reviewed_on": "2026-09-21",
+  "references": [
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer.__init__",
+      "line": 125,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer.forward",
+      "line": 352,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer._forward_impl",
+      "line": 532,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer._parallel_forward_impl",
+      "line": 687,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer._stochastic_depth",
+      "line": 458,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+      "symbol": "TransformerEncoderLayer._recompute_context",
+      "line": 518,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/rms_norm.py",
+      "symbol": "RMSNorm.forward",
+      "line": 105,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/positional_encoding.py",
+      "symbol": "PositionalEncoding.forward",
+      "line": 366,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/positional_encoding.py",
+      "symbol": "PositionalEncoding.apply_rotary_pos_emb",
+      "line": 419,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/positional_encoding.py",
+      "symbol": "PositionalEncoding._build_sinusoidal_pe",
+      "line": 216,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/positional_encoding.py",
+      "symbol": "PositionalEncoding._grow_to",
+      "line": 317,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/dil_katmani_module/positional_encoding.py",
+      "symbol": "PositionalEncoding._build_yarn_rope_freqs",
+      "line": 235,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/feed_forward_network.py",
+      "symbol": "FeedForwardNetwork._standard_forward",
+      "line": 344,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/feed_forward_network.py",
+      "symbol": "FeedForwardNetwork._gated_forward",
+      "line": 314,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/mixture_of_experts.py",
+      "symbol": "Router.forward",
+      "line": 173,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/mixture_of_experts.py",
+      "symbol": "MixtureOfExperts.forward",
+      "line": 349,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/mixture_of_experts.py",
+      "symbol": "MixtureOfExperts._compute_load_balance_loss",
+      "line": 428,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network_module/architecture_contracts.py",
+      "symbol": "resolve_ffn_dim",
+      "line": 7,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network.py",
+      "symbol": "CevahirNeuralNetwork.forward",
+      "line": 725,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network.py",
+      "symbol": "CevahirNeuralNetwork._prepare_routing_bias",
+      "line": 929,
+      "chapter": "tr/05-transformer.md"
+    },
+    {
+      "path": "src/neural_network.py",
+      "symbol": "CevahirNeuralNetwork.get_and_reset_moe_loss",
+      "line": 970,
+      "chapter": "tr/05-transformer.md"
+    }
+  ],
+  "primary_sources": [
+    {
+      "url": "https://arxiv.org/abs/1706.03762",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/1512.03385",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/1607.06450",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/1910.07467",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2002.04745",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2104.09864",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2309.00071",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/1606.08415",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2002.05202",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2101.03961",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2401.04088",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/1603.09382",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/1604.06174",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/1710.03740",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2307.09288",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2407.21783",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2408.00118",
+      "accessed": "2026-09-21"
+    }
+  ],
+  "review_notes": [
+    "Primary papers were opened and relevant architecture sections inspected; original mathematical examples and Cevahir source analysis are distinguished from reported empirical claims.",
+    "Executable example results are maintained separately in neural_walkthrough.json. This manifest does not assert tests passed.",
+    "Local dynamic RoPE option falls through to standard frequencies; learned-position growth replaces the embedding object. No runtime code changed."
+  ]
+}

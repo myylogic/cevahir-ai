@@ -1,0 +1,220 @@
+{
+  "reviewed_on": "2026-09-21",
+  "references": [
+    {
+      "chapter": "tr/03-sinir-aglari.md",
+      "path": "scripts/book_neural_walkthrough.py",
+      "symbol": "embedding_example",
+      "line": 47
+    },
+    {
+      "chapter": "tr/03-sinir-aglari.md",
+      "path": "scripts/book_neural_walkthrough.py",
+      "symbol": "scalar_backprop_example",
+      "line": 73
+    },
+    {
+      "chapter": "tr/03-sinir-aglari.md",
+      "path": "scripts/book_neural_walkthrough.py",
+      "symbol": "model_update_example",
+      "line": 182
+    },
+    {
+      "chapter": "tr/03-sinir-aglari.md",
+      "path": "training_management/v2/core/training_loop.py",
+      "symbol": "TrainingLoop._finish_update",
+      "line": 246
+    },
+    {
+      "chapter": "tr/04-attention.md",
+      "path": "scripts/book_neural_walkthrough.py",
+      "symbol": "attention_hand_example",
+      "line": 92
+    },
+    {
+      "chapter": "tr/04-attention.md",
+      "path": "scripts/book_neural_walkthrough.py",
+      "symbol": "attention_cache_examples",
+      "line": 106
+    },
+    {
+      "chapter": "tr/04-attention.md",
+      "path": "src/neural_network_module/ortak_katman_module/kv_cache.py",
+      "symbol": "KVCache.update",
+      "line": 177
+    },
+    {
+      "chapter": "tr/05-transformer.md",
+      "path": "scripts/book_neural_walkthrough.py",
+      "symbol": "block_examples",
+      "line": 138
+    },
+    {
+      "chapter": "tr/05-transformer.md",
+      "path": "scripts/book_neural_walkthrough.py",
+      "symbol": "rope_example",
+      "line": 167
+    },
+    {
+      "chapter": "tr/06-egitim.md",
+      "path": "scripts/book_neural_walkthrough.py",
+      "symbol": "model_update_example",
+      "line": 182
+    },
+    {
+      "chapter": "tr/06-egitim.md",
+      "path": "model_management/model_initializer.py",
+      "symbol": "ModelInitializer.initialize_optimizer",
+      "line": 251
+    },
+    {
+      "chapter": "tr/06-egitim.md",
+      "path": "training_management/v2/core/training_loop.py",
+      "symbol": "TrainingLoop._finish_update",
+      "line": 246
+    },
+    {
+      "chapter": "tr/06-egitim.md",
+      "path": "training_management/v2/core/training_loop.py",
+      "symbol": "TrainingLoop._step_scheduler_for_warmup",
+      "line": 219
+    }
+  ],
+  "chapter_sources": [
+    {
+      "chapter": "tr/03-sinir-aglari.md",
+      "sources": [
+        {
+          "bibliography_entry": "1. Rumelhart, D. E., Hinton, G. E. ve Williams, R. J. (1986). *Learning representations by back-propagating errors*. Nature 323, 533–536. [DOI:10.1038/323533a0](https://www.nature.com/articles/323533a0).",
+          "url": "https://www.nature.com/articles/323533a0",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "2. Bengio, Y., Ducharme, R., Vincent, P. ve Jauvin, C. (2003). *A Neural Probabilistic Language Model*. JMLR 3, 1137–1155. [Özgün yayın](https://www.jmlr.org/papers/v3/bengio03a.html).",
+          "url": "https://www.jmlr.org/papers/v3/bengio03a.html",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "3. Mikolov, T., Chen, K., Corrado, G. ve Dean, J. (2013). *Efficient Estimation of Word Representations in Vector Space*. [arXiv:1301.3781](https://arxiv.org/abs/1301.3781).",
+          "url": "https://arxiv.org/abs/1301.3781",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "4. Glorot, X. ve Bengio, Y. (2010). *Understanding the difficulty of training deep feedforward neural networks*. AISTATS, PMLR 9, 249–256. [Özgün yayın](https://proceedings.mlr.press/v9/glorot10a.html).",
+          "url": "https://proceedings.mlr.press/v9/glorot10a.html",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "5. He, K., Zhang, X., Ren, S. ve Sun, J. (2015). *Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification*. ICCV. [arXiv:1502.01852](https://arxiv.org/abs/1502.01852).",
+          "url": "https://arxiv.org/abs/1502.01852",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "6. Hendrycks, D. ve Gimpel, K. (2016 ön baskı). *Gaussian Error Linear Units (GELUs)*. [arXiv:1606.08415](https://arxiv.org/abs/1606.08415).",
+          "url": "https://arxiv.org/abs/1606.08415",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "7. Press, O. ve Wolf, L. (2017). *Using the Output Embedding to Improve Language Models*. EACL kısa makaleler, 157–163. [Özgün yayın](https://aclanthology.org/E17-2025/).",
+          "url": "https://aclanthology.org/E17-2025/",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "8. Devlin, J., Chang, M.-W., Lee, K. ve Toutanova, K. (2019). *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding*. NAACL, 4171–4186. [DOI:10.18653/v1/N19-1423](https://aclanthology.org/N19-1423/).",
+          "url": "https://aclanthology.org/N19-1423/",
+          "verified_on": "2026-09-21"
+        }
+      ]
+    },
+    {
+      "chapter": "tr/04-attention.md",
+      "sources": [
+        {
+          "bibliography_entry": "- Bahdanau, D., Cho, K. ve Bengio, Y. (2015). *Neural Machine Translation by Jointly Learning to Align and Translate*. ICLR. [Özgün makale](https://arxiv.org/abs/1409.0473).",
+          "url": "https://arxiv.org/abs/1409.0473",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "- Vaswani, A. ve diğerleri (2017). *Attention Is All You Need*. NeurIPS 30. [Özgün makale](https://arxiv.org/abs/1706.03762).",
+          "url": "https://arxiv.org/abs/1706.03762",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "- Shazeer, N. (2019). *Fast Transformer Decoding: One Write-Head is All You Need*. arXiv:1911.02150. [Özgün çalışma](https://arxiv.org/abs/1911.02150).",
+          "url": "https://arxiv.org/abs/1911.02150",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "- Ainslie, J., Lee-Thorp, J., de Jong, M., Zemlyanskiy, Y., Lebrón, F. ve Sanghai, S. (2023). *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*. EMNLP, 4895–4901. [Konferans makalesi](https://aclanthology.org/2023.emnlp-main.298/).",
+          "url": "https://aclanthology.org/2023.emnlp-main.298/",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "- Dao, T., Fu, D. Y., Ermon, S., Rudra, A. ve Ré, C. (2022). *FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness*. NeurIPS 35. [Özgün makale](https://arxiv.org/abs/2205.14135).",
+          "url": "https://arxiv.org/abs/2205.14135",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "- Touvron, H. ve diğerleri (2023). *Llama 2: Open Foundation and Fine-Tuned Chat Models*. arXiv:2307.09288. [Teknik rapor](https://arxiv.org/abs/2307.09288).",
+          "url": "https://arxiv.org/abs/2307.09288",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "- Jiang, A. Q. ve diğerleri (2023). *Mistral 7B*. arXiv:2310.06825. [Teknik rapor](https://arxiv.org/abs/2310.06825).",
+          "url": "https://arxiv.org/abs/2310.06825",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "- Jain, S. ve Wallace, B. C. (2019). *Attention is not Explanation*. NAACL-HLT, 3543–3556. DOI: 10.18653/v1/N19-1357. [Konferans makalesi](https://aclanthology.org/N19-1357/).",
+          "url": "https://aclanthology.org/N19-1357/",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "- Wiegreffe, S. ve Pinter, Y. (2019). *Attention is not not Explanation*. EMNLP-IJCNLP. [Özgün makale](https://arxiv.org/abs/1908.04626).",
+          "url": "https://arxiv.org/abs/1908.04626",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "- PyTorch contributors. *torch.nn.functional.scaled_dot_product_attention*. [Resmî API belgesi](https://docs.pytorch.org/docs/2.10/generated/torch.nn.functional.scaled_dot_product_attention.html), erişim: 21 Eylül 2026; API davranışı kullanılan sürümle ayrıca denetlenmelidir.",
+          "url": "https://docs.pytorch.org/docs/2.10/generated/torch.nn.functional.scaled_dot_product_attention.html",
+          "verified_on": "2026-09-21"
+        }
+      ]
+    },
+    {
+      "chapter": "tr/06-egitim.md",
+      "sources": [
+        {
+          "bibliography_entry": "1. Kingma, D. P. ve Ba, J. (2014 ön baskı; ICLR 2015). *Adam: A Method for Stochastic Optimization*. [arXiv:1412.6980](https://arxiv.org/abs/1412.6980).",
+          "url": "https://arxiv.org/abs/1412.6980",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "2. Loshchilov, I. ve Hutter, F. (2017 ön baskı; ICLR 2019). *Decoupled Weight Decay Regularization*. [arXiv:1711.05101](https://arxiv.org/abs/1711.05101).",
+          "url": "https://arxiv.org/abs/1711.05101",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "3. Micikevicius, P. vd. (2017 ön baskı; ICLR 2018). *Mixed Precision Training*. [arXiv:1710.03740](https://arxiv.org/abs/1710.03740).",
+          "url": "https://arxiv.org/abs/1710.03740",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "4. Hoffmann, J. vd. (2022). *Training Compute-Optimal Large Language Models*. NeurIPS. [arXiv:2203.15556](https://arxiv.org/abs/2203.15556).",
+          "url": "https://arxiv.org/abs/2203.15556",
+          "verified_on": "2026-09-21"
+        },
+        {
+          "bibliography_entry": "5. PyTorch contributors. *Automatic Differentiation with torch.autograd*. [Resmî öğretici](https://docs.pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html), erişim: 21 Eylül 2026.",
+          "url": "https://docs.pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html",
+          "verified_on": "2026-09-21"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Original publications or official API pages verified; paper-derived summaries kept distinct from local source analysis and original worked mathematics.",
+    "Chapter 5 sources are in academic_transformer_sources.json.",
+    "Dynamic API documentation linked to the installed PyTorch 2.10 version for SDPA."
+  ]
+}

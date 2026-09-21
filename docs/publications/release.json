@@ -1,14 +1,11 @@
 {
-  "version": "2026.09.21",
-  "tag": "research-2026.09.21-v1",
+  "version": "2026.09.21.2",
+  "tag": "research-2026.09.21-v2",
   "author": "Muhammed Yasin Yılmaz",
-  "github_url": "https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.09.21-v1",
-  "status": "published",
-  "doi": "10.5281/zenodo.22864661",
+  "github_url": "https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.09.21-v2",
+  "status": "prepared",
+  "doi": null,
   "concept_doi": "10.5281/zenodo.22864660",
-  "zenodo_url": "https://zenodo.org/records/22864661",
-  "source_commit": "5ae1e2f876ef53f14a170215e8c32414ccd2f3a2",
-  "archive_verification": "evidence/zenodo_archive_verification.json",
-  "doi_resolution": "evidence/doi_resolution.json",
-  "scope": "Nine research reports, technical book, source code and evidence in one archive; not separate DOIs for each paper"
+  "previous_release": "releases/research-2026.09.21-v1.json",
+  "scope": "Academic book expansion; nine preserved report editions and code in one archive. Not separate paper DOIs."
 }

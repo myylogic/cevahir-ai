@@ -262,7 +262,7 @@
       ]
     },
     "docs/development/EVOLUTION_LOG.md": {
-      "sha256": "aad1d19a363cd948079623a404a405ad574c285b3758bd0ce34d898f997bf149",
+      "sha256": "75f5f59c04e9c735a47070546a1b208ff5651ee28313e0b10cc2d43663570a25",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md"
@@ -399,9 +399,10 @@
       ]
     },
     "docs/publications/README.md": {
-      "sha256": "345a88d7087ff27f5ad84a8689f75258343f2189f1ccf8fdeb00ecbe3ab12188",
+      "sha256": "038e0bfcc69af14731df3179371b7c02af583e5b20f8da6324bee410cd136d12",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
+        "AKADEMIK_OKUMA.md",
         "BAKIM.md",
         "tr/12-acik-sorular.md"
       ]
@@ -759,11 +760,28 @@
         "tr/11-arastirma-laboratuvari.md"
       ]
     },
+    "scripts/book_neural_walkthrough.py": {
+      "sha256": "e80d093c53321af360fa553b45d8c7666fd0eb0a8e8ed69702908f9bbc09bb58",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/03-sinir-aglari.md",
+        "tr/04-attention.md",
+        "tr/05-transformer.md",
+        "tr/06-egitim.md"
+      ]
+    },
     "scripts/book_tokenizer_walkthrough.py": {
       "sha256": "fca3b8b43a125aa5114a0b3b5ebe8c67b7f19b34bd42ee3532d7192e2405e3b7",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "scripts/check_book.py": {
+      "sha256": "2b168f77d46de893f705e3a78037808dc17b1b5307576601f1fb6607b9d58549",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "AKADEMIK_OKUMA.md"
       ]
     },
     "src/neural_network.py": {
@@ -818,6 +836,7 @@
       "sha256": "1428e9dc65eaf1477330658db2c4627733dc095860efce511022fc4c2750d74a",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
+        "tr/04-attention.md",
         "tr/08-uretim.md"
       ]
     },
@@ -1005,6 +1024,7 @@
       "sha256": "96db2236dd8dbaacccdf97b345b771318ac2f01c9c0e933126e61dce4732b3bc",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
+        "tr/05-transformer.md",
         "tr/06-egitim.md"
       ]
     },
@@ -1021,6 +1041,7 @@
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
+        "tr/03-sinir-aglari.md",
         "tr/06-egitim.md"
       ]
     },

@@ -1,14 +1,29 @@
 {
   "title": "Cevahir AI: Living-Learning Research Reports and Technical Book",
-  "version": "2026.09.21",
-  "creators": [{"name": "Yılmaz, Muhammed Yasin"}],
-  "description": "<p>Versioned open-source research archive by Muhammed Yasin Yılmaz. Contains nine individually identified research reports/preprints (CEV-2026-01 through CEV-2026-09), reproducible computational experiments, preserved negative results, the Cevahir implementation, and a twelve-chapter Turkish technical book with an English reading guide.</p><p>The research asks how experience during operation can persistently, controllably and generalizably change a system's future computation and behavior. Studies examine experience-conditioned computation, representation search, persistence and transfer, credit assignment, learning-state transport, learned updates, recurrent-state acquisition, correction, and future-query state requirements. The general living-learning problem remains open.</p><p>The newest finite audit enumerates 61,575 histories and checks 712,632 content-informed label writes and 358,020 appends. Full records and limitations are included. These reports have not undergone external peer review. AI assistance was used for code, computational experiments, literature review and drafting. DOI registration identifies this archived version; it does not certify scientific correctness or establish novelty.</p><p>Start at docs/publications/README.md for the reports and docs/book/README.md for the book. This DOI covers the collection and code together, not separate DOI registrations for each report.</p>",
+  "version": "2026.09.21.2",
+  "creators": [
+    {
+      "name": "Yılmaz, Muhammed Yasin"
+    }
+  ],
+  "description": "<p>Versioned open-source research archive by Muhammed Yasin Yılmaz. Contains nine individually identified research reports/preprints (CEV-2026-01 through CEV-2026-09), reproducible computational experiments, preserved negative results, the Cevahir implementation, and a twelve-chapter Turkish technical book with an English reading guide.</p><p>The research asks how experience during operation can persistently, controllably and generalizably change a system's future computation and behavior. Studies examine experience-conditioned computation, representation search, persistence and transfer, credit assignment, learning-state transport, learned updates, recurrent-state acquisition, correction, and future-query state requirements. The general living-learning problem remains open.</p><p>The newest finite audit enumerates 61,575 histories and checks 712,632 content-informed label writes and 358,020 appends. Full records and limitations are included. These reports have not undergone external peer review. AI assistance was used for code, computational experiments, literature review and drafting. DOI registration identifies this archived version; it does not certify scientific correctness or establish novelty.</p><p>Start at docs/publications/README.md for the reports and docs/book/README.md for the book. This DOI covers the collection and code together, not separate DOI registrations for each report.</p><p>This second archive edition expands book chapters 3-6 with neural-network and embedding foundations, attention and Transformer mathematics, training methods, original-paper citations, dated industry comparisons, and solved exercises. Seven reproducible CPU example groups use actual Cevahir components; 99 selected neural-core, attention, MoE and training tests passed. This is an evolving educational manuscript, not a claim that every chapter is complete. The nine research reports retain their original findings and source records.</p>",
   "upload_type": "software",
   "access_right": "open",
   "license": "apache-2.0",
   "language": "tur",
-  "keywords": ["living-learning", "lifelong learning", "learning state", "reproducibility", "negative results", "Turkish AI education"],
+  "keywords": [
+    "living-learning",
+    "lifelong learning",
+    "learning state",
+    "reproducibility",
+    "negative results",
+    "Turkish AI education"
+  ],
   "related_identifiers": [
-    {"identifier": "https://github.com/myylogic/cevahir-ai", "relation": "isSupplementTo", "scheme": "url"}
+    {
+      "identifier": "https://github.com/myylogic/cevahir-ai",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
   ]
 }

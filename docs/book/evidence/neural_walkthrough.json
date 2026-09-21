@@ -1,0 +1,311 @@
+{
+  "date": "2026-09-21",
+  "kind": "executed_book_examples",
+  "environment": {
+    "python": "3.14.3",
+    "torch": "2.10.0+cpu",
+    "device": "cpu"
+  },
+  "seed": 20260921,
+  "cases": {
+    "embedding": {
+      "ids": [
+        [
+          1,
+          2,
+          1
+        ]
+      ],
+      "embedding": [
+        [
+          [
+            0.30000001192092896,
+            0.4000000059604645,
+            0.5
+          ],
+          [
+            0.6000000238418579,
+            0.699999988079071,
+            0.800000011920929
+          ],
+          [
+            0.30000001192092896,
+            0.4000000059604645,
+            0.5
+          ]
+        ]
+      ],
+      "lookup_one_hot_max_error": 0.0,
+      "lookup_only_gradient_rows": [
+        1,
+        2
+      ],
+      "tied_output_gradient_rows": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "tied_same_parameter_object": true,
+      "note": "Deliberately assigned teaching weights, not learned semantics; norm/dropout disabled."
+    },
+    "scalar_backprop": {
+      "prediction_before": 2.0,
+      "loss_before": 2.0,
+      "gradients_w_b_v_c": [
+        8.0,
+        4.0,
+        2.0,
+        2.0
+      ],
+      "learning_rate": 0.01,
+      "prediction_after": 1.5639999999999998,
+      "loss_after": 1.2230479999999997,
+      "note": "Scalar chain-rule teaching example, not Cevahir's architecture."
+    },
+    "attention_hand": {
+      "q_equals_k": [
+        1,
+        2,
+        0
+      ],
+      "v": [
+        1,
+        3,
+        2
+      ],
+      "weights": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.11920291185379028,
+          0.8807970285415649,
+          0.0
+        ],
+        [
+          0.3333333432674408,
+          0.3333333432674408,
+          0.3333333432674408
+        ]
+      ],
+      "output": [
+        1.0,
+        2.76159405708313,
+        2.0
+      ],
+      "note": "Hand-chosen projected vectors; bypasses learned projection and RoPE."
+    },
+    "attention_cache": [
+      {
+        "kv_heads": 1,
+        "query_heads": 4,
+        "full_vs_manual_max_error": 8.940696716308594e-08,
+        "full_vs_chunked_max_error": 5.960464477539063e-08,
+        "future_change_prefix_max_error": 0.0,
+        "weight_shape": [
+          2,
+          4,
+          6,
+          6
+        ],
+        "cache_key_shapes": [
+          [
+            2,
+            1,
+            6,
+            4
+          ],
+          [
+            2,
+            1,
+            6,
+            4
+          ]
+        ],
+        "fully_blocked_output_nonzero": 0
+      },
+      {
+        "kv_heads": 2,
+        "query_heads": 4,
+        "full_vs_manual_max_error": 1.1920928955078125e-07,
+        "full_vs_chunked_max_error": 1.1920928955078125e-07,
+        "future_change_prefix_max_error": 0.0,
+        "weight_shape": [
+          2,
+          4,
+          6,
+          6
+        ],
+        "cache_key_shapes": [
+          [
+            2,
+            2,
+            6,
+            4
+          ],
+          [
+            2,
+            2,
+            6,
+            4
+          ]
+        ],
+        "fully_blocked_output_nonzero": 0
+      },
+      {
+        "kv_heads": 4,
+        "query_heads": 4,
+        "full_vs_manual_max_error": 8.940696716308594e-08,
+        "full_vs_chunked_max_error": 8.940696716308594e-08,
+        "future_change_prefix_max_error": 0.0,
+        "weight_shape": [
+          2,
+          4,
+          6,
+          6
+        ],
+        "cache_key_shapes": [
+          [
+            2,
+            4,
+            6,
+            4
+          ],
+          [
+            2,
+            4,
+            6,
+            4
+          ]
+        ],
+        "fully_blocked_output_nonzero": 0
+      }
+    ],
+    "block": {
+      "bias_free_ffn_parameters_D8_F16": {
+        "gelu": 256,
+        "swiglu": 384
+      },
+      "resolved_gated_width_D512": 1536,
+      "serial_pre_norm_max_error": 0.0,
+      "rmsnorm_input": [
+        [
+          3.0,
+          4.0
+        ]
+      ],
+      "rmsnorm_output": [
+        [
+          0.8485280871391296,
+          1.1313707828521729
+        ]
+      ],
+      "rmsnorm_eps": 1e-06,
+      "rmsnorm_formula_max_error": 0.0
+    },
+    "rope": {
+      "positions": [
+        2,
+        5
+      ],
+      "shifted_positions": [
+        9,
+        12
+      ],
+      "dot_product": -2.8528499603271484,
+      "shifted_dot_product": -2.8528497219085693,
+      "common_shift_max_error": 2.384185791015625e-07,
+      "norm_preservation_max_error": 0.0
+    },
+    "model_update": {
+      "input_ids": [
+        [
+          1,
+          2,
+          3,
+          4
+        ],
+        [
+          6,
+          7,
+          3,
+          4
+        ]
+      ],
+      "targets": [
+        [
+          2,
+          3,
+          4,
+          5
+        ],
+        [
+          7,
+          3,
+          4,
+          -100
+        ]
+      ],
+      "trace_shapes": {
+        "embedding": [
+          2,
+          4,
+          16
+        ],
+        "layer_0": [
+          2,
+          4,
+          16
+        ],
+        "layer_1": [
+          2,
+          4,
+          16
+        ],
+        "output_norm": [
+          2,
+          4,
+          16
+        ],
+        "output_projection": [
+          2,
+          4,
+          41
+        ]
+      },
+      "logits_shape": [
+        2,
+        4,
+        41
+      ],
+      "parameter_count": 5184,
+      "tied_same_parameter_object": true,
+      "forward_parameters_unchanged": true,
+      "backward_parameters_unchanged": true,
+      "changed_parameter_tensors_after_sgd": 20,
+      "valid_target_tokens": 7,
+      "loss_before": 3.7709403038024902,
+      "loss_after_one_sgd_step": 3.7681756019592285,
+      "accuracy_before": 0.0,
+      "perplexity_before": 43.42087445948429,
+      "same_token_initial_vectors_equal": true,
+      "same_token_different_context_logits_max_difference": 0.6749579906463623,
+      "note": "Random tiny core; in-memory SGD only. No language-quality or generalization claim."
+    }
+  },
+  "comparison_tolerance": {
+    "absolute": 2e-06,
+    "relative": 2e-05
+  },
+  "limits": [
+    "No trained checkpoint, vocabulary or research record modified",
+    "Synthetic data, random tiny core and explicitly assigned teaching weights",
+    "No GPU, timing, large-model or language-quality benchmark",
+    "Assertions also execute independently of stored numerical evidence"
+  ]
+}

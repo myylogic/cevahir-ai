@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-21",
+  "base_commit": "a7cffbca2f189546c3765957f98280bba9208197",
+  "scope": "Academic expansion of chapters 3-6; source-linked teaching examples",
+  "environment": {
+    "python": "3.14.3",
+    "torch": "2.10.0+cpu",
+    "device": "CPU"
+  },
+  "targeted_tests": {
+    "command": "python -m pytest tests/evolution/test_attention_cache.py tests/evolution/test_lower_layer_contracts.py tests/evolution/test_contextual_moe_routing.py tests/evolution/test_training_contracts.py -q",
+    "passed": 99,
+    "warnings": 6,
+    "seconds": 9.11
+  },
+  "walkthrough": {
+    "command": "python scripts/book_neural_walkthrough.py",
+    "status": "passed",
+    "example_groups": 7,
+    "cache_variants": 3,
+    "result": "neural_walkthrough.json"
+  },
+  "review": {
+    "attention_independent_review": "Corrected stale generation link, soft-cap scope and Flash fallback wording; arithmetic and complexity assumptions reviewed",
+    "transformer": "Matched recorded dimensions and outcomes; distinguished dynamic RoPE option from implemented scaling; top-1 router gradient limitation derived from source"
+  },
+  "limits": [
+    "No full repository suite or GPU performance evaluation",
+    "No trained language quality or generalization claim",
+    "No production logic, tokenizer assets, trained checkpoint or prior research result changed",
+    "Academic development, not external peer review or whole-book completion"
+  ],
+  "bibliography": {
+    "entries_across_chapters": 40,
+    "distinct_primary_publications_and_official_docs": 36
+  },
+  "book_headings": {
+    "chapters": 12,
+    "level_2": 98,
+    "level_3": 50,
+    "scope": "Chapter files only; bibliography and exercises count when they have the corresponding heading level"
+  }
+}

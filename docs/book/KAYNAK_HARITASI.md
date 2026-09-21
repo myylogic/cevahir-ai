@@ -39,3 +39,7 @@ Bu kitap sürümü için çekirdek/attention/MoE grubunda **82**, eğitim/cache/
 Yeni düzeltme araştırması ayrıca tam sayı enumeration ve ayrı süreçte devam ile doğrulandı. Önceki araştırma sonuçları tarihli kendi kayıtlarından aktarılır; kitap yazımı sırasında hepsi yeniden çalıştırılmış sayılmaz. GPU başarımı, eğitilmiş Türkçe dil kalitesi, gerçek kullanıcı davranışı ve Mermaid'in bütün görüntüleyicilerde görünümü bu kontrollerin kapsamı değildir.
 
 Bir bağlantının ve metot adının varlığını doğrulamak, anlatımın matematiksel veya davranışsal doğruluğunu ispatlamaz. Bu yüzden mekanik denetim, kaynak incelemesi ve hedefli test farklı kanıt türleri olarak tutulur.
+
+## 21 Eylül akademik genişletmesi
+
+3–6. bölümler özgün yayınlar, türetimler ve çözümlü alıştırmalarla genişletildi. [Yedi CPU örnek grubu](evidence/neural_walkthrough.json), gerçek embedding, attention, cache, norm, FFN, RoPE ve küçük model güncellemesini kaydeder. Bu turda [99 hedefli test geçti](evidence/academic_expansion_verification.json); yukarıdaki 149 test ilk kitap turunun ayrı tarihli kaydıdır. [Akademik okuma ve atıf kapsamı](AKADEMIK_OKUMA.md), yayınları ve yerel kanıtları nasıl birlikte okumak gerektiğini açıklar.
