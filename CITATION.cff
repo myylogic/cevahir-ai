@@ -6,6 +6,7 @@ authors:
   - family-names: "Yılmaz"
     given-names: "Muhammed Yasin"
 version: "2026.09.21"
+doi: 10.5281/zenodo.22864661
 date-released: 2026-09-21
 repository-code: "https://github.com/myylogic/cevahir-ai"
 url: "https://github.com/myylogic/cevahir-ai/tree/main/docs/publications"

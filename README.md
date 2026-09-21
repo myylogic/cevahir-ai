@@ -2,6 +2,8 @@
 
 [English](README.md) · [Türkçe](README-TR.md)
 
+[Research archive DOI: 10.5281/zenodo.22864661](https://doi.org/10.5281/zenodo.22864661) · [Research reports](docs/publications/README.md)
+
 **An AI engine combining tokenizer infrastructure developed specifically for Turkish, a trainable language-model core and cognitive systems.**
 
 I'm Muhammed Yasin Yılmaz. I built Cevahir to bring data preparation, model learning and the use of a trained model in conversation into one codebase. It includes its own BPE pipeline, a configurable PyTorch Transformer decoder, training and checkpoint management, generation, cognitive workflows, conversational memory, and application services.

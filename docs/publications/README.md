@@ -2,6 +2,10 @@
 
 **Muhammed Yasin Yılmaz** · Araştırma raporları ve ön baskılar · 21 Eylül 2026
 
+**Yayımlanmış sürüm DOI'si: [10.5281/zenodo.22864661](https://doi.org/10.5281/zenodo.22864661)**
+· [Zenodo arşivi](https://zenodo.org/records/22864661)
+· [Bütün sürümlerin DOI'si](https://doi.org/10.5281/zenodo.22864660)
+
 Bu dizi, Cevahir'in çalıştığı süre boyunca deneyimden öğrenme araştırmasının
 makale düzenindeki yayınlarını, olumsuz sonuçlarını ve yeniden üretilebilir
 hesaplarını bir araya getirir. Genel soru hâlâ açıktır: **Bir sistem yaşadığı
@@ -53,10 +57,19 @@ durumunu taşır. Zenodo kaydı yazılım/araştırma arşivi türündedir; dizi
 metne ayrı DOI atanmış olduğu ileri sürülmez.
 
 Atıf biçimi: **Yılmaz, M. Y. (2026). Çalışma başlığı (CEV-2026-XX). Cevahir AI:
-Living-Learning Research Reports and Technical Book, sürüm 2026.09.21. Sürüm DOI'si.**
+Living-Learning Research Reports and Technical Book, sürüm 2026.09.21.**
+[https://doi.org/10.5281/zenodo.22864661](https://doi.org/10.5281/zenodo.22864661).
 Makinece kullanılabilir koleksiyon künyesi [CITATION.cff](../../CITATION.cff)
 dosyasındadır. DOI, içeriğin belirli arşiv sürümünü tanımlar; bilimsel doğruluk,
 özgünlük, kişisel kimlik belgesi veya kriptografik imza onayı değildir.
+
+[Arşiv denetiminde](evidence/zenodo_archive_verification.json) Zenodo ZIP'indeki
+829 dosyanın etiketlenmiş Git sürümüyle bayt bayt aynı olduğu doğrulandı.
+[DOI yönlendirmesi](evidence/doi_resolution.json) yayımlanmış kayda ulaşıyor.
+Türkiye'de 21 Eylül olan yayın anı UTC'de 20 Eylül olduğu için Zenodo tarih
+alanında 20 Eylül görünür; sürüm ve makale tarihi 21 Eylül'dür. Etiket içindeki
+yayın durumu dosyası yayın öncesi hazırlık kaydıdır; bu doğrulama kayıtları
+yayından sonra ana dala eklenmiştir. Arşiv etiketi değiştirilmemiştir.
 
 ## Katkı açıklaması ve devamlılık
 

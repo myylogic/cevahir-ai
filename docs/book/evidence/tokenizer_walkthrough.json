@@ -1,0 +1,627 @@
+{
+  "kind": "executed_book_examples",
+  "date": "2026-09-21",
+  "device": "CPU",
+  "asset_sha256_utf8_lf": {
+    "data/vocab_lib/vocab.json": "c4c635b175abbb077054884e5c7acaa1c1ebe03ecb9d9c133bd31d003da10f20",
+    "data/merges_lib/merges.txt": "b5b0b9fcc04a73ea79ed1d3cee5f4f96860204cad6b020364ec9f20af4b080b1"
+  },
+  "asset_bytes_unchanged": true,
+  "vocabulary_entries": 60000,
+  "loaded_merge_rules": 24896,
+  "cases": {
+    "inference_explicit_no_specials": {
+      "input": "Merhaba dünya!",
+      "options": {
+        "mode": "inference",
+        "add_special_tokens": false
+      },
+      "after_manager_normalization": "Merhaba dünya!",
+      "pretokenizer_output": [
+        "Merhaba",
+        " ",
+        "dünya",
+        " ",
+        "!"
+      ],
+      "pieces": [
+        "Merhaba</w>",
+        " ",
+        "dünya</w>",
+        " ",
+        "!"
+      ],
+      "ids": [
+        5281,
+        390,
+        14274,
+        390,
+        183
+      ],
+      "id_spellings": [
+        "Merhaba</w>",
+        " ",
+        "dünya</w>",
+        " ",
+        "!"
+      ],
+      "per_piece_ids": [
+        {
+          "piece": "Merhaba</w>",
+          "ids": [
+            5281
+          ]
+        },
+        {
+          "piece": " ",
+          "ids": [
+            390
+          ]
+        },
+        {
+          "piece": "dünya</w>",
+          "ids": [
+            14274
+          ]
+        },
+        {
+          "piece": " ",
+          "ids": [
+            390
+          ]
+        },
+        {
+          "piece": "!",
+          "ids": [
+            183
+          ]
+        }
+      ],
+      "stats": {
+        "length": 5.0,
+        "unk_count": 0.0,
+        "unk_ratio": 0.0
+      },
+      "decoded": "Merhaba dünya!"
+    },
+    "inference_defaults": {
+      "input": "Merhaba dünya!",
+      "options": {},
+      "after_manager_normalization": "Merhaba dünya!",
+      "pretokenizer_output": [
+        "Merhaba",
+        " ",
+        "dünya",
+        " ",
+        "!"
+      ],
+      "pieces": [
+        "<BOS>",
+        "Merhaba</w>",
+        " ",
+        "dünya</w>",
+        " ",
+        "!"
+      ],
+      "ids": [
+        2,
+        5281,
+        390,
+        14274,
+        390,
+        183
+      ],
+      "id_spellings": [
+        "<BOS>",
+        "Merhaba</w>",
+        " ",
+        "dünya</w>",
+        " ",
+        "!"
+      ],
+      "per_piece_ids": [
+        {
+          "piece": "<BOS>",
+          "ids": [
+            2
+          ]
+        },
+        {
+          "piece": "Merhaba</w>",
+          "ids": [
+            5281
+          ]
+        },
+        {
+          "piece": " ",
+          "ids": [
+            390
+          ]
+        },
+        {
+          "piece": "dünya</w>",
+          "ids": [
+            14274
+          ]
+        },
+        {
+          "piece": " ",
+          "ids": [
+            390
+          ]
+        },
+        {
+          "piece": "!",
+          "ids": [
+            183
+          ]
+        }
+      ],
+      "stats": {
+        "length": 6.0,
+        "unk_count": 0.0,
+        "unk_ratio": 0.0
+      },
+      "decoded": "Merhaba dünya!"
+    },
+    "train_defaults": {
+      "input": "Merhaba dünya!",
+      "options": {
+        "mode": "train"
+      },
+      "after_manager_normalization": "Merhaba dünya!",
+      "pretokenizer_output": [
+        "Merhaba",
+        " ",
+        "dünya",
+        " ",
+        "!"
+      ],
+      "pieces": [
+        "Merhaba</w>",
+        "Mer",
+        "ha",
+        "ba",
+        "<SEP>",
+        " ",
+        "dünya</w>",
+        "dün",
+        "ya",
+        "<SEP>",
+        " ",
+        "!"
+      ],
+      "ids": [
+        5281,
+        52,
+        10,
+        25,
+        391,
+        14,
+        5,
+        391,
+        6,
+        5,
+        391,
+        4,
+        390,
+        14274,
+        9,
+        30,
+        21,
+        391,
+        32,
+        5,
+        391,
+        4,
+        390,
+        183
+      ],
+      "id_spellings": [
+        "Merhaba</w>",
+        "M",
+        "e",
+        "r",
+        "</w>",
+        "h",
+        "a",
+        "</w>",
+        "b",
+        "a",
+        "</w>",
+        "<SEP>",
+        " ",
+        "dünya</w>",
+        "d",
+        "ü",
+        "n",
+        "</w>",
+        "y",
+        "a",
+        "</w>",
+        "<SEP>",
+        " ",
+        "!"
+      ],
+      "per_piece_ids": [
+        {
+          "piece": "Merhaba</w>",
+          "ids": [
+            5281
+          ]
+        },
+        {
+          "piece": "Mer",
+          "ids": [
+            52,
+            10,
+            25,
+            391
+          ]
+        },
+        {
+          "piece": "ha",
+          "ids": [
+            14,
+            5,
+            391
+          ]
+        },
+        {
+          "piece": "ba",
+          "ids": [
+            6,
+            5,
+            391
+          ]
+        },
+        {
+          "piece": "<SEP>",
+          "ids": [
+            4
+          ]
+        },
+        {
+          "piece": " ",
+          "ids": [
+            390
+          ]
+        },
+        {
+          "piece": "dünya</w>",
+          "ids": [
+            14274
+          ]
+        },
+        {
+          "piece": "dün",
+          "ids": [
+            9,
+            30,
+            21,
+            391
+          ]
+        },
+        {
+          "piece": "ya",
+          "ids": [
+            32,
+            5,
+            391
+          ]
+        },
+        {
+          "piece": "<SEP>",
+          "ids": [
+            4
+          ]
+        },
+        {
+          "piece": " ",
+          "ids": [
+            390
+          ]
+        },
+        {
+          "piece": "!",
+          "ids": [
+            183
+          ]
+        }
+      ],
+      "stats": {
+        "length": 24.0,
+        "unk_count": 0.0,
+        "unk_ratio": 0.0
+      },
+      "decoded": "Merhaba Mer ha ba dünya dün ya!"
+    },
+    "new_word": {
+      "input": "cevahirleştirilemeyenlerden",
+      "options": {
+        "add_special_tokens": false
+      },
+      "after_manager_normalization": "cevahirleştirilemeyenlerden",
+      "pretokenizer_output": [
+        "cevahirleştirilemeyenlerden"
+      ],
+      "pieces": [
+        "cevahirleştirilemeyenlerden</w>"
+      ],
+      "ids": [
+        7,
+        10,
+        31,
+        5,
+        14,
+        16,
+        25,
+        19,
+        10,
+        27,
+        28,
+        16,
+        25,
+        16,
+        19,
+        10,
+        20,
+        10,
+        32,
+        10,
+        21,
+        19,
+        10,
+        25,
+        9,
+        10,
+        21,
+        391
+      ],
+      "id_spellings": [
+        "c",
+        "e",
+        "v",
+        "a",
+        "h",
+        "i",
+        "r",
+        "l",
+        "e",
+        "ş",
+        "t",
+        "i",
+        "r",
+        "i",
+        "l",
+        "e",
+        "m",
+        "e",
+        "y",
+        "e",
+        "n",
+        "l",
+        "e",
+        "r",
+        "d",
+        "e",
+        "n",
+        "</w>"
+      ],
+      "per_piece_ids": [
+        {
+          "piece": "cevahirleştirilemeyenlerden</w>",
+          "ids": [
+            7,
+            10,
+            31,
+            5,
+            14,
+            16,
+            25,
+            19,
+            10,
+            27,
+            28,
+            16,
+            25,
+            16,
+            19,
+            10,
+            20,
+            10,
+            32,
+            10,
+            21,
+            19,
+            10,
+            25,
+            9,
+            10,
+            21,
+            391
+          ]
+        }
+      ],
+      "stats": {
+        "length": 28.0,
+        "unk_count": 0.0,
+        "unk_ratio": 0.0
+      },
+      "decoded": "cevahirleştirilemeyenlerden"
+    },
+    "normalization": {
+      "input": "  [USER] Merhaba\t  dünya!  ",
+      "options": {
+        "add_special_tokens": false
+      },
+      "after_manager_normalization": "Merhaba dünya!",
+      "pretokenizer_output": [
+        "Merhaba",
+        " ",
+        "dünya",
+        " ",
+        "!"
+      ],
+      "pieces": [
+        "Merhaba</w>",
+        " ",
+        "dünya</w>",
+        " ",
+        "!"
+      ],
+      "ids": [
+        5281,
+        390,
+        14274,
+        390,
+        183
+      ],
+      "id_spellings": [
+        "Merhaba</w>",
+        " ",
+        "dünya</w>",
+        " ",
+        "!"
+      ],
+      "per_piece_ids": [
+        {
+          "piece": "Merhaba</w>",
+          "ids": [
+            5281
+          ]
+        },
+        {
+          "piece": " ",
+          "ids": [
+            390
+          ]
+        },
+        {
+          "piece": "dünya</w>",
+          "ids": [
+            14274
+          ]
+        },
+        {
+          "piece": " ",
+          "ids": [
+            390
+          ]
+        },
+        {
+          "piece": "!",
+          "ids": [
+            183
+          ]
+        }
+      ],
+      "stats": {
+        "length": 5.0,
+        "unk_count": 0.0,
+        "unk_ratio": 0.0
+      },
+      "decoded": "Merhaba dünya!"
+    },
+    "emoji_warn": {
+      "input": "Merhaba 🧬 dünya!",
+      "options": {
+        "add_special_tokens": false
+      },
+      "after_manager_normalization": "Merhaba 🧬 dünya!",
+      "pretokenizer_output": [
+        "Merhaba",
+        " ",
+        "dünya",
+        " ",
+        "!"
+      ],
+      "pieces": [
+        "Merhaba</w>",
+        " ",
+        "dünya</w>",
+        " ",
+        "!"
+      ],
+      "ids": [
+        5281,
+        390,
+        14274,
+        390,
+        183
+      ],
+      "id_spellings": [
+        "Merhaba</w>",
+        " ",
+        "dünya</w>",
+        " ",
+        "!"
+      ],
+      "per_piece_ids": [
+        {
+          "piece": "Merhaba</w>",
+          "ids": [
+            5281
+          ]
+        },
+        {
+          "piece": " ",
+          "ids": [
+            390
+          ]
+        },
+        {
+          "piece": "dünya</w>",
+          "ids": [
+            14274
+          ]
+        },
+        {
+          "piece": " ",
+          "ids": [
+            390
+          ]
+        },
+        {
+          "piece": "!",
+          "ids": [
+            183
+          ]
+        }
+      ],
+      "stats": {
+        "length": 5.0,
+        "unk_count": 0.0,
+        "unk_ratio": 0.0
+      },
+      "decoded": "Merhaba dünya!"
+    }
+  },
+  "same_ids_without_punctuation_cleanup": "Merhaba dünya !",
+  "strict_preprocessing_loss": {
+    "outer_exception": "TokenizerCoreError",
+    "cause": "TokenizerTextLossError",
+    "dropped_codepoints": {
+      "U+1F9EC": 1
+    }
+  },
+  "batch": {
+    "inputs": [
+      "Merhaba",
+      "🧬",
+      "dünya"
+    ],
+    "returned_items": 2,
+    "decoded": [
+      "Merhaba",
+      "dünya"
+    ],
+    "skip_invalid_false_raises": true
+  },
+  "limits": [
+    "Worked examples, not a multilingual quality or throughput benchmark",
+    "Preprocessing stages re-evaluated diagnostically through the same methods",
+    "Asset fingerprints normalize line endings; not a replacement for tokenizer_digest",
+    "No GPU execution or tokenizer/model training"
+  ]
+}

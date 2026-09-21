@@ -257,6 +257,114 @@
       "symbol": "ModelManager.forward",
       "chapter": "tr/07-model-yasam-dongusu.md",
       "line": 486
+    },
+    {
+      "path": "tokenizer_management/core/tokenizer_core.py",
+      "symbol": "TokenizerCore.__init__",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 90
+    },
+    {
+      "path": "tokenizer_management/core/tokenizer_core.py",
+      "symbol": "TokenizerCore._resolve_include_flags",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 397
+    },
+    {
+      "path": "tokenizer_management/core/tokenizer_core.py",
+      "symbol": "TokenizerCore.batch_encode",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 514
+    },
+    {
+      "path": "tokenizer_management/core/tokenizer_core.py",
+      "symbol": "TokenizerCore.encode_with_stats",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 496
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_manager.py",
+      "symbol": "BPEManager.encode",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 463
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_manager.py",
+      "symbol": "BPEManager.decode",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 793
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_manager.py",
+      "symbol": "BPEManager.train",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 961
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_manager.py",
+      "symbol": "BPEManager._initialize_components",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 303
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_encoder.py",
+      "symbol": "BPEEncoder._build_merge_ranks",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 280
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_encoder.py",
+      "symbol": "BPEEncoder._bpe_ids_for_token",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 371
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_encoder.py",
+      "symbol": "BPEEncoder.encode_sequence",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 188
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_encoder.py",
+      "symbol": "BPEEncoder._token_to_symbols",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 652
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_encoder.py",
+      "symbol": "BPEEncoder._map_symbols_to_ids",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 514
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_encoder.py",
+      "symbol": "BPEEncoder._char_fallback_ids",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 529
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_decoder.py",
+      "symbol": "BPEDecoder.__init__",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 84
+    },
+    {
+      "path": "tokenizer_management/bpe/bpe_decoder.py",
+      "symbol": "BPEDecoder.decode",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 161
+    },
+    {
+      "path": "scripts/book_tokenizer_walkthrough.py",
+      "symbol": "probe",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 33
+    },
+    {
+      "path": "scripts/book_tokenizer_walkthrough.py",
+      "symbol": "run",
+      "chapter": "tr/02-metin-tokenizer.md",
+      "line": 48
     }
   ],
   "notes": [

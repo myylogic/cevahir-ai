@@ -2,7 +2,7 @@
   "format_version": 1,
   "files": {
     "README-TR.md": {
-      "sha256": "a650a9d46eedc0a19266d0df713bf5f50fe9bc8d39ad4e864cc05cd0c141dedf",
+      "sha256": "7c23c49b259bd60f412f79a126dd3327d62d3b3c8e21361e9f4030522b68c19b",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README.md",
@@ -10,7 +10,7 @@
       ]
     },
     "README.md": {
-      "sha256": "22501ed609df891698ffa02af68667c30974f1bd80edc6a9e90ee48b74fc651c",
+      "sha256": "9d9b77916477e6c430ff48430ab81797552003fd447cbd12f580b067ee7eb464",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README-en.md"
@@ -204,6 +204,20 @@
         "tr/10-uctan-uca-sistem.md"
       ]
     },
+    "data/merges_lib/merges.txt": {
+      "sha256": "b5b0b9fcc04a73ea79ed1d3cee5f4f96860204cad6b020364ec9f20af4b080b1",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "data/vocab_lib/vocab.json": {
+      "sha256": "c4c635b175abbb077054884e5c7acaa1c1ebe03ecb9d9c133bd31d003da10f20",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
     "docs/architecture/CEVAHIR_ARCHITECTURE_SPEC.md": {
       "sha256": "c8f5762775edfdd588a5e12135a9a3c2e16a075d27b7433f48ec0502f4d9c4c3",
       "fingerprint_mode": "utf8-lf",
@@ -248,7 +262,7 @@
       ]
     },
     "docs/development/EVOLUTION_LOG.md": {
-      "sha256": "a4ef41df02f0aac1e6280f9f2d92742673a9e071186cad47c694d4367df41b22",
+      "sha256": "aad1d19a363cd948079623a404a405ad574c285b3758bd0ce34d898f997bf149",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md"
@@ -385,7 +399,7 @@
       ]
     },
     "docs/publications/README.md": {
-      "sha256": "076c081ba098f54a7759a1642c2b811b0eb7df446d85c0e78a97747aa0611542",
+      "sha256": "345a88d7087ff27f5ad84a8689f75258343f2189f1ccf8fdeb00ecbe3ab12188",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "BAKIM.md",
@@ -745,6 +759,13 @@
         "tr/11-arastirma-laboratuvari.md"
       ]
     },
+    "scripts/book_tokenizer_walkthrough.py": {
+      "sha256": "fca3b8b43a125aa5114a0b3b5ebe8c67b7f19b34bd42ee3532d7192e2405e3b7",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
     "src/neural_network.py": {
       "sha256": "cb28041badce4b6c126af255996fa581d45e304abf2e6acbd2d20e993a4e1c2e",
       "fingerprint_mode": "utf8-lf",
@@ -921,6 +942,13 @@
         "tr/07-model-yasam-dongusu.md"
       ]
     },
+    "tokenizer_management/bpe/bpe_decoder.py": {
+      "sha256": "d41598796695586ba0c9bf28da17714543d244ee3c3b388b5197e55e0b09af40",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
     "tokenizer_management/bpe/bpe_encoder.py": {
       "sha256": "72eec68dab5593c80c4e7413aa7a540af97c2b6f5364825b866aca95aa6b705a",
       "fingerprint_mode": "utf8-lf",
@@ -930,6 +958,13 @@
     },
     "tokenizer_management/bpe/bpe_manager.py": {
       "sha256": "aa66f05a74421b83662582257ddeeddf4a9fe88e8d1541c0ffbd77eb7379826f",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/02-metin-tokenizer.md"
+      ]
+    },
+    "tokenizer_management/bpe/bpe_tokenizer.py": {
+      "sha256": "1ec89eff27c7212bb0152f299903cc153f7ef7563fb6152f9ef14c04bc14f3e5",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/02-metin-tokenizer.md"

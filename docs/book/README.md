@@ -14,7 +14,7 @@ Kitabın ana dili Türkçedir. Teknik terimlerin İngilizce karşılıkları ger
 |---|---|
 | **I — Temeller ve dilin sayısal temsili** | |
 | [1. Motor, dil modeli ve öğrenme](tr/01-motor-ve-ogrenme.md) | Metinden olasılığa; model, motor, eğitim ve kullanımın farklı rolleri. |
-| [2. Metinden token kimliklerine](tr/02-metin-tokenizer.md) | Normalization, BPE, vocabulary ve merge kurallarından `TokenizerCore` akışına. |
+| [2. Metinden token kimliklerine](tr/02-metin-tokenizer.md) | Konuya göre dosya/metot haritası; mevcut sözlükle altı çalıştırılmış örnek; BPE, ayarlar, bilgi kaybı ve embedding bağlantısı. |
 | **II — Sinirsel hesap** | |
 | [3. Embedding, parametre ve sinir ağı](tr/03-sinir-aglari.md) | ID → vektör → katman → logits; şekiller, ağırlıklar ve öğrenilebilir hesap. |
 | [4. Attention'ın matematiği ve gerçek yolları](tr/04-attention.md) | Q/K/V, causal mask, MHA/MQA/GQA; elle hesap, SDPA ve Flash koşulları. |

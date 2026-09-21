@@ -39,6 +39,8 @@ python scripts/check_book.py
 
 Bir kavramı tanımak için gerekli matematiği, çözdüğü problemi ve en yakın alternatifini anlatın. Cevahir'deki gerçek seçimi etkin çağrı yolu üzerinden gösterin. Kod parçası kısa ve kaynağa bağlı olsun; büyük dosyayı kopyalamayın. Varsayımı ve bilinen sınırı aynı yerde belirtin. Okur metottan önceki girdiye ve sonraki tüketiciye gidebilmeli.
 
+İkinci bölümde bunun somut örneği konu → dosya/metot → girdi/işlem/çıktı haritasıdır. Tokenizer veya dağıtılan varlıklar değiştiğinde `python scripts/book_tokenizer_walkthrough.py` ile kayıtlı altı örneği yeniden denetleyin. Bir farklılık çıkarsa önce nedenini ve bölümdeki anlatımı inceleyin; yalnız bundan sonra `--write` ile yeni çıktıyı kaydedin. Bu örnekler model eğitmez ve tokenizer varlıklarını değiştirmediklerini denetler.
+
 Araştırma bölümünde buna hipotez, bilgi erişimi, güçlü baseline, ayırıcı negatif, tekrar üretim komutu ve hangi sonucun hâlâ açık kaldığı eklenir. Var olmayan bir özellik için tahmini sınıf adı yazılmaz. Hazır özellik dili veya ayrıcalıklı doğrulama verisi varsa saklanmaz. Tek bir küçük başarılı deney ana sorunun çözümü diye sunulmaz.
 
 ## Araştırma yayınları

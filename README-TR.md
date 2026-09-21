@@ -2,6 +2,8 @@
 
 [English](README.md) · [Türkçe](README-TR.md)
 
+[Araştırma arşivi DOI: 10.5281/zenodo.22864661](https://doi.org/10.5281/zenodo.22864661) · [Araştırma yayınları](docs/publications/README.md)
+
 **Türkçeye özel geliştirilmiş tokenizer altyapısı, eğitilebilir dil modeli çekirdeği ve bilişsel sistemleri birleştiren yapay zekâ motoru.**
 
 Ben Muhammed Yasin Yılmaz. Cevahir'i, verinin hazırlanmasından modelin öğrenmesine ve konuşma içinde kullanılmasına kadar bütün sürecini geliştirebildiğim bir yapay zekâ altyapısı olarak kurdum. Kendi BPE hattını, yapılandırılabilir PyTorch Transformer decoder çekirdeğini, eğitim ve checkpoint yönetimini, metin üretimini, bilişsel iş akışlarını, konuşma belleğini ve uygulama servislerini aynı kod tabanında bir araya getirdim.
