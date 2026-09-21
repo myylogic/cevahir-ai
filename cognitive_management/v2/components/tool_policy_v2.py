@@ -201,20 +201,9 @@ class ToolPolicyV2:
         parameters: Dict[str, Any] = {}
         
         if tool_name == "calculator":
-            # Try to extract math expression from user message
-            # Simple heuristic: look for numbers and operators
-            import re
-            # Find patterns like "2+2", "10*5", etc.
-            math_pattern = r'\d+\s*[+\-*/]\s*\d+'
-            matches = re.findall(math_pattern, user_message)
-            if matches:
-                parameters["operation"] = matches[0].replace(" ", "")
-            else:
-                # Fallback: extract numbers and try to infer operation
-                numbers = re.findall(r'\d+', user_message)
-                if len(numbers) >= 2:
-                    # Simple addition as default
-                    parameters["operation"] = f"{numbers[0]}+{numbers[1]}"
+            expression = self._infer_calculator_expression(user_message)
+            if expression is not None:
+                parameters["operation"] = expression
         
         elif tool_name == "search":
             # Extract search query from user message
@@ -240,6 +229,45 @@ class ToolPolicyV2:
                 parameters["path"] = user_message.strip()[:200]
         
         return parameters
+
+    @staticmethod
+    def _infer_calculator_expression(message: str) -> Optional[str]:
+        """Keep one complete arithmetic span; never invent an operation.
+
+        This is deliberately a small expression recognizer, not natural-language
+        math understanding. Unsupported or ambiguous spans require explicit
+        parameters. Parsing validates syntax without executing user input.
+        """
+        import ast
+        import re
+
+        candidates = []
+        # Include unsupported mathematical punctuation so that e.g. 2^3+4
+        # cannot silently become the valid but different expression 3+4.
+        math_char = r"[0-9.+\-*/()%<>=^&|~!,\[\]{}\\]"
+        pattern = math_char + r"(?:" + math_char + r"|[eE][+\-]?[0-9]+|\s+(?=" + math_char + r"))*"
+        for match in re.finditer(pattern, message):
+            expression = match.group().strip()
+            if not any(c.isdigit() for c in expression) or not any(c in "+-*/%^" for c in expression):
+                continue
+            if ((match.start() and message[match.start()-1].isalnum()) or
+                    (match.end() < len(message) and message[match.end()].isalnum())):
+                return None
+            if len(expression) > 200:
+                return None
+            try:
+                tree = ast.parse(expression, mode="eval")
+            except (SyntaxError, ValueError, RecursionError):
+                return None
+            nodes = list(ast.walk(tree))
+            allowed = (ast.Expression, ast.Constant, ast.BinOp, ast.UnaryOp,
+                       ast.Add, ast.Sub, ast.Mult, ast.Div, ast.UAdd, ast.USub)
+            if (len(nodes) > 64 or not any(isinstance(n, ast.BinOp) for n in nodes) or
+                    any(not isinstance(n, allowed) for n in nodes) or
+                    any(isinstance(n, ast.Constant) and type(n.value) not in (int, float) for n in nodes)):
+                return None
+            candidates.append(expression)
+        return candidates[0] if len(candidates) == 1 else None
 
 
 __all__ = ["ToolPolicyV2"]

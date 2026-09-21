@@ -100,3 +100,5 @@ The reports preserve negative findings and explicitly leave the broad
 living-learning problem open. Computational verification is scoped in the
 evidence record; it is not external peer review. The accompanying
 [English book guide](../book/README-en.md) maps the implementation-grounded book.
+
+Üçüncü arşiv genişletmesinin [ayrı doğrulama kaydı](../book/evidence/runtime_expansion_verification.json), 7–9. bölümler ile calculator düzeltmesinin kapsamını taşır. Önceki sürümlerin DOI ve doğrulama dosyaları korunur.

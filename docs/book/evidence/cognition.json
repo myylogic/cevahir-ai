@@ -238,7 +238,7 @@
       "path": "tests/evolution/test_agent_contracts.py",
       "symbol": "test_vector_scope_is_filtered_before_top_k",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 110
+      "line": 147
     },
     {
       "path": "model/cevahir.py",

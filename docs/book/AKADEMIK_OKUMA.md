@@ -15,7 +15,7 @@
 | [5. Transformer](tr/05-transformer.md) | Önceki iki bölüm | Residual, norm, RoPE, FFN parametreleri ve MoE yardımcı hedefi | Kaynak incelemesi + blok rekonstrüksiyonu/RoPE/FFN kontrolleri |
 | [6. Eğitim](tr/06-egitim.md) | Zincir kuralı ve loss | Hedef kaydırma, token ağırlıklı birikim, optimizer adımı ve bütçe karşılaştırması | Gerçek loss/çekirdek çalıştırması + mevcut eğitim sözleşmesi testleri |
 
-Bu dört bölümde çözümlü alıştırmalar ve bölüm kaynakçaları bulunur. Diğer bölümler sistemin geri kalanına bağlantı sağlar; aynı sayıda çalıştırılmış örnek veya kapsamlı literatür tartışması taşıdıkları iddia edilmez. Araştırma bölümlerindeki açık living-learning problemi, standart geri yayılımın açıklanmış olmasıyla çözülmüş sayılmaz.
+Bu dört bölümden sonra 7–9. bölümler de genişletildi: model kimliği ve checkpoint, token üretimi/cache, retrieval ve araç yürütme. Bu üç bölümde 15 yeni çözümlü alıştırma ve 18 kaynakça girdisi bulunur. Yaşam döngüsü için beş, üretim/bellek/araç için beş yeni çalıştırılmış örnek grubu eklendi. Diğer bölümlerin aynı ayrıntı düzeyinde tamamlandığı iddia edilmez. Araştırma bölümlerindeki açık living-learning problemi, standart geri yayılımın açıklanmış olmasıyla çözülmüş sayılmaz.
 
 ## Atıf nasıl okunmalı?
 
@@ -34,6 +34,8 @@ Repository kökünde, projenin Python/PyTorch bağımlılıkları kurulu ortamda
 ```powershell
 python scripts/book_tokenizer_walkthrough.py
 python scripts/book_neural_walkthrough.py
+python scripts/book_lifecycle_walkthrough.py
+python scripts/book_runtime_walkthrough.py
 python scripts/check_book.py
 ```
 
@@ -42,6 +44,12 @@ python scripts/check_book.py
 [Neural yürütme kaydı](evidence/neural_walkthrough.json) Python 3.14.3, PyTorch 2.10.0+cpu ve sabit seed ile alınmıştır. Ondalıklı sonuçlar için mutlak `2e-6`, göreli `2e-5` karşılaştırma toleransı kullanılır; örneklerin kendi matematiksel denetimleri ayrıca çalışır. Platform veya kütüphane değişikliği sonucu farklılaştırırsa önce nedeni araştırılır, beklenen çıktı otomatik değiştirilmez.
 
 [Genişletme doğrulaması](evidence/academic_expansion_verification.json) 99 hedefli testin bu turda geçtiğini kaydeder. Bu testler GPU kernel başarımı, eğitilmiş modelin Türkçe kalitesi veya bütün repository'nin hatasızlığı için kanıt değildir. [Kitap denetleyicisi](../../scripts/check_book.py) bağlantı, sembol ve incelenmiş kaynak parmak izini kontrol eder; matematiksel anlatımı veya kaynakların bütün yorumlarını otomatik doğrulamaz.
+
+## Yaşam döngüsü ve çalışan sistem örnekleri
+
+[Checkpoint kaydı](evidence/lifecycle_walkthrough.json), gerçek ModelManager ve küçük modellerle geçici dosyalarda kayıt/yükleme, optimizer devamı, kimlik ve bütünlük denetimlerini gösterir. [Üretim/bellek/araç kaydı](evidence/runtime_walkthrough.json), gerçek adaptör filtrelerini sabit logitlerle, retrieval'ı elle verilmiş vektörlerle, calculator'ı gerçek fonksiyonuyla çalıştırır. Sabit logit kaynağı bir eğitilmiş model değildir. İki komut da varsayılan olarak mevcut sonuçları denetler; kalıcı model varlıklarına yazmaz.
+
+Kod incelemesi sırasında calculator çıkarıcısının `2+3*4` ifadesini `2+3` olarak kestiği bulundu ve düzeltildi. [Eski çıktı](evidence/runtime_walkthrough_before_tool_fix.json) saklandı; güncel örnekte hem çıkarılan hem açık ifade `"14"` verir. Belirsiz veya desteklenmeyen ifade yerine başka işlem üretilmez. Bu düzeltme genel doğal dil matematik çözümünü sağlamaz. [Yeni doğrulama kaydı](evidence/runtime_expansion_verification.json) hedefli testlerin kapsamını ve sürüm farkını açıklar.
 
 ## Akademik kullanımda sürümü belirtmek
 

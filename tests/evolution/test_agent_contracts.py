@@ -65,6 +65,43 @@ def test_failed_tool_is_not_reported_as_used():
         executor.execute("calculator", {"operation": "2**100000000"})
 
 
+@pytest.mark.parametrize("message,expected", [
+    ("2+3*4", "14"),
+    ("Hesapla: (2 + 3) * 4", "20"),
+    ("Hesapla: -2.5 * (3 + 1)", "-10.0"),
+    ("1e3 + 2", "1002.0"),
+    ("Lütfen 2+3*4 hesapla", "14"),
+    ("Calculate 2+3 please", "5"),
+    ("1e3+2", "1002.0"),
+])
+def test_tool_handler_preserves_complete_arithmetic_expression(message, expected):
+    cfg = config(); cfg.tools.enable_tools = True; cfg.tools.allow = ["calculator"]
+    executor = ToolExecutorV2(cfg)
+    context = ProcessingContext(CognitiveState(), CognitiveInput(message))
+    context.features = {"needs_calc_or_parse": True, "tool_decision": "must"}
+    result = ContextBuildingHandler(MemoryServiceV2(cfg), ToolPolicyV2(cfg, executor))._process(context)
+    assert result.tool_name == "calculator"
+    assert f"[ARAÇ SONUCU: calculator]\n{expected}" in result.context_text
+    assert executor.get_tool_metrics("calculator")["success_count"] == 1
+
+
+@pytest.mark.parametrize("message", [
+    "2 ve 3", "2+3 ve 4+5", "2^3+4", "2**3+4", "2//3+4",
+    "2+3*", "(2+3", "x2+3", "sqrt(9)+2", "2,5+3", "2 3+4",
+    "2+" + "3" * 200, "**2+3", "1e+3+", "2+3e",
+])
+def test_ambiguous_or_unsupported_math_is_not_silently_rewritten(message):
+    cfg = config(); cfg.tools.enable_tools = True; cfg.tools.allow = ["calculator"]
+    executor = ToolExecutorV2(cfg)
+    policy = ToolPolicyV2(cfg, executor)
+    assert policy.infer_tool_parameters("calculator", message, {}) == {}
+    context = ProcessingContext(CognitiveState(), CognitiveInput(message))
+    context.features = {"needs_calc_or_parse": True, "tool_decision": "must"}
+    result = ContextBuildingHandler(MemoryServiceV2(cfg), policy)._process(context)
+    assert result.tool_name is None
+    assert executor.get_tool_metrics("calculator")["success_count"] == 0
+
+
 def test_response_cache_keys_include_complete_history_identity_and_decoding():
     cache = CacheMiddleware()
     a = CognitiveState(session_id="a", history=[{"role": "user", "content": "secret"}] + [{"role": "assistant", "content": "same"}] * 3)

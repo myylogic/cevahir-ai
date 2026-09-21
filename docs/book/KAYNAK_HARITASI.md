@@ -27,7 +27,7 @@ Bazı kayıtlar ise tarihsel tasarım veya önceki denetimdir:
 - [Attention audit](../module_audits/4_attention_audit.md) içindeki ölçekleme ve satır toplamı açıklamaları güncel kodla doğrudan eşit sayılmaz. Bugünkü ölçek `1/(sqrt(d_head) * temperature)`; tam maskeli satırlar ve dropout için ayrıntı 4. bölümde.
 - [ModelManager rehberi](../modules/model_management/README.md) ve [İngilizcesindeki](../modules/model_management/README-en.md) bazı örnekler eski `setup_tensorboard`, save argümanları ve loss hizalaması kullanır. Güncel `configure_tensorboard`, save/load ve hazırlanmış hedef sözleşmesi 6–7'de gösterilir.
 - [Cognitive tasarım belgeleri](../modules/cognitive_management/architecture/README.md) etkin çağrı yolundan daha geniş tasarım hedefleri içerir. SQL öncelik sorgusu, vektör retrieval ve dış araç kaydı 9–10'da ayrı gösterilir.
-- [Sonraki geliştirme planı](../architecture/NEXT_DEVELOPMENT_ROADMAP.md) o taramanın bulgularını saklar; bütün maddeleri bugün de açık hata sayılmaz. Örneğin güncel handler sistem talimatını geçirir ve `entropy_details` ID çıktısını kullanır. Araç parametresi çıkarımındaki sınır ise 9. bölümde mevcut kaynak üzerinden gösterilir. Planın geçmiş bulguları sessizce silinmemiştir.
+- [Sonraki geliştirme planı](../architecture/NEXT_DEVELOPMENT_ROADMAP.md) o taramanın bulgularını saklar; bütün maddeleri bugün de açık hata sayılmaz. Örneğin güncel handler sistem talimatını geçirir ve `entropy_details` ID çıktısını kullanır. Araç parametresi çıkarımındaki ifade kesme hatası 21 Eylül devam turunda düzeltildi; önceki başarısız örnek ile yeni davranış 9. bölümde birlikte gösterilir. Planın geçmiş bulguları sessizce silinmemiştir.
 - [Gelişim günlüğü](../development/EVOLUTION_LOG.md) ve eski araştırma raporları o tarihteki kararları/sonuçları taşır. Sonraki düzeltme, önceki kaydı silmek için gerekçe değildir.
 
 Bir tarihsel belgedeki örneği çalıştırmadan önce buradaki güncel sembolün imzasını inceleyin. Eski kaydın varlığını gizlemek yerine kitaptan ona giderken farkını belirtiyoruz.
@@ -43,3 +43,5 @@ Bir bağlantının ve metot adının varlığını doğrulamak, anlatımın mate
 ## 21 Eylül akademik genişletmesi
 
 3–6. bölümler özgün yayınlar, türetimler ve çözümlü alıştırmalarla genişletildi. [Yedi CPU örnek grubu](evidence/neural_walkthrough.json), gerçek embedding, attention, cache, norm, FFN, RoPE ve küçük model güncellemesini kaydeder. Bu turda [99 hedefli test geçti](evidence/academic_expansion_verification.json); yukarıdaki 149 test ilk kitap turunun ayrı tarihli kaydıdır. [Akademik okuma ve atıf kapsamı](AKADEMIK_OKUMA.md), yayınları ve yerel kanıtları nasıl birlikte okumak gerektiğini açıklar.
+
+7–9. bölümlerin devam genişletmesi [ayrı doğrulama kaydında](evidence/runtime_expansion_verification.json) izlenir. Beş checkpoint ve beş üretim/bellek/araç örnek grubu, 15 yeni çözümlü alıştırma ve gerçek calculator çıkarım düzeltmesi içerir. Önceki test sayıları tarihli kapsamlarını korur.

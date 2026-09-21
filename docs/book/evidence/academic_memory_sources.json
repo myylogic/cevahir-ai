@@ -1,0 +1,297 @@
+{
+  "chapter": "tr/09-bellek-bilis-araclar.md",
+  "reviewed_on": "2026-09-21",
+  "references": [
+    {
+      "path": "cognitive_management/v2/components/embedding_adapter.py",
+      "symbol": "BaseEmbeddingAdapter.encode_single",
+      "line": 92,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/embedding_adapter.py",
+      "symbol": "SentenceTransformersAdapter.encode",
+      "line": 155,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2.add_turn",
+      "line": 135,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2.retrieve_context",
+      "line": 215,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2._combine_search_results",
+      "line": 302,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2._semantic_search",
+      "line": 356,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2._keyword_search",
+      "line": 414,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2.summarize_if_needed",
+      "line": 521,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/memory_service_v2.py",
+      "symbol": "MemoryServiceV2.inject_session_summary_if_needed",
+      "line": 547,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/vector_store/memory_vector_store.py",
+      "symbol": "MemoryVectorStore",
+      "line": 49,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/vector_store/memory_vector_store.py",
+      "symbol": "MemoryVectorStore._cosine_similarity",
+      "line": 83,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/vector_store/memory_vector_store.py",
+      "symbol": "MemoryVectorStore.search",
+      "line": 182,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/rag_enhancer.py",
+      "symbol": "RAGEnhancer.enhance_context",
+      "line": 74,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/policy_router_v2.py",
+      "symbol": "PolicyRouterV2.route",
+      "line": 82,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/policy_router_v2.py",
+      "symbol": "PolicyRouterV2._select_mode",
+      "line": 126,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/tool_policy_v2.py",
+      "symbol": "ToolPolicyV2.infer_tool_parameters",
+      "line": 184,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/tool_executor_v2.py",
+      "symbol": "ToolExecutorV2.execute",
+      "line": 139,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/tool_executor_v2.py",
+      "symbol": "ToolExecutorV2._register_default_tools",
+      "line": 281,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/tree_of_thoughts.py",
+      "symbol": "TreeOfThoughts.solve",
+      "line": 145,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/tree_of_thoughts.py",
+      "symbol": "TreeOfThoughts._expand_node",
+      "line": 280,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/tree_of_thoughts.py",
+      "symbol": "TreeOfThoughts._evaluate_thought",
+      "line": 372,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "_majority_select",
+      "line": 92,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "_score_select",
+      "line": 121,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "DeliberationHandler._process",
+      "line": 317,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "ContextBuildingHandler._process",
+      "line": 463,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "GenerationHandler._process",
+      "line": 558,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "SelfConsistencyHandler._process",
+      "line": 619,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "CriticHandler._process",
+      "line": 728,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "MemoryUpdateHandler._process",
+      "line": 796,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/core/orchestrator.py",
+      "symbol": "CognitiveOrchestrator._build_pipeline",
+      "line": 172,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/utils/request_scope.py",
+      "symbol": "current_scope",
+      "line": 13,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/utils/request_scope.py",
+      "symbol": "memory_scope",
+      "line": 18,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/utils/request_scope.py",
+      "symbol": "_prepare",
+      "line": 26,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "CevahirModelAPI.entropy_details",
+      "line": 899,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/cognitive_manager.py",
+      "symbol": "CognitiveManager.handle",
+      "line": 512,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/adapters/backend_adapter.py",
+      "symbol": "ModelAPIAdapter.generate",
+      "line": 101,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/processing/async_handlers.py",
+      "symbol": "AsyncGenerationHandler._process_async",
+      "line": 181,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    }
+  ],
+  "primary_sources": [
+    {
+      "url": "https://arxiv.org/abs/1908.10084",
+      "title": "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks",
+      "accessed": "2026-09-21",
+      "verified_content": "Primary arXiv abstract and author metadata."
+    },
+    {
+      "url": "https://arxiv.org/abs/2004.04906",
+      "title": "Dense Passage Retrieval for Open-Domain Question Answering",
+      "accessed": "2026-09-21",
+      "verified_content": "Primary arXiv abstract and author metadata."
+    },
+    {
+      "url": "https://arxiv.org/abs/2005.11401",
+      "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+      "accessed": "2026-09-21",
+      "verified_content": "Primary arXiv abstract and author metadata; RAG additionally reviewed in full HTML, sections 2.1-2.4."
+    },
+    {
+      "url": "https://arxiv.org/abs/2203.11171",
+      "title": "Self-Consistency Improves Chain of Thought Reasoning in Language Models",
+      "accessed": "2026-09-21",
+      "verified_content": "Primary arXiv abstract and author metadata."
+    },
+    {
+      "url": "https://arxiv.org/abs/2210.03629",
+      "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+      "accessed": "2026-09-21",
+      "verified_content": "Primary arXiv abstract and author metadata."
+    },
+    {
+      "url": "https://arxiv.org/abs/2302.04761",
+      "title": "Toolformer: Language Models Can Teach Themselves to Use Tools",
+      "accessed": "2026-09-21",
+      "verified_content": "Primary arXiv abstract and author metadata."
+    },
+    {
+      "url": "https://arxiv.org/abs/2305.10601",
+      "title": "Tree of Thoughts: Deliberate Problem Solving with Large Language Models",
+      "accessed": "2026-09-21",
+      "verified_content": "Primary arXiv abstract and author metadata."
+    },
+    {
+      "url": "https://arxiv.org/abs/2307.03172",
+      "title": "Lost in the Middle: How Language Models Use Long Contexts",
+      "accessed": "2026-09-21",
+      "verified_content": "Primary arXiv abstract and author metadata."
+    }
+  ],
+  "additional_verified_pages": [
+    {
+      "url": "https://arxiv.org/html/2005.11401v4",
+      "accessed": "2026-09-21",
+      "sections": [
+        "2.1 Models",
+        "2.2 Retriever: DPR",
+        "2.4 Training"
+      ]
+    }
+  ],
+  "review_notes": [
+    "MemoryVectorStore returns (1 + cosine)/2 for nonzero vectors; manual-vector scope example distinguishes raw cosine 0.9701425 from returned score 0.98507125.",
+    "Local majority selection uses bigram centrality, not original paper answer marginalization; local router thresholds are not asserted to be literature-validated.",
+    "Tool execution success is distinguished from faithful parameter extraction and final-answer correctness; calculator returns string results.",
+    "Original mathematical thought experiments are distinguished from repository execution records and external benchmark findings.",
+    "Only book chapter and this evidence manifest edited; no runtime modification or external model download.",
+    "Subsequent root review applied calculator inference fix; chapter and current execution record updated, pre-fix evidence retained."
+  ]
+}

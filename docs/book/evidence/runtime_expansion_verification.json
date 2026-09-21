@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-21",
+  "base_commit": "8fb26e3e43ee63178bb5fdf33cec01136e2c88c1",
+  "scope": "Academic expansion of chapters 7-9 and calculator expression-inference correction",
+  "tests": {
+    "command": "python -m pytest tests/evolution/test_config_generation.py tests/evolution/test_agent_contracts.py tests/evolution/test_checkpoint_lifecycle.py tests/evolution/test_runtime_lifecycle.py -q",
+    "passed": 70,
+    "seconds": 20.99,
+    "warnings": 0
+  },
+  "walkthroughs": {
+    "lifecycle": {
+      "groups": 5,
+      "record": "lifecycle_walkthrough.json",
+      "mode": "record then read-only comparison"
+    },
+    "runtime": {
+      "groups": 5,
+      "record": "runtime_walkthrough.json",
+      "mode": "record then read-only comparison"
+    },
+    "historical_negative": "runtime_walkthrough_before_tool_fix.json"
+  },
+  "book_counts": {
+    "chapters": 12,
+    "topics_h2": 115,
+    "subtopics_h3": 64,
+    "words_whitespace_including_markup": 29547
+  },
+  "new_solved_exercises": 15,
+  "new_bibliography_entries": 18,
+  "runtime_fix": {
+    "component": "ToolPolicyV2.infer_tool_parameters",
+    "before": "2+3*4 truncated to 2+3; calculator returned string 5",
+    "after": "Full expression retained; calculator returns string 14",
+    "new_regression_cases": 22,
+    "boundaries": "Conservative arithmetic-span recognizer; ambiguous/unsupported inference yields no parameters, explicit parameters remain available"
+  },
+  "limitations": [
+    "No GPU or trained-language-quality benchmark",
+    "Original research experiments preserved, not all re-executed",
+    "Fixed logits and assigned vectors are teaching fixtures",
+    "Remaining checkpoint checksum and alias-atomicity limits documented, not changed in this tranche"
+  ]
+}

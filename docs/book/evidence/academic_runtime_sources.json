@@ -1,0 +1,120 @@
+{
+  "reviewed_on": "2026-09-21",
+  "references": [
+    {
+      "path": "model/cevahir.py",
+      "symbol": "CevahirModelAPI.generate",
+      "line": 488,
+      "chapter": "tr/08-uretim.md"
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "CevahirModelAPI._generate_impl",
+      "line": 499,
+      "chapter": "tr/08-uretim.md"
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "CevahirModelAPI._autoregressive_generate",
+      "line": 569,
+      "chapter": "tr/08-uretim.md"
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "CevahirModelAPI._generate_with_beam_search",
+      "line": 780,
+      "chapter": "tr/08-uretim.md"
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/kv_cache.py",
+      "symbol": "KVCache.update",
+      "line": 177,
+      "chapter": "tr/08-uretim.md"
+    },
+    {
+      "path": "scripts/book_runtime_walkthrough.py",
+      "symbol": "sampling_examples",
+      "line": 69,
+      "chapter": "tr/08-uretim.md"
+    },
+    {
+      "path": "scripts/book_runtime_walkthrough.py",
+      "symbol": "generation_protocol_examples",
+      "line": 99,
+      "chapter": "tr/08-uretim.md"
+    },
+    {
+      "path": "scripts/book_runtime_walkthrough.py",
+      "symbol": "entropy_example",
+      "line": 130,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "scripts/book_runtime_walkthrough.py",
+      "symbol": "scoped_retrieval_example",
+      "line": 140,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "scripts/book_runtime_walkthrough.py",
+      "symbol": "tool_semantics_example",
+      "line": 165,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "cognitive_management/v2/components/tool_policy_v2.py",
+      "symbol": "ToolPolicyV2._infer_calculator_expression",
+      "line": 234,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "tests/evolution/test_agent_contracts.py",
+      "symbol": "test_tool_handler_preserves_complete_arithmetic_expression",
+      "line": 77,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    },
+    {
+      "path": "tests/evolution/test_agent_contracts.py",
+      "symbol": "test_ambiguous_or_unsupported_math_is_not_silently_rewritten",
+      "line": 93,
+      "chapter": "tr/09-bellek-bilis-araclar.md"
+    }
+  ],
+  "primary_sources": [
+    {
+      "url": "https://aclanthology.org/P18-1082/",
+      "title": "Hierarchical Neural Story Generation",
+      "verified_content": "ACL 2018; full PDF section 5.4 reviewed",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/1904.09751",
+      "title": "The Curious Case of Neural Text Degeneration",
+      "verified_content": "2019 preprint; ICLR 2020; primary abstract and metadata",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/1909.05858",
+      "title": "CTRL: A Conditional Transformer Language Model for Controllable Generation",
+      "verified_content": "2019 report; full HTML section 4.1 reviewed",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2309.17453",
+      "title": "Efficient Streaming Language Models with Attention Sinks",
+      "verified_content": "2023 preprint; ICLR 2024; primary abstract and metadata",
+      "accessed": "2026-09-21"
+    },
+    {
+      "url": "https://arxiv.org/abs/2309.06180",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "verified_content": "SOSP 2023; primary abstract and metadata",
+      "accessed": "2026-09-21"
+    }
+  ],
+  "review_notes": [
+    "Fixed-logit manager exercises production filtering and call protocol, not neural cache numerical equivalence.",
+    "Temperature, filter composition, beam counterexample and KV byte counts independently derived.",
+    "Calculator inference corrected after reproducing truncated-expression failure; original output is preserved separately."
+  ]
+}

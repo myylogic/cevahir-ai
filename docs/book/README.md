@@ -30,7 +30,7 @@ Kitabın ana dili Türkçedir. Teknik terimlerin İngilizce karşılıkları ger
 | [11. Yaşarken öğrenme laboratuvarı](tr/11-arastirma-laboratuvari.md) | Hipotez → mekanizma → kod → karşılaştırma → sonuç → sınırlılık. |
 | [12. Bilmediklerimiz ve araştırmanın devamı](tr/12-acik-sorular.md) | Kalıcılık, düzeltme, temsil, öğrenme biçimi ve birleşik yaşamın açık sorunları. |
 
-21 Eylül genişletmesinde 3–6. bölümlere sinir ağı ve temsilin temelleri, ayrıntılı matematik, yöntemlerin özgün kaynakları, tarihli endüstri karşılaştırmaları, dosya/metot haritaları ve çözümlü alıştırmalar eklendi. Gerçek Cevahir bileşenleriyle yedi küçük CPU örnek grubu çalıştırıldı. Bu, kitabın bütün bölümlerinin aynı ayrıntı düzeyinde tamamlandığı anlamına gelmez; güncel kapsam [akademik okuma rehberinde](AKADEMIK_OKUMA.md) açıklanır.
+21 Eylül genişletmesinde 3–6. bölümlere sinir ağı ve temsilin temelleri, ayrıntılı matematik, yöntemlerin özgün kaynakları, tarihli endüstri karşılaştırmaları, dosya/metot haritaları ve çözümlü alıştırmalar eklendi. Gerçek Cevahir bileşenleriyle yedi küçük CPU örnek grubu çalıştırıldı. Ardından 7–9. bölümlere checkpoint kimliği/devamı, üretim matematiği, retrieval ve araçlar için 15 çözümlü alıştırma ve 10 çalıştırılmış örnek grubu daha eklendi. İncelemede bulunan calculator ifade kesme hatası düzeltildi; eski negatif çıktı korundu. Bu, kitabın bütün bölümlerinin aynı ayrıntı düzeyinde tamamlandığı anlamına gelmez; güncel kapsam [akademik okuma rehberinde](AKADEMIK_OKUMA.md) açıklanır.
 
 ## Nasıl okunmalı?
 

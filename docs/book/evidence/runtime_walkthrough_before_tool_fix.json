@@ -1,0 +1,197 @@
+{
+  "date": "2026-09-21",
+  "kind": "executed_book_examples",
+  "environment": {
+    "python": "3.14.3",
+    "torch": "2.10.0+cpu",
+    "device": "cpu"
+  },
+  "cases": {
+    "sampling": {
+      "base_probabilities": [
+        0.5,
+        0.3,
+        0.15,
+        0.05
+      ],
+      "cases": {
+        "nucleus_only": {
+          "temperature": 1.0,
+          "top_k": 0,
+          "top_p": 0.6,
+          "probabilities": [
+            0.625,
+            0.375,
+            0.0,
+            0.0
+          ]
+        },
+        "top_k_then_nucleus": {
+          "temperature": 1.0,
+          "top_k": 2,
+          "top_p": 0.6,
+          "probabilities": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "temperature_two": {
+          "temperature": 2.0,
+          "top_k": 0,
+          "top_p": 1.0,
+          "probabilities": [
+            0.37899649143218994,
+            0.293569415807724,
+            0.2075849324464798,
+            0.11984921246767044
+          ]
+        }
+      },
+      "note": "Production filtering; multinomial intercepted to inspect its input, not a random-sampling experiment."
+    },
+    "generation_protocol": {
+      "cache": {
+        "text": "2 2 2",
+        "calls": [
+          {
+            "length": 2,
+            "use_cache": true,
+            "positions": [
+              0,
+              1
+            ]
+          },
+          {
+            "length": 1,
+            "use_cache": true,
+            "positions": [
+              2
+            ]
+          },
+          {
+            "length": 1,
+            "use_cache": true,
+            "positions": [
+              3
+            ]
+          }
+        ],
+        "cache_clears": 1
+      },
+      "no_cache": {
+        "text": "2 2 2",
+        "calls": [
+          {
+            "length": 2,
+            "use_cache": false,
+            "positions": [
+              0,
+              1
+            ]
+          },
+          {
+            "length": 3,
+            "use_cache": false,
+            "positions": null
+          },
+          {
+            "length": 4,
+            "use_cache": false,
+            "positions": null
+          }
+        ],
+        "cache_clears": 1
+      },
+      "minimum_then_eos": {
+        "text": "0 0",
+        "forward_calls": 3,
+        "minimum_new_tokens": 2
+      },
+      "zero_limit_forward_calls": 0,
+      "beam_calls": [
+        {
+          "length": 2,
+          "use_cache": false,
+          "positions": null
+        },
+        {
+          "length": 3,
+          "use_cache": false,
+          "positions": null
+        },
+        {
+          "length": 3,
+          "use_cache": false,
+          "positions": null
+        },
+        {
+          "length": 4,
+          "use_cache": false,
+          "positions": null
+        },
+        {
+          "length": 4,
+          "use_cache": false,
+          "positions": null
+        }
+      ],
+      "note": "Fixed logits verify adapter call protocol only; real neural cache equivalence is tested separately."
+    },
+    "entropy": {
+      "probabilities": [
+        0.5,
+        0.3,
+        0.15,
+        0.05
+      ],
+      "normalized_entropy": 0.8238654327192222,
+      "available": true,
+      "note": "Token distribution entropy; not the probability that an answer is true."
+    },
+    "scoped_retrieval": {
+      "query_vector": [
+        1.0,
+        0.0
+      ],
+      "other_vector": [
+        1.0,
+        0.0
+      ],
+      "mine_vector": [
+        0.8,
+        0.2
+      ],
+      "top_k": 1,
+      "scope": "mine",
+      "returned_content": "my related context",
+      "raw_cosine": 0.9701425001453319,
+      "score": 0.9850712500726659,
+      "note": "Assigned vectors exercise scope filtering before top-k, not embedding quality or authentication."
+    },
+    "tool_semantics": {
+      "request": "2+3*4",
+      "inferred_parameters": {
+        "operation": "2+3"
+      },
+      "inferred_result": "5",
+      "explicit_result": "14",
+      "successful_executions_before_failure": 2,
+      "division_by_zero_error": "ToolPolicyError",
+      "note": "Successful execution of a truncated expression is not successful fulfillment of the request."
+    }
+  },
+  "comparison_tolerance": {
+    "absolute": 2e-06,
+    "relative": 2e-05
+  },
+  "limits": [
+    "Fixed logits and assigned vectors, no trained-model quality claim",
+    "Actual production selection, memory and tool methods execute",
+    "No runtime code, model weights or historical research records modified"
+  ],
+  "source_commit": "8fb26e3",
+  "status": "historical_pre_fix_observation",
+  "note": "Preserved before calculator inference correction. Not the expected output of the current walkthrough."
+}

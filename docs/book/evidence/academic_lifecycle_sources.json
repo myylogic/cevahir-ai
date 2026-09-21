@@ -1,0 +1,164 @@
+{
+  "chapter": "tr/07-model-yasam-dongusu.md",
+  "reviewed_on": "2026-09-21",
+  "references": [
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.initialize",
+      "line": 312,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.save",
+      "line": 657,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.load",
+      "line": 694,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/model_manager.py",
+      "symbol": "ModelManager.forward",
+      "line": 486,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/model_saver.py",
+      "symbol": "ModelSaver.save_model",
+      "line": 377,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/model_saver.py",
+      "symbol": "ModelSaver.save_checkpoint",
+      "line": 218,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/model_saver.py",
+      "symbol": "_torch_save_atomic",
+      "line": 96,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/model_loader.py",
+      "symbol": "ModelLoader.load_model",
+      "line": 222,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/model_loader.py",
+      "symbol": "_verify_sha256",
+      "line": 114,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/model_loader.py",
+      "symbol": "_torch_load",
+      "line": 181,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "model_config",
+      "line": 27,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "unpack_checkpoint",
+      "line": 7,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "validate_model_identity",
+      "line": 36,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "validate_state_shapes",
+      "line": 56,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "validate_tokenizer_identity",
+      "line": 67,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "training_system/cache_identity.py",
+      "symbol": "tokenizer_digest",
+      "line": 27,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "training_management/v2/core/training_manager.py",
+      "symbol": "TrainingManager._checkpoint_extra_state",
+      "line": 274,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "training_management/v2/core/training_manager.py",
+      "symbol": "TrainingManager.resume_from_checkpoint",
+      "line": 293,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "training_management/v2/utils/checkpoint_manager.py",
+      "symbol": "CheckpointManager._atomic_save",
+      "line": 343,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "training_management/v2/utils/checkpoint_manager.py",
+      "symbol": "CheckpointManager._update_alias",
+      "line": 364,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    },
+    {
+      "path": "scripts/book_lifecycle_walkthrough.py",
+      "symbol": "run",
+      "line": 63,
+      "chapter": "tr/07-model-yasam-dongusu.md"
+    }
+  ],
+  "primary_sources": [
+    {
+      "url": "https://github.com/pytorch/pytorch/blob/main/docs/source/notes/serialization.md",
+      "accessed": "2026-09-21",
+      "method": "official repository raw HTTPS source"
+    },
+    {
+      "url": "https://github.com/pytorch/pytorch/blob/main/docs/source/notes/randomness.md",
+      "accessed": "2026-09-21",
+      "method": "official repository raw HTTPS source"
+    },
+    {
+      "url": "https://github.com/pytorch/tutorials/blob/main/beginner_source/saving_loading_models.py",
+      "accessed": "2026-09-21",
+      "method": "official repository raw HTTPS source"
+    },
+    {
+      "url": "https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.load_state_dict",
+      "accessed": "2026-09-21",
+      "method": "installed PyTorch 2.10.0+cpu API docstring"
+    },
+    {
+      "url": "https://docs.pytorch.org/docs/stable/generated/torch.optim.Optimizer.load_state_dict.html",
+      "accessed": "2026-09-21",
+      "method": "installed PyTorch 2.10.0+cpu API docstring"
+    }
+  ],
+  "review_notes": [
+    "Public documentation HTTP endpoint rejected automated requests; official raw GitHub source and installed API were inspected. No TLS validation disabled.",
+    "Observed outcomes recorded separately in lifecycle_walkthrough.json. Scratch-only roundtrip, cache clear, optimizer-history effect, mismatch preflight, checksum and dtype cases; no cross-device or complete V2 resume claim.",
+    "No production runtime changes. ModelSaver.save_checkpoint embedded SHA covers first serialization rather than final bytes; external sidecar covers final bytes. Manager save does not create a sidecar."
+  ]
+}

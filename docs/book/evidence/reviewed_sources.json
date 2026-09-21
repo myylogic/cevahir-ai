@@ -119,6 +119,13 @@
         "tr/09-bellek-bilis-araclar.md"
       ]
     },
+    "cognitive_management/v2/components/embedding_adapter.py": {
+      "sha256": "75e72d1114e274960079b3d9c0834c66dda0affa52346f0684f0673a4bae11e5",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
     "cognitive_management/v2/components/memory_service_v2.py": {
       "sha256": "6cf29d14e9915b05bffd9855990b1c555b0d2b08bdc3f9d1e2865e711e816583",
       "fingerprint_mode": "utf8-lf",
@@ -133,6 +140,13 @@
         "tr/09-bellek-bilis-araclar.md"
       ]
     },
+    "cognitive_management/v2/components/rag_enhancer.py": {
+      "sha256": "079d9d836abf9414519ded7b2bab6afa321d1cc448dbd1e720ce055d3ddb46fa",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
     "cognitive_management/v2/components/tool_executor_v2.py": {
       "sha256": "f3e435972d03825ae95ab3ffcb9e9708ff643b5d0c3edd6839ca8f7c57952193",
       "fingerprint_mode": "utf8-lf",
@@ -141,7 +155,7 @@
       ]
     },
     "cognitive_management/v2/components/tool_policy_v2.py": {
-      "sha256": "73bf570cada8f6635b1674611c5766987b4449e797767772059b48399c96cae4",
+      "sha256": "dd6b24e60c132f4f1e53b620e17f686742ff0dc18cdefb4660f453e13225c857",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
@@ -262,7 +276,7 @@
       ]
     },
     "docs/development/EVOLUTION_LOG.md": {
-      "sha256": "7cd0ef2eb537f90b8816d9b515a59a15c1ec9f1590cd73de0dec279fb6de5527",
+      "sha256": "928efe702e3b020916ebe68e8d5b0baabcaccc272e8e62edc677bb501c6a590c",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md"
@@ -399,7 +413,7 @@
       ]
     },
     "docs/publications/README.md": {
-      "sha256": "a2a4fce54089401366f7656f2df219e0c2bb9c1fe14394cff3e7b11254bab019",
+      "sha256": "fcf33aab699ecf6f58e2ef8a131b8f6a1ab0b9d5dd3042c2ece45e70f4f1a7aa",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "AKADEMIK_OKUMA.md",
@@ -585,6 +599,13 @@
         "tr/06-egitim.md"
       ]
     },
+    "model_management/model_loader.py": {
+      "sha256": "29a966df65047593593e6006fbab1465cc6cfab2f7720b8030e833d7aa059355",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
     "model_management/model_manager.py": {
       "sha256": "aefc2e9c60cdfa4e6a0cd4ef8fc18b1cb91648733ab0ac45eb5b861745a5f8af",
       "fingerprint_mode": "utf8-lf",
@@ -760,6 +781,13 @@
         "tr/11-arastirma-laboratuvari.md"
       ]
     },
+    "scripts/book_lifecycle_walkthrough.py": {
+      "sha256": "cce0f0a25d567187efff3c1b4bb452ac4cc5709371fd633cc74b51f9c4a92a2d",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
     "scripts/book_neural_walkthrough.py": {
       "sha256": "e80d093c53321af360fa553b45d8c7666fd0eb0a8e8ed69702908f9bbc09bb58",
       "fingerprint_mode": "utf8-lf",
@@ -768,6 +796,14 @@
         "tr/04-attention.md",
         "tr/05-transformer.md",
         "tr/06-egitim.md"
+      ]
+    },
+    "scripts/book_runtime_walkthrough.py": {
+      "sha256": "e863cadba038f33251659b099229addfa32b72fa71e708b5fc6504e9788bcd42",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/08-uretim.md",
+        "tr/09-bellek-bilis-araclar.md"
       ]
     },
     "scripts/book_tokenizer_walkthrough.py": {
@@ -863,7 +899,7 @@
       ]
     },
     "tests/evolution/test_agent_contracts.py": {
-      "sha256": "73604a78d286e8696c0011c6666049d78c0d0666d575f33434fbe6b6bb254e5e",
+      "sha256": "b610607c49dc7ab1e7b232228d1b0d9464a1338657a812b89ed392172b4b9118",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md",
@@ -1064,7 +1100,8 @@
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/02-metin-tokenizer.md",
-        "tr/06-egitim.md"
+        "tr/06-egitim.md",
+        "tr/07-model-yasam-dongusu.md"
       ]
     },
     "training_system/data_split.py": {

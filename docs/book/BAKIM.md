@@ -59,3 +59,7 @@ Keep the Turkish book, its English reading guide, existing bilingual module docu
 ## Sinirsel hesap örnekleri
 
 3–6. bölümleri etkileyen bir değişiklikte `python scripts/book_neural_walkthrough.py` komutunu çalıştırın. Yeni bir ölçümü kayıtlı sonucun yerine koymadan önce matematiksel iddiayı, gerçek çağrı yolunu ve toleransı inceleyin. Kaynakçadaki yöntem kökeni ile uygulama iddiası ayrı güncellenmelidir. [Akademik okuma rehberi](AKADEMIK_OKUMA.md) bu kapsamı açıklar.
+
+## Yaşam döngüsü ve üretim örnekleri
+
+7–9. bölümlerdeki ilgili değişikliklerde `python scripts/book_lifecycle_walkthrough.py` ve `python scripts/book_runtime_walkthrough.py` komutlarını çalıştırın. İlki geçici checkpoint dosyalarıyla çalışır; ikincisi sabit logitler ve elle atanmış vektörleri açık öğretim girdileri olarak kullanır. `runtime_walkthrough_before_tool_fix.json` tarihsel negatif gözlemdir; güncel beklenen sonuç diye üzerine yazılmaz. Araç parametre çıkarımı değiştiğinde gerçek handler üzerinden yürütülen testleri de denetleyin.

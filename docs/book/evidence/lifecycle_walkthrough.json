@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-21",
+  "kind": "executed_book_examples",
+  "environment": {
+    "python": "3.14.3",
+    "torch": "2.10.0+cpu",
+    "device": "cpu"
+  },
+  "seed": 20260921,
+  "cases": {
+    "roundtrip": {
+      "saved_epoch": 2,
+      "loaded_epoch": 2,
+      "logits_shape": [
+        1,
+        3,
+        16
+      ],
+      "max_logit_error": 0.0,
+      "optimizer_state_entries": 12,
+      "next_loss_uninterrupted": 2.864328384399414,
+      "next_loss_resumed": 2.864328384399414,
+      "next_step_parameter_max_error": 0.0,
+      "fresh_optimizer_next_step_parameter_max_difference": 0.004899280145764351
+    },
+    "cache": {
+      "seen_before_load": 3,
+      "seen_after_load": 0
+    },
+    "rejected_restores": {
+      "architecture": {
+        "rejected": true,
+        "parameters_unchanged": true,
+        "cause": "Checkpoint/model architecture mismatch: parallel_residual: checkpoint=False, model=True"
+      },
+      "tokenizer": {
+        "rejected": true,
+        "parameters_unchanged": true,
+        "cause": "Checkpoint/tokenizer identity mismatch; vocabulary size alone is insufficient"
+      }
+    },
+    "checksums": {
+      "manager_save_created_sidecar": false,
+      "save_checkpoint_sidecar_matches_final_bytes": true,
+      "embedded_sha256_matches_final_bytes": false,
+      "altered_scratch_file_rejected_with": "CheckpointCorruptError"
+    },
+    "dtype": {
+      "source": "float64",
+      "destination": "float32",
+      "strict_shape_check_passed": true,
+      "loaded_values": [
+        [
+          1.25,
+          2.5
+        ]
+      ]
+    }
+  },
+  "limits": [
+    "Only synthetic tiny models and automatically removed temporary checkpoint files",
+    "Same-process CPU, no dropout, fixed batches; not full V2 epoch resume or cross-hardware reproducibility",
+    "No production model, tokenizer asset, or historical research record modified"
+  ]
+}
