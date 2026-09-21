@@ -2,7 +2,7 @@
 
 [English](README.md) · [Türkçe](README-TR.md)
 
-[Araştırma arşivi DOI: 10.5281/zenodo.22874751](https://doi.org/10.5281/zenodo.22874751) · [Araştırma yayınları](docs/publications/README.md)
+[Araştırma arşivi DOI: 10.5281/zenodo.22875504](https://doi.org/10.5281/zenodo.22875504) · [Araştırma yayınları](docs/publications/README.md)
 
 **Türkçeye özel geliştirilmiş tokenizer altyapısı, eğitilebilir dil modeli çekirdeği ve bilişsel sistemleri birleştiren yapay zekâ motoru.**
 

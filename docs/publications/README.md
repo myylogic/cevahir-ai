@@ -2,8 +2,8 @@
 
 **Muhammed Yasin Yılmaz** · Araştırma raporları ve ön baskılar · 21 Eylül 2026
 
-**Yayımlanmış sürüm DOI'si: [10.5281/zenodo.22874751](https://doi.org/10.5281/zenodo.22874751)**
-· [Zenodo arşivi](https://zenodo.org/records/22874751)
+**Yayımlanmış sürüm DOI'si: [10.5281/zenodo.22875504](https://doi.org/10.5281/zenodo.22875504)**
+· [Zenodo arşivi](https://zenodo.org/records/22875504)
 · [Bütün sürümlerin DOI'si](https://doi.org/10.5281/zenodo.22864660)
 
 Bu dizi, Cevahir'in çalıştığı süre boyunca deneyimden öğrenme araştırmasının
@@ -51,21 +51,21 @@ Tam öğrenme yaşam döngüsü için [teknik kitap](../book/README.md),
 
 ## Atıf ve sürüm arşivi
 
-Sürüm: **2026.09.21.2**. Git etiketi: `research-2026.09.21-v2`. DOI ve arşiv eşleşmesi doğrulandı.
-[GitHub sürümü](https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.09.21-v2),
+Sürüm: **2026.09.21.3**. Git etiketi: `research-2026.09.21-v3`. DOI ve arşiv eşleşmesi doğrulandı.
+[GitHub sürümü](https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.09.21-v3),
 metinleri, kaynak kodu, deney kayıtlarını ve kitabı birlikte arşivler.
 [DOI yayın kaydı](release.json), dış hizmetten doğrulanmış kimliği ve yayın
 durumunu taşır. Zenodo kaydı yazılım/araştırma arşivi türündedir; dizideki her
 metne ayrı DOI atanmış olduğu ileri sürülmez.
 
 Atıf biçimi: **Yılmaz, M. Y. (2026). Çalışma başlığı (CEV-2026-XX). Cevahir AI:
-Living-Learning Research Reports and Technical Book, sürüm 2026.09.21.2.**
-[https://doi.org/10.5281/zenodo.22874751](https://doi.org/10.5281/zenodo.22874751).
+Living-Learning Research Reports and Technical Book, sürüm 2026.09.21.3.**
+[https://doi.org/10.5281/zenodo.22875504](https://doi.org/10.5281/zenodo.22875504).
 Makinece kullanılabilir koleksiyon künyesi [CITATION.cff](../../CITATION.cff)
 dosyasındadır. DOI, içeriğin belirli arşiv sürümünü tanımlar; bilimsel doğruluk,
 özgünlük, kişisel kimlik belgesi veya kriptografik imza onayı değildir.
 
-[İkinci arşivin denetiminde](evidence/zenodo_archive_verification_v2.json)
+[İkinci sürümün DOI'si](https://doi.org/10.5281/zenodo.22874751) ve [arşiv denetimi](evidence/zenodo_archive_verification_v2.json) korunmuştur. Bu denetimde
 Zenodo ZIP'indeki **841 dosyanın** etiketlenmiş Git sürümüyle bayt bayt aynı
 olduğu doğrulandı. [DOI yönlendirmesi](evidence/doi_resolution_v2.json)
 yayımlanmış kayda ulaşıyor. Etiket içindeki yayın durumu hazırlık kaydıdır;
@@ -102,3 +102,5 @@ evidence record; it is not external peer review. The accompanying
 [English book guide](../book/README-en.md) maps the implementation-grounded book.
 
 Üçüncü arşiv genişletmesinin [ayrı doğrulama kaydı](../book/evidence/runtime_expansion_verification.json), 7–9. bölümler ile calculator düzeltmesinin kapsamını taşır. Önceki sürümlerin DOI ve doğrulama dosyaları korunur.
+
+Üçüncü sürüm `research-2026.09.21-v3`, `3c8a52c4d4fffff2ebd533dd55bccdbce4e85434` kaynak sürümüyle arşivlendi. [Arşiv karşılaştırması](evidence/zenodo_archive_verification_v3.json) 854 dosyanın yolları ve içeriklerinin etiketle birebir eşleştiğini doğrular; [DOI bağlantı kontrolü](evidence/doi_resolution_v3.json) yayımlanmış kayda ulaşır. Önceki sürümün künyesi [burada](releases/research-2026.09.21-v2.json) korunur.
