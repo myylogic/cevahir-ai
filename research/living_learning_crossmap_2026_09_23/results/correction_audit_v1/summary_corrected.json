@@ -1,0 +1,451 @@
+{
+  "independent_seeds": 24,
+  "queries_per_method": 24,
+  "methods": [
+    {
+      "method": "separate",
+      "n": 576,
+      "correct": 0,
+      "abstained": 576,
+      "confident_errors": 0,
+      "life_work_mean": 178,
+      "life_work_min": 178,
+      "life_work_max": 178,
+      "setup_work_mean": 340,
+      "write_bytes_mean": 561,
+      "peak_candidates_mean": 0,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_work_mean": 1,
+          "brier_mean": null
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_work_mean": 1,
+          "brier_mean": null
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_work_mean": 1,
+          "brier_mean": null
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_work_mean": 1,
+          "brier_mean": null
+        }
+      ]
+    },
+    {
+      "method": "persistent",
+      "n": 576,
+      "correct": 374,
+      "abstained": 202,
+      "confident_errors": 0,
+      "life_work_mean": 6396,
+      "life_work_min": 6396,
+      "life_work_max": 6396,
+      "setup_work_mean": 340,
+      "write_bytes_mean": 1027,
+      "peak_candidates_mean": 24,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 48,
+          "abstained": 96,
+          "confident_errors": 0,
+          "candidate_mean": 24,
+          "service_work_mean": 79,
+          "brier_mean": null
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 72,
+          "abstained": 72,
+          "confident_errors": 0,
+          "candidate_mean": 6,
+          "service_work_mean": 40,
+          "brier_mean": null
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 110,
+          "abstained": 34,
+          "confident_errors": 0,
+          "candidate_mean": 2,
+          "service_work_mean": 13,
+          "brier_mean": null
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_work_mean": 10,
+          "brier_mean": null
+        }
+      ]
+    },
+    {
+      "method": "recompute",
+      "n": 576,
+      "correct": 374,
+      "abstained": 202,
+      "confident_errors": 0,
+      "life_work_mean": 130074,
+      "life_work_min": 130074,
+      "life_work_max": 130074,
+      "setup_work_mean": 192,
+      "write_bytes_mean": 5542,
+      "peak_candidates_mean": 24,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 48,
+          "abstained": 96,
+          "confident_errors": 0,
+          "candidate_mean": 24,
+          "service_work_mean": 5531,
+          "brier_mean": null
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 72,
+          "abstained": 72,
+          "confident_errors": 0,
+          "candidate_mean": 6,
+          "service_work_mean": 5408,
+          "brier_mean": null
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 110,
+          "abstained": 34,
+          "confident_errors": 0,
+          "candidate_mean": 2,
+          "service_work_mean": 5363,
+          "brier_mean": null
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_work_mean": 5356,
+          "brier_mean": null
+        }
+      ]
+    },
+    {
+      "method": "completion",
+      "n": 576,
+      "correct": 374,
+      "abstained": 202,
+      "confident_errors": 0,
+      "life_work_mean": 478,
+      "life_work_min": 478,
+      "life_work_max": 478,
+      "setup_work_mean": 340,
+      "write_bytes_mean": 561,
+      "peak_candidates_mean": 0,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 48,
+          "abstained": 96,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_work_mean": 16,
+          "brier_mean": null
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 72,
+          "abstained": 72,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_work_mean": 14,
+          "brier_mean": null
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 110,
+          "abstained": 34,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_work_mean": 13,
+          "brier_mean": null
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_work_mean": 11,
+          "brier_mean": null
+        }
+      ]
+    },
+    {
+      "method": "point",
+      "n": 576,
+      "correct": 450,
+      "abstained": 0,
+      "confident_errors": 126,
+      "life_work_mean": 5793,
+      "life_work_min": 5793,
+      "life_work_max": 5793,
+      "setup_work_mean": 340,
+      "write_bytes_mean": 1027,
+      "peak_candidates_mean": 24,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 77,
+          "abstained": 0,
+          "confident_errors": 67,
+          "candidate_mean": 24,
+          "service_work_mean": 10,
+          "brier_mean": null
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 105,
+          "abstained": 0,
+          "confident_errors": 39,
+          "candidate_mean": 6,
+          "service_work_mean": 12.5,
+          "brier_mean": null
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 124,
+          "abstained": 0,
+          "confident_errors": 20,
+          "candidate_mean": 2,
+          "service_work_mean": 9,
+          "brier_mean": null
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_work_mean": 10,
+          "brier_mean": null
+        }
+      ]
+    },
+    {
+      "method": "disabled",
+      "n": 576,
+      "correct": 144,
+      "abstained": 432,
+      "confident_errors": 0,
+      "life_work_mean": 5624,
+      "life_work_min": 5624,
+      "life_work_max": 5624,
+      "setup_work_mean": 340,
+      "write_bytes_mean": 1031,
+      "peak_candidates_mean": 24,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 24,
+          "service_work_mean": 1,
+          "brier_mean": null
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 6,
+          "service_work_mean": 1,
+          "brier_mean": null
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 2,
+          "service_work_mean": 1,
+          "brier_mean": null
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_work_mean": 10.333333333333334,
+          "brier_mean": null
+        }
+      ]
+    },
+    {
+      "method": "oracle",
+      "n": 576,
+      "correct": 576,
+      "abstained": 0,
+      "confident_errors": 0,
+      "life_work_mean": 409,
+      "life_work_min": 409,
+      "life_work_max": 409,
+      "setup_work_mean": 346,
+      "write_bytes_mean": 576,
+      "peak_candidates_mean": 0,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_work_mean": 10,
+          "brier_mean": null
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_work_mean": 12.5,
+          "brier_mean": null
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_work_mean": 9,
+          "brier_mean": null
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_work_mean": 10,
+          "brier_mean": null
+        }
+      ]
+    }
+  ],
+  "paired": [
+    {
+      "left": "persistent",
+      "right": "separate",
+      "life_work_difference_mean": 6218,
+      "left_cheaper_lives": 0,
+      "equal_cost_lives": 0
+    },
+    {
+      "left": "persistent",
+      "right": "recompute",
+      "life_work_difference_mean": -123678,
+      "left_cheaper_lives": 24,
+      "equal_cost_lives": 0
+    },
+    {
+      "left": "persistent",
+      "right": "completion",
+      "life_work_difference_mean": 5918,
+      "left_cheaper_lives": 0,
+      "equal_cost_lives": 0
+    },
+    {
+      "left": "persistent",
+      "right": "point",
+      "life_work_difference_mean": 603,
+      "left_cheaper_lives": 0,
+      "equal_cost_lives": 0
+    },
+    {
+      "left": "persistent",
+      "right": "disabled",
+      "life_work_difference_mean": 772,
+      "left_cheaper_lives": 0,
+      "equal_cost_lives": 0
+    },
+    {
+      "left": "persistent",
+      "right": "oracle",
+      "life_work_difference_mean": 5987,
+      "left_cheaper_lives": 0,
+      "equal_cost_lives": 0
+    }
+  ],
+  "candidate_counts_by_phase": {
+    "0": [
+      24
+    ],
+    "1": [
+      6
+    ],
+    "2": [
+      2
+    ],
+    "3": [
+      1
+    ]
+  },
+  "unit": "Scalar operation categories are reported separately; life_work_mean sums declared scalar counters and excludes JSON bytes.",
+  "scope": "Corrected post-result audit of finite six-symbol worlds; bridge identity is supplied by observed pairs."
+}

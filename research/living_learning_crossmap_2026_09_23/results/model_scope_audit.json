@@ -1,0 +1,319 @@
+{
+  "status": "post_result_scope_diagnostic",
+  "generator_family_rows": [
+    {
+      "seed": 0,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 1,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 2,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 3,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 4,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 5,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 6,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 7,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 8,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 9,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 10,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 11,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 12,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 13,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 14,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 15,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 16,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 17,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 18,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 19,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 20,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 21,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 22,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "seed": 23,
+      "counts_by_bridge_prefix_0_to_5": [
+        6,
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "count_histograms_by_prefix": {
+    "0": {
+      "6": 24
+    },
+    "1": {
+      "2": 24
+    },
+    "2": {
+      "1": 20,
+      "2": 4
+    },
+    "3": {
+      "1": 24
+    },
+    "4": {
+      "1": 24
+    },
+    "5": {
+      "1": 24
+    }
+  },
+  "extra_information": "Knows the planted cross-domain generation law, unlike the main learner family. Not a fair same-prior benchmark.",
+  "joint_query_counterexample": {
+    "legal_maps": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        0
+      ]
+    ],
+    "marginal_probabilities": [
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "true_collision_probability": 0,
+    "independent_marginal_collision_probability": [
+      1,
+      2
+    ]
+  },
+  "scope": "Compact known-pair state can recompute coupled queries; the current single-reference marginal routine cannot multiply marginals independently."
+}

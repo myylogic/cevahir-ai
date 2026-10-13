@@ -1,0 +1,51 @@
+{
+  "time": "2026-09-24T10:44:12.076762+00:00",
+  "checks": {
+    "statistics": {
+      "passed": true,
+      "checks": 56,
+      "details": "Exhaustive binary sign outcomes n<=8; hand Holm values; independent step-down rejection."
+    },
+    "memory": {
+      "checks": 26520,
+      "passed": true,
+      "details": [
+        "count: scalar checks and serialized continuation",
+        "fifo: scalar checks and serialized continuation",
+        "reservoir: scalar checks and serialized continuation",
+        "window: scalar checks and serialized continuation",
+        "last: scalar checks and serialized continuation",
+        "decay: scalar checks and serialized continuation",
+        "revision_delta: scalar checks and serialized continuation",
+        "revision_append: scalar checks and serialized continuation",
+        "revision_ignore: scalar checks and serialized continuation",
+        "revision_rebuild: scalar checks and serialized continuation",
+        "Independent label retraction reference and correction-disabled ablation",
+        "No campaign seed or main-run performance used in selfcheck"
+      ]
+    },
+    "representation": {
+      "checks": 266,
+      "passed": true,
+      "details": "Independent normal equations; fixed-basis reconstruction; JSON continuation; installation ablation; scalar feature map."
+    },
+    "update": {
+      "checks": 83,
+      "passed": true,
+      "details": {
+        "failed_check_indices": [],
+        "fixed_closed_form": 27,
+        "independent_meta_step": 8,
+        "mechanism_ablation": "zero_learning_rate_equals_fixed_mean_gain",
+        "continuation": "all_three_learners_json_state_and_cost_exact",
+        "truth_firewall": "run_model_accepts_observations_only",
+        "main_seed_performance_runs": 0
+      }
+    },
+    "environment": {
+      "checks": 1886,
+      "passed": true,
+      "details": "1220 restored-state steps, 512 epsilon-off comparisons, 150 window references, 4 regret identities."
+    }
+  }
+}

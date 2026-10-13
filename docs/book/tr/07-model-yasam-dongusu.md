@@ -135,6 +135,18 @@ PyTorch'un yeniden üretilebilirlik belgesi aynı seed'e rağmen sürümler, pla
 
 Bu ayrım araştırmaya da uzanır: [sonlu durum deneyindeki](../../research/living_learning_state_2026_09_20/REPORT_TR.md) “çalışan grafiği saklama” ile “sonraki deneyimde grafiği tekrar öğrenebilmek için kanıtı saklama” aynı kapsam değildir. Transformer checkpoint'i ile bu küçük deneyin öğrenme durumu farklı mekanizmalardır; ortak soru, gelecekte hangi işlemleri sürdürebilmek için neyin korunması gerektiğidir.
 
+## Quantization: sayı biçimi değişince hangi model kalır?
+
+Quantization, gerçek değerlerin daha az bitli bir temsil üzerinden yaklaşık hesaplanmasıdır. Basit affine gösterimde `q=clip(round(x/s)+z₀)` ve geri yaklaşım `x̂=s(q−z₀)` olsun. `s` ölçek, `z₀` sıfır noktasıdır. Kırpma yoksa yuvarlama hatası en fazla `s/2`dir; aralık dışına taşan değerlerde bu sınır geçmez. Bu yerel hata sınırından bütün ağın cevabının değişmeyeceği sonucu çıkmaz. Örneğin birbirine yakın iki son logitin sırası değişebilir.
+
+FP16/BF16'ya dönüştürmek ve INT8 quantization aynı işlem değildir. İlki kayan nokta biçimini değiştirir; ikincisi ölçekli tamsayı gösterimi ve uygun kernel gerektirir. Eğitimde mixed precision, modelin dağıtım için dönüştürülmesi ve ağırlıkların diskte sıkıştırılması da ayrı kapsam taşır. Dört kat az bit, bütün uygulamanın dört kat az bellek veya dört kat hız kullanacağı anlamına gelmez; dönüştürülmeyen katmanlar, KV cache ve ek metadata vardır.
+
+Cevahir'de [`CevahirNeuralNetwork.apply_quantization`](../../../src/neural_network.py#L976), kurucu sırasında otomatik çalışmaz. Açık çağrı gerekirse eval moduna geçer, KV cache'i temizler ve yöneticiyi çağırır. [`QuantizationManager._apply_int8_dynamic`](../../../src/neural_network_module/ortak_katman_module/quantization_manager.py#L293), `nn.Linear` modülleri için PyTorch `quantize_dynamic(..., dtype=torch.qint8, inplace=True)` kullanır. Gerçek çağrı yerinde dönüşümdür; üst metottaki eski “yeni nesne” açıklaması uygulamanın yerine okunmamalıdır. Dinamik yolun arayüz kaynağı [PyTorch 2.10 belgesidir](https://docs.pytorch.org/docs/2.10/generated/torch.ao.quantization.quantize_dynamic.html).
+
+Statik `int8` dalı, kalibrasyon verisi veya gerekli QuantStub bulunmadığında dinamik yola döner. Bir ayarda `int8` yazması statik kalibrasyonun gerçekten uygulandığını göstermez. Bu bölüm CPU quantization kalite/hız benchmark'ı raporlamaz; katman dönüşümünün kurulmuş olması bütün özel çekirdek yollarının uyumunu kanıtlamaz. Dönüşümden önceki eğitim checkpoint'i korunmalıdır; sonradan FP32'ye çevirmek kaybolan değerleri geri getirmez.
+
+Endüstri literatüründe [Dettmers ve arkadaşlarının LLM.int8() çalışması](https://arxiv.org/abs/2208.07339), büyük Transformer'lardaki aykırı özellikler için yüksek hassasiyetli kısmı ayıran özel bir matris çarpımı düzeni sunar. Cevahir'in yukarıdaki dinamik PyTorch çağrısı bu yöntemin uygulanmış eşdeğeri değildir. Aynı “8 bit” etiketi farklı sayısal ve donanımsal yöntemleri örtebilir.
+
 ## Gerçek sınıflarla geçici CPU deneyi
 
 [`book_lifecycle_walkthrough.py`](../../../scripts/book_lifecycle_walkthrough.py) yalnız geçici bir klasörde küçük Cevahir modelleri kaydeder; çalışma sonunda bu örnek dosyaları kaldırır. Sonuçları [`lifecycle_walkthrough.json`](../evidence/lifecycle_walkthrough.json) içerir. Mevcut eğitimli model, tokenizer varlıkları veya araştırma kayıtları kullanılmaz/değiştirilmez.
@@ -197,6 +209,8 @@ Bu bölümdeki genel API açıklamaları PyTorch'un resmî belgelerinden; Cevahi
 - PyTorch contributors. *Saving and Loading Models*. [Resmî eğitim rehberi](https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html); [incelenen kaynak](https://github.com/pytorch/tutorials/blob/main/beginner_source/saving_loading_models.py).
 - PyTorch contributors. *Module.load_state_dict*. [Resmî API](https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.load_state_dict). `strict` ve `assign` ayrı sözleşmelerdir.
 - PyTorch contributors. *Optimizer.load_state_dict*. [Resmî API](https://docs.pytorch.org/docs/stable/generated/torch.optim.Optimizer.load_state_dict.html). Optimizer durumunun parametre grupları ve scheduler kurulumuyla ilişkisi için; kurulu API açıklaması da incelenmiştir.
+- PyTorch contributors. *quantize_dynamic*. [Sürüm 2.10 API belgesi](https://docs.pytorch.org/docs/2.10/generated/torch.ao.quantization.quantize_dynamic.html), erişim 21 Eylül 2026. Dinamik katman dönüşümünün arayüz sözleşmesi.
+- Dettmers, T., Lewis, M., Belkada, Y. ve Zettlemoyer, L. (2022). *LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale*. NeurIPS. [arXiv:2208.07339](https://arxiv.org/abs/2208.07339). Cevahir'de uygulanmış sayılmayan yöntem karşılaştırması.
 
 Buradaki **eğitim checkpoint'i** kesinti sonrası devam için durum kaydıdır. [Transformer bölümündeki aktivasyon checkpointing](05-transformer.md) backward sırasında ara değerleri yeniden hesaplayan bellek yöntemidir. İkisinin aynı sözcüğü taşıması, aynı amaç ve kanıt ölçütüne sahip olduğu anlamına gelmez.
 

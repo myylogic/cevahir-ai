@@ -1,0 +1,1555 @@
+{
+  "counting_method": "12 Turkish chapter files; whitespace words include code, equations, tables and links. H2/H3 include exercise and bibliography headings. Solved exercises are numbered questions in the designated exercise section, counted once.",
+  "chapters_count": 12,
+  "totals": {
+    "whitespace_words_including_code_tables_math": 35318,
+    "topics_h2": 142,
+    "subtopics_h3": 81,
+    "solved_exercises": 63
+  },
+  "glossary_term_rows": 76,
+  "chapters": [
+    {
+      "file": "tr/01-motor-ve-ogrenme.md",
+      "title": "1. Motor, dil modeli ve öğrenme",
+      "whitespace_words_including_code_tables_math": 1993,
+      "topics_h2": 12,
+      "subtopics_h3": 5,
+      "solved_exercises": 5,
+      "sha256_utf8_lf": "07d95f6337c88c54a8c781362d3eec86a2f219991271e7d9255acad2cde73da8",
+      "headings": [
+        {
+          "level": 1,
+          "title": "1. Motor, dil modeli ve öğrenme",
+          "line": 1,
+          "anchor": "1-motor-dil-modeli-ve-öğrenme"
+        },
+        {
+          "level": 2,
+          "title": "Dil modeli hangi problemi çözer?",
+          "line": 9,
+          "anchor": "dil-modeli-hangi-problemi-çözer"
+        },
+        {
+          "level": 2,
+          "title": "Sayılara dönüşün ilk resmi",
+          "line": 21,
+          "anchor": "sayılara-dönüşün-ilk-resmi"
+        },
+        {
+          "level": 2,
+          "title": "Cevahir'de tek ileri geçişi izlemek",
+          "line": 48,
+          "anchor": "cevahirde-tek-ileri-geçişi-izlemek"
+        },
+        {
+          "level": 2,
+          "title": "Eğitilmemiş bir motoru çalıştırmak",
+          "line": 66,
+          "anchor": "eğitilmemiş-bir-motoru-çalıştırmak"
+        },
+        {
+          "level": 2,
+          "title": "Hesap yapmak ile öğrenmek",
+          "line": 90,
+          "anchor": "hesap-yapmak-ile-öğrenmek"
+        },
+        {
+          "level": 2,
+          "title": "Matematiği okumak için gereken küçük araç kutusu",
+          "line": 98,
+          "anchor": "matematiği-okumak-için-gereken-küçük-araç-kutusu"
+        },
+        {
+          "level": 2,
+          "title": "Olasılık hesabından eğitim hedefine",
+          "line": 108,
+          "anchor": "olasılık-hesabından-eğitim-hedefine"
+        },
+        {
+          "level": 2,
+          "title": "Genelleme nasıl sınanır?",
+          "line": 122,
+          "anchor": "genelleme-nasıl-sınanır"
+        },
+        {
+          "level": 2,
+          "title": "Kod okurken üç farklı sözleşme",
+          "line": 128,
+          "anchor": "kod-okurken-üç-farklı-sözleşme"
+        },
+        {
+          "level": 2,
+          "title": "Çözümlü alıştırmalar",
+          "line": 136,
+          "anchor": "çözümlü-alıştırmalar"
+        },
+        {
+          "level": 3,
+          "title": "1. Şekli ve belleği hesaplayın",
+          "line": 138,
+          "anchor": "1-şekli-ve-belleği-hesaplayın"
+        },
+        {
+          "level": 3,
+          "title": "2. Logit kaydırma",
+          "line": 142,
+          "anchor": "2-logit-kaydırma"
+        },
+        {
+          "level": 3,
+          "title": "3. Zincir kuralı bağımsızlık mı ister?",
+          "line": 146,
+          "anchor": "3-zincir-kuralı-bağımsızlık-mı-ister"
+        },
+        {
+          "level": 3,
+          "title": "4. Değişen durum öğrenme midir?",
+          "line": 150,
+          "anchor": "4-değişen-durum-öğrenme-midir"
+        },
+        {
+          "level": 3,
+          "title": "5. Sızıntıyı belirleyin",
+          "line": 154,
+          "anchor": "5-sızıntıyı-belirleyin"
+        },
+        {
+          "level": 2,
+          "title": "Kaynakça",
+          "line": 158,
+          "anchor": "kaynakça"
+        },
+        {
+          "level": 2,
+          "title": "Kendi kontrol sorunuz",
+          "line": 163,
+          "anchor": "kendi-kontrol-sorunuz"
+        }
+      ]
+    },
+    {
+      "file": "tr/02-metin-tokenizer.md",
+      "title": "2. Metinden sayılara: token, sözlük ve tokenizer",
+      "whitespace_words_including_code_tables_math": 2967,
+      "topics_h2": 12,
+      "subtopics_h3": 3,
+      "solved_exercises": 5,
+      "sha256_utf8_lf": "2d7b96bccd6b70530cf0c82b2bc1d991c3f4fa364f7fc974a6165712b6434533",
+      "headings": [
+        {
+          "level": 1,
+          "title": "2. Metinden sayılara: token, sözlük ve tokenizer",
+          "line": 1,
+          "anchor": "2-metinden-sayılara-token-sözlük-ve-tokenizer"
+        },
+        {
+          "level": 2,
+          "title": "Kelime, token ve kimlik aynı şey değildir",
+          "line": 7,
+          "anchor": "kelime-token-ve-kimlik-aynı-şey-değildir"
+        },
+        {
+          "level": 2,
+          "title": "Bir BPE sözlüğü neyi öğrenir?",
+          "line": 15,
+          "anchor": "bir-bpe-sözlüğü-neyi-öğrenir"
+        },
+        {
+          "level": 2,
+          "title": "Alternatifler ve temsil maliyeti",
+          "line": 23,
+          "anchor": "alternatifler-ve-temsil-maliyeti"
+        },
+        {
+          "level": 2,
+          "title": "Cevahir'de encode çağrısının içi",
+          "line": 33,
+          "anchor": "cevahirde-encode-çağrısının-içi"
+        },
+        {
+          "level": 2,
+          "title": "Konuya göre hangi dosyayı, hangi metodu okumalı?",
+          "line": 67,
+          "anchor": "konuya-göre-hangi-dosyayı-hangi-metodu-okumalı"
+        },
+        {
+          "level": 2,
+          "title": "Mevcut sözlüğümüzle gerçekten çalışan bir cümle",
+          "line": 89,
+          "anchor": "mevcut-sözlüğümüzle-gerçekten-çalışan-bir-cümle"
+        },
+        {
+          "level": 2,
+          "title": "Tek parça neden 28 kimlik olabilir?",
+          "line": 133,
+          "anchor": "tek-parça-neden-28-kimlik-olabilir"
+        },
+        {
+          "level": 2,
+          "title": "Hangi seçenek hangi davranışı değiştirir?",
+          "line": 162,
+          "anchor": "hangi-seçenek-hangi-davranışı-değiştirir"
+        },
+        {
+          "level": 3,
+          "title": "Aynı cümle, iki farklı mod",
+          "line": 176,
+          "anchor": "aynı-cümle-iki-farklı-mod"
+        },
+        {
+          "level": 3,
+          "title": "UNK sıfır olduğu halde bilgi kaybolabilir",
+          "line": 196,
+          "anchor": "unk-sıfır-olduğu-halde-bilgi-kaybolabilir"
+        },
+        {
+          "level": 3,
+          "title": "Batch işlemi kayıt sırasını nasıl etkiler?",
+          "line": 214,
+          "anchor": "batch-işlemi-kayıt-sırasını-nasıl-etkiler"
+        },
+        {
+          "level": 2,
+          "title": "Bu çıktıyı kim kullanıyor?",
+          "line": 225,
+          "anchor": "bu-çıktıyı-kim-kullanıyor"
+        },
+        {
+          "level": 2,
+          "title": "Okumayı gerçek bir kontrole bağlamak",
+          "line": 233,
+          "anchor": "okumayı-gerçek-bir-kontrole-bağlamak"
+        },
+        {
+          "level": 2,
+          "title": "Beş çözümlü alıştırma",
+          "line": 253,
+          "anchor": "beş-çözümlü-alıştırma"
+        },
+        {
+          "level": 2,
+          "title": "Kaynakça",
+          "line": 261,
+          "anchor": "kaynakça"
+        }
+      ]
+    },
+    {
+      "file": "tr/03-sinir-aglari.md",
+      "title": "3. Sayılardan öğrenilebilir bir hesaba: sinir ağı",
+      "whitespace_words_including_code_tables_math": 2911,
+      "topics_h2": 11,
+      "subtopics_h3": 11,
+      "solved_exercises": 6,
+      "sha256_utf8_lf": "d4c40e4b983100991239695ccc84ba5b5d8fe5b875888cd32024ae5ef997ac4a",
+      "headings": [
+        {
+          "level": 1,
+          "title": "3. Sayılardan öğrenilebilir bir hesaba: sinir ağı",
+          "line": 1,
+          "anchor": "3-sayılardan-öğrenilebilir-bir-hesaba-sinir-ağı"
+        },
+        {
+          "level": 2,
+          "title": "Sinir ağı nedir, hangi anlamda öğrenir?",
+          "line": 7,
+          "anchor": "sinir-ağı-nedir-hangi-anlamda-öğrenir"
+        },
+        {
+          "level": 3,
+          "title": "Nöron benzetmesinden hesap grafiğine",
+          "line": 13,
+          "anchor": "nöron-benzetmesinden-hesap-grafiğine"
+        },
+        {
+          "level": 3,
+          "title": "Neden yalnız doğrusal katmanları çoğaltmak yetmez?",
+          "line": 19,
+          "anchor": "neden-yalnız-doğrusal-katmanları-çoğaltmak-yetmez"
+        },
+        {
+          "level": 2,
+          "title": "Parametre, aktivasyon ve katman",
+          "line": 25,
+          "anchor": "parametre-aktivasyon-ve-katman"
+        },
+        {
+          "level": 3,
+          "title": "Tensör şekli ve parametre sayısı",
+          "line": 33,
+          "anchor": "tensör-şekli-ve-parametre-sayısı"
+        },
+        {
+          "level": 3,
+          "title": "Aktivasyonlar ve başlangıç",
+          "line": 39,
+          "anchor": "aktivasyonlar-ve-başlangıç"
+        },
+        {
+          "level": 2,
+          "title": "Embedding: kimlikten vektöre",
+          "line": 47,
+          "anchor": "embedding-kimlikten-vektöre"
+        },
+        {
+          "level": 3,
+          "title": "One-hot ile aynı lookup hesabı",
+          "line": 57,
+          "anchor": "one-hot-ile-aynı-lookup-hesabı"
+        },
+        {
+          "level": 3,
+          "title": "Dağıtık temsil, benzerlik ve bağlam",
+          "line": 63,
+          "anchor": "dağıtık-temsil-benzerlik-ve-bağlam"
+        },
+        {
+          "level": 3,
+          "title": "Temsil öğrenmenin literatürdeki yeri",
+          "line": 71,
+          "anchor": "temsil-öğrenmenin-literatürdeki-yeri"
+        },
+        {
+          "level": 2,
+          "title": "Bir ileri geçişi dosyalar arasında izlemek",
+          "line": 77,
+          "anchor": "bir-ileri-geçişi-dosyalar-arasında-izlemek"
+        },
+        {
+          "level": 2,
+          "title": "Logit neden henüz olasılık değildir?",
+          "line": 91,
+          "anchor": "logit-neden-henüz-olasılık-değildir"
+        },
+        {
+          "level": 3,
+          "title": "Softmax türevi neden öğrenme sinyali verir?",
+          "line": 97,
+          "anchor": "softmax-türevi-neden-öğrenme-sinyali-verir"
+        },
+        {
+          "level": 2,
+          "title": "Ağırlık paylaşımı neyi değiştirir?",
+          "line": 105,
+          "anchor": "ağırlık-paylaşımı-neyi-değiştirir"
+        },
+        {
+          "level": 3,
+          "title": "Giriş satırı ve çıkış sınıfı farklı gradyan yollarıdır",
+          "line": 117,
+          "anchor": "giriş-satırı-ve-çıkış-sınıfı-farklı-gradyan-yollarıdır"
+        },
+        {
+          "level": 2,
+          "title": "Geri yayılımı bir sayı zinciriyle görmek",
+          "line": 123,
+          "anchor": "geri-yayılımı-bir-sayı-zinciriyle-görmek"
+        },
+        {
+          "level": 3,
+          "title": "Yerel türevden parametre türevine",
+          "line": 125,
+          "anchor": "yerel-türevden-parametre-türevine"
+        },
+        {
+          "level": 3,
+          "title": "Forward, backward ve step aynı olay değildir",
+          "line": 131,
+          "anchor": "forward-backward-ve-step-aynı-olay-değildir"
+        },
+        {
+          "level": 2,
+          "title": "Konudan dosyaya ve metoda okuma haritası",
+          "line": 137,
+          "anchor": "konudan-dosyaya-ve-metoda-okuma-haritası"
+        },
+        {
+          "level": 2,
+          "title": "Çözümlü alıştırmalar",
+          "line": 148,
+          "anchor": "çözümlü-alıştırmalar"
+        },
+        {
+          "level": 2,
+          "title": "Kod okuma deneyi ve kanıt sınırı",
+          "line": 157,
+          "anchor": "kod-okuma-deneyi-ve-kanıt-sınırı"
+        },
+        {
+          "level": 2,
+          "title": "Kaynakça",
+          "line": 167,
+          "anchor": "kaynakça"
+        }
+      ]
+    },
+    {
+      "file": "tr/04-attention.md",
+      "title": "4. Attention: bir konum başka konumlardan ne alır?",
+      "whitespace_words_including_code_tables_math": 3885,
+      "topics_h2": 12,
+      "subtopics_h3": 10,
+      "solved_exercises": 5,
+      "sha256_utf8_lf": "e26d6bf21d48d53d9cf83313c7962f80fa48f23d39138357572ccecacf5641bc",
+      "headings": [
+        {
+          "level": 1,
+          "title": "4. Attention: bir konum başka konumlardan ne alır?",
+          "line": 1,
+          "anchor": "4-attention-bir-konum-başka-konumlardan-ne-alır"
+        },
+        {
+          "level": 2,
+          "title": "Attention hangi problemi çözer?",
+          "line": 9,
+          "anchor": "attention-hangi-problemi-çözer"
+        },
+        {
+          "level": 3,
+          "title": "Sabit temsil ile bağlama göre bilgi taşıma",
+          "line": 11,
+          "anchor": "sabit-temsil-ile-bağlama-göre-bilgi-taşıma"
+        },
+        {
+          "level": 3,
+          "title": "Self-attention, cross-attention ve bilgi yönü",
+          "line": 17,
+          "anchor": "self-attention-cross-attention-ve-bilgi-yönü"
+        },
+        {
+          "level": 2,
+          "title": "Q, K ve V aynı girdiden neden üç kez üretilir?",
+          "line": 23,
+          "anchor": "q-k-ve-v-aynı-girdiden-neden-üç-kez-üretilir"
+        },
+        {
+          "level": 3,
+          "title": "Ölçeklemenin varsayımı ve gradyanı",
+          "line": 37,
+          "anchor": "ölçeklemenin-varsayımı-ve-gradyanı"
+        },
+        {
+          "level": 3,
+          "title": "Üç tokenı elle hesaplamak",
+          "line": 51,
+          "anchor": "üç-tokenı-elle-hesaplamak"
+        },
+        {
+          "level": 2,
+          "title": "Şekilleri görmeden head sayısını anlamak zordur",
+          "line": 81,
+          "anchor": "şekilleri-görmeden-head-sayısını-anlamak-zordur"
+        },
+        {
+          "level": 3,
+          "title": "Başlık paylaşımı neyi değiştirir?",
+          "line": 98,
+          "anchor": "başlık-paylaşımı-neyi-değiştirir"
+        },
+        {
+          "level": 2,
+          "title": "Maske, modelin hangi bilgiye erişebileceğidir",
+          "line": 108,
+          "anchor": "maske-modelin-hangi-bilgiye-erişebileceğidir"
+        },
+        {
+          "level": 3,
+          "title": "Padding, nedensellik ve pencere aynı maske değildir",
+          "line": 120,
+          "anchor": "padding-nedensellik-ve-pencere-aynı-maske-değildir"
+        },
+        {
+          "level": 2,
+          "title": "Aynı hesap, üç yürütme yolu",
+          "line": 126,
+          "anchor": "aynı-hesap-üç-yürütme-yolu"
+        },
+        {
+          "level": 3,
+          "title": "Q/K normalizasyonu ve skor sınırlandırma",
+          "line": 146,
+          "anchor": "qk-normalizasyonu-ve-skor-sınırlandırma"
+        },
+        {
+          "level": 2,
+          "title": "Hesap maliyeti, çalışma belleği ve cache nasıl ayrılır?",
+          "line": 152,
+          "anchor": "hesap-maliyeti-çalışma-belleği-ve-cache-nasıl-ayrılır"
+        },
+        {
+          "level": 3,
+          "title": "Yoğun attention için işlemleri saymak",
+          "line": 154,
+          "anchor": "yoğun-attention-için-işlemleri-saymak"
+        },
+        {
+          "level": 3,
+          "title": "FlashAttention hangi maliyeti azaltır?",
+          "line": 162,
+          "anchor": "flashattention-hangi-maliyeti-azaltır"
+        },
+        {
+          "level": 3,
+          "title": "KV cache yeniden hesaplamayı azaltır, öğrenme yapmaz",
+          "line": 168,
+          "anchor": "kv-cache-yeniden-hesaplamayı-azaltır-öğrenme-yapmaz"
+        },
+        {
+          "level": 2,
+          "title": "Endüstri örnekleri nasıl karşılaştırılmalı?",
+          "line": 186,
+          "anchor": "endüstri-örnekleri-nasıl-karşılaştırılmalı"
+        },
+        {
+          "level": 2,
+          "title": "Attention ağırlığı bir açıklama mıdır?",
+          "line": 198,
+          "anchor": "attention-ağırlığı-bir-açıklama-mıdır"
+        },
+        {
+          "level": 2,
+          "title": "Konudan dosyaya ve metoda okuma haritası",
+          "line": 204,
+          "anchor": "konudan-dosyaya-ve-metoda-okuma-haritası"
+        },
+        {
+          "level": 2,
+          "title": "Hangi iddia hangi testle sınanır?",
+          "line": 222,
+          "anchor": "hangi-iddia-hangi-testle-sınanır"
+        },
+        {
+          "level": 2,
+          "title": "Çözümlü alıştırmalar",
+          "line": 230,
+          "anchor": "çözümlü-alıştırmalar"
+        },
+        {
+          "level": 2,
+          "title": "Kaynakça",
+          "line": 244,
+          "anchor": "kaynakça"
+        }
+      ]
+    },
+    {
+      "file": "tr/05-transformer.md",
+      "title": "5. Transformer: dikkat hesabını öğrenilebilir bir bloğa dönüştürmek",
+      "whitespace_words_including_code_tables_math": 3998,
+      "topics_h2": 12,
+      "subtopics_h3": 19,
+      "solved_exercises": 7,
+      "sha256_utf8_lf": "bbbacd9bfef8c8620eb43d5559f7f6f14354ccf814f7f34add992980e2c02dff",
+      "headings": [
+        {
+          "level": 1,
+          "title": "5. Transformer: dikkat hesabını öğrenilebilir bir bloğa dönüştürmek",
+          "line": 1,
+          "anchor": "5-transformer-dikkat-hesabını-öğrenilebilir-bir-bloğa-dönüştürmek"
+        },
+        {
+          "level": 2,
+          "title": "5.1. Encoder, decoder ve Cevahir'in gerçek hesap grafiği",
+          "line": 9,
+          "anchor": "51-encoder-decoder-ve-cevahirin-gerçek-hesap-grafiği"
+        },
+        {
+          "level": 3,
+          "title": "Üç mimari düzen",
+          "line": 11,
+          "anchor": "üç-mimari-düzen"
+        },
+        {
+          "level": 3,
+          "title": "Nedensellik, eğitim ve üretim",
+          "line": 17,
+          "anchor": "nedensellik-eğitim-ve-üretim"
+        },
+        {
+          "level": 2,
+          "title": "5.2. Konudan dosyaya ve metoda okuma haritası",
+          "line": 23,
+          "anchor": "52-konudan-dosyaya-ve-metoda-okuma-haritası"
+        },
+        {
+          "level": 2,
+          "title": "5.3. Residual bağlantı: temsilin tümünü yeniden üretmek yerine katkı eklemek",
+          "line": 42,
+          "anchor": "53-residual-bağlantı-temsilin-tümünü-yeniden-üretmek-yerine-katkı-eklemek"
+        },
+        {
+          "level": 3,
+          "title": "Pre-norm, post-norm ve paralel dal",
+          "line": 44,
+          "anchor": "pre-norm-post-norm-ve-paralel-dal"
+        },
+        {
+          "level": 3,
+          "title": "Türev yolunu açıkça görmek",
+          "line": 77,
+          "anchor": "türev-yolunu-açıkça-görmek"
+        },
+        {
+          "level": 2,
+          "title": "5.4. LayerNorm ve RMSNorm: hangi eksen, hangi bilgi?",
+          "line": 85,
+          "anchor": "54-layernorm-ve-rmsnorm-hangi-eksen-hangi-bilgi"
+        },
+        {
+          "level": 3,
+          "title": "İşlem ve sayısal örnek",
+          "line": 87,
+          "anchor": "işlem-ve-sayısal-örnek"
+        },
+        {
+          "level": 3,
+          "title": "Cevahir'deki sayı türü ve ayrı normalizasyonlar",
+          "line": 105,
+          "anchor": "cevahirdeki-sayı-türü-ve-ayrı-normalizasyonlar"
+        },
+        {
+          "level": 2,
+          "title": "5.5. Konum bilgisi ve RoPE'nin matematiği",
+          "line": 111,
+          "anchor": "55-konum-bilgisi-ve-ropenin-matematiği"
+        },
+        {
+          "level": 3,
+          "title": "Toplanan konum vektörü ile Q/K dönüşümünün ayrımı",
+          "line": 113,
+          "anchor": "toplanan-konum-vektörü-ile-qk-dönüşümünün-ayrımı"
+        },
+        {
+          "level": 3,
+          "title": "Göreli fark neden ortaya çıkar?",
+          "line": 119,
+          "anchor": "göreli-fark-neden-ortaya-çıkar"
+        },
+        {
+          "level": 3,
+          "title": "Daha uzun tablo, öğrenilmiş uzun bağlam değildir",
+          "line": 135,
+          "anchor": "daha-uzun-tablo-öğrenilmiş-uzun-bağlam-değildir"
+        },
+        {
+          "level": 2,
+          "title": "5.6. FFN, GELU ve SwiGLU: token içindeki dönüşüm",
+          "line": 143,
+          "anchor": "56-ffn-gelu-ve-swiglu-token-içindeki-dönüşüm"
+        },
+        {
+          "level": 3,
+          "title": "Yoğun ileri besleme hesabı",
+          "line": 145,
+          "anchor": "yoğun-ileri-besleme-hesabı"
+        },
+        {
+          "level": 3,
+          "title": "Kapılama ve parametre hesabı",
+          "line": 155,
+          "anchor": "kapılama-ve-parametre-hesabı"
+        },
+        {
+          "level": 2,
+          "title": "5.7. MoE: parametre kapasitesi ile token başına hesabı ayırmak",
+          "line": 169,
+          "anchor": "57-moe-parametre-kapasitesi-ile-token-başına-hesabı-ayırmak"
+        },
+        {
+          "level": 3,
+          "title": "Router, seçim ve ağırlıklı çıktı",
+          "line": 171,
+          "anchor": "router-seçim-ve-ağırlıklı-çıktı"
+        },
+        {
+          "level": 3,
+          "title": "Yardımcı kaybı doğru okumak",
+          "line": 179,
+          "anchor": "yardımcı-kaybı-doğru-okumak"
+        },
+        {
+          "level": 3,
+          "title": "Bağlamsal yönlendirme, cache ve öğrenme ayrımı",
+          "line": 193,
+          "anchor": "bağlamsal-yönlendirme-cache-ve-öğrenme-ayrımı"
+        },
+        {
+          "level": 2,
+          "title": "5.8. Düzenleme ve kaynak yönetimi aynı yöntem değildir",
+          "line": 199,
+          "anchor": "58-düzenleme-ve-kaynak-yönetimi-aynı-yöntem-değildir"
+        },
+        {
+          "level": 3,
+          "title": "Dropout ve stochastic depth",
+          "line": 201,
+          "anchor": "dropout-ve-stochastic-depth"
+        },
+        {
+          "level": 3,
+          "title": "Aktivasyon checkpointing, diske checkpoint ve mixed precision",
+          "line": 209,
+          "anchor": "aktivasyon-checkpointing-diske-checkpoint-ve-mixed-precision"
+        },
+        {
+          "level": 2,
+          "title": "5.9. Tek bloktan logitlere: yürütülebilir iz",
+          "line": 217,
+          "anchor": "59-tek-bloktan-logitlere-yürütülebilir-iz"
+        },
+        {
+          "level": 2,
+          "title": "5.10. Endüstriyel uygulamalarla kaynaklı karşılaştırma",
+          "line": 254,
+          "anchor": "510-endüstriyel-uygulamalarla-kaynaklı-karşılaştırma"
+        },
+        {
+          "level": 2,
+          "title": "5.11. Kontroller, alıştırmalar ve yanıtlar",
+          "line": 267,
+          "anchor": "511-kontroller-alıştırmalar-ve-yanıtlar"
+        },
+        {
+          "level": 3,
+          "title": "Kaynaktan doğrulamaya",
+          "line": 269,
+          "anchor": "kaynaktan-doğrulamaya"
+        },
+        {
+          "level": 3,
+          "title": "Alıştırmalar",
+          "line": 273,
+          "anchor": "alıştırmalar"
+        },
+        {
+          "level": 3,
+          "title": "Yanıtlar",
+          "line": 283,
+          "anchor": "yanıtlar"
+        },
+        {
+          "level": 2,
+          "title": "5.12. Kaynakça ve atıf kapsamı",
+          "line": 293,
+          "anchor": "512-kaynakça-ve-atıf-kapsamı"
+        }
+      ]
+    },
+    {
+      "file": "tr/06-egitim.md",
+      "title": "6. Veriden parametre güncellemesine",
+      "whitespace_words_including_code_tables_math": 2683,
+      "topics_h2": 12,
+      "subtopics_h3": 7,
+      "solved_exercises": 5,
+      "sha256_utf8_lf": "5c432967f439eb14ea6a50c8f14cf89278b743a7fd00f001be429a0c98d445ae",
+      "headings": [
+        {
+          "level": 1,
+          "title": "6. Veriden parametre güncellemesine",
+          "line": 1,
+          "anchor": "6-veriden-parametre-güncellemesine"
+        },
+        {
+          "level": 2,
+          "title": "Aynı veri, iki ayrı öğrenme işi",
+          "line": 7,
+          "anchor": "aynı-veri-iki-ayrı-öğrenme-işi"
+        },
+        {
+          "level": 2,
+          "title": "Değerlendirme verisi gerçekten ayrı mı?",
+          "line": 30,
+          "anchor": "değerlendirme-verisi-gerçekten-ayrı-mı"
+        },
+        {
+          "level": 2,
+          "title": "Etkin çağrı yolu",
+          "line": 36,
+          "anchor": "etkin-çağrı-yolu"
+        },
+        {
+          "level": 2,
+          "title": "Loss, gradient ve geri yayılım",
+          "line": 66,
+          "anchor": "loss-gradient-ve-geri-yayılım"
+        },
+        {
+          "level": 2,
+          "title": "SGD, Adam ve AdamW hangi hesabı yapar?",
+          "line": 81,
+          "anchor": "sgd-adam-ve-adamw-hangi-hesabı-yapar"
+        },
+        {
+          "level": 3,
+          "title": "Bir adım ile optimizer durumunun ayrımı",
+          "line": 83,
+          "anchor": "bir-adım-ile-optimizer-durumunun-ayrımı"
+        },
+        {
+          "level": 3,
+          "title": "Weight decay ile L2 cezası neden aynı olmayabilir?",
+          "line": 96,
+          "anchor": "weight-decay-ile-l2-cezası-neden-aynı-olmayabilir"
+        },
+        {
+          "level": 3,
+          "title": "Adım büyüklüğü, warmup ve clipping",
+          "line": 102,
+          "anchor": "adım-büyüklüğü-warmup-ve-clipping"
+        },
+        {
+          "level": 2,
+          "title": "Birikimin doğru paydası",
+          "line": 108,
+          "anchor": "birikimin-doğru-paydası"
+        },
+        {
+          "level": 3,
+          "title": "Eşit olmayan minibatch'lerde sayısal karşı örnek",
+          "line": 122,
+          "anchor": "eşit-olmayan-minibatchlerde-sayısal-karşı-örnek"
+        },
+        {
+          "level": 3,
+          "title": "Mixed precision neyi değiştirir?",
+          "line": 128,
+          "anchor": "mixed-precision-neyi-değiştirir"
+        },
+        {
+          "level": 2,
+          "title": "Eğitim bütçesi ve genelleme nasıl raporlanır?",
+          "line": 134,
+          "anchor": "eğitim-bütçesi-ve-genelleme-nasıl-raporlanır"
+        },
+        {
+          "level": 3,
+          "title": "Model büyüklüğü tek başına deney tanımı değildir",
+          "line": 136,
+          "anchor": "model-büyüklüğü-tek-başına-deney-tanımı-değildir"
+        },
+        {
+          "level": 3,
+          "title": "Kayıp azalması ile çalışırken öğrenme arasındaki bağ",
+          "line": 142,
+          "anchor": "kayıp-azalması-ile-çalışırken-öğrenme-arasındaki-bağ"
+        },
+        {
+          "level": 2,
+          "title": "Ön eğitim, uyarlama ve tercih öğrenimi",
+          "line": 146,
+          "anchor": "ön-eğitim-uyarlama-ve-tercih-öğrenimi"
+        },
+        {
+          "level": 2,
+          "title": "Bir bayrak, uygulanmış yöntem değildir",
+          "line": 166,
+          "anchor": "bir-bayrak-uygulanmış-yöntem-değildir"
+        },
+        {
+          "level": 2,
+          "title": "Hangi kanıtı okuyabiliriz?",
+          "line": 172,
+          "anchor": "hangi-kanıtı-okuyabiliriz"
+        },
+        {
+          "level": 2,
+          "title": "Çözümlü alıştırmalar",
+          "line": 178,
+          "anchor": "çözümlü-alıştırmalar"
+        },
+        {
+          "level": 2,
+          "title": "Kaynakça",
+          "line": 186,
+          "anchor": "kaynakça"
+        }
+      ]
+    },
+    {
+      "file": "tr/07-model-yasam-dongusu.md",
+      "title": "7. Model kimliği, checkpoint ve devam",
+      "whitespace_words_including_code_tables_math": 3380,
+      "topics_h2": 11,
+      "subtopics_h3": 6,
+      "solved_exercises": 5,
+      "sha256_utf8_lf": "af1fd50e48c57303d21028a80a17d2784833faa31ebcee88642b1db132d14014",
+      "headings": [
+        {
+          "level": 1,
+          "title": "7. Model kimliği, checkpoint ve devam",
+          "line": 1,
+          "anchor": "7-model-kimliği-checkpoint-ve-devam"
+        },
+        {
+          "level": 2,
+          "title": "Model hangi bilgiyle kurulur?",
+          "line": 9,
+          "anchor": "model-hangi-bilgiyle-kurulur"
+        },
+        {
+          "level": 3,
+          "title": "Parametre, buffer, çalışma modu ve dış durum",
+          "line": 25,
+          "anchor": "parametre-buffer-çalışma-modu-ve-dış-durum"
+        },
+        {
+          "level": 3,
+          "title": "Tokenizer parmak izinin kapsamı",
+          "line": 33,
+          "anchor": "tokenizer-parmak-izinin-kapsamı"
+        },
+        {
+          "level": 2,
+          "title": "Kaydetme: tek isim altında farklı kapsamlar",
+          "line": 39,
+          "anchor": "kaydetme-tek-isim-altında-farklı-kapsamlar"
+        },
+        {
+          "level": 3,
+          "title": "İki farklı atomiklik sınırı",
+          "line": 63,
+          "anchor": "iki-farklı-atomiklik-sınırı"
+        },
+        {
+          "level": 3,
+          "title": "Checksum neyi doğrular, neyi doğrulamaz?",
+          "line": 69,
+          "anchor": "checksum-neyi-doğrular-neyi-doğrulamaz"
+        },
+        {
+          "level": 2,
+          "title": "Yükleme: doğru sayıları yanlış anlama bağlamamak",
+          "line": 77,
+          "anchor": "yükleme-doğru-sayıları-yanlış-anlama-bağlamamak"
+        },
+        {
+          "level": 3,
+          "title": "`strict`, sayı türü ve cihaz aynı denetim değildir",
+          "line": 89,
+          "anchor": "strict-sayı-türü-ve-cihaz-aynı-denetim-değildir"
+        },
+        {
+          "level": 2,
+          "title": "Devam etmek, yeniden başlamakla nasıl ayrılır?",
+          "line": 99,
+          "anchor": "devam-etmek-yeniden-başlamakla-nasıl-ayrılır"
+        },
+        {
+          "level": 3,
+          "title": "İşlevsel devam ile aynı yörüngeyi sürdürme",
+          "line": 107,
+          "anchor": "işlevsel-devam-ile-aynı-yörüngeyi-sürdürme"
+        },
+        {
+          "level": 2,
+          "title": "Kullanım modunu öğrenmeyle karıştırmamak",
+          "line": 132,
+          "anchor": "kullanım-modunu-öğrenmeyle-karıştırmamak"
+        },
+        {
+          "level": 2,
+          "title": "Quantization: sayı biçimi değişince hangi model kalır?",
+          "line": 138,
+          "anchor": "quantization-sayı-biçimi-değişince-hangi-model-kalır"
+        },
+        {
+          "level": 2,
+          "title": "Gerçek sınıflarla geçici CPU deneyi",
+          "line": 150,
+          "anchor": "gerçek-sınıflarla-geçici-cpu-deneyi"
+        },
+        {
+          "level": 2,
+          "title": "Konudan dosyaya ve metoda okuma haritası",
+          "line": 174,
+          "anchor": "konudan-dosyaya-ve-metoda-okuma-haritası"
+        },
+        {
+          "level": 2,
+          "title": "Beş alıştırma ve çözümleri",
+          "line": 189,
+          "anchor": "beş-alıştırma-ve-çözümleri"
+        },
+        {
+          "level": 2,
+          "title": "Kontrol ve eski belgeler",
+          "line": 197,
+          "anchor": "kontrol-ve-eski-belgeler"
+        },
+        {
+          "level": 2,
+          "title": "Birincil kaynaklar ve sürüm notu",
+          "line": 203,
+          "anchor": "birincil-kaynaklar-ve-sürüm-notu"
+        }
+      ]
+    },
+    {
+      "file": "tr/08-uretim.md",
+      "title": "08 · Logitlerden cevaba: üretim ve KV cache",
+      "whitespace_words_including_code_tables_math": 2694,
+      "topics_h2": 12,
+      "subtopics_h3": 0,
+      "solved_exercises": 5,
+      "sha256_utf8_lf": "f3a82b9433796cc91f44c2c6b903a09bcbdd67bb7703ea699769506ef8b06d66",
+      "headings": [
+        {
+          "level": 1,
+          "title": "08 · Logitlerden cevaba: üretim ve KV cache",
+          "line": 1,
+          "anchor": "08--logitlerden-cevaba-üretim-ve-kv-cache"
+        },
+        {
+          "level": 2,
+          "title": "Bir ileri geçiş neden bir cevap değildir?",
+          "line": 7,
+          "anchor": "bir-ileri-geçiş-neden-bir-cevap-değildir"
+        },
+        {
+          "level": 2,
+          "title": "Seçim kuralı davranışı nasıl değiştirir?",
+          "line": 35,
+          "anchor": "seçim-kuralı-davranışı-nasıl-değiştirir"
+        },
+        {
+          "level": 2,
+          "title": "KV cache: öğrenilmiş bilgi değil, yeniden kullanılabilir hesap",
+          "line": 61,
+          "anchor": "kv-cache-öğrenilmiş-bilgi-değil-yeniden-kullanılabilir-hesap"
+        },
+        {
+          "level": 2,
+          "title": "Beam search ve aynı isimli farklı girişler",
+          "line": 73,
+          "anchor": "beam-search-ve-aynı-isimli-farklı-girişler"
+        },
+        {
+          "level": 2,
+          "title": "Sıcaklık ve filtreleri sayılarla izlemek",
+          "line": 79,
+          "anchor": "sıcaklık-ve-filtreleri-sayılarla-izlemek"
+        },
+        {
+          "level": 2,
+          "title": "Tekrar cezası, durma ve sayısal sınırlar",
+          "line": 104,
+          "anchor": "tekrar-cezası-durma-ve-sayısal-sınırlar"
+        },
+        {
+          "level": 2,
+          "title": "Beam search neyi arar, neyi garanti etmez?",
+          "line": 114,
+          "anchor": "beam-search-neyi-arar-neyi-garanti-etmez"
+        },
+        {
+          "level": 2,
+          "title": "Cache maliyeti ve endüstriyle doğru karşılaştırma",
+          "line": 122,
+          "anchor": "cache-maliyeti-ve-endüstriyle-doğru-karşılaştırma"
+        },
+        {
+          "level": 2,
+          "title": "Konudan gerçek metoda okuma haritası",
+          "line": 144,
+          "anchor": "konudan-gerçek-metoda-okuma-haritası"
+        },
+        {
+          "level": 2,
+          "title": "Beş alıştırma ve çözümleri",
+          "line": 155,
+          "anchor": "beş-alıştırma-ve-çözümleri"
+        },
+        {
+          "level": 2,
+          "title": "Okuyarak ve deneyerek doğrulama",
+          "line": 163,
+          "anchor": "okuyarak-ve-deneyerek-doğrulama"
+        },
+        {
+          "level": 2,
+          "title": "Kaynakça",
+          "line": 171,
+          "anchor": "kaynakça"
+        }
+      ]
+    },
+    {
+      "file": "tr/09-bellek-bilis-araclar.md",
+      "title": "09 · Bellek, bilişsel işlem ve araçlar",
+      "whitespace_words_including_code_tables_math": 2924,
+      "topics_h2": 11,
+      "subtopics_h3": 8,
+      "solved_exercises": 5,
+      "sha256_utf8_lf": "1a9e5c5a4b36b716023f204211afb61425892ed6f3e060fb3d6b58d63ad2a0e7",
+      "headings": [
+        {
+          "level": 1,
+          "title": "09 · Bellek, bilişsel işlem ve araçlar",
+          "line": 1,
+          "anchor": "09--bellek-bilişsel-işlem-ve-araçlar"
+        },
+        {
+          "level": 2,
+          "title": "Context, memory ve retrieval aynı şey değildir",
+          "line": 7,
+          "anchor": "context-memory-ve-retrieval-aynı-şey-değildir"
+        },
+        {
+          "level": 2,
+          "title": "Token embedding'den cümle ve belge embedding'ine",
+          "line": 33,
+          "anchor": "token-embeddingden-cümle-ve-belge-embeddingine"
+        },
+        {
+          "level": 2,
+          "title": "Benzerlik puanı, kapsam ve aday seçimi",
+          "line": 41,
+          "anchor": "benzerlik-puanı-kapsam-ve-aday-seçimi"
+        },
+        {
+          "level": 2,
+          "title": "Hybrid retrieval neyi birleştirir?",
+          "line": 55,
+          "anchor": "hybrid-retrieval-neyi-birleştirir"
+        },
+        {
+          "level": 2,
+          "title": "RAG: dış kayıt, üretim ve eğitim ilişkisi",
+          "line": 67,
+          "anchor": "rag-dış-kayıt-üretim-ve-eğitim-ilişkisi"
+        },
+        {
+          "level": 2,
+          "title": "Bilişsel çağrı sırası",
+          "line": 73,
+          "anchor": "bilişsel-çağrı-sırası"
+        },
+        {
+          "level": 3,
+          "title": "Entropi ile doğruluk arasındaki karşı örnek",
+          "line": 99,
+          "anchor": "entropi-ile-doğruluk-arasındaki-karşı-örnek"
+        },
+        {
+          "level": 3,
+          "title": "Çok adaylı seçim ve ortak hata",
+          "line": 103,
+          "anchor": "çok-adaylı-seçim-ve-ortak-hata"
+        },
+        {
+          "level": 2,
+          "title": "Araç seçmek ile araç kullanmak",
+          "line": 111,
+          "anchor": "araç-seçmek-ile-araç-kullanmak"
+        },
+        {
+          "level": 3,
+          "title": "Araç doğruluğunu üç aşamada okumak",
+          "line": 127,
+          "anchor": "araç-doğruluğunu-üç-aşamada-okumak"
+        },
+        {
+          "level": 2,
+          "title": "Taslak denetimi, geri bildirim ve öğrenme sınırı",
+          "line": 133,
+          "anchor": "taslak-denetimi-geri-bildirim-ve-öğrenme-sınırı"
+        },
+        {
+          "level": 2,
+          "title": "Eşzamanlılık ve doğrulama",
+          "line": 143,
+          "anchor": "eşzamanlılık-ve-doğrulama"
+        },
+        {
+          "level": 2,
+          "title": "Çalıştırılabilir örnek ve çözümlü alıştırmalar",
+          "line": 149,
+          "anchor": "çalıştırılabilir-örnek-ve-çözümlü-alıştırmalar"
+        },
+        {
+          "level": 3,
+          "title": "Alıştırma 1 — Kapsam filtresinin sırası",
+          "line": 153,
+          "anchor": "alıştırma-1--kapsam-filtresinin-sırası"
+        },
+        {
+          "level": 3,
+          "title": "Alıştırma 2 — Hybrid puan",
+          "line": 157,
+          "anchor": "alıştırma-2--hybrid-puan"
+        },
+        {
+          "level": 3,
+          "title": "Alıştırma 3 — Üç adayın oybirliği",
+          "line": 161,
+          "anchor": "alıştırma-3--üç-adayın-oybirliği"
+        },
+        {
+          "level": 3,
+          "title": "Alıştırma 4 — Başarılı ama yanlış araç çağrısı",
+          "line": 165,
+          "anchor": "alıştırma-4--başarılı-ama-yanlış-araç-çağrısı"
+        },
+        {
+          "level": 3,
+          "title": "Alıştırma 5 — Bir kayıt yeni kapasite midir?",
+          "line": 169,
+          "anchor": "alıştırma-5--bir-kayıt-yeni-kapasite-midir"
+        },
+        {
+          "level": 2,
+          "title": "Birincil kaynaklar",
+          "line": 173,
+          "anchor": "birincil-kaynaklar"
+        }
+      ]
+    },
+    {
+      "file": "tr/10-uctan-uca-sistem.md",
+      "title": "10 · Bir mesajın sistem boyunca yolculuğu",
+      "whitespace_words_including_code_tables_math": 2210,
+      "topics_h2": 12,
+      "subtopics_h3": 5,
+      "solved_exercises": 5,
+      "sha256_utf8_lf": "3a2b6cd2fe9cc3f2bd1e92ee50fee411c9039f2bb6b12f53973ecef326e48071",
+      "headings": [
+        {
+          "level": 1,
+          "title": "10 · Bir mesajın sistem boyunca yolculuğu",
+          "line": 1,
+          "anchor": "10--bir-mesajın-sistem-boyunca-yolculuğu"
+        },
+        {
+          "level": 2,
+          "title": "Kurulum ile istek işleme farklı evrelerdir",
+          "line": 9,
+          "anchor": "kurulum-ile-istek-işleme-farklı-evrelerdir"
+        },
+        {
+          "level": 2,
+          "title": "Örnek mesaj: girişten bağlama",
+          "line": 42,
+          "anchor": "örnek-mesaj-girişten-bağlama"
+        },
+        {
+          "level": 2,
+          "title": "Bağlamdan model çağrısına",
+          "line": 50,
+          "anchor": "bağlamdan-model-çağrısına"
+        },
+        {
+          "level": 2,
+          "title": "Dönüş yolu ve kayıt sahipliği",
+          "line": 77,
+          "anchor": "dönüş-yolu-ve-kayıt-sahipliği"
+        },
+        {
+          "level": 2,
+          "title": "İşlem sınırı, tekrar gönderme ve kısmi başarı",
+          "line": 83,
+          "anchor": "işlem-sınırı-tekrar-gönderme-ve-kısmi-başarı"
+        },
+        {
+          "level": 2,
+          "title": "Bağlam bütçesi gerçek prompt bütçesi değildir",
+          "line": 101,
+          "anchor": "bağlam-bütçesi-gerçek-prompt-bütçesi-değildir"
+        },
+        {
+          "level": 2,
+          "title": "İstek kimliği bir metin parçası değildir",
+          "line": 109,
+          "anchor": "istek-kimliği-bir-metin-parçası-değildir"
+        },
+        {
+          "level": 2,
+          "title": "Yedi çalıştırılmış sistem örneği",
+          "line": 115,
+          "anchor": "yedi-çalıştırılmış-sistem-örneği"
+        },
+        {
+          "level": 2,
+          "title": "Bir checkpoint hangi hayatı taşır?",
+          "line": 125,
+          "anchor": "bir-checkpoint-hangi-hayatı-taşır"
+        },
+        {
+          "level": 2,
+          "title": "Eşzamanlılık ve okurun denetim rotası",
+          "line": 131,
+          "anchor": "eşzamanlılık-ve-okurun-denetim-rotası"
+        },
+        {
+          "level": 2,
+          "title": "Çözümlü alıştırmalar",
+          "line": 139,
+          "anchor": "çözümlü-alıştırmalar"
+        },
+        {
+          "level": 3,
+          "title": "1. Çağıran kim?",
+          "line": 141,
+          "anchor": "1-çağıran-kim"
+        },
+        {
+          "level": 3,
+          "title": "2. Yarım yazım",
+          "line": 145,
+          "anchor": "2-yarım-yazım"
+        },
+        {
+          "level": 3,
+          "title": "3. Aynı metin ve idempotence",
+          "line": 149,
+          "anchor": "3-aynı-metin-ve-idempotence"
+        },
+        {
+          "level": 3,
+          "title": "4. Bütçe hesabı",
+          "line": 153,
+          "anchor": "4-bütçe-hesabı"
+        },
+        {
+          "level": 3,
+          "title": "5. Kontrol edilen ve edilmeyen",
+          "line": 157,
+          "anchor": "5-kontrol-edilen-ve-edilmeyen"
+        },
+        {
+          "level": 2,
+          "title": "Kaynakça",
+          "line": 161,
+          "anchor": "kaynakça"
+        }
+      ]
+    },
+    {
+      "file": "tr/11-arastirma-laboratuvari.md",
+      "title": "11 · Araştırma laboratuvarı: çalışırken öğrenmek ne demektir?",
+      "whitespace_words_including_code_tables_math": 2920,
+      "topics_h2": 15,
+      "subtopics_h3": 5,
+      "solved_exercises": 5,
+      "sha256_utf8_lf": "bb73902655d39235c2d902cf097c0cd089e2a06b2fb817e1c0674a889cdfb6d9",
+      "headings": [
+        {
+          "level": 1,
+          "title": "11 · Araştırma laboratuvarı: çalışırken öğrenmek ne demektir?",
+          "line": 1,
+          "anchor": "11--araştırma-laboratuvarı-çalışırken-öğrenmek-ne-demektir"
+        },
+        {
+          "level": 2,
+          "title": "1. Eğitim, edinim, konsolidasyon ve çıkarım",
+          "line": 9,
+          "anchor": "1-eğitim-edinim-konsolidasyon-ve-çıkarım"
+        },
+        {
+          "level": 2,
+          "title": "2. Ana sistemdeki araştırma kancası neyi gösteriyor?",
+          "line": 33,
+          "anchor": "2-ana-sistemdeki-araştırma-kancası-neyi-gösteriyor"
+        },
+        {
+          "level": 2,
+          "title": "3. İlk elenen iddia: temsil tanığı yeni bilgi sağlar mı?",
+          "line": 41,
+          "anchor": "3-ilk-elenen-iddia-temsil-tanığı-yeni-bilgi-sağlar-mı"
+        },
+        {
+          "level": 2,
+          "title": "4. Deneyimden yürütülebilir kurala, kuraldan derlemeye",
+          "line": 54,
+          "anchor": "4-deneyimden-yürütülebilir-kurala-kuraldan-derlemeye"
+        },
+        {
+          "level": 2,
+          "title": "5. Sapma, hangi koşulda öğrenmeye yardım ediyor?",
+          "line": 62,
+          "anchor": "5-sapma-hangi-koşulda-öğrenmeye-yardım-ediyor"
+        },
+        {
+          "level": 2,
+          "title": "6. Edinmek, korumak ve taşımak aynı başarı değil",
+          "line": 68,
+          "anchor": "6-edinmek-korumak-ve-taşımak-aynı-başarı-değil"
+        },
+        {
+          "level": 2,
+          "title": "7. Aynı yaşamda ve hazır görev kimliği olmadan",
+          "line": 84,
+          "anchor": "7-aynı-yaşamda-ve-hazır-görev-kimliği-olmadan"
+        },
+        {
+          "level": 2,
+          "title": "8. Deneyim, sonraki öğrenme biçimini değiştirebilir mi?",
+          "line": 98,
+          "anchor": "8-deneyim-sonraki-öğrenme-biçimini-değiştirebilir-mi"
+        },
+        {
+          "level": 2,
+          "title": "9. Geçmişi işleyen yordamın edinilmesi",
+          "line": 111,
+          "anchor": "9-geçmişi-işleyen-yordamın-edinilmesi"
+        },
+        {
+          "level": 2,
+          "title": "10. Bugünkü adayları korumak düzeltmeye yeter mi?",
+          "line": 130,
+          "anchor": "10-bugünkü-adayları-korumak-düzeltmeye-yeter-mi"
+        },
+        {
+          "level": 2,
+          "title": "11. Daha zengin bellek her zaman gerekli mi?",
+          "line": 138,
+          "anchor": "11-daha-zengin-bellek-her-zaman-gerekli-mi"
+        },
+        {
+          "level": 2,
+          "title": "12. Deneyleri ortak bir ölçüm diliyle okumak",
+          "line": 156,
+          "anchor": "12-deneyleri-ortak-bir-ölçüm-diliyle-okumak"
+        },
+        {
+          "level": 2,
+          "title": "13. Araştırma statüsü ve devam sözleşmesi",
+          "line": 171,
+          "anchor": "13-araştırma-statüsü-ve-devam-sözleşmesi"
+        },
+        {
+          "level": 2,
+          "title": "Çözümlü alıştırmalar",
+          "line": 181,
+          "anchor": "çözümlü-alıştırmalar"
+        },
+        {
+          "level": 3,
+          "title": "1. Edinim etkisi",
+          "line": 183,
+          "anchor": "1-edinim-etkisi"
+        },
+        {
+          "level": 3,
+          "title": "2. Ortalama yeterli mi?",
+          "line": 187,
+          "anchor": "2-ortalama-yeterli-mi"
+        },
+        {
+          "level": 3,
+          "title": "3. Birlikte iyileşme",
+          "line": 191,
+          "anchor": "3-birlikte-iyileşme"
+        },
+        {
+          "level": 3,
+          "title": "4. Gelecek sözleşmesini değiştirin",
+          "line": 195,
+          "anchor": "4-gelecek-sözleşmesini-değiştirin"
+        },
+        {
+          "level": 3,
+          "title": "5. İyi son model, iyi yaşam mı?",
+          "line": 199,
+          "anchor": "5-iyi-son-model-iyi-yaşam-mı"
+        },
+        {
+          "level": 2,
+          "title": "Kaynakça ve araştırma kayıtları",
+          "line": 203,
+          "anchor": "kaynakça-ve-araştırma-kayıtları"
+        }
+      ]
+    },
+    {
+      "file": "tr/12-acik-sorular.md",
+      "title": "12. Bilmediklerimiz ve araştırmanın devamı",
+      "whitespace_words_including_code_tables_math": 2753,
+      "topics_h2": 10,
+      "subtopics_h3": 2,
+      "solved_exercises": 5,
+      "sha256_utf8_lf": "6f92732b3047ce0662d43ddd53942fe305fcfa79a5a7be54aa29afbcca3df336",
+      "headings": [
+        {
+          "level": 1,
+          "title": "12. Bilmediklerimiz ve araştırmanın devamı",
+          "line": 1,
+          "anchor": "12-bilmediklerimiz-ve-araştırmanın-devamı"
+        },
+        {
+          "level": 2,
+          "title": "Önceki sonuçlardan hangileri taşınabilir?",
+          "line": 7,
+          "anchor": "önceki-sonuçlardan-hangileri-taşınabilir"
+        },
+        {
+          "level": 2,
+          "title": "Yeni tur: doğru bugünkü cevap, düzeltilebilir bilgi mi?",
+          "line": 27,
+          "anchor": "yeni-tur-doğru-bugünkü-cevap-düzeltilebilir-bilgi-mi"
+        },
+        {
+          "level": 2,
+          "title": "21 Eylül devamı: gelecekteki hangi işlem için yeterli?",
+          "line": 62,
+          "anchor": "21-eylül-devamı-gelecekteki-hangi-işlem-için-yeterli"
+        },
+        {
+          "level": 2,
+          "title": "Durum yeterliliğini adım adım türetmek",
+          "line": 94,
+          "anchor": "durum-yeterliliğini-adım-adım-türetmek"
+        },
+        {
+          "level": 3,
+          "title": "Sayaç, bit ve uygulama belleği farklı ölçülerdir",
+          "line": 106,
+          "anchor": "sayaç-bit-ve-uygulama-belleği-farklı-ölçülerdir"
+        },
+        {
+          "level": 3,
+          "title": "Küçük örneği bugün yeniden çalıştırmak",
+          "line": 114,
+          "anchor": "küçük-örneği-bugün-yeniden-çalıştırmak"
+        },
+        {
+          "level": 2,
+          "title": "Unutmayı önlemek ile öğrenebilir kalmak",
+          "line": 124,
+          "anchor": "unutmayı-önlemek-ile-öğrenebilir-kalmak"
+        },
+        {
+          "level": 2,
+          "title": "İç durum sapması ne zaman öğrenmenin parçasıdır?",
+          "line": 134,
+          "anchor": "iç-durum-sapması-ne-zaman-öğrenmenin-parçasıdır"
+        },
+        {
+          "level": 2,
+          "title": "Henüz araştırılmamış veya birleşmemiş yönler",
+          "line": 144,
+          "anchor": "henüz-araştırılmamış-veya-birleşmemiş-yönler"
+        },
+        {
+          "level": 2,
+          "title": "Bir sonraki iddiayı nasıl sınayacağız?",
+          "line": 158,
+          "anchor": "bir-sonraki-iddiayı-nasıl-sınayacağız"
+        },
+        {
+          "level": 2,
+          "title": "Beş çözümlü alıştırma",
+          "line": 166,
+          "anchor": "beş-çözümlü-alıştırma"
+        },
+        {
+          "level": 2,
+          "title": "Kaynaklar ve kitabın kapanış noktası",
+          "line": 174,
+          "anchor": "kaynaklar-ve-kitabın-kapanış-noktası"
+        }
+      ]
+    }
+  ]
+}

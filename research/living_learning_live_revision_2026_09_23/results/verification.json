@@ -1,0 +1,334 @@
+{
+  "structural": {
+    "short_history_relation_checks": 258048,
+    "suffix_relation_checks": 258048,
+    "retained_parity_does_not_recover_mod3": true,
+    "intermediate_summary_can_lose_information": true,
+    "sound_transfer_can_use_wrong_model": true
+  },
+  "preservation": {
+    "files_unchanged": 1039,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "recorded": {
+    "paths": 864,
+    "prediction_checks": 235008,
+    "sound_replay_containment_checks": 195840,
+    "parity_checks": 235008,
+    "suffix_control_subset_checks": 39168
+  },
+  "renaming": [
+    {
+      "family": "cycle_reset",
+      "method": "reset_start",
+      "renaming_invariant": true
+    },
+    {
+      "family": "cycle_reset",
+      "method": "all_states",
+      "renaming_invariant": true
+    },
+    {
+      "family": "cycle_reset",
+      "method": "parity_suffix8",
+      "renaming_invariant": true
+    },
+    {
+      "family": "cycle_reset",
+      "method": "model_relation",
+      "renaming_invariant": true
+    },
+    {
+      "family": "cycle_reset",
+      "method": "model_relation_suffix8",
+      "renaming_invariant": true
+    },
+    {
+      "family": "cycle_reset",
+      "method": "full_archive",
+      "renaming_invariant": true
+    },
+    {
+      "family": "random_cycle",
+      "method": "reset_start",
+      "renaming_invariant": true
+    },
+    {
+      "family": "random_cycle",
+      "method": "all_states",
+      "renaming_invariant": true
+    },
+    {
+      "family": "random_cycle",
+      "method": "parity_suffix8",
+      "renaming_invariant": true
+    },
+    {
+      "family": "random_cycle",
+      "method": "model_relation",
+      "renaming_invariant": true
+    },
+    {
+      "family": "random_cycle",
+      "method": "model_relation_suffix8",
+      "renaming_invariant": true
+    },
+    {
+      "family": "random_cycle",
+      "method": "full_archive",
+      "renaming_invariant": true
+    },
+    {
+      "family": "delay",
+      "method": "reset_start",
+      "renaming_invariant": true
+    },
+    {
+      "family": "delay",
+      "method": "all_states",
+      "renaming_invariant": true
+    },
+    {
+      "family": "delay",
+      "method": "parity_suffix8",
+      "renaming_invariant": true
+    },
+    {
+      "family": "delay",
+      "method": "model_relation",
+      "renaming_invariant": true
+    },
+    {
+      "family": "delay",
+      "method": "model_relation_suffix8",
+      "renaming_invariant": true
+    },
+    {
+      "family": "delay",
+      "method": "full_archive",
+      "renaming_invariant": true
+    }
+  ],
+  "fresh_process_resume": [
+    {
+      "family": "cycle_reset",
+      "stride": 32,
+      "method": "reset_start",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 32,
+      "method": "all_states",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 32,
+      "method": "parity_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 32,
+      "method": "model_relation",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 32,
+      "method": "model_relation_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 32,
+      "method": "full_archive",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 256,
+      "method": "reset_start",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 256,
+      "method": "all_states",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 256,
+      "method": "parity_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 256,
+      "method": "model_relation",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 256,
+      "method": "model_relation_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "cycle_reset",
+      "stride": 256,
+      "method": "full_archive",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 32,
+      "method": "reset_start",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 32,
+      "method": "all_states",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 32,
+      "method": "parity_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 32,
+      "method": "model_relation",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 32,
+      "method": "model_relation_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 32,
+      "method": "full_archive",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 256,
+      "method": "reset_start",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 256,
+      "method": "all_states",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 256,
+      "method": "parity_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 256,
+      "method": "model_relation",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 256,
+      "method": "model_relation_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "random_cycle",
+      "stride": 256,
+      "method": "full_archive",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 32,
+      "method": "reset_start",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 32,
+      "method": "all_states",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 32,
+      "method": "parity_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 32,
+      "method": "model_relation",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 32,
+      "method": "model_relation_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 32,
+      "method": "full_archive",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 256,
+      "method": "reset_start",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 256,
+      "method": "all_states",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 256,
+      "method": "parity_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 256,
+      "method": "model_relation",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 256,
+      "method": "model_relation_suffix8",
+      "exact_equal": true
+    },
+    {
+      "family": "delay",
+      "stride": 256,
+      "method": "full_archive",
+      "exact_equal": true
+    }
+  ],
+  "full_rerun": {
+    "returncode": 0,
+    "stdout": "completed 0 cycle_reset\ncompleted 0 random_cycle\ncompleted 0 delay\ncompleted 1 cycle_reset\ncompleted 1 random_cycle\ncompleted 1 delay\ncompleted 2 cycle_reset\ncompleted 2 random_cycle\ncompleted 2 delay\ncompleted 3 cycle_reset\ncompleted 3 random_cycle\ncompleted 3 delay\ncompleted 4 cycle_reset\ncompleted 4 random_cycle\ncompleted 4 delay\ncompleted 5 cycle_reset\ncompleted 5 random_cycle\ncompleted 5 delay\ncompleted 6 cycle_reset\ncompleted 6 random_cycle\ncompleted 6 delay\ncompleted 7 cycle_reset\ncompleted 7 random_cycle\ncompleted 7 delay\ncompleted 8 cycle_reset\ncompleted 8 random_cycle\ncompleted 8 delay\ncompleted 9 cycle_reset\ncompleted 9 random_cycle\ncompleted 9 delay\ncompleted 10 cycle_reset\ncompleted 10 random_cycle\ncompleted 10 delay\ncompleted 11 cycle_reset\ncompleted 11 random_cycle\ncompleted 11 delay\ncompleted 12 cycle_reset\ncompleted 12 random_cycle\ncompleted 12 delay\ncompleted 13 cycle_reset\ncompleted 13 random_cycle\ncompleted 13 delay\ncompleted 14 cycle_reset\ncompleted 14 random_cycle\ncompleted 14 delay\ncompleted 15 cycle_reset\ncompleted 15 random_cycle\ncompleted 15 delay\ncompleted 16 cycle_reset\ncompleted 16 random_cycle\ncompleted 16 delay\ncompleted 17 cycle_reset\ncompleted 17 random_cycle\ncompleted 17 delay\ncompleted 18 cycle_reset\ncompleted 18 random_cycle\ncompleted 18 delay\ncompleted 19 cycle_reset\ncompleted 19 random_cycle\ncompleted 19 delay\ncompleted 20 cycle_reset\ncompleted 20 random_cycle\ncompleted 20 delay\ncompleted 21 cycle_reset\ncompleted 21 random_cycle\ncompleted 21 delay\ncompleted 22 cycle_reset\ncompleted 22 random_cycle\ncompleted 22 delay\ncompleted 23 cycle_reset\ncompleted 23 random_cycle\ncompleted 23 delay\nexact_rerun_passed"
+  }
+}

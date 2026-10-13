@@ -1,0 +1,35 @@
+# Bağımsız uygulama ve yorum denetimi
+
+21 Eylül 2026 · Yerel araştırma turu 10
+
+[Ön kayıt](PROTOCOL.md), [ana uygulama](../../../research/living_learning_geometry_2026_09_21/geometry.py), [ana sonuç](../../../research/living_learning_geometry_2026_09_21/results/geometry.json), [sonradan eklenen kontrol planı](POSTHOC_CONTROLS.md), [kontrol uygulaması](../../../research/living_learning_geometry_2026_09_21/posthoc_controls.py) ve [ek sonuç](../../../research/living_learning_geometry_2026_09_21/results/posthoc_controls.json) karşılaştırıldı. **Bu denetimde sonuçları geçersiz kılan kritik uygulama hatası bulunmadı.** Bu ifade bütün kodun veya bütün çıkarımların ispatı değildir; aşağıdaki kapsamla sınırlıdır. Deney kodları ve sonuçları değiştirilmedi. Kontroller geçici Python işlemlerinde, sonuçları üzerine yazmadan yürütüldü.
+
+## İncelenen sözleşmeler
+
+| Konu | Kaynak incelemesi ve bağımsız kontrol |
+|---|---|
+| Parametre düzeni | `unpack` ile `values_jacobian` aynı sırayı kullanıyor: 8 çıktı ağırlığı, 8×2 giriş ağırlığı, 8 gizli bias, 1 çıktı bias; toplam 33. Giriş-ağırlığı türevlerinin düzleştirme sırası tutarlı. Bağımsız merkezî sonlu farkta en büyük mutlak fark `8.23×10⁻¹¹`; bağımsız PyTorch autograd karşılaştırmasında `1.67×10⁻¹⁶` bulundu. Bu kontrol rastgele bir noktada 7 girdi ve bütün 33 parametreyi kapsadı. |
+| Öğretmenin aynı sınıfta olması | Öğretmen aynı 33 sayılık düzeni kullanıyor, yalnız üç birimi etkin. Girdideki ve ağırlıktaki dönüşler çarpımda birbirini götürüyor. Tohum 0, 1 ve 11'de yerel koordinatlardaki doğrudan üç-tanh formülüyle fark en fazla `2.22×10⁻¹⁶`. Öğretmen parametreleri kapasite tanığıdır; öğrencinin bunları edindiği iddiası değildir. |
+| Bilgi sınırı | `Learner`a yalnız başlangıç ağırlıkları, yöntem/ayarlar ve izinli eski ankorlar veriliyor. Yeni minibatch, girdisi ve etiketiyle `step`e geliyor; `step` önceki tahmini döndürüyor. Dünya içindeki öğretmen, dönüş açısı ve bölge adları öğrenicinin girdisi değil. Ancak eski-veri kesimi ve ilk eğitim evresi araştırmacı tarafından sağlanıyor; tamamen bilinmeyen görev sınırı problemi çözülmüş değildir. |
+| Değerlendirme sızıntısı | `risks` yalnız kayıt noktalarında/sonunda kullanılıyor, yön veya kabul kararına dönmüyor. Ek kontrol olarak tohum 0, 16 ankor, oran `.12` koşulunda bütün holdout etiketleri yapay `−999` değeriyle değiştirildi: `replay_guard` ve `tangent_current` son ağırlıkları, prequential sonuçları ve maliyet sayaçları birebir aynı kaldı. Bu müdahale otomatik kod yolunu sınar; insanın sonradan sonuçlara göre tasarım değiştirmediğini ispatlamaz. Post-hoc seçimin statüsü ayrıca açıklanmış. |
+| Guard bütçesi | Ana guard sabit warmup çıktısına göre MSE ölçüyor. İlk aday dahil 13 deneme, en çok 12 yarılama var; tümü reddedilirse ağırlık değişmiyor. Kayıtlı bütün guard koşullarında en yüksek izlenen sapma `9.9999975381×10⁻⁵`, bütçe `10⁻⁴`. Kabul+ret toplamları 128, aday sayıları sınırlar içinde; aday ileri satırları deneme sayısı×ankor sayısı ile tutarlı. |
+| Ek kayıp guard'ı | Doğru ankor etiketine göre sabit başlangıç MSE+`10⁻⁴` ölçütü uygulanıyor. Bütün ek guard koşullarında en yüksek izlenen artış `9.9999969086×10⁻⁵`. Bu çıktı sapması ölçütüyle aynı koruma hedefi değildir. |
+| Devam müdahalesi | İki ayrı durum kopyası aynı ağırlıklar ve aynı sonraki 32 minibatch ile başlıyor; serbest kopyada yalnız `mode='online'` atanıyor. Bütün 36 kayıtta ilk tahmin farkı sıfır. Ankorlar/referans kopyada kalıyor fakat online adımı bunları kullanmıyor. İki ek kontrolde müdahalenin kaynak öğrenicinin snapshot'ını değiştirmediği doğrulandı. Bu, koruma politikasının etkisini gösterir; yeni öğrenme kuralının deneyimden keşfedildiğini göstermez. |
+
+## Kayıt bütünlüğü ve tekrar hesaplama
+
+Ana kodun hash'i ana JSON'dakiyle; ek kodun ve kullandığı ana kodun hash'leri ek JSON'dakiyle eşleşti. Ön kayıttaki 12 tohum, üç bellek boyutu, iki oran ve ana/hassasiyet yöntemleri tam olarak **864 benzersiz koşul**, **72 özet grup** oluşturuyor. Ek sonuçta **216 koşul**, **18 özet grup**, **12 çevrimdışı ortak eğitim referansı** var.
+
+Tohum 0, 64 ankor, oran `.12`, eşik `10⁻⁸` için `online`, `tangent_fixed`, `tangent_current`, `tangent_guard`, `replay_guard` yeniden hesaplandı. Bütün dönen kayıtlar mevcut karşılaştırıcının toleransı içinde aynıydı. Üç post-hoc yöntemin aynı hücresinde prequential sonuçlar, üç bölge MSE'si ve maliyet sayaçları ayrıca eşleşti. Bu inceleme bütün ana taramanın ikinci kez çalıştırılması veya ayrı süreç devam doğrulamasının yerine geçmez.
+
+## Sonuç yorumunda korunması gereken sınırlar
+
+1. **Tam rank demek yanlış olur.** 64 ankor, `.12` ve `10⁻⁸` koşulunda `tangent_current` ortalama projeksiyon rankı `31.5`; parametre sayısı 33. Ortalama projekte/yeni gradyan norm oranı yaklaşık `1.0842×10⁻⁴`. Çok küçük izinli güncelleme, bu sonuç için tam null-uzay yokluğu iddiasından daha doğru açıklamadır. Rank eşik ve sayısal spektruma bağlıdır.
+2. **Bir sıfır alanı ölçüm sanmamak gerekir.** `max_linearized_anchor_change` yalnız güncel Jacobian hesaplanan teğet yöntemlerde dolduruluyor. `tangent_fixed` veya replay satırındaki sıfır, güncel Jacobian etkisinin ölçülüp sıfır bulunduğu anlamına gelmez. Aynı şekilde `mean_projection_rank=0` teğet olmayan yöntemlerde uygulanmayan ölçümdür.
+3. **Kabul sayısı edinim sayısı değildir.** Guard sıfır veya çok küçük öneriyi de kabul edebilir. `accepted_updates` ancak adayın ölçüte uyduğunu sayar. Edinim, risk/prequential eğrisi ve güncelleme büyüklüğüyle birlikte değerlendirilmelidir.
+4. **Maliyetler kısmi algoritmik muhasebedir.** Gradient satırları, ek Jacobian satırları, SVD çağrıları ve aday ileri satırları tutarlı. Başlangıç referans ileri geçişi, her adımdaki değerlendirici drift izlemesi, holdout ölçümleri, ortak warmup ve bazı geçici ara matrisler bu sayaçlara dahil değil. `stored_*_scalars` model/ankor/saklanan baz için sayı adedidir; toplam veya tepe RAM değildir. Sayaçlar FLOP, süre ya da eşit hesap bütçesi olarak yorumlanmamalıdır.
+5. **Eski risk garantisi dar kapsamlıdır.** Ana çıktı guard'ı başlangıç hatalarını koruyabilir. Ek doğru-kayıp guard'ı bu hataları düzeltebilir ama ortalama ankor kaybı sınırı her eski beceriye veya görülmemiş eski girdiye garanti vermez. Ankorda kabul işlemi, bağımsız doğrulama değildir.
+6. **Ortak eğitim ve post-hoc koşullar ayrı kalmalı.** Çevrimdışı referans yeni akışın bütün etiketlerine ve ek hesaba erişiyor. `replay_two_steps` aynı batch üzerinde iki güncelleme yapıyor; prequential cevap bunlardan önce alınıyor. Bunların kontrol olarak kullanımı uygun, eşit koşullu online üstünlük iddiası uygun değil.
+7. **Belirsizlik aralığı kapsamı sınırlı.** Özet aralıklar 12 tohumdaki ortalamaya uygulanan yaklaşık normal `1.96×SEM` aralıklarıdır. Çoklu karşılaştırma düzeltmesi, bütün dünyalara genelleme veya post-hoc tasarım yanlılığını giderme içermez.
+
+Denetim, mevcut kayıtların belirtilen sınırlı deneyi temsil ettiğini destekler. Öğrenilebilir temsil, kalıcı edinim ve eski beceriyi birlikte yönetmenin genel computational ilkesinin bulunduğu sonucu bu denetimden çıkmaz.

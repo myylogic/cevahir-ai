@@ -1,0 +1,236 @@
+{
+  "date": "2026-09-21",
+  "environment": {
+    "python": "3.14.3"
+  },
+  "cases": {
+    "correction": {
+      "hypotheses_by_integer_id": [
+        0,
+        3,
+        5
+      ],
+      "truth_tables_in_input_order": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          1
+        ]
+      ],
+      "histories": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            0
+          ],
+          [
+            2,
+            0
+          ]
+        ]
+      ],
+      "survivors_before": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "survivors_after_same_edit": [
+        [
+          5
+        ],
+        [
+          3
+        ]
+      ],
+      "counts_after": [
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          1
+        ]
+      ],
+      "incremental_equals_replay": true,
+      "restored_counts_equal": true,
+      "assumption": "The actual old event contents (0,0) are supplied externally."
+    },
+    "query_boundary": {
+      "histories": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      ],
+      "signed_states": [
+        [
+          2,
+          [
+            0,
+            0
+          ]
+        ],
+        [
+          2,
+          [
+            0,
+            0
+          ]
+        ]
+      ],
+      "all_boolean_loss_counts": [
+        [
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1
+        ]
+      ],
+      "observation_histograms": [
+        [
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          1
+        ]
+      ],
+      "negative_controls": {
+        "signed_collision": [
+          [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        ],
+        "indicator_query_counts": [
+          1,
+          0
+        ],
+        "nonexistent_old_content_can_pass_numeric_bounds": true,
+        "histogram_id_collision": [
+          [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        ],
+        "same_id_set_label_produces_distinct_risks": true
+      },
+      "meaning": "Same answers for every allowed loss query do not imply the same answers for observation-count or event-identity queries."
+    },
+    "finite_cell": {
+      "m": 3,
+      "N": 4,
+      "histories": 1296,
+      "risk_classes": 85,
+      "histogram_classes": 126,
+      "id_classes": 1296,
+      "ideal_fixed_bits": {
+        "risk": 7,
+        "histogram": 7,
+        "id": 11
+      },
+      "content_edits_checked": 10368,
+      "appends_checked": 7776,
+      "query_mismatches": 0,
+      "formula_count_mismatches": 0,
+      "mean_json_payload_bytes": {
+        "all_risks": 17.0,
+        "signed": 11.974537037037036,
+        "histogram": 13.0,
+        "id_records": 25.0
+      }
+    }
+  },
+  "research_sources_unchanged": true,
+  "scope": "Three small teaching example groups; one m=3,N=4 audit cell, not the full historical audit.",
+  "limits": [
+    "Exact finite counts, not language-model quality or open-world learning",
+    "Fixed code length bounds do not measure Python allocation or produce an efficient encoder",
+    "No historical source or result files overwritten"
+  ]
+}

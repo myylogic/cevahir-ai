@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-22",
+  "status": "passed",
+  "preservation": {
+    "files_unchanged": 977,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "environment": {
+    "python": "3.14.3"
+  },
+  "runs": 576,
+  "paired_lives": 24,
+  "calibration_predictions": 9216,
+  "mainstream_events": 37440,
+  "capability_outputs": 74880,
+  "unique_correct_compiled_programs": 72,
+  "fresh_process_resume_checks": 24,
+  "full_exact_rerun": true,
+  "source_protocol_result_hashes_match": true,
+  "summary_recomputed": true,
+  "initial_cost_omission_preserved": true,
+  "all_predictions_unchanged_by_correction": true,
+  "only_installation_replay_counter_and_derived_hashes_changed": true,
+  "report_claims_checked": true,
+  "local_links_checked": 21,
+  "artifacts_sha256": {
+    "docs/research/living_learning_migration_2026_09_22/CORRECTIONS.md": "a53edd647034f1622a00cc5db84abc8d2ac9d62d70def306c43c6e5d87d0e38f",
+    "docs/research/living_learning_migration_2026_09_22/MATHEMATICAL_AND_LITERATURE_TR.md": "845832ff8e3083b132517b1e5b0a2e14707d18fb68c1e2d5c7281849087262a5",
+    "docs/research/living_learning_migration_2026_09_22/PROTOCOL.md": "8dba66163933bbdc23bf80d7cd51d8ab8893ac71423ffd7de846ac7da8dcb078",
+    "docs/research/living_learning_migration_2026_09_22/REPORT_TR.md": "bb889e6d31ce076a6b6757bf6edce7e1cdc650dc7062e2bb50a3c027242da002",
+    "docs/research/living_learning_migration_2026_09_22/WHOLE_PROBLEM_AND_NEXT_TEST_TR.md": "b71541dfdece2fa0931c9b0fb57d735642066cfdf90f3516fad728250c57d6cb",
+    "research/living_learning_migration_2026_09_22/analyze_results.py": "b96b085821dd4a862be207b5674b33cc2ac12fe454af18d8989af9a737957bdd",
+    "research/living_learning_migration_2026_09_22/final_audit.py": "6ac7bf799eae11028515e0ed28a6659a6095c6e9d20e365982c32fad1183d74f",
+    "research/living_learning_migration_2026_09_22/migration_learning.py": "fc62e4e6f459235dde9ce9981bf0704d108a472d5416dbe5d333065e4e55e063",
+    "research/living_learning_migration_2026_09_22/README.md": "2ac5fea21e5304ab5e766372398259a279255f8e1228b0060e474431953e04ef",
+    "research/living_learning_migration_2026_09_22/results/initial_source_cost_omission.txt": "46ba90be824d5d0f1c7fe81cf1c5d640ea20c2233e17a08f386fe70d2f644186",
+    "research/living_learning_migration_2026_09_22/results/migration_learning.json": "8d9580c62de96356b6ba4052e343b65d254f7acbd9d78d049e7500e7e9ef7967",
+    "research/living_learning_migration_2026_09_22/results/migration_learning_initial_cost_omission.json": "d0aaaff973d17372fee2cc093e017a57085fbdfd57ca12d21a4b88eedf856ab8",
+    "research/living_learning_migration_2026_09_22/results/preservation_baseline.json": "17bf456eb0693799cd2ac8d93c3e24081ca299896202e25fd01fb03ca0b1c4b1",
+    "research/living_learning_migration_2026_09_22/results/summary.json": "8b9365cba2759b3506058244bcbf471b1409c907a6717671034748c560ff6c49",
+    "research/living_learning_migration_2026_09_22/results/verification.json": "fd27dd7f75c992adf54e62d4e493e84437cb9b5cfb5208b12fa246eeb99fa6bd",
+    "research/living_learning_migration_2026_09_22/verify_migration.py": "97ff1d27e9d2b9ecfefc7efbec70258b45960ac266be3c47b8a703b80534879d"
+  },
+  "scope": "Finite live state migration with learned supplied programs and separate reset calibration. No claim of an invented representation language, general continual learner or AGI. No commit/push."
+}

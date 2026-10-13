@@ -127,7 +127,48 @@ On altı üç-durumlu hedefin hepsi, boş olmayan kullanım alanının bütünü
 
 Çalışma grafiği yaklaşık üç durumken yeniden öğrenmek için 256 dizi, ortalama 2.094 sembol tutuldu. Yeni süreçte yalnız grafik ve mevcut durumla yürütme korunabildi; **öğrenmeye devam etmek için arşiv de taşındı**. Küçük çıkarım durumu, küçük ve yeterli öğrenme belleği değildir. [Deney ve maliyetler](../../research/living_learning_state_2026_09_20/EXPERIMENT.md)
 
-## 10. Araştırma statüsü ve devam sözleşmesi
+## 10. Bugünkü adayları korumak düzeltmeye yeter mi?
+
+[Düzeltilebilir durum çalışması](../../research/living_learning_correction_2026_09_20/REPORT_TR.md), bir sonraki açık noktayı kesin bir karşı örnekle ayırır. Üç girdide `000`, `110` ve `101` cevaplarını veren adaylar olsun. `[(0,0),(1,0)]` ve `[(0,0),(2,0)]` geçmişlerinin ikisinde de yalnız `000` tutarlıdır. İlk olayın etiketi her iki geçmişte `0`dan `1`e çevrildiğinde ise tutarlı adaylar sırasıyla `101` ve `110` olur. Eski tam aday kümesi ve gelen düzeltme aynı olduğu halde gerekli sonuç farklıdır. Yalnız bugünkü adayları saklayan güncelleme bu iki geleceği ayıramaz.
+
+[`CorrectionSummary.replace_label`](../../../research/living_learning_correction_2026_09_20/correction_state.py#L51), elenmiş adaylar dahil her adayın ihlal sayısını tutarak doğru eski katkıyı çıkarır ve yeni katkıyı ekler. [`ObservationHistogram`](../../../research/living_learning_correction_2026_09_20/correction_state.py#L72), daha basit güçlü rakiptir: bu küçük evrende altı `(x,y)` sayacı da yeterlidir. Sayaçların her adımda doğru olması dış düzeltme paketinin doğru eski içeriği taşımasına bağlıdır; yöntem kaynak kimliğini doğrulayan bir servis değildir.
+
+Tam rapordaki 255 aday altkümesi üzerinden 1.507.050 sınıf–düzeltme karşılaştırmasında iki yöntem de replay ile aynı adayları verdi. Bu sayı bağımsız rastgele deney sayısı değildir; aynı sonlu evrenin tam taramasıdır. Yalnız hayatta kalanları saklayan ablation, doğru yeni kümenin boş olmadığı 360.000 durumun hepsinde başarısız oldu. Birden fazla çelişkiyi tek var/yok bitine sıkıştırmak da düzeltmede çelişki çokluğunu kaybetti. Sonuç “bütün geçmişi her zaman sakla” değildir; gelecekte izin verilen değişikliğin gerektirdiği ayrımı kaybetme koşuludur.
+
+## 11. Daha zengin bellek her zaman gerekli mi?
+
+[Gelecek işlem sözleşmesi araştırması](../../research/living_learning_query_state_2026_09_21/REPORT_TR.md), histogramın yeterli olmasından minimal olduğu sonucunun çıkmadığını gösterir. Sabit `m` girdide bütün Boolean hipotezlerin toplam 0–1 hataları isteniyorsa `N` ve `dₓ=n[x,0]−n[x,1]` yeterlidir:
+
+$$
+c_h=\frac{N-\sum_x d_x}{2}+\sum_x h(x)d_x.
+$$
+
+[`signed`](../../../research/living_learning_query_state_2026_09_21/query_state.py#L22) bu özeti, [`query`](../../../research/living_learning_query_state_2026_09_21/query_state.py#L29) yanıtı hesaplar. Sabit-sıfır ile yalnız bir girdide 1 veren adayın hata farkı `dₓ`'i; sabit-sıfır ve sabit-bir hatalarının toplamı `N`'yi geri verir. Dolayısıyla bu tam risk sorguları için özetin taşıdığı ayrımlar tam olarak gereklidir. Yalnız en iyi adayı sormak daha zayıf başka bir sözleşmedir.
+
+`[(0,0),(0,1)]` ve `[(1,0),(1,1)]`, aynı `N=2,d=(0,0)` özetini verir; bütün dört Boolean hipotezin hatası 1'dir. Ancak `(0,0)` gözlemi sayısı farklıdır. Gözlem sayma sorusu eklenirse özet artık yeterli değildir. Sadece olay kimliği verilen düzeltmeler, kayıt sırası hakkında ek ayrım da gerektirir. Dışarıda kimlik→içerik tablosu tutmak bu bilgiyi yok etmez; saklama maliyetini başka bileşene taşır.
+
+Tarihsel tam tarama 61.575 geçmişte üç sözleşmeyi karşılaştırdı. Bu kitap için [`book_research_walkthrough.py`](../../../scripts/book_research_walkthrough.py), eski deneyleri değiştirmeden üç öğretim grubu çalıştırır: düzeltme tanığı, sorgu sınırı ve `m=3,N=4` hücresi. Son hücrede 1.296 geçmiş, 10.368 içerikli etiket yazımı ve 7.776 ekleme tekrar sınandı; uyuşmazlık sıfırdı. Risk, histogram ve kimlikli düzenleme sözleşmeleri sırasıyla 85, 126 ve 1.296 ayırt edilebilir sınıf verdi. [Yeni kitap kaydı](../evidence/research_walkthrough.json), tam tarihsel deneyi yeniden çalıştırmış olduğumuz iddiası taşımaz.
+
+```powershell
+python scripts/book_research_walkthrough.py
+```
+
+## 12. Deneyleri ortak bir ölçüm diliyle okumak
+
+Bir deneyin son hatası ile yaşam boyunca yaptığı hataları ayırmak gerekir. Prequential değerlendirmede örnek `t` için önce eski durumla `ŷₜ` hesaplanır, sonra etiket öğreniciye verilir ve güncelleme yapılır. Yaşam kaybı `L₁:ₜ=Σₜ ℓ(ŷₜ,yₜ)` bu sırayla ölçülür. Aynı etiketi önce öğretip sonra ölçmek başka bir soruyu, güncelleme sonrası uyumu ölçer. Durum yordamı deneyindeki `predictions → observe` sırası bu nedenle önemlidir. Son modelin tam doğru olması, edinim sırasında daha az hata yaptığı anlamına gelmez.
+
+| Araştırma iddiası | Gerekli ayırıcı kontrol | Tek başına yetmeyen gözlem |
+|---|---|---|
+| Kalıcı edinim | Geçici bağlamı temizleme, yeni girdiler, durum silme/taşıma | Eğitim örneklerinin tekrar doğru cevaplanması |
+| Daha ucuz kullanılabilir hesap | Aynı bilgi ve toplam edinim/güncelleme/saklama/cevap bütçesi | Yalnız tek cevaplama adımının kısalması |
+| Eski geçerli bilginin korunması | Hedefi sabit kalan bölgeyi ayrıca ölçme | Değişen bölgedeki yeni hatanın azalması |
+| Daha iyi öğrenme kuralı | Tahmin katsayılarını sıfırlayıp yalnız güncelleyiciyi taşıma | Eski görevde yüksek başarı |
+| Yeterli kalıcı durum | İzinli yeni sorgu/düzeltmelerde replay ile karşılaştırma | Bugünkü çıktının eşitliği |
+| Genellenebilir mekanizma | Hazır dil/ayrıcalıklı bilgi ve güçlü rakiplerin açıklanması | Daha karmaşık yapının bir örnekte çalışması |
+
+Bir tohumdaki bin sorgu bağımsız bin dünya değildir. Dünya veya yaşamlar arası değişkenlik araştırılıyorsa raporda bu birim kullanılmalıdır. Aynı akışı yöntemlere vermek eşleştirilmiş farkı ölçmeyi sağlar; fakat akışın dar olması dış geçerliliği sınırlamaya devam eder. Buradaki küçük araştırmalar için belgelenmemiş güven aralıkları, anlamlılık testleri veya yeni büyük ölçekli sonuçlar uydurulmaz.
+
+## 13. Araştırma statüsü ve devam sözleşmesi
 
 `Experience threads`, `stacks` ve `pathways` bu kitapta uygulanmış yeni mimari parçalar olarak sunulmaz. Kaynakta deneyim kayıtları, gecikme tamponları, bağımlı derlemeler ve durum grafikleri vardır; bunları bu adlarla yeniden etiketlemek yeni sonuç üretmez. **Plasticity**, burada yeni deneyimlerden öğrenebilme kapasitesini anlatan araştırma kavramıdır; genel plastisite koruma modülü gösterilmedi. Aynı şekilde hata nedenini fiziksel olarak teşhis etmek ile daha iyi öngörü edinmek farklı hedeflerdir. [Tanımlanabilirlik karşı örnekleri](../../research/living_learning_state_2026_09_20/FAILURE_IDENTIFIABILITY.md) hedef değişimi ve geri bildirim bozulmasının aynı gözlemleri üretebildiğini gösterir.
 
@@ -136,5 +177,34 @@ Ortaklaşan bulgular; kalıcı durumun nedensel etkisi, bilgi ile hesap bütçes
 Eski sonuçların yeniden üretim kayıtları [ilk tur](../../../research/living_learning/results/verification.json), [yeniden değerlendirme](../../../research/living_learning_reassessment/results/verification.json), [ortak yaşam](../../../research/living_learning_joint_2026_09_20/results/verification.json), [güncelleme](../../../research/living_learning_update_2026_09_20/results/verification.json) ve [durum yordamı](../../../research/living_learning_state_2026_09_20/results/verification.json) altında bulunur. Son turun 74 eski dosyayı koruma denetimi, o turun kaydıdır; bu kitap yazılırken deneyler yeniden çalıştırılmış gibi sunulmaz. Tekrar üretim uygulama güvenini artırır; genellik veya özgünlük sertifikası değildir.
 
 Geniş açık, deneyimden yararlı ayrım edinmek; geçerli bilgiyi korurken yanlışını düzeltebilmek; gelecekteki öğrenmeye yetecek durumu sonlu kaynakla taşımak ve bütün bunları kendi eylemlerinin ürettiği veride sürdürebilmektir. Ne yeniden sınama, ne güncelleme matrisi, ne otomata çıkarımı bu bütünün yerine geçirilir. [Sonraki bölüm](12-acik-sorular.md), yeni çalışmaların bu birikimi nasıl koruyarak ilerleyeceğini anlatır.
+
+## Çözümlü alıştırmalar
+
+### 1. Edinim etkisi
+
+Deneyim öncesi kayıp `.30`, sonrasında `.12`; durum silinince `.29`, başka sürece taşınınca `.13` olsun. Ne söylenebilir? **Çözüm:** Aynı yeni sorgular ve bütçe altında kazanım `.18`dir. Silme ve taşıma, etkinin kalıcı duruma bağlı olduğu iddiasını destekler. Bu sayılar öğretim örneğidir; Cevahir ölçümü değildir. Başka görev ailelerine genelleme henüz gösterilmemiştir.
+
+### 2. Ortalama yeterli mi?
+
+`(0,2)` ile `(1)` aynı ortalamaya sahip. Yeni `4`ten sonra neden ayrılır? **Çözüm:** İlk ortalama `6/3=2`, ikincisi `5/2=2.5` olur. Sayı adedi kaybolmuştur. `(toplam,adet)` bu ekleme ailesinde kapalı bir özet verir; yeni özellik sorgularına evrensel çözüm olmaz.
+
+### 3. Birlikte iyileşme
+
+`R(a,b)=(a+b−1)²` için `(0,0)`dan ayrı ayrı `a=1.5` ve `b=1.5` güncellemeleri iyidir. Birlikte neden kötüdür? **Çözüm:** Ayrı risk `.25`, birleşik risk `(3−1)²=4` olur. Güncellemelerin etkileri aynı çıktıda birleşir; bağımsız deney başarısı bileşim garantisi değildir.
+
+### 4. Gelecek sözleşmesini değiştirin
+
+İki çelişkili etiketin aynı girdide toplandığı iki farklı geçmişin `N,d` özeti aynı. Hipotez risklerini doğru vermek, bir girdinin kaç defa görüldüğünü bilmeyi sağlar mı? **Çözüm:** Hayır. `dₓ=0`, hem hiç gözlem hem eşit sayıda karşıt etiket olabilir. Risk sorgusu ile gözlem çokluğu sorgusu farklı ayrımlar ister.
+
+### 5. İyi son model, iyi yaşam mı?
+
+İki yöntem son görevlerin hepsini çözüyor; ilki edinim sırasında 40, ikincisi 12 yanlış cevap vermiş. Hangisi daha iyi? **Çözüm:** Yalnız son doğrulukta eşitler; servis hatası ölçüsünde ikinci daha iyidir. İlk yöntemin bellek veya hesap üstünlüğü varsa onu ayrıca saymak gerekir. Tek ölçüden bütün yaşamın üstünlüğü çıkmaz.
+
+## Kaynakça ve araştırma kayıtları
+
+1. Mitchell, T. M. (1977). [Version Spaces: A Candidate Elimination Approach to Rule Learning](https://www.ijcai.org/Proceedings/77-1/Papers/048.pdf), IJCAI. Tutarlı hipotezlerle öğrenme için özgün kaynak; buradaki bütün güncelleme düzeneklerini kapsamaz.
+2. Sutton, R. S. (1992). [Adapting Bias by Gradient Descent: An Incremental Version of Delta-Bar-Delta](https://cdn.aaai.org/AAAI/1992/AAAI92-027.pdf), AAAI. Deneyimle adım büyüklüğü uyarlama ve öğrenilmiş güncelleme deneyinin literatür bağlantısı.
+3. Cao, Y. ve Yang, J. (2015). [Towards Making Systems Forget with Machine Unlearning](https://www.yinzhicao.org/unlearning/UnlearningOakland15.pdf), IEEE Symposium on Security and Privacy. Toplamsal katkı çıkarma bağlantısı; bu kitaptaki sayaçlar o sistemin uygulanmış kopyası veya genel unlearning garantisi değildir.
+4. Yılmaz, M. Y. (2026). [Cevahir araştırma dizisi](../../publications/README.md), dokuz çalışma ve korunmuş teknik raporlar. Yerel deney sayılarının kaynakları her ilgili alt bölümde verilmiştir. Bunlar dış hakemli yayın olarak sunulmaz.
 
 [İçindekiler](../README.md) · [Sonraki: Açık sorular ve katkı](12-acik-sorular.md)

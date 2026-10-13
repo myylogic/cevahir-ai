@@ -2,11 +2,11 @@
 
 **Gerçek kaynak kodundan, açık araştırma sorularına uzanan teknik kitap.**
 
-[Repository ana sayfası](../../README-TR.md) · [English reading guide](README-en.md) · [Kaynak haritası](KAYNAK_HARITASI.md) · [Akademik okuma ve yeniden üretim](AKADEMIK_OKUMA.md) · [Kitabı güncel tutmak](BAKIM.md)
+[Repository ana sayfası](../../README-TR.md) · [English reading guide](README-en.md) · [Kaynak haritası](KAYNAK_HARITASI.md) · [Akademik okuma ve yeniden üretim](AKADEMIK_OKUMA.md) · [Kitabı güncel tutmak](BAKIM.md) · [Ayrıntılı içindekiler](AYRINTILI_ICINDEKILER.md) · [Terimler](TERIMLER.md) · [Bütünleştirici çalışma](BUTUNLESTIRICI_CALISMA.md)
 
 Cevahir'in yönü açık kaynak araştırma ve eğitimdir. Bu kitap, ürün geliştirme hedefinin yerine yeni bir basitleştirilmiş uygulama koymaz. Aynı mühendislik kodunu, testleri ve araştırma kayıtlarını birbirine bağlar. Okuyucu bir kavramı öğrendikten sonra onun gerçek bir sistemde hangi girdiyi aldığını, hangi hesabı yaptığını ve çıktısını kimin kullandığını izleyebilmelidir.
 
-Kitabın ana dili Türkçedir. Teknik terimlerin İngilizce karşılıkları gerektiğinde verilir; mevcut İngilizce modül belgeleri korunur. **Bu ilk sürümün kaynak inceleme tarihi 20 Eylül 2026'dır.** Davranışın son sözü güncel uygulamadır; bir kaynak dosyasındaki eski başlık veya yorum, etkin çağrı yolunun yerine geçmez. Bir kararın tarihsel gerekçesi kayıtlı değilse, kitap bunun mühendislik etkisini açıklar ve gerekçe uydurmaz.
+Kitabın ana dili Türkçedir. Teknik terimlerin İngilizce karşılıkları gerektiğinde verilir; mevcut İngilizce modül belgeleri korunur. **12 bölümlük ilk tam metin 21 Eylül 2026'da yerel olarak tamamlandı. Yazar: Muhammed Yasin Yılmaz.** Kaynak incelemesi 20–21 Eylül 2026 tarihlerinde yapıldı. Davranışın son sözü güncel uygulamadır; bir kaynak dosyasındaki eski başlık veya yorum, etkin çağrı yolunun yerine geçmez. Bir kararın tarihsel gerekçesi kayıtlı değilse, kitap bunun mühendislik etkisini açıklar ve gerekçe uydurmaz.
 
 ## İçindekiler
 
@@ -30,7 +30,7 @@ Kitabın ana dili Türkçedir. Teknik terimlerin İngilizce karşılıkları ger
 | [11. Yaşarken öğrenme laboratuvarı](tr/11-arastirma-laboratuvari.md) | Hipotez → mekanizma → kod → karşılaştırma → sonuç → sınırlılık. |
 | [12. Bilmediklerimiz ve araştırmanın devamı](tr/12-acik-sorular.md) | Kalıcılık, düzeltme, temsil, öğrenme biçimi ve birleşik yaşamın açık sorunları. |
 
-21 Eylül genişletmesinde 3–6. bölümlere sinir ağı ve temsilin temelleri, ayrıntılı matematik, yöntemlerin özgün kaynakları, tarihli endüstri karşılaştırmaları, dosya/metot haritaları ve çözümlü alıştırmalar eklendi. Gerçek Cevahir bileşenleriyle yedi küçük CPU örnek grubu çalıştırıldı. Ardından 7–9. bölümlere checkpoint kimliği/devamı, üretim matematiği, retrieval ve araçlar için 15 çözümlü alıştırma ve 10 çalıştırılmış örnek grubu daha eklendi. İncelemede bulunan calculator ifade kesme hatası düzeltildi; eski negatif çıktı korundu. Bu, kitabın bütün bölümlerinin aynı ayrıntı düzeyinde tamamlandığı anlamına gelmez; güncel kapsam [akademik okuma rehberinde](AKADEMIK_OKUMA.md) açıklanır.
+Kitap; **12 bölüm, 142 konu başlığı, 81 alt başlık ve 63 çözümlü alıştırma** içerir. Altı çalıştırılabilir eşlikçide toplam 33 örnek veya örnek grubu, ayrıca 76 terimlik dizin ve yedi aşamalı bütünleştirici çalışma bulunur. Sayım yöntemi, bölüm kapsamı ve denetim sonuçları [tamamlanma kaydındadır](TAMAMLANMA.md). Bu, Türkçe ilk tam metindir; dış hakemlik, son baskı veya genel living-learning probleminin çözümü iddiası değildir. Son eklemeler yerel çalışma kopyasındadır; henüz yeni commit ya da DOI yayını yapılmadı.
 
 ## Nasıl okunmalı?
 

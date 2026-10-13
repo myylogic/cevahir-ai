@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-22",
+  "status": "passed",
+  "preservation": {
+    "files_unchanged": 961,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "environment": {
+    "python": "3.14.3",
+    "numpy": "2.4.2"
+  },
+  "trajectories": 504,
+  "paired_lives": 24,
+  "prequential_predictions": 516096,
+  "snapshots": 2520,
+  "complete_exact_replays": 1,
+  "fresh_process_resume_checks": 21,
+  "independent_scalar_metric_checks": 1512,
+  "exact_fraction_kt_checks": 80,
+  "enumerated_tree_checks": 168,
+  "scalar_automaton_outputs": 32640,
+  "auxiliary_memory_witness_pairs": 2016,
+  "source_protocol_result_hashes_match": true,
+  "summary_recomputed": true,
+  "report_key_claims_checked": true,
+  "local_links_checked": 19,
+  "artifacts_sha256": {
+    "docs/research/living_learning_temporal_2026_09_22/LEARNING_STATE_TR.md": "3400de3e016a581e011b5ee61ebc8c28830a45d44b00c4e7f31e61ee5c11fcd2",
+    "docs/research/living_learning_temporal_2026_09_22/MATHEMATICAL_AND_LITERATURE_TR.md": "e89c6f992f13023825b22a4ab2fcd6cee02ab3e1c0e5f37e1357a5cfcb40183b",
+    "docs/research/living_learning_temporal_2026_09_22/PROTOCOL.md": "bacc9cbc06572bfb3aef39ac75704beb41d8214704acfccc65a0e3ae9c8fe53c",
+    "docs/research/living_learning_temporal_2026_09_22/REPORT_TR.md": "52e5592e97380ae32e700887e49f8ab5d696cd2880f5cfb7fe46e72ce9b0a0ce",
+    "research/living_learning_temporal_2026_09_22/analyze_results.py": "f776891c76776ca2ba282d54bdfb427049b89847834183582d03ad5ce3f1e82d",
+    "research/living_learning_temporal_2026_09_22/final_audit.py": "3344c0a67cc966e9e8b57e8b20c6c1bbdf13deba7de22f399e09a9e49cee457f",
+    "research/living_learning_temporal_2026_09_22/README.md": "99da450c128f196075ab987a31129e95c3c6a1bc6d3d3a014fb0ec40b06128cb",
+    "research/living_learning_temporal_2026_09_22/results/learning_state_verification.json": "6f72e5517d1756461192a8e6d9cdfd0f969bb9a6e87e22a07f2d372b3296c57a",
+    "research/living_learning_temporal_2026_09_22/results/preservation_baseline.json": "89977319c8b0f3f46675d10af13d110a8cc40dce5cfa248e4e85b311ec843c3b",
+    "research/living_learning_temporal_2026_09_22/results/summary.json": "525153bd86bf51928bc549a2a02085460116d65c0a4e2ce1576053d0cdf48d02",
+    "research/living_learning_temporal_2026_09_22/results/temporal_learning.json": "6716dbf38decbcc924b53233302c4dc85efad9b0fe9c64c595a0e2ddef398001",
+    "research/living_learning_temporal_2026_09_22/results/verification.json": "2c657bbe79d42384f4490060fa0cb79809d3598907d2d974826f9777a94b68ec",
+    "research/living_learning_temporal_2026_09_22/temporal_learning.py": "634fdd1d1058f204d39537c871828a2b0ca7da49ec4f885134522fb6375e977f",
+    "research/living_learning_temporal_2026_09_22/verify_learning_state.py": "ae512d0b583ea7cf507423245fa01971987359af3600cd409c097ad293d45c90",
+    "research/living_learning_temporal_2026_09_22/verify_temporal.py": "74080313856ed79a9727f8bbdde622a7fd3d8214e3cbd79584db3d829e1d11ab"
+  },
+  "scope": "Local finite experiments and conditional proofs. Supplied memory families; no new fundamental algorithm, biological mechanism or AGI claim. No commit or push."
+}

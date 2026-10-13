@@ -1,0 +1,141 @@
+{
+  "checker_selftest": {
+    "ok": true,
+    "accepted": 5,
+    "rejected": 14,
+    "work": 235
+  },
+  "randomized_solver": {
+    "cases": 1000,
+    "sat_witnesses": 198,
+    "unsat_proofs": 802
+  },
+  "recorded": {
+    "answers_checked": 16128,
+    "accepted_certificates_checked_including_controls": 815,
+    "active_lemma_truth_checks_including_controls": 33940,
+    "blind_invalid_active_lemma_uses": 1705,
+    "blind_invalid_new_lemmas": 5,
+    "exact_replay_pairs": 2304
+  },
+  "fresh_process_resume": [
+    {
+      "seed": 0,
+      "method": "scoped",
+      "cut": 49,
+      "exact_equal": true
+    },
+    {
+      "seed": 0,
+      "method": "scoped",
+      "cut": 73,
+      "exact_equal": true
+    },
+    {
+      "seed": 0,
+      "method": "blind",
+      "cut": 49,
+      "exact_equal": true
+    },
+    {
+      "seed": 0,
+      "method": "blind",
+      "cut": 73,
+      "exact_equal": true
+    },
+    {
+      "seed": 0,
+      "method": "erase",
+      "cut": 49,
+      "exact_equal": true
+    },
+    {
+      "seed": 0,
+      "method": "erase",
+      "cut": 73,
+      "exact_equal": true
+    },
+    {
+      "seed": 7,
+      "method": "scoped",
+      "cut": 49,
+      "exact_equal": true
+    },
+    {
+      "seed": 7,
+      "method": "scoped",
+      "cut": 73,
+      "exact_equal": true
+    },
+    {
+      "seed": 7,
+      "method": "blind",
+      "cut": 49,
+      "exact_equal": true
+    },
+    {
+      "seed": 7,
+      "method": "blind",
+      "cut": 73,
+      "exact_equal": true
+    },
+    {
+      "seed": 7,
+      "method": "erase",
+      "cut": 49,
+      "exact_equal": true
+    },
+    {
+      "seed": 7,
+      "method": "erase",
+      "cut": 73,
+      "exact_equal": true
+    },
+    {
+      "seed": 23,
+      "method": "scoped",
+      "cut": 49,
+      "exact_equal": true
+    },
+    {
+      "seed": 23,
+      "method": "scoped",
+      "cut": 73,
+      "exact_equal": true
+    },
+    {
+      "seed": 23,
+      "method": "blind",
+      "cut": 49,
+      "exact_equal": true
+    },
+    {
+      "seed": 23,
+      "method": "blind",
+      "cut": 73,
+      "exact_equal": true
+    },
+    {
+      "seed": 23,
+      "method": "erase",
+      "cut": 49,
+      "exact_equal": true
+    },
+    {
+      "seed": 23,
+      "method": "erase",
+      "cut": 73,
+      "exact_equal": true
+    }
+  ],
+  "preservation": {
+    "files": 1055,
+    "all_unchanged": true,
+    "head": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "full_rerun": {
+    "returncode": 0,
+    "stdout": "exact_rerun_passed",
+    "stderr": ""
+  }
+}

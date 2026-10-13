@@ -1,0 +1,409 @@
+{
+  "independent_seeds": 24,
+  "queries_per_method": 24,
+  "methods": [
+    {
+      "method": "separate",
+      "n": 576,
+      "correct": 0,
+      "abstained": 576,
+      "confident_errors": 0,
+      "life_work_mean": 24,
+      "life_work_min": 24,
+      "life_work_max": 24,
+      "max_state_bytes_mean": 397,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_mean": 1
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_mean": 1
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_mean": 1
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_mean": 1
+        }
+      ]
+    },
+    {
+      "method": "persistent",
+      "n": 576,
+      "correct": 374,
+      "abstained": 202,
+      "confident_errors": 0,
+      "life_work_mean": 265.4166666666667,
+      "life_work_min": 264,
+      "life_work_max": 266,
+      "max_state_bytes_mean": 1299,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 48,
+          "abstained": 96,
+          "confident_errors": 0,
+          "candidate_mean": 24,
+          "service_mean": 28
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 72,
+          "abstained": 72,
+          "confident_errors": 0,
+          "candidate_mean": 6,
+          "service_mean": 9
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 110,
+          "abstained": 34,
+          "confident_errors": 0,
+          "candidate_mean": 2,
+          "service_mean": 4.236111111111111
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_mean": 3
+        }
+      ]
+    },
+    {
+      "method": "recompute",
+      "n": 576,
+      "correct": 374,
+      "abstained": 202,
+      "confident_errors": 0,
+      "life_work_mean": 10345.416666666666,
+      "life_work_min": 10344,
+      "life_work_max": 10346,
+      "max_state_bytes_mean": 1765,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 48,
+          "abstained": 96,
+          "confident_errors": 0,
+          "candidate_mean": 24,
+          "service_mean": 268
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 72,
+          "abstained": 72,
+          "confident_errors": 0,
+          "candidate_mean": 6,
+          "service_mean": 369
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 110,
+          "abstained": 34,
+          "confident_errors": 0,
+          "candidate_mean": 2,
+          "service_mean": 484.2361111111111
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_mean": 603
+        }
+      ]
+    },
+    {
+      "method": "oracle",
+      "n": 576,
+      "correct": 576,
+      "abstained": 0,
+      "confident_errors": 0,
+      "life_work_mean": 72,
+      "life_work_min": 72,
+      "life_work_max": 72,
+      "max_state_bytes_mean": 435,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_mean": 3
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_mean": 3
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_mean": 3
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_mean": 3
+        }
+      ]
+    },
+    {
+      "method": "wrong",
+      "n": 576,
+      "correct": 450,
+      "abstained": 0,
+      "confident_errors": 126,
+      "life_work_mean": 72,
+      "life_work_min": 72,
+      "life_work_max": 72,
+      "max_state_bytes_mean": 1292,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 77,
+          "abstained": 0,
+          "confident_errors": 67,
+          "candidate_mean": 1,
+          "service_mean": 3
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 105,
+          "abstained": 0,
+          "confident_errors": 39,
+          "candidate_mean": 1,
+          "service_mean": 3
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 124,
+          "abstained": 0,
+          "confident_errors": 20,
+          "candidate_mean": 1,
+          "service_mean": 3
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 144,
+          "abstained": 0,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_mean": 3
+        }
+      ]
+    },
+    {
+      "method": "disabled",
+      "n": 576,
+      "correct": 0,
+      "abstained": 576,
+      "confident_errors": 0,
+      "life_work_mean": 42,
+      "life_work_min": 42,
+      "life_work_max": 42,
+      "max_state_bytes_mean": 1294,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 24,
+          "service_mean": 2
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 6,
+          "service_mean": 2
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 2,
+          "service_mean": 1
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 1,
+          "service_mean": 2
+        }
+      ]
+    },
+    {
+      "method": "tree",
+      "n": 576,
+      "correct": 0,
+      "abstained": 576,
+      "confident_errors": 0,
+      "life_work_mean": 24,
+      "life_work_min": 24,
+      "life_work_max": 24,
+      "max_state_bytes_mean": 393,
+      "phases": [
+        {
+          "phase": 0,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_mean": 1
+        },
+        {
+          "phase": 1,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_mean": 1
+        },
+        {
+          "phase": 2,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_mean": 1
+        },
+        {
+          "phase": 3,
+          "n": 144,
+          "correct": 0,
+          "abstained": 144,
+          "confident_errors": 0,
+          "candidate_mean": 0,
+          "service_mean": 1
+        }
+      ]
+    }
+  ],
+  "paired": [
+    {
+      "left": "persistent",
+      "right": "separate",
+      "life_work_difference_mean": 241.41666666666666,
+      "left_cheaper_lives": 0,
+      "equal_cost_lives": 0
+    },
+    {
+      "left": "persistent",
+      "right": "recompute",
+      "life_work_difference_mean": -10080,
+      "left_cheaper_lives": 24,
+      "equal_cost_lives": 0
+    },
+    {
+      "left": "persistent",
+      "right": "oracle",
+      "life_work_difference_mean": 193.41666666666666,
+      "left_cheaper_lives": 0,
+      "equal_cost_lives": 0
+    },
+    {
+      "left": "persistent",
+      "right": "wrong",
+      "life_work_difference_mean": 193.41666666666666,
+      "left_cheaper_lives": 0,
+      "equal_cost_lives": 0
+    },
+    {
+      "left": "persistent",
+      "right": "disabled",
+      "life_work_difference_mean": 223.41666666666666,
+      "left_cheaper_lives": 0,
+      "equal_cost_lives": 0
+    },
+    {
+      "left": "persistent",
+      "right": "tree",
+      "life_work_difference_mean": 241.41666666666666,
+      "left_cheaper_lives": 0,
+      "equal_cost_lives": 0
+    }
+  ],
+  "candidate_counts_by_phase": {
+    "0": [
+      24
+    ],
+    "1": [
+      6
+    ],
+    "2": [
+      2
+    ],
+    "3": [
+      1
+    ]
+  },
+  "unit": "Declared virtual operations: parsing, filtering, candidate scans, query steps, writes and tree-copy work; not CPU time.",
+  "scope": "Finite six-symbol relational worlds with hidden symbol permutations and finite bridge evidence."
+}

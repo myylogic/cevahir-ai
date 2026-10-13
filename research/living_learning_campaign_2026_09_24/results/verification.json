@@ -1,0 +1,23 @@
+{
+  "time_utc": "2026-09-24T10:47:54.411995+00:00",
+  "passed": true,
+  "catalog_entries": 200,
+  "complete_engine_lifetimes": 288,
+  "paired_outcomes": 3456,
+  "summary_recomputed": true,
+  "deterministic_reruns": {
+    "memory": 72,
+    "representation": 72,
+    "update": 72,
+    "environment": 72
+  },
+  "preserved_existing_files": 1114,
+  "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c",
+  "frozen_sources_unchanged": true,
+  "statistics": {
+    "passed": true,
+    "checks": 56,
+    "details": "Exhaustive binary sign outcomes n<=8; hand Holm values; independent step-down rejection."
+  },
+  "note": "Deterministic replay is reproducibility, not an independent implementation or real-world validation."
+}

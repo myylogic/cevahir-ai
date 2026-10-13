@@ -1,0 +1,57 @@
+{
+  "trees": 945,
+  "category_masks": [
+    7,
+    56,
+    21,
+    42
+  ],
+  "maximum_categories_represented_by_single_nodes": 2,
+  "all_categories_single_node_possible": false,
+  "all_trees_support_exact_union_readout_without_duplicate_leaves": true,
+  "minimum_total_union_node_references": 6,
+  "total_reference_histogram": {
+    "6": 2,
+    "7": 16,
+    "8": 57,
+    "9": 112,
+    "10": 224,
+    "11": 336,
+    "12": 198
+  },
+  "witness": {
+    "tree": [
+      [
+        [
+          0,
+          2
+        ],
+        1
+      ],
+      [
+        [
+          3,
+          5
+        ],
+        4
+      ]
+    ],
+    "covers": [
+      [
+        7
+      ],
+      [
+        56
+      ],
+      [
+        5,
+        16
+      ],
+      [
+        2,
+        40
+      ]
+    ]
+  },
+  "scope": "Exact representation audit; no concept-learning or tree-training experiment."
+}

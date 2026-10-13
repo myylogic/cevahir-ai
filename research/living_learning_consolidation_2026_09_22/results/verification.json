@@ -1,0 +1,205 @@
+{
+  "scalar": {
+    "candidate_scalar_outputs": 5376,
+    "independent_teacher_labels": 9216,
+    "unique_functions": 84,
+    "old_acquisition_exact_worlds": 72,
+    "learner_interface_has_no_world_or_truth": true
+  },
+  "structure": {
+    "schedule_count_identity": true,
+    "independent_error_count_cells": 168,
+    "source_and_day_order_invariance": true,
+    "self_replay_preserves_old_model": true,
+    "exported_and_restored_states_are_isolated": true,
+    "conflicting_input_exact_lower_bound": "1/4",
+    "full_hidden_world_tight_bound": "1/8"
+  },
+  "preservation": {
+    "files_unchanged": 924,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "recorded": {
+    "trajectories": 576,
+    "snapshots": 4032,
+    "prequential_records": 13824,
+    "scalar_final_query_checks": 73728,
+    "schedule_equivalent_pairs": 72,
+    "cache_purged_all_runs": true,
+    "hidden_context_lower_bound_all_snapshots": true
+  },
+  "fresh_process_resume": [
+    {
+      "regime": "visible_context",
+      "method": "frozen_core",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "visible_context",
+      "method": "cache_only",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "visible_context",
+      "method": "sleep_linear_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "visible_context",
+      "method": "sleep_rich_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "visible_context",
+      "method": "online_rich",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "visible_context",
+      "method": "sleep_rich_recent",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "visible_context",
+      "method": "sleep_self_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "visible_context",
+      "method": "sleep_mispaired_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "hidden_context",
+      "method": "frozen_core",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "hidden_context",
+      "method": "cache_only",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "hidden_context",
+      "method": "sleep_linear_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "hidden_context",
+      "method": "sleep_rich_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "hidden_context",
+      "method": "online_rich",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "hidden_context",
+      "method": "sleep_rich_recent",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "hidden_context",
+      "method": "sleep_self_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "hidden_context",
+      "method": "sleep_mispaired_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "noisy_day",
+      "method": "frozen_core",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "noisy_day",
+      "method": "cache_only",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "noisy_day",
+      "method": "sleep_linear_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "noisy_day",
+      "method": "sleep_rich_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "noisy_day",
+      "method": "online_rich",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "noisy_day",
+      "method": "sleep_rich_recent",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "noisy_day",
+      "method": "sleep_self_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    },
+    {
+      "regime": "noisy_day",
+      "method": "sleep_mispaired_replay",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object",
+      "raw_episodes_present": false
+    }
+  ],
+  "full_rerun": {
+    "returncode": 0,
+    "stdout": "{\"status\": \"exact_rerun_passed\", \"trajectories\": 576}"
+  }
+}

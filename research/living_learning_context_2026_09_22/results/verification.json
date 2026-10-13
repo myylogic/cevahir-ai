@@ -1,0 +1,163 @@
+{
+  "structural": {
+    "scalar_bank_cells": 8388608,
+    "unique_functions": 15904,
+    "world_checks": 72,
+    "prefix_equality_and_suffix_balance": true,
+    "exact_pair_odds": [
+      {
+        "method": "joint_uniform_gate",
+        "distinguishing_records": 7,
+        "multiplier": 893871739
+      },
+      {
+        "method": "joint_balanced_family",
+        "distinguishing_records": 7,
+        "multiplier": 893871739
+      }
+    ],
+    "state_isolation": true,
+    "ordinary_constructor_has_no_teacher": true
+  },
+  "preservation": {
+    "files_unchanged": 941,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "recorded": {
+    "trajectories": 504,
+    "snapshots": 4032,
+    "prequential_predictions": 32256
+  },
+  "fresh_process_resume": [
+    {
+      "method": "full_table",
+      "regime": "aligned",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "pooled_x",
+      "regime": "aligned",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "surface_only",
+      "regime": "aligned",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "history_only",
+      "regime": "aligned",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "joint_uniform_gate",
+      "regime": "aligned",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "joint_balanced_family",
+      "regime": "aligned",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "oracle_gate",
+      "regime": "aligned",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "full_table",
+      "regime": "balanced",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "pooled_x",
+      "regime": "balanced",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "surface_only",
+      "regime": "balanced",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "history_only",
+      "regime": "balanced",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "joint_uniform_gate",
+      "regime": "balanced",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "joint_balanced_family",
+      "regime": "balanced",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "oracle_gate",
+      "regime": "balanced",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "full_table",
+      "regime": "reversed",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "pooled_x",
+      "regime": "reversed",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "surface_only",
+      "regime": "reversed",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "history_only",
+      "regime": "reversed",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "joint_uniform_gate",
+      "regime": "reversed",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "joint_balanced_family",
+      "regime": "reversed",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "oracle_gate",
+      "regime": "reversed",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    }
+  ],
+  "full_rerun": {
+    "returncode": 0,
+    "stdout": "{\"status\": \"exact_rerun_passed\", \"trajectories\": 504}"
+  }
+}

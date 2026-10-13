@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-22",
+  "status": "passed",
+  "preservation": {
+    "files_unchanged": 904,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "environment": {
+    "python": "3.14.3",
+    "numpy": "2.4.2"
+  },
+  "primary_trajectories": 576,
+  "primary_checkpoints": 7488,
+  "complete_exact_replays": 1,
+  "uninterrupted_fresh_process_comparisons": 24,
+  "source_result_hashes_match": true,
+  "paired_summary_recomputed": true,
+  "post_result_witness_exact": true,
+  "report_main_positive_and_negative_claims_checked": true,
+  "local_document_links_checked": 34,
+  "source_update_prior_symmetry": true,
+  "artifacts_sha256": {
+    "docs/research/living_learning_relations_2026_09_22/LITERATURE_TR.md": "2d28c47d37a69b3dc97ccc54701378b0c9ff056b37f4311f743e8772af7c81c7",
+    "docs/research/living_learning_relations_2026_09_22/MATHEMATICAL_AUDIT_TR.md": "42fd33b9890a783095255086ba2b9c8342fc881d1db7d5e1bbb6eed410e42fd5",
+    "docs/research/living_learning_relations_2026_09_22/NEXT_HYPOTHESES_TR.md": "0ed735992085703d8ad29eb98b6cfbfe26ca59aaa962e38b0c6cd12722cfc18a",
+    "docs/research/living_learning_relations_2026_09_22/PROTOCOL.md": "3a2451a8c41068314291dd10a5b41dbb191cb17a34348917c931c8916524beab",
+    "docs/research/living_learning_relations_2026_09_22/REPORT_TR.md": "71cbdb3007e96c6b1ea4aa60bf3acfd6a62c94ddf08868370c2a7432d8bbd03d",
+    "research/living_learning_relations_2026_09_22/analyze_results.py": "64826acd11874664e582ab5a6f514285734c1accf4eac54a9a2251753d7f9bc0",
+    "research/living_learning_relations_2026_09_22/final_audit.py": "80641a027d79d73694e33919386ce755b0bc80d74d50df0f53f83aa74be5cf56",
+    "research/living_learning_relations_2026_09_22/plot_results.py": "0ea52c87c9233937ce3213baff76311dd7fcfd321dc21609f3f0cca72293be8c",
+    "research/living_learning_relations_2026_09_22/README.md": "8f5ccc696482cd98c551a4710ba91d304403961866ffc56b08f57261443868dd",
+    "research/living_learning_relations_2026_09_22/relation_learning.py": "0642c68627a052469843b9f4e37bbcaf24eaf57518c6372faae5a17c8350a965",
+    "research/living_learning_relations_2026_09_22/results/composition_curves.png": "7de0695d2b3894a0daf24910221736e6f50142bf33880b7c89fd96bdb45fc9a5",
+    "research/living_learning_relations_2026_09_22/results/composition_curves.svg": "2f03624fc239aa6034a3caba45ba4f14a6bce897b03961080e3f75096b10bda2",
+    "research/living_learning_relations_2026_09_22/results/paired_summary.json": "053d4c060266805e2f659cdbff2b21f396035ef7130d1e56acbd57419c3d5905",
+    "research/living_learning_relations_2026_09_22/results/preservation_baseline.json": "de48af3c0a760c14ef925a752530a2e1ed7a02ebff61629661e06da911e1f939",
+    "research/living_learning_relations_2026_09_22/results/relation_learning.json": "59dfa1c8de83765f4b13a1fae9572aa959c74bae5506e1a6b36de47513cd66eb",
+    "research/living_learning_relations_2026_09_22/results/structural_witness.json": "3a4eabdc6b19e71812f72f769f28c76fb3ffbbbffc6004d9e8cf92b30d4dc999",
+    "research/living_learning_relations_2026_09_22/results/verification.json": "dca9f71dbe0d8715d94cd46b373ec4fb842193b4830ad086a9f7d79a878c643b",
+    "research/living_learning_relations_2026_09_22/structural_witness.py": "573e531d3020df313b19c7a4b2a91ba8c7801599a73650c7832d8e7ef052fbdd",
+    "research/living_learning_relations_2026_09_22/verify_relations.py": "a4db864b1ae66aadaa966258a4a63020cd3a4f2eda74024061c51675c3446029"
+  },
+  "scope": "Local checks, no external peer review or independent-world replication. No commit, push, or publication."
+}

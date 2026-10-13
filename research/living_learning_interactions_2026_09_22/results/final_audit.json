@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-22",
+  "status": "passed",
+  "preservation": {
+    "files_unchanged": 1007,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "environment": {
+    "python": "3.14.3",
+    "numpy": "2.4.2"
+  },
+  "paired_lives": 24,
+  "trajectories": 168,
+  "target_attempts": 2688,
+  "independent_probe_checks": 94110,
+  "accepted_full_field_checks": 1744,
+  "false_accepts": 0,
+  "correct_different_masks": 4,
+  "distinct_alias_tasks": 1,
+  "full_exact_rerun": true,
+  "fresh_process_resume_checks": 14,
+  "structural_scalar_outputs": 3072,
+  "full_mobius_reconstructions": 768,
+  "post_run_diagnostic_scalar_outputs": 16896,
+  "source_protocol_result_hashes_match": true,
+  "all_source_and_target_costs_match": true,
+  "no_target_hit_budget": true,
+  "paired_sequence_equal_lives": 24,
+  "persistent_more_expensive_lives": 24,
+  "report_claims_checked": true,
+  "summary_recomputed": true,
+  "local_links_checked": 29,
+  "independent_read_only_review": "No blocking error or target leakage found; reporting limits incorporated.",
+  "diagnostic_development_note": "First diagnostic-only attempt omitted JSON AST restoration; first final-audit attempt imported the prior same-named analyzer. Both stopped before reporting success. Restored tuple ASTs and selected the local analyzer by path; reruns passed. Primary experiment and protocol unchanged.",
+  "artifacts_sha256": {
+    "docs/research/living_learning_interactions_2026_09_22/MATHEMATICS_AND_PRIOR_ART_TR.md": "8dd52539f9b334f52ed748ffdcfa1c30922f5564ae6a06489db27421bc46aacb",
+    "docs/research/living_learning_interactions_2026_09_22/PROTOCOL.md": "c267526ca23bbf79aff1987ed53774d1f81dacdca1b7d17320a8501c79c76aeb",
+    "docs/research/living_learning_interactions_2026_09_22/REPORT_TR.md": "255fdcc70cb02c5a4339b0ad61a3a487f5b0a334bec4314b3ef976d7b89c0cd8",
+    "docs/research/living_learning_interactions_2026_09_22/WHOLE_PROBLEM_AND_NEXT_TEST_TR.md": "51f4064dd9751f3967658eb1918341e4ae0d50b0cf7428559fde3e33a1842d45",
+    "research/living_learning_interactions_2026_09_22/analyze_results.py": "89ab43e9fb904243bdb1d814933fe5ed6cd44111ae4be57e0a73c188dcc8a935",
+    "research/living_learning_interactions_2026_09_22/diagnose_coverage.py": "79bf005ea836a6b820b72fb9d1129427e53856d785ed1edbba456b8cabdd0b77",
+    "research/living_learning_interactions_2026_09_22/final_audit.py": "67c81214d68746a7464534465df2000fa7c248784c3a0db92dcb6ef5994aa0d1",
+    "research/living_learning_interactions_2026_09_22/interaction_learning.py": "4866f361de018203fc9232fc932eba71961a6b6e6808060573fb244f1873b283",
+    "research/living_learning_interactions_2026_09_22/README.md": "3e559df54ceef85f391bb7ff2e2a40cb146cf2e9d7393e235f3b27aa9ef3f105",
+    "research/living_learning_interactions_2026_09_22/results/coverage_diagnostics.json": "770da9d8ef9a4e37885b8a8aacdd8e0fe265a80d9a90cc6c2ba67120a1ad26eb",
+    "research/living_learning_interactions_2026_09_22/results/interaction_learning.json": "f632851cf785e9e1e836320ab7367b699a85385bf4dd9d253c4a519cf6a87864",
+    "research/living_learning_interactions_2026_09_22/results/preservation_baseline.json": "51e17ee806c787ea0eed8bbbee3bfacdfd1f1449f92b94a8567e78a5a9d23129",
+    "research/living_learning_interactions_2026_09_22/results/summary.json": "8d0249e00fb8b9939fd3853d2c55ffff22e001b112358646ef61ead1de6d9660",
+    "research/living_learning_interactions_2026_09_22/results/verification.json": "274329ef9b64063c626f0be8a947ffff7e09b19c4b8e730e4db685652d81d688",
+    "research/living_learning_interactions_2026_09_22/verify_interactions.py": "7308a9124d02877f6dbf7e71b72a46ff6ef61c358eda0e399bce494e177e3e36"
+  },
+  "scope": "Finite field, 8 disjoint edit sites, 16 examples, declared virtual work. Persisted preference is one bit. General living-learning problem remains open. Local only, no commit/push/publication."
+}

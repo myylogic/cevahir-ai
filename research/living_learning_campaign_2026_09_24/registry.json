@@ -1,0 +1,2850 @@
+[
+  {
+    "id": "CON01",
+    "family": "CON",
+    "title_tr": "Boşluklarda derleme",
+    "prediction_tr": "Dış etkileşim boşluklarında pahalı güncellemeleri yapmak, aynı toplam iş ile cevap gecikmesini düşürür.",
+    "intervention_tr": "Aynı işi çevrimiçi anlara veya boşluklara yerleştir.",
+    "falsifier_tr": "Boşluk dışı kuyruk gecikmesi ve toplam maliyet birlikte düşmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON02",
+    "family": "CON",
+    "title_tr": "Kesintiye dayanıklı birleştirme",
+    "prediction_tr": "Kesilebilir birleştirme, kesilemez toplu güncellemeye göre yarım iş kaybını azaltır.",
+    "intervention_tr": "Aynı kesinti akışında güncelleme işlemini küçük doğrulanmış adımlara ayır.",
+    "falsifier_tr": "Checkpoint bedeli dahil toplam iş azalmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON03",
+    "family": "CON",
+    "title_tr": "Birleştirme sırasının nedensel etkisi",
+    "prediction_tr": "Değişmeli olmayan güncellemelerin sırası, aynı kanıtla son davranışı değiştirir.",
+    "intervention_tr": "Kanıt çoklu kümesi sabitken sıralamayı değiştir.",
+    "falsifier_tr": "Belirtilen işlemler için bütün sıralamalar aynı durumu ve davranışı verir.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON04",
+    "family": "CON",
+    "title_tr": "Bağımsız kanıtta zamanlamanın etkisizliği",
+    "prediction_tr": "Toplamsal yeterli istatistikte yalnız birleştirme zamanını değiştirmek son öğrenilmiş durumu değiştirmez.",
+    "intervention_tr": "Aynı gözlemleri her adım veya blok sonunda topla.",
+    "falsifier_tr": "Aralık içi cevaplar ayrı tutulduğunda son durumlar farklıdır.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON05",
+    "family": "CON",
+    "title_tr": "Geri çağırma önceliğinin edinilmesi",
+    "prediction_tr": "Deneyimle edinilen tekrar sırası, uniform tekrarın aynı işiyle daha iyi eski görev koruması verir.",
+    "intervention_tr": "Tekrar önceliğini edinilmiş veya uniform yap.",
+    "falsifier_tr": "Öncelik edinme işiyle toplam kayıp iyileşmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON06",
+    "family": "CON",
+    "title_tr": "Tekrarın hatayı büyütmesi",
+    "prediction_tr": "Yanlış geçmişi daha sık yeniden işlemek, bağımsız düzeltme yoksa hatalı inancı güçlendirebilir.",
+    "intervention_tr": "Yanlış kayıtların tekrar sayısını artır ve kanıt bağımlılığını koru veya sil.",
+    "falsifier_tr": "Bağımsız kanıt sayımı hatası ya da gelecek kaybı artmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON07",
+    "family": "CON",
+    "title_tr": "Sıkıştırma öncesi çelişki kontrolü",
+    "prediction_tr": "Çelişki denetimi, hatalı kayıtların kalıcı özetlere yayılmasını azaltır.",
+    "intervention_tr": "Özetlemeden önce veya sonra aynı denetimi çalıştır.",
+    "falsifier_tr": "Ek denetim maliyetiyle yanlış kalıcı davranış azalmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON08",
+    "family": "CON",
+    "title_tr": "Çok ölçekli birleştirme",
+    "prediction_tr": "Hızlı değişen ve durağan alt görevler için ayrı birleştirme hızları tek hızdan iyidir.",
+    "intervention_tr": "Aynı karma akışta tek hız ile edinilmiş çoklu hız kullan.",
+    "falsifier_tr": "Hız atama maliyetiyle toplam kayıp azalmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON09",
+    "family": "CON",
+    "title_tr": "Göreve koşullu birleştirme",
+    "prediction_tr": "Her kanıtı ortak duruma yazmak yerine göreve göre paylaşmak negatif aktarımı azaltır.",
+    "intervention_tr": "Paylaşım kararını aynı bütçede sabit veya edinilmiş yap.",
+    "falsifier_tr": "Ortak kontrolün kaybı daha düşük veya eşittir.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON10",
+    "family": "CON",
+    "title_tr": "Birleştirme ile edinim arasındaki yarış",
+    "prediction_tr": "İç yeniden işleme dış örnek edinimine bütçe bırakmayınca gelecek öğrenme yavaşlar.",
+    "intervention_tr": "Sabit bütçeyi yeniden işleme ve yeni kanıt edinimi arasında değiştir.",
+    "falsifier_tr": "Edinim fırsatı maliyeti hesaba katıldığında olumsuz bölge yoktur.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON11",
+    "family": "CON",
+    "title_tr": "Senkronizasyon borcu",
+    "prediction_tr": "Uzun süre ertelenen durum birleştirmesi, sonraki düzeltme bedelini doğrusalın üstüne çıkarabilir.",
+    "intervention_tr": "Birleştirme aralığını önceden belirtilen bağımlılık ağında artır.",
+    "falsifier_tr": "Toplam bekleyen bağımlılık işi doğrusalın üstüne çıkmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON12",
+    "family": "CON",
+    "title_tr": "Geri alınabilir derleme",
+    "prediction_tr": "Dayanak izleyen derleme, kaynak değiştiğinde tam yeniden derlemeden ucuz olabilir.",
+    "intervention_tr": "Aynı kaynak düzeltmelerinde bağımlılıklı geri alma ve yeniden kurmayı karşılaştır.",
+    "falsifier_tr": "Aynı doğru cevapla toplam maliyet düşmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON13",
+    "family": "CON",
+    "title_tr": "Üretilmiş örneklerde destek kayması",
+    "prediction_tr": "Kendi ürettiği tekrar örnekleri, özgün kanıtın seyrek bölgelerini kaybedebilir.",
+    "intervention_tr": "Gerçek örnek ve öğrenilmiş üretici tekrarını eşit maliyetle karşılaştır.",
+    "falsifier_tr": "Seyrek sorgu kaybı veya kapsam farkı görülmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON14",
+    "family": "CON",
+    "title_tr": "Birleştirme ölçütünün oyunlaştırılması",
+    "prediction_tr": "Yalnız yeniden yapılandırma hatasını azaltan birleştirme gelecekteki güncellenebilirliği bozabilir.",
+    "intervention_tr": "Aynı eski cevap doğruluğunda farklı özetleri yeni kanıtla sınayarak ayır.",
+    "falsifier_tr": "Yeni kanıt sonrası ayrım veya hata farkı oluşmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON15",
+    "family": "CON",
+    "title_tr": "Düşük faaliyet ile uyku varsayımının ayrılması",
+    "prediction_tr": "Biyolojik uyku taklidi olmadan kaynak tahsisi aynı gözlenen hesap yararını açıklayabilir.",
+    "intervention_tr": "Yalnız bütçe ve zamanlaması eşit iki soyut kontrol kur.",
+    "falsifier_tr": "Uyku adlı mekanizmaya özgü ek etki kalır; biyolojiye doğrudan çıkarım yapılmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON16",
+    "family": "CON",
+    "title_tr": "Öğrenilmiş birleştirme tetikleyicisi",
+    "prediction_tr": "İş yükünden edinilen tetikleyici, sabit aralığın toplam gecikme ve iş kaybını azaltır.",
+    "intervention_tr": "Tetikleyiciyi aynı geçmişle öğren veya sabit tut.",
+    "falsifier_tr": "Edinim maliyeti dahil toplam hedef iyileşmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON17",
+    "family": "CON",
+    "title_tr": "Birleştirme sonrası tanıklık denetimi",
+    "prediction_tr": "Korunan küçük tanık kümesi, yanlış birleştirmeyi yeni kanıt gelmeden yakalayabilir.",
+    "intervention_tr": "Tanık seçimini rastgele veya edinilmiş yap ve hatalı birleştirmeleri enjekte et.",
+    "falsifier_tr": "Aynı denetim bütçesinde yakalama oranı artmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON18",
+    "family": "CON",
+    "title_tr": "Hiyerarşik birleştirme sırası",
+    "prediction_tr": "Önce yerel sonra ortak özetleme bazı çapraz bağımlılıkları geri getirilemez siler.",
+    "intervention_tr": "Aynı kayıtları düz veya iki aşamalı özetle.",
+    "falsifier_tr": "Gelecek çapraz sorgularda belirlenen ayırt edilemezlik oluşmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON19",
+    "family": "CON",
+    "title_tr": "Kısmi aktarımın kesintisiz hizmeti",
+    "prediction_tr": "Eski ve yeni duruma geçişi kademelendirmek, bütünsel geçişin hizmet kesintisini azaltır.",
+    "intervention_tr": "Aynı kanıtta atomik ve kademeli aktarım maliyetlerini karşılaştır.",
+    "falsifier_tr": "Tutarlılık ve bakım işiyle toplam kesinti yararı kaybolur.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CON20",
+    "family": "CON",
+    "title_tr": "Birleştirme politikasının değişebilirliği",
+    "prediction_tr": "Geçmişte yararlı birleştirme politikası değişen iş yükünde yeniden öğrenilebilir olmalıdır.",
+    "intervention_tr": "Politika kilitleme ile politika güncellemesini karşılaştır.",
+    "falsifier_tr": "Yeniden öğrenme bedeli dahil sonraki toplam yarar görülmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "CRD01",
+    "family": "CRD",
+    "title_tr": "Gecikme uzunluğu ile kredi ayrıştırılabilirliği farklıdır",
+    "prediction_tr": "Sonuç gecikmesi aynı olsa bile sonuçların hangi eyleme ait olduğunun bilindiği akış daha hızlı öğrenilir.",
+    "intervention_tr": "Gecikmeleri sabit tut; yalnız nedensel eşleşme anahtarını kaldır.",
+    "falsifier_tr": "Eşleşme belirsizliği eş bütçede öğrenmeyi etkilemezse.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD02",
+    "family": "CRD",
+    "title_tr": "Toplu ödülden tekil nedenler her zaman ayrıştırılamaz",
+    "prediction_tr": "Aynı toplam sonuç üreten farklı nedenlere sahip iki dünyada yalnız toplamlar bireysel etkileri belirleyemez.",
+    "intervention_tr": "Gözlemsel olarak aynı kayıtları veren iki nedeni farklı dünya kur.",
+    "falsifier_tr": "Ayırt edici ek bilgi olmadan doğru tekil nedenler her iki dünyada çıkarılabilirse.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD03",
+    "family": "CRD",
+    "title_tr": "Kalıcı izler gecikmiş öğrenmeyi destekler",
+    "prediction_tr": "Gecikmiş geri bildirimde dayanak izlerini saklamak, yalnız son duruma göre güncellemeden düşük atıf hatası verir.",
+    "intervention_tr": "Sonuçları geciktir; geçmiş eylem/bağlam izini kaldırma deneyi yap.",
+    "falsifier_tr": "İz saklama maliyeti dahil düşük hata avantajı yoksa.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD04",
+    "family": "CRD",
+    "title_tr": "Gecikmeye uyarlanmış iz sabit izden üstün olmayabilir",
+    "prediction_tr": "Öğrenilmiş iz süresi, sabit iyi seçilmiş süreye göre bütün yaşam faydası sağlamayabilir.",
+    "intervention_tr": "İz süresini geçmiş gecikmelerden seç; aynı ailede güçlü sabit ve karışım kontrolü kullan.",
+    "falsifier_tr": "Öğrenilmiş iz her önkayıtlı rejimde tüm maliyet dahil üstünse.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD05",
+    "family": "CRD",
+    "title_tr": "Yanlış eşlenmiş doğru etiketler yanlış öğrenme üretir",
+    "prediction_tr": "Etiket değerleri doğru olsa da yanlış olaya bağlanması kalıcı bilgiye zarar verir.",
+    "intervention_tr": "Etiket değer dağılımını koru; olay kimliklerini karıştır.",
+    "falsifier_tr": "Kalıcı atıf doğruluğu değişmezse.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD06",
+    "family": "CRD",
+    "title_tr": "Sonradan düzeltilen sonuç geçmiş krediyi değiştirmelidir",
+    "prediction_tr": "Bir eski sonuç düzeltildiğinde yalnız son yanıtı onarmak gelecekteki seçimleri tam onarmayabilir.",
+    "intervention_tr": "Sonuç düzeltmesi sonrası olay izli güncelleme ile yalnız yanıt düzeltmesini karşılaştır.",
+    "falsifier_tr": "Her gelecekteki davranış ve güncelleme eşdeğer kalırsa.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD07",
+    "family": "CRD",
+    "title_tr": "Ortak neden sahte kredi oluşturabilir",
+    "prediction_tr": "Eylem ve sonuç ortak bir bağlamdan etkilenirken gözlemsel kredi seçimi nedensel etkiyi ters tahmin edebilir.",
+    "intervention_tr": "Gözlemsel eşleştirme ve rastgele müdahaleli veri aynı bütçede karşılaştırılır.",
+    "falsifier_tr": "Kurulan karşı örnekte ortak neden çıkarımı bozmazsa.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD08",
+    "family": "CRD",
+    "title_tr": "Birleşik eylem etkisi tekil kredilere indirgenmeyebilir",
+    "prediction_tr": "İki eylemin etkileşimli sonucu tekil kredi toplamıyla doğru temsil edilemez.",
+    "intervention_tr": "Tekil ve birlikte eylem deneyleri aynı toplam bütçede verilir.",
+    "falsifier_tr": "Tekil terimli model tüm ortak sonuçları doğru açıklar ise.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD09",
+    "family": "CRD",
+    "title_tr": "Uzun gecikmede doğru özet yeterli olabilir",
+    "prediction_tr": "Gecikme artsa da sonuç için yeterli istatistik biliniyorsa tüm olayları saklamak gerekmez.",
+    "intervention_tr": "Tam kayıt, yeterli özet ve yanlış özetle aynı gecikmiş sonucu işle.",
+    "falsifier_tr": "Doğru özet tam kayıtla aynı güncellemeyi yapamazsa.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD10",
+    "family": "CRD",
+    "title_tr": "Gelecek sonuç dili genişlediğinde eski özet yetersizleşebilir",
+    "prediction_tr": "Eski sonuçlar için yeterli kredi özeti yeni sonuç tipini öğrenmeye yetmeyebilir.",
+    "intervention_tr": "Aynı özete sahip farklı geçmişlere yeni geri bildirim türü ekle.",
+    "falsifier_tr": "Yeni kredi her geçmiş için aynı özetten doğru hesaplanırsa.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD11",
+    "family": "CRD",
+    "title_tr": "Güvenilmeyen etiket kaynaklarını ayırmak öğrenmeyi iyileştirebilir",
+    "prediction_tr": "Farklı güvenilirlikteki kaynakları ayrı izlemek tek havuzdan daha az yanlış kalıcı güncelleme üretir.",
+    "intervention_tr": "Kaynak kimliğini koru veya kaldır; kaynak kalitesi ve örnek sayısını sabit tut.",
+    "falsifier_tr": "Kaynak kimliği güçlü kontrol karşısında ek fayda sağlamazsa.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD12",
+    "family": "CRD",
+    "title_tr": "Güven öğrenmesi kendi tahminine dayanırsa kapanabilir",
+    "prediction_tr": "Etiket güvenini yalnız mevcut modelle uyuma göre seçmek doğru aykırı kanıtı dışlayabilir.",
+    "intervention_tr": "Başlangıç modeli yanlışken bağımsız denetimli ve öz uyumlu güven güncellemesini karşılaştır.",
+    "falsifier_tr": "Öz uyumlu seçim aynı bütçede doğru aykırı kanıtı eşit hızla öğrenirse.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD13",
+    "family": "CRD",
+    "title_tr": "Nadir kritik sonuçlar ortalama kayıpta kaybolabilir",
+    "prediction_tr": "Ortalama hatayı azaltan kredi yöntemi nadir yüksek etkili olaylarda kötüleşebilir.",
+    "intervention_tr": "Toplam ortalama ve önkayıtlı nadir olay hatasını ayrı ölç.",
+    "falsifier_tr": "Her kazanç nadir olaylarda da aynı yönlü ise.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD14",
+    "family": "CRD",
+    "title_tr": "Sonuç yokluğu da bilgi olabilir",
+    "prediction_tr": "Gözlenebilir bir sonuç son tarihi varsa sonuç gelmemesi kredi tahminini değiştirebilir.",
+    "intervention_tr": "Bilinen ve bilinmeyen gözlem pencerelerini karşılaştır.",
+    "falsifier_tr": "Sonuç yokluğu bilinen pencerede koşullu tahmini hiç değiştirmezse.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD15",
+    "family": "CRD",
+    "title_tr": "Sansürlü gecikme yanlış olumsuz kredi üretebilir",
+    "prediction_tr": "Geç gelen sonuçları yok saymak yavaş faydalı eylemlerin öğrenilmesini engelleyebilir.",
+    "intervention_tr": "Aynı sonuç dizisini farklı kesilme zamanlarında puanla; sağ sansürü modelle.",
+    "falsifier_tr": "Kesilme düzeltmesi nedensel sıralamayı değiştirmezse.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD16",
+    "family": "CRD",
+    "title_tr": "Kredi belirsizliği güvenli güncellemeyi sınırlayabilir",
+    "prediction_tr": "Birden çok atıf veriyle uyumluysa tek atfı kalıcılaştırmak seçenek kümesi saklamaktan daha çok yanlış güncelleme üretebilir.",
+    "intervention_tr": "Eş kanıtta tek atıf ve aday atıf kümesini karşılaştır.",
+    "falsifier_tr": "Belirsizlik koruma ek maliyet dahil hiçbir rejimde yanlış atfı azaltmazsa.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD17",
+    "family": "CRD",
+    "title_tr": "İzlerin sıkıştırılma sırası güncellemeyi etkileyebilir",
+    "prediction_tr": "Doğrusal olmayan kredi güncellemesinde önce birleştirme ve sonra güncelleme yer değiştiremez.",
+    "intervention_tr": "Aynı olayları önce ayrı sonra ortak güncelle ve tersi; hesapları eşleştir.",
+    "falsifier_tr": "İleri sürülen doğrusal olmayan örnekte iki yol her zaman eşitse.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD18",
+    "family": "CRD",
+    "title_tr": "Kredi mekanizması yeni eylem bileşimlerine aktarılabilir",
+    "prediction_tr": "Geçmişten öğrenilmiş atıf yapısı yeni bileşik görevde daha az etiketle nedenleri ayrıştırabilir.",
+    "intervention_tr": "Atıf yapısını taşı; tekil geçmiş cevapları ve hazır atıf kontrolünü ayrı tut.",
+    "falsifier_tr": "Aktarım sadece geçmiş cevap ezberiyle açıklanırsa veya güçlü kontrolü geçmezse.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD19",
+    "family": "CRD",
+    "title_tr": "Değişen nedenlerde eski kredi düzeni zarar verebilir",
+    "prediction_tr": "Eylem-sonuç bağlantısı değişince kalıcı kredi önceliği eşit öncelikten yavaş düzelir.",
+    "intervention_tr": "Aynı gözlemle nedeni değiştir; geçmiş önceliği koru, sıfırla ve uyarlamalı unutmayı karşılaştır.",
+    "falsifier_tr": "Korunan öncelik ters rejimde ek hata üretmezse.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CRD20",
+    "family": "CRD",
+    "title_tr": "Kredi doğruluğu ile yararlı eylem seçimi ayrıdır",
+    "prediction_tr": "Nedenleri doğru ayırmak, sınırlı eylem bütçesinde daha iyi sonuç garantilemez.",
+    "intervention_tr": "Atıf doğruluğu ve gelecekteki eylem değeri ayrı ölçülür.",
+    "falsifier_tr": "İleri sürülen ailede atıf doğruluğu her zaman eylem değerini de sıralarsa.",
+    "status": "queued",
+    "prior_art": "Gecikmiş geri bildirim, temporal credit assignment, nedensel çıkarım ve provenance ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX01",
+    "family": "CTX",
+    "title_tr": "Gizli bağlam ayırt edici geçmiş gerektirir",
+    "prediction_tr": "Aynı anlık girdide farklı doğru davranışlar varsa anlık temsil tek başına yeterli olmayabilir.",
+    "intervention_tr": "Anlık girdiyi eşitle; geçmişte ayırt edici ipucu bırak veya kaldır.",
+    "falsifier_tr": "Geçmişsiz yöntem tüm bağlamları doğru ayırabilirse.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX02",
+    "family": "CTX",
+    "title_tr": "Bağlam sayısının büyümesi öğrenme sayılmaz",
+    "prediction_tr": "Yeni küme sayısı artarken dokunulmamış davranış kapasitesi sabit veya kötü olabilir.",
+    "intervention_tr": "Küme sayısı ve maliyet eşliğinde yeni görev hatasını ayrı ölç.",
+    "falsifier_tr": "Her küme artışı zorunlu olarak genellemeyi iyileştirirse.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX03",
+    "family": "CTX",
+    "title_tr": "Yanlış bölünmüş bağlamları birleştirme yararlı olabilir",
+    "prediction_tr": "Aynı davranış yasasına sahip farklı yüzeyleri birleştirmek veri verimini artırır.",
+    "intervention_tr": "Yüzey etiketlerini değiştir; davranış yasasını aynı tut; birleştirme müdahalesi yap.",
+    "falsifier_tr": "Birleştirme eş bütçeli ayrı öğrenmeye üstün olmazsa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX04",
+    "family": "CTX",
+    "title_tr": "Yanlış birleştirilmiş bağlamları ayırma gerekebilir",
+    "prediction_tr": "Gözlemsel benzer fakat farklı sonuç yasalarına sahip durumları ayırmak kalıcı hatayı azaltır.",
+    "intervention_tr": "Aynı yüzeyi iki farklı geçmişe bağla; ipucu varsa ayrıştırma dene.",
+    "falsifier_tr": "İpucu varken ayrıştırma yeni veride hatayı azaltmazsa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX05",
+    "family": "CTX",
+    "title_tr": "Aynı olay farklı görevler için farklı kümelere girebilir",
+    "prediction_tr": "Tek görevde yeterli kümeleme ikinci görevde bilgi kaybı yaratabilir.",
+    "intervention_tr": "Aynı olay havuzuna kesişen iki görev ata; görev koşullu ve ortak bölümü karşılaştır.",
+    "falsifier_tr": "Tek ilk bölüm tüm ikinci görev cevaplarını korursa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX06",
+    "family": "CTX",
+    "title_tr": "Bağlamın revizyonu geçmiş ilişkileri taşımalıdır",
+    "prediction_tr": "Yeni kategori düzeni eski geçerli bağlantıları taşımazsa hatırlanan ilişkiler bozulur.",
+    "intervention_tr": "Kategori kimliklerini değiştir; bağlantı taşıma ve kör yeniden etiketlemeyi karşılaştır.",
+    "falsifier_tr": "Taşıma her yeni sorguda kör yaklaşımla eşitse.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX07",
+    "family": "CTX",
+    "title_tr": "Bağlam dili genişlediğinde eski kayıt değerlenebilir",
+    "prediction_tr": "Önceden işe yaramayan ayrıntı yeni bağlam ayrımı için belirleyici olabilir.",
+    "intervention_tr": "Eski yeterli özetle tam geçmişi yeni ayırt edici görevde karşılaştır.",
+    "falsifier_tr": "Yeni görevde tam geçmişin ayırt edici bilgisi yoksa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX08",
+    "family": "CTX",
+    "title_tr": "Bağlamları çok erken kesinleştirmek düzeltmeyi pahalılaştırır",
+    "prediction_tr": "Erken tek bağlam seçimi belirsiz atıf saklamaktan daha fazla sonradan onarım gerektirir.",
+    "intervention_tr": "Aynı ilk belirsiz veri ve sonraki ayırt edici kanıtı iki belleğe ver.",
+    "falsifier_tr": "Belirsizliği koruma maliyeti dahil onarım faydası yoksa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX09",
+    "family": "CTX",
+    "title_tr": "Bağlamı çoğaltmak gürültüyü ezberleyebilir",
+    "prediction_tr": "Bağlam başına ayrı parametre sayısını artırmak gürültülü küçük örnekte genellemeyi bozabilir.",
+    "intervention_tr": "Saklı yasa sabitken yüzey kümelerini artır; güçlü küçültme kontrolü kullan.",
+    "falsifier_tr": "Dokunulmamış hata ve tüm maliyet hiçbir koşulda kötüleşmezse.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX10",
+    "family": "CTX",
+    "title_tr": "Kısmi bağlam paylaşımı tam paylaşım ve ayrımdan farklıdır",
+    "prediction_tr": "Bazı ilişkileri ortak bazılarını ayrı tutmak tamamen ortak ve ayrı modellere göre veri verimli olabilir.",
+    "intervention_tr": "Paylaşılan ve özel alt ilişkileri içeren akışlar üret; eş bütçeli kontrolleri karşılaştır.",
+    "falsifier_tr": "Kazanım yalnız daha çok parametre veya etiketle açıklanırsa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX11",
+    "family": "CTX",
+    "title_tr": "Bağlam ipucunun güvenilirliği öğrenilmelidir",
+    "prediction_tr": "Geçmişte yararlı ipucu değişince sabit bağlam yönlendirmesi zararlı olur.",
+    "intervention_tr": "İpucu geçerliliğini akışta ters çevir; yönlendirme güncellemesini kaldır.",
+    "falsifier_tr": "Sabit yönlendirme aynı kanıtla eşit hızda düzelirse.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX12",
+    "family": "CTX",
+    "title_tr": "Bağlam keşfi ile kategori adı eşleştirme ayrıdır",
+    "prediction_tr": "Etiketlerin permütasyonundan bağımsız ilişki keşfi, yalnız ad eşleştirmeye indirgenmeyebilir.",
+    "intervention_tr": "Bağlam adlarını gizle veya rastgele değiştir; yapısal ve isimli yöntemleri karşılaştır.",
+    "falsifier_tr": "İsim eşleme güçlü yapısal yöntemin bütün tahminlerini açıklarsa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX13",
+    "family": "CTX",
+    "title_tr": "Sürekli bağlam her zaman sonlu kategorilerle ekonomik değildir",
+    "prediction_tr": "Sürekli değişen yasa için çok sayıda ayrık bağlam gereksiz bellek maliyeti doğurabilir.",
+    "intervention_tr": "Aynı veriyle sürekli koşullama ve büyüyen ayrık bağlamları karşılaştır.",
+    "falsifier_tr": "Sonlu küçük bölüm aynı doğruluk ve toplam maliyeti sürekli sağlar ise.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX14",
+    "family": "CTX",
+    "title_tr": "Bir bağlam geçmişteki tüm olayları yeniden yazmamalıdır",
+    "prediction_tr": "Yeni bir yerel ilişki tüm kategori üyelerine uygulanırsa yanlış genelleme oluşabilir.",
+    "intervention_tr": "Yerel istisna ekle; kapsamlı ve tümel kategori güncellemesini karşılaştır.",
+    "falsifier_tr": "Tümel aktarım dokunulmamış olaylarda yanlışlık üretmezse.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX15",
+    "family": "CTX",
+    "title_tr": "Bağlam geçişi ile bilgi değişimi farklı kanıt ister",
+    "prediction_tr": "Çıktı değişikliği eski bağlamın dönüşü veya yasadaki değişimden kaynaklanabilir; tek gözlem bunları ayırmayabilir.",
+    "intervention_tr": "Aynı kısa gözlemi üreten iki mekanizma ve ayırt edici devamlar kur.",
+    "falsifier_tr": "Belirlenen kısa veri ikisini her durumda ayırırsa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX16",
+    "family": "CTX",
+    "title_tr": "Görevden bağımsız tek anlam ağacı maliyetli olabilir",
+    "prediction_tr": "Birden çok görevde ortak ağaçtan birlik okuması doğru olsa da sorgu maliyeti ayrı görünümlerden büyük olabilir.",
+    "intervention_tr": "Aynı cevapları veren ağaç-birlik ve görev görünümlerini toplam maliyetle karşılaştır.",
+    "falsifier_tr": "Ek görünüm edinimi dahil ağaç hiçbir rejimde daha pahalı olmazsa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX17",
+    "family": "CTX",
+    "title_tr": "Bağlam aktarımı ortak arayüz olmadan keşif gerektirir",
+    "prediction_tr": "İki deneyim kümesini birleştirmenin faydası hazır eşleme kaldırıldığında kaybolabilir.",
+    "intervention_tr": "Doğru arayüzü verme; eşlemeyi gözlemlerden öğren; hazır arayüz kontrolünü ayrı raporla.",
+    "falsifier_tr": "Arayüz verilmemişken eş kanıtlı basit kontrol bütün faydayı açıklarsa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX18",
+    "family": "CTX",
+    "title_tr": "Bağlamlar arası köprü yanlış ilişkiyi de yayabilir",
+    "prediction_tr": "Yanlış bir ortak referans üzerinden aktarım ayrı öğrenmeden fazla kalıcı hata üretebilir.",
+    "intervention_tr": "Doğru ve yanlış köprüler ekle; bağımlılık izli düzeltme dene.",
+    "falsifier_tr": "Yanlış köprü yeni bağlamlarda ek hata üretmezse.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX19",
+    "family": "CTX",
+    "title_tr": "Bağlam temsilinin yaşam boyu maliyeti ölçülmelidir",
+    "prediction_tr": "Kısa dönemde sorguyu hızlandıran yeniden örgütleme daha uzun ufukta edinim ve bakım maliyetini amorti edemeyebilir.",
+    "intervention_tr": "Aynı yaşamları değişik kullanım ufuklarında toplam maliyetle puanla.",
+    "falsifier_tr": "Her örgütleme tüm ufuklarda maliyet avantajı sağlarsa.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "CTX20",
+    "family": "CTX",
+    "title_tr": "Bağlam öğrenmesini durdurmak bilinen cevapları korusa da yeni öğrenmeyi bozabilir",
+    "prediction_tr": "Bugünkü testlerde aynı iki temsil yeni bağlam öğreniminde farklı veri ihtiyacı gösterebilir.",
+    "intervention_tr": "Mevcut cevapları eşitle; bağlam güncelleme kapasitesini kaldırıp yeni ilişkiler ekle.",
+    "falsifier_tr": "Güncelleme kaldırma yeni görev öğrenimini hiç değiştirmezse.",
+    "status": "queued",
+    "prior_art": "Latent-state inference, representation learning, context discovery ve belief revision ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "ENV-01",
+    "family": "ENV",
+    "title_tr": "Sabit büyük ödül farkı: Belirsizlik bonusu",
+    "prediction_tr": "Sabit büyük ödül farkı koşulunda ucb, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Eylem seçimindeki belirsizlik bonusunu açma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "ucb",
+      "control": "greedy"
+    },
+    "regime": "stationary_gap",
+    "practical_margin": 0.01,
+    "mechanism_group": "Belirsizlik bonusu",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-02",
+    "family": "ENV",
+    "title_tr": "Sabit büyük ödül farkı: Sabit rastgele sapma",
+    "prediction_tr": "Sabit büyük ödül farkı koşulunda epsilon, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Gözlenen en iyi eylemden yüzde10 sapma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "epsilon",
+      "control": "greedy"
+    },
+    "regime": "stationary_gap",
+    "practical_margin": 0.01,
+    "mechanism_group": "Sabit rastgele sapma",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-03",
+    "family": "ENV",
+    "title_tr": "Sabit büyük ödül farkı: Yakın deneyim penceresi",
+    "prediction_tr": "Sabit büyük ödül farkı koşulunda window_ucb, ucb karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Bütün-geçmiş istatistiğini son64 adımla değiştirme",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window_ucb",
+      "control": "ucb"
+    },
+    "regime": "stationary_gap",
+    "practical_margin": 0.01,
+    "mechanism_group": "Yakın deneyim penceresi",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-04",
+    "family": "ENV",
+    "title_tr": "Sabit küçük ödül farkı: Belirsizlik bonusu",
+    "prediction_tr": "Sabit küçük ödül farkı koşulunda ucb, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Eylem seçimindeki belirsizlik bonusunu açma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "ucb",
+      "control": "greedy"
+    },
+    "regime": "stationary_small",
+    "practical_margin": 0.01,
+    "mechanism_group": "Belirsizlik bonusu",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-05",
+    "family": "ENV",
+    "title_tr": "Sabit küçük ödül farkı: Sabit rastgele sapma",
+    "prediction_tr": "Sabit küçük ödül farkı koşulunda epsilon, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Gözlenen en iyi eylemden yüzde10 sapma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "epsilon",
+      "control": "greedy"
+    },
+    "regime": "stationary_small",
+    "practical_margin": 0.01,
+    "mechanism_group": "Sabit rastgele sapma",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-06",
+    "family": "ENV",
+    "title_tr": "Sabit küçük ödül farkı: Yakın deneyim penceresi",
+    "prediction_tr": "Sabit küçük ödül farkı koşulunda window_ucb, ucb karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Bütün-geçmiş istatistiğini son64 adımla değiştirme",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window_ucb",
+      "control": "ucb"
+    },
+    "regime": "stationary_small",
+    "practical_margin": 0.01,
+    "mechanism_group": "Yakın deneyim penceresi",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-07",
+    "family": "ENV",
+    "title_tr": "Tek terslenme: Belirsizlik bonusu",
+    "prediction_tr": "Tek terslenme koşulunda ucb, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Eylem seçimindeki belirsizlik bonusunu açma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "ucb",
+      "control": "greedy"
+    },
+    "regime": "single_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Belirsizlik bonusu",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-08",
+    "family": "ENV",
+    "title_tr": "Tek terslenme: Sabit rastgele sapma",
+    "prediction_tr": "Tek terslenme koşulunda epsilon, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Gözlenen en iyi eylemden yüzde10 sapma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "epsilon",
+      "control": "greedy"
+    },
+    "regime": "single_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Sabit rastgele sapma",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-09",
+    "family": "ENV",
+    "title_tr": "Tek terslenme: Yakın deneyim penceresi",
+    "prediction_tr": "Tek terslenme koşulunda window_ucb, ucb karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Bütün-geçmiş istatistiğini son64 adımla değiştirme",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window_ucb",
+      "control": "ucb"
+    },
+    "regime": "single_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Yakın deneyim penceresi",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-10",
+    "family": "ENV",
+    "title_tr": "Tekrarlı terslenme: Belirsizlik bonusu",
+    "prediction_tr": "Tekrarlı terslenme koşulunda ucb, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Eylem seçimindeki belirsizlik bonusunu açma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "ucb",
+      "control": "greedy"
+    },
+    "regime": "recurring_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Belirsizlik bonusu",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-11",
+    "family": "ENV",
+    "title_tr": "Tekrarlı terslenme: Sabit rastgele sapma",
+    "prediction_tr": "Tekrarlı terslenme koşulunda epsilon, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Gözlenen en iyi eylemden yüzde10 sapma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "epsilon",
+      "control": "greedy"
+    },
+    "regime": "recurring_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Sabit rastgele sapma",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-12",
+    "family": "ENV",
+    "title_tr": "Tekrarlı terslenme: Yakın deneyim penceresi",
+    "prediction_tr": "Tekrarlı terslenme koşulunda window_ucb, ucb karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Bütün-geçmiş istatistiğini son64 adımla değiştirme",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window_ucb",
+      "control": "ucb"
+    },
+    "regime": "recurring_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Yakın deneyim penceresi",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-13",
+    "family": "ENV",
+    "title_tr": "Ödül yerine bilgilendiricilik",
+    "prediction_tr": "Gözlem değerine göre eylem seçimi, aynı eylem bütçesinde sonraki görev öğrenimini yalnız anlık ödül seçimine göre iyileştirir.",
+    "intervention_tr": "Eylem hedefini sonraki öğrenilebilirliğe bağla.",
+    "falsifier_tr": "Sonraki görev başarısı eşit veya kötü kalır.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok.",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-14",
+    "family": "ENV",
+    "title_tr": "İç durumdan deterministik sapma",
+    "prediction_tr": "Kanıta bağlı iç durum değişimi, eşlenmiş eylem çeşitliliğine sahip rastgele sapmadan daha çok ayırt edici deneyim üretir.",
+    "intervention_tr": "Sapmayı üreten iç kuralı değiştir; ziyaret sayısını eşle.",
+    "falsifier_tr": "Kazanç ziyaret edilen veri miktarı eşitlenince kaybolur.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok.",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-15",
+    "family": "ENV",
+    "title_tr": "Kendi verisinin yanlılığı",
+    "prediction_tr": "Seçim olasılığını saklamak, politika değişince geçmiş veriden öğrenilen kuralın yanlılığını azaltır.",
+    "intervention_tr": "Aynı olayları seçim olasılığı bilgisiyle ve bilgisiz güncelle.",
+    "falsifier_tr": "Düzeltme hata/varyans toplamını düşürmez.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok.",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-16",
+    "family": "ENV",
+    "title_tr": "Gecikmiş keşif yararı",
+    "prediction_tr": "Gecikmiş sonuçlara kredi veren seçici, kısa ufuk seçiciye göre geç beliren beceriyi daha sık edinir.",
+    "intervention_tr": "Kredi ufkunu değiştir; toplam gözlem maliyeti aynı.",
+    "falsifier_tr": "Fark sadece fazladan gözlemden gelir veya tersine döner.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok.",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-17",
+    "family": "ENV",
+    "title_tr": "Gözlem kanalı seçimi",
+    "prediction_tr": "Sensör seçimini öğrenmek, sabit sensör karışımından daha düşük ölçüm maliyetiyle ayırıcı temsili kurar.",
+    "intervention_tr": "Kanal seçicisini edinilmiş/sabit kullan.",
+    "falsifier_tr": "Aynı maliyette yeni ayrım başarısı artmaz.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok.",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-18",
+    "family": "ENV",
+    "title_tr": "Karşıolgusal sınama",
+    "prediction_tr": "Model uyuşmazlığını hedefleyen müdahale, aynı bütçeli pasif akıştan daha güvenilir mekanizma ayrımı sağlar.",
+    "intervention_tr": "Aday uyuşmazlığına göre müdahale üret.",
+    "falsifier_tr": "Yeni müdahalede yanlış model oranı azalmıyor.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok.",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-19",
+    "family": "ENV",
+    "title_tr": "Yanlış merak döngüsü",
+    "prediction_tr": "Tahmin hatasını ödüllendiren iç hedef, indirgenemez gürültüde öğrenilebilirliği hedefleyen seçiciden daha kötü kaynak kullanır.",
+    "intervention_tr": "Gürültü ile öğrenilebilir belirsizliği ayıran hedefi aç.",
+    "falsifier_tr": "Gürültüde zaman kaybı veya sonraki beceri kaybı farkı yok.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok.",
+    "engine": "environment"
+  },
+  {
+    "id": "ENV-20",
+    "family": "ENV",
+    "title_tr": "Deneyim üretmenin maliyeti",
+    "prediction_tr": "Edinilmiş eylem yordamının sonraki öğrenme yararı, edinim ve çevre maliyeti birlikte sayıldığında da sürer.",
+    "intervention_tr": "Yalnız sonraki skor yerine bütün yaşam maliyetini ölç.",
+    "falsifier_tr": "Toplam maliyette avantaj kaybolur.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok.",
+    "engine": "environment"
+  },
+  {
+    "id": "LAN01",
+    "family": "LAN",
+    "title_tr": "Yordamın örneklerden edinilmesi",
+    "prediction_tr": "Görev örneklerinden işlem sırası edinen sistem, yalnız yanıt saklamadan görülmemiş girdilerde daha başarılıdır.",
+    "intervention_tr": "Örnek-yanıt tablosu / edinilmiş işlem dizisi; eşit kanıt.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN02",
+    "family": "LAN",
+    "title_tr": "Yeni bileştiricinin maliyeti",
+    "prediction_tr": "Deneyimden döngü şeması edinmek, aynı sonlu açılımları saklamadan uzun girdilerde düşük maliyet sağlar.",
+    "intervention_tr": "Döngü şeması / açılmış programlar; edinim maliyeti dahil.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN03",
+    "family": "LAN",
+    "title_tr": "İşlem dilinin yanlışlanması",
+    "prediction_tr": "Karşı örnekte işlem dilini genişleten yöntem, sabit yetersiz dilden farklı görev türlerinde düşük hata verir.",
+    "intervention_tr": "Başlangıçta eksik işlem dili; genişleme / sabit dil.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN04",
+    "family": "LAN",
+    "title_tr": "İlkel işlem ile kısaltma ayrımı",
+    "prediction_tr": "Bir edinilmiş işlemi eski dile açma kontrolü, salt makro kazancını gerçek temsil sınıfı farkından ayırır.",
+    "intervention_tr": "Yeni işlem / aynı işlemin açılmış eski dil karşılığı.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN05",
+    "family": "LAN",
+    "title_tr": "Öğrenme yordamını öğrenme",
+    "prediction_tr": "Görev dizisinden güncelleme yordamı edinmek, aynı görev kanıtlı sabit güncellemeden yeni görevde daha iyi örnek verimi sağlar.",
+    "intervention_tr": "Edinilmiş güncelleyici / güçlü sabit güncelleyici; meta edinim maliyeti.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN06",
+    "family": "LAN",
+    "title_tr": "Yordam düzenlemesinin geriye etkisi",
+    "prediction_tr": "Eski yordamın yerine yerel yama koyma, tüm yordamı yeniden sentezlemekten eşit doğrulukta az hesap gerektirir.",
+    "intervention_tr": "Yerel karşı örnek; yama / sıfırdan sentez.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN07",
+    "family": "LAN",
+    "title_tr": "Yanlış soyutlamanın tersine çevrilmesi",
+    "prediction_tr": "Soyutlamayı açıp ayrıntıya dönebilmek, yalnız yeni soyutlama eklemekten değişen görevde düşük hata verir.",
+    "intervention_tr": "Açılabilir / kalıcı soyutlama; eski görev koruma.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN08",
+    "family": "LAN",
+    "title_tr": "İki parçadan yeni hesap oluşturma",
+    "prediction_tr": "Kaynakta ayrı edinilen yordamların arayüzlerini öğrenmek, hazır arayüz varsayımından daha geniş hedef ailesinde başarılı olur.",
+    "intervention_tr": "Arayüz türleri gizli; edinilmiş / sabit tür bağlama.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN09",
+    "family": "LAN",
+    "title_tr": "Tip bilgisinin deneyimden oluşması",
+    "prediction_tr": "Başarısız işlemlerden edinilen tip kısıtları, yalnız frekans önceliğinden arama maliyetini düşürür.",
+    "intervention_tr": "Tip kısıtı edinme / aynı geçmişli frekans sıralaması.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN10",
+    "family": "LAN",
+    "title_tr": "Program durumunu değiştirmeden sürdürme",
+    "prediction_tr": "Yordam değişiminde korunacak durumun çıkarılması, baştan çalıştırmadan daha az maliyetle doğru sürdürme sağlar.",
+    "intervention_tr": "Öğrenilmiş durum taşıma / tam geçmişi tekrar yürütme.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN11",
+    "family": "LAN",
+    "title_tr": "Gerekçe bağımlılıklarının yordamda tutulması",
+    "prediction_tr": "Edinilmiş yordamın dayanaklarını izlemek, geçersiz kaynak değişince kör yordam belleğinden daha az yanlış yürütme üretir.",
+    "intervention_tr": "Dayanaklı / dayanıksız yordam; yerel kaynak değişimleri.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN12",
+    "family": "LAN",
+    "title_tr": "Arama stratejisi koşula bağlı öğrenilir",
+    "prediction_tr": "Görev özelliklerinden arama düzeni seçmek, tek global öğrenilmiş sıradan heterojen görevlerde düşük toplam maliyet sağlar.",
+    "intervention_tr": "Koşullu / global sıra; seçici eğitim maliyeti dahil.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN13",
+    "family": "LAN",
+    "title_tr": "Başarısızlıklardan negatif şema",
+    "prediction_tr": "Karşı örneklerden edinilmiş yasak şemaları, yalnız başarılı program belleğinden daha az arama üretir.",
+    "intervention_tr": "Başarısızlık kısıtları açık / kapalı; yanlış budama ölçülür.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN14",
+    "family": "LAN",
+    "title_tr": "Eşdeğer programların birleşmesi",
+    "prediction_tr": "Kanıtlı eşdeğerlik sınıfları, yalnız gözlenen çıktı eşitliğiyle birleştirmeden daha az gizli hata doğurur.",
+    "intervention_tr": "Kanıtlı / örnek üstünde eşdeğerlik; görülmemiş girdiler.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN15",
+    "family": "LAN",
+    "title_tr": "Sabit doğrulayıcının sınırı",
+    "prediction_tr": "Yeni yordam dili mevcut doğrulayıcının kapsamını aştığında yüksek eğitim doğruluğu güvenilir genellemeyi garanti etmez.",
+    "intervention_tr": "Doğrulayıcı kapsamı içinde / dışında yeni işlem; bağımsız tam kontrol.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN16",
+    "family": "LAN",
+    "title_tr": "Yordam belleği kapasite baskısı",
+    "prediction_tr": "Beklenen tekrar değeriyle yordam tutma, kullanım sayısıyla tutmadan değişen tekrar yapısında düşük toplam maliyet verir.",
+    "intervention_tr": "Değer tahmini / frekans silme; eğitim ve bellek erişimi dahil.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN17",
+    "family": "LAN",
+    "title_tr": "Kaynak dağılımı arama dilini daraltır",
+    "prediction_tr": "Tek ailede edinilmiş program önceliği farklı aileye geçince sabit genel aramadan kötü olabilir.",
+    "intervention_tr": "İlişkili / ilişkisiz hedefler; genel arama güçlü kontrol.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN18",
+    "family": "LAN",
+    "title_tr": "Özyineleme ile ezber ayrımı",
+    "prediction_tr": "Örnek uzunluğu dışındaki görevlerde edinilmiş özyineleme, benzer kısa program belleğinden yüksek doğruluk sağlar.",
+    "intervention_tr": "Uzunluk dışına aktarım; sabit açılım kontrolü.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN19",
+    "family": "LAN",
+    "title_tr": "Dilin büyümesi seçim maliyetini artırır",
+    "prediction_tr": "Yeni yordamları indislemeden eklemek, yeterince büyük bellekte arama faydasını toplam maliyette kaybeder.",
+    "intervention_tr": "Bellek büyüklüğü; düz liste / öğrenilmiş veya sabit indis.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "LAN20",
+    "family": "LAN",
+    "title_tr": "Yeni güncelleme kuralının güven sınırı",
+    "prediction_tr": "Edinilmiş güncelleyiciyi eski bilgide karşı örneklerle sınırlamak, sınırsız güncellemeden daha az yıkıcı unutma üretir.",
+    "intervention_tr": "Kısıtlı / sınırsız güncelleyici; yeni öğrenme hızındaki bedel birlikte.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Program sentezi, program kitaplığı öğrenme, meta-learning; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "MEM01",
+    "family": "MEM",
+    "title_tr": "Bloklu akışta geçmiş kapsamı",
+    "prediction_tr": "clustered koşulunda reservoir, fifo yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız reservoir ile fifo bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "reservoir",
+      "control": "fifo"
+    },
+    "regime": "clustered",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "retention",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM02",
+    "family": "MEM",
+    "title_tr": "Durağan kanıtın yeterli sayımlarla birikmesi",
+    "prediction_tr": "stable koşulunda count, reservoir yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız count ile reservoir bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "count",
+      "control": "reservoir"
+    },
+    "regime": "stable",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "aggregation",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM03",
+    "family": "MEM",
+    "title_tr": "Tek gözlem yerine gürültülü kanıt birleştirme",
+    "prediction_tr": "stable koşulunda count, last yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız count ile last bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "count",
+      "control": "last"
+    },
+    "regime": "stable",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "aggregation",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM04",
+    "family": "MEM",
+    "title_tr": "Ani değişimde anahtar başına yakın geçmiş",
+    "prediction_tr": "abrupt koşulunda window, count yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız window ile count bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window",
+      "control": "count"
+    },
+    "regime": "abrupt",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "forgetting",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM05",
+    "family": "MEM",
+    "title_tr": "Yerel değişimlerde yumuşak unutma",
+    "prediction_tr": "staggered koşulunda decay, count yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız decay ile count bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "decay",
+      "control": "count"
+    },
+    "regime": "staggered",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "forgetting",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM06",
+    "family": "MEM",
+    "title_tr": "Değişimde uniform tarih örneklemesinin sınırı",
+    "prediction_tr": "abrupt koşulunda window, reservoir yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız window ile reservoir bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window",
+      "control": "reservoir"
+    },
+    "regime": "abrupt",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "forgetting",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM07",
+    "family": "MEM",
+    "title_tr": "Durağan dünyada unutmanın bedeli",
+    "prediction_tr": "stable koşulunda count, decay yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız count ile decay bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "count",
+      "control": "decay"
+    },
+    "regime": "stable",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "forgetting",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM08",
+    "family": "MEM",
+    "title_tr": "Seyrek anahtarlarda kapsam kotası",
+    "prediction_tr": "rare koşulunda window, fifo yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız window ile fifo bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window",
+      "control": "fifo"
+    },
+    "regime": "rare",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "coverage",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM09",
+    "family": "MEM",
+    "title_tr": "Kimlikli düzeltmenin sayımlara taşınması",
+    "prediction_tr": "revisions koşulunda revision_delta, revision_ignore yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız revision_delta ile revision_ignore bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "revision_delta",
+      "control": "revision_ignore"
+    },
+    "regime": "revisions",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "revision",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM10",
+    "family": "MEM",
+    "title_tr": "Düzeltme ile yeni gözlemin ayrılması",
+    "prediction_tr": "revisions koşulunda revision_delta, revision_append yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız revision_delta ile revision_append bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "revision_delta",
+      "control": "revision_append"
+    },
+    "regime": "revisions",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "revision",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM11",
+    "family": "MEM",
+    "title_tr": "Düzeltmenin artımlı uygulanması",
+    "prediction_tr": "revisions koşulunda revision_delta, revision_rebuild ile aynı cevapları daha az toplam sanal işlemle verir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız revision_delta ile revision_rebuild bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez. Herhangi bir cevap farkı eşdeğerlik şartını ayrıca yanlışlar.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "virtual_operations_per_event",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "revision_delta",
+      "control": "revision_rebuild"
+    },
+    "regime": "revisions",
+    "practical_margin": 5.0,
+    "metric_range": [
+      0,
+      900
+    ],
+    "mechanism_group": "incremental_computation",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM12",
+    "family": "MEM",
+    "title_tr": "Durağan gürültüde sonlu pencere sınırı",
+    "prediction_tr": "stable koşulunda count, window yönteminden daha düşük bütün yaşam karesel kaybı üretir.",
+    "intervention_tr": "Aynı sorgu ve açık gözlem/düzeltme akışında yalnız count ile window bellek işlemleri değiştirilir.",
+    "falsifier_tr": "Dokunulmamış doğrulama örnekleminde pratik eşiği aşan beklenen yön desteklenmez veya ters etki görülür; eşitlik de üstünlüğü desteklemez.",
+    "status": "wave1",
+    "prior_art": "Bilinen rezervuar örnekleme, yeterli istatistik, kayan pencere, üstel unutma veya artımlı veri güncelleme ailesi; özgünlük iddiası yok.",
+    "metric": "whole_life_squared_loss",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "count",
+      "control": "window"
+    },
+    "regime": "stable",
+    "practical_margin": 0.005,
+    "metric_range": [
+      0,
+      1
+    ],
+    "mechanism_group": "aggregation",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM13",
+    "family": "MEM",
+    "title_tr": "Öğrenilen değişim algılayıcısı",
+    "prediction_tr": "Sınır işareti verilmeden edinilen değişim algılayıcısı, sabit pencereye göre değişim sonrası ve durağan dönem kaybı toplamını azaltır.",
+    "intervention_tr": "Sabit pencereyi aynı geçmişle öğrenilen pencere seçimiyle değiştir.",
+    "falsifier_tr": "Algılama ve yanlış alarm bedeliyle toplam kayıp azalmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM14",
+    "family": "MEM",
+    "title_tr": "Görev kimliği bilinmeden bağlam belleği",
+    "prediction_tr": "Tekrar eden bağlamların kimliğini deneyimden çıkarmak, açık görev etiketi olmayan dönüşlerde yeniden öğrenme bedelini azaltır.",
+    "intervention_tr": "Gizli bağlamı çıkarsayan bellek ile aynı bütçeli tek bellek karşılaştırılır.",
+    "falsifier_tr": "Ek yapı ve bağlam hataları dahil toplam bedel azalmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM15",
+    "family": "MEM",
+    "title_tr": "Sıkıştırılmış kanıtın seçmeli geri çekilmesi",
+    "prediction_tr": "Kimlik sorgusunu yanıtlayacak yan bilgi, ham kayıt olmadan bazı düzeltmeleri tam uygulamaya yeter.",
+    "intervention_tr": "Farklı sıkıştırma biçimlerini aynı kimlikli düzeltmelerle karşılaştır.",
+    "falsifier_tr": "Aynı sıkıştırılmış duruma düşen geçmişler düzeltme sonrası farklı doğru sayımlar gerektirir.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM16",
+    "family": "MEM",
+    "title_tr": "İlişkili tekrarların kanıt sayılması",
+    "prediction_tr": "Öğrenilmiş tekrar bağımlılığını tutmak, kopya gözlemler karşısında yalancı kesinliği azaltır.",
+    "intervention_tr": "Bağımsız sayım ile aynı bütçeli bağımlılık hesabını karşılaştır.",
+    "falsifier_tr": "Bağımlılık bilinmeden veya kayınca kalibrasyon üstünlüğü kaybolur.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM17",
+    "family": "MEM",
+    "title_tr": "Sorgu kayması altında rezervuar",
+    "prediction_tr": "Önceki sorgu dağılımına göre seçilen bellek, yeni sorgu dağılımında uniform rezervuardan kötüleşebilir.",
+    "intervention_tr": "Kayıt seçimini geçmiş sorgu sıklığına bağla ve sonra gizli sorgu dağılımını değiştir.",
+    "falsifier_tr": "Kayma sonrasında uniform kontrol lehine önceden belirtilen fark görülmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM18",
+    "family": "MEM",
+    "title_tr": "Soğuk kaydın gelecekteki yararı",
+    "prediction_tr": "Düşük güncel kullanımına rağmen yapısal köprü olan kayıtları korumak, yeni bileşik görevlerde yarar sağlar.",
+    "intervention_tr": "Köprü kimliği verilmeden edinilmiş önem puanıyla eşit bütçeli sıklık seçimini karşılaştır.",
+    "falsifier_tr": "Köprü keşif maliyeti dahil yeni görev yararı görülmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM19",
+    "family": "MEM",
+    "title_tr": "Kategori sınırının bellek bütçesinden edinilmesi",
+    "prediction_tr": "Deneyimden çıkarılan paylaşım bölmeleri, hazır anahtar başı kotaya göre aynı bellekle daha düşük gelecek kaybı verir.",
+    "intervention_tr": "Anahtar paylaşımını sabit veya öğrenilmiş yap, öğrenilmiş bölmenin maliyetini say.",
+    "falsifier_tr": "Yanlış birleştirme ve ayırma maliyetiyle üstünlük kaybolur.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "MEM20",
+    "family": "MEM",
+    "title_tr": "Yeni etiketlerin bellek diline eklenmesi",
+    "prediction_tr": "Yeni etiket değerleri ortaya çıktığında genişleyen durum dili, sabit etiketli özetin bilgi kaybını önler.",
+    "intervention_tr": "Sonradan doğan etiketlerde sabit ve genişletilebilir depoyu eşit kaynak çizelgesiyle sınayarak ayır.",
+    "falsifier_tr": "Genişleme kontrolünün maliyetiyle fayda yoktur veya eski ayrımlar silinir.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "REP01",
+    "family": "REP",
+    "title_tr": "Hata güdümlü özellik ekleme doğrusal modeli aşar",
+    "prediction_tr": "Seyrek ikili etkileşim bulunan akışta hata güdümlü özellik ekleme bütün yaşam karesel hatasını düşürür.",
+    "intervention_tr": "Etkinleştirme açık/kapalı; aynı sıralı ridge güncellemesi.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay1_replay",
+      "control": "linear_decay1_replay"
+    },
+    "regime": "interaction",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP02",
+    "family": "REP",
+    "title_tr": "Seçici büyüme tam hazır temsili aşar",
+    "prediction_tr": "Aynı etkileşim akışında seçici özellik büyümesi tam 11 özellikli ridge modelinden düşük hata verir.",
+    "intervention_tr": "Büyüyen 5–8 özellikli temsil / baştan tam 11 özellikli temsil.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay1_replay",
+      "control": "full_decay1_replay"
+    },
+    "regime": "interaction",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP03",
+    "family": "REP",
+    "title_tr": "Gereksiz özellikleri geciktirme",
+    "prediction_tr": "Salt doğrusal hedefte hata güdümlü büyüme tam özellikli ridge modelinden düşük hata verir.",
+    "intervention_tr": "Aynı veriyle seçici büyüme / tam özellik bankası.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay1_replay",
+      "control": "full_decay1_replay"
+    },
+    "regime": "additive",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP04",
+    "family": "REP",
+    "title_tr": "Hata yönü rastgele genişlemeden değerlidir",
+    "prediction_tr": "Etkileşim hedefinde gözlenen artıkla ilişkili özelliği seçmek aynı hata tetikleyicili rastgele seçimden düşük hata verir.",
+    "intervention_tr": "Özellik seçicisi artık ilişkisi / sabit tohumlu rastgele seçim.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay1_replay",
+      "control": "random_decay1_replay"
+    },
+    "regime": "interaction",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP05",
+    "family": "REP",
+    "title_tr": "Eski gözlemi zayıflatma değişen ilişkide yararlıdır",
+    "prediction_tr": "Ortada etkileşimi değişen akışta 0.97 unutma çarpanı, 1.0 çarpanından düşük bütün yaşam hatası verir.",
+    "intervention_tr": "Aynı büyüyen öğrenicide üstel ağırlık 0.97 / 1.0.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay0.97_replay",
+      "control": "adaptive_decay1_replay"
+    },
+    "regime": "switch",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP06",
+    "family": "REP",
+    "title_tr": "Büyüme ve unutma tam unutmalı temsili aşar",
+    "prediction_tr": "Değişen etkileşimlerde seçici büyüme, aynı unutma çarpanlı tam temsilden düşük hata verir.",
+    "intervention_tr": "Her iki yöntemde 0.97; seçici / tam özellikler.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay0.97_replay",
+      "control": "full_decay0.97_replay"
+    },
+    "regime": "switch",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP07",
+    "family": "REP",
+    "title_tr": "Gürültü altında seçici temsil",
+    "prediction_tr": "Gürültülü doğrusal hedefte seçici büyüme tam özellikli ridge modelinden düşük hata verir.",
+    "intervention_tr": "Etiket gürültüsü 1.2; seçici / tam temsil.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay1_replay",
+      "control": "full_decay1_replay"
+    },
+    "regime": "noisy",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP08",
+    "family": "REP",
+    "title_tr": "Seyrek kanıt özellik edinmeye yeter",
+    "prediction_tr": "İlk iki koordinatın +1 değerinin seyrek olduğu etkileşim akışında seçici büyüme doğrusal modelden düşük hata verir.",
+    "intervention_tr": "Aynı dengesiz girdi dağılımında özellik ekleme açık / kapalı.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay1_replay",
+      "control": "linear_decay1_replay"
+    },
+    "regime": "rare",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP09",
+    "family": "REP",
+    "title_tr": "Dağılım kaymasında seçici temsil korunur",
+    "prediction_tr": "Önce güçlü ilişkili sonra bağımsız olan girdilerde seçici temsil tam temsilden düşük bütün yaşam hatası verir.",
+    "intervention_tr": "İlk 96 örnekte ilişkili koordinatlar, sonra bağımsız; seçici / tam.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay1_replay",
+      "control": "full_decay1_replay"
+    },
+    "regime": "covariate",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP10",
+    "family": "REP",
+    "title_tr": "Geç ortaya çıkan ilişki seçici olarak edinilir",
+    "prediction_tr": "İlk yarısı doğrusal, ikinci yarısı etkileşimli akışta unutmalı seçici büyüme unutmalı tam temsilden düşük hata verir.",
+    "intervention_tr": "Hedefte 96. örnekte yeni etkileşim; her iki yöntemde 0.97.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay0.97_replay",
+      "control": "full_decay0.97_replay"
+    },
+    "regime": "onset",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP11",
+    "family": "REP",
+    "title_tr": "Özellik edinmenin toplam hesap maliyeti azalır",
+    "prediction_tr": "Etkileşim akışında tarama, arşiv ve yeniden kurma dahil seçici büyüme tam temsilden az sanal işlem tüketir.",
+    "intervention_tr": "REP02 ile aynı koşu; hata yerine önceden tanımlı toplam maliyet ölçümü.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "cost",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay1_replay",
+      "control": "full_decay1_replay"
+    },
+    "regime": "interaction",
+    "practical_margin": 1000,
+    "metric_range": "Sıfırdan büyük sonlu tam sayı; tahmin, güncelleme, algılama, arşiv ve yeniden kurma sanal işlem toplamı",
+    "group": "REP02_same_trajectory_cost",
+    "engine": "representation"
+  },
+  {
+    "id": "REP12",
+    "family": "REP",
+    "title_tr": "Yeni özelliğe geçmiş kanıtı taşıma",
+    "prediction_tr": "Özellik eklenince gözlenmiş geçmişi yeniden işlemek sıfır geçmişle yeni koordinat eklemekten düşük hata verir.",
+    "intervention_tr": "Aynı ekleme tetikleyicisi; tam geçmişten ridge kurulumu / blok köşegen sıfır-geçmiş kurulumu.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "wave1",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Önceden tanımlı koşullu mekanizma karşılaştırması; ayrı temel ilke sayılmaz.",
+    "metric": "mse",
+    "direction": "lower",
+    "contrast": {
+      "candidate": "adaptive_decay1_replay",
+      "control": "adaptive_decay1_zero_history"
+    },
+    "regime": "interaction",
+    "practical_margin": 0.01,
+    "metric_range": "[0,144]; bütün 192 adımda tahmin-sonra-etiket karesel hata ortalaması",
+    "group": "REP_feature_acquisition",
+    "engine": "representation"
+  },
+  {
+    "id": "REP13",
+    "family": "REP",
+    "title_tr": "Özellik silmenin geri dönüş maliyeti",
+    "prediction_tr": "Dönüşümlü hedeflerde eski özelliği uykuda saklama, tamamen silmeye göre geri dönüşte daha az etiket gerektirir.",
+    "intervention_tr": "Aktif bütçe eşit; pasif istatistik saklama / silme; toplam pasif bellek ücretli.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "REP14",
+    "family": "REP",
+    "title_tr": "Örnek arşivinin yeterli istatistikle değiştirilmesi",
+    "prediction_tr": "Sonradan eklenen özellikler için tutulmuş çapraz momentler aynı güncellemeyi örnek arşivinden düşük bellekle üretir.",
+    "intervention_tr": "Ham arşiv / tüm aday momentleri; bütün edinim maliyeti dahil.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "REP15",
+    "family": "REP",
+    "title_tr": "Görev kaymasının girdi kaymasından ayrılması",
+    "prediction_tr": "Etiketli artık ile etiketsiz girdi değişimini ayrı izlemek, yalnız artık izlemeye göre gereksiz temsil değişikliklerini azaltır.",
+    "intervention_tr": "Ayrı iki dedektör / tek dedektör; yanlış alarm ve tespit gecikmesi.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "REP16",
+    "family": "REP",
+    "title_tr": "Özellik dilinin yetersizliği",
+    "prediction_tr": "İkili özellik bankasına hapsolmuş öğrenici saf üçüncü dereceli etkileşimde kalıcı hata tabanına sahiptir.",
+    "intervention_tr": "Aynı örnekler; ikili banka / üçüncü dereceyi içerme; bütçe eşit.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "REP17",
+    "family": "REP",
+    "title_tr": "Temsilin öğrenilmiş dönüşümle kurulması",
+    "prediction_tr": "Ham koordinat döndürmelerinde deneyimden öğrenilen dönüşüm sabit eksen özelliklerinden daha iyi yeni görev aktarımı sağlar.",
+    "intervention_tr": "Kaynakta dönüşüm edinme / sabit dönüşüm; hedefte aynı etiket bütçesi.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "REP18",
+    "family": "REP",
+    "title_tr": "Yanlış seçimin geri alınabilmesi",
+    "prediction_tr": "Özellik değiştirmeye izin vermek üç özelliklik bütçeyi yalnız büyütmeye göre değişen hedefte daha iyi kullanır.",
+    "intervention_tr": "Ekle-sil / yalnız ekle; silme maliyeti ve unutulan görevler ölçülür.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "REP19",
+    "family": "REP",
+    "title_tr": "Aynı cevap farklı güncelleme",
+    "prediction_tr": "Bugünkü tahminleri eşit iki temsilden çapraz momentleri koruyan, sonraki yeni özellikte daha düşük hata verir.",
+    "intervention_tr": "Aynı mevcut ağırlıklar; ek çapraz istatistikler korunur / silinir.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "REP20",
+    "family": "REP",
+    "title_tr": "Temsil edinmede farklı hızlar",
+    "prediction_tr": "Hızlı geçici özellik deposu ve yavaş kalıcılaştırma, tek eşikli kalıcı eklemeye göre kısa gürültü patlamalarında düşük hata verir.",
+    "intervention_tr": "İki zaman ölçeği / tek ölçek; aynı toplam durum bütçesi.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Sıralı özellik seçimi, recursive least squares, unutma çarpanı; özgünlük iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "RES01",
+    "family": "RES",
+    "title_tr": "Bütün yaşam başabaş noktası",
+    "prediction_tr": "Öğrenilmiş hızlandırıcının edinim maliyeti kullanım sıklığına bağlı başabaş eşiği doğurur.",
+    "intervention_tr": "Kullanım sayısını değiştirerek edinim dahil iki yöntemin işini karşılaştır.",
+    "falsifier_tr": "Önceden türetilen eşik gözlenen maliyeti açıklamaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES02",
+    "family": "RES",
+    "title_tr": "Bellek ve hesap arasında taşınan bedel",
+    "prediction_tr": "Daha fazla saklanan durum yeniden hesaplamayı azaltırken toplam kaynak cephesini değiştirebilir.",
+    "intervention_tr": "Aynı bilgiyi sakla veya yeniden kur, iki kaynağı ayrı kaydet.",
+    "falsifier_tr": "Belirtilen görev ailesinde öngörülen değiş tokuş yoktur.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES03",
+    "family": "RES",
+    "title_tr": "Bütçe kesimindeki yöntem sırası",
+    "prediction_tr": "Sınırsız hesapta iyi yöntem sonlu zaman sınırında kötüleşebilir.",
+    "intervention_tr": "Aynı görevleri önceden sabitlenmiş durdurma sınırlarıyla çalıştır.",
+    "falsifier_tr": "Sıra değişimi görülmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES04",
+    "family": "RES",
+    "title_tr": "Kaynak politikasının edinim bedeli",
+    "prediction_tr": "Kaynak seçicisini öğrenmek küçük görev sayısında sabit seçiciden pahalıdır.",
+    "intervention_tr": "Öğrenilmiş ve sabit seçicinin bütün yaşam toplamını ölç.",
+    "falsifier_tr": "Belirtilen kısa yaşam aralığında edinim cezası görülmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES05",
+    "family": "RES",
+    "title_tr": "Gecikmiş kaynak ödülü",
+    "prediction_tr": "Anlık ucuzlukla seçilen öğrenme yöntemi uzun dönem yeniden kullanım yararını kaçırır.",
+    "intervention_tr": "Anlık ve çok adımlı bütçe seçimini aynı deneyimle karşılaştır.",
+    "falsifier_tr": "Uzun dönem toplamda beklenen fark yoktur.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES06",
+    "family": "RES",
+    "title_tr": "Ölçüm maliyetinin ihmal edilmesi",
+    "prediction_tr": "Yararı ölçme işi sayılınca bazı uyarlamalı kaynak yöneticileri üstünlüğünü kaybeder.",
+    "intervention_tr": "Aynı yöneticiyi ölçüm işi dahil ve hariç muhasebeleştir.",
+    "falsifier_tr": "Önceden belirtilen koşulda üstünlük yönü değişmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES07",
+    "family": "RES",
+    "title_tr": "Karışık iş yükünde portföy",
+    "prediction_tr": "Birden fazla yönteme pay ayırmak dağılım değişiminde tek yönteme bağlılığın kaybını sınırlar.",
+    "intervention_tr": "Aynı bütçede sabit tek yöntem ve önceden belirlenen portföyü karşılaştır.",
+    "falsifier_tr": "Bölünen bütçenin fırsat maliyetiyle toplam zarar azalmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES08",
+    "family": "RES",
+    "title_tr": "Bütçe ile kanıt ediniminin etkileşimi",
+    "prediction_tr": "Daha ucuz iç hesap ek dış deneyime izin vererek sonraki öğrenmeyi dolaylı iyileştirir.",
+    "intervention_tr": "Artan bütçeyi harcama veya dış deneyime aktar.",
+    "falsifier_tr": "Aynı toplam kaynak altında gelecekte fark görülmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES09",
+    "family": "RES",
+    "title_tr": "Yanlış kesinliğin kaynak israfı",
+    "prediction_tr": "Hatalı yüksek güvenle aramayı erken kesmek beklenen toplam düzeltme işini artırabilir.",
+    "intervention_tr": "Güvene bağlı kesme ile sabit sınırı karşılaştır.",
+    "falsifier_tr": "Düzeltme dahil toplam iş artmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES10",
+    "family": "RES",
+    "title_tr": "Nadir ağır görevin ortalamaya etkisi",
+    "prediction_tr": "Ortalama işlem maliyetine göre seçilen yöntem kuyruk gecikmesini kötüleştirebilir.",
+    "intervention_tr": "Ortalama ve üst yüzdelik hedefli seçimleri aynı akışta karşılaştır.",
+    "falsifier_tr": "Öngörülen ortalama-kuyruk ayrımı görülmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES11",
+    "family": "RES",
+    "title_tr": "Artan sayı bitlerinin gerçek bedeli",
+    "prediction_tr": "Sabit sayıda sayacı tutmak sınırsız sabit bit belleği anlamına gelmez.",
+    "intervention_tr": "Alan sayısı ve bit sayısı muhasebelerini aynı uzun akışta çıkar.",
+    "falsifier_tr": "Önceden belirtilen sayma görevinde bit ihtiyacı büyümez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES12",
+    "family": "RES",
+    "title_tr": "Deneyim seçmenin fırsat maliyeti",
+    "prediction_tr": "Aktif deneyim seçimi kazancını seçim aramasının işi aşabilir.",
+    "intervention_tr": "Seçim araması ve pasif edinimi eşit toplam bütçeyle karşılaştır.",
+    "falsifier_tr": "Öngörülen maliyet bölgesinde aktif seçim daha kötü olmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES13",
+    "family": "RES",
+    "title_tr": "Donanım fiyatına bağlı yöntem sırası",
+    "prediction_tr": "Hesap ve bellek birim fiyatları değişince aynı algoritmaların toplam maliyet sırası değişir.",
+    "intervention_tr": "İki bağımsız kaynak ölçüsüne açık farklı fiyatlar uygula.",
+    "falsifier_tr": "Önceden türetilmiş sıralama bölgeleri doğrulanmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES14",
+    "family": "RES",
+    "title_tr": "Güncelleme güvenliğinin kaynak sınırı",
+    "prediction_tr": "Doğrulama bütçesi kısıldığında edinilen yeni yordamın yanlış kabul oranı artabilir.",
+    "intervention_tr": "Aday üretimi sabitken doğrulama bütçesini değiştir.",
+    "falsifier_tr": "Yanlış kabul ve kaynak arasında belirtilen ilişki yoktur.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES15",
+    "family": "RES",
+    "title_tr": "Görev dağılımını bilmenin ayrıcalığı",
+    "prediction_tr": "Gerçek gelecek görev sıklığını bilen kaynak seçicisinin üstünlüğü öğrenilebilir olmayabilir.",
+    "intervention_tr": "Gelecek bilgili tanı kontrolünü yalnız geçmiş kullanan seçiciyle ayır.",
+    "falsifier_tr": "Aynı yarar geçmişten edinilir veya ayrıcalık etkisizdir.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES16",
+    "family": "RES",
+    "title_tr": "Dış depolamanın gizli bedeli",
+    "prediction_tr": "Harici arşivle sabit iç bellek iddiası toplam depolama ve erişim işini gizleyebilir.",
+    "intervention_tr": "İç, dış ve erişim maliyetlerini birlikte ölç.",
+    "falsifier_tr": "Belirtilen yöntemde ihmal edilmiş büyüyen bedel bulunmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES17",
+    "family": "RES",
+    "title_tr": "Yeniden öğrenme ile saklama eşiği",
+    "prediction_tr": "Nadir bir beceriyi yeniden edinmek saklama maliyetinden ucuz olabilir.",
+    "intervention_tr": "Görev dönüş aralığını değiştir ve bütün maliyeti say.",
+    "falsifier_tr": "Önceden türetilen sakla/sil eşik bölgesi yoktur.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES18",
+    "family": "RES",
+    "title_tr": "Yöntem seçicisinin negatif aktarımı",
+    "prediction_tr": "Geçmişten öğrenilen kaynak kuralı yeni işlem fiyatlarında zararlı olabilir.",
+    "intervention_tr": "Aynı görevleri fiyat değişimiyle sürdür, seçiciyi kilitle veya güncelle.",
+    "falsifier_tr": "Fiyat değişimi sonrasında kilitli seçici zarar görmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES19",
+    "family": "RES",
+    "title_tr": "Kapsam maliyetinin öğrenilebilirliği",
+    "prediction_tr": "Yeni konu ekledikçe erişim aramasının büyümesi toplam yetenek kazancını sınırlayabilir.",
+    "intervention_tr": "Aynı görev çözücüsüne artan konu bankası bağla ve erişim işini say.",
+    "falsifier_tr": "Konu sayısıyla erişim bedeli veya kayıp artmaz.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "RES20",
+    "family": "RES",
+    "title_tr": "Açık uçlu genişlemede kaynak denetimi",
+    "prediction_tr": "Yeni durum dilini büyüten sistem kaynak denetimi olmadan yararlı beceriyi hizmete çeviremeyebilir.",
+    "intervention_tr": "Dil genişletmesini kaynak denetimli ve denetimsiz sürdür.",
+    "falsifier_tr": "Aynı dış bütçede hizmet kaybı farkı görülmez.",
+    "status": "queued",
+    "prior_art": "İlgili bilinen bellek, çevrimiçi öğrenme, bilgi derleme veya kaynak sınırlı karar aileleriyle karşılaştırılacak; bu kayıt özgünlük veya doğrulanma iddiası değildir.",
+    "engine": "memory"
+  },
+  {
+    "id": "UPD01",
+    "family": "UPD",
+    "title_tr": "Sabit düşük gürültüde deneyimden kazanç seçimi",
+    "prediction_tr": "stationary_low koşulunda gain_meta, fixed_005 yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı gözlem akışı üzerinde kazanç yordamasını değiştir; gizli sinyal, gelecek gözlemler ve rejim etiketi öğreniciye verilmez.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "gain_meta",
+      "control": "fixed_005"
+    },
+    "regime": "stationary_low",
+    "practical_margin": 0.0005,
+    "claim_group": "fixed_gain_regimes",
+    "engine": "update"
+  },
+  {
+    "id": "UPD02",
+    "family": "UPD",
+    "title_tr": "Sabit yüksek gürültüde deneyimden kazanç seçimi",
+    "prediction_tr": "stationary_noisy koşulunda gain_meta, fixed_005 yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı gözlem akışı üzerinde kazanç yordamasını değiştir; gizli sinyal, gelecek gözlemler ve rejim etiketi öğreniciye verilmez.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "gain_meta",
+      "control": "fixed_005"
+    },
+    "regime": "stationary_noisy",
+    "practical_margin": 0.0005,
+    "claim_group": "fixed_gain_regimes",
+    "engine": "update"
+  },
+  {
+    "id": "UPD03",
+    "family": "UPD",
+    "title_tr": "Yavaş sürüklenmede deneyimden kazanç seçimi",
+    "prediction_tr": "drift koşulunda gain_meta, fixed_02 yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı gözlem akışı üzerinde kazanç yordamasını değiştir; gizli sinyal, gelecek gözlemler ve rejim etiketi öğreniciye verilmez.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "gain_meta",
+      "control": "fixed_02"
+    },
+    "regime": "drift",
+    "practical_margin": 0.0005,
+    "claim_group": "fixed_gain_regimes",
+    "engine": "update"
+  },
+  {
+    "id": "UPD04",
+    "family": "UPD",
+    "title_tr": "Ani sıçramalarda deneyimden kazanç seçimi",
+    "prediction_tr": "jumps koşulunda gain_meta, fixed_02 yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı gözlem akışı üzerinde kazanç yordamasını değiştir; gizli sinyal, gelecek gözlemler ve rejim etiketi öğreniciye verilmez.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "gain_meta",
+      "control": "fixed_02"
+    },
+    "regime": "jumps",
+    "practical_margin": 0.0005,
+    "claim_group": "fixed_gain_regimes",
+    "engine": "update"
+  },
+  {
+    "id": "UPD05",
+    "family": "UPD",
+    "title_tr": "Sürüklenme yönü değiştiğinde deneyimden kazanç seçimi",
+    "prediction_tr": "reversals koşulunda gain_meta, fixed_02 yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı gözlem akışı üzerinde kazanç yordamasını değiştir; gizli sinyal, gelecek gözlemler ve rejim etiketi öğreniciye verilmez.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "gain_meta",
+      "control": "fixed_02"
+    },
+    "regime": "reversals",
+    "practical_margin": 0.0005,
+    "claim_group": "fixed_gain_regimes",
+    "engine": "update"
+  },
+  {
+    "id": "UPD06",
+    "family": "UPD",
+    "title_tr": "Dinamik ve gürültü değişirken deneyimden kazanç seçimi",
+    "prediction_tr": "mixed koşulunda gain_meta, fixed_02 yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı gözlem akışı üzerinde kazanç yordamasını değiştir; gizli sinyal, gelecek gözlemler ve rejim etiketi öğreniciye verilmez.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "gain_meta",
+      "control": "fixed_02"
+    },
+    "regime": "mixed",
+    "practical_margin": 0.0005,
+    "claim_group": "fixed_gain_regimes",
+    "engine": "update"
+  },
+  {
+    "id": "UPD07",
+    "family": "UPD",
+    "title_tr": "Yüksek gürültüde ortak durumlu güncelleme ve bağımsız filtre bankası",
+    "prediction_tr": "stationary_noisy koşulunda gain_meta, expert_bank yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı gözlem akışı üzerinde kazanç yordamasını değiştir; gizli sinyal, gelecek gözlemler ve rejim etiketi öğreniciye verilmez.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "gain_meta",
+      "control": "expert_bank"
+    },
+    "regime": "stationary_noisy",
+    "practical_margin": 0.0005,
+    "claim_group": "independent_state_control",
+    "engine": "update"
+  },
+  {
+    "id": "UPD08",
+    "family": "UPD",
+    "title_tr": "Sürüklenmede ortak durumlu güncelleme ve bağımsız filtre bankası",
+    "prediction_tr": "drift koşulunda gain_meta, expert_bank yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı gözlem akışı üzerinde kazanç yordamasını değiştir; gizli sinyal, gelecek gözlemler ve rejim etiketi öğreniciye verilmez.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "gain_meta",
+      "control": "expert_bank"
+    },
+    "regime": "drift",
+    "practical_margin": 0.0005,
+    "claim_group": "independent_state_control",
+    "engine": "update"
+  },
+  {
+    "id": "UPD09",
+    "family": "UPD",
+    "title_tr": "Sıçramalarda ortak durumlu güncelleme ve bağımsız filtre bankası",
+    "prediction_tr": "jumps koşulunda gain_meta, expert_bank yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı gözlem akışı üzerinde kazanç yordamasını değiştir; gizli sinyal, gelecek gözlemler ve rejim etiketi öğreniciye verilmez.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "gain_meta",
+      "control": "expert_bank"
+    },
+    "regime": "jumps",
+    "practical_margin": 0.0005,
+    "claim_group": "independent_state_control",
+    "engine": "update"
+  },
+  {
+    "id": "UPD10",
+    "family": "UPD",
+    "title_tr": "Değişken rejimde ortak durumlu güncelleme ve bağımsız filtre bankası",
+    "prediction_tr": "mixed koşulunda gain_meta, expert_bank yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı gözlem akışı üzerinde kazanç yordamasını değiştir; gizli sinyal, gelecek gözlemler ve rejim etiketi öğreniciye verilmez.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "gain_meta",
+      "control": "expert_bank"
+    },
+    "regime": "mixed",
+    "practical_margin": 0.0005,
+    "claim_group": "independent_state_control",
+    "engine": "update"
+  },
+  {
+    "id": "UPD11",
+    "family": "UPD",
+    "title_tr": "Edinilmiş kazancın benzer yeni dinamiğe aktarılması",
+    "prediction_tr": "transfer_matched koşulunda frozen_gain_transfer, fixed_02_reset yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı edinim ve hedef gözlemleri; tahmin durumu iki yöntemde sıfırlanır; yalnız adayın geçmiş gözlem hatalarından edindiği kazanç taşınır.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "frozen_gain_transfer",
+      "control": "fixed_02_reset"
+    },
+    "regime": "transfer_matched",
+    "practical_margin": 0.0005,
+    "claim_group": "gain_transfer",
+    "engine": "update"
+  },
+  {
+    "id": "UPD12",
+    "family": "UPD",
+    "title_tr": "Edinilmiş kazancın uyumsuz yeni dinamiğe aktarılması",
+    "prediction_tr": "transfer_mismatch koşulunda frozen_gain_transfer, fixed_02_reset yönteminden en az 0.0005 düşük bütün yaşam normalize saklı sinyal hatası üretir.",
+    "intervention_tr": "Aynı edinim ve hedef gözlemleri; tahmin durumu iki yöntemde sıfırlanır; yalnız adayın geçmiş gözlem hatalarından edindiği kazanç taşınır.",
+    "falsifier_tr": "Dokunulmamış doğrulamada önkayıtlı pratik fark ve çoklu karşılaştırma ölçütü karşılanmazsa iddia desteklenmez; ters yön güçlü ise reddedilir.",
+    "status": "wave1",
+    "prior_art": "Bilinen uyarlamalı filtreleme ve üstel ağırlıklı uzman öğrenme ailesi; yeni optimizer iddiası yok.",
+    "metric": "mean_normalized_latent_prequential_squared_error",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "frozen_gain_transfer",
+      "control": "fixed_02_reset"
+    },
+    "regime": "transfer_mismatch",
+    "practical_margin": 0.0005,
+    "claim_group": "gain_transfer",
+    "engine": "update"
+  },
+  {
+    "id": "UPD13",
+    "family": "UPD",
+    "title_tr": "Geçmişe göre kazanç seçmek değişim hızını öğrenebilir",
+    "prediction_tr": "Aynı gözlemlerle edinilen kazanç, yeni fakat benzer değişim hızındaki görevlerde başlangıç kazancından düşük hedef hatası verir.",
+    "intervention_tr": "Edinilmiş kazancı yeni tahmin durumu sıfırlandıktan sonra taşı; edinimi ters zaman sırasıyla da dene.",
+    "falsifier_tr": "Eş bütçeli sabit veya basit uyarlamalı kontrolün hedef hatası daha düşük ya da eşitse.",
+    "status": "queued",
+    "prior_art": "Uyarlamalı filtreleme, meta-learning ve optimizer learning ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "UPD14",
+    "family": "UPD",
+    "title_tr": "Öğrenilmiş kazancı unutmak bazen gereklidir",
+    "prediction_tr": "Eski dinamiğin tersine döndüğü akışta kazanç belleğini kısmen unutmak tam korumadan düşük bütün yaşam hatası verir.",
+    "intervention_tr": "Aynı yeni kanıt altında eski kazanç ağırlıklarını koru, sıfırla veya azalt.",
+    "falsifier_tr": "Unutmanın geçiş maliyeti dahil farkı yoksa ya da koruma daha iyiyse.",
+    "status": "queued",
+    "prior_art": "Uyarlamalı filtreleme, meta-learning ve optimizer learning ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "UPD15",
+    "family": "UPD",
+    "title_tr": "Güncelleme dili yeni terim gerektirebilir",
+    "prediction_tr": "Sabit kazanç ailesi yeterli değilken edinilmiş ikinci durum değişkeni, aynı kaynak sınırında daha az hata sağlar.",
+    "intervention_tr": "Tek durumlu kazanç ailesine karşı deneyimden seçilen hız durumu ve eş bütçeli hazır iki durumlu kontrol.",
+    "falsifier_tr": "Güçlü hazır kontrol tüm kazanımı açıklarsa veya ek terim yeni görevlerde yararsızsa.",
+    "status": "queued",
+    "prior_art": "Uyarlamalı filtreleme, meta-learning ve optimizer learning ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "UPD16",
+    "family": "UPD",
+    "title_tr": "Hataların büyüklüğü ile yönü farklı güncelleme bilgisi taşır",
+    "prediction_tr": "Aynı büyüklük dağılımlı fakat farklı işaret bağımlılıklı hatalarda yalnız hata büyüklüğünden öğrenen yöntem yetersiz kalır.",
+    "intervention_tr": "İşaret dizisini koru veya karıştır; marjinal hata büyüklüklerini aynı tut.",
+    "falsifier_tr": "İşaret bilgisini kullanan yöntem dokunulmamış akışta avantaj sağlamazsa.",
+    "status": "queued",
+    "prior_art": "Uyarlamalı filtreleme, meta-learning ve optimizer learning ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "UPD17",
+    "family": "UPD",
+    "title_tr": "Kazanç öğrenmesi ölçüm yanlılığını öğrenme sanabilir",
+    "prediction_tr": "Ölçüm yanlılığı kalıcıyken hata küçülmesi saklı sinyal doğruluğunda iyileşme sağlamayabilir.",
+    "intervention_tr": "Aynı gerçek sinyale sıfır ortalamalı ve yanlı sensörler uygula; gözlem ve doğruluk kaybını ayır.",
+    "falsifier_tr": "Gözlem hatası ve saklı doğruluk her koşulda birlikte iyileşirse.",
+    "status": "queued",
+    "prior_art": "Uyarlamalı filtreleme, meta-learning ve optimizer learning ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "UPD18",
+    "family": "UPD",
+    "title_tr": "Durum ve güncelleme öğrenmesi için ayrı kanıt gerekebilir",
+    "prediction_tr": "Tahmin durumu için yeterli kısa kayıt, hangi güncellemenin yeni görevde iyi olacağını belirlemek için yeterli olmayabilir.",
+    "intervention_tr": "Bugünkü tahminleri eşit iki geçmiş kur; gelecekteki değişimlere aynı yeni kanıtı uygula.",
+    "falsifier_tr": "Önerilen karşı örnekte bütün gelecekteki optimum güncellemeler aynı kalırsa.",
+    "status": "queued",
+    "prior_art": "Uyarlamalı filtreleme, meta-learning ve optimizer learning ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "UPD19",
+    "family": "UPD",
+    "title_tr": "Güncelleme yetkisinin sınırlanması edinim hızına zarar verebilir",
+    "prediction_tr": "Geçmiş becerileri koruyan kısıt, hızlı değişimde uyarlama hatasını artırabilir.",
+    "intervention_tr": "Sabit geçmiş testlerini koruyan sınır ile serbest ve bütçe eşlenmiş yeniden öğrenmeyi karşılaştır.",
+    "falsifier_tr": "Koruma maliyeti dahil uyarlama farkı yoksa veya sınırlı yöntem daha iyi ise.",
+    "status": "queued",
+    "prior_art": "Uyarlamalı filtreleme, meta-learning ve optimizer learning ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "UPD20",
+    "family": "UPD",
+    "title_tr": "Güncelleme yordaması geri alınabilir olmalıdır",
+    "prediction_tr": "Yanlış gözlem sonradan düzeltildiğinde dayanaklı kazanç belleği, kör belleğe göre daha doğru gelecek güncellemeler yapar.",
+    "intervention_tr": "Bir eski gözlemi düzelt; tam tekrar, dayanaklı kısmi onarım ve yalnız canlı durum onarımını karşılaştır.",
+    "falsifier_tr": "Kazanç belleğinin onarımı eş kanıt ve bütün maliyet altında fark yaratmazsa.",
+    "status": "queued",
+    "prior_art": "Uyarlamalı filtreleme, meta-learning ve optimizer learning ile kesişir; yenilik iddiası değildir.",
+    "engine": "update"
+  },
+  {
+    "id": "XFR01",
+    "family": "XFR",
+    "title_tr": "Hazır kimlik köprüsü olmadan eşleme",
+    "prediction_tr": "İlişkisel düzen üzerinden edinilen alan eşlemesi, yüzey benzerliği eşlemesinden yeni alanda daha düşük hata verir.",
+    "intervention_tr": "Nesne kimlikleri karıştırılır; ilişkisel / yüzey eşleyici.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR02",
+    "family": "XFR",
+    "title_tr": "Yanlış ilişkisel simetriyi bozma",
+    "prediction_tr": "Bir ek ayırıcı deney seçmek, simetrik alanlardaki yanlış aktarımı rastgele deneyden daha çok azaltır.",
+    "intervention_tr": "Simetrik grafiklerde amaçlı / rastgele tek köprü gözlemi.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR03",
+    "family": "XFR",
+    "title_tr": "Ortak işlem türünü edinme",
+    "prediction_tr": "Kaynak sonuçlarından işlem türünü çıkaran yöntem, önceden sabit işlem türünden heterojen hedeflerde daha iyi aktarır.",
+    "intervention_tr": "Eşleme dışında bileştirme türü de gizlenir; çıkarım / sabit seçim.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR04",
+    "family": "XFR",
+    "title_tr": "Çoktan bire anlam köprüsü",
+    "prediction_tr": "Birebir olmayan eşleme dili, kavramların hedefte birleştiği alanlarda bijeksiyon varsayımından düşük hata verir.",
+    "intervention_tr": "Kaynak kavramları hedefte birleşir; bölümleme / bijeksiyon.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR05",
+    "family": "XFR",
+    "title_tr": "Bir kavramın hedefte ayrışması",
+    "prediction_tr": "Bağlama bağlı bire-çok köprü, hedefte ayrışan kavramlarda tek görüntülü köprüden iyi tahmin verir.",
+    "intervention_tr": "Hedef bağlamı erişilebilir; bağlamsal / sabit köprü.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR06",
+    "family": "XFR",
+    "title_tr": "Köprünün güvenini ayrı tutma",
+    "prediction_tr": "Kaynak bilginin doğruluğu ile köprü güvenini ayırmak, yanlış köprüde tüm kaynak bilgiyi reddetmekten az unutma doğurur.",
+    "intervention_tr": "Yanlışlanan köprü; yerel / küresel güven düşüşü.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR07",
+    "family": "XFR",
+    "title_tr": "Aktarım olumsuzluğu erken tanınır",
+    "prediction_tr": "Kaynak uyumu için ayrılmış az sayıda hedef örneği, koşulsuz aktarıma göre bütün yaşam hatasını azaltır.",
+    "intervention_tr": "Uyum yoklama / doğrudan aktarım; yoklama bütçesi ücretli.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR08",
+    "family": "XFR",
+    "title_tr": "Alanlar arası işaret dönüşümü",
+    "prediction_tr": "Aynı bağıntının ters işaretle kodlandığı hedefte dönüşüm edinme, örnek benzerliği aktarımını aşar.",
+    "intervention_tr": "İşaret dönüşümü gizli; öğrenilmiş dönüşüm / en yakın örnek.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR09",
+    "family": "XFR",
+    "title_tr": "Bağlam değişince kategori yeniden düzenlenir",
+    "prediction_tr": "Görev koşullu bölümlemeler, tek kalıcı bölümlemeden kesişen görevlerde düşük toplam karar hatası verir.",
+    "intervention_tr": "Aynı olaylar iki görev; çoklu bölümleme / tek bölümleme.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR10",
+    "family": "XFR",
+    "title_tr": "Ortak alt yapı yeni kavramı hızlandırır",
+    "prediction_tr": "Ayrı kaynaklarda öğrenilmiş iki ilişkinin ortak alt yapısı, birleşik yeni görevde tek kaynak aktarımından daha az etiket gerektirir.",
+    "intervention_tr": "İki kaynak / her tek kaynak; yeni birleşim ve eşit toplam kaynak maliyeti.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR11",
+    "family": "XFR",
+    "title_tr": "İlgisiz kaynak bilgisi aktarımı engeller",
+    "prediction_tr": "Kaynak seçimi, giderek artan ilgisiz kaynak sayısında bütün kaynakları birleştirmekten az hedef hata doğurur.",
+    "intervention_tr": "Kaynak sayısı ve ilgisizlik artırılır; seçici / toplu aktarım.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR12",
+    "family": "XFR",
+    "title_tr": "İki taraflı köprü denetimi",
+    "prediction_tr": "Gidiş-dönüş tutarlılığı kontrolü yalnız ileri uyumdan daha az yanlış köprü kabul eder.",
+    "intervention_tr": "Yalnız ileri / iki yönlü test; simetri tuzakları dahil.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR13",
+    "family": "XFR",
+    "title_tr": "Köprü oluşturmanın bedeli",
+    "prediction_tr": "Öğrenilmiş köprü toplam ömür maliyetinde tekrar hedef çözümlemeyi yalnız yeterli tekrar sayısından sonra aşar.",
+    "intervention_tr": "Tekrar sayısı taraması; köprü edinimi dahil kırılma noktası.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR14",
+    "family": "XFR",
+    "title_tr": "Soyut ilişkiden yüzeye geri aktarım",
+    "prediction_tr": "Soyut ilişkisel başarıyı ham gözlem eylemlerine bağlama eğitimi, yalnız soyut eğitimden uçtan uca hedef başarısını artırır.",
+    "intervention_tr": "Algısal bağlantı edinilir / hazır bağlantı tanısal kontrol.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR15",
+    "family": "XFR",
+    "title_tr": "Çelişkili kültürler benzeri alanlar",
+    "prediction_tr": "Alan kimliğini korumak, çelişen yerel kuralları tek kümede birleştirmekten az negatif aktarım üretir.",
+    "intervention_tr": "Aynı sembollerin farklı yasaları; alan koşullu / küresel.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR16",
+    "family": "XFR",
+    "title_tr": "Az köprüyle tüm eşlemeyi bilmek gerekmez",
+    "prediction_tr": "Göreve özgü kısmi köprü, tam eşleme ediniminden aynı karar doğruluğunu daha düşük maliyetle sağlar.",
+    "intervention_tr": "Hedef sorgularının kapsamı sınırlı; kısmi / tam eşleme.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR17",
+    "family": "XFR",
+    "title_tr": "Eski köprü yeni bilgiyi de taşıyabilir",
+    "prediction_tr": "Kaynak güncellendiğinde bağıntı koruyan köprü, yüzey ezber köprüsünden güncelleme aktarımında daha başarılıdır.",
+    "intervention_tr": "Köprü kurulduktan sonra yeni kaynak gerçekleri verilir.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR18",
+    "family": "XFR",
+    "title_tr": "Eşleme yanlışını bilgi yanlışından ayırma",
+    "prediction_tr": "Köprü ve yerel model için ayrı karşı örnek açıklamaları, tek hata havuzundan daha az gereksiz düzeltme doğurur.",
+    "intervention_tr": "Ayrı nedenler / tek neden; hata yerinin gerçek dağılımı gizli.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR19",
+    "family": "XFR",
+    "title_tr": "Yapısal uzaklık başarıyı sınırlar",
+    "prediction_tr": "Öğrenilmiş ilişkisel uzaklıkla aktarımı sınırlamak, yalnız yüzey uzaklığından daha iyi başarısızlık öngörür.",
+    "intervention_tr": "Hedef başarı tahmini için iki uzaklık; kalibrasyon.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  },
+  {
+    "id": "XFR20",
+    "family": "XFR",
+    "title_tr": "Köprülerin bileştirilmesi hata biriktirir",
+    "prediction_tr": "Ara köprü doğrulaması, çok adımlı alan aktarımında doğrudan köprü zincirinden düşük son hata verir.",
+    "intervention_tr": "Üç alan; denetimli / denetimsiz köprü bileşimi.",
+    "falsifier_tr": "Eşleştirilmiş bağımsız doğrulama tohumlarında önceden belirtilen üstünlük elde edilmezse bu koşullu öngörü desteklenmez; ters ve pratik olarak anlamlı etki öngörüyü çürütür.",
+    "status": "queued",
+    "prior_art": "Yapı eşleme, alan uyarlama, ilişkisel aktarım; henüz uygulama veya yenilik iddiası yok.",
+    "execution_note": "Kuyruk önerisi; henüz protokolü dondurulmuş veya deneyle sınanmış değildir.",
+    "engine": "representation"
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-21",
+  "status": "passed",
+  "preservation": {
+    "files_byte_exact": 866,
+    "changed": [],
+    "head_unchanged": true
+  },
+  "source_result_hashes_match": true,
+  "unique_primary_conditions": 864,
+  "unique_posthoc_conditions": 216,
+  "distinct_lives": 12,
+  "local_document_links_checked": 42,
+  "fresh_process_main_methods_exact": 9,
+  "prior_full_reruns": 2,
+  "continuation_pairs_initially_equal": 36,
+  "endpoint_diagnostic_reproduction": {
+    "status": "passed",
+    "mode": "check",
+    "runs": 12,
+    "feasible_label_endpoints": 10,
+    "tested_paths_violating_label_budget": 12
+  },
+  "offline_endpoint_and_reference_agree": true,
+  "artifacts_sha256": {
+    "docs/research/living_learning_geometry_2026_09_21/MATHEMATICS_AND_LITERATURE.md": "dd0364b09f2c395f482850599ee4322f7d811f5a5eae413de2b64a8b9ea827de",
+    "docs/research/living_learning_geometry_2026_09_21/POSTHOC_CONTROLS.md": "159e167c8cc5c4ea7ab9784376ea837d6aaaa5af10e6d5301a624dedb61ae117",
+    "docs/research/living_learning_geometry_2026_09_21/PROTOCOL.md": "f81412029f40cdb0d9d3831db72daaafb1a5dbbc9c84b81c9e25b86a2d0cc0f0",
+    "docs/research/living_learning_geometry_2026_09_21/REPORT_TR.md": "5fcd9cb94fa1e539d9741b94ae923ee4eeb6ae2fbf646c31931fc4526ee5a227",
+    "docs/research/living_learning_geometry_2026_09_21/REVIEW.md": "1a5a0d2cc83034fd16c5a413db9f81908d7b61d4e44e7399ca9bfcadfc69a4ec",
+    "research/living_learning_geometry_2026_09_21/endpoint_diagnostic.py": "56e1b23fd3b1af61aed8d9b73755b75c76aca49b317f814c9c7ae3237a2ec21e",
+    "research/living_learning_geometry_2026_09_21/final_audit.py": "f2afe1f9bebf178594bfd21dcde7d5cdfbaddf2b075d3823efd228307409bbb0",
+    "research/living_learning_geometry_2026_09_21/geometry.py": "fe737f3020d3513908d47ab9467af55e36cb302bd1d37d958d188201eccfc329",
+    "research/living_learning_geometry_2026_09_21/posthoc_controls.py": "bf2cfe11878504d16a2515409093ab1fc2540e8f21c214d772cb9138b54c40d4",
+    "research/living_learning_geometry_2026_09_21/README.md": "7cb5a8478d44adcb24b15e81f4034a854c9a30de197535e4419d91fd51f9cf41",
+    "research/living_learning_geometry_2026_09_21/results/endpoint_diagnostic.json": "5e10ab43db630d2b3f40a37009ea326f28a8890510019abd4df6fe3c7a2c3356",
+    "research/living_learning_geometry_2026_09_21/results/geometry.json": "5c77db17b6a93295c8b41676f5707fdcac9d89cfcb56ea7ed665b9a41bf41df5",
+    "research/living_learning_geometry_2026_09_21/results/posthoc_controls.json": "b1298928bcf18b743c65aaa20de29fe74126bedc9f297bf59d33bc601072c7cc",
+    "research/living_learning_geometry_2026_09_21/results/preservation_baseline.json": "42f493437d89a3f6200d96f7b71a9a8a3f1b3c0c5a8e6dbbf611c019de2eed40",
+    "research/living_learning_geometry_2026_09_21/results/verification.json": "35b7df960a8ae980b2a9790fea8b4f823b0759f0efeee6bc5d19ababb8dc5965",
+    "research/living_learning_geometry_2026_09_21/verify_geometry.py": "d48bd42d9d5ad763ecc42fa406d274b5c126ce94f7026a56dfb2ce92621322f4"
+  },
+  "scope": "Local provenance and reproducibility; not external peer review or independent-world validation. No book, prior research, runtime, commit or publication changes."
+}

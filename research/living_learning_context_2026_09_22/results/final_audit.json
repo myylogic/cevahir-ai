@@ -1,0 +1,46 @@
+{
+  "date": "2026-09-22",
+  "status": "passed",
+  "preservation": {
+    "files_unchanged": 941,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "environment": {
+    "python": "3.14.3",
+    "numpy": "2.4.2"
+  },
+  "primary_trajectories": 504,
+  "active_trajectories": 96,
+  "primary_prequential_predictions": 32256,
+  "active_external_queries": 1536,
+  "complete_exact_replays": 2,
+  "ordinary_process_resume_checks": 21,
+  "active_process_resume_checks": 4,
+  "source_protocol_result_hashes_match": true,
+  "paired_summary_recomputed": true,
+  "full_candidate_bank_scalar_checked": true,
+  "report_key_claims_checked": true,
+  "local_links_checked": 28,
+  "artifacts_sha256": {
+    "docs/research/living_learning_context_2026_09_22/ACTIVE_EXPERIENCE_PROTOCOL.md": "1433b39a86ef464be3286a5643ba02350ad847bddff661bfd58f33df5f8e5482",
+    "docs/research/living_learning_context_2026_09_22/CONTINUOUS_SYSTEM_TARGET_TR.md": "9e452c4b787ff351310eef2bdc779ac5b87a9df89ffd57dfe1757d81ad63c692",
+    "docs/research/living_learning_context_2026_09_22/MATHEMATICAL_AUDIT_TR.md": "f9c6d70f69adc2fa4936705e4dbf6312373f1473c6ff47dc4bd0049b3c127190",
+    "docs/research/living_learning_context_2026_09_22/PROTOCOL.md": "64f88b36b66e8a1068d052dda8b99ef14a17082afca847280decc73b5a10f1f2",
+    "docs/research/living_learning_context_2026_09_22/REPORT_TR.md": "888dbe6c050d78f35bbfe2f4bee088b47df62fad2b0ececfb471d9d6090b3f20",
+    "docs/research/living_learning_context_2026_09_22/THEORY_NOVELTY_BOUNDARY_TR.md": "028fe67429fad6468526add06106df9bdff7f27f0db035e87a5385e5eb4b956f",
+    "research/living_learning_context_2026_09_22/active_experience.py": "a744104c3d5f2450f9d8266a7bbf1b97b415be99c325475722a01fc7f08c0cc6",
+    "research/living_learning_context_2026_09_22/analyze_results.py": "02b678f7c574cec73e24a7698dfe13627853566b1e808c3365e84d95db383287",
+    "research/living_learning_context_2026_09_22/context_learning.py": "d073734c9eb68086fb205d1057cf0a0977107cb1694b487a9bfedceb95859a38",
+    "research/living_learning_context_2026_09_22/final_audit.py": "5c4d0fb590a80240772d4fe3ebb9aa62c865fa62685c3e118d80a4728cbf440b",
+    "research/living_learning_context_2026_09_22/README.md": "e76a77d031c67f45601c6fbd26657c2319e3342edebbd467ac2bc5460ef03d8a",
+    "research/living_learning_context_2026_09_22/results/active_experience.json": "f41cf443fe0c00913ef9ea57463919ebb61c5d0b894c49af832bee8393d8fd1a",
+    "research/living_learning_context_2026_09_22/results/active_verification.json": "14cb3303b75985791717b1b0bec09014be173d3d7de4fc78d7a4f59c59b0bcf8",
+    "research/living_learning_context_2026_09_22/results/context_learning.json": "4f2d0aa4efe64dc02e7f27b59706b9b9c16cae18ccb839f26f61a2b8ac9b5f49",
+    "research/living_learning_context_2026_09_22/results/paired_summary.json": "e14e0a491c99cdc01cb65a57907b5bc7bc2ae570b52eb1edb09abbd2b2ea210d",
+    "research/living_learning_context_2026_09_22/results/preservation_baseline.json": "d3e6731c579e36e3d3f3229239af8836c7d72a4066c571d12f18317dfc9c0350",
+    "research/living_learning_context_2026_09_22/results/verification.json": "fe049cadb0e9ae2c612fc493d19a188202dfa8c834ce00cd2d96c272f5d44bd8",
+    "research/living_learning_context_2026_09_22/verify_active.py": "dcb6be018a156427b9dc55ce2b0fc5e302277c8636172afd57d9a0cd40dd46ed",
+    "research/living_learning_context_2026_09_22/verify_context.py": "220560b8b0b319b24ed8389eee7ae360f4d2997e95c658cb98b8fb395443d737"
+  },
+  "scope": "Local finite experiments and conditional mathematics; supplied representation language and query interface. No claim of a new fundamental principle, biological mechanism or AGI. No commit, push or publication."
+}

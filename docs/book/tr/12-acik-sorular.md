@@ -91,6 +91,56 @@ nasıl güvenilir yeni hesaplama kapasitesine dönüşeceği birlikte araştır�
 [Yayın dizisi](../../publications/README.md) önceki sekiz çalışmayla bu yeni
 sonucu aynı arşivde, açık kapsam ve yazar künyeleriyle sunar.
 
+## Durum yeterliliğini adım adım türetmek
+
+Bir geçmişin hangi ayrımlarının korunacağını, daha sonra ondan ne isteyeceğimize göre belirleyebiliriz. $D$ ve $D'$ iki geçmiş, $Q$ izinli sorgular ailesi olsun. Yalnız bugünkü sorgular için
+
+$$D\equiv_Q D'\quad\Longleftrightarrow\quad q(D)=q(D')\quad\text{her }q\in Q\text{ için}$$
+
+yazarız. Bu bir öğrenme algoritması değildir; iki geçmişi birleştirirken hangi bilginin kaybedilmediğini tanımlar. İleride düzeltme veya ekleme de yapılacaksa yalnız bugünkü eşitliği istemek yetmez. İzinli her işlem dizisi $u$ sonrasında $q(uD)=q(uD')$ gerekir. Geçersiz işlemi reddetmek de sözleşmenin parçasıysa, işlemin iki geçmişte geçerli olup olmadığı da eşleşmelidir. İşlem geçerliliğini güvenilir bir dış hizmetin sağladığı sözleşme daha zayıftır.
+
+Örneğin iki girdilik alanda `D=[(0,0),(0,1)]` ve `D'=[(1,0),(1,1)]` alalım. İkisinde `N=2`, `d=(0,0)` olur. Her Boolean hipotez, hangi girdide bulunduğundan bağımsız olarak bu karşıt etiket çiftinden tam bir hata alır. Dolayısıyla dört hipotezin hata vektörü de `(1,1,1,1)`dir. Fakat “kaç tane `(0,0)` var?” sorusuna cevaplar `1` ve `0` olur. Sorgu ailesini genişletmek, daha önce birleştirilebilen geçmişleri ayırır. Hiçbir yeni deney yapılmadan eldeki eski özetten bu kayıp ayrım geri üretilemez.
+
+Kodda [`signed`](../../../research/living_learning_query_state_2026_09_21/query_state.py#L22), sayım farklarını; [`query`](../../../research/living_learning_query_state_2026_09_21/query_state.py#L29), bütün adayların kayıplarını; [`histogram`](../../../research/living_learning_query_state_2026_09_21/query_state.py#L35), gözlem çokluklarını üretir. Bunlar aynı girdiyi alan fakat farklı gelecek işlemlerini destekleyen temsillerdir. İlgili [matematiksel çalışma notu](../../publications/working-notes/future-state-review.md), bu düşüncenin deneyden önceki türetimini ve sonradan eklenen deney bağlantısını birlikte korur.
+
+### Sayaç, bit ve uygulama belleği farklı ölçülerdir
+
+$K$ farklı yanıt davranışını tam ayırması gereken deterministik bir durum, sabit uzunluklu ikili kodda en az $\lceil\log_2K\rceil$ bit gerektirir. Çünkü $b$ bit en fazla $2^b$ farklı kod taşır; iki ayırt edilebilir geçmiş aynı koda düşerse onları ayıran sorguya aynı cevabı vermek zorunda kalır. Bu sonlu sayma argümanı ne verimli bir encoder kurar ne de Python nesnesinin boyutunu hesaplar.
+
+`85` ve `126` durumun ikisi de `7` bite sığan ideal kod gerektirir; sınıf sayısının azalması her örnekte bir tam bit kazanç değildir. `1296` durum ise `11` bit ister. Gerçekte tamsayı nesneleri, liste alanları, şema, program, adayların tanımı ve dış kayıt hizmeti de bellek tüketir. Dört sayaç tutmak, sayaçların değerleri sınırsız büyürken sabit bit belleği demek değildir. Aynı şekilde bütün geçmişi sonsuz hassasiyetli tek gerçek sayıya kodlamak pratik bir sabit bellek çözümü vermez.
+
+Bu araştırmada “yeterli durum” ifadesi, belirtilen sorgu ve güncelleme hakları için **hesaplamalı yeterliliği** anlatır. Klasik istatistikteki bir parametre için yeterli istatistik tanımıyla koşulsuz eşanlamlı değildir. Tahminlerden durum kurma fikrinin daha eski bir örneği, eylemlere koşullu gelecek gözlemleri kullanan predictive state representations yaklaşımıdır. Bu yakınlık yeni kavram icat edildiğini değil, durumun gelecekteki işlevlerle tanımlanmasının bilinen bir araştırma çizgisine bağlandığını gösterir. [Littman, Sutton ve Singh, 2001](https://proceedings.neurips.cc/paper/2001/hash/1e4d36177d71bbb3558e43af9577d70e-Abstract.html)
+
+### Küçük örneği bugün yeniden çalıştırmak
+
+[`book_research_walkthrough.py`](../../../scripts/book_research_walkthrough.py) korunmuş araştırma modüllerini doğrudan çağırır. Üç örnek grubu vardır: aynı bugünkü aday kümesinden farklı düzeltme sonucu, aynı kayıp vektöründen farklı histogram ve `m=3,N=4` için tam sınıf sayımı. Son grup 1.296 geçmişi işler; **61.575 geçmişlik tarihsel deneyin tamamını tekrar çalıştırmaz**. [`research_walkthrough.json`](../evidence/research_walkthrough.json) bu küçük yeniden üretimin sonuçlarını ayrı saklar.
+
+```text
+python scripts/book_research_walkthrough.py
+```
+
+Varsayılan komut kaydı karşılaştırır, özgün rapor veya sonuç dosyasının üzerine yazmaz. Sayımlar tamsayıdır; yaklaşık toleransla eşitleme kullanılmaz. Çıktıların eşitliği sonlu işlemin tutarlılığıdır; yeni bir genel öğrenicinin başarısı değildir.
+
+## Unutmayı önlemek ile öğrenebilir kalmak
+
+Eski görevde başarı düşmesi **unutma**, yeni hedefe uyumun yavaşlaması **plastisite kaybı** olarak ayrı sorulara yol açar. Dondurulmuş bir ağ eski parametrelerini kusursuz korurken yeni parametre öğrenmesini tamamen durdurabilir. Tersine sürekli sıfırlanan bir ağ yeni örneklere hızlı uyum sağlarken eski beceriyi kaybedebilir. Birinin ölçümü diğerinin yerine geçmez.
+
+Literatürde EWC önemli görülen ağırlıkların değişimini sınırlayarak eski görevleri korumayı; GEM saklanan örneklerle yeni güncellemelerin geçmiş görevlerle ilişkisini yönetmeyi inceler. Bunlar belirli öğrenme ortamlarında somut yöntemlerdir. Kitaptaki çekirdekte ve aktif eğitim döngüsünde bu iki yöntem entegre edilmiş gibi sunulmaz. [Kirkpatrick ve arkadaşları, 2017](https://arxiv.org/abs/1612.00796), [Lopez-Paz ve Ranzato, 2017](https://arxiv.org/abs/1706.08840)
+
+Dohare ve arkadaşları, uzun sürekli öğrenme dizilerinde plastisite kaybını inceler ve az kullanılan birimlerin yenilenmesini içeren continual backpropagation yöntemini değerlendirir. Bu sonuç, deneylerdeki değişkenliği koruma mekanizmasının dayanağıdır; her öğrenicinin mutlaka rastgele biyolojik benzeri değişim kullanması gerektiğinin evrensel ispatı değildir. Cevahir'in [öğrenilmiş güncelleme raporu](../../research/living_learning_update_2026_09_20/REPORT_TR.md), edinilmiş güncelleme davranışının aktarım koşulları değişince tersine dönebildiğini ayrı bir küçük dünyada gösterir. [Dohare ve arkadaşları, Nature 2024](https://www.nature.com/articles/s41586-024-07711-7)
+
+Pratik değerlendirme iki ekseni birlikte tutmalıdır: korunması gereken eski görevlerdeki hata ve yeni görevde deneyim sayısına karşı hata eğrisi. Ayrıca toplam hesap, bellek ve erişilen etiket sayıları kaydedilir. Daha çok etiket kullanarak daha hızlı wall-clock sonuç elde etmek ile aynı kanıtla daha az hata yapmak farklı üstünlüklerdir. **Bunları tek puana indirmek isteniyorsa ağırlıkları bir uygulama tercihi belirler; doğa kendiliğinden tek evrensel ağırlık vermiş sayılmaz.**
+
+## İç durum sapması ne zaman öğrenmenin parçasıdır?
+
+Başlangıçtaki gözlem, aynı dış koşullar altında değişen iç durumun yeni davranışa katkıda bulunabileceğiydi. Tam durum verilirse deterministik bir sistemde de bu mümkündür: dış gözlem $o$ aynı kalsa bile $a=C(s,o)$ içinde $s$ değiştiğinde eylem değişir. Dışarıdan görülen çeşitlilik kendi başına rastgelelik veya öğrenme kanıtı değildir. İç durum bir sayaç, enerji bütçesi, parametre, hatırlanan olay veya değişen güncelleme mekanizması olabilir; bunların hiçbirini baştan tek cevap olarak seçmiyoruz.
+
+Öğretim için iki kapılı bir ortam düşünelim. Eski deneyimler A'nın ödülünün `1` olduğunu göstermiş, B hiç denenmemiş olsun. İç değişken bir gün B'yi seçtirir. Dünya 1'de B'nin ödülü `0`, Dünya 2'de `2` olsun; A deneyimleri iki dünyayı ayırmamıştır. Sapma B hakkında yeni kanıt üretme imkânı açar, fakat hangi dünyada yararlı olacağı geçmiş A verisinden kesin çıkarılamaz. Bu karşı örnek bir optimal exploration politikası önermez; sapmanın **bilgiye erişim** rolünü izole eder.
+
+Üç ayrı kayıt gerekir: sapmanın hangi iç durum nedeniyle oluştuğu, onun hangi çevresel sonucu erişilebilir kıldığı ve sonucun sonraki hesap durumuna nasıl yazıldığı. Sistem B'yi deneyip sonucu tamamen atarsa çeşitlilik vardır fakat bu olaydan kalıcı edinim gösterilmemiştir. Sonuç kaydedilip yalnız aynı kapı seçimi değişirse dar bir edinim olabilir; başka bağlamlara aktarım için ek sınama gerekir. İç değişken dondurulduğunda kazanımın kaybolması yararlı bir müdahaledir, fakat hesap bütçesinin veya eylem imkânının da değişmediği kontrol edilmelidir.
+
+Bu değerlendirme, ana problemi “ne zaman sapılmalı?” sorusuna indirmez. Yeni temsil edinme, yanlış kaydı düzeltme, hesap yordamını değiştirme, eski beceriyi koruma ve öğrenebilir kalma birlikte araştırma alanında kalır. Yeniden sınama bu alanın bir bölgesidir; bütün alanın tanımı değildir.
+
 ## Henüz araştırılmamış veya birleşmemiş yönler
 
 **Deneyimin temsilini edinmek.** Çoğu deney `x`, doğru etiket, bölüm sınırı veya hazır özellik dilini verdi. Oysa sistem hangi olayları aynı tür sayacağını, hangi ayrımın önemli olduğunu, yeni algısal özellikleri nasıl kuracağını da öğrenmek zorunda kalabilir. Hazır çarpma özelliklerini açmak veya üç sembolde histogram tutmak bu işi genel olarak çözmez.
@@ -112,5 +162,24 @@ Yeni bir mekanizma için önce hangi davranışı değiştireceğini ve onu yeni
 Sonra yalnız son başarı değil öğrenme boyunca hizmet hatası, eski beceri, kalıcılık, transfer, düzeltme ve bellek/hesap maliyeti ölçülür. Test etiketleri güncelleyiciye verilmez; sonradan tasarlanan kontroller ayrı işaretlenir. Negatif sonucu eski dosyadan çıkarmak yerine yeni yorumu yeni raporla bağlarız. Bir mekanizma literatürde zaten varsa bunu adıyla söyleriz.
 
 Araştırma bu ölçütlerden herhangi birini ele alabilir; belirli bir mimariye mecbur değildir. Ana sorunun tümü görünür kalır: **Deneyim, gelecekte yapılabilen hesabı ve davranışı nasıl kalıcı, kontrollü ve genellenebilir biçimde değiştirir?** Kitabın bakım düzeni bu soruyu çözdüğünü varsaymaz; cevapların kod, kanıt ve anlatımda aynı sınırlar içinde kalmasını sağlar.
+
+## Beş çözümlü alıştırma
+
+1. **Sorgu değişimi:** İki geçmiş bütün Boolean hipotezlerin hata sayılarını eşit veriyorsa gözlem histogramları aynı olmak zorunda mıdır? **Çözüm:** Hayır. `[(0,0),(0,1)]` ile `[(1,0),(1,1)]` dört hipotez için de bir hata verir; `(0,0)` sayıları farklıdır. Yeterlilik sorgu ailesine bağlıdır.
+2. **Düzeltme:** Bugün yalnız `000` adayı kalan iki geçmişe aynı ilk etiket düzeltmesi yapılıyor. Neden tek aday kimliği yeterli olmayabilir? **Çözüm:** Daha önce başka adayları hangi olayın dışladığı kaybolmuştur. Bölümdeki örnekte düzeltmeden sonra `101` ve `110` ayrı ayrı dirilir. Güncel tahminlerin eşitliği güncelleme durumlarının eşitliği değildir.
+3. **Bellek:** 85 yerine 126 sınıf taşıyan iki temsilin ideal sabit bit uzunlukları nedir? **Çözüm:** İkisi de 7; `64<85<126≤128`. Daha az sınıfın her seferinde daha az tam bit gerektirdiği sonucu yanlıştır. Nesne boyutu ve encoder maliyeti ayrıca ölçülür.
+4. **İç değişim:** İç sayaç nedeniyle farklı eylem üretilmesi yaşayan öğrenmeyi kanıtlar mı? **Çözüm:** Hayır. Eylemin getirdiği sonuç, deneyime bağlı durum değişimi, etkinin korunması ve yeni koşullarda kapasite farkı ayrı gösterilmelidir. Deterministik sistem de farklı iç durumlarla farklı eylem üretebilir.
+5. **Plastisite:** Eski görev başarısı hiç azalmayan model yeni görevi öğrenemiyorsa bütün yaşam ölçütlerinde başarılı mıdır? **Çözüm:** Hayır. Koruma sağlanmış olabilir; edinim ve öğrenebilirlik sağlanmamıştır. Eski görev kaybı ile yeni görev öğrenme eğrisi birlikte değerlendirilir.
+
+## Kaynaklar ve kitabın kapanış noktası
+
+Bu bölümün sayısal iddiaları bağlantılı özgün Cevahir raporlarına dayanır. Yeni öğretim örneği tam tarihsel deneyi tekrar çalıştırdığı iddiası taşımaz. Aşağıdaki yayınlar yöntem benzerliğini ve araştırma ayrımlarını açıklamak içindir; Cevahir'e ölçülmemiş başarı aktarmaz:
+
+- Littman, M. L., Sutton, R. S. ve Singh, S. (2001). *Predictive Representations of State*. NeurIPS. [Özgün yayın](https://proceedings.neurips.cc/paper/2001/hash/1e4d36177d71bbb3558e43af9577d70e-Abstract.html).
+- Kirkpatrick, J. ve arkadaşları (2017). *Overcoming catastrophic forgetting in neural networks*. PNAS, 114(13), 3521–3526. [Yazar ön baskısı](https://arxiv.org/abs/1612.00796), [DOI](https://doi.org/10.1073/pnas.1611835114).
+- Lopez-Paz, D. ve Ranzato, M. (2017). *Gradient Episodic Memory for Continual Learning*. NeurIPS. [Özgün metin](https://arxiv.org/abs/1706.08840).
+- Dohare, S., Hernandez-Garcia, J. F., Lan, Q., Rahman, P., Mahmood, A. R. ve Sutton, R. S. (2024). *Loss of plasticity in deep continual learning*. Nature, 632, 768–774. [DOI ve makale](https://www.nature.com/articles/s41586-024-07711-7).
+
+Kitabın tamamlanması, araştırmanın çözüldüğü anlamına gelmez. Buradaki kapanış, okurun metinden tokena, tensörden eğitime, modelden hizmete ve ölçülmüş deneyden açık soruya kadar bütün akışı izleyebilmesidir. Yeni sonuçlar bu metnin üstüne eklenirken önceki kanıtın kapsamı ve olumsuz bulgular korunur. Kavramlara dönmek için [terim dizini](../TERIMLER.md), bölümleri bir çalışma akışında birleştirmek için [bütünleştirici uygulama](../BUTUNLESTIRICI_CALISMA.md) kullanılabilir.
 
 [İçindekilere dön](../README.md) · [Kaynak haritası](../KAYNAK_HARITASI.md) · [Kitabı güncel tutmak](../BAKIM.md)

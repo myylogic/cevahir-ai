@@ -143,6 +143,26 @@ Bir yöntem karşılaştırmasında yalnız daha düşük son loss değil, bu so
 
 [Gerçek küçük çekirdek örneğinde](../evidence/neural_walkthrough.json) yedi geçerli hedefin loss'u bir SGD adımından sonra `3.7709403 → 3.7681756` oldu. Forward ve backward ağırlıkları değiştirmedi; optimizer adımı değiştirdi. Bu, deneyimden parametre değişimine giden hesap yolunun varlığını gösterir. Öğrenilen değişimin kalıcılığı, eski becerilerin korunması, yeni görevlerde aktarım ve çalışma sırasında hangi deneyimin kullanılacağı ayrıca çözülmelidir. Bu geniş soru [araştırma bölümüne](11-arastirma-laboratuvari.md) taşınır.
 
+## Ön eğitim, uyarlama ve tercih öğrenimi
+
+**Ön eğitim**, geniş bir veri dağılımından başlangıç parametrelerinin edinildiği evreyi; **fine-tuning**, eldeki parametrelerin daha dar bir veri veya amaç için yeniden güncellenmesini anlatır. Bunlar farklı optimizer sınıfları olmak zorunda değildir. Aynı next-token loss, farklı başlangıç ağırlıkları ve farklı örneklerle iki evrede de kullanılabilir. **Supervised fine-tuning / SFT**, istenen davranış örnekleriyle gözetimli uyarlamadır. Bir soru-cevap dosyasının bulunması tek başına iyi bir instruction-tuned model elde edildiğini göstermez; hedef maskesi, veri kapsamı ve değerlendirme belirleyicidir.
+
+Cevahir'in etkin veri yolu soru ve cevabı bir diziye dönüştürür. Kullanılan hedef düzeni önceki bölümlerdeki kaydırılmış next-token sözleşmesidir; yalnız cevap kısmına loss uygulayan özel bir SFT maskesi varmış gibi anlatılmaz. Önceden yüklenmiş ağırlıklarla aynı döngüyü çalıştırmak mümkündür, fakat bundan LoRA, RLHF veya preference training'in etkin olduğu sonucu çıkmaz. Gerçek amaç [`LossComputation.compute_loss`](../../../training_management/v2/core/loss_computation.py#L76) ve gerçek optimizer adımı [`TrainingLoop._finish_update`](../../../training_management/v2/core/training_loop.py#L246) üzerinden okunur.
+
+| Yöntem | Değişen şey / gerekli veri | Bu kitabın Cevahir sınırı |
+|---|---|---|
+| Tam fine-tuning | Seçilen eğitilebilir ağırlıklar, örnek hedefler | Normal optimizer yolu; başlangıç checkpoint'i ve veri ayrıca belirtilir. |
+| LoRA | Dondurulan ana ağırlıklara düşük ranklı öğrenilebilir katkı | Aktif çekirdekte bu bölümün gösterdiği bir LoRA enjeksiyon/eğitim yolu yoktur. |
+| RLHF | İnsan tercihleriyle öğrenilen değerlendirme ve politika optimizasyonu | Bilişsel critic veya geri bildirim kaydı bu eğitim hattının eşdeğeri değildir. |
+| DPO | Tercih edilen/edilmeyen yanıt çiftleri ve referans modele göre amaç | Mevcut next-token loss'ta bu çiftli amaç uygulanmıyor. |
+| Distillation | Öğretmen çıktıları/dağılımıyla öğrencinin eğitimi | Model küçüklüğü kendi başına distillation değildir; mevcut deney bu süreci çalıştırmıyor. |
+
+LoRA'nın temel parametrelemesi $W'=W+BA$ biçiminde yazılabilir; ölçek katsayısı ayrıca kullanılabilir. `W` boyutu `d_out×d_in`, `B` boyutu `d_out×r`, `A` boyutu `r×d_in` olduğunda katkı `r(d_out+d_in)` parametre taşır. `4096×4096` bir matris ve `r=8` için `16.777.216` yerine `65.536` katkı parametresi öğrenilir. Ana matrisin bellekte kalması, aktivasyon ve optimizer maliyetleri nedeniyle toplam bellek bu oranla otomatik küçülmez. Bu bir boyut hesabıdır; Cevahir'de ölçülmüş LoRA kazancı değildir. [Hu ve arkadaşları, 2021](https://arxiv.org/abs/2106.09685)
+
+InstructGPT çalışması, davranış örnekleriyle gözetimli uyarlamayı ve insan sıralamalarına dayalı sonraki eğitimi ayırır. DPO ise tercih çiftleri için doğrudan bir optimizasyon amacı sunar. Tercih etiketi, olgusal doğruluğun her durumda bağımsız kanıtı değildir; hangi değerlendiricinin hangi koşulda tercih yaptığı önemlidir. Bu çalışmaların kendi sonuçlarını Cevahir'in puanı gibi aktarmıyoruz. [Ouyang ve arkadaşları, 2022](https://arxiv.org/abs/2203.02155), [Rafailov ve arkadaşları, 2023](https://arxiv.org/abs/2305.18290)
+
+Distillation'da öğretmenin sınıflar üzerindeki dağılımı, yalnız en yüksek sınıf kimliğinden daha fazla ilişki taşıyabilir; öğrenci bu hedefe göre eğitilir. Öğretmenin yanılması veya veri kapsamının dar olması öğrenciye de taşınabilir. Bu, bir checkpoint'i daha az bit ile saklayan quantization ile farklı bir işlemdir. Sayı biçiminin küçülmesi, modelin öğretmenden yeni davranış öğrendiğini göstermez. [Hinton, Vinyals ve Dean, 2015](https://arxiv.org/abs/1503.02531)
+
 ## Bir bayrak, uygulanmış yöntem değildir
 
 [`validate_training_backend`](../../../training_management/contracts.py#L5) yalnız entegre V2 backend'ine izin verir. EMA, SWA, SAM, lookahead, curriculum, scheduled sampling ve listelenen diğer desteklenmeyen seçenekler açıkken hata üretir. Distributed eğitim stratejisi de bu uçtan uca hatta desteklenmez. Ayrı modülde sınıf veya config alanı bulunması bu yöntemlerin çalışan eğitim servisine entegre olduğunu göstermez. Kitap bu sınırı korur.
@@ -161,6 +181,7 @@ Eğitim sonunda ağırlıkların değişmesi bir başlangıçtır. Bu değişimi
 2. Global gradyan normu `10`, clipping sınırı `2` ise çarpan nedir? **Yanıt:** `0.2`. Loss scaling açıksa bu hesap gerçek ölçeğe döndürülmüş gradyan üzerinde yapılır.
 3. On minibatch ve `grad_accum_steps=4` için son grup da işleniyorsa kaç optimizer adımı vardır? **Yanıt:** `3`; gruplar `4,4,2` minibatch'tir. Scheduler'ın batch ve optimizer sayacını karıştırması programı değiştirir.
 4. Smoothing ve entropy terimi içeren loss'un üssü neden standart perplexity olmayabilir? **Yanıt:** Standart yorum ortalama gerçek hedef negatif log olasılığına dayanır; değiştirilmiş amaç aynı büyüklük değildir.
+5. `2048×1024` ağırlık için rank 4 LoRA katkısında kaç parametre vardır? **Yanıt:** `4×(2048+1024)=12.288`; tam matris `2.097.152` parametredir. Bu yalnız katkı parametre sayısıdır; toplam eğitim belleği veya kalite oranı değildir.
 
 ## Kaynakça
 
@@ -169,5 +190,9 @@ Eğitim sonunda ağırlıkların değişmesi bir başlangıçtır. Bu değişimi
 3. Micikevicius, P. vd. (2017 ön baskı; ICLR 2018). *Mixed Precision Training*. [arXiv:1710.03740](https://arxiv.org/abs/1710.03740).
 4. Hoffmann, J. vd. (2022). *Training Compute-Optimal Large Language Models*. NeurIPS. [arXiv:2203.15556](https://arxiv.org/abs/2203.15556).
 5. PyTorch contributors. *Automatic Differentiation with torch.autograd*. [Resmî öğretici](https://docs.pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html), erişim: 21 Eylül 2026.
+6. Hu, E. J. ve arkadaşları (2021 ön baskı). *LoRA: Low-Rank Adaptation of Large Language Models*. [arXiv:2106.09685](https://arxiv.org/abs/2106.09685).
+7. Ouyang, L. ve arkadaşları (2022). *Training language models to follow instructions with human feedback*. [arXiv:2203.02155](https://arxiv.org/abs/2203.02155).
+8. Rafailov, R. ve arkadaşları (2023). *Direct Preference Optimization: Your Language Model is Secretly a Reward Model*. [arXiv:2305.18290](https://arxiv.org/abs/2305.18290).
+9. Hinton, G., Vinyals, O. ve Dean, J. (2015). *Distilling the Knowledge in a Neural Network*. [arXiv:1503.02531](https://arxiv.org/abs/1503.02531).
 
 [Sonraki: Model yaşam döngüsü](07-model-yasam-dongusu.md) · [İçindekiler](../README.md)

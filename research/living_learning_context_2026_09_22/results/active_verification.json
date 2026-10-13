@@ -1,0 +1,45 @@
+{
+  "checks": {
+    "trajectories": 96,
+    "query_choices_checked": 1536,
+    "outcome_labels_scalar_checked": 1536,
+    "greedy_choices_independently_scored": 768,
+    "policy_replay_exact": true,
+    "query_selection_interface_has_no_truth": true,
+    "selection_costs_counted": true
+  },
+  "persistent_controller": [
+    {
+      "method": "joint_uniform_gate",
+      "policy": "uniform_query",
+      "choices_and_updates_exact": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "joint_uniform_gate",
+      "policy": "disagreement_query",
+      "choices_and_updates_exact": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "joint_balanced_family",
+      "policy": "uniform_query",
+      "choices_and_updates_exact": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "joint_balanced_family",
+      "policy": "disagreement_query",
+      "choices_and_updates_exact": true,
+      "reference": "uninterrupted_live_object"
+    }
+  ],
+  "preservation": {
+    "files_unchanged": 941,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "full_rerun": {
+    "returncode": 0,
+    "stdout": "{\"status\": \"exact_rerun_passed\", \"trajectories\": 96}"
+  }
+}

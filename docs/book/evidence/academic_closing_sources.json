@@ -1,0 +1,153 @@
+{
+  "reviewed_on": "2026-09-21",
+  "references": [
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "CorrectionSummary.append",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 46
+    },
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "CorrectionSummary.replace_label",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 51
+    },
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "CorrectionSummary.restore",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 65
+    },
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "replay_counts",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 29
+    },
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "version_space",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 92
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "signed",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 22
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "query",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 29
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "histogram",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 35
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "audit_cell",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 52
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "negative_controls",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 98
+    },
+    {
+      "path": "scripts/book_research_walkthrough.py",
+      "symbol": "correction_example",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 32
+    },
+    {
+      "path": "scripts/book_research_walkthrough.py",
+      "symbol": "query_boundary_example",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 57
+    },
+    {
+      "path": "scripts/book_research_walkthrough.py",
+      "symbol": "finite_cell_example",
+      "chapter": "tr/12-acik-sorular.md",
+      "line": 71
+    }
+  ],
+  "primary_sources": [
+    {
+      "chapter": "tr/02-metin-tokenizer.md",
+      "url": "https://aclanthology.org/P16-1162/",
+      "title": "Neural Machine Translation of Rare Words with Subword Units",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/02-metin-tokenizer.md",
+      "url": "https://aclanthology.org/P18-1007/",
+      "title": "Subword Regularization: Improving Neural Network Translation Models with Multiple Subword Candidates",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/02-metin-tokenizer.md",
+      "url": "https://aclanthology.org/D18-2012/",
+      "title": "SentencePiece: A simple and language independent subword tokenizer and detokenizer for Neural Text Processing",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/06-egitim.md",
+      "url": "https://arxiv.org/abs/2106.09685",
+      "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/06-egitim.md",
+      "url": "https://arxiv.org/abs/2203.02155",
+      "title": "Training language models to follow instructions with human feedback",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/06-egitim.md",
+      "url": "https://arxiv.org/abs/2305.18290",
+      "title": "Direct Preference Optimization: Your Language Model is Secretly a Reward Model",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/06-egitim.md",
+      "url": "https://arxiv.org/abs/1503.02531",
+      "title": "Distilling the Knowledge in a Neural Network",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/12-acik-sorular.md",
+      "url": "https://proceedings.neurips.cc/paper/2001/hash/1e4d36177d71bbb3558e43af9577d70e-Abstract.html",
+      "title": "Predictive Representations of State",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/12-acik-sorular.md",
+      "url": "https://arxiv.org/abs/1612.00796",
+      "title": "Overcoming catastrophic forgetting in neural networks",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/12-acik-sorular.md",
+      "url": "https://arxiv.org/abs/1706.08840",
+      "title": "Gradient Episodic Memory for Continual Learning",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/12-acik-sorular.md",
+      "url": "https://www.nature.com/articles/s41586-024-07711-7",
+      "title": "Loss of plasticity in deep continual learning",
+      "accessed": "2026-09-21"
+    }
+  ],
+  "scope": "Primary abstracts/metadata and Nature full text reviewed; detailed local claims grounded in preserved research code and records. Added methods are contrasted with the implemented training path, not asserted to be integrated.",
+  "executed_example": "research_walkthrough.json"
+}

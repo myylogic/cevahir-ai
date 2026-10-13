@@ -1,0 +1,190 @@
+{
+  "classes": {
+    "source_class_sizes": [
+      120,
+      15,
+      40,
+      144
+    ],
+    "catalog_types": 11,
+    "source_missing_edge_rejections": 24
+  },
+  "equivariance": {
+    "renamed_prediction_checkpoints": 312,
+    "tolerance": 1e-12,
+    "renamed": "independent sources + target objects + target actions"
+  },
+  "composition": {
+    "joint_candidate_pairs": 12,
+    "composed_queries": 12,
+    "repeated_same_action_counterexample": true,
+    "same_initial_marginals": true,
+    "independent_scalar_composite_label_cases": 36
+  },
+  "frozen_and_scores": {
+    "frozen_rejects_but_records": true,
+    "fallback_only_affected_action": true,
+    "score_boundary_checks": true,
+    "learner_interface_has_no_hidden_truth": true
+  },
+  "preservation": {
+    "files_unchanged": 904,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "fresh_process_resume": [
+    {
+      "method": "table",
+      "regime": "compatible",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "permutation_prior",
+      "regime": "compatible",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "source_a",
+      "regime": "compatible",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "source_b",
+      "regime": "compatible",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "source_both",
+      "regime": "compatible",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "unrelated_sources",
+      "regime": "compatible",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "frozen_source_both",
+      "regime": "compatible",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "cycle_catalog",
+      "regime": "compatible",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "table",
+      "regime": "cycle_shift",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "permutation_prior",
+      "regime": "cycle_shift",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "source_a",
+      "regime": "cycle_shift",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "source_b",
+      "regime": "cycle_shift",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "source_both",
+      "regime": "cycle_shift",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "unrelated_sources",
+      "regime": "cycle_shift",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "frozen_source_both",
+      "regime": "cycle_shift",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "cycle_catalog",
+      "regime": "cycle_shift",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "table",
+      "regime": "local_exception",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "permutation_prior",
+      "regime": "local_exception",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "source_a",
+      "regime": "local_exception",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "source_b",
+      "regime": "local_exception",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "source_both",
+      "regime": "local_exception",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "unrelated_sources",
+      "regime": "local_exception",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "frozen_source_both",
+      "regime": "local_exception",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "method": "cycle_catalog",
+      "regime": "local_exception",
+      "exact_json_equal": true,
+      "reference": "uninterrupted_live_object"
+    }
+  ],
+  "recorded_results": {
+    "trajectories": 576,
+    "checkpoints": 7488,
+    "prequential_labels": 6912,
+    "complete_evidence_endpoints_checked": true
+  },
+  "complete_rerun": {
+    "returncode": 0,
+    "stdout": "{\"status\": \"exact_rerun_passed\", \"trajectories\": 576}"
+  }
+}

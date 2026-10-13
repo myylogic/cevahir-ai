@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "equal_current_prediction_states": 100,
+  "distinct_after_one_label": 100,
+  "no_sample_after_one": "3/4",
+  "balanced_198_after_one": "201/400",
+  "joint_state_witnesses": 64,
+  "pairwise_distinguished": 2016,
+  "max_new_states_per_old_parity_state": 32,
+  "auxiliary_bits_lower_bound": 5,
+  "scope": "Finite witnesses supplement the proofs; no general learner or biological claim."
+}

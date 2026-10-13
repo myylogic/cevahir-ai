@@ -45,3 +45,7 @@ Bir bağlantının ve metot adının varlığını doğrulamak, anlatımın mate
 3–6. bölümler özgün yayınlar, türetimler ve çözümlü alıştırmalarla genişletildi. [Yedi CPU örnek grubu](evidence/neural_walkthrough.json), gerçek embedding, attention, cache, norm, FFN, RoPE ve küçük model güncellemesini kaydeder. Bu turda [99 hedefli test geçti](evidence/academic_expansion_verification.json); yukarıdaki 149 test ilk kitap turunun ayrı tarihli kaydıdır. [Akademik okuma ve atıf kapsamı](AKADEMIK_OKUMA.md), yayınları ve yerel kanıtları nasıl birlikte okumak gerektiğini açıklar.
 
 7–9. bölümlerin devam genişletmesi [ayrı doğrulama kaydında](evidence/runtime_expansion_verification.json) izlenir. Beş checkpoint ve beş üretim/bellek/araç örnek grubu, 15 yeni çözümlü alıştırma ve gerçek calculator çıkarım düzeltmesi içerir. Önceki test sayıları tarihli kapsamlarını korur.
+
+## İlk tam metnin kapanışı
+
+1–2 ve 10–12. bölümlerin tamamlanması, yeni eğitim yöntemi/quantization karşılaştırmaları, 76 terimlik dizin ve bütünleştirici çalışma [tamamlanma kaydında](TAMAMLANMA.md) bir araya getirildi. [Son örnek denetimi](evidence/manuscript_examples_verification.json) altı eşlikçinin geçtiğini kaydeder; önceki test kayıtları tarihsel kapsamlarını korur. Yeni [sistem örneği](../../scripts/book_system_walkthrough.py) gerçek chat/context/storage sınırlarını, [araştırma örneği](../../scripts/book_research_walkthrough.py) korunmuş sonlu uygulamaları kullanır. Yeni kaynak-sembol incelemeleri `academic_completion_sources.json` ve `academic_closing_sources.json` manifestlerindedir.

@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-23",
+  "status": "passed",
+  "methods": [
+    "fresh",
+    "scoped",
+    "blind",
+    "erase",
+    "replay",
+    "full_table",
+    "full_table_cached"
+  ],
+  "source_worlds": 24,
+  "queries_per_method": 2304,
+  "full_amended_rerun": true,
+  "independent_randomized_solver_cases": 1000,
+  "recorded_answer_checks": 16128,
+  "proof_certificates_checked": 815,
+  "active_lemma_truth_checks": 33940,
+  "exact_replay_pairs": 2304,
+  "blind_invalid_active_lemma_uses": 1705,
+  "blind_invalid_new_lemmas": 5,
+  "fresh_process_resumes": 18,
+  "preserved_prior_files": 1055,
+  "base_head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c",
+  "markdown_links_checked": 8,
+  "initial_pre_audit_run_preserved": true,
+  "changed_files_not_committed_or_pushed": true,
+  "scope": "Checked internal deductions in small guarded CNFs; no general living-learning principle, AGI result or biological claim."
+}

@@ -1,0 +1,1043 @@
+{
+  "recorded": {
+    "independent_answer_checks": 4032,
+    "scored_probability_checks": 3024,
+    "state_snapshots_checked": 672,
+    "exact_distribution_pairs": 1728,
+    "local_response_checks": 4032,
+    "cost_telescope_lives": 168,
+    "original_worlds_unchanged": 24,
+    "same_code_record_replay": true
+  },
+  "renaming": [
+    {
+      "seed": 0,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 0,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 0,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 0,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 0,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 0,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 1,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 1,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 1,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 1,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 1,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 1,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 2,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 2,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 2,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 2,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 2,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 2,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 3,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 3,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 3,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 3,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 3,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 3,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 4,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 4,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 4,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 4,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 4,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 4,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 5,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 5,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 5,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 5,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 5,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 5,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 6,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 6,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 6,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 6,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 6,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 6,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 7,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 7,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 7,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 7,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 7,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 7,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 8,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 8,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 8,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 8,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 8,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 8,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 9,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 9,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 9,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 9,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 9,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 9,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 10,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 10,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 10,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 10,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 10,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 10,
+      "method": "oracle",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 11,
+      "method": "separate",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 11,
+      "method": "persistent",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 11,
+      "method": "recompute",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 11,
+      "method": "completion",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 11,
+      "method": "disabled",
+      "invariant_probabilities": true
+    },
+    {
+      "seed": 11,
+      "method": "oracle",
+      "invariant_probabilities": true
+    }
+  ],
+  "tampering": {
+    "rejected": [
+      "candidate",
+      "bridge"
+    ],
+    "scope": "Verifier checks against recorded evidence; not a hardened runtime restore."
+  },
+  "structural": {
+    "trees": 945,
+    "category_masks": [
+      7,
+      56,
+      21,
+      42
+    ],
+    "maximum_categories_represented_by_single_nodes": 2,
+    "all_categories_single_node_possible": false,
+    "all_trees_support_exact_union_readout_without_duplicate_leaves": true,
+    "minimum_total_union_node_references": 6,
+    "total_reference_histogram": {
+      "6": 2,
+      "7": 16,
+      "8": 57,
+      "9": 112,
+      "10": 224,
+      "11": 336,
+      "12": 198
+    },
+    "witness": {
+      "tree": [
+        [
+          [
+            0,
+            2
+          ],
+          1
+        ],
+        [
+          [
+            3,
+            5
+          ],
+          4
+        ]
+      ],
+      "covers": [
+        [
+          7
+        ],
+        [
+          56
+        ],
+        [
+          5,
+          16
+        ],
+        [
+          2,
+          40
+        ]
+      ]
+    },
+    "scope": "Exact representation audit; no concept-learning or tree-training experiment.",
+    "independent_recursive_cover_checks": 3780,
+    "no_bridge_abstract_family": {
+      "maps": 720,
+      "uniform_xy_output": "1/6",
+      "scope": "Arbitrary maps with fixed local tables, not the planted-generator posterior."
+    }
+  },
+  "fresh_process_resume": [
+    {
+      "seed": 0,
+      "method": "separate",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 0,
+      "method": "separate",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 0,
+      "method": "separate",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 0,
+      "method": "separate",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 0,
+      "method": "persistent",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 0,
+      "method": "persistent",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 0,
+      "method": "persistent",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 0,
+      "method": "persistent",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 0,
+      "method": "recompute",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 0,
+      "method": "recompute",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 0,
+      "method": "recompute",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 0,
+      "method": "recompute",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 0,
+      "method": "completion",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 0,
+      "method": "completion",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 0,
+      "method": "completion",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 0,
+      "method": "completion",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 0,
+      "method": "point",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 0,
+      "method": "point",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 0,
+      "method": "point",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 0,
+      "method": "point",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 0,
+      "method": "disabled",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 0,
+      "method": "disabled",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 0,
+      "method": "disabled",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 0,
+      "method": "disabled",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 0,
+      "method": "oracle",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 0,
+      "method": "oracle",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 0,
+      "method": "oracle",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 0,
+      "method": "oracle",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 1,
+      "method": "separate",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 1,
+      "method": "separate",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 1,
+      "method": "separate",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 1,
+      "method": "separate",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 1,
+      "method": "persistent",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 1,
+      "method": "persistent",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 1,
+      "method": "persistent",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 1,
+      "method": "persistent",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 1,
+      "method": "recompute",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 1,
+      "method": "recompute",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 1,
+      "method": "recompute",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 1,
+      "method": "recompute",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 1,
+      "method": "completion",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 1,
+      "method": "completion",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 1,
+      "method": "completion",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 1,
+      "method": "completion",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 1,
+      "method": "point",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 1,
+      "method": "point",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 1,
+      "method": "point",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 1,
+      "method": "point",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 1,
+      "method": "disabled",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 1,
+      "method": "disabled",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 1,
+      "method": "disabled",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 1,
+      "method": "disabled",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 1,
+      "method": "oracle",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 1,
+      "method": "oracle",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 1,
+      "method": "oracle",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 1,
+      "method": "oracle",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 2,
+      "method": "separate",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 2,
+      "method": "separate",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 2,
+      "method": "separate",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 2,
+      "method": "separate",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 2,
+      "method": "persistent",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 2,
+      "method": "persistent",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 2,
+      "method": "persistent",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 2,
+      "method": "persistent",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 2,
+      "method": "recompute",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 2,
+      "method": "recompute",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 2,
+      "method": "recompute",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 2,
+      "method": "recompute",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 2,
+      "method": "completion",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 2,
+      "method": "completion",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 2,
+      "method": "completion",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 2,
+      "method": "completion",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 2,
+      "method": "point",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 2,
+      "method": "point",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 2,
+      "method": "point",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 2,
+      "method": "point",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 2,
+      "method": "disabled",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 2,
+      "method": "disabled",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 2,
+      "method": "disabled",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 2,
+      "method": "disabled",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    },
+    {
+      "seed": 2,
+      "method": "oracle",
+      "cut": 6,
+      "exact": true,
+      "tail_length": 18
+    },
+    {
+      "seed": 2,
+      "method": "oracle",
+      "cut": 12,
+      "exact": true,
+      "tail_length": 12
+    },
+    {
+      "seed": 2,
+      "method": "oracle",
+      "cut": 18,
+      "exact": true,
+      "tail_length": 6
+    },
+    {
+      "seed": 2,
+      "method": "oracle",
+      "cut": 24,
+      "exact": true,
+      "tail_length": 0
+    }
+  ],
+  "preservation": {
+    "files": 1075,
+    "all_unchanged": true,
+    "head": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c",
+    "invalid_initial_archive_unchanged": true
+  },
+  "full_rerun": true,
+  "source_sha256": "4ca244cf74271b3dd54ca188ab97e1a4b8d340d8a285d684af43be40006095d4",
+  "verifier_sha256": "b7c97580f0dc0994f9373fc9cde7edb55c7d5a20c53a0191dec3045616f6505d"
+}

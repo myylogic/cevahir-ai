@@ -20,6 +20,12 @@ Chapter 2 now includes a topic-to-file/method map and six executed examples usin
 
 The book and its source references are reviewed together. Run `python scripts/check_book.py` from the repository root to check local links, Python symbols and reviewed-source fingerprints. A passing result cannot establish semantic correctness. When a source changes, review its chapter before renewing the fingerprint. See the [maintenance rules](BAKIM.md) and [source map](KAYNAK_HARITASI.md).
 
-Chapters 3–6 were substantially expanded on September 21 with mathematical derivations, original-paper citations, dated industry comparisons, solved exercises, and seven CPU example groups using real Cevahir components. See the [academic reading and reproducibility guide](AKADEMIK_OKUMA.md). These additions do not claim that every chapter is complete or externally peer reviewed.
+Chapters 3–6 were substantially expanded on September 21 with mathematical derivations, original-paper citations, dated industry comparisons, solved exercises, and seven CPU example groups using real Cevahir components. See the [academic reading and reproducibility guide](AKADEMIK_OKUMA.md). These dated expansions are preserved as part of the completed first Turkish manuscript; they do not establish external peer review.
 
 Chapters 7–9 now add checkpoint identity and resume, generation mathematics, retrieval and tool orchestration, with 15 solved exercises and ten additional executed example groups. Fixed-logit and manual-vector fixtures are identified explicitly. The calculator expression-truncation bug found during review was corrected; its pre-fix output remains as a historical negative example. See the current lifecycle/runtime evidence and the academic reading guide.
+
+## Complete first Turkish manuscript
+
+The planned 12-chapter manuscript was completed locally on September 21, 2026: 142 second-level headings, 81 third-level headings, 63 solved exercises and 76 glossary entries. Headings include exercise and bibliography sections; these are structural counts, not unique scientific concepts. The six executable companions contain 33 examples or example groups and all passed their recorded-result checks. See the [completion record](TAMAMLANMA.md), [detailed contents](AYRINTILI_ICINDEKILER.md), [glossary](TERIMLER.md), [integrative study](BUTUNLESTIRICI_CALISMA.md) and [verification](evidence/manuscript_examples_verification.json).
+
+The latest additions are local and uncommitted. They are not part of an earlier DOI archive. Completion refers to the book's defined teaching scope, not a resolution of the open living-learning problem, a full English translation, external peer review or a typeset final edition.

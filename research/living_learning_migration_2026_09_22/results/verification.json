@@ -1,0 +1,175 @@
+{
+  "structural": {
+    "synchronization_transition_checks": 160,
+    "exhaustive_histories": 8192,
+    "reserve8_parity_fibers": 512,
+    "reserve_mod6_fibers": 6,
+    "distinct_output_brier_checked": true,
+    "prediction_does_not_mutate": true,
+    "isolated_states": true,
+    "one_modulo_label_selects_single_state": true
+  },
+  "preservation": {
+    "files_unchanged": 977,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "recorded": {
+    "calibration_predictions": 9216,
+    "compiled_correct": 72,
+    "unique_consistent_all": true,
+    "mainstream_events": 37440,
+    "label_after_prediction": true,
+    "one_live_new_label_per_path": true,
+    "final_states_match": true
+  },
+  "fresh_process_resume": [
+    {
+      "task": "delay_5",
+      "policy": "guess_zero",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "guess_zero",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "possible_states",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "possible_states",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "reserve_8",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "reserve_8",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "reserve_mod6",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "reserve_mod6",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "archive",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "archive",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "reset_all",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "delay_5",
+      "policy": "reset_all",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "guess_zero",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "guess_zero",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "possible_states",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "possible_states",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "reserve_8",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "reserve_8",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "reserve_mod6",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "reserve_mod6",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "archive",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "archive",
+      "checkpoint": 16,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "reset_all",
+      "checkpoint": 3,
+      "exact_equal": true
+    },
+    {
+      "task": "mod3",
+      "policy": "reset_all",
+      "checkpoint": 16,
+      "exact_equal": true
+    }
+  ],
+  "full_rerun": {
+    "returncode": 0,
+    "stdout": "{\"status\": \"exact_rerun_passed\", \"runs\": 576}"
+  }
+}

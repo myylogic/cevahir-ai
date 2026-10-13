@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-21",
+  "status": "passed",
+  "preservation": {
+    "files_byte_exact": 886,
+    "changed": [],
+    "head_unchanged": true
+  },
+  "source_result_hashes_match": true,
+  "paired_summary_exact": true,
+  "posthoc_scalar_semantic_cases": 1152,
+  "posthoc_false_accepts": 0,
+  "portfolio_selection_and_budget_checks": 384,
+  "local_document_links_checked": 28,
+  "artifacts_sha256": {
+    "docs/research/living_learning_library_2026_09_21/MATHEMATICS_AND_LITERATURE.md": "19c55939ef0c031b13c6c8f00817fffabdf3f55d0be85aee17bcf6b5e8e0e912",
+    "docs/research/living_learning_library_2026_09_21/POSTHOC_PORTFOLIO.md": "5ef30d6a7b2b01dd7cf60b8dc9a3c7b6f6cf8565b488a1a79268e391bc3f63f0",
+    "docs/research/living_learning_library_2026_09_21/PROTOCOL.md": "79538db8692f043e904d61b4df8b1c77b5358fcec0e0e803aea33bde16d74375",
+    "docs/research/living_learning_library_2026_09_21/REPORT_TR.md": "f06cfb5c249028e895dbbabb1a0dde16d26382db612f514837d8223c8f71ec33",
+    "research/living_learning_library_2026_09_21/analyze_results.py": "c03caf47c074f929569a728ecf7a96cf9b1efa3fd6425494c3baea292f801b51",
+    "research/living_learning_library_2026_09_21/final_audit.py": "b80cf6895a1ddacab2aefcdc514ca18dec24c50a4f11077d57f0bc537e55b739",
+    "research/living_learning_library_2026_09_21/library_learning.py": "7c4afd13b3a9a804d3881baf31927e6ddf1fe00c68be1a8b19fd538f30251449",
+    "research/living_learning_library_2026_09_21/portfolio_control.py": "aad9264f9c433198ff22837af2922fb7ca4abe32a4e77178cc3413420931f93c",
+    "research/living_learning_library_2026_09_21/README.md": "7a8a79aecc0e0b7de0de26df45e4cce85c03628191946afb486791fef00dee6c",
+    "research/living_learning_library_2026_09_21/results/library_learning.json": "35ebd59e07f72744cd0109f25c6974e9f00e1c03df4acaf2956cc145756efac8",
+    "research/living_learning_library_2026_09_21/results/paired_summary.json": "47a82ec0bc00452fae37c435ce2269c1eb182eb8b91b39c64b2a8e6d5d77748d",
+    "research/living_learning_library_2026_09_21/results/portfolio_control.json": "588a26547d7cb6ec09a660f515ebf56f80ae0fd092f1d8f59182fafad0649ce2",
+    "research/living_learning_library_2026_09_21/results/preservation_baseline.json": "ee959adc115445ae06cd157a287258bb9c7746028ed36634b70e3a1834b5a42d",
+    "research/living_learning_library_2026_09_21/results/verification.json": "ec90a55bf1f0b7adc94b9ade093b574c4caa194465435c8fcbf8fa4d853f07bc",
+    "research/living_learning_library_2026_09_21/verify_library.py": "7cf95305a47d5d8ac9e562c964431f8d34d2f68196d9a3e0ed28505e13c896fe"
+  },
+  "scope": "Local code/results/document audit; no external peer review, independent-world replication, or publication."
+}

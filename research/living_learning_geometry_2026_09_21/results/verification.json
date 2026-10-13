@@ -1,0 +1,133 @@
+{
+  "date": "2026-09-21",
+  "numerical": {
+    "jacobian_finite_difference_max_error": 8.22666379463044e-11,
+    "jacobian_autograd_max_error": 2.220446049250313e-16,
+    "loss_gradient_autograd_max_error": 2.7755575615628914e-17,
+    "projector_idempotence_max_error": 5.551115123125783e-16,
+    "projector_orthogonality_max_error": 9.853229343548264e-16,
+    "affine_finite_step_output_max_error": 4.440892098500626e-16,
+    "torch": "2.10.0+cpu"
+  },
+  "fresh_process_continuation": [
+    {
+      "mode": "frozen",
+      "continued_batches": 17,
+      "exact_json_equality": true,
+      "prediction_max_error": 0.0
+    },
+    {
+      "mode": "head_only",
+      "continued_batches": 17,
+      "exact_json_equality": true,
+      "prediction_max_error": 0.0
+    },
+    {
+      "mode": "online",
+      "continued_batches": 17,
+      "exact_json_equality": true,
+      "prediction_max_error": 0.0
+    },
+    {
+      "mode": "replay",
+      "continued_batches": 17,
+      "exact_json_equality": true,
+      "prediction_max_error": 0.0
+    },
+    {
+      "mode": "loss_halfspace",
+      "continued_batches": 17,
+      "exact_json_equality": true,
+      "prediction_max_error": 0.0
+    },
+    {
+      "mode": "tangent_fixed",
+      "continued_batches": 17,
+      "exact_json_equality": true,
+      "prediction_max_error": 0.0
+    },
+    {
+      "mode": "tangent_current",
+      "continued_batches": 17,
+      "exact_json_equality": true,
+      "prediction_max_error": 0.0
+    },
+    {
+      "mode": "tangent_guard",
+      "continued_batches": 17,
+      "exact_json_equality": true,
+      "prediction_max_error": 0.0
+    },
+    {
+      "mode": "replay_guard",
+      "continued_batches": 17,
+      "exact_json_equality": true,
+      "prediction_max_error": 0.0
+    }
+  ],
+  "result_contracts": {
+    "primary_runs": 864,
+    "posthoc_runs": 216,
+    "continuation_initial_equality": true,
+    "output_guard_budget_violations": 0,
+    "label_loss_guard_budget_violations": 0,
+    "teacher_exactly_in_model_class": true
+  },
+  "exact_witnesses": {
+    "regular_tangent": {
+      "initial": [
+        "1",
+        "1"
+      ],
+      "delta": [
+        "1/2",
+        "-1/2"
+      ],
+      "jacobian_times_delta": "0",
+      "prediction_after": "3/4",
+      "half_squared_error": "1/32",
+      "curved_path_prediction": "1"
+    },
+    "compatible_but_interacting": {
+      "old_output": "a*b+c",
+      "initial": [
+        0,
+        0,
+        0
+      ],
+      "separate_old_losses": [
+        0,
+        0
+      ],
+      "combined_half_squared_loss": "1/32",
+      "joint_zero_loss_parameters": [
+        "1/2",
+        "1/2",
+        "-1/4"
+      ]
+    },
+    "loss_gradient_at_perfect_fit": [
+      0,
+      0
+    ],
+    "scope": "Exact counterexamples to unqualified finite-step claims, not refutations of the original papers' stated assumptions."
+  },
+  "preservation": {
+    "files_byte_exact": 866,
+    "changed": [],
+    "head_unchanged": true
+  },
+  "complete_reruns": [
+    {
+      "program": "geometry.py",
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"mode\": \"check\", \"runs\": 864, \"groups\": 72, \"continuation_probes\": 36}"
+    },
+    {
+      "program": "posthoc_controls.py",
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"mode\": \"check\", \"runs\": 216}"
+    }
+  ],
+  "scope": "Independent numerical derivative checks and fresh-process resume, plus optional same-code complete reproduction. This is not external peer review or an independent data replication."
+}

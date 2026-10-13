@@ -1,0 +1,454 @@
+{
+  "independent_seeds": 24,
+  "methods": [
+    {
+      "method": "fresh",
+      "n": 2304,
+      "correct": 2304,
+      "novel_n": 1755,
+      "novel_correct": 1755,
+      "new_lemmas": 0,
+      "service_mean": 1166.3276909722222,
+      "life_work_mean": 111967.45833333333,
+      "life_work_min": 86604,
+      "life_work_max": 147257,
+      "mean_max_state_bytes": 0,
+      "categories_mean_per_life": {
+        "service": 111967.45833333333
+      },
+      "service_thresholds": {
+        "500": 669,
+        "2000": 1973,
+        "10000": 2304
+      },
+      "phases": [
+        {
+          "phase": 0,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 1185.5694444444443,
+          "whole_work_mean_per_life": 28453.666666666668
+        },
+        {
+          "phase": 1,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 1140.376736111111,
+          "whole_work_mean_per_life": 27369.041666666668
+        },
+        {
+          "phase": 2,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 1167.8003472222222,
+          "whole_work_mean_per_life": 28027.208333333332
+        },
+        {
+          "phase": 3,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 1171.564236111111,
+          "whole_work_mean_per_life": 28117.541666666668
+        }
+      ]
+    },
+    {
+      "method": "scoped",
+      "n": 2304,
+      "correct": 2304,
+      "novel_n": 1755,
+      "novel_correct": 1755,
+      "new_lemmas": 185,
+      "service_mean": 440.34765625,
+      "life_work_mean": 111812.29166666667,
+      "life_work_min": 67630,
+      "life_work_max": 178410,
+      "mean_max_state_bytes": 22973.25,
+      "categories_mean_per_life": {
+        "acquisition": 30446.708333333332,
+        "checking": 2558.6666666666665,
+        "dependencies": 14752.875,
+        "service": 42273.375,
+        "writes": 21780.666666666668
+      },
+      "service_thresholds": {
+        "500": 1788,
+        "2000": 2247,
+        "10000": 2304
+      },
+      "phases": [
+        {
+          "phase": 0,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 718.2291666666666,
+          "whole_work_mean_per_life": 42588.916666666664
+        },
+        {
+          "phase": 1,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 303.3489583333333,
+          "whole_work_mean_per_life": 21139.583333333332
+        },
+        {
+          "phase": 2,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 532.7725694444445,
+          "whole_work_mean_per_life": 36734.083333333336
+        },
+        {
+          "phase": 3,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 207.03993055555554,
+          "whole_work_mean_per_life": 11349.708333333334
+        }
+      ]
+    },
+    {
+      "method": "blind",
+      "n": 2304,
+      "correct": 2218,
+      "novel_n": 1755,
+      "novel_correct": 1700,
+      "new_lemmas": 160,
+      "service_mean": 378.10850694444446,
+      "life_work_mean": 97554.08333333333,
+      "life_work_min": 51815,
+      "life_work_max": 137837,
+      "mean_max_state_bytes": 21547.166666666668,
+      "categories_mean_per_life": {
+        "acquisition": 24321.875,
+        "checking": 2158.3333333333335,
+        "dependencies": 14418.75,
+        "service": 36298.416666666664,
+        "writes": 20356.708333333332
+      },
+      "service_thresholds": {
+        "500": 1808,
+        "2000": 2171,
+        "10000": 2218
+      },
+      "phases": [
+        {
+          "phase": 0,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 718.2291666666666,
+          "whole_work_mean_per_life": 42588.916666666664
+        },
+        {
+          "phase": 1,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 303.3489583333333,
+          "whole_work_mean_per_life": 21139.583333333332
+        },
+        {
+          "phase": 2,
+          "correct": 526,
+          "n": 576,
+          "service_mean": 326.9513888888889,
+          "whole_work_mean_per_life": 23649.291666666668
+        },
+        {
+          "phase": 3,
+          "correct": 540,
+          "n": 576,
+          "service_mean": 163.90451388888889,
+          "whole_work_mean_per_life": 10176.291666666666
+        }
+      ]
+    },
+    {
+      "method": "erase",
+      "n": 2304,
+      "correct": 2304,
+      "novel_n": 1755,
+      "novel_correct": 1755,
+      "new_lemmas": 285,
+      "service_mean": 612.4240451388889,
+      "life_work_mean": 156070.33333333334,
+      "life_work_min": 77454,
+      "life_work_max": 229706,
+      "mean_max_state_bytes": 16387.958333333332,
+      "categories_mean_per_life": {
+        "acquisition": 51870.916666666664,
+        "checking": 4028.5416666666665,
+        "dependencies": 8760.0,
+        "service": 58792.708333333336,
+        "writes": 32618.166666666668
+      },
+      "service_thresholds": {
+        "500": 1525,
+        "2000": 2181,
+        "10000": 2304
+      },
+      "phases": [
+        {
+          "phase": 0,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 718.2291666666666,
+          "whole_work_mean_per_life": 42588.916666666664
+        },
+        {
+          "phase": 1,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 303.3489583333333,
+          "whole_work_mean_per_life": 21139.583333333332
+        },
+        {
+          "phase": 2,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 714.1493055555555,
+          "whole_work_mean_per_life": 45535.375
+        },
+        {
+          "phase": 3,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 713.96875,
+          "whole_work_mean_per_life": 46806.458333333336
+        }
+      ]
+    },
+    {
+      "method": "replay",
+      "n": 2304,
+      "correct": 2304,
+      "novel_n": 1755,
+      "novel_correct": 1755,
+      "new_lemmas": 185,
+      "service_mean": 440.34765625,
+      "life_work_mean": 6560128.541666667,
+      "life_work_min": 3942066,
+      "life_work_max": 9444199,
+      "mean_max_state_bytes": 29420.291666666668,
+      "categories_mean_per_life": {
+        "acquisition": 2009328.625,
+        "checking": 161754.875,
+        "dependencies": 563566.125,
+        "history_writes": 6318.041666666667,
+        "service": 2499980.0,
+        "writes": 1319180.875
+      },
+      "service_thresholds": {
+        "500": 1788,
+        "2000": 2247,
+        "10000": 2304
+      },
+      "phases": [
+        {
+          "phase": 0,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 718.2291666666666,
+          "whole_work_mean_per_life": 643993.3333333334
+        },
+        {
+          "phase": 1,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 303.3489583333333,
+          "whole_work_mean_per_life": 1312282.4583333333
+        },
+        {
+          "phase": 2,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 532.7725694444445,
+          "whole_work_mean_per_life": 2045503.3333333333
+        },
+        {
+          "phase": 3,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 207.03993055555554,
+          "whole_work_mean_per_life": 2558349.4166666665
+        }
+      ]
+    },
+    {
+      "method": "full_table",
+      "n": 2304,
+      "correct": 2304,
+      "novel_n": 1755,
+      "novel_correct": 1755,
+      "new_lemmas": 0,
+      "service_mean": 28.15277777777778,
+      "life_work_mean": 128739.625,
+      "life_work_min": 110107,
+      "life_work_max": 140936,
+      "mean_max_state_bytes": 387.3333333333333,
+      "categories_mean_per_life": {
+        "compilation": 126036.95833333333,
+        "service": 2702.6666666666665,
+        "version_checks": 0.0
+      },
+      "service_thresholds": {
+        "500": 2304,
+        "2000": 2304,
+        "10000": 2304
+      },
+      "phases": [
+        {
+          "phase": 0,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 27.630208333333332,
+          "whole_work_mean_per_life": 42908.458333333336
+        },
+        {
+          "phase": 1,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 28.26388888888889,
+          "whole_work_mean_per_life": 678.3333333333334
+        },
+        {
+          "phase": 2,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 29.848958333333332,
+          "whole_work_mean_per_life": 42262.666666666664
+        },
+        {
+          "phase": 3,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 26.868055555555557,
+          "whole_work_mean_per_life": 42890.166666666664
+        }
+      ]
+    },
+    {
+      "method": "full_table_cached",
+      "n": 2304,
+      "correct": 2304,
+      "novel_n": 1755,
+      "novel_correct": 1755,
+      "new_lemmas": 0,
+      "service_mean": 28.15277777777778,
+      "life_work_mean": 92136.29166666667,
+      "life_work_min": 84121,
+      "life_work_max": 99198,
+      "mean_max_state_bytes": 2796.9166666666665,
+      "categories_mean_per_life": {
+        "compilation": 85881.625,
+        "service": 2702.6666666666665,
+        "version_checks": 3552.0
+      },
+      "service_thresholds": {
+        "500": 2304,
+        "2000": 2304,
+        "10000": 2304
+      },
+      "phases": [
+        {
+          "phase": 0,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 27.630208333333332,
+          "whole_work_mean_per_life": 44841.458333333336
+        },
+        {
+          "phase": 1,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 28.26388888888889,
+          "whole_work_mean_per_life": 1566.3333333333333
+        },
+        {
+          "phase": 2,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 29.848958333333332,
+          "whole_work_mean_per_life": 44195.666666666664
+        },
+        {
+          "phase": 3,
+          "correct": 576,
+          "n": 576,
+          "service_mean": 26.868055555555557,
+          "whole_work_mean_per_life": 1532.8333333333333
+        }
+      ]
+    }
+  ],
+  "paired": [
+    {
+      "left": "scoped",
+      "right": "fresh",
+      "life_work_difference_mean": -155.16666666666666,
+      "left_cheaper_lives": 15,
+      "equal_cost_lives": 0,
+      "service_cheaper_points": 1702,
+      "novel_service_cheaper_points": 1261,
+      "service_more_expensive_points": 474,
+      "wrong_difference": 0
+    },
+    {
+      "left": "scoped",
+      "right": "erase",
+      "life_work_difference_mean": -44258.041666666664,
+      "left_cheaper_lives": 24,
+      "equal_cost_lives": 0,
+      "service_cheaper_points": 500,
+      "novel_service_cheaper_points": 316,
+      "service_more_expensive_points": 422,
+      "wrong_difference": 0
+    },
+    {
+      "left": "scoped",
+      "right": "blind",
+      "life_work_difference_mean": 14258.208333333334,
+      "left_cheaper_lives": 4,
+      "equal_cost_lives": 0,
+      "service_cheaper_points": 473,
+      "novel_service_cheaper_points": 316,
+      "service_more_expensive_points": 405,
+      "wrong_difference": -86
+    },
+    {
+      "left": "scoped",
+      "right": "replay",
+      "life_work_difference_mean": -6448316.25,
+      "left_cheaper_lives": 24,
+      "equal_cost_lives": 0,
+      "service_cheaper_points": 0,
+      "novel_service_cheaper_points": 0,
+      "service_more_expensive_points": 0,
+      "wrong_difference": 0
+    },
+    {
+      "left": "scoped",
+      "right": "full_table",
+      "life_work_difference_mean": -16927.333333333332,
+      "left_cheaper_lives": 18,
+      "equal_cost_lives": 0,
+      "service_cheaper_points": 389,
+      "novel_service_cheaper_points": 272,
+      "service_more_expensive_points": 1910,
+      "wrong_difference": 0
+    },
+    {
+      "left": "scoped",
+      "right": "full_table_cached",
+      "life_work_difference_mean": 19676,
+      "left_cheaper_lives": 5,
+      "equal_cost_lives": 0,
+      "service_cheaper_points": 389,
+      "novel_service_cheaper_points": 272,
+      "service_more_expensive_points": 1910,
+      "wrong_difference": 0
+    }
+  ],
+  "inconsistent_base_versions": 0,
+  "unit": "Declared virtual operations, including serialized certificate/history byte writes; not CPU time.",
+  "budget_scope": "Retrospective service thresholds exclude acquisition/compilation/replay. They are not complete budgeted-learning success counts."
+}

@@ -1,0 +1,70 @@
+{
+  "date": "2026-09-22",
+  "status": "passed",
+  "phase": "post_result_diagnostic_not_primary",
+  "source_sha256": "ea25ea65829e53bcc0537eb039f95b7b2c9d441de3e0e5a7493be9ec61c17223",
+  "primary_source_sha256": "acee530cee4bf45f18512a051fb5230eb33eddb44950b758dbf0ee67fd549cc1",
+  "rational_ridge": {
+    "steps": 4,
+    "regularizer": "2",
+    "final_theta": [
+      "10/11",
+      "3/11"
+    ],
+    "recursive_equals_batch_every_step": true,
+    "scope": "separate fixed-feature example, not parity learner"
+  },
+  "conflicting_labels": {
+    "single_input_minimum_average_mse": "1/4",
+    "experiment_full_space_bound": "1/8"
+  },
+  "noisy_ambiguity": {
+    "seed": 22,
+    "candidate_ids": [
+      35,
+      52
+    ],
+    "true_teacher_id": 52,
+    "candidate_programs": [
+      [
+        [
+          2,
+          4
+        ],
+        1
+      ],
+      [
+        [
+          0,
+          2,
+          3
+        ],
+        0
+      ]
+    ],
+    "mismatched_observation_positions": [
+      [
+        0,
+        6,
+        7,
+        23
+      ],
+      [
+        11,
+        13,
+        18,
+        20
+      ]
+    ],
+    "same_observed_data_and_exact_four_corruptions": true,
+    "differing_inputs": 32,
+    "differing_heldout_inputs": 24,
+    "witness_heldout_input": 0,
+    "witness_labels": [
+      1,
+      0
+    ],
+    "explanation": "Both latent target rules plus four label flips produce the identical available observations. An internal supervisor without additional distinguishing information cannot guarantee which rule is true."
+  },
+  "source_scope": "No new biological, consciousness, or AGI claim; witness selection after primary results is explicit."
+}

@@ -1,0 +1,107 @@
+{
+  "structural": {
+    "scalar_field_outputs": 13872,
+    "shared_holes": true,
+    "repeated_holes_enforced": true,
+    "free_rhs_holes_rejected": true,
+    "rule_template_equivalence_cases": 40,
+    "generated_nodes_not_revisited": true,
+    "atomic_budget_limit": true,
+    "finite_sample_counterexample": true,
+    "field_not_integer_semantics": true
+  },
+  "preservation": {
+    "files_unchanged": 994,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "recorded": {
+    "trajectories": 360,
+    "target_attempts": 2880,
+    "source_evidence_accepts": 96,
+    "full_grid_accepted_program_checks": 1095,
+    "false_accepts": 0,
+    "rule_provenance_checked": true,
+    "budget_accounting_checked": true
+  },
+  "fresh_process_resume": [
+    {
+      "method": "local_plain",
+      "regime": "compatible",
+      "exact_equal": true
+    },
+    {
+      "method": "local_ranked",
+      "regime": "compatible",
+      "exact_equal": true
+    },
+    {
+      "method": "bulk_ranked",
+      "regime": "compatible",
+      "exact_equal": true
+    },
+    {
+      "method": "learned_rules",
+      "regime": "compatible",
+      "exact_equal": true
+    },
+    {
+      "method": "rules_disabled_paid",
+      "regime": "compatible",
+      "exact_equal": true
+    },
+    {
+      "method": "local_plain",
+      "regime": "changed",
+      "exact_equal": true
+    },
+    {
+      "method": "local_ranked",
+      "regime": "changed",
+      "exact_equal": true
+    },
+    {
+      "method": "bulk_ranked",
+      "regime": "changed",
+      "exact_equal": true
+    },
+    {
+      "method": "learned_rules",
+      "regime": "changed",
+      "exact_equal": true
+    },
+    {
+      "method": "rules_disabled_paid",
+      "regime": "changed",
+      "exact_equal": true
+    },
+    {
+      "method": "local_plain",
+      "regime": "partial",
+      "exact_equal": true
+    },
+    {
+      "method": "local_ranked",
+      "regime": "partial",
+      "exact_equal": true
+    },
+    {
+      "method": "bulk_ranked",
+      "regime": "partial",
+      "exact_equal": true
+    },
+    {
+      "method": "learned_rules",
+      "regime": "partial",
+      "exact_equal": true
+    },
+    {
+      "method": "rules_disabled_paid",
+      "regime": "partial",
+      "exact_equal": true
+    }
+  ],
+  "full_rerun": {
+    "returncode": 0,
+    "stdout": "completed life 1/24\ncompleted life 2/24\ncompleted life 3/24\ncompleted life 4/24\ncompleted life 5/24\ncompleted life 6/24\ncompleted life 7/24\ncompleted life 8/24\ncompleted life 9/24\ncompleted life 10/24\ncompleted life 11/24\ncompleted life 12/24\ncompleted life 13/24\ncompleted life 14/24\ncompleted life 15/24\ncompleted life 16/24\ncompleted life 17/24\ncompleted life 18/24\ncompleted life 19/24\ncompleted life 20/24\ncompleted life 21/24\ncompleted life 22/24\ncompleted life 23/24\ncompleted life 24/24\nexact_rerun_passed"
+  }
+}

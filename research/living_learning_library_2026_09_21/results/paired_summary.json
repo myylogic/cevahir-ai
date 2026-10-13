@@ -1,0 +1,638 @@
+{
+  "primary_result_sha256": "35ebd59e07f72744cd0109f25c6974e9f00e1c03df4acaf2956cc145756efac8",
+  "learned_vs_primitive": [
+    {
+      "history": 6,
+      "budget": 512,
+      "regime": "related",
+      "gained": 61,
+      "lost": 2,
+      "seed_success_count_differences": [
+        1,
+        8,
+        4,
+        2,
+        4,
+        6,
+        8,
+        6,
+        2,
+        6,
+        6,
+        6
+      ],
+      "jointly_solved": 23,
+      "common_mean_primitive_steps": 274.5652173913044,
+      "common_mean_learned_steps": 101.65217391304348
+    },
+    {
+      "history": 6,
+      "budget": 512,
+      "regime": "shifted",
+      "gained": 4,
+      "lost": 16,
+      "seed_success_count_differences": [
+        -1,
+        0,
+        3,
+        -3,
+        0,
+        -1,
+        0,
+        -3,
+        -2,
+        -1,
+        -1,
+        -3
+      ],
+      "jointly_solved": 5,
+      "common_mean_primitive_steps": 46.8,
+      "common_mean_learned_steps": 177.4
+    },
+    {
+      "history": 6,
+      "budget": 2048,
+      "regime": "related",
+      "gained": 20,
+      "lost": 3,
+      "seed_success_count_differences": [
+        0,
+        3,
+        -1,
+        -1,
+        2,
+        4,
+        3,
+        0,
+        0,
+        3,
+        2,
+        2
+      ],
+      "jointly_solved": 70,
+      "common_mean_primitive_steps": 824.8428571428572,
+      "common_mean_learned_steps": 156.37142857142857
+    },
+    {
+      "history": 6,
+      "budget": 2048,
+      "regime": "shifted",
+      "gained": 4,
+      "lost": 49,
+      "seed_success_count_differences": [
+        -5,
+        -3,
+        4,
+        -5,
+        -4,
+        -4,
+        -4,
+        -4,
+        -3,
+        -4,
+        -7,
+        -6
+      ],
+      "jointly_solved": 20,
+      "common_mean_primitive_steps": 769.5,
+      "common_mean_learned_steps": 683.6
+    },
+    {
+      "history": 12,
+      "budget": 512,
+      "regime": "related",
+      "gained": 62,
+      "lost": 1,
+      "seed_success_count_differences": [
+        1,
+        8,
+        4,
+        6,
+        3,
+        7,
+        8,
+        4,
+        2,
+        7,
+        6,
+        5
+      ],
+      "jointly_solved": 24,
+      "common_mean_primitive_steps": 281.5416666666667,
+      "common_mean_learned_steps": 150.08333333333334
+    },
+    {
+      "history": 12,
+      "budget": 512,
+      "regime": "shifted",
+      "gained": 4,
+      "lost": 15,
+      "seed_success_count_differences": [
+        -1,
+        0,
+        0,
+        -3,
+        0,
+        2,
+        0,
+        -2,
+        -2,
+        -1,
+        -1,
+        -3
+      ],
+      "jointly_solved": 6,
+      "common_mean_primitive_steps": 67.83333333333333,
+      "common_mean_learned_steps": 185.83333333333334
+    },
+    {
+      "history": 12,
+      "budget": 2048,
+      "regime": "related",
+      "gained": 23,
+      "lost": 2,
+      "seed_success_count_differences": [
+        0,
+        3,
+        0,
+        4,
+        2,
+        4,
+        3,
+        -2,
+        0,
+        3,
+        2,
+        2
+      ],
+      "jointly_solved": 71,
+      "common_mean_primitive_steps": 876.2816901408451,
+      "common_mean_learned_steps": 156.56338028169014
+    },
+    {
+      "history": 12,
+      "budget": 2048,
+      "regime": "shifted",
+      "gained": 0,
+      "lost": 55,
+      "seed_success_count_differences": [
+        -5,
+        -3,
+        -4,
+        -6,
+        -4,
+        -3,
+        -4,
+        -5,
+        -3,
+        -4,
+        -8,
+        -6
+      ],
+      "jointly_solved": 14,
+      "common_mean_primitive_steps": 441.92857142857144,
+      "common_mean_learned_steps": 489.2142857142857
+    }
+  ],
+  "history_6_to_12": [
+    {
+      "budget": 512,
+      "regime": "related",
+      "gained": [
+        [
+          2,
+          "related1"
+        ],
+        [
+          3,
+          "related0"
+        ],
+        [
+          3,
+          "related1"
+        ],
+        [
+          3,
+          "related2"
+        ],
+        [
+          3,
+          "related4"
+        ],
+        [
+          3,
+          "related5"
+        ],
+        [
+          5,
+          "related4"
+        ],
+        [
+          9,
+          "related7"
+        ]
+      ],
+      "lost": [
+        [
+          2,
+          "related4"
+        ],
+        [
+          3,
+          "related6"
+        ],
+        [
+          4,
+          "related4"
+        ],
+        [
+          7,
+          "related4"
+        ],
+        [
+          7,
+          "related5"
+        ],
+        [
+          11,
+          "related5"
+        ]
+      ],
+      "first_loss_records": {
+        "history6": {
+          "seed": 2,
+          "history": 6,
+          "budget": 512,
+          "regime": "related",
+          "task": "related4",
+          "method": "learned_library",
+          "status": "accepted",
+          "program": [
+            2,
+            2,
+            0,
+            2,
+            0,
+            3
+          ],
+          "token_depth": 4,
+          "primitive_length": 6,
+          "costs": {
+            "search_vector_steps": 504,
+            "acceptance_vector_steps": 6,
+            "candidates": 420,
+            "duplicate_signatures": 103,
+            "unique_signatures": 317,
+            "max_queue": 233
+          },
+          "charged_vector_steps": 510,
+          "exact": true,
+          "unseen_correct": 85,
+          "unseen_total": 85
+        },
+        "history12": {
+          "seed": 2,
+          "history": 12,
+          "budget": 512,
+          "regime": "related",
+          "task": "related4",
+          "method": "learned_library",
+          "status": "search_budget_exhausted",
+          "program": null,
+          "token_depth": null,
+          "primitive_length": null,
+          "costs": {
+            "search_vector_steps": 512,
+            "acceptance_vector_steps": 0,
+            "candidates": 291,
+            "duplicate_signatures": 116,
+            "unique_signatures": 176,
+            "max_queue": 139
+          },
+          "charged_vector_steps": 512,
+          "exact": false,
+          "unseen_correct": 0,
+          "unseen_total": 85
+        }
+      }
+    },
+    {
+      "budget": 512,
+      "regime": "shifted",
+      "gained": [
+        [
+          5,
+          "shifted2"
+        ],
+        [
+          5,
+          "shifted3"
+        ],
+        [
+          5,
+          "shifted4"
+        ],
+        [
+          7,
+          "shifted0"
+        ]
+      ],
+      "lost": [
+        [
+          2,
+          "shifted1"
+        ],
+        [
+          2,
+          "shifted2"
+        ],
+        [
+          2,
+          "shifted3"
+        ]
+      ],
+      "first_loss_records": {
+        "history6": {
+          "seed": 2,
+          "history": 6,
+          "budget": 512,
+          "regime": "shifted",
+          "task": "shifted1",
+          "method": "learned_library",
+          "status": "accepted",
+          "program": [
+            2,
+            2,
+            0,
+            2,
+            0,
+            0
+          ],
+          "token_depth": 4,
+          "primitive_length": 6,
+          "costs": {
+            "search_vector_steps": 501,
+            "acceptance_vector_steps": 6,
+            "candidates": 417,
+            "duplicate_signatures": 103,
+            "unique_signatures": 314,
+            "max_queue": 230
+          },
+          "charged_vector_steps": 507,
+          "exact": true,
+          "unseen_correct": 85,
+          "unseen_total": 85
+        },
+        "history12": {
+          "seed": 2,
+          "history": 12,
+          "budget": 512,
+          "regime": "shifted",
+          "task": "shifted1",
+          "method": "learned_library",
+          "status": "search_budget_exhausted",
+          "program": null,
+          "token_depth": null,
+          "primitive_length": null,
+          "costs": {
+            "search_vector_steps": 512,
+            "acceptance_vector_steps": 0,
+            "candidates": 291,
+            "duplicate_signatures": 116,
+            "unique_signatures": 176,
+            "max_queue": 139
+          },
+          "charged_vector_steps": 512,
+          "exact": false,
+          "unseen_correct": 0,
+          "unseen_total": 85
+        }
+      }
+    },
+    {
+      "budget": 2048,
+      "regime": "related",
+      "gained": [
+        [
+          2,
+          "related1"
+        ],
+        [
+          3,
+          "related0"
+        ],
+        [
+          3,
+          "related1"
+        ],
+        [
+          3,
+          "related4"
+        ],
+        [
+          3,
+          "related5"
+        ],
+        [
+          3,
+          "related7"
+        ]
+      ],
+      "lost": [
+        [
+          7,
+          "related4"
+        ],
+        [
+          7,
+          "related5"
+        ]
+      ],
+      "first_loss_records": {
+        "history6": {
+          "seed": 7,
+          "history": 6,
+          "budget": 2048,
+          "regime": "related",
+          "task": "related4",
+          "method": "learned_library",
+          "status": "accepted",
+          "program": [
+            2,
+            2,
+            0,
+            3,
+            0,
+            0,
+            2
+          ],
+          "token_depth": 3,
+          "primitive_length": 7,
+          "costs": {
+            "search_vector_steps": 471,
+            "acceptance_vector_steps": 7,
+            "candidates": 274,
+            "duplicate_signatures": 74,
+            "unique_signatures": 200,
+            "max_queue": 161
+          },
+          "charged_vector_steps": 478,
+          "exact": true,
+          "unseen_correct": 85,
+          "unseen_total": 85
+        },
+        "history12": {
+          "seed": 7,
+          "history": 12,
+          "budget": 2048,
+          "regime": "related",
+          "task": "related4",
+          "method": "learned_library",
+          "status": "search_budget_exhausted",
+          "program": null,
+          "token_depth": null,
+          "primitive_length": null,
+          "costs": {
+            "search_vector_steps": 2048,
+            "acceptance_vector_steps": 0,
+            "candidates": 1259,
+            "duplicate_signatures": 398,
+            "unique_signatures": 862,
+            "max_queue": 704
+          },
+          "charged_vector_steps": 2048,
+          "exact": false,
+          "unseen_correct": 0,
+          "unseen_total": 85
+        }
+      }
+    },
+    {
+      "budget": 2048,
+      "regime": "shifted",
+      "gained": [
+        [
+          5,
+          "shifted2"
+        ]
+      ],
+      "lost": [
+        [
+          2,
+          "shifted0"
+        ],
+        [
+          2,
+          "shifted1"
+        ],
+        [
+          2,
+          "shifted2"
+        ],
+        [
+          2,
+          "shifted3"
+        ],
+        [
+          2,
+          "shifted4"
+        ],
+        [
+          2,
+          "shifted5"
+        ],
+        [
+          2,
+          "shifted6"
+        ],
+        [
+          2,
+          "shifted7"
+        ],
+        [
+          3,
+          "shifted3"
+        ],
+        [
+          7,
+          "shifted4"
+        ],
+        [
+          10,
+          "shifted0"
+        ]
+      ],
+      "first_loss_records": {
+        "history6": {
+          "seed": 2,
+          "history": 6,
+          "budget": 2048,
+          "regime": "shifted",
+          "task": "shifted0",
+          "method": "learned_library",
+          "status": "accepted",
+          "program": [
+            2,
+            2,
+            0,
+            2,
+            2,
+            0
+          ],
+          "token_depth": 4,
+          "primitive_length": 6,
+          "costs": {
+            "search_vector_steps": 518,
+            "acceptance_vector_steps": 6,
+            "candidates": 431,
+            "duplicate_signatures": 103,
+            "unique_signatures": 328,
+            "max_queue": 242
+          },
+          "charged_vector_steps": 524,
+          "exact": true,
+          "unseen_correct": 85,
+          "unseen_total": 85
+        },
+        "history12": {
+          "seed": 2,
+          "history": 12,
+          "budget": 2048,
+          "regime": "shifted",
+          "task": "shifted0",
+          "method": "learned_library",
+          "status": "search_budget_exhausted",
+          "program": null,
+          "token_depth": null,
+          "primitive_length": null,
+          "costs": {
+            "search_vector_steps": 2047,
+            "acceptance_vector_steps": 0,
+            "candidates": 1169,
+            "duplicate_signatures": 517,
+            "unique_signatures": 653,
+            "max_queue": 508
+          },
+          "charged_vector_steps": 2047,
+          "exact": false,
+          "unseen_correct": 0,
+          "unseen_total": 85
+        }
+      }
+    }
+  ],
+  "warmup_cost": {
+    "min": 1018,
+    "mean": 1374.0833333333333,
+    "max": 2154
+  },
+  "state_json_bytes_history12": {
+    "min": 431,
+    "mean": 441.25,
+    "max": 450
+  },
+  "mean_history12_substring_windows": 49.833333333333336,
+  "false_accepts": 0,
+  "main_max_queue": 969,
+  "scope": "Descriptive paired counts over twelve synthetic lives; no multiple-comparison or population-generalization claim."
+}

@@ -1,0 +1,101 @@
+{
+  "structural": {
+    "scalar_intervention_outputs": 3072,
+    "full_mobius_reconstructions": 768,
+    "all_8_disjoint_sites": true,
+    "single_edits_masked_pair_witness": true,
+    "nonzero_third_order_witness": true,
+    "source_costs_equal": true,
+    "atomic_budget_limit": true
+  },
+  "preservation": {
+    "files_unchanged": 1007,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "recorded": {
+    "trajectories": 168,
+    "target_attempts": 2688,
+    "independent_probe_checks": 94110,
+    "full_field_accepted_checks": 1744,
+    "false_accepts": 0,
+    "correct_different_masks": 4,
+    "causal_acceptance_order": true,
+    "cost_categories_match": true
+  },
+  "fresh_process_resume": [
+    {
+      "method": "bulk_all",
+      "checkpoint": 4,
+      "exact_equal": true
+    },
+    {
+      "method": "bulk_all",
+      "checkpoint": 8,
+      "exact_equal": true
+    },
+    {
+      "method": "greedy_single",
+      "checkpoint": 4,
+      "exact_equal": true
+    },
+    {
+      "method": "greedy_single",
+      "checkpoint": 8,
+      "exact_equal": true
+    },
+    {
+      "method": "first_order",
+      "checkpoint": 4,
+      "exact_equal": true
+    },
+    {
+      "method": "first_order",
+      "checkpoint": 8,
+      "exact_equal": true
+    },
+    {
+      "method": "second_order",
+      "checkpoint": 4,
+      "exact_equal": true
+    },
+    {
+      "method": "second_order",
+      "checkpoint": 8,
+      "exact_equal": true
+    },
+    {
+      "method": "adaptive_reset",
+      "checkpoint": 4,
+      "exact_equal": true
+    },
+    {
+      "method": "adaptive_reset",
+      "checkpoint": 8,
+      "exact_equal": true
+    },
+    {
+      "method": "adaptive_persistent",
+      "checkpoint": 4,
+      "exact_equal": true
+    },
+    {
+      "method": "adaptive_persistent",
+      "checkpoint": 8,
+      "exact_equal": true
+    },
+    {
+      "method": "exact_subset",
+      "checkpoint": 4,
+      "exact_equal": true
+    },
+    {
+      "method": "exact_subset",
+      "checkpoint": 8,
+      "exact_equal": true
+    }
+  ],
+  "full_rerun": {
+    "returncode": 0,
+    "stdout": "completed life 1/24\ncompleted life 2/24\ncompleted life 3/24\ncompleted life 4/24\ncompleted life 5/24\ncompleted life 6/24\ncompleted life 7/24\ncompleted life 8/24\ncompleted life 9/24\ncompleted life 10/24\ncompleted life 11/24\ncompleted life 12/24\ncompleted life 13/24\ncompleted life 14/24\ncompleted life 15/24\ncompleted life 16/24\ncompleted life 17/24\ncompleted life 18/24\ncompleted life 19/24\ncompleted life 20/24\ncompleted life 21/24\ncompleted life 22/24\ncompleted life 23/24\ncompleted life 24/24\nexact_rerun_passed"
+  }
+}

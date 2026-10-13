@@ -1,0 +1,125 @@
+{
+  "date": "2026-09-21",
+  "status": "passed",
+  "independent_semantics": {
+    "exhaustive_primitive_programs_up_to_length_three": 85,
+    "brute_search_program_equality": 85,
+    "macro_compositions": 40
+  },
+  "result_contracts": {
+    "primary_conditions": 9216,
+    "posthoc_conditions": 384,
+    "budget_violations": 0
+  },
+  "instrumented_and_leakage": {
+    "instrumented_primitive_accounting_cases": 48,
+    "teacher_and_metadata_intervention_cases": 48,
+    "state_not_mutated_cases": 48
+  },
+  "causal_state": {
+    "old_programs_retained_after_library_erase": 144,
+    "erased_search_equals_primitive_cases": 192,
+    "all_warm_programs_exact": true,
+    "states_mined_only_from_acquired_programs": true
+  },
+  "fresh_process_resume": [
+    {
+      "method": "primitive_only",
+      "regime": "related",
+      "exact_json_equal": true
+    },
+    {
+      "method": "primitive_only",
+      "regime": "shifted",
+      "exact_json_equal": true
+    },
+    {
+      "method": "frequency_prior",
+      "regime": "related",
+      "exact_json_equal": true
+    },
+    {
+      "method": "frequency_prior",
+      "regime": "shifted",
+      "exact_json_equal": true
+    },
+    {
+      "method": "learned_library",
+      "regime": "related",
+      "exact_json_equal": true
+    },
+    {
+      "method": "learned_library",
+      "regime": "shifted",
+      "exact_json_equal": true
+    },
+    {
+      "method": "expanded_proposals",
+      "regime": "related",
+      "exact_json_equal": true
+    },
+    {
+      "method": "expanded_proposals",
+      "regime": "shifted",
+      "exact_json_equal": true
+    },
+    {
+      "method": "whole_program_cache",
+      "regime": "related",
+      "exact_json_equal": true
+    },
+    {
+      "method": "whole_program_cache",
+      "regime": "shifted",
+      "exact_json_equal": true
+    },
+    {
+      "method": "static_all_chunks",
+      "regime": "related",
+      "exact_json_equal": true
+    },
+    {
+      "method": "static_all_chunks",
+      "regime": "shifted",
+      "exact_json_equal": true
+    },
+    {
+      "method": "random_library",
+      "regime": "related",
+      "exact_json_equal": true
+    },
+    {
+      "method": "random_library",
+      "regime": "shifted",
+      "exact_json_equal": true
+    },
+    {
+      "method": "oracle_motifs",
+      "regime": "related",
+      "exact_json_equal": true
+    },
+    {
+      "method": "oracle_motifs",
+      "regime": "shifted",
+      "exact_json_equal": true
+    }
+  ],
+  "preservation": {
+    "files_byte_exact": 886,
+    "changed": [],
+    "head_unchanged": true
+  },
+  "complete_reruns": [
+    {
+      "program": "library_learning.py",
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"mode\": \"check\", \"conditions\": 9216, \"lives\": 12, \"expansion_equal\": 1152}"
+    },
+    {
+      "program": "portfolio_control.py",
+      "returncode": 0,
+      "stdout": "{\"status\": \"passed\", \"mode\": \"check\", \"conditions\": 384, \"aggregate\": [{\"budget\": 512, \"regime\": \"related\", \"conditions\": 96, \"primitive_half_exact\": 10, \"learned_half_exact\": 69, \"portfolio_exact\": 71, \"false_accepts\": 0, \"mean_total_charged_vector_steps\": 375.7083333333333}, {\"budget\": 512, \"regime\": \"shifted\", \"conditions\": 96, \"primitive_half_exact\": 12, \"learned_half_exact\": 4, \"portfolio_exact\": 12, \"false_accepts\": 0, \"mean_total_charged_vector_steps\": 482.59375}, {\"budget\": 2048, \"regime\": \"related\", \"conditions\": 96, \"primitive_half_exact\": 46, \"learned_half_exact\": 93, \"portfolio_exact\": 96, \"false_accepts\": 0, \"mean_total_charged_vector_steps\": 975.8541666666666}, {\"budget\": 2048, \"regime\": \"shifted\", \"conditions\": 96, \"primitive_half_exact\": 37, \"learned_half_exact\": 13, \"portfolio_exact\": 40, \"false_accepts\": 0, \"mean_total_charged_vector_steps\": 1730.9791666666667}]}"
+    }
+  ],
+  "scope": "Independent scalar implementation and enumerator plus interventions/fresh processes; same-code full rerun is not independent-world replication or external peer review."
+}

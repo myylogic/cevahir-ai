@@ -1,0 +1,80 @@
+{
+  "date": "2026-09-22",
+  "status": "passed",
+  "diagnostic": "post_result_not_primary_benchmark",
+  "source_sha256": "573e531d3020df313b19c7a4b2a91ba8c7801599a73650c7832d8e7ef052fbdd",
+  "primary_source_sha256": "0642c68627a052469843b9f4e37bbcaf24eaf57518c6372faae5a17c8350a965",
+  "source_class_sizes": [
+    120,
+    15
+  ],
+  "before_marginals_exact": [
+    [
+      "0",
+      "1/5",
+      "1/5",
+      "1/5",
+      "1/5",
+      "1/5"
+    ],
+    [
+      "1/5",
+      "0",
+      "1/5",
+      "1/5",
+      "1/5",
+      "1/5"
+    ],
+    [
+      "1/5",
+      "1/5",
+      "0",
+      "1/5",
+      "1/5",
+      "1/5"
+    ],
+    [
+      "1/5",
+      "1/5",
+      "1/5",
+      "0",
+      "1/5",
+      "1/5"
+    ],
+    [
+      "1/5",
+      "1/5",
+      "1/5",
+      "1/5",
+      "0",
+      "1/5"
+    ],
+    [
+      "1/5",
+      "1/5",
+      "1/5",
+      "1/5",
+      "1/5",
+      "0"
+    ]
+  ],
+  "before_predictions_equal": true,
+  "new_evidence": {
+    "action": 0,
+    "x": 0,
+    "y": 1
+  },
+  "remaining_candidate_counts": [
+    24,
+    3
+  ],
+  "subsequent_query": {
+    "action": 0,
+    "x": 1,
+    "y": 0
+  },
+  "after_probability_A": "0",
+  "after_probability_B": "1",
+  "implication": "A deterministic state/update using only the shared current marginal matrix and this same evidence cannot reproduce both correct class-conditioned updates.",
+  "scope": "Not an impossibility theorem for embeddings: a representation may preserve the missing joint constraints or identify the source class."
+}

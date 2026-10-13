@@ -1,0 +1,155 @@
+{
+  "structural": {
+    "enumerated_tree_prediction_checks": 168,
+    "scalar_automaton_outputs": 32640,
+    "delay5_not_in_two_state_family": true,
+    "parity_two_state_witness": 26,
+    "fixed_suffix_collision": true,
+    "evaluation_does_not_change_learner": true,
+    "no_parameter_update_before_terminal_label": true,
+    "isolated_states": true,
+    "distinct_train_test_words_all_lives": true
+  },
+  "preservation": {
+    "files_unchanged": 961,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "recorded": {
+    "trajectories": 504,
+    "prequential_records": 516096,
+    "snapshots": 2520,
+    "final_hashes_match": true
+  },
+  "fresh_process_resume": [
+    {
+      "task": "last_bit",
+      "method": "kt_constant",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "last_bit",
+      "method": "suffix_1",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "last_bit",
+      "method": "suffix_5",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "last_bit",
+      "method": "suffix_8",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "last_bit",
+      "method": "map_tree_8",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "last_bit",
+      "method": "mixture_tree_8",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "last_bit",
+      "method": "two_state",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "delay_5",
+      "method": "kt_constant",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "delay_5",
+      "method": "suffix_1",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "delay_5",
+      "method": "suffix_5",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "delay_5",
+      "method": "suffix_8",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "delay_5",
+      "method": "map_tree_8",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "delay_5",
+      "method": "mixture_tree_8",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "delay_5",
+      "method": "two_state",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "parity",
+      "method": "kt_constant",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "parity",
+      "method": "suffix_1",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "parity",
+      "method": "suffix_5",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "parity",
+      "method": "suffix_8",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "parity",
+      "method": "map_tree_8",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "parity",
+      "method": "mixture_tree_8",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    },
+    {
+      "task": "parity",
+      "method": "two_state",
+      "exact_equal": true,
+      "reference": "uninterrupted_live_object"
+    }
+  ],
+  "full_rerun": {
+    "returncode": 0,
+    "stdout": "{\"status\": \"exact_rerun_passed\", \"trajectories\": 504}"
+  }
+}

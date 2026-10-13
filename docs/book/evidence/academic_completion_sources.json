@@ -1,0 +1,234 @@
+{
+  "reviewed_on": "2026-09-21",
+  "references": [
+    {
+      "path": "model/cevahir.py",
+      "symbol": "_InputValidator.validate_and_convert_input",
+      "chapter": "tr/01-motor-ve-ogrenme.md",
+      "line": 280
+    },
+    {
+      "path": "model/cevahir.py",
+      "symbol": "Cevahir.forward",
+      "chapter": "tr/01-motor-ve-ogrenme.md",
+      "line": 1291
+    },
+    {
+      "path": "model_management/config_schema.py",
+      "symbol": "tiny_model_config",
+      "chapter": "tr/01-motor-ve-ogrenme.md",
+      "line": 660
+    },
+    {
+      "path": "src/neural_network.py",
+      "symbol": "CevahirNeuralNetwork.apply_quantization",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 976
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/quantization_manager.py",
+      "symbol": "QuantizationManager.quantize_model",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 115
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/quantization_manager.py",
+      "symbol": "QuantizationManager._apply_int8_dynamic",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 293
+    },
+    {
+      "path": "src/neural_network_module/ortak_katman_module/quantization_manager.py",
+      "symbol": "QuantizationManager._apply_int8_static",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 313
+    },
+    {
+      "path": "chatting_management/chatting_manager.py",
+      "symbol": "ChattingManager.send_message",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 111
+    },
+    {
+      "path": "chatting_management/components/context_builder.py",
+      "symbol": "ContextBuilder.build_context",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 79
+    },
+    {
+      "path": "chatting_management/components/context_builder.py",
+      "symbol": "ContextBuilder._get_recent_history",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 135
+    },
+    {
+      "path": "chatting_management/components/context_builder.py",
+      "symbol": "ContextBuilder._estimate_tokens",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 220
+    },
+    {
+      "path": "chatting_management/storage/conversation_storage.py",
+      "symbol": "ConversationStorage.add_message",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 55
+    },
+    {
+      "path": "database/unit_of_work.py",
+      "symbol": "UnitOfWork",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 28
+    },
+    {
+      "path": "database/unit_of_work.py",
+      "symbol": "UnitOfWork.__exit__",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 65
+    },
+    {
+      "path": "cognitive_management/v2/utils/request_scope.py",
+      "symbol": "_prepare",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 26
+    },
+    {
+      "path": "cognitive_management/v2/utils/request_scope.py",
+      "symbol": "memory_scope",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 18
+    },
+    {
+      "path": "cognitive_management/v2/utils/request_scope.py",
+      "symbol": "scoped_request",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 44
+    },
+    {
+      "path": "scripts/book_system_walkthrough.py",
+      "symbol": "ControlledBackend.handle",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 53
+    },
+    {
+      "path": "scripts/book_system_walkthrough.py",
+      "symbol": "database_cases",
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "line": 69
+    },
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "CorrectionSummary.replace_label",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 51
+    },
+    {
+      "path": "research/living_learning_correction_2026_09_20/correction_state.py",
+      "symbol": "ObservationHistogram",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 72
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "signed",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 22
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "query",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 29
+    },
+    {
+      "path": "research/living_learning_query_state_2026_09_21/query_state.py",
+      "symbol": "audit_cell",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 52
+    },
+    {
+      "path": "scripts/book_research_walkthrough.py",
+      "symbol": "correction_example",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 32
+    },
+    {
+      "path": "scripts/book_research_walkthrough.py",
+      "symbol": "finite_cell_example",
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "line": 71
+    }
+  ],
+  "primary_sources": [
+    {
+      "chapter": "tr/01-motor-ve-ogrenme.md",
+      "url": "https://www.deeplearningbook.org/contents/prob.html",
+      "title": "Probability and Information Theory",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/01-motor-ve-ogrenme.md",
+      "url": "https://arxiv.org/abs/1706.03762",
+      "title": "Attention Is All You Need",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "url": "https://docs.pytorch.org/docs/2.10/generated/torch.ao.quantization.quantize_dynamic.html",
+      "title": "quantize_dynamic, PyTorch 2.10",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "url": "https://arxiv.org/abs/2208.07339",
+      "title": "LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "title": "RFC 9110 HTTP Semantics",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "url": "https://docs.sqlalchemy.org/en/20/orm/session_basics.html",
+      "title": "Session Basics",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "url": "https://www.sqlite.org/lang_transaction.html",
+      "title": "Transaction",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/10-uctan-uca-sistem.md",
+      "url": "https://docs.python.org/3.14/library/contextvars.html",
+      "title": "Context Variables",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "url": "https://www.ijcai.org/Proceedings/77-1/Papers/048.pdf",
+      "title": "Version Spaces",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "url": "https://cdn.aaai.org/AAAI/1992/AAAI92-027.pdf",
+      "title": "Adapting Bias by Gradient Descent",
+      "accessed": "2026-09-21"
+    },
+    {
+      "chapter": "tr/11-arastirma-laboratuvari.md",
+      "url": "https://www.yinzhicao.org/unlearning/UnlearningOakland15.pdf",
+      "title": "Towards Making Systems Forget with Machine Unlearning",
+      "accessed": "2026-09-21"
+    }
+  ],
+  "scope": "New foundation, quantization, service and research sections reviewed against the local implementation and primary sources. No quantization performance or open-world learning claims.",
+  "executed_examples": [
+    "system_walkthrough.json",
+    "research_walkthrough.json"
+  ]
+}

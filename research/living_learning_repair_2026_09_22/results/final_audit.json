@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-22",
+  "status": "passed",
+  "preservation": {
+    "files_unchanged": 994,
+    "head_unchanged": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c"
+  },
+  "environment": {
+    "python": "3.14.3",
+    "numpy": "2.4.2"
+  },
+  "paired_lives": 24,
+  "trajectories": 360,
+  "target_attempts": 2880,
+  "source_full_field_correct": 96,
+  "accepted_target_full_field_checks": 1095,
+  "false_accepts": 0,
+  "scalar_structural_outputs": 13872,
+  "source_scalar_comparisons": 27744,
+  "fresh_process_resume_checks": 15,
+  "full_exact_rerun": true,
+  "identical_learned_and_bulk_program_sequences": 72,
+  "all_acquisition_and_target_category_totals_match": true,
+  "no_path_hit_global_budget": true,
+  "deep_compatible_correct": 2,
+  "source_protocol_result_hashes_match": true,
+  "summary_recomputed": true,
+  "report_claims_checked": true,
+  "local_links_checked": 16,
+  "artifacts_sha256": {
+    "docs/research/living_learning_repair_2026_09_22/MATHEMATICS_AND_LITERATURE_TR.md": "b524c9dafead5b843efc1106439b92c06aa3b1aabf7ee112e48bf956a0eae5db",
+    "docs/research/living_learning_repair_2026_09_22/PROTOCOL.md": "918da85ab77e8ad2144b88fcb2277fd37137df2de557a9fbdabc19641ea687cf",
+    "docs/research/living_learning_repair_2026_09_22/REPORT_TR.md": "0dfe535d36ecb9f4d2f73400f1a0da74ee6016d3ef3e6ef2338b551f5e80e8f9",
+    "research/living_learning_repair_2026_09_22/analyze_results.py": "096080b5ff483f7eced326f99f2db7912b54ba52b6bec14d4db2218f04ae4338",
+    "research/living_learning_repair_2026_09_22/final_audit.py": "c04c579211ce7cf758ab4fe99cdebe79ea5278b69171b43879d715de60a67246",
+    "research/living_learning_repair_2026_09_22/README.md": "3b7ac436305d216e55a553ae909129e70baadd3e105891120fba28e463a5e60d",
+    "research/living_learning_repair_2026_09_22/repair_learning.py": "862e597c212805c87b8ab7b93fccbb0347891f6146c922106f7ecd8d5dfbf201",
+    "research/living_learning_repair_2026_09_22/results/preservation_baseline.json": "e3ac0a8c56e45bbdbc24ce6dd310f5436885bbb5783b2bcfedc33ebfa0944b7b",
+    "research/living_learning_repair_2026_09_22/results/repair_learning.json": "95f38890f3f11ae11462c7a2dc77049706e182bafab5c67d46c5202e599c387b",
+    "research/living_learning_repair_2026_09_22/results/summary.json": "c6207d60fe0baf0707907466df13661b8e91d05bcc1e0a08daabd57e541b172e",
+    "research/living_learning_repair_2026_09_22/results/verification.json": "d4f54a15315643517d5de483f50800d3ae87755cbe7954199d29bba8d697e645",
+    "research/living_learning_repair_2026_09_22/verify_repair.py": "950092f2f00b74616281b2235bbc7e3677739a1e4c8b93f1f03897f109c6244c"
+  },
+  "scope": "Declared virtual work and finite field semantics. Transfer benefit is matched by learned-priority bulk edits; no new fundamental principle or AGI claim. Local only, no commit/push."
+}

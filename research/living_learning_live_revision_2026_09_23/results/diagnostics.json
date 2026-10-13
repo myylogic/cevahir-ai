@@ -1,0 +1,1877 @@
+{
+  "status": "passed",
+  "source_worlds": 72,
+  "source_revisions": 70,
+  "worlds_by_revision_count": {
+    "0": 14,
+    "1": 48,
+    "2": 8,
+    "3": 2
+  },
+  "revisions_with_nontrivial_old_model": 27,
+  "revisions": [
+    {
+      "seed": 0,
+      "family": "cycle_reset",
+      "block": 2,
+      "old_states": 1,
+      "new_states": 5,
+      "new_exact": true
+    },
+    {
+      "seed": 0,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 0,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 8,
+      "new_exact": true
+    },
+    {
+      "seed": 1,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 9,
+      "new_exact": false
+    },
+    {
+      "seed": 1,
+      "family": "random_cycle",
+      "block": 3,
+      "old_states": 9,
+      "new_states": 10,
+      "new_exact": true
+    },
+    {
+      "seed": 1,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 16,
+      "new_exact": true
+    },
+    {
+      "seed": 2,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 11,
+      "new_exact": false
+    },
+    {
+      "seed": 2,
+      "family": "random_cycle",
+      "block": 5,
+      "old_states": 11,
+      "new_states": 14,
+      "new_exact": true
+    },
+    {
+      "seed": 2,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 32,
+      "new_exact": true
+    },
+    {
+      "seed": 3,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 3,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 8,
+      "new_exact": true
+    },
+    {
+      "seed": 4,
+      "family": "cycle_reset",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 5,
+      "new_exact": true
+    },
+    {
+      "seed": 4,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 10,
+      "new_exact": true
+    },
+    {
+      "seed": 4,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 16,
+      "new_exact": true
+    },
+    {
+      "seed": 5,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 14,
+      "new_exact": true
+    },
+    {
+      "seed": 5,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 32,
+      "new_exact": true
+    },
+    {
+      "seed": 6,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 6,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 8,
+      "new_exact": true
+    },
+    {
+      "seed": 7,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 10,
+      "new_exact": true
+    },
+    {
+      "seed": 7,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 16,
+      "new_exact": true
+    },
+    {
+      "seed": 8,
+      "family": "cycle_reset",
+      "block": 5,
+      "old_states": 1,
+      "new_states": 5,
+      "new_exact": true
+    },
+    {
+      "seed": 8,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 9,
+      "new_exact": false
+    },
+    {
+      "seed": 8,
+      "family": "random_cycle",
+      "block": 3,
+      "old_states": 9,
+      "new_states": 14,
+      "new_exact": true
+    },
+    {
+      "seed": 8,
+      "family": "delay",
+      "block": 1,
+      "old_states": 1,
+      "new_states": 32,
+      "new_exact": true
+    },
+    {
+      "seed": 9,
+      "family": "cycle_reset",
+      "block": 1,
+      "old_states": 1,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 9,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 9,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 8,
+      "new_exact": true
+    },
+    {
+      "seed": 10,
+      "family": "cycle_reset",
+      "block": 5,
+      "old_states": 1,
+      "new_states": 7,
+      "new_exact": true
+    },
+    {
+      "seed": 10,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 10,
+      "new_exact": true
+    },
+    {
+      "seed": 10,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 16,
+      "new_exact": true
+    },
+    {
+      "seed": 11,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 3,
+      "new_exact": false
+    },
+    {
+      "seed": 11,
+      "family": "random_cycle",
+      "block": 2,
+      "old_states": 3,
+      "new_states": 14,
+      "new_exact": true
+    },
+    {
+      "seed": 11,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 32,
+      "new_exact": true
+    },
+    {
+      "seed": 12,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 12,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 8,
+      "new_exact": true
+    },
+    {
+      "seed": 13,
+      "family": "cycle_reset",
+      "block": 9,
+      "old_states": 1,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 13,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 3,
+      "new_exact": false
+    },
+    {
+      "seed": 13,
+      "family": "random_cycle",
+      "block": 1,
+      "old_states": 3,
+      "new_states": 10,
+      "new_exact": true
+    },
+    {
+      "seed": 13,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 16,
+      "new_exact": true
+    },
+    {
+      "seed": 14,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 7,
+      "new_exact": false
+    },
+    {
+      "seed": 14,
+      "family": "random_cycle",
+      "block": 1,
+      "old_states": 7,
+      "new_states": 14,
+      "new_exact": true
+    },
+    {
+      "seed": 14,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 32,
+      "new_exact": true
+    },
+    {
+      "seed": 15,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 15,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 8,
+      "new_exact": true
+    },
+    {
+      "seed": 16,
+      "family": "cycle_reset",
+      "block": 5,
+      "old_states": 1,
+      "new_states": 5,
+      "new_exact": true
+    },
+    {
+      "seed": 16,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 4,
+      "new_exact": false
+    },
+    {
+      "seed": 16,
+      "family": "random_cycle",
+      "block": 1,
+      "old_states": 4,
+      "new_states": 10,
+      "new_exact": true
+    },
+    {
+      "seed": 16,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 16,
+      "new_exact": true
+    },
+    {
+      "seed": 17,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 9,
+      "new_exact": false
+    },
+    {
+      "seed": 17,
+      "family": "random_cycle",
+      "block": 1,
+      "old_states": 9,
+      "new_states": 13,
+      "new_exact": false
+    },
+    {
+      "seed": 17,
+      "family": "random_cycle",
+      "block": 2,
+      "old_states": 13,
+      "new_states": 14,
+      "new_exact": true
+    },
+    {
+      "seed": 17,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 32,
+      "new_exact": true
+    },
+    {
+      "seed": 18,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 18,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 8,
+      "new_exact": true
+    },
+    {
+      "seed": 19,
+      "family": "cycle_reset",
+      "block": 9,
+      "old_states": 1,
+      "new_states": 8,
+      "new_exact": true
+    },
+    {
+      "seed": 19,
+      "family": "random_cycle",
+      "block": 1,
+      "old_states": 1,
+      "new_states": 9,
+      "new_exact": false
+    },
+    {
+      "seed": 19,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 16,
+      "new_exact": true
+    },
+    {
+      "seed": 20,
+      "family": "cycle_reset",
+      "block": 15,
+      "old_states": 1,
+      "new_states": 5,
+      "new_exact": true
+    },
+    {
+      "seed": 20,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 7,
+      "new_exact": false
+    },
+    {
+      "seed": 20,
+      "family": "random_cycle",
+      "block": 1,
+      "old_states": 7,
+      "new_states": 12,
+      "new_exact": false
+    },
+    {
+      "seed": 20,
+      "family": "random_cycle",
+      "block": 3,
+      "old_states": 12,
+      "new_states": 14,
+      "new_exact": true
+    },
+    {
+      "seed": 20,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 32,
+      "new_exact": true
+    },
+    {
+      "seed": 21,
+      "family": "cycle_reset",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 21,
+      "family": "random_cycle",
+      "block": 1,
+      "old_states": 2,
+      "new_states": 6,
+      "new_exact": true
+    },
+    {
+      "seed": 21,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 8,
+      "new_exact": true
+    },
+    {
+      "seed": 22,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 10,
+      "new_exact": true
+    },
+    {
+      "seed": 22,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 16,
+      "new_exact": true
+    },
+    {
+      "seed": 23,
+      "family": "random_cycle",
+      "block": 0,
+      "old_states": 2,
+      "new_states": 13,
+      "new_exact": false
+    },
+    {
+      "seed": 23,
+      "family": "random_cycle",
+      "block": 1,
+      "old_states": 13,
+      "new_states": 14,
+      "new_exact": true
+    },
+    {
+      "seed": 23,
+      "family": "delay",
+      "block": 0,
+      "old_states": 1,
+      "new_states": 32,
+      "new_exact": true
+    }
+  ],
+  "paired_error_accounting": [
+    {
+      "seed": 0,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 1,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 0,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 1,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 0,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 155,
+      "archive_wrong": 0,
+      "transfer_damage": 155,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 0,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 159,
+      "archive_wrong": 0,
+      "transfer_damage": 159,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 0,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 0,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 1,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 4,
+      "archive_wrong": 4,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 1,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 2,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 1,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 19,
+      "archive_wrong": 11,
+      "transfer_damage": 8,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 1,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 19,
+      "archive_wrong": 9,
+      "transfer_damage": 10,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 1,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 1,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 2,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 2,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 3,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 2,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 37,
+      "archive_wrong": 21,
+      "transfer_damage": 20,
+      "error_cancellation": 4
+    },
+    {
+      "seed": 2,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 32,
+      "archive_wrong": 32,
+      "transfer_damage": 2,
+      "error_cancellation": 2
+    },
+    {
+      "seed": 2,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 2,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 3,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 2,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 3,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 3,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 3,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 3,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 3,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 4,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 4,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 4,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 4,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 8,
+      "archive_wrong": 0,
+      "transfer_damage": 8,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 4,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 4,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 5,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 4,
+      "archive_wrong": 4,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 5,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 7,
+      "archive_wrong": 7,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 5,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 5,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 8,
+      "archive_wrong": 0,
+      "transfer_damage": 8,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 5,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 5,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 6,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 1,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 6,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 3,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 6,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 8,
+      "archive_wrong": 0,
+      "transfer_damage": 8,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 6,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 6,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 6,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 7,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 1,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 7,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 3,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 7,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 7,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 7,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 7,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 8,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 2,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 8,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 3,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 8,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 20,
+      "archive_wrong": 4,
+      "transfer_damage": 16,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 8,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 10,
+      "archive_wrong": 6,
+      "transfer_damage": 4,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 8,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 11,
+      "archive_wrong": 8,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 8,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 10,
+      "archive_wrong": 6,
+      "transfer_damage": 4,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 9,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 2,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 9,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 9,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 9,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 9,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 9,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 10,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 10,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 2,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 10,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 13,
+      "archive_wrong": 0,
+      "transfer_damage": 13,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 10,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 9,
+      "archive_wrong": 0,
+      "transfer_damage": 9,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 10,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 10,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 4,
+      "archive_wrong": 0,
+      "transfer_damage": 4,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 11,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 2,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 11,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 2,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 11,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 18,
+      "archive_wrong": 18,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 11,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 16,
+      "archive_wrong": 15,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 11,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 4,
+      "archive_wrong": 0,
+      "transfer_damage": 4,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 11,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 12,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 6,
+      "archive_wrong": 6,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 12,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 7,
+      "archive_wrong": 7,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 12,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 12,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 12,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 12,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 13,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 13,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 2,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 13,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 16,
+      "archive_wrong": 11,
+      "transfer_damage": 7,
+      "error_cancellation": 2
+    },
+    {
+      "seed": 13,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 4,
+      "archive_wrong": 5,
+      "transfer_damage": 2,
+      "error_cancellation": 3
+    },
+    {
+      "seed": 13,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 13,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 14,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 7,
+      "archive_wrong": 7,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 14,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 2,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 14,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 16,
+      "archive_wrong": 5,
+      "transfer_damage": 13,
+      "error_cancellation": 2
+    },
+    {
+      "seed": 14,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 17,
+      "archive_wrong": 6,
+      "transfer_damage": 14,
+      "error_cancellation": 3
+    },
+    {
+      "seed": 14,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 14,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 15,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 15,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 1,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 15,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 15,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 15,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 15,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 16,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 3,
+      "archive_wrong": 3,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 16,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 2,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 16,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 16,
+      "archive_wrong": 7,
+      "transfer_damage": 13,
+      "error_cancellation": 4
+    },
+    {
+      "seed": 16,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 11,
+      "archive_wrong": 9,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 16,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 16,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 17,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 6,
+      "archive_wrong": 6,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 17,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 8,
+      "archive_wrong": 8,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 17,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 16,
+      "archive_wrong": 6,
+      "transfer_damage": 15,
+      "error_cancellation": 5
+    },
+    {
+      "seed": 17,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 15,
+      "archive_wrong": 6,
+      "transfer_damage": 10,
+      "error_cancellation": 1
+    },
+    {
+      "seed": 17,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 17,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 18,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 3,
+      "archive_wrong": 3,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 18,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 2,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 18,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 18,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 18,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 18,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 19,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 1,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 19,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 19,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 18,
+      "archive_wrong": 14,
+      "transfer_damage": 4,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 19,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 22,
+      "archive_wrong": 24,
+      "transfer_damage": 2,
+      "error_cancellation": 4
+    },
+    {
+      "seed": 19,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 4,
+      "archive_wrong": 0,
+      "transfer_damage": 4,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 19,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 20,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 6,
+      "archive_wrong": 6,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 20,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 8,
+      "archive_wrong": 8,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 20,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 34,
+      "archive_wrong": 16,
+      "transfer_damage": 20,
+      "error_cancellation": 2
+    },
+    {
+      "seed": 20,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 31,
+      "archive_wrong": 24,
+      "transfer_damage": 12,
+      "error_cancellation": 5
+    },
+    {
+      "seed": 20,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 20,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 21,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 21,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 0,
+      "archive_wrong": 0,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 21,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 10,
+      "archive_wrong": 10,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 21,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 19,
+      "archive_wrong": 12,
+      "transfer_damage": 7,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 21,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 0,
+      "transfer_damage": 1,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 21,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 22,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 5,
+      "archive_wrong": 5,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 22,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 3,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 22,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 7,
+      "archive_wrong": 0,
+      "transfer_damage": 7,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 22,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 7,
+      "archive_wrong": 0,
+      "transfer_damage": 7,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 22,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 22,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 0,
+      "transfer_damage": 3,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 23,
+      "family": "cycle_reset",
+      "stride": 32,
+      "reset_wrong": 1,
+      "archive_wrong": 1,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 23,
+      "family": "cycle_reset",
+      "stride": 256,
+      "reset_wrong": 3,
+      "archive_wrong": 3,
+      "transfer_damage": 0,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 23,
+      "family": "random_cycle",
+      "stride": 32,
+      "reset_wrong": 88,
+      "archive_wrong": 6,
+      "transfer_damage": 85,
+      "error_cancellation": 3
+    },
+    {
+      "seed": 23,
+      "family": "random_cycle",
+      "stride": 256,
+      "reset_wrong": 22,
+      "archive_wrong": 6,
+      "transfer_damage": 18,
+      "error_cancellation": 2
+    },
+    {
+      "seed": 23,
+      "family": "delay",
+      "stride": 32,
+      "reset_wrong": 2,
+      "archive_wrong": 0,
+      "transfer_damage": 2,
+      "error_cancellation": 0
+    },
+    {
+      "seed": 23,
+      "family": "delay",
+      "stride": 256,
+      "reset_wrong": 5,
+      "archive_wrong": 0,
+      "transfer_damage": 5,
+      "error_cancellation": 0
+    }
+  ],
+  "reset_wrong": 1158,
+  "archive_wrong": 418,
+  "transfer_damage": 782,
+  "error_cancellation": 42,
+  "scope": "Post-run descriptive diagnosis; no teacher labels or evaluator state supplied to migration algorithms."
+}

@@ -1,0 +1,74 @@
+{
+  "date": "2026-09-21",
+  "kind": "executed_book_examples",
+  "environment": {
+    "python": "3.14.3",
+    "sqlalchemy": "2.0.52",
+    "database": "temporary SQLite",
+    "model": "controlled backend fixture"
+  },
+  "cases": {
+    "successful_call": {
+      "backend_observation": {
+        "text": "first input",
+        "history": [],
+        "persisted_count_at_generation": 0,
+        "scope_user": "alice",
+        "scope_session_matches_state": true
+      },
+      "persisted_roles_after_return": [
+        "user",
+        "assistant"
+      ],
+      "current_input_row_count": 1,
+      "scope_restored_after_call": true
+    },
+    "identical_request_repeated": {
+      "backend_calls": 2,
+      "rows_after_two_calls": 4,
+      "user_rows_with_identical_content": 2,
+      "second_call_history_count": 2
+    },
+    "session_ownership": {
+      "error": "SessionAccessDeniedError",
+      "additional_backend_calls": 0,
+      "rows_unchanged": true
+    },
+    "backend_failure": {
+      "error": "CevahirIntegrationError",
+      "persisted_rows": 0,
+      "scope_restored_after_error": true
+    },
+    "second_write_failure": {
+      "backend_calls": 1,
+      "persisted_roles": [
+        "user"
+      ],
+      "normal_return": false,
+      "note": "Injected failure between separate production storage transactions; no hardware crash simulated."
+    },
+    "history_budget": {
+      "budget": 4,
+      "selected_contents": [
+        "abcdefgh",
+        "ijklmnop"
+      ],
+      "estimated_tokens": 4,
+      "oversized_newest_message_selected_history": [],
+      "current_message_not_in_history": true
+    },
+    "memory_added_after_history_budget": {
+      "configured_history_budget": 1,
+      "final_history_estimate": 14,
+      "roles": [
+        "system_summary"
+      ],
+      "note": "The approximate recent-history budget is not a final prompt token cap."
+    }
+  },
+  "limits": [
+    "No language model, tokenizer, HTTP transport or hardware crash is exercised",
+    "Actual ChattingManager, ContextBuilder, storage, UnitOfWork and request-scope decorator execute",
+    "Failure injection documents the present transaction boundary; not a guarantee against every failure mode"
+  ]
+}

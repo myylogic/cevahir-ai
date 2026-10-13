@@ -20,6 +20,16 @@ Cevahir'de [BPETrainer.train](../../../tokenizer_management/bpe/bpe_trainer.py#L
 
 Üst API [TokenizerCore.train_model](../../../tokenizer_management/core/tokenizer_core.py#L247), metin korpusunu `BPEManager.train` çağrısına verir; ardından sözlük ve birleşimleri saklar. Bu imzadaki `vocab_size` parametresinin bulunması tek başına onun hedef büyüklüğü uyguladığı anlamına gelmez: mevcut gövdede bu parametre dalı `pass` içerir. Etkin BPE yapılandırması ve alt eğitim sınırları kontrol edilmelidir. Yeni tokenizer eğitimi için gerçek giriş [train_bpe.py](../../../tokenizer_management/train_bpe.py), mevcut araçların kullanım rehberi ise [tokenizer modül belgesidir](../../modules/tokenizer_management/README.md).
 
+## Alternatifler ve temsil maliyeti
+
+Tokenizer seçimi yalnız metni farklı biçimde bölmez; ağın kaç konum işleyeceğini ve kaç çıktı adayı puanlayacağını değiştirir. Kelime tabanlı sözlük nadir biçimlerde büyüyebilir; karakter ve byte birimleri daha uzun diziler doğurabilir. Sabit `D` için embedding/çıkış tablosunun boyutu `V×D`, yoğun attention skorlarının boyutu ise başlık başına `T×T` ile ilişkilidir. Vocabulary küçülürken dizi uzuyorsa bir maliyet azalırken diğeri artabilir. Bunun tam süreye etkisi kernel, donanım ve batch'e bağlıdır.
+
+Öğretim örneğinde aynı metin bir tokenizer ile 100, diğeriyle 150 token olsun. Yoğun attention skor elemanı oranı `150²/100²=2.25` olur. Bu, bütün modelin 2.25 kat yavaşlayacağı anlamına gelmez: FFN, projeksiyonlar, bellek erişimi ve kullanılan attention uygulaması da toplamı belirler. Aynı biçimde iki farklı tokenizer'ın token başına perplexity değerini doğrudan karşılaştırmak aynı birimde ölçüm değildir. Değerlendirme, metnin hangi bölümlendiği ve kaybın hangi birime göre normalize edildiğiyle birlikte verilmelidir.
+
+Kudo'nun unigram yaklaşımı, alt parça dizilerine olasılık atayan bir model ve eğitimde alternatif parçalanmalardan örnekleme ele alır; sıralı BPE birleşim listesinin başka adı değildir. SentencePiece ise ham metinden çalışan tokenizer/detokenizer yazılımı sunar ve BPE ile unigram gibi seçenekleri içerir. Bir araç adı ile bir parçalama algoritmasını birbirine eşitlememek gerekir. Cevahir'in burada incelenen `TokenizerCore → BPEManager` yolu kendi uygulamasıdır; SentencePiece kullanılıyormuş gibi anlatılmaz. [Kudo, 2018](https://aclanthology.org/P18-1007/), [Kudo ve Richardson, 2018](https://aclanthology.org/D18-2012/)
+
+Bir başka ayrım Unicode karakteriyle UTF-8 byte'ıdır. Bir karakterin birden fazla byte ile kodlanabilmesi, byte sözlüğünde birkaç kimlik gerektirebilir. Cevahir'in karakter fallback'i bu nedenle byte düzeyindeki bütün girdileri kayıpsız temsil etme garantisi vermez. Sonraki gerçek örneklerde `UNK=0` ile özgün metnin korunmasının neden ayrı kontroller olduğunu göreceğiz.
+
 ## Cevahir'de encode çağrısının içi
 
 ```mermaid
@@ -239,5 +249,19 @@ yazmak içindir; sıradan denetimde kullanılmaz. Bu bir hız yarışı, bütün
 doğruluk sınaması veya GPU deneyi değildir. Eğitim ve çıkarımın hangi bilgiye
 gerçekten eriştiğini dosya ve metot düzeyinde görmek için küçük bir çalışma
 örneğidir.
+
+## Beş çözümlü alıştırma
+
+1. **Kimlik:** `elma=17`, `armut=18` ise iki sözcüğün anlamı yakın olduğu kanıtlanır mı? **Çözüm:** Hayır; ID'ler satır adresidir. Sayısal yakınlık semantik uzaklık ölçüsü değildir. Öğrenilmiş embedding değerlerini veya görev başarısını incelemek gerekir.
+2. **Boyut:** Aynı metnin 100 yerine 150 tokena bölünmesi yoğun attention skor elemanı sayısını nasıl değiştirir? **Çözüm:** Aynı batch ve head sayısında 2.25 kat yapar; bütün sistem süresinin aynı oranda değiştiği ayrıca ölçülmeden söylenemez.
+3. **Bilgi kaybı:** UNK oranı sıfır olan decode özgün metne eşit değilse nasıl mümkün olur? **Çözüm:** Normalizasyon veya temizlik önceden bir ayrımı kaldırmış olabilir. Encoder kalan bütün parçaları tanısa bile silinen emoji, harf farkı veya boşluk kendiliğinden geri gelmez.
+4. **Batch kimliği:** Üç kayıttan ortadaki atlanıp iki sonuç dönüyorsa `zip(girdiler,çıktılar)` güvenilir midir? **Çözüm:** Hayır; ikinci sonuç yanlış girdiye bağlanabilir. Hata politikası sıkılaştırılmalı veya kaynak kimliği başarı/başarısızlıkla birlikte taşınmalıdır. Mevcut `skip_invalid=False` yolu hatayı açık verir.
+5. **Model uyumu:** Vocabulary büyüklüğü değişmeden iki ID yer değiştirirse aynı checkpoint aynı dil modelini mi verir? **Çözüm:** Genellikle hayır. Embedding ve output satırlarının metin anlamları değişir. Tokenizer kimliği sözlük boyutundan daha güçlü bir sözleşmedir.
+
+## Kaynakça
+
+- Sennrich, R., Haddow, B. ve Birch, A. (2016). *Neural Machine Translation of Rare Words with Subword Units*. ACL, 1715–1725. [Özgün yayın](https://aclanthology.org/P16-1162/), DOI: 10.18653/v1/P16-1162. Alt kelime BPE'nin sinirsel çevirideki kullanımına ilişkin kaynak; Cevahir'e benchmark üstünlüğü aktarmaz.
+- Kudo, T. (2018). *Subword Regularization: Improving Neural Network Translation Models with Multiple Subword Candidates*. ACL, 66–75. [Özgün yayın](https://aclanthology.org/P18-1007/), DOI: 10.18653/v1/P18-1007. Unigram ve alternatif parçalanmalar için.
+- Kudo, T. ve Richardson, J. (2018). *SentencePiece: A simple and language independent subword tokenizer and detokenizer for Neural Text Processing*. EMNLP System Demonstrations, 66–71. [Özgün yayın](https://aclanthology.org/D18-2012/), DOI: 10.18653/v1/D18-2012. Yazılım/algoritma ayrımı için.
 
 [Sonraki: Sinir ağları ve parametreler](03-sinir-aglari.md) · [İçindekiler](../README.md)

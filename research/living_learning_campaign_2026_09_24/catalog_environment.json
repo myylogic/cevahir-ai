@@ -1,0 +1,358 @@
+[
+  {
+    "id": "ENV-01",
+    "family": "ENV",
+    "title_tr": "Sabit büyük ödül farkı: Belirsizlik bonusu",
+    "prediction_tr": "Sabit büyük ödül farkı koşulunda ucb, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Eylem seçimindeki belirsizlik bonusunu açma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "ucb",
+      "control": "greedy"
+    },
+    "regime": "stationary_gap",
+    "practical_margin": 0.01,
+    "mechanism_group": "Belirsizlik bonusu"
+  },
+  {
+    "id": "ENV-02",
+    "family": "ENV",
+    "title_tr": "Sabit büyük ödül farkı: Sabit rastgele sapma",
+    "prediction_tr": "Sabit büyük ödül farkı koşulunda epsilon, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Gözlenen en iyi eylemden yüzde10 sapma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "epsilon",
+      "control": "greedy"
+    },
+    "regime": "stationary_gap",
+    "practical_margin": 0.01,
+    "mechanism_group": "Sabit rastgele sapma"
+  },
+  {
+    "id": "ENV-03",
+    "family": "ENV",
+    "title_tr": "Sabit büyük ödül farkı: Yakın deneyim penceresi",
+    "prediction_tr": "Sabit büyük ödül farkı koşulunda window_ucb, ucb karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Bütün-geçmiş istatistiğini son64 adımla değiştirme",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window_ucb",
+      "control": "ucb"
+    },
+    "regime": "stationary_gap",
+    "practical_margin": 0.01,
+    "mechanism_group": "Yakın deneyim penceresi"
+  },
+  {
+    "id": "ENV-04",
+    "family": "ENV",
+    "title_tr": "Sabit küçük ödül farkı: Belirsizlik bonusu",
+    "prediction_tr": "Sabit küçük ödül farkı koşulunda ucb, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Eylem seçimindeki belirsizlik bonusunu açma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "ucb",
+      "control": "greedy"
+    },
+    "regime": "stationary_small",
+    "practical_margin": 0.01,
+    "mechanism_group": "Belirsizlik bonusu"
+  },
+  {
+    "id": "ENV-05",
+    "family": "ENV",
+    "title_tr": "Sabit küçük ödül farkı: Sabit rastgele sapma",
+    "prediction_tr": "Sabit küçük ödül farkı koşulunda epsilon, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Gözlenen en iyi eylemden yüzde10 sapma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "epsilon",
+      "control": "greedy"
+    },
+    "regime": "stationary_small",
+    "practical_margin": 0.01,
+    "mechanism_group": "Sabit rastgele sapma"
+  },
+  {
+    "id": "ENV-06",
+    "family": "ENV",
+    "title_tr": "Sabit küçük ödül farkı: Yakın deneyim penceresi",
+    "prediction_tr": "Sabit küçük ödül farkı koşulunda window_ucb, ucb karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Bütün-geçmiş istatistiğini son64 adımla değiştirme",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window_ucb",
+      "control": "ucb"
+    },
+    "regime": "stationary_small",
+    "practical_margin": 0.01,
+    "mechanism_group": "Yakın deneyim penceresi"
+  },
+  {
+    "id": "ENV-07",
+    "family": "ENV",
+    "title_tr": "Tek terslenme: Belirsizlik bonusu",
+    "prediction_tr": "Tek terslenme koşulunda ucb, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Eylem seçimindeki belirsizlik bonusunu açma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "ucb",
+      "control": "greedy"
+    },
+    "regime": "single_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Belirsizlik bonusu"
+  },
+  {
+    "id": "ENV-08",
+    "family": "ENV",
+    "title_tr": "Tek terslenme: Sabit rastgele sapma",
+    "prediction_tr": "Tek terslenme koşulunda epsilon, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Gözlenen en iyi eylemden yüzde10 sapma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "epsilon",
+      "control": "greedy"
+    },
+    "regime": "single_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Sabit rastgele sapma"
+  },
+  {
+    "id": "ENV-09",
+    "family": "ENV",
+    "title_tr": "Tek terslenme: Yakın deneyim penceresi",
+    "prediction_tr": "Tek terslenme koşulunda window_ucb, ucb karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Bütün-geçmiş istatistiğini son64 adımla değiştirme",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window_ucb",
+      "control": "ucb"
+    },
+    "regime": "single_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Yakın deneyim penceresi"
+  },
+  {
+    "id": "ENV-10",
+    "family": "ENV",
+    "title_tr": "Tekrarlı terslenme: Belirsizlik bonusu",
+    "prediction_tr": "Tekrarlı terslenme koşulunda ucb, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Eylem seçimindeki belirsizlik bonusunu açma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "ucb",
+      "control": "greedy"
+    },
+    "regime": "recurring_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Belirsizlik bonusu"
+  },
+  {
+    "id": "ENV-11",
+    "family": "ENV",
+    "title_tr": "Tekrarlı terslenme: Sabit rastgele sapma",
+    "prediction_tr": "Tekrarlı terslenme koşulunda epsilon, greedy karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Gözlenen en iyi eylemden yüzde10 sapma",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "epsilon",
+      "control": "greedy"
+    },
+    "regime": "recurring_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Sabit rastgele sapma"
+  },
+  {
+    "id": "ENV-12",
+    "family": "ENV",
+    "title_tr": "Tekrarlı terslenme: Yakın deneyim penceresi",
+    "prediction_tr": "Tekrarlı terslenme koşulunda window_ucb, ucb karşısında bütün-yaşam beklenen ödül açığını azaltır.",
+    "intervention_tr": "Bütün-geçmiş istatistiğini son64 adımla değiştirme",
+    "falsifier_tr": "Eşlenmiş doğrulama yaşamlarında pratik eşik üstünde ters fark veya destek koşullarının oluşmaması.",
+    "status": "wave1",
+    "prior_art": "Bilinen bandit seçimi/unutma ailesi; dört rejimde üç mekanizmanın koşullu iddiaları, yeni ilke değil.",
+    "metric": "mean_pseudo_regret_512",
+    "metric_range": [
+      0,
+      1
+    ],
+    "direction": "lower",
+    "contrast": {
+      "candidate": "window_ucb",
+      "control": "ucb"
+    },
+    "regime": "recurring_reversal",
+    "practical_margin": 0.01,
+    "mechanism_group": "Yakın deneyim penceresi"
+  },
+  {
+    "id": "ENV-13",
+    "family": "ENV",
+    "title_tr": "Ödül yerine bilgilendiricilik",
+    "prediction_tr": "Gözlem değerine göre eylem seçimi, aynı eylem bütçesinde sonraki görev öğrenimini yalnız anlık ödül seçimine göre iyileştirir.",
+    "intervention_tr": "Eylem hedefini sonraki öğrenilebilirliğe bağla.",
+    "falsifier_tr": "Sonraki görev başarısı eşit veya kötü kalır.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok."
+  },
+  {
+    "id": "ENV-14",
+    "family": "ENV",
+    "title_tr": "İç durumdan deterministik sapma",
+    "prediction_tr": "Kanıta bağlı iç durum değişimi, eşlenmiş eylem çeşitliliğine sahip rastgele sapmadan daha çok ayırt edici deneyim üretir.",
+    "intervention_tr": "Sapmayı üreten iç kuralı değiştir; ziyaret sayısını eşle.",
+    "falsifier_tr": "Kazanç ziyaret edilen veri miktarı eşitlenince kaybolur.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok."
+  },
+  {
+    "id": "ENV-15",
+    "family": "ENV",
+    "title_tr": "Kendi verisinin yanlılığı",
+    "prediction_tr": "Seçim olasılığını saklamak, politika değişince geçmiş veriden öğrenilen kuralın yanlılığını azaltır.",
+    "intervention_tr": "Aynı olayları seçim olasılığı bilgisiyle ve bilgisiz güncelle.",
+    "falsifier_tr": "Düzeltme hata/varyans toplamını düşürmez.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok."
+  },
+  {
+    "id": "ENV-16",
+    "family": "ENV",
+    "title_tr": "Gecikmiş keşif yararı",
+    "prediction_tr": "Gecikmiş sonuçlara kredi veren seçici, kısa ufuk seçiciye göre geç beliren beceriyi daha sık edinir.",
+    "intervention_tr": "Kredi ufkunu değiştir; toplam gözlem maliyeti aynı.",
+    "falsifier_tr": "Fark sadece fazladan gözlemden gelir veya tersine döner.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok."
+  },
+  {
+    "id": "ENV-17",
+    "family": "ENV",
+    "title_tr": "Gözlem kanalı seçimi",
+    "prediction_tr": "Sensör seçimini öğrenmek, sabit sensör karışımından daha düşük ölçüm maliyetiyle ayırıcı temsili kurar.",
+    "intervention_tr": "Kanal seçicisini edinilmiş/sabit kullan.",
+    "falsifier_tr": "Aynı maliyette yeni ayrım başarısı artmaz.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok."
+  },
+  {
+    "id": "ENV-18",
+    "family": "ENV",
+    "title_tr": "Karşıolgusal sınama",
+    "prediction_tr": "Model uyuşmazlığını hedefleyen müdahale, aynı bütçeli pasif akıştan daha güvenilir mekanizma ayrımı sağlar.",
+    "intervention_tr": "Aday uyuşmazlığına göre müdahale üret.",
+    "falsifier_tr": "Yeni müdahalede yanlış model oranı azalmıyor.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok."
+  },
+  {
+    "id": "ENV-19",
+    "family": "ENV",
+    "title_tr": "Yanlış merak döngüsü",
+    "prediction_tr": "Tahmin hatasını ödüllendiren iç hedef, indirgenemez gürültüde öğrenilebilirliği hedefleyen seçiciden daha kötü kaynak kullanır.",
+    "intervention_tr": "Gürültü ile öğrenilebilir belirsizliği ayıran hedefi aç.",
+    "falsifier_tr": "Gürültüde zaman kaybı veya sonraki beceri kaybı farkı yok.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok."
+  },
+  {
+    "id": "ENV-20",
+    "family": "ENV",
+    "title_tr": "Deneyim üretmenin maliyeti",
+    "prediction_tr": "Edinilmiş eylem yordamının sonraki öğrenme yararı, edinim ve çevre maliyeti birlikte sayıldığında da sürer.",
+    "intervention_tr": "Yalnız sonraki skor yerine bütün yaşam maliyetini ölç.",
+    "falsifier_tr": "Toplam maliyette avantaj kaybolur.",
+    "status": "queued",
+    "prior_art": "Aktif öğrenme/deney tasarımı/öğrenme ilerlemesi literatürüyle ayrıntılı eşleştirme bekliyor; yenilik iddiası yok."
+  }
+]

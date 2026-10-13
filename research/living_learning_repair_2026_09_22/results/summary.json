@@ -1,0 +1,3727 @@
+{
+  "runs": 360,
+  "attempts": 2880,
+  "source": {
+    "base_cost": {
+      "mean": 5690.0,
+      "min": 5690,
+      "max": 5690
+    },
+    "rule_acquisition_cost": {
+      "mean": 468.0,
+      "min": 468,
+      "max": 468
+    },
+    "rule_count": {
+      "mean": 3.0,
+      "min": 3,
+      "max": 3
+    },
+    "priority_count": {
+      "mean": 1.0,
+      "min": 1,
+      "max": 1
+    },
+    "source_accepts": 96,
+    "unique_rules": [
+      "[\"mul\",[\"add\",\"x\",[\"hole\",0]],\"y\"] -> [\"add\",[\"mul\",\"x\",\"y\"],[\"hole\",0]]",
+      "[\"mul\",[\"add\",\"y\",[\"hole\",0]],\"x\"] -> [\"add\",[\"mul\",\"y\",\"x\"],[\"hole\",0]]",
+      "[\"mul\",[\"add\",[\"hole\",0],[\"hole\",1]],[\"hole\",2]] -> [\"add\",[\"mul\",[\"hole\",0],[\"hole\",2]],[\"hole\",1]]"
+    ]
+  },
+  "groups": [
+    {
+      "regime": "compatible",
+      "method": "local_plain",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 48,
+      "accepted": 48,
+      "false_accepted": 0,
+      "budget_stopped": 144,
+      "correct_per_life": {
+        "mean": 2.0,
+        "min": 2,
+        "max": 2
+      },
+      "total_work": {
+        "mean": 724627.625,
+        "min": 719491,
+        "max": 725616
+      },
+      "candidates": {
+        "mean": 622.125,
+        "min": 591,
+        "max": 628
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 1609.125,
+        "min": 1590,
+        "max": 1629
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 2479.2083333333335,
+            "min": 176,
+            "max": 3145
+          },
+          "cumulative_work": {
+            "mean": 8169.208333333333,
+            "min": 5866,
+            "max": 8835
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119766.0,
+            "min": 119766,
+            "max": 119766
+          },
+          "cumulative_work": {
+            "mean": 127935.20833333333,
+            "min": 125632,
+            "max": 128601
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117801.0,
+            "min": 117801,
+            "max": 117801
+          },
+          "cumulative_work": {
+            "mean": 245736.20833333334,
+            "min": 243433,
+            "max": 246402
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 3009.4166666666665,
+            "min": 176,
+            "max": 3332
+          },
+          "cumulative_work": {
+            "mean": 248745.625,
+            "min": 243609,
+            "max": 249734
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119953.0,
+            "min": 119953,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 368698.625,
+            "min": 363562,
+            "max": 369687
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117988.0,
+            "min": 117988,
+            "max": 117988
+          },
+          "cumulative_work": {
+            "mean": 486686.625,
+            "min": 481550,
+            "max": 487675
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119953.0,
+            "min": 119953,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 606639.625,
+            "min": 601503,
+            "max": 607628
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117988.0,
+            "min": 117988,
+            "max": 117988
+          },
+          "cumulative_work": {
+            "mean": 724627.625,
+            "min": 719491,
+            "max": 725616
+          }
+        }
+      ]
+    },
+    {
+      "regime": "compatible",
+      "method": "local_ranked",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 54,
+      "accepted": 54,
+      "false_accepted": 0,
+      "budget_stopped": 138,
+      "correct_per_life": {
+        "mean": 2.25,
+        "min": 2,
+        "max": 3
+      },
+      "total_work": {
+        "mean": 691659.75,
+        "min": 603374,
+        "max": 720754
+      },
+      "candidates": {
+        "mean": 564.5,
+        "min": 451,
+        "max": 602
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 1676.0,
+        "min": 1594,
+        "max": 1888
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 624.3333333333334,
+            "min": 176,
+            "max": 714
+          },
+          "cumulative_work": {
+            "mean": 6314.333333333333,
+            "min": 5866,
+            "max": 6404
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 1,
+          "accepted": 1,
+          "false_accepted": 0,
+          "work": {
+            "mean": 114897.58333333333,
+            "min": 2924,
+            "max": 119766
+          },
+          "cumulative_work": {
+            "mean": 121211.91666666667,
+            "min": 9328,
+            "max": 126170
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117834.29166666667,
+            "min": 117801,
+            "max": 118600
+          },
+          "cumulative_work": {
+            "mean": 239046.20833333334,
+            "min": 127928,
+            "max": 243971
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 840.5833333333334,
+            "min": 176,
+            "max": 901
+          },
+          "cumulative_work": {
+            "mean": 239886.79166666666,
+            "min": 128104,
+            "max": 244872
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 1,
+          "accepted": 1,
+          "false_accepted": 0,
+          "work": {
+            "mean": 115151.16666666667,
+            "min": 4709,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 355037.9583333333,
+            "min": 248057,
+            "max": 364825
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118054.58333333333,
+            "min": 117988,
+            "max": 118787
+          },
+          "cumulative_work": {
+            "mean": 473092.5416666667,
+            "min": 366844,
+            "max": 482813
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 4,
+          "accepted": 4,
+          "false_accepted": 0,
+          "work": {
+            "mean": 100379.45833333333,
+            "min": 2312,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 573472.0,
+            "min": 484587,
+            "max": 602766
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118187.75,
+            "min": 117988,
+            "max": 118787
+          },
+          "cumulative_work": {
+            "mean": 691659.75,
+            "min": 603374,
+            "max": 720754
+          }
+        }
+      ]
+    },
+    {
+      "regime": "compatible",
+      "method": "bulk_ranked",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 84,
+      "accepted": 84,
+      "false_accepted": 0,
+      "budget_stopped": 108,
+      "correct_per_life": {
+        "mean": 3.5,
+        "min": 2,
+        "max": 5
+      },
+      "total_work": {
+        "mean": 548624.7916666666,
+        "min": 372445,
+        "max": 720710
+      },
+      "candidates": {
+        "mean": 392.4583333333333,
+        "min": 163,
+        "max": 600
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 2078.0,
+        "min": 1608,
+        "max": 2970
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 631.0,
+            "min": 176,
+            "max": 722
+          },
+          "cumulative_work": {
+            "mean": 6321.0,
+            "min": 5866,
+            "max": 6412
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 10,
+          "accepted": 10,
+          "false_accepted": 0,
+          "work": {
+            "mean": 70823.33333333333,
+            "min": 2167,
+            "max": 119873
+          },
+          "cumulative_work": {
+            "mean": 77144.33333333333,
+            "min": 8579,
+            "max": 126279
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 2,
+          "accepted": 2,
+          "false_accepted": 0,
+          "work": {
+            "mean": 109294.58333333333,
+            "min": 7203,
+            "max": 119043
+          },
+          "cumulative_work": {
+            "mean": 186438.91666666666,
+            "min": 127572,
+            "max": 244519
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 1418.125,
+            "min": 176,
+            "max": 4156
+          },
+          "cumulative_work": {
+            "mean": 187857.04166666666,
+            "min": 127798,
+            "max": 245428
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 12,
+          "accepted": 12,
+          "false_accepted": 0,
+          "work": {
+            "mean": 61208.958333333336,
+            "min": 2354,
+            "max": 119300
+          },
+          "cumulative_work": {
+            "mean": 249066.0,
+            "min": 130951,
+            "max": 364667
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119103.625,
+            "min": 118367,
+            "max": 119993
+          },
+          "cumulative_work": {
+            "mean": 368169.625,
+            "min": 250944,
+            "max": 483062
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 12,
+          "accepted": 12,
+          "false_accepted": 0,
+          "work": {
+            "mean": 61474.291666666664,
+            "min": 2354,
+            "max": 119255
+          },
+          "cumulative_work": {
+            "mean": 429643.9166666667,
+            "min": 254896,
+            "max": 602305
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118980.875,
+            "min": 117531,
+            "max": 119997
+          },
+          "cumulative_work": {
+            "mean": 548624.7916666666,
+            "min": 372445,
+            "max": 720710
+          }
+        }
+      ]
+    },
+    {
+      "regime": "compatible",
+      "method": "learned_rules",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 84,
+      "accepted": 84,
+      "false_accepted": 0,
+      "budget_stopped": 108,
+      "correct_per_life": {
+        "mean": 3.5,
+        "min": 2,
+        "max": 5
+      },
+      "total_work": {
+        "mean": 548820.5833333334,
+        "min": 370188,
+        "max": 725661
+      },
+      "candidates": {
+        "mean": 387.4583333333333,
+        "min": 158,
+        "max": 596
+      },
+      "rejected_rule_candidates": 776,
+      "rule_proposals": 1070,
+      "final_json_bytes": {
+        "mean": 2447.0,
+        "min": 1977,
+        "max": 3339
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 646.2916666666666,
+            "min": 176,
+            "max": 742
+          },
+          "cumulative_work": {
+            "mean": 6804.291666666667,
+            "min": 6334,
+            "max": 6900
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 10,
+          "accepted": 10,
+          "false_accepted": 0,
+          "work": {
+            "mean": 70857.16666666667,
+            "min": 2216,
+            "max": 119970
+          },
+          "cumulative_work": {
+            "mean": 77661.45833333333,
+            "min": 9113,
+            "max": 126840
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 2,
+          "accepted": 2,
+          "false_accepted": 0,
+          "work": {
+            "mean": 109606.45833333333,
+            "min": 7373,
+            "max": 119674
+          },
+          "cumulative_work": {
+            "mean": 187267.91666666666,
+            "min": 126146,
+            "max": 246305
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 1434.5833333333333,
+            "min": 176,
+            "max": 4175
+          },
+          "cumulative_work": {
+            "mean": 188702.5,
+            "min": 126994,
+            "max": 247233
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 12,
+          "accepted": 12,
+          "false_accepted": 0,
+          "work": {
+            "mean": 61434.166666666664,
+            "min": 2402,
+            "max": 119999
+          },
+          "cumulative_work": {
+            "mean": 250136.66666666666,
+            "min": 130203,
+            "max": 366949
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118865.5,
+            "min": 117072,
+            "max": 119887
+          },
+          "cumulative_work": {
+            "mean": 369002.1666666667,
+            "min": 247581,
+            "max": 486606
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 12,
+          "accepted": 12,
+          "false_accepted": 0,
+          "work": {
+            "mean": 61628.666666666664,
+            "min": 2405,
+            "max": 119999
+          },
+          "cumulative_work": {
+            "mean": 430630.8333333333,
+            "min": 251583,
+            "max": 606599
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118189.75,
+            "min": 116967,
+            "max": 119882
+          },
+          "cumulative_work": {
+            "mean": 548820.5833333334,
+            "min": 370188,
+            "max": 725661
+          }
+        }
+      ]
+    },
+    {
+      "regime": "compatible",
+      "method": "rules_disabled_paid",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 54,
+      "accepted": 54,
+      "false_accepted": 0,
+      "budget_stopped": 138,
+      "correct_per_life": {
+        "mean": 2.25,
+        "min": 2,
+        "max": 3
+      },
+      "total_work": {
+        "mean": 692127.75,
+        "min": 603842,
+        "max": 721222
+      },
+      "candidates": {
+        "mean": 564.5,
+        "min": 451,
+        "max": 602
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 2045.0,
+        "min": 1963,
+        "max": 2257
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 624.3333333333334,
+            "min": 176,
+            "max": 714
+          },
+          "cumulative_work": {
+            "mean": 6782.333333333333,
+            "min": 6334,
+            "max": 6872
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 1,
+          "accepted": 1,
+          "false_accepted": 0,
+          "work": {
+            "mean": 114897.58333333333,
+            "min": 2924,
+            "max": 119766
+          },
+          "cumulative_work": {
+            "mean": 121679.91666666667,
+            "min": 9796,
+            "max": 126638
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117834.29166666667,
+            "min": 117801,
+            "max": 118600
+          },
+          "cumulative_work": {
+            "mean": 239514.20833333334,
+            "min": 128396,
+            "max": 244439
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 840.5833333333334,
+            "min": 176,
+            "max": 901
+          },
+          "cumulative_work": {
+            "mean": 240354.79166666666,
+            "min": 128572,
+            "max": 245340
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 1,
+          "accepted": 1,
+          "false_accepted": 0,
+          "work": {
+            "mean": 115151.16666666667,
+            "min": 4709,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 355505.9583333333,
+            "min": 248525,
+            "max": 365293
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118054.58333333333,
+            "min": 117988,
+            "max": 118787
+          },
+          "cumulative_work": {
+            "mean": 473560.5416666667,
+            "min": 367312,
+            "max": 483281
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 4,
+          "accepted": 4,
+          "false_accepted": 0,
+          "work": {
+            "mean": 100379.45833333333,
+            "min": 2312,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 573940.0,
+            "min": 485055,
+            "max": 603234
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118187.75,
+            "min": 117988,
+            "max": 118787
+          },
+          "cumulative_work": {
+            "mean": 692127.75,
+            "min": 603842,
+            "max": 721222
+          }
+        }
+      ]
+    },
+    {
+      "regime": "changed",
+      "method": "local_plain",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 48,
+      "accepted": 48,
+      "false_accepted": 0,
+      "budget_stopped": 144,
+      "correct_per_life": {
+        "mean": 2.0,
+        "min": 2,
+        "max": 2
+      },
+      "total_work": {
+        "mean": 720700.5416666666,
+        "min": 719471,
+        "max": 720754
+      },
+      "candidates": {
+        "mean": 601.6666666666666,
+        "min": 594,
+        "max": 602
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 1607.625,
+        "min": 1578,
+        "max": 1629
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 714.0,
+            "min": 714,
+            "max": 714
+          },
+          "cumulative_work": {
+            "mean": 6404.0,
+            "min": 6404,
+            "max": 6404
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119766.0,
+            "min": 119766,
+            "max": 119766
+          },
+          "cumulative_work": {
+            "mean": 126170.0,
+            "min": 126170,
+            "max": 126170
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117801.0,
+            "min": 117801,
+            "max": 117801
+          },
+          "cumulative_work": {
+            "mean": 243971.0,
+            "min": 243971,
+            "max": 243971
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 877.875,
+            "min": 346,
+            "max": 901
+          },
+          "cumulative_work": {
+            "mean": 244848.875,
+            "min": 244317,
+            "max": 244872
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119945.41666666667,
+            "min": 119771,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 364794.2916666667,
+            "min": 364088,
+            "max": 364825
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117980.41666666667,
+            "min": 117806,
+            "max": 117988
+          },
+          "cumulative_work": {
+            "mean": 482774.7083333333,
+            "min": 481894,
+            "max": 482813
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119945.41666666667,
+            "min": 119771,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 602720.125,
+            "min": 601665,
+            "max": 602766
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117980.41666666667,
+            "min": 117806,
+            "max": 117988
+          },
+          "cumulative_work": {
+            "mean": 720700.5416666666,
+            "min": 719471,
+            "max": 720754
+          }
+        }
+      ]
+    },
+    {
+      "regime": "changed",
+      "method": "local_ranked",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 48,
+      "accepted": 48,
+      "false_accepted": 0,
+      "budget_stopped": 144,
+      "correct_per_life": {
+        "mean": 2.0,
+        "min": 2,
+        "max": 2
+      },
+      "total_work": {
+        "mean": 721066.75,
+        "min": 719658,
+        "max": 721128
+      },
+      "candidates": {
+        "mean": 603.625,
+        "min": 595,
+        "max": 604
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 1607.625,
+        "min": 1578,
+        "max": 1629
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 901.0,
+            "min": 901,
+            "max": 901
+          },
+          "cumulative_work": {
+            "mean": 6591.0,
+            "min": 6591,
+            "max": 6591
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119766.0,
+            "min": 119766,
+            "max": 119766
+          },
+          "cumulative_work": {
+            "mean": 126357.0,
+            "min": 126357,
+            "max": 126357
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117801.0,
+            "min": 117801,
+            "max": 117801
+          },
+          "cumulative_work": {
+            "mean": 244158.0,
+            "min": 244158,
+            "max": 244158
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 1057.0833333333333,
+            "min": 346,
+            "max": 1088
+          },
+          "cumulative_work": {
+            "mean": 245215.08333333334,
+            "min": 244504,
+            "max": 245246
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119945.41666666667,
+            "min": 119771,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 365160.5,
+            "min": 364275,
+            "max": 365199
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117980.41666666667,
+            "min": 117806,
+            "max": 117988
+          },
+          "cumulative_work": {
+            "mean": 483140.9166666667,
+            "min": 482081,
+            "max": 483187
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119945.41666666667,
+            "min": 119771,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 603086.3333333334,
+            "min": 601852,
+            "max": 603140
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117980.41666666667,
+            "min": 117806,
+            "max": 117988
+          },
+          "cumulative_work": {
+            "mean": 721066.75,
+            "min": 719658,
+            "max": 721128
+          }
+        }
+      ]
+    },
+    {
+      "regime": "changed",
+      "method": "bulk_ranked",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 48,
+      "accepted": 48,
+      "false_accepted": 0,
+      "budget_stopped": 144,
+      "correct_per_life": {
+        "mean": 2.0,
+        "min": 2,
+        "max": 2
+      },
+      "total_work": {
+        "mean": 721758.0,
+        "min": 721076,
+        "max": 722622
+      },
+      "candidates": {
+        "mean": 602.5833333333334,
+        "min": 595,
+        "max": 604
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 1607.625,
+        "min": 1578,
+        "max": 1629
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 931.0,
+            "min": 931,
+            "max": 931
+          },
+          "cumulative_work": {
+            "mean": 6621.0,
+            "min": 6621,
+            "max": 6621
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119860.0,
+            "min": 119855,
+            "max": 119873
+          },
+          "cumulative_work": {
+            "mean": 126481.0,
+            "min": 126476,
+            "max": 126494
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118209.25,
+            "min": 118174,
+            "max": 118244
+          },
+          "cumulative_work": {
+            "mean": 244690.25,
+            "min": 244656,
+            "max": 244728
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 1085.8333333333333,
+            "min": 346,
+            "max": 1118
+          },
+          "cumulative_work": {
+            "mean": 245776.08333333334,
+            "min": 245060,
+            "max": 245846
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119618.125,
+            "min": 119249,
+            "max": 119995
+          },
+          "cumulative_work": {
+            "mean": 365394.2083333333,
+            "min": 364926,
+            "max": 365841
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118387.5,
+            "min": 118249,
+            "max": 118435
+          },
+          "cumulative_work": {
+            "mean": 483781.7083333333,
+            "min": 483175,
+            "max": 484228
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119585.79166666667,
+            "min": 119249,
+            "max": 119995
+          },
+          "cumulative_work": {
+            "mean": 603367.5,
+            "min": 602675,
+            "max": 604223
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118390.5,
+            "min": 118233,
+            "max": 118453
+          },
+          "cumulative_work": {
+            "mean": 721758.0,
+            "min": 721076,
+            "max": 722622
+          }
+        }
+      ]
+    },
+    {
+      "regime": "changed",
+      "method": "learned_rules",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 48,
+      "accepted": 48,
+      "false_accepted": 0,
+      "budget_stopped": 144,
+      "correct_per_life": {
+        "mean": 2.0,
+        "min": 2,
+        "max": 2
+      },
+      "total_work": {
+        "mean": 725126.4583333334,
+        "min": 723593,
+        "max": 726737
+      },
+      "candidates": {
+        "mean": 597.0416666666666,
+        "min": 589,
+        "max": 598
+      },
+      "rejected_rule_candidates": 934,
+      "rule_proposals": 1363,
+      "final_json_bytes": {
+        "mean": 1976.625,
+        "min": 1947,
+        "max": 1998
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 1103.25,
+            "min": 1096,
+            "max": 1114
+          },
+          "cumulative_work": {
+            "mean": 7261.25,
+            "min": 7254,
+            "max": 7272
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119844.20833333333,
+            "min": 119769,
+            "max": 119970
+          },
+          "cumulative_work": {
+            "mean": 127105.45833333333,
+            "min": 127023,
+            "max": 127224
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118913.125,
+            "min": 118194,
+            "max": 119959
+          },
+          "cumulative_work": {
+            "mean": 246018.58333333334,
+            "min": 245327,
+            "max": 247000
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 1249.9583333333333,
+            "min": 346,
+            "max": 1295
+          },
+          "cumulative_work": {
+            "mean": 247268.54166666666,
+            "min": 246622,
+            "max": 248295
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119806.0,
+            "min": 119255,
+            "max": 119999
+          },
+          "cumulative_work": {
+            "mean": 367074.5416666667,
+            "min": 366175,
+            "max": 368293
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119112.33333333333,
+            "min": 118501,
+            "max": 119964
+          },
+          "cumulative_work": {
+            "mean": 486186.875,
+            "min": 484726,
+            "max": 487330
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119732.625,
+            "min": 119249,
+            "max": 119999
+          },
+          "cumulative_work": {
+            "mean": 605919.5,
+            "min": 604688,
+            "max": 607323
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119206.95833333333,
+            "min": 118555,
+            "max": 119968
+          },
+          "cumulative_work": {
+            "mean": 725126.4583333334,
+            "min": 723593,
+            "max": 726737
+          }
+        }
+      ]
+    },
+    {
+      "regime": "changed",
+      "method": "rules_disabled_paid",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 48,
+      "accepted": 48,
+      "false_accepted": 0,
+      "budget_stopped": 144,
+      "correct_per_life": {
+        "mean": 2.0,
+        "min": 2,
+        "max": 2
+      },
+      "total_work": {
+        "mean": 721534.75,
+        "min": 720126,
+        "max": 721596
+      },
+      "candidates": {
+        "mean": 603.625,
+        "min": 595,
+        "max": 604
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 1976.625,
+        "min": 1947,
+        "max": 1998
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 901.0,
+            "min": 901,
+            "max": 901
+          },
+          "cumulative_work": {
+            "mean": 7059.0,
+            "min": 7059,
+            "max": 7059
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119766.0,
+            "min": 119766,
+            "max": 119766
+          },
+          "cumulative_work": {
+            "mean": 126825.0,
+            "min": 126825,
+            "max": 126825
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117801.0,
+            "min": 117801,
+            "max": 117801
+          },
+          "cumulative_work": {
+            "mean": 244626.0,
+            "min": 244626,
+            "max": 244626
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 1057.0833333333333,
+            "min": 346,
+            "max": 1088
+          },
+          "cumulative_work": {
+            "mean": 245683.08333333334,
+            "min": 244972,
+            "max": 245714
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119945.41666666667,
+            "min": 119771,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 365628.5,
+            "min": 364743,
+            "max": 365667
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117980.41666666667,
+            "min": 117806,
+            "max": 117988
+          },
+          "cumulative_work": {
+            "mean": 483608.9166666667,
+            "min": 482549,
+            "max": 483655
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119945.41666666667,
+            "min": 119771,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 603554.3333333334,
+            "min": 602320,
+            "max": 603608
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117980.41666666667,
+            "min": 117806,
+            "max": 117988
+          },
+          "cumulative_work": {
+            "mean": 721534.75,
+            "min": 720126,
+            "max": 721596
+          }
+        }
+      ]
+    },
+    {
+      "regime": "partial",
+      "method": "local_plain",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 51,
+      "accepted": 51,
+      "false_accepted": 0,
+      "budget_stopped": 141,
+      "correct_per_life": {
+        "mean": 2.125,
+        "min": 2,
+        "max": 3
+      },
+      "total_work": {
+        "mean": 704798.4166666666,
+        "min": 601089,
+        "max": 719491
+      },
+      "candidates": {
+        "mean": 572.0416666666666,
+        "min": 438,
+        "max": 591
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 1642.5416666666667,
+        "min": 1594,
+        "max": 1888
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 176.0,
+            "min": 176,
+            "max": 176
+          },
+          "cumulative_work": {
+            "mean": 5866.0,
+            "min": 5866,
+            "max": 5866
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 1,
+          "accepted": 1,
+          "false_accepted": 0,
+          "work": {
+            "mean": 114807.08333333333,
+            "min": 752,
+            "max": 119766
+          },
+          "cumulative_work": {
+            "mean": 120673.08333333333,
+            "min": 6618,
+            "max": 125632
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117834.29166666667,
+            "min": 117801,
+            "max": 118600
+          },
+          "cumulative_work": {
+            "mean": 238507.375,
+            "min": 125218,
+            "max": 243433
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 176.0,
+            "min": 176,
+            "max": 176
+          },
+          "cumulative_work": {
+            "mean": 238683.375,
+            "min": 125394,
+            "max": 243609
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 1,
+          "accepted": 1,
+          "false_accepted": 0,
+          "work": {
+            "mean": 114986.29166666667,
+            "min": 752,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 353669.6666666667,
+            "min": 244361,
+            "max": 363562
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118054.58333333333,
+            "min": 117988,
+            "max": 118787
+          },
+          "cumulative_work": {
+            "mean": 471724.25,
+            "min": 363148,
+            "max": 481550
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 1,
+          "accepted": 1,
+          "false_accepted": 0,
+          "work": {
+            "mean": 114986.29166666667,
+            "min": 752,
+            "max": 119953
+          },
+          "cumulative_work": {
+            "mean": 586710.5416666666,
+            "min": 482302,
+            "max": 601503
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118087.875,
+            "min": 117988,
+            "max": 118787
+          },
+          "cumulative_work": {
+            "mean": 704798.4166666666,
+            "min": 601089,
+            "max": 719491
+          }
+        }
+      ]
+    },
+    {
+      "regime": "partial",
+      "method": "local_ranked",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 120,
+      "accepted": 120,
+      "false_accepted": 0,
+      "budget_stopped": 72,
+      "correct_per_life": {
+        "mean": 5.0,
+        "min": 5,
+        "max": 5
+      },
+      "total_work": {
+        "mean": 370224.9166666667,
+        "min": 367354,
+        "max": 370512
+      },
+      "candidates": {
+        "mean": 157.04166666666666,
+        "min": 149,
+        "max": 158
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 2410.2083333333335,
+        "min": 2383,
+        "max": 2436
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 176.0,
+            "min": 176,
+            "max": 176
+          },
+          "cumulative_work": {
+            "mean": 5866.0,
+            "min": 5866,
+            "max": 5866
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 2067.7916666666665,
+            "min": 752,
+            "max": 2125
+          },
+          "cumulative_work": {
+            "mean": 7933.791666666667,
+            "min": 6618,
+            "max": 7991
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118600.0,
+            "min": 118600,
+            "max": 118600
+          },
+          "cumulative_work": {
+            "mean": 126533.79166666667,
+            "min": 125218,
+            "max": 126591
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 176.0,
+            "min": 176,
+            "max": 176
+          },
+          "cumulative_work": {
+            "mean": 126709.79166666667,
+            "min": 125394,
+            "max": 126767
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 3012.7083333333335,
+            "min": 752,
+            "max": 3111
+          },
+          "cumulative_work": {
+            "mean": 129722.5,
+            "min": 127519,
+            "max": 129878
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119586.0,
+            "min": 119586,
+            "max": 119586
+          },
+          "cumulative_work": {
+            "mean": 249308.5,
+            "min": 247105,
+            "max": 249464
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 3778.4166666666665,
+            "min": 752,
+            "max": 3910
+          },
+          "cumulative_work": {
+            "mean": 253086.91666666666,
+            "min": 250216,
+            "max": 253374
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117138.0,
+            "min": 117138,
+            "max": 117138
+          },
+          "cumulative_work": {
+            "mean": 370224.9166666667,
+            "min": 367354,
+            "max": 370512
+          }
+        }
+      ]
+    },
+    {
+      "regime": "partial",
+      "method": "bulk_ranked",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 120,
+      "accepted": 120,
+      "false_accepted": 0,
+      "budget_stopped": 72,
+      "correct_per_life": {
+        "mean": 5.0,
+        "min": 5,
+        "max": 5
+      },
+      "total_work": {
+        "mean": 373897.8333333333,
+        "min": 370363,
+        "max": 374447
+      },
+      "candidates": {
+        "mean": 159.83333333333334,
+        "min": 151,
+        "max": 161
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 2410.2083333333335,
+        "min": 2383,
+        "max": 2436
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 176.0,
+            "min": 176,
+            "max": 176
+          },
+          "cumulative_work": {
+            "mean": 5866.0,
+            "min": 5866,
+            "max": 5866
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 2923.7916666666665,
+            "min": 752,
+            "max": 3031
+          },
+          "cumulative_work": {
+            "mean": 8789.791666666666,
+            "min": 6618,
+            "max": 8897
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119008.25,
+            "min": 118973,
+            "max": 119043
+          },
+          "cumulative_work": {
+            "mean": 127798.04166666667,
+            "min": 125661,
+            "max": 127930
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 176.0,
+            "min": 176,
+            "max": 176
+          },
+          "cumulative_work": {
+            "mean": 127974.04166666667,
+            "min": 125837,
+            "max": 128106
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 3867.9583333333335,
+            "min": 752,
+            "max": 4017
+          },
+          "cumulative_work": {
+            "mean": 131842.0,
+            "min": 128826,
+            "max": 132105
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119945.33333333333,
+            "min": 119814,
+            "max": 119999
+          },
+          "cumulative_work": {
+            "mean": 251787.33333333334,
+            "min": 248666,
+            "max": 252094
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 4562.416666666667,
+            "min": 752,
+            "max": 4810
+          },
+          "cumulative_work": {
+            "mean": 256349.75,
+            "min": 252792,
+            "max": 256892
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117548.08333333333,
+            "min": 117517,
+            "max": 117603
+          },
+          "cumulative_work": {
+            "mean": 373897.8333333333,
+            "min": 370363,
+            "max": 374447
+          }
+        }
+      ]
+    },
+    {
+      "regime": "partial",
+      "method": "learned_rules",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 120,
+      "accepted": 120,
+      "false_accepted": 0,
+      "budget_stopped": 72,
+      "correct_per_life": {
+        "mean": 5.0,
+        "min": 5,
+        "max": 5
+      },
+      "total_work": {
+        "mean": 373331.0416666667,
+        "min": 369262,
+        "max": 376539
+      },
+      "candidates": {
+        "mean": 155.79166666666666,
+        "min": 147,
+        "max": 158
+      },
+      "rejected_rule_candidates": 684,
+      "rule_proposals": 897,
+      "final_json_bytes": {
+        "mean": 2779.2083333333335,
+        "min": 2752,
+        "max": 2805
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 176.0,
+            "min": 176,
+            "max": 176
+          },
+          "cumulative_work": {
+            "mean": 6334.0,
+            "min": 6334,
+            "max": 6334
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 2947.8333333333335,
+            "min": 752,
+            "max": 3076
+          },
+          "cumulative_work": {
+            "mean": 9281.833333333334,
+            "min": 7086,
+            "max": 9410
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119170.95833333333,
+            "min": 117030,
+            "max": 119896
+          },
+          "cumulative_work": {
+            "mean": 128452.79166666667,
+            "min": 124788,
+            "max": 129291
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 176.0,
+            "min": 176,
+            "max": 176
+          },
+          "cumulative_work": {
+            "mean": 128628.79166666667,
+            "min": 124964,
+            "max": 129467
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 3889.9166666666665,
+            "min": 752,
+            "max": 4060
+          },
+          "cumulative_work": {
+            "mean": 132518.70833333334,
+            "min": 128985,
+            "max": 133482
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117852.91666666667,
+            "min": 117084,
+            "max": 119962
+          },
+          "cumulative_work": {
+            "mean": 250371.625,
+            "min": 246363,
+            "max": 253253
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 4586.916666666667,
+            "min": 752,
+            "max": 4845
+          },
+          "cumulative_work": {
+            "mean": 254958.54166666666,
+            "min": 250622,
+            "max": 258068
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118372.5,
+            "min": 117705,
+            "max": 119309
+          },
+          "cumulative_work": {
+            "mean": 373331.0416666667,
+            "min": 369262,
+            "max": 376539
+          }
+        }
+      ]
+    },
+    {
+      "regime": "partial",
+      "method": "rules_disabled_paid",
+      "n_lives": 24,
+      "attempted": 192,
+      "correct": 120,
+      "accepted": 120,
+      "false_accepted": 0,
+      "budget_stopped": 72,
+      "correct_per_life": {
+        "mean": 5.0,
+        "min": 5,
+        "max": 5
+      },
+      "total_work": {
+        "mean": 370692.9166666667,
+        "min": 367822,
+        "max": 370980
+      },
+      "candidates": {
+        "mean": 157.04166666666666,
+        "min": 149,
+        "max": 158
+      },
+      "rejected_rule_candidates": 0,
+      "rule_proposals": 0,
+      "final_json_bytes": {
+        "mean": 2779.2083333333335,
+        "min": 2752,
+        "max": 2805
+      },
+      "points": [
+        {
+          "task_index": 0,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 176.0,
+            "min": 176,
+            "max": 176
+          },
+          "cumulative_work": {
+            "mean": 6334.0,
+            "min": 6334,
+            "max": 6334
+          }
+        },
+        {
+          "task_index": 1,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 2067.7916666666665,
+            "min": 752,
+            "max": 2125
+          },
+          "cumulative_work": {
+            "mean": 8401.791666666666,
+            "min": 7086,
+            "max": 8459
+          }
+        },
+        {
+          "task_index": 2,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 118600.0,
+            "min": 118600,
+            "max": 118600
+          },
+          "cumulative_work": {
+            "mean": 127001.79166666667,
+            "min": 125686,
+            "max": 127059
+          }
+        },
+        {
+          "task_index": 3,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 176.0,
+            "min": 176,
+            "max": 176
+          },
+          "cumulative_work": {
+            "mean": 127177.79166666667,
+            "min": 125862,
+            "max": 127235
+          }
+        },
+        {
+          "task_index": 4,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 3012.7083333333335,
+            "min": 752,
+            "max": 3111
+          },
+          "cumulative_work": {
+            "mean": 130190.5,
+            "min": 127987,
+            "max": 130346
+          }
+        },
+        {
+          "task_index": 5,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 119586.0,
+            "min": 119586,
+            "max": 119586
+          },
+          "cumulative_work": {
+            "mean": 249776.5,
+            "min": 247573,
+            "max": 249932
+          }
+        },
+        {
+          "task_index": 6,
+          "correct": 24,
+          "accepted": 24,
+          "false_accepted": 0,
+          "work": {
+            "mean": 3778.4166666666665,
+            "min": 752,
+            "max": 3910
+          },
+          "cumulative_work": {
+            "mean": 253554.91666666666,
+            "min": 250684,
+            "max": 253842
+          }
+        },
+        {
+          "task_index": 7,
+          "correct": 0,
+          "accepted": 0,
+          "false_accepted": 0,
+          "work": {
+            "mean": 117138.0,
+            "min": 117138,
+            "max": 117138
+          },
+          "cumulative_work": {
+            "mean": 370692.9166666667,
+            "min": 367822,
+            "max": 370980
+          }
+        }
+      ]
+    }
+  ],
+  "paired": [
+    {
+      "regime": "compatible",
+      "left": "learned_rules",
+      "right": "rules_disabled_paid",
+      "per_life": [
+        {
+          "seed": 0,
+          "correct": 1,
+          "work": -115028
+        },
+        {
+          "seed": 1,
+          "correct": 2,
+          "work": -235864
+        },
+        {
+          "seed": 2,
+          "correct": 2,
+          "work": -231321
+        },
+        {
+          "seed": 3,
+          "correct": 0,
+          "work": 4439
+        },
+        {
+          "seed": 4,
+          "correct": 3,
+          "work": -348179
+        },
+        {
+          "seed": 5,
+          "correct": 1,
+          "work": -116026
+        },
+        {
+          "seed": 6,
+          "correct": 3,
+          "work": -350187
+        },
+        {
+          "seed": 7,
+          "correct": 1,
+          "work": -111678
+        },
+        {
+          "seed": 8,
+          "correct": 1,
+          "work": -118392
+        },
+        {
+          "seed": 9,
+          "correct": 1,
+          "work": -114779
+        },
+        {
+          "seed": 10,
+          "correct": 2,
+          "work": -230115
+        },
+        {
+          "seed": 11,
+          "correct": 2,
+          "work": -231039
+        },
+        {
+          "seed": 12,
+          "correct": 1,
+          "work": -113848
+        },
+        {
+          "seed": 13,
+          "correct": 2,
+          "work": -220444
+        },
+        {
+          "seed": 14,
+          "correct": 0,
+          "work": 2691
+        },
+        {
+          "seed": 15,
+          "correct": 2,
+          "work": -231456
+        },
+        {
+          "seed": 16,
+          "correct": 0,
+          "work": -1226
+        },
+        {
+          "seed": 17,
+          "correct": 0,
+          "work": 841
+        },
+        {
+          "seed": 18,
+          "correct": 1,
+          "work": -114645
+        },
+        {
+          "seed": 19,
+          "correct": 1,
+          "work": -104464
+        },
+        {
+          "seed": 20,
+          "correct": 0,
+          "work": 1652
+        },
+        {
+          "seed": 21,
+          "correct": 1,
+          "work": -113627
+        },
+        {
+          "seed": 22,
+          "correct": 1,
+          "work": -114983
+        },
+        {
+          "seed": 23,
+          "correct": 2,
+          "work": -231694
+        }
+      ],
+      "correct_difference": {
+        "mean": 1.25,
+        "min": 0,
+        "max": 3
+      },
+      "work_difference": {
+        "mean": -143307.16666666666,
+        "min": -350187,
+        "max": 4439
+      },
+      "left_more_correct": 19,
+      "tied_correct": 5,
+      "right_more_correct": 0
+    },
+    {
+      "regime": "compatible",
+      "left": "learned_rules",
+      "right": "bulk_ranked",
+      "per_life": [
+        {
+          "seed": 0,
+          "correct": 0,
+          "work": -728
+        },
+        {
+          "seed": 1,
+          "correct": 0,
+          "work": -2257
+        },
+        {
+          "seed": 2,
+          "correct": 0,
+          "work": -944
+        },
+        {
+          "seed": 3,
+          "correct": 0,
+          "work": 4955
+        },
+        {
+          "seed": 4,
+          "correct": 0,
+          "work": -699
+        },
+        {
+          "seed": 5,
+          "correct": 0,
+          "work": -175
+        },
+        {
+          "seed": 6,
+          "correct": 0,
+          "work": -2731
+        },
+        {
+          "seed": 7,
+          "correct": 0,
+          "work": 3348
+        },
+        {
+          "seed": 8,
+          "correct": 0,
+          "work": -3436
+        },
+        {
+          "seed": 9,
+          "correct": 0,
+          "work": 1891
+        },
+        {
+          "seed": 10,
+          "correct": 0,
+          "work": -351
+        },
+        {
+          "seed": 11,
+          "correct": 0,
+          "work": -674
+        },
+        {
+          "seed": 12,
+          "correct": 0,
+          "work": 2061
+        },
+        {
+          "seed": 13,
+          "correct": 0,
+          "work": -114
+        },
+        {
+          "seed": 14,
+          "correct": 0,
+          "work": 3203
+        },
+        {
+          "seed": 15,
+          "correct": 0,
+          "work": -121
+        },
+        {
+          "seed": 16,
+          "correct": 0,
+          "work": -2380
+        },
+        {
+          "seed": 17,
+          "correct": 0,
+          "work": 601
+        },
+        {
+          "seed": 18,
+          "correct": 0,
+          "work": 381
+        },
+        {
+          "seed": 19,
+          "correct": 0,
+          "work": -1092
+        },
+        {
+          "seed": 20,
+          "correct": 0,
+          "work": 2216
+        },
+        {
+          "seed": 21,
+          "correct": 0,
+          "work": 2262
+        },
+        {
+          "seed": 22,
+          "correct": 0,
+          "work": 41
+        },
+        {
+          "seed": 23,
+          "correct": 0,
+          "work": -558
+        }
+      ],
+      "correct_difference": {
+        "mean": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      "work_difference": {
+        "mean": 195.79166666666666,
+        "min": -3436,
+        "max": 4955
+      },
+      "left_more_correct": 0,
+      "tied_correct": 24,
+      "right_more_correct": 0
+    },
+    {
+      "regime": "compatible",
+      "left": "bulk_ranked",
+      "right": "local_ranked",
+      "per_life": [
+        {
+          "seed": 0,
+          "correct": 1,
+          "work": -113832
+        },
+        {
+          "seed": 1,
+          "correct": 2,
+          "work": -233139
+        },
+        {
+          "seed": 2,
+          "correct": 2,
+          "work": -229909
+        },
+        {
+          "seed": 3,
+          "correct": 0,
+          "work": -48
+        },
+        {
+          "seed": 4,
+          "correct": 3,
+          "work": -347012
+        },
+        {
+          "seed": 5,
+          "correct": 1,
+          "work": -115383
+        },
+        {
+          "seed": 6,
+          "correct": 3,
+          "work": -346988
+        },
+        {
+          "seed": 7,
+          "correct": 1,
+          "work": -114558
+        },
+        {
+          "seed": 8,
+          "correct": 1,
+          "work": -114488
+        },
+        {
+          "seed": 9,
+          "correct": 1,
+          "work": -116202
+        },
+        {
+          "seed": 10,
+          "correct": 2,
+          "work": -229296
+        },
+        {
+          "seed": 11,
+          "correct": 2,
+          "work": -229897
+        },
+        {
+          "seed": 12,
+          "correct": 1,
+          "work": -115441
+        },
+        {
+          "seed": 13,
+          "correct": 2,
+          "work": -219862
+        },
+        {
+          "seed": 14,
+          "correct": 0,
+          "work": -44
+        },
+        {
+          "seed": 15,
+          "correct": 2,
+          "work": -230867
+        },
+        {
+          "seed": 16,
+          "correct": 0,
+          "work": 1622
+        },
+        {
+          "seed": 17,
+          "correct": 0,
+          "work": 708
+        },
+        {
+          "seed": 18,
+          "correct": 1,
+          "work": -114558
+        },
+        {
+          "seed": 19,
+          "correct": 1,
+          "work": -102904
+        },
+        {
+          "seed": 20,
+          "correct": 0,
+          "work": -96
+        },
+        {
+          "seed": 21,
+          "correct": 1,
+          "work": -115421
+        },
+        {
+          "seed": 22,
+          "correct": 1,
+          "work": -114556
+        },
+        {
+          "seed": 23,
+          "correct": 2,
+          "work": -230668
+        }
+      ],
+      "correct_difference": {
+        "mean": 1.25,
+        "min": 0,
+        "max": 3
+      },
+      "work_difference": {
+        "mean": -143034.95833333334,
+        "min": -347012,
+        "max": 1622
+      },
+      "left_more_correct": 19,
+      "tied_correct": 5,
+      "right_more_correct": 0
+    },
+    {
+      "regime": "changed",
+      "left": "learned_rules",
+      "right": "rules_disabled_paid",
+      "per_life": [
+        {
+          "seed": 0,
+          "correct": 0,
+          "work": 3667
+        },
+        {
+          "seed": 1,
+          "correct": 0,
+          "work": 5141
+        },
+        {
+          "seed": 2,
+          "correct": 0,
+          "work": 2593
+        },
+        {
+          "seed": 3,
+          "correct": 0,
+          "work": 4789
+        },
+        {
+          "seed": 4,
+          "correct": 0,
+          "work": 3349
+        },
+        {
+          "seed": 5,
+          "correct": 0,
+          "work": 3562
+        },
+        {
+          "seed": 6,
+          "correct": 0,
+          "work": 4583
+        },
+        {
+          "seed": 7,
+          "correct": 0,
+          "work": 3279
+        },
+        {
+          "seed": 8,
+          "correct": 0,
+          "work": 5959
+        },
+        {
+          "seed": 9,
+          "correct": 0,
+          "work": 2330
+        },
+        {
+          "seed": 10,
+          "correct": 0,
+          "work": 3795
+        },
+        {
+          "seed": 11,
+          "correct": 0,
+          "work": 2885
+        },
+        {
+          "seed": 12,
+          "correct": 0,
+          "work": 2509
+        },
+        {
+          "seed": 13,
+          "correct": 0,
+          "work": 3657
+        },
+        {
+          "seed": 14,
+          "correct": 0,
+          "work": 3046
+        },
+        {
+          "seed": 15,
+          "correct": 0,
+          "work": 4252
+        },
+        {
+          "seed": 16,
+          "correct": 0,
+          "work": 3820
+        },
+        {
+          "seed": 17,
+          "correct": 0,
+          "work": 4375
+        },
+        {
+          "seed": 18,
+          "correct": 0,
+          "work": 3515
+        },
+        {
+          "seed": 19,
+          "correct": 0,
+          "work": 3425
+        },
+        {
+          "seed": 20,
+          "correct": 0,
+          "work": 1997
+        },
+        {
+          "seed": 21,
+          "correct": 0,
+          "work": 2859
+        },
+        {
+          "seed": 22,
+          "correct": 0,
+          "work": 2991
+        },
+        {
+          "seed": 23,
+          "correct": 0,
+          "work": 3823
+        }
+      ],
+      "correct_difference": {
+        "mean": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      "work_difference": {
+        "mean": 3591.7083333333335,
+        "min": 1997,
+        "max": 5959
+      },
+      "left_more_correct": 0,
+      "tied_correct": 24,
+      "right_more_correct": 0
+    },
+    {
+      "regime": "changed",
+      "left": "learned_rules",
+      "right": "bulk_ranked",
+      "per_life": [
+        {
+          "seed": 0,
+          "correct": 0,
+          "work": 2671
+        },
+        {
+          "seed": 1,
+          "correct": 0,
+          "work": 4115
+        },
+        {
+          "seed": 2,
+          "correct": 0,
+          "work": 2391
+        },
+        {
+          "seed": 3,
+          "correct": 0,
+          "work": 5261
+        },
+        {
+          "seed": 4,
+          "correct": 0,
+          "work": 2367
+        },
+        {
+          "seed": 5,
+          "correct": 0,
+          "work": 3318
+        },
+        {
+          "seed": 6,
+          "correct": 0,
+          "work": 3577
+        },
+        {
+          "seed": 7,
+          "correct": 0,
+          "work": 3769
+        },
+        {
+          "seed": 8,
+          "correct": 0,
+          "work": 4811
+        },
+        {
+          "seed": 9,
+          "correct": 0,
+          "work": 2114
+        },
+        {
+          "seed": 10,
+          "correct": 0,
+          "work": 3537
+        },
+        {
+          "seed": 11,
+          "correct": 0,
+          "work": 2671
+        },
+        {
+          "seed": 12,
+          "correct": 0,
+          "work": 2315
+        },
+        {
+          "seed": 13,
+          "correct": 0,
+          "work": 3427
+        },
+        {
+          "seed": 14,
+          "correct": 0,
+          "work": 3514
+        },
+        {
+          "seed": 15,
+          "correct": 0,
+          "work": 3266
+        },
+        {
+          "seed": 16,
+          "correct": 0,
+          "work": 4212
+        },
+        {
+          "seed": 17,
+          "correct": 0,
+          "work": 4091
+        },
+        {
+          "seed": 18,
+          "correct": 0,
+          "work": 4005
+        },
+        {
+          "seed": 19,
+          "correct": 0,
+          "work": 3925
+        },
+        {
+          "seed": 20,
+          "correct": 0,
+          "work": 2517
+        },
+        {
+          "seed": 21,
+          "correct": 0,
+          "work": 2661
+        },
+        {
+          "seed": 22,
+          "correct": 0,
+          "work": 3479
+        },
+        {
+          "seed": 23,
+          "correct": 0,
+          "work": 2829
+        }
+      ],
+      "correct_difference": {
+        "mean": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      "work_difference": {
+        "mean": 3368.4583333333335,
+        "min": 2114,
+        "max": 5261
+      },
+      "left_more_correct": 0,
+      "tied_correct": 24,
+      "right_more_correct": 0
+    },
+    {
+      "regime": "changed",
+      "left": "bulk_ranked",
+      "right": "local_ranked",
+      "per_life": [
+        {
+          "seed": 0,
+          "correct": 0,
+          "work": 1464
+        },
+        {
+          "seed": 1,
+          "correct": 0,
+          "work": 1494
+        },
+        {
+          "seed": 2,
+          "correct": 0,
+          "work": 670
+        },
+        {
+          "seed": 3,
+          "correct": 0,
+          "work": -4
+        },
+        {
+          "seed": 4,
+          "correct": 0,
+          "work": 1450
+        },
+        {
+          "seed": 5,
+          "correct": 0,
+          "work": 712
+        },
+        {
+          "seed": 6,
+          "correct": 0,
+          "work": 1474
+        },
+        {
+          "seed": 7,
+          "correct": 0,
+          "work": -22
+        },
+        {
+          "seed": 8,
+          "correct": 0,
+          "work": 1616
+        },
+        {
+          "seed": 9,
+          "correct": 0,
+          "work": 684
+        },
+        {
+          "seed": 10,
+          "correct": 0,
+          "work": 726
+        },
+        {
+          "seed": 11,
+          "correct": 0,
+          "work": 682
+        },
+        {
+          "seed": 12,
+          "correct": 0,
+          "work": 662
+        },
+        {
+          "seed": 13,
+          "correct": 0,
+          "work": 698
+        },
+        {
+          "seed": 14,
+          "correct": 0,
+          "work": 0
+        },
+        {
+          "seed": 15,
+          "correct": 0,
+          "work": 1454
+        },
+        {
+          "seed": 16,
+          "correct": 0,
+          "work": 76
+        },
+        {
+          "seed": 17,
+          "correct": 0,
+          "work": 752
+        },
+        {
+          "seed": 18,
+          "correct": 0,
+          "work": -22
+        },
+        {
+          "seed": 19,
+          "correct": 0,
+          "work": -32
+        },
+        {
+          "seed": 20,
+          "correct": 0,
+          "work": -52
+        },
+        {
+          "seed": 21,
+          "correct": 0,
+          "work": 666
+        },
+        {
+          "seed": 22,
+          "correct": 0,
+          "work": -20
+        },
+        {
+          "seed": 23,
+          "correct": 0,
+          "work": 1462
+        }
+      ],
+      "correct_difference": {
+        "mean": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      "work_difference": {
+        "mean": 691.25,
+        "min": -52,
+        "max": 1616
+      },
+      "left_more_correct": 0,
+      "tied_correct": 24,
+      "right_more_correct": 0
+    },
+    {
+      "regime": "partial",
+      "left": "learned_rules",
+      "right": "rules_disabled_paid",
+      "per_life": [
+        {
+          "seed": 0,
+          "correct": 0,
+          "work": 1750
+        },
+        {
+          "seed": 1,
+          "correct": 0,
+          "work": 175
+        },
+        {
+          "seed": 2,
+          "correct": 0,
+          "work": 5415
+        },
+        {
+          "seed": 3,
+          "correct": 0,
+          "work": 3548
+        },
+        {
+          "seed": 4,
+          "correct": 0,
+          "work": 2384
+        },
+        {
+          "seed": 5,
+          "correct": 0,
+          "work": 5559
+        },
+        {
+          "seed": 6,
+          "correct": 0,
+          "work": 378
+        },
+        {
+          "seed": 7,
+          "correct": 0,
+          "work": 2911
+        },
+        {
+          "seed": 8,
+          "correct": 0,
+          "work": 1828
+        },
+        {
+          "seed": 9,
+          "correct": 0,
+          "work": 5033
+        },
+        {
+          "seed": 10,
+          "correct": 0,
+          "work": 2794
+        },
+        {
+          "seed": 11,
+          "correct": 0,
+          "work": 2589
+        },
+        {
+          "seed": 12,
+          "correct": 0,
+          "work": 2212
+        },
+        {
+          "seed": 13,
+          "correct": 0,
+          "work": 2580
+        },
+        {
+          "seed": 14,
+          "correct": 0,
+          "work": 3387
+        },
+        {
+          "seed": 15,
+          "correct": 0,
+          "work": 3218
+        },
+        {
+          "seed": 16,
+          "correct": 0,
+          "work": 3358
+        },
+        {
+          "seed": 17,
+          "correct": 0,
+          "work": 2485
+        },
+        {
+          "seed": 18,
+          "correct": 0,
+          "work": 3254
+        },
+        {
+          "seed": 19,
+          "correct": 0,
+          "work": 1440
+        },
+        {
+          "seed": 20,
+          "correct": 0,
+          "work": 2247
+        },
+        {
+          "seed": 21,
+          "correct": 0,
+          "work": 2578
+        },
+        {
+          "seed": 22,
+          "correct": 0,
+          "work": 2704
+        },
+        {
+          "seed": 23,
+          "correct": 0,
+          "work": -512
+        }
+      ],
+      "correct_difference": {
+        "mean": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      "work_difference": {
+        "mean": 2638.125,
+        "min": -512,
+        "max": 5559
+      },
+      "left_more_correct": 0,
+      "tied_correct": 24,
+      "right_more_correct": 0
+    },
+    {
+      "regime": "partial",
+      "left": "learned_rules",
+      "right": "bulk_ranked",
+      "per_life": [
+        {
+          "seed": 0,
+          "correct": 0,
+          "work": -831
+        },
+        {
+          "seed": 1,
+          "correct": 0,
+          "work": -2394
+        },
+        {
+          "seed": 2,
+          "correct": 0,
+          "work": 2030
+        },
+        {
+          "seed": 3,
+          "correct": 0,
+          "work": 85
+        },
+        {
+          "seed": 4,
+          "correct": 0,
+          "work": -838
+        },
+        {
+          "seed": 5,
+          "correct": 0,
+          "work": 2132
+        },
+        {
+          "seed": 6,
+          "correct": 0,
+          "work": -2868
+        },
+        {
+          "seed": 7,
+          "correct": 0,
+          "work": -534
+        },
+        {
+          "seed": 8,
+          "correct": 0,
+          "work": -1496
+        },
+        {
+          "seed": 9,
+          "correct": 0,
+          "work": 1634
+        },
+        {
+          "seed": 10,
+          "correct": 0,
+          "work": -456
+        },
+        {
+          "seed": 11,
+          "correct": 0,
+          "work": -808
+        },
+        {
+          "seed": 12,
+          "correct": 0,
+          "work": -1165
+        },
+        {
+          "seed": 13,
+          "correct": 0,
+          "work": -833
+        },
+        {
+          "seed": 14,
+          "correct": 0,
+          "work": -80
+        },
+        {
+          "seed": 15,
+          "correct": 0,
+          "work": -199
+        },
+        {
+          "seed": 16,
+          "correct": 0,
+          "work": 906
+        },
+        {
+          "seed": 17,
+          "correct": 0,
+          "work": -136
+        },
+        {
+          "seed": 18,
+          "correct": 0,
+          "work": -191
+        },
+        {
+          "seed": 19,
+          "correct": 0,
+          "work": -1101
+        },
+        {
+          "seed": 20,
+          "correct": 0,
+          "work": -1168
+        },
+        {
+          "seed": 21,
+          "correct": 0,
+          "work": -803
+        },
+        {
+          "seed": 22,
+          "correct": 0,
+          "work": -552
+        },
+        {
+          "seed": 23,
+          "correct": 0,
+          "work": -3937
+        }
+      ],
+      "correct_difference": {
+        "mean": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      "work_difference": {
+        "mean": -566.7916666666666,
+        "min": -3937,
+        "max": 2132
+      },
+      "left_more_correct": 0,
+      "tied_correct": 24,
+      "right_more_correct": 0
+    },
+    {
+      "regime": "partial",
+      "left": "bulk_ranked",
+      "right": "local_ranked",
+      "per_life": [
+        {
+          "seed": 0,
+          "correct": 0,
+          "work": 3049
+        },
+        {
+          "seed": 1,
+          "correct": 0,
+          "work": 3037
+        },
+        {
+          "seed": 2,
+          "correct": 0,
+          "work": 3853
+        },
+        {
+          "seed": 3,
+          "correct": 0,
+          "work": 3931
+        },
+        {
+          "seed": 4,
+          "correct": 0,
+          "work": 3690
+        },
+        {
+          "seed": 5,
+          "correct": 0,
+          "work": 3895
+        },
+        {
+          "seed": 6,
+          "correct": 0,
+          "work": 3714
+        },
+        {
+          "seed": 7,
+          "correct": 0,
+          "work": 3913
+        },
+        {
+          "seed": 8,
+          "correct": 0,
+          "work": 3792
+        },
+        {
+          "seed": 9,
+          "correct": 0,
+          "work": 3867
+        },
+        {
+          "seed": 10,
+          "correct": 0,
+          "work": 3718
+        },
+        {
+          "seed": 11,
+          "correct": 0,
+          "work": 3865
+        },
+        {
+          "seed": 12,
+          "correct": 0,
+          "work": 3845
+        },
+        {
+          "seed": 13,
+          "correct": 0,
+          "work": 3881
+        },
+        {
+          "seed": 14,
+          "correct": 0,
+          "work": 3935
+        },
+        {
+          "seed": 15,
+          "correct": 0,
+          "work": 3885
+        },
+        {
+          "seed": 16,
+          "correct": 0,
+          "work": 2920
+        },
+        {
+          "seed": 17,
+          "correct": 0,
+          "work": 3089
+        },
+        {
+          "seed": 18,
+          "correct": 0,
+          "work": 3913
+        },
+        {
+          "seed": 19,
+          "correct": 0,
+          "work": 3009
+        },
+        {
+          "seed": 20,
+          "correct": 0,
+          "work": 3883
+        },
+        {
+          "seed": 21,
+          "correct": 0,
+          "work": 3849
+        },
+        {
+          "seed": 22,
+          "correct": 0,
+          "work": 3724
+        },
+        {
+          "seed": 23,
+          "correct": 0,
+          "work": 3893
+        }
+      ],
+      "correct_difference": {
+        "mean": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      "work_difference": {
+        "mean": 3672.9166666666665,
+        "min": 2920,
+        "max": 3935
+      },
+      "left_more_correct": 0,
+      "tied_correct": 24,
+      "right_more_correct": 0
+    }
+  ],
+  "interpretation": "24 paired lives, finite field semantics, declared virtual work. Descriptive transfer experiment; not new universal learning theory."
+}

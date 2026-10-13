@@ -63,3 +63,9 @@ Keep the Turkish book, its English reading guide, existing bilingual module docu
 ## Yaşam döngüsü ve üretim örnekleri
 
 7–9. bölümlerdeki ilgili değişikliklerde `python scripts/book_lifecycle_walkthrough.py` ve `python scripts/book_runtime_walkthrough.py` komutlarını çalıştırın. İlki geçici checkpoint dosyalarıyla çalışır; ikincisi sabit logitler ve elle atanmış vektörleri açık öğretim girdileri olarak kullanır. `runtime_walkthrough_before_tool_fix.json` tarihsel negatif gözlemdir; güncel beklenen sonuç diye üzerine yazılmaz. Araç parametre çıkarımı değiştiğinde gerçek handler üzerinden yürütülen testleri de denetleyin.
+
+## Tam metin, sistem ve araştırma eşlikçileri
+
+10. bölümdeki kayıt, kapsam veya bağlam davranışı değiştiğinde `python scripts/book_system_walkthrough.py`; 11–12. bölümlerdeki sonlu örnekler değiştiğinde `python scripts/book_research_walkthrough.py` çalıştırılır. Sistem eşlikçisi geçici SQLite kullanır ve kapatır; gerçek üretim veritabanına bağlanmaz. Araştırma eşlikçisi tarihsel kaynakları ve sonuçları yeniden yazmaz. Sabit backend ve öğretim girdileri tam model kalite ölçümü olarak gösterilmez.
+
+Bölüm başlıkları, alıştırmalar veya metin değiştiğinde [ayrıntılı dizini](AYRINTILI_ICINDEKILER.md), [envanteri](evidence/manuscript_inventory.json) ve [tamamlanma tablosunu](TAMAMLANMA.md) birlikte güncelleyin. `python scripts/book_inventory.py` mevcut kayıtla karşılaştırır. İnceleme sonrasında `python scripts/book_inventory.py --write` yalnız sayım kaydını ve ayrıntılı dizini yeniler; tamamlanma tablosunun pedagojik değerlendirmesini otomatik yapmaz. Ardından normal denetimleri tekrar çalıştırın. Metin sayısı akademik eksiksizliği kanıtlamaz.

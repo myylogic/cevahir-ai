@@ -1,0 +1,105 @@
+{
+  "date": "2026-09-21",
+  "kind": "local_complete_manuscript_example_verification",
+  "python": "3.14.3",
+  "base_commit": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c",
+  "runs": [
+    {
+      "command": "python scripts/book_tokenizer_walkthrough.py",
+      "exit_code": 0,
+      "seconds": 10.542,
+      "stdout": "{\"examples\": 6, \"asset_bytes_unchanged\": true, \"vocabulary_entries\": 60000, \"loaded_merge_rules\": 24896, \"mode\": \"check\"}",
+      "stderr_tail": "",
+      "script_sha256_lf": "fca3b8b43a125aa5114a0b3b5ebe8c67b7f19b34bd42ee3532d7192e2405e3b7"
+    },
+    {
+      "command": "python scripts/book_neural_walkthrough.py",
+      "exit_code": 0,
+      "seconds": 11.132,
+      "stdout": "{\"status\": \"passed\", \"example_groups\": 7, \"cache_variants\": 3, \"device\": \"cpu\", \"mode\": \"check\"}",
+      "stderr_tail": "",
+      "script_sha256_lf": "e80d093c53321af360fa553b45d8c7666fd0eb0a8e8ed69702908f9bbc09bb58"
+    },
+    {
+      "command": "python scripts/book_lifecycle_walkthrough.py",
+      "exit_code": 0,
+      "seconds": 7.501,
+      "stdout": "{\"cases\": 5, \"mode\": \"check\", \"scratch_checkpoints_removed\": true}",
+      "stderr_tail": "",
+      "script_sha256_lf": "cce0f0a25d567187efff3c1b4bb452ac4cc5709371fd633cc74b51f9c4a92a2d"
+    },
+    {
+      "command": "python scripts/book_runtime_walkthrough.py",
+      "exit_code": 0,
+      "seconds": 5.12,
+      "stdout": "{\"status\": \"passed\", \"example_groups\": 5, \"mode\": \"check\"}",
+      "stderr_tail": "",
+      "script_sha256_lf": "e863cadba038f33251659b099229addfa32b72fa71e708b5fc6504e9788bcd42"
+    },
+    {
+      "command": "python scripts/book_system_walkthrough.py",
+      "exit_code": 0,
+      "seconds": 5.54,
+      "stdout": "{\"status\": \"passed\", \"example_groups\": 7, \"mode\": \"check\"}",
+      "stderr_tail": "",
+      "script_sha256_lf": "6da0275aa48a6a31cf64a1a65edabbe64a6fe38dcabaf1ca679fc4d67cbb94f4"
+    },
+    {
+      "command": "python scripts/book_research_walkthrough.py",
+      "exit_code": 0,
+      "seconds": 0.802,
+      "stdout": "{\"example_groups\": 3, \"finite_histories_checked\": 1296, \"research_sources_unchanged\": true, \"mode\": \"check\"}",
+      "stderr_tail": "",
+      "script_sha256_lf": "a455a844c9b569e730b2416abfea2283dba680e256f5fc33f65357af61093cff"
+    },
+    {
+      "command": "chapter 1 standalone Python example",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr_tail": "2026-09-21 21:19:07,945 - INFO - model_initializer - Model oluşturuluyor: CevahirNeuralNetwork (device=cpu)\n2026-09-21 21:19:07,962 - INFO - model_initializer - Model hazır: CevahirNeuralNetwork\n2026-09-21 21:19:07,962 - INFO - ModelManager - Model oluşturuldu (V-2/V-3/V-4): CevahirNeuralNetwork -> cpu, V-2 params: {'num_layers': 2, 'ffn_dim': 64, 'pre_norm': True, 'causal_mask': True}, V-3 params: {'use_flash_attention': False, 'pe_mode': 'rope', 'use_gradient_checkpointing': False, 'tie_weights': True}, V-4 params: {'use_rmsnorm': True, 'use_swiglu': True, 'use_kv_cache': True, 'use_advanced_checkpointing': False, 'quantization_type': 'none', 'use_moe': False, 'num_experts': 8, 'moe_top_k': 2}\n"
+    }
+  ],
+  "all_passed": true,
+  "scope": "Six example programs in read-only checking mode plus the introductory standalone example. No full repository suite, GPU, HTTP load, trained-language quality or universal living-learning validation.",
+  "final_structural_checks": {
+    "book": {
+      "command": "python scripts/check_book.py",
+      "status": "passed",
+      "markdown_files": 21,
+      "local_links": 974,
+      "symbol_references": 346,
+      "referenced_files": 156
+    },
+    "inventory": {
+      "command": "python scripts/book_inventory.py",
+      "status": "passed",
+      "chapters": 12,
+      "topics_h2": 142,
+      "subtopics_h3": 81,
+      "solved_exercises": 63,
+      "whitespace_words_including_code_tables_math": 35318,
+      "glossary_term_rows": 76
+    },
+    "preservation": {
+      "command": "python scripts/check_publications.py",
+      "status": "passed",
+      "papers": 9,
+      "preserved_prior_files": 94,
+      "local_links": 138,
+      "doi_status": "published (prior archives only)"
+    },
+    "python_fences": {
+      "status": "passed",
+      "parsed_blocks": 11,
+      "scope": "Syntax only; the chapter-1 standalone example was also executed above."
+    },
+    "git_diff_check": {
+      "status": "passed"
+    },
+    "head_unchanged": true,
+    "staged_files": 0,
+    "commit_created": false,
+    "push_performed": false
+  },
+  "completion_scope": "Completed first Turkish manuscript in the defined 12-chapter teaching scope. Open research remains open; no external peer review, full English translation or typeset print edition is claimed."
+}
