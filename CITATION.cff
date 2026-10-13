@@ -5,9 +5,8 @@ title: "Cevahir AI: Living-Learning Research Reports and Technical Book"
 authors:
   - family-names: "Yılmaz"
     given-names: "Muhammed Yasin"
-version: "2026.09.21.3"
-doi: 10.5281/zenodo.22875504
-date-released: 2026-09-21
+version: "2026.10.13"
+date-released: 2026-10-13
 repository-code: "https://github.com/myylogic/cevahir-ai"
 url: "https://github.com/myylogic/cevahir-ai/tree/main/docs/publications"
 license: Apache-2.0
@@ -18,7 +17,7 @@ keywords:
   - negative results
   - artificial intelligence education
 abstract: >-
-  A versioned open-source research archive containing nine research reports,
+  A versioned open-source research archive containing ten research reports,
   reproducible finite experiments, preserved negative results, and a technical
   book grounded in the Cevahir implementation. The broad problem of persistent,
   controlled, generalizable learning during operation remains open. Reports are

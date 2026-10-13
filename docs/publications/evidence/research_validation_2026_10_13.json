@@ -1,0 +1,58 @@
+{
+  "checked_at_utc": "2026-10-13T13:10:22.010618+00:00",
+  "scope": "read-only reproducibility check; no historical verify action invoked",
+  "historical_baseline_head": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c",
+  "current_head_at_check": "fd44960704b507b1f63f3736fe3bd063892d6664",
+  "preservation_baseline_files": 1149,
+  "preserved_paths_unchanged_at_check": true,
+  "release_metadata_paths_changed_after_baseline": [
+    ".zenodo.json",
+    "CITATION.cff",
+    "docs/book/evidence/reviewed_sources.json",
+    "docs/publications/README.md",
+    "docs/publications/catalog.json",
+    "docs/publications/papers/01-experience-conditioned-computation.md",
+    "docs/publications/papers/02-representation-witness-negative.md",
+    "docs/publications/papers/03-persistence-transfer-retesting.md",
+    "docs/publications/papers/04-representation-credit-state-transport.md",
+    "docs/publications/papers/05-joint-lifetime-temporal-relations.md",
+    "docs/publications/papers/06-learned-update-transfer.md",
+    "docs/publications/papers/07-acquired-recurrent-state.md",
+    "docs/publications/papers/08-correctable-learning-state.md",
+    "docs/publications/papers/09-future-query-state-classes.md",
+    "docs/publications/release.json"
+  ],
+  "campaign": {
+    "catalog_entries": 200,
+    "executed_claims": 48,
+    "queued_claims": 152,
+    "engine_lifetimes": 288,
+    "paired_outcomes": 3456,
+    "decisions": {
+      "inconclusive": 9,
+      "contradicted": 9,
+      "supported": 30
+    },
+    "exact_deterministic_reruns": 288,
+    "summary_recomputed_without_write": true,
+    "freeze_sha256": "8ed6d248440eab72204276ca04074cccce47f3e0571735f3cb1c8777e941d3e4"
+  },
+  "wave2": {
+    "directory": "research/living_learning_campaign_wave2_2026_09_24",
+    "files_present": 2,
+    "performance_results_present": false,
+    "scope_note": "Wave 2 has only CONTRACT.md and preservation_baseline.json at this check; no performance outcomes are claimed."
+  },
+  "publication_checks": {
+    "book_check": "python scripts/check_book.py; passed before this record",
+    "publication_build_check": "python scripts/build_publications.py; check mode passed before this record",
+    "zenodo_evidence_file": "docs/publications/evidence/zenodo_archive_verification_v3.json",
+    "existing_published_record": {
+      "doi": "10.5281/zenodo.22875504",
+      "record_url": "https://zenodo.org/records/22875504",
+      "version": "2026.09.21.3"
+    },
+    "current_release_archive": "No new Zenodo v4 record was verified by this local check; v4 remains a local/GitHub metadata candidate until Zenodo publishes it."
+  },
+  "interpretation": "Exact replay establishes deterministic reproducibility, not independent implementation, external replication, peer review, or a general living-learning theorem."
+}

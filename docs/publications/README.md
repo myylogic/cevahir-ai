@@ -31,6 +31,7 @@ bulunur. Kaynak kod, ölçüm, karşı örnek ve literatür bağlantıları koru
 | CEV-2026-07 | [Edinilmiş yinelemeli durum yordamı](papers/07-acquired-recurrent-state.md) | Küçük yürütme grafiği, yeniden öğrenme arşivinden ayrıldı. |
 | CEV-2026-08 | [Düzeltilebilir öğrenme durumu](papers/08-correctable-learning-state.md) | Tam bugünkü aday kümesi bile düzeltmeye yetmeyebilir. |
 | CEV-2026-09 | [Gelecekteki sorgular ve gerekli durum](papers/09-future-query-state-classes.md) | Aynı geçmiş için sorgu ve düzeltme haklarına bağlı farklı bilgi sınırları. |
+| CEV-2026-10 | [Çok yönlü yaşarken öğrenme kampanyası](papers/10-living-learning-campaign-wave1.md) | Dört motorda 48 koşullu karşılaştırma; 30 destek, 9 ters sonuç, 9 belirsiz. Genel problem açık. |
 
 ## Kanıtları okumak
 
@@ -51,7 +52,7 @@ Tam öğrenme yaşam döngüsü için [teknik kitap](../book/README.md),
 
 ## Atıf ve sürüm arşivi
 
-Sürüm: **2026.09.21.3**. Git etiketi: `research-2026.09.21-v3`. DOI ve arşiv eşleşmesi doğrulandı.
+Yayımlanmış sürüm: **2026.09.21.3**. Buna ek olarak **2026.10.13 / `research-2026.10.13-v4`** GitHub sürümü hazırlanıyor; ilk geniş kampanya ve onuncu rapor bu sürüme dahil.
 [GitHub sürümü](https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.09.21-v3),
 metinleri, kaynak kodu, deney kayıtlarını ve kitabı birlikte arşivler.
 [DOI yayın kaydı](release.json), dış hizmetten doğrulanmış kimliği ve yayın
@@ -59,7 +60,9 @@ durumunu taşır. Zenodo kaydı yazılım/araştırma arşivi türündedir; dizi
 metne ayrı DOI atanmış olduğu ileri sürülmez.
 
 Atıf biçimi: **Yılmaz, M. Y. (2026). Çalışma başlığı (CEV-2026-XX). Cevahir AI:
-Living-Learning Research Reports and Technical Book, sürüm 2026.09.21.3.**
+Living-Learning Research Reports and Technical Book, sürüm 2026.10.13.** DOI, yeni
+sürüm yayımlandıktan sonra bu satıra eklenir; hazırlık kaydı DOI varmış gibi
+gösterilmez.
 [https://doi.org/10.5281/zenodo.22875504](https://doi.org/10.5281/zenodo.22875504).
 Makinece kullanılabilir koleksiyon künyesi [CITATION.cff](../../CITATION.cff)
 dosyasındadır. DOI, içeriğin belirli arşiv sürümünü tanımlar; bilimsel doğruluk,

@@ -1,8 +1,8 @@
 {
-  "version": "2026.09.21.3",
-  "release_tag": "research-2026.09.21-v3",
+  "version": "2026.10.13",
+  "release_tag": "research-2026.10.13-v4",
   "author": "Muhammed Yasin Yılmaz",
-  "date": "2026-09-21",
+  "date": "2026-10-13",
   "status": "Research reports / preprints; not peer reviewed",
   "papers": [
     {
@@ -94,6 +94,16 @@
       "abstract_en": "We compare state classes for all Boolean loss queries, observation counts and identity-only label edits on the same finite histories. Length plus signed label differences suffices for all future Boolean loss queries; identity edits impose a separate linear information bound. Exact enumeration checks 61,575 histories, 712,632 label writes and 358,020 appends with no count-formula or replay mismatches.",
       "finding": "Bilinmeyen gelecekteki hipotezler her zaman tam histogram gerektirmez. Gerekli bilgi, hipotezlerin bilinip bilinmemesinden önce hangi sorgu ve işlemlerin destekleneceğine bağlıdır.",
       "limit": "Sabit sonlu alan, bütün Boolean riskleri ve tam doğruluk kullanılır. Sınıf sayısı verimli kodlayıcı veya gerçek dünya öğrenme başarımı değildir; genel living-learning sorusu açık kalır."
+    },
+    {
+      "id": "CEV-2026-10",
+      "file": "10-living-learning-campaign-wave1.md",
+      "title": "Yaşarken öğrenme için çok yönlü deney kampanyası: ilk dalga",
+      "source": "docs/research/living_learning_campaign_2026_09_24/REPORT_TR.md",
+      "abstract": "Dört deney motorunda bellek, temsil, güncelleme ve eylemle deneyim üretimi karşılaştırıldı. On aileye yayılan 200 katalog kaydının 48 koşullu karşılaştırması, 24 keşif ve 48 doğrulama tohumu ile 3.456 eşleştirilmiş sonuç üretti. 30 iddia desteklendi, 9 ters sonuç verdi ve 9 belirsiz kaldı. Güçlü kontroller, öğrenilen temsil ve güncelleme davranışının dağılım değişiminde sınırlı ve bazen zararlı olabildiğini gösterdi.",
+      "abstract_en": "A first broad campaign compares memory, representation, update behavior and action-produced experience in four local engines. Of 200 catalog entries across ten families, 48 conditional comparisons yielded 3,456 paired outcomes over discovery and untouched confirmation seeds. Thirty claims were supported, nine contradicted and nine inconclusive under the preregistered synthetic decision rule. Strong controls show that learned representation and update behavior can be conditional and harmful under shift; the general living-learning problem remains open.",
+      "finding": "The campaign maps conditional mechanisms and negative controls rather than discovering a general computational principle. Experience can change later computation in these supplied languages, but a stronger pre-supplied representation or a shifted environment can remove the apparent advantage.",
+      "limit": "The worlds, languages, actions, metrics and candidate families are finite and researcher supplied. Catalog entries overlap and are not 200 independent mechanisms. The results are local synthetic evidence, not external peer review, biological validation, AGI evidence or proof of novelty."
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 **Muhammed Yasin Yılmaz**
 
-CEV-2026-09 · Sürüm 2026.09.21.3 · Yayın tarihi 2026-09-21
+CEV-2026-09 · Sürüm 2026.10.13 · Yayın tarihi 2026-10-13
 
 Araştırma raporu / ön baskı. Dış hakem değerlendirmesinden geçmemiştir.
 
