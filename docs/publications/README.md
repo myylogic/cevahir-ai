@@ -1,9 +1,9 @@
 # Cevahir — Yaşarken Öğrenme Araştırmaları
 
-**Muhammed Yasin Yılmaz** · Araştırma raporları ve ön baskılar · 21 Eylül 2026
+**Muhammed Yasin Yılmaz** · Araştırma raporları ve ön baskılar · 13 Ekim 2026
 
-**Yayımlanmış sürüm DOI'si: [10.5281/zenodo.22875504](https://doi.org/10.5281/zenodo.22875504)**
-· [Zenodo arşivi](https://zenodo.org/records/22875504)
+**Yayımlanmış sürüm DOI'si: [10.5281/zenodo.22875504](https://doi.org/10.5281/zenodo.23342649)**
+· [Zenodo arşivi](https://zenodo.org/records/23342649)
 · [Bütün sürümlerin DOI'si](https://doi.org/10.5281/zenodo.22864660)
 
 Bu dizi, Cevahir'in çalıştığı süre boyunca deneyimden öğrenme araştırmasının
@@ -53,7 +53,7 @@ Tam öğrenme yaşam döngüsü için [teknik kitap](../book/README.md),
 ## Atıf ve sürüm arşivi
 
 Yayımlanmış sürüm: **2026.09.21.3**. Buna ek olarak **2026.10.13 / `research-2026.10.13-v4`** GitHub sürümü hazırlanıyor; ilk geniş kampanya ve onuncu rapor bu sürüme dahil.
-[GitHub sürümü](https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.09.21-v3),
+[GitHub sürümü](https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.10.13-v4),
 metinleri, kaynak kodu, deney kayıtlarını ve kitabı birlikte arşivler.
 [DOI yayın kaydı](release.json), dış hizmetten doğrulanmış kimliği ve yayın
 durumunu taşır. Zenodo kaydı yazılım/araştırma arşivi türündedir; dizideki her
@@ -63,7 +63,7 @@ Atıf biçimi: **Yılmaz, M. Y. (2026). Çalışma başlığı (CEV-2026-XX). Ce
 Living-Learning Research Reports and Technical Book, sürüm 2026.10.13.** DOI, yeni
 sürüm yayımlandıktan sonra bu satıra eklenir; hazırlık kaydı DOI varmış gibi
 gösterilmez.
-[https://doi.org/10.5281/zenodo.22875504](https://doi.org/10.5281/zenodo.22875504).
+[https://doi.org/10.5281/zenodo.23342649](https://doi.org/10.5281/zenodo.23342649).
 Makinece kullanılabilir koleksiyon künyesi [CITATION.cff](../../CITATION.cff)
 dosyasındadır. DOI, içeriğin belirli arşiv sürümünü tanımlar; bilimsel doğruluk,
 özgünlük, kişisel kimlik belgesi veya kriptografik imza onayı değildir.

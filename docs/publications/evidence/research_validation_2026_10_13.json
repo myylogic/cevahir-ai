@@ -1,10 +1,16 @@
 {
-  "checked_at_utc": "2026-10-13T13:10:22.010618+00:00",
+  "checked_at_utc": "2026-10-13T13:11:39.272116+00:00",
   "scope": "read-only reproducibility check; no historical verify action invoked",
   "historical_baseline_head": "f4eb1dc550b3efc8b2a62fc1c5db262c804b219c",
-  "current_head_at_check": "fd44960704b507b1f63f3736fe3bd063892d6664",
+  "current_head_at_check": "923c3e5461219667ebfa7a13d3ef5610feeeaa08",
   "preservation_baseline_files": 1149,
-  "preserved_paths_unchanged_at_check": true,
+  "immutable_baseline_paths_unchanged_at_check": true,
+  "immutable_baseline_paths_count": 1134,
+  "file_hashes_sha256": {
+    "baseline": "12efab06e7fe01f06baa74de08502ea4deb1aa92ddad8d608c1db3cfc00ff045",
+    "preserved_summary": "181934256ba97a159ba9a17b4b68b88a24b17bc9059bcf6bd6b5697fee2e9de3",
+    "verifier_script": "80c92febe19840df46fd0137c0ce8bf0c60c4f8eea8059845f8667e6fea8c9f7"
+  },
   "release_metadata_paths_changed_after_baseline": [
     ".zenodo.json",
     "CITATION.cff",
@@ -35,6 +41,12 @@
     },
     "exact_deterministic_reruns": 288,
     "summary_recomputed_without_write": true,
+    "summary_equals_preserved_summary": true,
+    "statistics_selfcheck": {
+      "passed": true,
+      "checks": 56,
+      "details": "Exhaustive binary sign outcomes n<=8; hand Holm values; independent step-down rejection."
+    },
     "freeze_sha256": "8ed6d248440eab72204276ca04074cccce47f3e0571735f3cb1c8777e941d3e4"
   },
   "wave2": {
@@ -44,8 +56,26 @@
     "scope_note": "Wave 2 has only CONTRACT.md and preservation_baseline.json at this check; no performance outcomes are claimed."
   },
   "publication_checks": {
-    "book_check": "python scripts/check_book.py; passed before this record",
-    "publication_build_check": "python scripts/build_publications.py; check mode passed before this record",
+    "commands": [
+      {
+        "command": [
+          "C:\\Users\\Huawei\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+          "scripts/check_book.py"
+        ],
+        "returncode": 0,
+        "stdout": "{\"status\": \"passed\", \"markdown_files\": 21, \"local_links\": 974, \"symbol_references\": 346, \"referenced_files\": 156}\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "C:\\Users\\Huawei\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+          "scripts/build_publications.py"
+        ],
+        "returncode": 0,
+        "stdout": "{\"publication_editions\": 10, \"mode\": \"check\"}\n",
+        "stderr": ""
+      }
+    ],
     "zenodo_evidence_file": "docs/publications/evidence/zenodo_archive_verification_v3.json",
     "existing_published_record": {
       "doi": "10.5281/zenodo.22875504",

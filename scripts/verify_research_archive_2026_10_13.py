@@ -45,6 +45,11 @@ def main() -> int:
 
     registry, records = campaign.load_all()
     recomputed = campaign.analyze(write=False)
+    saved_summary_path = CAMPAIGN / "results/summary.json"
+    saved_summary = json.loads(saved_summary_path.read_text(encoding="utf-8"))
+    if campaign.encoded(recomputed) != campaign.encoded(saved_summary):
+        raise AssertionError("Recomputed campaign summary differs from preserved summary.json")
+    statistics_selfcheck = campaign.stats_selfcheck()
     exact = 0
     for row in records:
         module = __import__(row["engine"])
@@ -68,10 +73,20 @@ def main() -> int:
         "docs/publications/release.json", "docs/publications/README.md",
         "docs/book/evidence/reviewed_sources.json",
     }
-    mutable_release.update(
-        name for name in changed
-        if name.startswith("docs/publications/papers/")
-    )
+    mutable_release.update({
+        f"docs/publications/papers/{n:02d}-{slug}.md"
+        for n, slug in (
+            (1, "experience-conditioned-computation"),
+            (2, "representation-witness-negative"),
+            (3, "persistence-transfer-retesting"),
+            (4, "representation-credit-state-transport"),
+            (5, "joint-lifetime-temporal-relations"),
+            (6, "learned-update-transfer"),
+            (7, "acquired-recurrent-state"),
+            (8, "correctable-learning-state"),
+            (9, "future-query-state-classes"),
+        )
+    })
     immutable_changed = [name for name in changed if name not in mutable_release]
     if immutable_changed:
         raise AssertionError({"immutable_baseline_changed_paths": immutable_changed})
@@ -80,6 +95,12 @@ def main() -> int:
     prior_zenodo = json.loads(
         (ROOT / "docs/publications/evidence/zenodo_archive_verification_v3.json")
         .read_text(encoding="utf-8"))
+    publication_commands = [
+        command([sys.executable, "scripts/check_book.py"]),
+        command([sys.executable, "scripts/build_publications.py"]),
+    ]
+    if any(item["returncode"] != 0 for item in publication_commands):
+        raise AssertionError({"publication_commands": publication_commands})
 
     wave2_files = [p for p in WAVE2.rglob("*") if p.is_file()]
     result = {
@@ -88,7 +109,13 @@ def main() -> int:
         "historical_baseline_head": baseline.get("base_head"),
         "current_head_at_check": head,
         "preservation_baseline_files": len(baseline_files),
-        "preserved_paths_unchanged_at_check": not immutable_changed,
+        "immutable_baseline_paths_unchanged_at_check": not immutable_changed,
+        "immutable_baseline_paths_count": len(baseline_files) - len(changed),
+        "file_hashes_sha256": {
+            "baseline": sha(baseline_path),
+            "preserved_summary": sha(saved_summary_path),
+            "verifier_script": sha(Path(__file__)),
+        },
         "release_metadata_paths_changed_after_baseline": sorted(
             name for name in changed if name in mutable_release),
         "campaign": {
@@ -100,6 +127,8 @@ def main() -> int:
             "decisions": recomputed["decisions"],
             "exact_deterministic_reruns": exact,
             "summary_recomputed_without_write": True,
+            "summary_equals_preserved_summary": True,
+            "statistics_selfcheck": statistics_selfcheck,
             "freeze_sha256": campaign.frozen_check(),
         },
         "wave2": {
@@ -109,8 +138,7 @@ def main() -> int:
             "scope_note": "Wave 2 has only CONTRACT.md and preservation_baseline.json at this check; no performance outcomes are claimed.",
         },
         "publication_checks": {
-            "book_check": "python scripts/check_book.py; passed before this record",
-            "publication_build_check": "python scripts/build_publications.py; check mode passed before this record",
+            "commands": publication_commands,
             "zenodo_evidence_file": "docs/publications/evidence/zenodo_archive_verification_v3.json",
             "existing_published_record": {
                 "doi": prior_zenodo.get("doi"),

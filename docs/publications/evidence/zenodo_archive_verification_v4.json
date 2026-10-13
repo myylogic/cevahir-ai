@@ -1,0 +1,23 @@
+{
+  "checked_at_utc": "2026-10-13T13:21:11.507926+00:00",
+  "zenodo_record_url": "https://zenodo.org/records/23342649",
+  "zenodo_record_id": 23342649,
+  "doi": "10.5281/zenodo.23342649",
+  "concept_doi": "10.5281/zenodo.22864660",
+  "zenodo_publication_date_utc": "2026-10-13",
+  "author_metadata_verified": "Yılmaz, Muhammed Yasin",
+  "title_verified": "Cevahir AI: Living-Learning Research Reports and Technical Book",
+  "version_verified": "2026.10.13",
+  "release_tag": "research-2026.10.13-v4",
+  "tag_object": "6de63402e45d843c89d65cda5b876cb064306117",
+  "source_commit": "923c3e5461219667ebfa7a13d3ef5610feeeaa08",
+  "archive_file": "myylogic/cevahir-ai-research-2026.10.13-v4.zip",
+  "archive_bytes": 28646763,
+  "archive_md5": "md5:3346840f62a4fd7cc61f9d8dba89889d",
+  "git_archive_file_count": 1154,
+  "zenodo_archive_file_count": 1154,
+  "archive_paths_equal": true,
+  "byte_mismatches": [],
+  "archive_files_equal_to_tag": true,
+  "comparison_note": "Compared normalized Zenodo ZIP paths with git ls-tree at the immutable release tag and compared every file byte hash. Three non-ASCII filename spellings differ only in API decoding; file count and bytes match. This verifies archive correspondence, not personal identity or peer review."
+}
