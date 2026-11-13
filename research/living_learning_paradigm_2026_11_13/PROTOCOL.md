@@ -1,8 +1,29 @@
-# CEV-11 "Paradigma" — PROTOCOL (DRAFT, not yet frozen)
+# CEV-11 "Paradigma" — PROTOCOL (FROZEN 2026-11-13)
 
-Status: draft. It becomes binding when it is committed with the SHA-256 manifest of the code tree, generator
-configuration, tokenizer recipe, frozen edit lists, thresholds and analyze.py, before the first confirmatory
-pretraining run. Deviations after the freeze go only into AMENDMENTS.md (timestamped).
+Status: FROZEN on 2026-11-13 (UTC), before the first confirmatory pretraining run. The code tree (generator,
+tokenizer recipe, trainer, gates, edit engine, selection rule, thresholds, analyze.py, verify.py and the tests) is
+pinned by `freeze_manifest.sha256`, committed together with this file. Deviations after the freeze go only into
+AMENDMENTS.md (timestamped).
+
+Freeze record:
+- Discovery pretraining (worlds 0 and 1, K = 20, with lead-ins) passed every gate: G1 100%; G3 100% (every case);
+  G4 100% (held-out P3 frames); G5 99.3% (IDENT 100%, FUSED 98.2-98.3%); G6 100%; G7 280/280 editable;
+  boundary check 100%. The fallback ladder is not used: K = 20 for every confirmatory base.
+- Informal NONIDENT share among all informal forms: 36.7% (world 0) and 37.8% (world 1).
+- Ordering. The arm configurations (results/selection.json) are produced by the frozen select_decide.py from the
+  discovery worlds 0-1 only. Confirmatory pretraining may run while the discovery selection runs, because the
+  selection never sees confirmatory data; selection.json is fixed (and its hash recorded in AMENDMENTS.md as a
+  recorded output, not an amendment) before any confirmatory edit run. Edit lists derive deterministically from the
+  seeds and each base's editable list; their hashes are written to results/edits/items_<world>.json.
+- Decisions accepted at the freeze (from the independent engine review): FT-L/FT-ALL train on the lived sentence
+  with the same loss as v* (ROOT/LAST v* also use the lived sentence only, STD adds 4 prose copies); the map-only
+  switch uses the WE of STD's selected configuration; lambda ties go to the smaller lambda; PARA-ORTH and NORM use
+  STD's selected layer and configuration; S3 max_tau = max over other live writes m of tau(k_f, k_m) =
+  k_f' C0^-1 k_m / k_m' C0^-1 k_m (how strongly write m fires at fact f's key); in lives a retracted A counts in
+  E_end as a believed base fact, retractions never overlap corrections, and Leak_RN is not recorded.
+- Not run unless compute remains (PROTOCOL §14 priority 5-6): the confirmatory binding-site map on worlds 1000-1001,
+  causal tracing, and the exploratory F_freq arm (its runner path is known to be incomplete). The discovery map is
+  reported from the selection-grid records (sites ROOT, LAST, STD and PRED at layers 0-4, 20 edits per world).
 
 Pre-freeze adjustments by the lead (recorded here, applied to the judge's text below):
 - Location: the judge proposed `experiments/cev11_paradigma/`. Following the repository convention the study lives

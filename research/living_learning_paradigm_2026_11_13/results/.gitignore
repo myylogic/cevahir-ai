@@ -1,0 +1,2 @@
+# Large per-base artifacts stay local (weights are already ignored repo-wide by *.pt)
+bases/*/exposure.json
