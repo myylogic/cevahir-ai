@@ -1,0 +1,170 @@
+{
+ "rule": {
+  "Leak_RD_max": 0.01,
+  "Leak_C_max": 0.05,
+  "map_only_if_STD_WE_below": 0.5,
+  "ties": "shallower layer, smaller step (FT: lr), smaller cap_mult (FT-L: eps), config label",
+  "map_only_uses": "WE of STD's selected configuration"
+ },
+ "n_records": 6120,
+ "arms": {
+  "STD": {
+   "arm": "STD",
+   "layer": 1,
+   "config": "cap_mult=8,step=5.0",
+   "n": 40,
+   "worlds": [
+    0,
+    1
+   ],
+   "WE": 1.0,
+   "Leak_RD": 0.012142857142857143,
+   "Leak_C": 0.25357142857142856,
+   "Leak_RN": 0.3626728110599078,
+   "PE6": 0.8708333333333333,
+   "PE5": 0.8633333333333333,
+   "IE5": 0.6108333333333333,
+   "feasible": false,
+   "status": "not installable under constraints"
+  },
+  "ROOT": {
+   "arm": "ROOT",
+   "layer": 0,
+   "config": "cap_mult=8,step=0.5",
+   "n": 40,
+   "worlds": [
+    0,
+    1
+   ],
+   "WE": 1.0,
+   "Leak_RD": 0.007142857142857143,
+   "Leak_C": 0.05714285714285714,
+   "Leak_RN": 0.1640937019969278,
+   "PE6": 0.9416666666666667,
+   "PE5": 0.9316666666666666,
+   "IE5": 0.6058333333333333,
+   "feasible": false,
+   "status": "not installable under constraints"
+  },
+  "LAST": {
+   "arm": "LAST",
+   "layer": 1,
+   "config": "cap_mult=8,step=0.5",
+   "n": 40,
+   "worlds": [
+    0,
+    1
+   ],
+   "WE": 1.0,
+   "Leak_RD": 0.005357142857142857,
+   "Leak_C": 0.025,
+   "Leak_RN": 0.04612683783190695,
+   "PE6": 0.1375,
+   "PE5": 0.12916666666666668,
+   "IE5": 0.058333333333333334,
+   "feasible": true,
+   "status": "selected"
+  },
+  "PARA-ORTH": {
+   "arm": "PARA-ORTH",
+   "layer": 1,
+   "config": "cap_mult=8,step=5.0",
+   "n": 40,
+   "worlds": [
+    0,
+    1
+   ],
+   "WE": 0.975,
+   "Leak_RD": 0.019999999999999997,
+   "Leak_C": 0.28214285714285714,
+   "Leak_RN": 0.41109282422646476,
+   "PE6": 0.8458333333333334,
+   "PE5": 0.8333333333333334,
+   "IE5": 0.635,
+   "feasible": false,
+   "status": "uses STD's selection (same delta; S1 compares keys only)"
+  },
+  "FT-L": {
+   "arm": "FT-L",
+   "layer": 0,
+   "config": "eps=0.02,lr=0.001,steps=60",
+   "n": 40,
+   "worlds": [
+    0,
+    1
+   ],
+   "WE": 1.0,
+   "Leak_RD": 0.0,
+   "Leak_C": 0.0,
+   "Leak_RN": 0.04078889620364274,
+   "PE6": 0.9458333333333334,
+   "PE5": 0.9366666666666668,
+   "IE5": 0.7833333333333333,
+   "feasible": true,
+   "status": "selected"
+  },
+  "FT-ALL": {
+   "arm": "FT-ALL",
+   "layer": null,
+   "config": "lr=0.0001,steps=40",
+   "n": 40,
+   "worlds": [
+    0,
+    1
+   ],
+   "WE": 1.0,
+   "Leak_RD": 0.0,
+   "Leak_C": 0.0035714285714285713,
+   "Leak_RN": 0.03917050691244239,
+   "PE6": 0.9916666666666666,
+   "PE5": 0.99,
+   "IE5": 0.8816666666666666,
+   "feasible": true,
+   "status": "selected"
+  },
+  "NORM": {
+   "arm": "NORM",
+   "layer": 1,
+   "config": "cap_mult=8,step=5.0",
+   "n": 40,
+   "worlds": [
+    0,
+    1
+   ],
+   "WE": 1.0,
+   "Leak_RD": 0.012142857142857143,
+   "Leak_C": 0.25357142857142856,
+   "Leak_RN": 0.3626728110599078,
+   "PE6": 0.8708333333333333,
+   "PE5": 0.8633333333333333,
+   "IE5": 0.6108333333333333,
+   "feasible": false,
+   "status": "uses STD's selection (preprocessing)"
+  }
+ },
+ "map_only": false,
+ "life_lambda": 1.0,
+ "life_lambda_table": [
+  {
+   "lam": 0.01,
+   "E_end": 0.04095238095238095,
+   "Leak_RD": 0.95,
+   "n_lives": 2,
+   "feasible": false
+  },
+  {
+   "lam": 0.1,
+   "E_end": 0.04095238095238095,
+   "Leak_RD": 0.95,
+   "n_lives": 2,
+   "feasible": false
+  },
+  {
+   "lam": 1.0,
+   "E_end": 0.0419047619047619,
+   "Leak_RD": 0.95,
+   "n_lives": 2,
+   "feasible": false
+  }
+ ]
+}

@@ -1,0 +1,110 @@
+{
+ "world": 1,
+ "base_sha": "c4ed303b11c82b2301f6a293b4c0fd575673d8ad4259931e6e6627409d1e965c",
+ "layer": 1,
+ "config": "cap_mult=8,step=5.0",
+ "frac": 0.05,
+ "seed": 0,
+ "edits": 10,
+ "V2": {
+  "entities": 20,
+  "forms": 209,
+  "layers": 6,
+  "truncated_max_abs_diff_across_forms": 0.0,
+  "full_padded_max_rel_diff_vs_own_truncated": 1.1008856972694048e-06,
+  "pass": true
+ },
+ "V1": {
+  "prefixes": 40,
+  "zero_memory_max_abs_dlogit": 0.0,
+  "detached_max_abs_dlogit": 0.0,
+  "after_write_zeroed_max_abs_dlogit": 0.0,
+  "after_restore_max_abs_dlogit": 0.0,
+  "pass": true
+ },
+ "V8": {
+  "kind": "pre-run sample (STD writes and the unedited model), not every scored probe",
+  "families": {
+   "CF14": {
+    "n": 20,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "IF5": {
+    "n": 20,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "OLD": {
+    "n": 20,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "PF5": {
+    "n": 20,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "PF6": {
+    "n": 20,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "PX": {
+    "n": 6,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "RB": {
+    "n": 20,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "RC": {
+    "n": 20,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "RD": {
+    "n": 80,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "RN": {
+    "n": 34,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "RN-adopt": {
+    "n": 34,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "SS": {
+    "n": 18,
+    "disagree": 0,
+    "rate": 0.0
+   },
+   "WF": {
+    "n": 20,
+    "disagree": 0,
+    "rate": 0.0
+   }
+  },
+  "n": 332,
+  "disagree": 0,
+  "rate": 0.0,
+  "skipped_scored_by_true_greedy": 0,
+  "true_greedy_families": [],
+  "disagreements": [],
+  "pass": true
+ },
+ "V6": {
+  "n": 332,
+  "mismatches": 0,
+  "examples": [],
+  "pass": true
+ },
+ "all_pass": true,
+ "seconds": 520.0
+}

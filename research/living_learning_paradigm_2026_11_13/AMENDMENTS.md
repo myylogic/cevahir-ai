@@ -37,3 +37,5 @@ entries are not amendments.
   non-zero only when V1 or V2 fails; V6 and V8 failures are recorded and, per PROTOCOL §10.3, block publication of
   the H and S results until resolved rather than stopping the runs. V8 here is a pre-run sample on STD writes in
   four worlds, not a check of every scored probe; the report says so.
+
+- 2026-11-13 11:38 UTC — recorded output (not an amendment): results/selection.json sha256 83cb20052a3a406c0c79a03a16c8a4006d76113dd9a658ca65fceb85e6cba5e8, produced by the frozen select_decide.py from discovery worlds 0-1 before any confirmatory edit run.
