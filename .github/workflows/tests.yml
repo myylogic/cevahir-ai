@@ -20,6 +20,11 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: tests/evolution/test_awa_attention.py exports the engine at commit 0f9be09 (before the
+          # attention operator existed) and compares it bit for bit with the checkout. With a shallow clone that
+          # test is skipped.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'

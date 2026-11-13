@@ -1,0 +1,114 @@
+[
+ {
+  "id": "p0_AWA-2L_lr0.0005",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm AWA-2L --lr 0.0005",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_AWA-2L_lr0.0005.log"
+ },
+ {
+  "id": "p0_AWA-own-2L_lr0.0005",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm AWA-own-2L --lr 0.0005",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_AWA-own-2L_lr0.0005.log"
+ },
+ {
+  "id": "p0_ChaCAL-2L_lr0.0005",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm ChaCAL-2L --lr 0.0005",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_ChaCAL-2L_lr0.0005.log"
+ },
+ {
+  "id": "p0_LOOPED-2L_lr0.0005",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm LOOPED-2L --lr 0.0005",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_LOOPED-2L_lr0.0005.log"
+ },
+ {
+  "id": "p0_ARLOOP-2L_lr0.0005",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm ARLOOP-2L --lr 0.0005",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_ARLOOP-2L_lr0.0005.log"
+ },
+ {
+  "id": "p0_AWA-2L_lr0.001",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm AWA-2L --lr 0.001",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_AWA-2L_lr0.001.log"
+ },
+ {
+  "id": "p0_AWA-own-2L_lr0.001",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm AWA-own-2L --lr 0.001",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_AWA-own-2L_lr0.001.log"
+ },
+ {
+  "id": "p0_ChaCAL-2L_lr0.001",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm ChaCAL-2L --lr 0.001",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_ChaCAL-2L_lr0.001.log"
+ },
+ {
+  "id": "p0_LOOPED-2L_lr0.001",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm LOOPED-2L --lr 0.001",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_LOOPED-2L_lr0.001.log"
+ },
+ {
+  "id": "p0_ARLOOP-2L_lr0.001",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm ARLOOP-2L --lr 0.001",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_ARLOOP-2L_lr0.001.log"
+ },
+ {
+  "id": "p0_AWA-2L_lr0.002",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm AWA-2L --lr 0.002",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_AWA-2L_lr0.002.log"
+ },
+ {
+  "id": "p0_AWA-own-2L_lr0.002",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm AWA-own-2L --lr 0.002",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_AWA-own-2L_lr0.002.log"
+ },
+ {
+  "id": "p0_ChaCAL-2L_lr0.002",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm ChaCAL-2L --lr 0.002",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_ChaCAL-2L_lr0.002.log"
+ },
+ {
+  "id": "p0_LOOPED-2L_lr0.002",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm LOOPED-2L --lr 0.002",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_LOOPED-2L_lr0.002.log"
+ },
+ {
+  "id": "p0_ARLOOP-2L_lr0.002",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 0 --arm ARLOOP-2L --lr 0.002",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_ARLOOP-2L_lr0.002.log"
+ },
+ {
+  "id": "p0_select",
+  "cmd": "python research/attention_order_law_2026_11_13/run_phase0_select.py",
+  "deps": [
+   "p0_AWA-2L_lr0.0005",
+   "p0_AWA-own-2L_lr0.0005",
+   "p0_ChaCAL-2L_lr0.0005",
+   "p0_LOOPED-2L_lr0.0005",
+   "p0_ARLOOP-2L_lr0.0005",
+   "p0_AWA-2L_lr0.001",
+   "p0_AWA-own-2L_lr0.001",
+   "p0_ChaCAL-2L_lr0.001",
+   "p0_LOOPED-2L_lr0.001",
+   "p0_ARLOOP-2L_lr0.001",
+   "p0_AWA-2L_lr0.002",
+   "p0_AWA-own-2L_lr0.002",
+   "p0_ChaCAL-2L_lr0.002",
+   "p0_LOOPED-2L_lr0.002",
+   "p0_ARLOOP-2L_lr0.002"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p0_select.log"
+ }
+]

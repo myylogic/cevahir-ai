@@ -83,13 +83,13 @@
     {
       "path": "model_management/checkpoint_contract.py",
       "symbol": "validate_state_shapes",
-      "line": 56,
+      "line": 63,
       "chapter": "tr/07-model-yasam-dongusu.md"
     },
     {
       "path": "model_management/checkpoint_contract.py",
       "symbol": "validate_tokenizer_identity",
-      "line": 67,
+      "line": 74,
       "chapter": "tr/07-model-yasam-dongusu.md"
     },
     {

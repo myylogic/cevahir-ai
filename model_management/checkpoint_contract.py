@@ -43,11 +43,18 @@ def validate_model_identity(model, saved_config):
     for cfg in (saved, live):
         cfg["num_kv_heads"] = cfg.get("num_kv_heads") or cfg["num_heads"]
         cfg["tie_weights"] = bool(cfg.get("tie_weights")) and cfg.get("seq_proj_dim") in (None, cfg["embed_dim"])
+        cfg["attention_operator"] = cfg.get("attention_operator") or "standard"
+        # The walk budget K (num_hops) is weight-tied and free at inference (set_attention_hops): the
+        # weights do not depend on it, so it is not part of the identity. Every other option is.
+        if isinstance(cfg.get("attention_operator_options"), Mapping):
+            cfg["attention_operator_options"] = {
+                k: v for k, v in cfg["attention_operator_options"].items() if k != "num_hops"}
     # These can change computation without changing any state_dict shape.
     fields = ("embed_dim", "num_heads", "num_kv_heads", "num_layers", "vocab_size",
         "use_swiglu", "use_moe", "num_experts", "moe_top_k", "pre_norm", "use_rmsnorm",
         "parallel_residual", "pe_mode", "rope_theta", "rope_scaling_type", "rope_scaling_factor",
-        "tie_weights", "use_qk_norm", "rope_original_max_len", "causal_mask", "attn_logit_cap", "logit_soft_cap", "sliding_window")
+        "tie_weights", "use_qk_norm", "rope_original_max_len", "causal_mask", "attn_logit_cap", "logit_soft_cap", "sliding_window",
+        "attention_operator", "attention_operator_options")
     differences = [f"{k}: checkpoint={saved.get(k)!r}, model={live.get(k)!r}" for k in fields if saved.get(k) != live.get(k)]
     if differences:
         raise ValueError("Checkpoint/model architecture mismatch: " + "; ".join(differences))

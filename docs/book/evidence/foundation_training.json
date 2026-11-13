@@ -28,7 +28,7 @@
       "path": "model_management/config_schema.py",
       "symbol": "tiny_model_config",
       "chapter": "tr/01-motor-ve-ogrenme.md",
-      "line": 660
+      "line": 670
     },
     {
       "path": "tokenizer_management/bpe/bpe_trainer.py",
@@ -244,7 +244,7 @@
       "path": "model_management/checkpoint_contract.py",
       "symbol": "validate_tokenizer_identity",
       "chapter": "tr/07-model-yasam-dongusu.md",
-      "line": 67
+      "line": 74
     },
     {
       "path": "model_management/checkpoint_contract.py",
@@ -256,13 +256,13 @@
       "path": "model_management/checkpoint_contract.py",
       "symbol": "validate_state_shapes",
       "chapter": "tr/07-model-yasam-dongusu.md",
-      "line": 56
+      "line": 63
     },
     {
       "path": "model_management/checkpoint_contract.py",
       "symbol": "validate_scheduler_state",
       "chapter": "tr/07-model-yasam-dongusu.md",
-      "line": 98
+      "line": 105
     },
     {
       "path": "training_management/v2/core/training_manager.py",

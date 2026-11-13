@@ -76,7 +76,7 @@ BERT, Google araştırmacılarının çift yönlü bağlamsal temsilleri ön eğ
 
 ## Bir ileri geçişi dosyalar arasında izlemek
 
-Modeli üst düzeyden kuran yol [ModelManager.build_model](../../../model_management/model_manager.py#L209) içindedir. Yapılandırma normalize edilir ve initializer aracılığıyla çekirdek oluşturulur. Çalıştırma sınırlarından biri [ModelManager.forward](../../../model_management/model_manager.py#L486), asıl tensör hesabı ise [CevahirNeuralNetwork.forward](../../../src/neural_network.py#L725) metodudur.
+Modeli üst düzeyden kuran yol [ModelManager.build_model](../../../model_management/model_manager.py#L209) içindedir. Yapılandırma normalize edilir ve initializer aracılığıyla çekirdek oluşturulur. Çalıştırma sınırlarından biri [ModelManager.forward](../../../model_management/model_manager.py#L486), asıl tensör hesabı ise [CevahirNeuralNetwork.forward](../../../src/neural_network.py#L749) metodudur.
 
 | Adım | Girdi → çıktı | Gerçek çağrı ve sonraki tüketici |
 | --- | --- | --- |
@@ -86,11 +86,11 @@ Modeli üst düzeyden kuran yol [ModelManager.build_model](../../../model_manage
 | Son normalizasyon | `[B,T,D]` → `[B,T,D]` | `self.output_norm(x)`; sonuç vocabulary projeksiyonuna gider. |
 | Vocabulary projeksiyonu | `[B,T,D]` → `[B,T,V]` | `self.output_layer(x_normalized)`; isteğe bağlı soft-cap sonrası skorlar döner. |
 
-`B` bağımsız örnek sayısı, `T` bu çağrının token sayısıdır. Önbellekli üretimde `T` yalnız yeni tokenları kapsayabilir. `seq_proj_dim` adı sizi ayrı bir projeksiyon katmanına götürmemeli: [kurucu](../../../src/neural_network.py#L329) etkin genişlik olarak `embed_dim` kullanır; farklı eski `seq_proj_dim` değeri ağırlık paylaşımını kapatabilir, fakat yeni bir sequence projection oluşturmaz.
+`B` bağımsız örnek sayısı, `T` bu çağrının token sayısıdır. Önbellekli üretimde `T` yalnız yeni tokenları kapsayabilir. `seq_proj_dim` adı sizi ayrı bir projeksiyon katmanına götürmemeli: [kurucu](../../../src/neural_network.py#L345) etkin genişlik olarak `embed_dim` kullanır; farklı eski `seq_proj_dim` değeri ağırlık paylaşımını kapatabilir, fakat yeni bir sequence projection oluşturmaz.
 
 ## Logit neden henüz olasılık değildir?
 
-Son temsil `h` için vocabulary projeksiyonu `z = h W_outᵀ + b` üretir. `z_i` bir **logit**, yani olasılığa dönüştürülebilen sınırlanmamış skordur. Olasılık gerektiğinde `p_i = exp(z_i) / Σ_j exp(z_j)` kullanılır. Çekirdeğin normal çıktısı bu olasılıklar değildir. [Çıkış hesabında](../../../src/neural_network.py#L848) `logit_soft_cap > 0` ise `c tanh(z/c)` uygulanır; değilse ham logit döner. Varsayılan `c=30` değeri skoru yumuşak biçimde sınırlar, olasılık kalibrasyonu veya doğru cevap garantisi vermez.
+Son temsil `h` için vocabulary projeksiyonu `z = h W_outᵀ + b` üretir. `z_i` bir **logit**, yani olasılığa dönüştürülebilen sınırlanmamış skordur. Olasılık gerektiğinde `p_i = exp(z_i) / Σ_j exp(z_j)` kullanılır. Çekirdeğin normal çıktısı bu olasılıklar değildir. [Çıkış hesabında](../../../src/neural_network.py#L872) `logit_soft_cap > 0` ise `c tanh(z/c)` uygulanır; değilse ham logit döner. Varsayılan `c=30` değeri skoru yumuşak biçimde sınırlar, olasılık kalibrasyonu veya doğru cevap garantisi vermez.
 
 Hedef token `y` için en temel çapraz entropi `L = −log p_y` olur. Bu formül “doğru tokenın olasılığı düşükse daha büyük ceza” fikrini sayıya çevirir. Gerçek eğitimde padding, etiket yumuşatma ve ek kayıplar sonucu değiştirebilir. Çekirdek `forward` içinde `backward()` veya `optimizer.step()` yoktur; kayıp hesabı ve güncelleme dış eğitim döngüsünün işidir. [LossComputation.compute_loss](../../../training_management/v2/core/loss_computation.py#L76) logits ile hedeflerin buluştuğu somut örnektir. Hedef kaydırma, maskelenmiş ortalama ve güncellemenin ayrıntısı [eğitim bölümünde](06-egitim.md) izlenir.
 
@@ -104,7 +104,7 @@ Türev çıktıda uygulanmış soft-cap'ten önceki skora taşınırken cap'in t
 
 ## Ağırlık paylaşımı neyi değiştirir?
 
-Giriş tablosu ve çıkış projeksiyonu iki farklı görevde kullanılsa da boyutları uygunsa aynı parametreyi paylaşabilir. [Ana model kurucusundaki](../../../src/neural_network.py#L493) gerçek bağlama şöyledir:
+Giriş tablosu ve çıkış projeksiyonu iki farklı görevde kullanılsa da boyutları uygunsa aynı parametreyi paylaşabilir. [Ana model kurucusundaki](../../../src/neural_network.py#L509) gerçek bağlama şöyledir:
 
 ```python
 self.output_layer.weight = self.embedding.embedding.weight
@@ -141,7 +141,7 @@ Gerçek Cevahir çekirdeğinin CPU örneğinde `V=41,D=16,H=4,L=2,F=24`, dropout
 | Kimlikleri hangi tablo karşılıyor? | [language_embedding.py — LanguageEmbedding.forward](../../../src/neural_network_module/dil_katmani_module/language_embedding.py#L234) | Tamsayı kimlikleri → lookup/norm/dropout → katmanların girdisi. |
 | Başlangıç neden öğrenilmiş bilgi değil? | [LanguageEmbedding._initialize_weights](../../../src/neural_network_module/dil_katmani_module/language_embedding.py#L262) | Başlangıç yöntemi → normalize/ölçeklenmiş parametre satırları. |
 | Hesap hangi modüllerden oluşuyor? | [neural_network.py — CevahirNeuralNetwork.__init__](../../../src/neural_network.py#L111) | Yapılandırma → embedding, katmanlar, norm ve bağlı/bağımsız çıkış ağırlıkları. |
-| Tokenlar hangi şekilleri izliyor? | [CevahirNeuralNetwork.forward](../../../src/neural_network.py#L725) | `[B,T]` → `[B,T,D]` → `[B,T,V]`. |
+| Tokenlar hangi şekilleri izliyor? | [CevahirNeuralNetwork.forward](../../../src/neural_network.py#L749) | `[B,T]` → `[B,T,D]` → `[B,T,V]`. |
 | Logit hangi hedefle karşılaştırılıyor? | [loss_computation.py — LossComputation.compute_loss](../../../training_management/v2/core/loss_computation.py#L76) | Logit ve maskeli hedef → skaler kayıp ve raporlanan ölçüler. |
 | Gradyanı kim parametreye uyguluyor? | [training_loop.py — TrainingLoop._finish_update](../../../training_management/v2/core/training_loop.py#L252) | Birikmiş türev → ölçek/clipping/optimizer → sonraki çağrının parametreleri. |
 

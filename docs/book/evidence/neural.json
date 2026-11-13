@@ -126,6 +126,16 @@
       "chapter": "tr/04-attention.md"
     },
     {
+      "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/absorbing_walk.py",
+      "symbol": "operator_weights_transform",
+      "chapter": "tr/04-attention.md"
+    },
+    {
+      "path": "tests/evolution/test_awa_attention.py",
+      "symbol": "test_operator_off_is_bit_identical_to_the_engine_before_awa",
+      "chapter": "tr/04-attention.md"
+    },
+    {
       "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
       "symbol": "TransformerEncoderLayer.__init__",
       "chapter": "tr/05-transformer.md"

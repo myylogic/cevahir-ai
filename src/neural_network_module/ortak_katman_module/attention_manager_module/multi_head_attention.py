@@ -451,7 +451,7 @@ class MultiHeadAttention(nn.Module):
             )
 
     # ---------------- Scaled Dot-Product Attention ---------------- #
-    def scaled_dot_product_attention(self, query, key, value, mask=None, temperature=1.0, apply_dropout=True, causal_mask=False, return_attention_weights=True):
+    def scaled_dot_product_attention(self, query, key, value, mask=None, temperature=1.0, apply_dropout=True, causal_mask=False, return_attention_weights=True, weights_transform=None):
         """
         Ölçeklenmiş nokta çarpımı dikkat mekanizması.
         [V6] Routing: use_pytorch_sdpa → F.sdpa → Flash/memory-efficient/math otomatik
@@ -480,10 +480,10 @@ class MultiHeadAttention(nn.Module):
         if causal_mask and mask is None:
             rows = torch.arange(query.size(-2), device=query.device)[:, None]
             cols = torch.arange(key.size(-2), device=query.device)[None, :]
-            if return_attention_weights or not self.use_pytorch_sdpa or self.attn_logit_cap > 0:
+            if return_attention_weights or not self.use_pytorch_sdpa or self.attn_logit_cap > 0 or weights_transform is not None:
                 manual_mask = torch.zeros_like(rows + cols, dtype=query.dtype).masked_fill(cols > rows, float('-inf'))
-        if return_attention_weights or self.attn_logit_cap > 0:
-            return self._standard_sdpa_forward(query, key, value, manual_mask, temperature, apply_dropout)
+        if return_attention_weights or self.attn_logit_cap > 0 or weights_transform is not None:
+            return self._standard_sdpa_forward(query, key, value, manual_mask, temperature, apply_dropout, weights_transform)
         if self.use_pytorch_sdpa:
             return self._pytorch_sdpa_forward(query, key, value, mask=mask, temperature=temperature, apply_dropout=apply_dropout, causal_mask=causal_mask)
 
@@ -610,7 +610,7 @@ class MultiHeadAttention(nn.Module):
                 self._flash_attn_dtype_warning_shown = True
             return self._standard_sdpa_forward(query, key, value, fallback_mask, temperature, apply_dropout)
 
-    def _standard_sdpa_forward(self, query, key, value, mask, temperature, apply_dropout):
+    def _standard_sdpa_forward(self, query, key, value, mask, temperature, apply_dropout, weights_transform=None):
         """
         Standard Scaled Dot-Product Attention (geriye dönük uyumluluk)
         [V6] Feature F: Attention Logit Soft-Cap (Gemma 2 standardı)
@@ -660,6 +660,8 @@ class MultiHeadAttention(nn.Module):
 
         attn_weights = F.softmax(scores, dim=-1)
         attn_weights = attn_weights.masked_fill(fully_masked, 0.0)
+        if weights_transform is not None:  # attention operator (AWA / comparison arms): A -> effective weights
+            attn_weights = weights_transform(attn_weights)
 
         if apply_dropout and self.training:
             attn_weights = self.dropout(attn_weights)
@@ -785,6 +787,7 @@ class MultiHeadAttention(nn.Module):
         if self.use_qk_norm and self.q_norm is not None and self.k_norm is not None:
             query_proj = self.q_norm(query_proj)  # [B, H, T, head_dim]
             key_proj = self.k_norm(key_proj)      # [B, num_kv_heads, S, head_dim]
+        operator_address = key_proj  # attention operators: keys after QK-norm, before GQA expand and RoPE
 
         # [OK] V5: GQA — KV heads expand (KV cache güncellemesinden ÖNCE expand)
         # KV Cache ile kullanıldığında: önce cache'e ekle (num_kv_heads boyutunda),
@@ -878,6 +881,7 @@ class MultiHeadAttention(nn.Module):
             and self.sliding_window is None  # sliding window yok → add_mask=None garantili
             and not cache_active
             and self.attn_logit_cap == 0.0
+            and self.attention_operator == "standard"
         )
         if causal_mask and not _skip_dense_causal:
             # Dense causal mask — F.sdpa olmayan path veya sliding window + causal birleştirme
@@ -927,6 +931,10 @@ class MultiHeadAttention(nn.Module):
         # [V3] Fallback: use_flash_attention → _flash_attention_forward
         # Fallback: _standard_sdpa_forward (causal_mask için Flash parametresi)
         use_causal_for_sdpa = causal_mask if (self.use_flash_attention and not self.use_pytorch_sdpa) else causal_mask
+        weights_transform = None
+        if self.attention_operator != "standard":
+            weights_transform = self._operator_weights_transform(
+                key, operator_address, add_mask, causal_mask, cache_active, query_positions, key_positions)
         attn_output, attn_weights = self.scaled_dot_product_attention(
             query_proj, key_proj, value_proj,
             mask=add_mask,
@@ -934,6 +942,7 @@ class MultiHeadAttention(nn.Module):
             apply_dropout=apply_dropout,
             causal_mask=use_causal_for_sdpa,
             return_attention_weights=return_attention_weights,
+            weights_transform=weights_transform,
         )
 
         # --- Birleştir, çıkış projeksiyon ---
@@ -960,3 +969,21 @@ class MultiHeadAttention(nn.Module):
             return output, attn_weights
         else:
             return output
+
+    # ---------------- Attention operators (optional; default "standard") ---------------- #
+    # "standard" is the ordinary softmax row. "awa" (Absorbing-Walk Attention), "awa_own" and "chacal"
+    # are research operators that map the softmax weights to effective weights; see absorbing_walk.py.
+    attention_operator = "standard"
+
+    def set_attention_operator(self, operator, **options):
+        """Switch this module to an attention operator and register its parameters (once)."""
+        from src.neural_network_module.ortak_katman_module.attention_manager_module.absorbing_walk import attach_operator
+        return attach_operator(self, operator, **options)
+
+    def _operator_weights_transform(self, key_input, address, add_mask, causal_mask, cache_active,
+                                    query_positions, key_positions):
+        from src.neural_network_module.ortak_katman_module.attention_manager_module.absorbing_walk import (
+            operator_weights_transform,
+        )
+        return operator_weights_transform(self, key_input, address, add_mask, causal_mask, cache_active,
+                                          query_positions, key_positions)

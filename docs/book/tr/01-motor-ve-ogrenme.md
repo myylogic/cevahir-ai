@@ -85,7 +85,7 @@ assert tuple(logits.shape) == (1, 4, 128)
 assert torch.isfinite(logits).all()
 ```
 
-[`tiny_model_config`](../../../model_management/config_schema.py#L660) iki katman, 32 genişlik ve 128 tokenlık sözlükle CPU boyutlu bir deneme kurar. Rastgele başlangıçlı model kullanılır. Bu örnek dil kalitesini, Türkçe yeteneği veya öğrenmeyi göstermez; veri/hesap sözleşmesini görünür kılar. Gerçek dil üretimi için eğitilmiş checkpoint ve onunla aynı tokenizer gerekir. Mevcut [başlangıç yönergeleri](../../../README-TR.md) ve [modül rehberleri](../../modules/README.md) kurulum ayrıntılarını taşır.
+[`tiny_model_config`](../../../model_management/config_schema.py#L670) iki katman, 32 genişlik ve 128 tokenlık sözlükle CPU boyutlu bir deneme kurar. Rastgele başlangıçlı model kullanılır. Bu örnek dil kalitesini, Türkçe yeteneği veya öğrenmeyi göstermez; veri/hesap sözleşmesini görünür kılar. Gerçek dil üretimi için eğitilmiş checkpoint ve onunla aynı tokenizer gerekir. Mevcut [başlangıç yönergeleri](../../../README-TR.md) ve [modül rehberleri](../../modules/README.md) kurulum ayrıntılarını taşır.
 
 ## Hesap yapmak ile öğrenmek
 

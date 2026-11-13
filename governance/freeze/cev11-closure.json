@@ -14,7 +14,7 @@
   {
    "module": "model_management.checkpoint_contract",
    "path": "model_management/checkpoint_contract.py",
-   "sha256": "0a8e76a3e4d527dd4ae9a78759ce993da5fb96037d218978e2e59e3e2a55f2a1"
+   "sha256": "b274257d873e693ed6af454cc9ee1a8426f45f686e0a11432d262db17f1e8302"
   },
   {
    "module": "model_management.compilation",
@@ -24,7 +24,7 @@
   {
    "module": "model_management.config_schema",
    "path": "model_management/config_schema.py",
-   "sha256": "51b8e183341340e7216048f518128bbabbdbf2d07476f430a8d97f19889cd696"
+   "sha256": "8ed1b56d6139540eabb468faacbf63a45bcd77ced908acbfaef11e110bed3a3a"
   },
   {
    "module": "model_management.exceptions",
@@ -74,7 +74,7 @@
   {
    "module": "src.neural_network",
    "path": "src/neural_network.py",
-   "sha256": "0eb7cacfa5cb6dce33652065f9d86f858754cb2d508295336ae303fc09ae4f91"
+   "sha256": "9ba2cdb45fcef4b2d1207bce02f92f42777689570586bd8a3746de6447bbba0a"
   },
   {
    "module": "src.neural_network_module",
@@ -117,9 +117,14 @@
    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   {
+   "module": "src.neural_network_module.ortak_katman_module.attention_manager_module.absorbing_walk",
+   "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/absorbing_walk.py",
+   "sha256": "cb6b5501142d7d88de43d77f55e6e3d28093d7c97b87bc99394c0192d71aabde"
+  },
+  {
    "module": "src.neural_network_module.ortak_katman_module.attention_manager_module.multi_head_attention",
    "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
-   "sha256": "8c0fce2354a4520b7dadacb1340c8e23f8ebe3490b1cffc23d4d2a2e377a2688"
+   "sha256": "8460b53bfa86c63ca13c26f23c0882c5002622548942384cdd98e712c8937d10"
   },
   {
    "module": "src.neural_network_module.ortak_katman_module.feed_forward_network",
@@ -172,13 +177,18 @@
    "sha256": "10b29af69f894af3cb0384a51f32acf33fcf4a220c413b85b6a5bd99730c6d4f"
   }
  ],
- "closure_key": "cev:code:tree-v1:c1289a775fefd56e9bc65d195c2663eec493742288fc2a7600a1ccd74f4568a3",
+ "closure_key": "cev:code:tree-v1:1437e1c0069b567b3492d127b9cb1a86521066eac5f1ff580596fb15b5b2cd4d",
  "history": [
   {
    "closure_key": "cev:code:tree-v1:c1289a775fefd56e9bc65d195c2663eec493742288fc2a7600a1ccd74f4568a3",
    "modules": 33,
    "reason": "initial pin at main 0f9be09; equals the closure key computed for the roof specification (33 modules)",
    "commit": "0f9be09"
+  },
+  {
+   "closure_key": "cev:code:tree-v1:1437e1c0069b567b3492d127b9cb1a86521066eac5f1ff580596fb15b5b2cd4d",
+   "modules": 34,
+   "reason": "AWA attention operator added as an optional, default-off path; default behaviour proven bit-identical (tests/evolution/test_awa_attention.py differential test against 0f9be09; tests/evolution/test_cev11_*.py pass)"
   }
  ]
 }

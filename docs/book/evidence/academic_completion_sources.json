@@ -17,13 +17,13 @@
       "path": "model_management/config_schema.py",
       "symbol": "tiny_model_config",
       "chapter": "tr/01-motor-ve-ogrenme.md",
-      "line": 660
+      "line": 670
     },
     {
       "path": "src/neural_network.py",
       "symbol": "CevahirNeuralNetwork.apply_quantization",
       "chapter": "tr/07-model-yasam-dongusu.md",
-      "line": 976
+      "line": 1000
     },
     {
       "path": "src/neural_network_module/ortak_katman_module/quantization_manager.py",

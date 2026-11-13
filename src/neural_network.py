@@ -193,6 +193,11 @@ class CevahirNeuralNetwork(nn.Module):
         kv_num_sink_tokens: int = 4,
         moe_jitter_noise: float = 0.01,
         moe_load_balance_alpha: float = 0.01,
+        # Optional attention operator; the default is ordinary softmax attention in every layer.
+        # "awa" | "awa_own" | "chacal" attach a research operator to the layers named in
+        # attention_operator_options["layers"] (default: the last layer); see absorbing_walk.py.
+        attention_operator: str = "standard",
+        attention_operator_options: Optional[Dict[str, Any]] = None,
         # ---- TensorBoard / Telemetri seçenekleri ----
         use_tensorboard: bool = False,
         tb_writer: Optional[_SummaryWriterLike] = None,
@@ -280,6 +285,17 @@ class CevahirNeuralNetwork(nn.Module):
             "tb_log_attention_image": tb_log_attention_image,
             "tb_flush_secs": tb_flush_secs,
         }
+        # Attention operator: validated here, attached after every other module is built (end of
+        # __init__). Its two keys enter the stored constructor config only when an operator is on,
+        # so the stored config of a standard model is unchanged.
+        from src.neural_network_module.ortak_katman_module.attention_manager_module.absorbing_walk import (
+            resolve_operator_config,
+        )
+        attention_operator, _operator_options = resolve_operator_config(
+            attention_operator, attention_operator_options, num_layers)
+        if _operator_options is not None:
+            self._ctor_cfg["attention_operator"] = attention_operator
+            self._ctor_cfg["attention_operator_options"] = dict(_operator_options)
 
         # [OK] ENDÜSTRİ STANDARDI: Parametre validasyonu (Transformer , BERT, T5)
         # Kritik parametreler için validation eklenmeli
@@ -570,6 +586,14 @@ class CevahirNeuralNetwork(nn.Module):
             "SeqProjection kaldırıldı (Transformer standardı)."
         )
         
+        # Attention-operator parameters are created last, so every weight above is drawn exactly as
+        # in a standard model built from the same seed.
+        self.attention_operator = attention_operator
+        self.attention_operator_layers = list(_operator_options["layers"]) if _operator_options else []
+        for _i in self.attention_operator_layers:
+            self.layers[_i].attn.set_attention_operator(
+                attention_operator, **{k: v for k, v in _operator_options.items() if k != "layers"})
+
         # Quantization __init__ içinde uygulanmaz (self.training bu noktada daima True).
         # Eğitim tamamlandıktan sonra apply_quantization() çağrılmalıdır.
 
@@ -1034,3 +1058,64 @@ class CevahirNeuralNetwork(nn.Module):
             "is_quantized": self.quantization_manager.is_quantized(self),
             "model_size_mb": round(self.quantization_manager.get_model_size_mb(self), 2),
         }
+
+    # ------------------ Rows-only forward and attention-operator controls ------------------ #
+    def _output_head(self, hidden: torch.Tensor) -> torch.Tensor:
+        logits = self.output_layer(self.output_norm(hidden))
+        if self.logit_soft_cap > 0.0:
+            return torch.tanh(logits / self.logit_soft_cap) * self.logit_soft_cap
+        return logits
+
+    def forward_rows(
+        self,
+        x: torch.Tensor,
+        rows: torch.Tensor,
+        mask: Optional[torch.Tensor] = None,
+        causal_mask: Optional[bool] = None,
+        num_hops: Optional[int] = None,
+        return_all_hops: bool = False,
+    ):
+        """
+        Logits at selected positions only: [B, R, vocab_size].
+
+        Every layer but the last runs on the full sequence; the last layer (attention, residual, FFN)
+        and the output head are evaluated only at ``rows`` ([R] or [B, R] position indices). The result
+        equals ``forward(x, mask, causal_mask)[0]`` gathered at those rows, for every attention operator.
+        ``num_hops`` overrides the walk budget of a walk-operator last layer for this call; with
+        ``return_all_hops`` a list of logits at budgets 0..num_hops is returned from one pass.
+        No KV cache and no MoE layers; telemetry and the step counter are not touched.
+        """
+        from src.neural_network_module.ortak_katman_module.attention_manager_module.absorbing_walk import (
+            layer_forward_rows,
+        )
+        if not isinstance(x, torch.Tensor):
+            raise TypeError(f"Beklenen giriş türü torch.Tensor, ancak {type(x)} alındı.")
+        use_causal = causal_mask if causal_mask is not None else self.causal_mask
+        hidden = self.embed_dropout(self.pos_encoding(self.embedding(x)))
+        for layer in self.layers[:-1]:
+            hidden = layer(hidden, mask=mask, causal_mask=use_causal)[0]
+        out = layer_forward_rows(self.layers[-1], hidden, rows, mask=mask, causal_mask=use_causal,
+                                 num_hops=num_hops, return_all_hops=return_all_hops)
+        if return_all_hops:
+            return [self._output_head(o) for o in out]
+        return self._output_head(out)
+
+    def set_attention_hops(self, num_hops: int) -> None:
+        """Set the walk budget K of every walk-operator layer (hops are weight-tied, so K is free at inference).
+
+        K is stored with the model: the constructor config that checkpoints carry is updated too, so a model
+        saved after this call is restored with the same K. The checkpoint identity check ignores K (the
+        weights do not depend on it), so weights saved at one K load into a model configured with another.
+        """
+        if isinstance(num_hops, bool) or not isinstance(num_hops, int) or num_hops < 0:
+            raise ValueError("num_hops must be a non-negative integer")
+        touched = False
+        for layer in self.layers:
+            if getattr(layer.attn, "attention_operator", "standard") in ("awa", "awa_own"):
+                layer.attn.walk_num_hops = num_hops
+                touched = True
+        if not touched:
+            raise ValueError("this model has no walk-operator layer (attention_operator 'awa' or 'awa_own')")
+        stored = self._ctor_cfg.get("attention_operator_options")
+        if isinstance(stored, dict):
+            stored["num_hops"] = num_hops

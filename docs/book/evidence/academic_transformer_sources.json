@@ -113,19 +113,19 @@
     {
       "path": "src/neural_network.py",
       "symbol": "CevahirNeuralNetwork.forward",
-      "line": 725,
+      "line": 749,
       "chapter": "tr/05-transformer.md"
     },
     {
       "path": "src/neural_network.py",
       "symbol": "CevahirNeuralNetwork._prepare_routing_bias",
-      "line": 929,
+      "line": 953,
       "chapter": "tr/05-transformer.md"
     },
     {
       "path": "src/neural_network.py",
       "symbol": "CevahirNeuralNetwork.get_and_reset_moe_loss",
-      "line": 970,
+      "line": 994,
       "chapter": "tr/05-transformer.md"
     }
   ],

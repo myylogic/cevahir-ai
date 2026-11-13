@@ -12,7 +12,7 @@ Bu bölümde `B` batch büyüklüğü, `T` token sayısı, `D` temsil genişliğ
 
 Bir **encoder**, girdiyi bağlama duyarlı temsillere dönüştürür. Çift yönlü self-attention kullanıldığında bir konum kendisinden önceki ve sonraki geçerli konumlara erişebilir. Bir **autoregressive decoder**, sıradaki sembolün dağılımını yalnız eldeki ön eke koşullandırır. **Encoder–decoder** düzeninde ise kaynak dizisini işleyen encoder ile hedef dizisini üreten decoder ayrıdır; decoder'ın cross-attention kısmında sorgular hedef temsilinden, anahtar ve değerler encoder çıktısından gelir. Vaswani ve arkadaşlarının 2017 çalışması encoder–decoder Transformer'ı; decoder'da nedensel self-attention, cross-attention ve FFN bileşimini tanımlar. [Vaswani vd., 2017, §3](https://arxiv.org/html/1706.03762v7#S3).
 
-Mimari türünü dosya adından belirlemeyiz. Cevahir'in [TransformerEncoderLayer](../../../src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py#L60) sınıfı self-attention ve FFN içerir. [CevahirNeuralNetwork.forward](../../../src/neural_network.py#L725) ana akışında bu bloklar `causal_mask=True` varsayılanıyla istiflenir; ayrı bir kaynak encoder çıktısını okuyan cross-attention alt bloğu kurulmaz. Bu nedenle mevcut ana dil modeli **nedensel, decoder-only işlevli** bir yığındır. Kurucudaki `attention_type` gibi bir seçenek veya sınıf adındaki “Encoder”, fiilî çağrı grafiğinin yerini tutmaz.
+Mimari türünü dosya adından belirlemeyiz. Cevahir'in [TransformerEncoderLayer](../../../src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py#L60) sınıfı self-attention ve FFN içerir. [CevahirNeuralNetwork.forward](../../../src/neural_network.py#L749) ana akışında bu bloklar `causal_mask=True` varsayılanıyla istiflenir; ayrı bir kaynak encoder çıktısını okuyan cross-attention alt bloğu kurulmaz. Bu nedenle mevcut ana dil modeli **nedensel, decoder-only işlevli** bir yığındır. Kurucudaki `attention_type` gibi bir seçenek veya sınıf adındaki “Encoder”, fiilî çağrı grafiğinin yerini tutmaz.
 
 ### Nedensellik, eğitim ve üretim
 
@@ -35,7 +35,7 @@ Bu ayrım bir denetim ölçütü verir: dropout kapalıyken aynı ön eke farkl�
 | Genişlik sözleşmesi | [architecture_contracts.py — `resolve_ffn_dim`](../../../src/neural_network_module/architecture_contracts.py#L7) | Açık genişliği korur; otomatik genişliği aktivasyon ailesine göre seçer. |
 | Uzman seçimi | [mixture_of_experts.py — `Router.forward`](../../../src/neural_network_module/ortak_katman_module/mixture_of_experts.py#L173) | Token temsillerinden top-k uzman ve ağırlık çıkarır. |
 | Uzman birleştirme | [Aynı dosya — `MixtureOfExperts.forward`](../../../src/neural_network_module/ortak_katman_module/mixture_of_experts.py#L349) | Seçilmiş uzman çıktılarını `[B,T,D]` içinde toplar, yardımcı kayıp döndürür. |
-| Katman yığını | [neural_network.py — `CevahirNeuralNetwork.forward`](../../../src/neural_network.py#L725) | Token kimlikleri → embedding → L blok → son norm → sözlük logitleri. |
+| Katman yığını | [neural_network.py — `CevahirNeuralNetwork.forward`](../../../src/neural_network.py#L749) | Token kimlikleri → embedding → L blok → son norm → sözlük logitleri. |
 
 Bu harita dosya sırasından çok veri akışını izler. Bir ayar için önce kurucuya nasıl girdiğine, sonra hangi metot dalını değiştirdiğine, son olarak bu dalı sınayan kanıta bakılır. Kaynak yorumlarında geçen model adları akademik atıf yerine kullanılamaz; örneğin açık teknik kanıt olmadan kapalı bir modelin FFN veya normalizasyon ayrıntısı çıkarılamaz.
 
@@ -188,13 +188,13 @@ f_e=\frac1N\sum_t\mathbf1[e\in S_t],\qquad
 
 Buradan ince bir sınır daha çıkar: mevcut router'da `top_k=1` seçilirse tek logitin softmax'ı daima `1` olur ve bu ağırlığın logite türevi sıfırdır. Sert seçimin indeksinden de standart autograd gradyanı geçmez. Bu nedenle ana görev kaybı, mevcut karışım ağırlığı yolu üzerinden router'ı eğitemez; router için yardımcı kayıp gibi başka türev yolları gerekir. Bu yerel kodun cebirsel sonucudur; bütün top-1 MoE yöntemleri için genel bir önerme değildir. Seçilmiş uzman çıktısını tüm uzmanların softmax'ından alınan olasılıkla ağırlıklandırmak farklı bir hesap olurdu.
 
-`valid_token_mask` padding'in **yardımcı kayıp istatistiğine** katılmasını engeller; mevcut uzman dağıtma döngüsünü bütünüyle padding'den arındıran bir yürütme optimizasyonu değildir. Attention maskesiyle de aynı sözleşme değildir. Bütün konumlar geçersizse korunan payda ve sıfır çarpanlar sıfır yardımcı değer üretir. Katman yalnız o forward'ın kaybını saklar; [get_and_reset_moe_loss](../../../src/neural_network.py#L970) çağrısı bir kez tüketir. `α` zaten içeridedir: eğitim hedefinde tekrar çarpmak amaçlanan ağırlığı değiştirir.
+`valid_token_mask` padding'in **yardımcı kayıp istatistiğine** katılmasını engeller; mevcut uzman dağıtma döngüsünü bütünüyle padding'den arındıran bir yürütme optimizasyonu değildir. Attention maskesiyle de aynı sözleşme değildir. Bütün konumlar geçersizse korunan payda ve sıfır çarpanlar sıfır yardımcı değer üretir. Katman yalnız o forward'ın kaybını saklar; [get_and_reset_moe_loss](../../../src/neural_network.py#L994) çağrısı bir kez tüketir. `α` zaten içeridedir: eğitim hedefinde tekrar çarpmak amaçlanan ağırlığı değiştirir.
 
 ### Bağlamsal yönlendirme, cache ve öğrenme ayrımı
 
 `routing_bias` biçimi `[B,E]`'dir; aynı batch satırındaki tokenların router logitlerine aynı önceliği ekler. Böylece aynı ağırlıklar farklı etkin uzman yollarından geçebilir. Bunun tek başına kalıcı öğrenme olduğu söylenemez; dışarıdan verilen geçici bir koşullandırma da olabilir.
 
-[CevahirNeuralNetwork._prepare_routing_bias](../../../src/neural_network.py#L929), dolu KV cache sırasında bu önceliğin değişmesine izin vermez; cache önce temizlenmelidir. Çünkü önceki temsiller eski hesap koşuluyla üretilmiştir. Uzman yönlendirmesi veya model ağırlıkları değiştiğinde geçmiş K/V'lerin otomatik olarak yeni model geçmişi sayılması tutarsızlık yaratabilir. Bu sözleşme hesap doğruluğuna ilişkindir; hangi yönlendirmenin daha iyi olduğuna karar vermez.
+[CevahirNeuralNetwork._prepare_routing_bias](../../../src/neural_network.py#L953), dolu KV cache sırasında bu önceliğin değişmesine izin vermez; cache önce temizlenmelidir. Çünkü önceki temsiller eski hesap koşuluyla üretilmiştir. Uzman yönlendirmesi veya model ağırlıkları değiştiğinde geçmiş K/V'lerin otomatik olarak yeni model geçmişi sayılması tutarsızlık yaratabilir. Bu sözleşme hesap doğruluğuna ilişkindir; hangi yönlendirmenin daha iyi olduğuna karar vermez.
 
 ## 5.8. Düzenleme ve kaynak yönetimi aynı yöntem değildir
 

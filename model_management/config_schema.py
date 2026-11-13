@@ -638,7 +638,7 @@ def normalize_model_config(config: Optional[Dict[str, Any]] = None, *, strict: b
         data["quantization_type"] = data.pop("quant_type")
     if data.get("load_in_8bit") or data.get("load_in_4bit"):
         raise ValueError("bitsandbytes loading flags are not integrated with the Cevahir core")
-    known |= {"config_version", "architecture_version", "torch_compile", "torch_compile_mode", "torch_compile_dynamic", "torch_compile_fullgraph", "distributed_strategy", "distributed_backend", "log_level", "use_tensorboard", "attention_type", "normalization_type"}
+    known |= {"config_version", "architecture_version", "torch_compile", "torch_compile_mode", "torch_compile_dynamic", "torch_compile_fullgraph", "distributed_strategy", "distributed_backend", "log_level", "use_tensorboard", "attention_type", "normalization_type", "attention_operator", "attention_operator_options"}
     if strict and set(data) - known:
         raise ValueError(f"Unknown configuration fields: {sorted(set(data) - known)}")
     result = ModelArchConfig().to_dict()
@@ -654,6 +654,16 @@ def normalize_model_config(config: Optional[Dict[str, Any]] = None, *, strict: b
     result["config_version"] = CONFIG_VERSION
     result["architecture_version"] = ARCHITECTURE_VERSION
     ModelArchConfig.from_dict(result).validate()
+    if "attention_operator" in result or "attention_operator_options" in result:
+        # Optional research operators (AWA and its comparison arms). The keys are never added by default,
+        # so the normalized config of a standard model is unchanged; when an operator is on, its options
+        # are stored with every default filled in and the layer list resolved.
+        from src.neural_network_module.ortak_katman_module.attention_manager_module.absorbing_walk import resolve_operator_config
+        operator, options = resolve_operator_config(
+            result.get("attention_operator"), result.get("attention_operator_options"), result["num_layers"])
+        result["attention_operator"] = operator
+        if options is not None:
+            result["attention_operator_options"] = options
     return result
 
 

@@ -1,0 +1,272 @@
+[
+ {
+  "id": "p1_freeze_check",
+  "cmd": "python research/attention_order_law_2026_11_13/run_verify.py --check-freeze",
+  "deps": [],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_freeze_check.log"
+ },
+ {
+  "id": "p1_train_ChaCAL-2L_s0",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm ChaCAL-2L --seed 0",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_ChaCAL-2L_s0.log"
+ },
+ {
+  "id": "p1_train_AWA-own-2L_s0",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm AWA-own-2L --seed 0",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_AWA-own-2L_s0.log"
+ },
+ {
+  "id": "p1_train_STD-2L-pm_s0",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm STD-2L-pm --seed 0",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_STD-2L-pm_s0.log"
+ },
+ {
+  "id": "p1_train_ChaCAL-2L_s1",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm ChaCAL-2L --seed 1",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_ChaCAL-2L_s1.log"
+ },
+ {
+  "id": "p1_train_AWA-own-2L_s1",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm AWA-own-2L --seed 1",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_AWA-own-2L_s1.log"
+ },
+ {
+  "id": "p1_train_STD-2L-pm_s1",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm STD-2L-pm --seed 1",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_STD-2L-pm_s1.log"
+ },
+ {
+  "id": "p1_train_ChaCAL-2L_s2",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm ChaCAL-2L --seed 2",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_ChaCAL-2L_s2.log"
+ },
+ {
+  "id": "p1_train_AWA-own-2L_s2",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm AWA-own-2L --seed 2",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_AWA-own-2L_s2.log"
+ },
+ {
+  "id": "p1_train_STD-2L-pm_s2",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm STD-2L-pm --seed 2",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_STD-2L-pm_s2.log"
+ },
+ {
+  "id": "p1_train_ChaCAL-2L_s3",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm ChaCAL-2L --seed 3",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_ChaCAL-2L_s3.log"
+ },
+ {
+  "id": "p1_train_AWA-own-2L_s3",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm AWA-own-2L --seed 3",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_AWA-own-2L_s3.log"
+ },
+ {
+  "id": "p1_train_ChaCAL-2L_s4",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm ChaCAL-2L --seed 4",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_ChaCAL-2L_s4.log"
+ },
+ {
+  "id": "p1_train_AWA-own-2L_s4",
+  "cmd": "python research/attention_order_law_2026_11_13/run_train.py --phase 1 --arm AWA-own-2L --seed 4",
+  "deps": [
+   "p1_freeze_check"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_train_AWA-own-2L_s4.log"
+ },
+ {
+  "id": "p1_extend",
+  "cmd": "python research/attention_order_law_2026_11_13/run_extend.py",
+  "deps": [
+   "p1_train_ChaCAL-2L_s0",
+   "p1_train_AWA-own-2L_s0",
+   "p1_train_STD-2L-pm_s0",
+   "p1_train_ChaCAL-2L_s1",
+   "p1_train_AWA-own-2L_s1",
+   "p1_train_STD-2L-pm_s1",
+   "p1_train_ChaCAL-2L_s2",
+   "p1_train_AWA-own-2L_s2",
+   "p1_train_STD-2L-pm_s2",
+   "p1_train_ChaCAL-2L_s3",
+   "p1_train_AWA-own-2L_s3",
+   "p1_train_ChaCAL-2L_s4",
+   "p1_train_AWA-own-2L_s4"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_extend.log"
+ },
+ {
+  "id": "p1_eval_ChaCAL-2L_s0",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm ChaCAL-2L --seed 0",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_ChaCAL-2L_s0.log"
+ },
+ {
+  "id": "p1_eval_AWA-own-2L_s0",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm AWA-own-2L --seed 0",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_AWA-own-2L_s0.log"
+ },
+ {
+  "id": "p1_eval_STD-2L-pm_s0",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm STD-2L-pm --seed 0",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_STD-2L-pm_s0.log"
+ },
+ {
+  "id": "p1_eval_ChaCAL-2L_s1",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm ChaCAL-2L --seed 1",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_ChaCAL-2L_s1.log"
+ },
+ {
+  "id": "p1_eval_AWA-own-2L_s1",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm AWA-own-2L --seed 1",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_AWA-own-2L_s1.log"
+ },
+ {
+  "id": "p1_eval_STD-2L-pm_s1",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm STD-2L-pm --seed 1",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_STD-2L-pm_s1.log"
+ },
+ {
+  "id": "p1_eval_ChaCAL-2L_s2",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm ChaCAL-2L --seed 2",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_ChaCAL-2L_s2.log"
+ },
+ {
+  "id": "p1_eval_AWA-own-2L_s2",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm AWA-own-2L --seed 2",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_AWA-own-2L_s2.log"
+ },
+ {
+  "id": "p1_eval_STD-2L-pm_s2",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm STD-2L-pm --seed 2",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_STD-2L-pm_s2.log"
+ },
+ {
+  "id": "p1_eval_ChaCAL-2L_s3",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm ChaCAL-2L --seed 3",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_ChaCAL-2L_s3.log"
+ },
+ {
+  "id": "p1_eval_AWA-own-2L_s3",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm AWA-own-2L --seed 3",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_AWA-own-2L_s3.log"
+ },
+ {
+  "id": "p1_eval_ChaCAL-2L_s4",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm ChaCAL-2L --seed 4",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_ChaCAL-2L_s4.log"
+ },
+ {
+  "id": "p1_eval_AWA-own-2L_s4",
+  "cmd": "python research/attention_order_law_2026_11_13/run_eval.py --phase 1 --arm AWA-own-2L --seed 4",
+  "deps": [
+   "p1_extend"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_eval_AWA-own-2L_s4.log"
+ },
+ {
+  "id": "p1_analyze",
+  "cmd": "python research/attention_order_law_2026_11_13/run_analyze.py --phase 1",
+  "deps": [
+   "p1_eval_ChaCAL-2L_s0",
+   "p1_eval_AWA-own-2L_s0",
+   "p1_eval_STD-2L-pm_s0",
+   "p1_eval_ChaCAL-2L_s1",
+   "p1_eval_AWA-own-2L_s1",
+   "p1_eval_STD-2L-pm_s1",
+   "p1_eval_ChaCAL-2L_s2",
+   "p1_eval_AWA-own-2L_s2",
+   "p1_eval_STD-2L-pm_s2",
+   "p1_eval_ChaCAL-2L_s3",
+   "p1_eval_AWA-own-2L_s3",
+   "p1_eval_ChaCAL-2L_s4",
+   "p1_eval_AWA-own-2L_s4"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_analyze.log"
+ },
+ {
+  "id": "p1_manifest",
+  "cmd": "python research/attention_order_law_2026_11_13/run_verify.py --manifest",
+  "deps": [
+   "p1_analyze"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_manifest.log"
+ },
+ {
+  "id": "p1_verify",
+  "cmd": "python research/attention_order_law_2026_11_13/run_verify.py --rerun --phase 1",
+  "deps": [
+   "p1_manifest"
+  ],
+  "log": "research/attention_order_law_2026_11_13/results/job_logs/p1_verify.log"
+ }
+]

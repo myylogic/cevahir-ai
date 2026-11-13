@@ -80,7 +80,7 @@ Sonuç `[1, 2.761594156, 2]`'dir. Üçüncü query'nin sıfır olması çıktıy
 
 ## Şekilleri görmeden head sayısını anlamak zordur
 
-`H` query head sayısı, `H_kv` key/value head sayısı ve `d=D/H` olsun. [MultiHeadAttention.forward](../../../src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py#L678) projeksiyonları yeniden şekillendirip eksen değiştirir:
+`H` query head sayısı, `H_kv` key/value head sayısı ve `d=D/H` olsun. [MultiHeadAttention.forward](../../../src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py#L680) projeksiyonları yeniden şekillendirip eksen değiştirir:
 
 | Tensör | Şekil | Anlamı |
 | --- | --- | --- |
@@ -127,7 +127,7 @@ Sayısal maskelerin özel 0–1 yorumuna güvenerek farklı arayüzler arasında
 
 [scaled_dot_product_attention](../../../src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py#L454) hangi hesabın çağrılacağını seçer:
 
-1. `return_attention_weights=True` veya `attn_logit_cap>0` ise manuel yol kullanılır. Soft-cap, skorların üzerine maske eklenmeden önce uygulanır.
+1. `return_attention_weights=True` veya `attn_logit_cap>0` ise manuel yol kullanılır. Soft-cap, skorların üzerine maske eklenmeden önce uygulanır. İsteğe bağlı bir attention operatörü etkinse de (`attention_operator`; varsayılan `standard`) manuel yol seçilir: operatör softmax ağırlıklarını görüp etkin ağırlıklara çevirir ([operator_weights_transform](../../../src/neural_network_module/ortak_katman_module/attention_manager_module/absorbing_walk.py)). Bu, araştırma amaçlı ve varsayılanda kapalı bir daldır; kapalıyken hesabın eskisiyle bit düzeyinde aynı kaldığı [testle](../../../tests/evolution/test_awa_attention.py) sabitlenmiştir, yararı ise henüz ölçülmemiştir.
 2. Aksi halde `use_pytorch_sdpa=True` ise `F.scaled_dot_product_attention` çağrılır. PyTorch uygun backend'i seçer; bu bayrak belirli bir GPU kernelinin çalıştığını kanıtlamaz.
 3. PyTorch yolu kapalıyken kullanılabilir harici Flash Attention istenmişse `flash_attn_func` denenir. Float32 veya özel maske varsa doğrudan manuel yola dönülür; ayrıca harici çağrı hata verirse de manuel hesap kullanılır. Harici Flash yolu seçilmemişse yine manuel yol çalışır.
 
@@ -208,7 +208,7 @@ Tablodaki her satır bir yazılım sorusuna karşılık gelir. Ana attention dos
 | Konu | Dosya / metot | Girdi ve sonuç |
 | --- | --- | --- |
 | Mimari boyutlar | [multi_head_attention.py — MultiHeadAttention.__init__](../../../src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py#L91) | `D,H,H_kv` → doğrulamalar ve Q/K/V/output ağırlıkları. |
-| Tüm attention akışı | [MultiHeadAttention.forward](../../../src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py#L678) | Query/key/value ve seçenekler → projeksiyon, QK-Norm, RoPE, cache, maskeler, çıktı. |
+| Tüm attention akışı | [MultiHeadAttention.forward](../../../src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py#L680) | Query/key/value ve seçenekler → projeksiyon, QK-Norm, RoPE, cache, maskeler, çıktı. |
 | Maske sözleşmesi | [_prepare_attention_mask](../../../src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py#L372) | Farklı maske biçimleri → skorlarla birleşebilen additive maske. |
 | Yürütme seçimi | [scaled_dot_product_attention](../../../src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py#L454) | Q/K/V ve tanı isteği → manuel, PyTorch veya harici Flash yolu. |
 | Manuel matematik | [_standard_sdpa_forward](../../../src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py#L613) | Skor, cap, maske, softmax ve dropout → `AV`. |
