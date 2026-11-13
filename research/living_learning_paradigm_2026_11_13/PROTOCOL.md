@@ -40,6 +40,19 @@ Pre-freeze adjustments by the lead (recorded here, applied to the judge's text b
   (6) S4: the unit is an entity with RN neighbours at layers 0 and 4 (>= 15 per world), medians over pooled
   (entity, neighbour) tau values; (7) S1 and S2 use the inflected-lived edits only (section 7); (8) a confirmatory
   (world, arm) must contain all 10 edits per lived case, otherwise the analysis stops (a crashed run is rerun).
+- Pre-freeze design fixes after the memory-group review (scratch pilot, non-study seed 777, discovery evidence only):
+  (a) Lead-ins. Pretraining never placed a world sentence after other text, so STD's 10 prose-prefixed copies were
+      out of distribution: after a prose prefix the base produced the old town in only 0.9% of 4,200 probes and the
+      STD v* search converged in 0/72 runs. Now 20% of world sentences (independently per sentence and pass) get one
+      lead-in sentence from the training prose (3-16 words, <= 20 tokens, no digits or markup; pool of about 4,500
+      sentences per world; cev11/leadins.py). keysites.PROSE_PREFIXES are hand-written and excluded from the pool;
+      the CF14 context probes keep the trained P1/P2 contexts. Discovery pretraining restarted with this change.
+  (b) The v* cap bound in nearly every pilot run, so the selection grid adds the cap multiplier {8, 16} x median
+      ||fc2 output|| (discovery only, same selection rule).
+  (c) C0 includes BOS positions (only PAD is excluded): the write then avoids the BOS direction that every later
+      position reads.
+  (d) PARA-ORTH reuses STD's residual delta with its own key: v* = W k_PO + delta (not STD's v*), so no extra
+      W(k_STD - k_PO) term is installed.
 
 PROTOCOL — CEV-11 'Paradigma' v1.0. Freeze as experiments/cev11_paradigma/PROTOCOL.md. Commit it, with SHA-256 of the code tree, generator configuration, tokenizer recipe, frozen edit lists, thresholds and analyze.py, before the first confirmatory pretraining run. Deviations go only into a timestamped AMENDMENTS.md. Any analysis not listed here is exploratory.
 

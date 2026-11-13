@@ -69,8 +69,20 @@ def main(argv=None) -> int:
 
     log(f"world {args.world}: {len(world.names)} names, tokenizer {tok.vocab_size} ids, "
         f"informal NONIDENT share {seg.get('nonident_share', 'n/a')}")
+    # Pre-freeze fix: a share of world sentences gets a lead-in sentence from the training prose (cev11/leadins.py),
+    # so that STD's prose-prefix averaging reads the model in distribution.
+    from cev11 import leadins as LI
+    from cev11.keysites import PROSE_PREFIXES
+    import hashlib
+    pool = LI.leadin_pool(prose_train, tok, exclude=PROSE_PREFIXES)
+    (out / "leadins.json").write_text(json.dumps({
+        "p": LI.LEADIN_P, "pool_size": len(pool), "min_words": LI.MIN_WORDS, "max_words": LI.MAX_WORDS,
+        "max_tokens": LI.MAX_TOKENS,
+        "pool_sha256": hashlib.sha256("\n".join(pool).encode("utf-8")).hexdigest()}, indent=1), encoding="utf-8")
+    log(f"lead-ins: p={LI.LEADIN_P}, pool={len(pool)} sentences")
     ckpt = TR.pretrain(world, tok, prose_train, out, passes=args.passes, seed=args.world, log=log,
-                       layers=args.layers, d=args.d, prose_share=args.prose_share)
+                       layers=args.layers, d=args.d, prose_share=args.prose_share,
+                       sentence_fn=LI.make_sentence_fn(pool))
     from cev11.model import load_checkpoint
     model, cfg, tok2, meta = load_checkpoint(ckpt)
     gates = TR.evaluate_gates(model, tok2, world, prose_held, seed=args.world + 3)
