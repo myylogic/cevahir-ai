@@ -1,0 +1,205 @@
+{
+ "tokenizer": {
+  "class": "ByteLevelBPE",
+  "identity": "4db9febe26c3f9605d931751e54cbcb770a83b486704d70149b1d4d34f6e7b0f",
+  "vocab_size": 4096
+ },
+ "nonident_share": 0.37166666666666665,
+ "n_names": 400,
+ "tokens_per_name": {
+  "2": 15,
+  "3": 149,
+  "4": 116,
+  "5": 77,
+  "6": 40,
+  "7": 3
+ },
+ "tokens_per_name_mean": 3.9675,
+ "single_token_names": 0,
+ "names_with_char_split_root": 0,
+ "last_root_token": {
+  "n_clusters": 119,
+  "cluster_size_hist": {
+   "1": 56,
+   "2": 24,
+   "3": 10,
+   "4": 5,
+   "5": 3,
+   "6": 2,
+   "7": 1,
+   "8": 4,
+   "9": 5,
+   "10": 2,
+   "11": 3,
+   "14": 1,
+   "17": 1,
+   "24": 1,
+   "27": 1
+  },
+  "largest_cluster": 27,
+  "names_in_clusters_ge2": 344,
+  "share_in_clusters_ge2": 0.86,
+  "top_clusters": [
+   {
+    "token_id": 324,
+    "token": "ay",
+    "size": 27
+   },
+   {
+    "token_id": 121,
+    "token": "u",
+    "size": 24
+   },
+   {
+    "token_id": 441,
+    "token": "ül",
+    "size": 17
+   },
+   {
+    "token_id": 309,
+    "token": "un",
+    "size": 14
+   },
+   {
+    "token_id": 277,
+    "token": "ç",
+    "size": 11
+   },
+   {
+    "token_id": 284,
+    "token": "er",
+    "size": 11
+   },
+   {
+    "token_id": 323,
+    "token": "ur",
+    "size": 11
+   },
+   {
+    "token_id": 276,
+    "token": "li",
+    "size": 10
+   },
+   {
+    "token_id": 3671,
+    "token": "can",
+    "size": 10
+   },
+   {
+    "token_id": 357,
+    "token": "ün",
+    "size": 9
+   }
+  ]
+ },
+ "informal": {
+  "per_case": {
+   "gen": {
+    "n_classified": 400,
+    "formal_fused": 0,
+    "counts": {
+     "IDENT": 192,
+     "RESEG": 0,
+     "FUSED": 208
+    },
+    "shares": {
+     "IDENT": 0.48,
+     "RESEG": 0.0,
+     "FUSED": 0.52
+    },
+    "nonident_share": 0.52
+   },
+   "dat": {
+    "n_classified": 400,
+    "formal_fused": 0,
+    "counts": {
+     "IDENT": 185,
+     "RESEG": 0,
+     "FUSED": 215
+    },
+    "shares": {
+     "IDENT": 0.4625,
+     "RESEG": 0.0,
+     "FUSED": 0.5375
+    },
+    "nonident_share": 0.5375
+   },
+   "acc": {
+    "n_classified": 400,
+    "formal_fused": 0,
+    "counts": {
+     "IDENT": 135,
+     "RESEG": 0,
+     "FUSED": 265
+    },
+    "shares": {
+     "IDENT": 0.3375,
+     "RESEG": 0.0,
+     "FUSED": 0.6625
+    },
+    "nonident_share": 0.6625
+   },
+   "loc": {
+    "n_classified": 400,
+    "formal_fused": 0,
+    "counts": {
+     "IDENT": 344,
+     "RESEG": 0,
+     "FUSED": 56
+    },
+    "shares": {
+     "IDENT": 0.86,
+     "RESEG": 0.0,
+     "FUSED": 0.14
+    },
+    "nonident_share": 0.14
+   },
+   "abl": {
+    "n_classified": 400,
+    "formal_fused": 0,
+    "counts": {
+     "IDENT": 359,
+     "RESEG": 0,
+     "FUSED": 41
+    },
+    "shares": {
+     "IDENT": 0.8975,
+     "RESEG": 0.0,
+     "FUSED": 0.1025
+    },
+    "nonident_share": 0.1025
+   },
+   "ins": {
+    "n_classified": 400,
+    "formal_fused": 0,
+    "counts": {
+     "IDENT": 293,
+     "RESEG": 0,
+     "FUSED": 107
+    },
+    "shares": {
+     "IDENT": 0.7325,
+     "RESEG": 0.0,
+     "FUSED": 0.2675
+    },
+    "nonident_share": 0.2675
+   }
+  },
+  "overall": {
+   "n_classified": 2400,
+   "formal_fused": 0,
+   "counts": {
+    "IDENT": 1508,
+    "RESEG": 0,
+    "FUSED": 892
+   },
+   "shares": {
+    "IDENT": 0.6283333333333333,
+    "RESEG": 0.0,
+    "FUSED": 0.37166666666666665
+   },
+   "nonident_share": 0.37166666666666665
+  }
+ },
+ "formal_fused_share": 0.0
+}
