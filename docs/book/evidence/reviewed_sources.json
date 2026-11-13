@@ -871,7 +871,7 @@
       ]
     },
     "src/neural_network.py": {
-      "sha256": "cb28041badce4b6c126af255996fa581d45e304abf2e6acbd2d20e993a4e1c2e",
+      "sha256": "0eb7cacfa5cb6dce33652065f9d86f858754cb2d508295336ae303fc09ae4f91",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",

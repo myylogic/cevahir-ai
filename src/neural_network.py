@@ -346,7 +346,7 @@ class CevahirNeuralNetwork(nn.Module):
             embed_dim=embed_dim,
             init_method="xavier_normal",  # [OK] Endüstri standardı: Gradient explosion önleme
             scale_by_sqrt=False,   # [OK] Gradient explosion önleme
-            dropout=dropout,
+            dropout=0.0,  # dropout aşağıda embed_dropout ile tek kez uygulanır (çift dropout'u önler)
             log_level=log_level,
         )
         
@@ -455,8 +455,8 @@ class CevahirNeuralNetwork(nn.Module):
 
         # [V6] Feature E: Scaled Residual Projection Init (LLaMA / DeepNet standardı)
         # Derinlikle birlikte varyans büyümesini önler; eğitim stabilitesini artırır
-        # out_proj ve fc2 ağırlıkları 1/sqrt(2*N) ile ölçeklenir (N = num_layers)
-        _residual_init_scale = 1.0 / math.sqrt(2.0 * num_layers)
+        # out_proj ve fc2 ağırlıkları std = 0.02/sqrt(2*N) ile başlatılır (GPT-2 kuralı, N = num_layers)
+        _residual_init_scale = 0.02 / math.sqrt(2.0 * num_layers)
         for _layer in self.layers:
             if hasattr(_layer, 'attn') and hasattr(_layer.attn, 'out_proj'):
                 nn.init.normal_(_layer.attn.out_proj.weight, mean=0.0, std=_residual_init_scale)
@@ -464,7 +464,7 @@ class CevahirNeuralNetwork(nn.Module):
                 nn.init.normal_(_layer.ffn.fc2.weight, mean=0.0, std=_residual_init_scale)
         self.logger.info(
             f"[V6] Scaled Residual Init uygulandı: out_proj + fc2 ağırlıkları "
-            f"1/sqrt(2*{num_layers}) = {_residual_init_scale:.4f} ile başlatıldı (LLaMA/DeepNet)"
+            f"0.02/sqrt(2*{num_layers}) = {_residual_init_scale:.4f} std ile başlatıldı (GPT-2 kuralı)"
         )
         
         # [OK] V-2/V-3/V-4: TransformerEncoderLayer kullanılıyor (eski NeuralLayerProcessor ve TensorProcessingManager yerine)
