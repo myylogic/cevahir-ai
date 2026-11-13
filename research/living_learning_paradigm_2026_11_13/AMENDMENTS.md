@@ -27,3 +27,13 @@ entries are not amendments.
   one written after the discovery lives, whose hash is appended below. The gap in the frozen script is reported
   here and left unchanged. This qualifies the orchestration entry above: the split cannot change the selection
   because the scheduled select_decide.py run starts only after all six selection jobs have exited successfully.
+- 2026-11-13 11:00 UTC — verify_real.py revised before its first scheduled run, after an independent review: V8 now
+  samples per probe family from the same family-level batched exact check that scoring uses (including OLD on PF6
+  and RN adoption; leak probes scored by true greedy decoding are skipped and counted), pools the unedited and the
+  edited state per family, records every disagreement, lists families with any disagreement as
+  `true_greedy_families` (the protocol's remedy), and passes at an overall disagreement of at most 1% (per family
+  only where at least 100 probes were sampled). V1 now also checks the logits after a real write was zeroed and
+  after the installer's restore. V2's padded check compares each query with its own truncated key. The script exits
+  non-zero only when V1 or V2 fails; V6 and V8 failures are recorded and, per PROTOCOL §10.3, block publication of
+  the H and S results until resolved rather than stopping the runs. V8 here is a pre-run sample on STD writes in
+  four worlds, not a check of every scored probe; the report says so.

@@ -5,17 +5,28 @@ Added after the freeze as a verification tool; it imports the frozen modules and
 and no analysis (see AMENDMENTS.md). The unit tests in tests/evolution/test_cev11_*.py cover the same checks on tiny
 models; this script repeats them on the study's own bases and edits:
 
-- V1: with an all-zero memory installed at every layer, max|Δlogit| over probe prefixes is exactly 0.0, and
-  detaching the hooks restores exactly 0.0.
+- V1: with an all-zero memory installed at every layer, max|Δlogit| over probe prefixes is exactly 0.0; detaching
+  the hooks restores exactly 0.0; after a real write is installed and zeroed, and after the installer's restore,
+  the logits are again bitwise equal to the unhooked base.
 - V2: fc2 inputs at the root-final token are bitwise identical across the 7 formal forms and the IDENT informal
-  forms on truncated prefixes (every layer), and within relative 1e-5 on the full, right-padded frame queries.
-- V6: with a write installed, cached and uncached greedy decoding give identical outputs on the sampled probes.
-- V8: on a random share (default 5%) of all probes of the edited and the unedited model, the batched exact check
-  agrees with true (uncached) greedy decoding; disagreement must be at most 1% per family and overall.
+  forms on truncated prefixes (every layer), and each full, right-padded frame query reproduces its own truncated
+  key within relative 1e-5.
+- V6: cached and uncached greedy decoding give identical outputs on the sampled probes (edited and unedited model).
+- V8 (pre-run sample): for each probe family, a random share (default 5%, at least one probe) of the probes is
+  taken from the SAME family-level batched exact check that scoring uses (measure / _changed composition: WF, PF6,
+  OLD on PF6, PF5, IF5, CF14, RN adoption, and the leak families scored by the batched check, i.e. probes with a
+  base answer and exact_ok), on the unedited model and under one STD write per edit, and compared with true
+  (uncached) greedy decoding. Families with any disagreement are listed as `true_greedy_families` (the protocol's
+  remedy: that family is scored by true greedy decoding). Pass: overall disagreement ≤ 1%, and ≤ 1% for every
+  family with at least 100 sampled probes.
+
+Exit code: 1 if V1 or V2 fails (deterministic checks whose failure would invalidate the write mechanics), else 0.
+V6 and V8 outcomes are recorded with every disagreement; like any failed check they block publication of the H and
+S results until resolved (PROTOCOL §10.3), but they do not stop the runs.
 
 Usage: python verify_real.py --base results/bases/confirm_w1000_K20 --world 1000 [--edits 10] [--frac 0.05]
            [--selection | --layer 1 --config cap_mult=8,step=5.0] [--out results/verification]
-Writes <out>/real_<world>.json; exit code 0 if every check passes, 1 otherwise.
+Writes <out>/real_<world>.json.
 """
 from __future__ import annotations
 
@@ -34,7 +45,6 @@ import torch  # noqa: E402
 
 torch.set_num_threads(1)
 
-NEW_FAMILIES = ("WF", "PF6", "PF5", "IF5", "CF14")
 LEAK_FAMILIES = ("RN", "RD", "SS", "RB", "RC", "PX")
 
 
@@ -44,6 +54,46 @@ def _logits(model, ids_list):
         for ids in ids_list:
             out.append(model(torch.tensor([ids], dtype=torch.long))[0][0].clone())
     return out
+
+
+def _maxdiff(a_list, b_list) -> float:
+    return max(float((a - b).abs().max()) for a, b in zip(a_list, b_list))
+
+
+def scored_units(E, base, prep):
+    """(family, prefix, candidate, batched_result) for every probe scored by the batched exact check, with the same
+    per-family batch composition as experiment.measure / experiment._changed. Leak probes without a base answer or
+    with exact_ok False are scored by true greedy decoding in the study and are skipped here (counted)."""
+    fam, item = prep["fam"], prep["item"]
+    new, old = item["new"], item["old"]
+    units, skipped = [], 0
+
+    def add(label, probes, cands):
+        if not probes:
+            return
+        res = E._exact(base, [d["prefix"] for d in probes], cands)
+        units.extend((label, d["prefix"], c, bool(r)) for d, c, r in zip(probes, cands, res))
+
+    add("WF", fam["WF"][:1], [new])
+    add("PF6", fam["PF6"], [new] * len(fam["PF6"]))
+    add("OLD", fam["PF6"], [old] * len(fam["PF6"]))
+    add("PF5", fam["PF5"], [new] * len(fam["PF5"]))
+    add("IF5", fam["IF5"], [new] * len(fam["IF5"]))
+    add("CF14", fam["CF14"], [new] * len(fam["CF14"]))
+    for f in LEAK_FAMILIES:
+        probes = fam.get(f, [])
+        clean = [d for d in probes if d["base_answer"] is not None]
+        # the study batches all clean probes together; only exact_ok ones are scored by the batched result
+        res = E._exact(base, [d["prefix"] for d in clean], [d["base_answer"] for d in clean]) if clean else []
+        for d, r in zip(clean, res):
+            if d.get("exact_ok", True):
+                units.append((f, d["prefix"], d["base_answer"], bool(r)))
+            else:
+                skipped += 1
+        skipped += len(probes) - len(clean)
+        if f == "RN" and probes:
+            add("RN-adopt", probes, [new] * len(probes))
+    return units, skipped
 
 
 def main(argv=None) -> int:
@@ -62,7 +112,7 @@ def main(argv=None) -> int:
 
     from cev11 import experiment as E
     from cev11 import probes as P
-    from cev11.decode import clear_cache, exact_check_batch, greedy_ids, greedy_reproduces
+    from cev11.decode import clear_cache, greedy_ids
     from cev11.keysites import fc2_inputs, sites
     from cev11.memory import FFNMemory
     from cev11.model import model_sha256
@@ -88,7 +138,7 @@ def main(argv=None) -> int:
     n_layers = len(model.layers)
     t0 = time.time()
     report = {"world": args.world, "base_sha": base.base_sha, "layer": layer, "config": cfg, "frac": args.frac,
-              "seed": args.seed}
+              "seed": args.seed, "edits": args.edits}
 
     # ---------------------------------------------------------------------------------------------- V2 (unedited)
     rnd = random.Random(args.seed)
@@ -106,84 +156,96 @@ def main(argv=None) -> int:
             kt = [h[r] for h, r in zip(fc2_inputs(model, L, trunc), roots)]
             kf = [h[r] for h, r in zip(fc2_inputs(model, L, full, batch_size=len(full)), roots)]
             for a, b in zip(kt, kf):
-                v2_trunc_max = max(v2_trunc_max, float((a - kt[0]).abs().max()))
-                v2_full_rel = max(v2_full_rel, float((b - kt[0]).norm() / kt[0].norm()))
+                v2_trunc_max = max(v2_trunc_max, float((a - kt[0]).abs().max()))   # identity across forms
+                v2_full_rel = max(v2_full_rel, float((b - a).norm() / a.norm()))    # padding vs own key
         v2_n += len(forms)
     report["V2"] = {"entities": len(ents), "forms": v2_n, "layers": n_layers,
-                    "truncated_max_abs_diff": v2_trunc_max, "full_padded_max_rel_diff": v2_full_rel,
+                    "truncated_max_abs_diff_across_forms": v2_trunc_max,
+                    "full_padded_max_rel_diff_vs_own_truncated": v2_full_rel,
                     "pass": v2_trunc_max == 0.0 and v2_full_rel <= 1e-5}
 
     # ---------------------------------------------------------------------------------------------- edits
-    items = P.edit_items(w, editable, seed=args.world + 2, per_case=10)
-    items = items[: args.edits]
+    items = P.edit_items(w, editable, seed=args.world + 2, per_case=10)[: args.edits]
     answers = E.Answers(base)
     inst = E.Installer(base)
     preps = [E.prepare_item(base, it, answers, seed=args.world + 3) for it in items]
     answers.locked = True
 
-    def probe_list(prep):
-        out = []
-        for fam in NEW_FAMILIES + LEAK_FAMILIES:
-            for d in prep["fam"].get(fam, []):
-                cand = prep["item"]["new"] if fam in NEW_FAMILIES else d.get("base_answer")
-                if cand is not None:
-                    out.append((fam, d["prefix"], cand))
-        return out
-
-    # V1: zero memory at every layer (bitwise), then detach (bitwise)
-    v1_prefixes = [[BOS_ID] + list(tok.encode(p)) for _, p, _ in probe_list(preps[0])[:40]]
+    # V1: zero memory at every layer (bitwise), detach (bitwise)
+    v1_prefixes = [[BOS_ID] + list(tok.encode(p)) for _, p, _, _ in scored_units(E, base, preps[0])[0][:40]]
     ref = _logits(model, v1_prefixes)
     mems = [FFNMemory(model, L) for L in range(n_layers)]
     for m in mems:
         m.zero()
-    z = _logits(model, v1_prefixes)
+    v1_zero = _maxdiff(ref, _logits(model, v1_prefixes))
     for m in mems:
         m.remove()
-    d = _logits(model, v1_prefixes)
-    v1_zero = max(float((a - b).abs().max()) for a, b in zip(ref, z))
-    v1_detach = max(float((a - b).abs().max()) for a, b in zip(ref, d))
-    report["V1"] = {"prefixes": len(v1_prefixes), "zero_memory_max_abs_dlogit": v1_zero,
-                    "detached_max_abs_dlogit": v1_detach, "pass": v1_zero == 0.0 and v1_detach == 0.0}
+    v1_detach = _maxdiff(ref, _logits(model, v1_prefixes))
 
-    # V6 + V8 on the edited model (STD write at the given layer/config) and on the unedited model
-    v8 = {}
-    v6_n, v6_bad = 0, 0
+    # V6 + V8: per family, sampled from the family-level batched results, on the unedited and the edited model
     srnd = random.Random(args.seed + 1)
+    v8, disagreements, v6_mismatch = {}, [], []
+    v6_n = 0
+    skipped_true_greedy = 0
+    v1_after_write = None
 
-    def sample_and_check(probes, tag):
-        nonlocal v6_n, v6_bad
-        k = max(1, round(args.frac * len(probes)))
-        pick = srnd.sample(probes, k)
-        exact = exact_check_batch(model, tok, [p for _, p, _ in pick], [c for _, _, c in pick])
-        for (fam, prefix, cand), ex in zip(pick, exact):
-            true = greedy_reproduces(model, tok, prefix, cand, use_cache=False)
-            key = f"{tag}:{fam}"
-            s = v8.setdefault(key, {"n": 0, "disagree": 0})
-            s["n"] += 1
-            s["disagree"] += int(bool(ex) != bool(true))
-            ids = [BOS_ID] + list(tok.encode(prefix))
-            a = greedy_ids(model, ids, max_new=8, use_cache=True)
-            clear_cache(model)
-            b = greedy_ids(model, ids, max_new=8, use_cache=False)
-            v6_n += 1
-            v6_bad += int(a != b)
+    def sample_and_check(prep, tag):
+        nonlocal v6_n, skipped_true_greedy
+        units, skipped = scored_units(E, base, prep)
+        skipped_true_greedy += skipped
+        by_fam = {}
+        for u in units:
+            by_fam.setdefault(u[0], []).append(u)
+        for fam_label in sorted(by_fam):
+            us = by_fam[fam_label]
+            for fam_name, prefix, cand, ex in srnd.sample(us, max(1, round(args.frac * len(us)))):
+                ids = [BOS_ID] + list(tok.encode(prefix))
+                t = tok.encode(" " + cand + ".")
+                clear_cache(model)
+                a = greedy_ids(model, ids, max_new=8, use_cache=True)
+                clear_cache(model)
+                b = greedy_ids(model, ids, max_new=8, use_cache=False)
+                true = len(t) <= 8 and b[: len(t)] == t      # == decode.greedy_reproduces (uncached), one decode
+                s = v8.setdefault(fam_name, {"n": 0, "disagree": 0})
+                s["n"] += 1
+                if bool(ex) != bool(true):
+                    s["disagree"] += 1
+                    disagreements.append({"state": tag, "family": fam_name, "edit_id": prep["item"]["edit_id"],
+                                          "prefix": prefix, "candidate": cand, "batched": bool(ex),
+                                          "true_greedy": bool(true)})
+                v6_n += 1
+                if a != b:
+                    v6_mismatch.append({"state": tag, "edit_id": prep["item"]["edit_id"], "prefix": prefix,
+                                        "cached": a, "uncached": b})
 
     memo: dict = {}
-    for prep in preps:
-        probes = probe_list(prep)
-        sample_and_check(probes, "base")
+    for i, prep in enumerate(preps):
+        sample_and_check(prep, "base")
         wr = E.compute_write(base, prep["item"], "STD", layer, hp, args.world, memo)
         inst.set_M(layer, wr["M"])
-        sample_and_check(probes, "edited")
+        sample_and_check(prep, "edited")
         inst.zero_all()
+        if i == 0:      # V1 after a real write was installed and zeroed
+            v1_after_write = _maxdiff(ref, _logits(model, v1_prefixes))
     inst.restore()
+    v1_restore = _maxdiff(ref, _logits(model, v1_prefixes))
+    report["V1"] = {"prefixes": len(v1_prefixes), "zero_memory_max_abs_dlogit": v1_zero,
+                    "detached_max_abs_dlogit": v1_detach, "after_write_zeroed_max_abs_dlogit": v1_after_write,
+                    "after_restore_max_abs_dlogit": v1_restore,
+                    "pass": v1_zero == 0.0 and v1_detach == 0.0 and v1_after_write == 0.0 and v1_restore == 0.0}
+
     tot_n = sum(s["n"] for s in v8.values())
     tot_bad = sum(s["disagree"] for s in v8.values())
-    fam_rate = {k: s["disagree"] / s["n"] for k, s in sorted(v8.items())}
-    report["V8"] = {"families": {k: {**v8[k], "rate": fam_rate[k]} for k in sorted(v8)}, "n": tot_n,
-                    "disagree": tot_bad, "rate": tot_bad / max(tot_n, 1),
-                    "pass": tot_bad / max(tot_n, 1) <= 0.01 and all(r <= 0.01 for r in fam_rate.values())}
-    report["V6"] = {"n": v6_n, "mismatches": v6_bad, "pass": v6_bad == 0}
+    fams = {k: {**s, "rate": s["disagree"] / s["n"]} for k, s in sorted(v8.items())}
+    report["V8"] = {"kind": "pre-run sample (STD writes and the unedited model), not every scored probe",
+                    "families": fams, "n": tot_n, "disagree": tot_bad, "rate": tot_bad / max(tot_n, 1),
+                    "skipped_scored_by_true_greedy": skipped_true_greedy,
+                    "true_greedy_families": sorted(k for k, s in v8.items() if s["disagree"]),
+                    "disagreements": disagreements,
+                    "pass": tot_bad <= 0.01 * tot_n and all(s["disagree"] <= 0.01 * s["n"] for s in v8.values()
+                                                            if s["n"] >= 100)}
+    report["V6"] = {"n": v6_n, "mismatches": len(v6_mismatch), "examples": v6_mismatch[:20],
+                    "pass": not v6_mismatch}
     if model_sha256(model) != base.base_sha:
         raise SystemExit("base model changed during verification")
     report["all_pass"] = all(report[k]["pass"] for k in ("V1", "V2", "V6", "V8"))
@@ -191,9 +253,13 @@ def main(argv=None) -> int:
     out = pathlib.Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     (out / f"real_{args.world}.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(json.dumps({k: (v["pass"] if isinstance(v, dict) and "pass" in v else v) for k, v in report.items()
-                      if k in ("V1", "V2", "V6", "V8", "all_pass", "seconds")}), flush=True)
-    return 0 if report["all_pass"] else 1
+    print(json.dumps({k: report[k]["pass"] for k in ("V1", "V2", "V6", "V8")} |
+                     {"all_pass": report["all_pass"], "v8_n": tot_n, "v8_disagree": tot_bad,
+                      "seconds": report["seconds"]}), flush=True)
+    if not report["all_pass"]:
+        print("WARNING: a verification check failed; H/S results must not be published until it is resolved",
+              flush=True)
+    return 0 if (report["V1"]["pass"] and report["V2"]["pass"]) else 1
 
 
 if __name__ == "__main__":
