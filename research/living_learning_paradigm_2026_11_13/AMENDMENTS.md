@@ -39,3 +39,17 @@ entries are not amendments.
   four worlds, not a check of every scored probe; the report says so.
 
 - 2026-11-13 11:38 UTC — recorded output (not an amendment): results/selection.json sha256 83cb20052a3a406c0c79a03a16c8a4006d76113dd9a658ca65fceb85e6cba5e8, produced by the frozen select_decide.py from discovery worlds 0-1 before any confirmatory edit run.
+- 2026-11-13 12:20 UTC — diagnosis recorded before any confirmatory life started (discovery evidence only; no
+  frozen file or record changed): the discovery J lives collapse for every λ in the preregistered grid (E_end
+  0.025-0.057, Leak_RD 63-70 of 70). An independent code audit found no implementation defect: the frozen Ledger
+  rebuilt from the final belief sets reproduces the recorded lives exactly. Mechanism: (1) C0 is a per-position mean,
+  so λ ≤ 1 lies two to four decades below the eigenvalues of KᵀC0⁻¹K (35.5-4362 on world 0); the grid is inert and
+  the joint solve is the exact-interpolation limit (M(0.01) and M(1) differ by about 1.3%); MEMIT works at about 1e4.
+  (2) The collapse itself comes from overloading one fc2 layer: about 52 writes whose residuals sit at the cap (step 5,
+  cap 8 × median fc2 norm) raise the RMS of ΔW·h over C0 positions to about 2× the native fc2 output, versus 0.2× for
+  one edit; a real I state on world 0 collapses too (E_end 0.065, RD 70/70). No λ from 1e-2 to 1e5 and no
+  preregistered step gives Leak_RD ≤ 1% with a useful E_end. Consequence: the confirmatory S3 test stays as frozen
+  (PROTOCOL §13) and is predicted to be 'refuted' because all three variants are overloaded; it is therefore not a
+  test of joint versus independent state under capacity, and the report will say so. Per PROTOCOL §14 the lives run
+  last (after H1-H3, S1-S2 and S4); any life run with a rescaled λ or a smaller step is exploratory. Diagnosis
+  scripts and numbers: kept with the session's working files (code audit, numerical diagnosis, skeptic verdict).
