@@ -19,13 +19,20 @@ Test Senaryoları:
 5. Dropout kontrolü (training/eval mode)
 6. Embedding weight shape kontrolü
 7. Padding_idx kontrolü
+
+Konfigürasyon:
+- Varsayılan: test konfigürasyonu (vocab_size=1000, embed_dim=128).
+- Gerçek model konfigürasyonu (vocab_size=60312, embed_dim=512): daha yavaş
+  olduğu için isteğe bağlıdır; CEVAHIR_REAL_CONFIG=1 ortam değişkeni ile ya da
+  `python tests/test_embedding_layer.py --real-config` ile çalıştırılır.
 """
 
 import sys
 import os
-import torch
-import torch.nn as nn
 import math
+
+import pytest
+import torch
 
 # Proje kök dizinini path'e ekle
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -34,24 +41,27 @@ if BASE_DIR not in sys.path:
 
 from src.neural_network_module.dil_katmani_module.language_embedding import LanguageEmbedding
 
+# Gerçek model konfigürasyonunu etkinleştiren ortam değişkeni
+REAL_CONFIG_ENV = "CEVAHIR_REAL_CONFIG"
 
-def test_padding_token_embedding(use_real_config=False):
+
+@pytest.fixture
+def use_real_config():
+    """Gerçek model konfigürasyonu istendi mi? (varsayılan: hayır → test konfigürasyonu)"""
+    return os.environ.get(REAL_CONFIG_ENV) == "1"
+
+
+def _config(use_real_config):
+    """(vocab_size, embed_dim, pad_id) döndürür."""
+    if use_real_config:
+        return 60312, 512, 0
+    return 1000, 128, 0
+
+
+def test_padding_token_embedding(use_real_config):
     """Test 1: Padding token embedding sıfır olmalı (PyTorch standardı)"""
-    print("\n" + "=" * 80)
-    print("TEST 1: Padding Token Embedding Kontrolü")
-    if use_real_config:
-        print("(Gerçek Model Konfigürasyonu ile)")
-    print("=" * 80)
-    
-    if use_real_config:
-        vocab_size = 60312
-        embed_dim = 512
-        pad_id = 0
-    else:
-        vocab_size = 1000
-        embed_dim = 128
-        pad_id = 0
-    
+    vocab_size, embed_dim, pad_id = _config(use_real_config)
+
     embedding = LanguageEmbedding(
         vocab_size=vocab_size,
         embed_dim=embed_dim,
@@ -59,45 +69,22 @@ def test_padding_token_embedding(use_real_config=False):
         scale_by_sqrt=False,  # Scaling'i kapatıyoruz, sadece padding kontrolü için
         dropout=0.0
     )
-    
+
     # Padding token embedding'i al
     pad_input = torch.tensor([[pad_id]])
     pad_embedding = embedding(pad_input)
-    
-    print(f"Padding token ID: {pad_id}")
-    print(f"Padding embedding shape: {pad_embedding.shape}")
-    print(f"Padding embedding (ilk 10 dim): {pad_embedding[0, 0, :10].tolist()}")
-    print(f"Padding embedding sum: {pad_embedding.sum().item():.6f}")
-    print(f"Padding embedding norm: {pad_embedding.norm().item():.6f}")
-    
+
     # Kontrol: Padding embedding sıfır olmalı
-    is_zero = torch.allclose(pad_embedding, torch.zeros_like(pad_embedding), atol=1e-6)
-    print(f"\n✅ Padding embedding sıfır mı? {is_zero}")
-    
-    if not is_zero:
-        print("⚠️  UYARI: Padding embedding sıfır değil! PyTorch standardına uygun değil.")
-        return False
-    
-    return True
+    assert torch.allclose(pad_embedding, torch.zeros_like(pad_embedding), atol=1e-6), (
+        "Padding embedding sıfır değil! PyTorch standardına uygun değil. "
+        f"sum={pad_embedding.sum().item():.6f}, norm={pad_embedding.norm().item():.6f}"
+    )
 
 
-def test_normal_token_embedding(use_real_config=False):
+def test_normal_token_embedding(use_real_config):
     """Test 2: Normal token embedding'ler sıfır olmamalı"""
-    print("\n" + "=" * 80)
-    print("TEST 2: Normal Token Embedding Kontrolü")
-    if use_real_config:
-        print("(Gerçek Model Konfigürasyonu ile)")
-    print("=" * 80)
-    
-    if use_real_config:
-        vocab_size = 60312
-        embed_dim = 512
-        pad_id = 0
-    else:
-        vocab_size = 1000
-        embed_dim = 128
-        pad_id = 0
-    
+    vocab_size, embed_dim, pad_id = _config(use_real_config)
+
     embedding = LanguageEmbedding(
         vocab_size=vocab_size,
         embed_dim=embed_dim,
@@ -105,112 +92,91 @@ def test_normal_token_embedding(use_real_config=False):
         scale_by_sqrt=False,
         dropout=0.0
     )
-    
+
     # Normal token embedding'leri al
     normal_input = torch.tensor([[100, 200, 300]])
     normal_embedding = embedding(normal_input)
-    
-    print(f"Normal token IDs: [100, 200, 300]")
-    print(f"Normal embedding shape: {normal_embedding.shape}")
-    print(f"Normal embedding mean: {normal_embedding.mean().item():.6f}")
-    print(f"Normal embedding std: {normal_embedding.std().item():.6f}")
-    print(f"Normal embedding norm (token 100): {normal_embedding[0, 0].norm().item():.6f}")
-    
+
     # Kontrol: Normal embedding'ler sıfır olmamalı
-    is_non_zero = not torch.allclose(normal_embedding, torch.zeros_like(normal_embedding), atol=1e-6)
-    print(f"\n✅ Normal embedding'ler sıfır olmamalı mı? {is_non_zero}")
-    
-    if not is_non_zero:
-        print("⚠️  UYARI: Normal embedding'ler sıfır! Weight initialization sorunu olabilir.")
-        return False
-    
-    return True
+    assert not torch.allclose(normal_embedding, torch.zeros_like(normal_embedding), atol=1e-6), (
+        "Normal embedding'ler sıfır! Weight initialization sorunu olabilir. "
+        f"mean={normal_embedding.mean().item():.6f}, std={normal_embedding.std().item():.6f}"
+    )
 
 
-def test_embedding_scaling(use_real_config=False):
-    """Test 3: Embedding scaling kontrolü (scale_by_sqrt)"""
-    print("\n" + "=" * 80)
-    print("TEST 3: Embedding Scaling Kontrolü (scale_by_sqrt)")
-    if use_real_config:
-        print("(Gerçek Model Konfigürasyonu ile)")
-    print("=" * 80)
-    
-    if use_real_config:
-        vocab_size = 60312
-        embed_dim = 512
-        pad_id = 0
-        test_token_id = 100
-    else:
-        vocab_size = 1000
-        embed_dim = 128
-        pad_id = 0
-        test_token_id = 100
-    
+def test_embedding_scaling(use_real_config):
+    """Test 3: Embedding scaling kontrolü (scale_by_sqrt)
+
+    Beklenti düzeltmesi: forward() sırası lookup → (scale_by_sqrt ise) * sqrt(embed_dim)
+    → norm → dropout şeklindedir ve norm varsayılan olarak LayerNorm'dur. LayerNorm
+    ölçeği (eps dışında) yok ettiği için normalize edilmiş çıktıdaki oran sqrt(embed_dim)
+    değil ~1'dir (embed_dim=128 için ~1.03); eski test bu yüzden sessizce False
+    döndürüyordu. Ölçekleme bu nedenle gözlemlenebildiği yerde doğrulanır:
+    (a) normalizasyon kapalıyken (norm_type="none") çıktı tam olarak sqrt(embed_dim) katıdır;
+    (b) varsayılan LayerNorm ile çıktı norm(lookup * sqrt(embed_dim))'e eşittir,
+        yani ölçek normdan ÖNCE uygulanır.
+    """
+    vocab_size, embed_dim, pad_id = _config(use_real_config)
+    test_token_id = 100
+    test_input = torch.tensor([[test_token_id]])
+    expected_scale = math.sqrt(embed_dim)
+
+    # (a) Normalizasyon KAPALI: scale_by_sqrt etkisi çıktıda doğrudan görünür
     # Scaling KAPALI
     embedding_no_scale = LanguageEmbedding(
         vocab_size=vocab_size,
         embed_dim=embed_dim,
         padding_idx=pad_id,
         scale_by_sqrt=False,
-        dropout=0.0
+        dropout=0.0,
+        norm_type="none",
     )
-    
+
     # Scaling AÇIK
     embedding_with_scale = LanguageEmbedding(
         vocab_size=vocab_size,
         embed_dim=embed_dim,
         padding_idx=pad_id,
         scale_by_sqrt=True,
-        dropout=0.0
+        dropout=0.0,
+        norm_type="none",
     )
-    
+
     # Aynı weight'leri kopyala (karşılaştırma için)
     embedding_with_scale.embedding.weight.data = embedding_no_scale.embedding.weight.data.clone()
-    
-    test_input = torch.tensor([[test_token_id]])
-    
-    # Scaling olmadan
+
     emb_no_scale = embedding_no_scale(test_input)
-    
-    # Scaling ile
     emb_with_scale = embedding_with_scale(test_input)
-    
-    expected_scale = math.sqrt(embed_dim)
     actual_scale = (emb_with_scale / emb_no_scale).mean().item()
-    
-    print(f"Embed dim: {embed_dim}")
-    print(f"Expected scale factor: sqrt({embed_dim}) = {expected_scale:.6f}")
-    print(f"Actual scale factor: {actual_scale:.6f}")
-    print(f"Scale difference: {abs(actual_scale - expected_scale):.6f}")
-    
+
     # Kontrol: Scaling doğru uygulanmalı
-    scale_is_correct = math.isclose(actual_scale, expected_scale, rel_tol=1e-5)
-    print(f"\n✅ Scaling doğru uygulanıyor mu? {scale_is_correct}")
-    
-    if not scale_is_correct:
-        print("⚠️  UYARI: Scaling doğru uygulanmıyor! scale_by_sqrt=True ama sqrt(embed_dim) ile çarpılmıyor.")
-        return False
-    
-    return True
+    assert math.isclose(actual_scale, expected_scale, rel_tol=1e-5), (
+        "scale_by_sqrt=True ama çıktı sqrt(embed_dim) ile çarpılmıyor! "
+        f"Beklenen: sqrt({embed_dim}) = {expected_scale:.6f}, Alınan: {actual_scale:.6f}"
+    )
+
+    # (b) Varsayılan LayerNorm (norm_type=None): ölçek normdan önce uygulanmalı
+    embedding_ln = LanguageEmbedding(
+        vocab_size=vocab_size,
+        embed_dim=embed_dim,
+        padding_idx=pad_id,
+        scale_by_sqrt=True,
+        dropout=0.0,
+    )
+    with torch.no_grad():
+        expected_ln = embedding_ln.norm(embedding_ln.embedding(test_input) * expected_scale)
+        actual_ln = embedding_ln(test_input)
+    max_diff = (actual_ln - expected_ln).abs().max().item()
+    assert torch.allclose(actual_ln, expected_ln, atol=1e-6), (
+        "Varsayılan LayerNorm ile çıktı norm(lookup * sqrt(embed_dim)) değil; "
+        f"scaling/norm sırası beklenenden farklı (max |fark|={max_diff:.3e})"
+    )
 
 
-def test_weight_initialization(use_real_config=False):
+def test_weight_initialization(use_real_config):
     """Test 4: Weight initialization kontrolü"""
-    print("\n" + "=" * 80)
-    print("TEST 4: Weight Initialization Kontrolü")
-    if use_real_config:
-        print("(Gerçek Model Konfigürasyonu ile)")
-    print("=" * 80)
-    
-    if use_real_config:
-        vocab_size = 60312
-        embed_dim = 512
-        pad_id = 0
-    else:
-        vocab_size = 1000
-        embed_dim = 128
-        pad_id = 0
-    
+    vocab_size, embed_dim, pad_id = _config(use_real_config)
+
     # Xavier initialization ile test
     embedding_xavier = LanguageEmbedding(
         vocab_size=vocab_size,
@@ -220,57 +186,38 @@ def test_weight_initialization(use_real_config=False):
         scale_by_sqrt=False,
         dropout=0.0
     )
-    
+
     weights = embedding_xavier.embedding.weight.data
-    
+
     # Padding token hariç weight'leri al
     non_pad_weights = weights[1:]  # pad_id=0 hariç
-    
-    print(f"Embedding weight shape: {weights.shape}")
-    print(f"Non-padding weights shape: {non_pad_weights.shape}")
-    print(f"Weight mean: {non_pad_weights.mean().item():.6f}")
-    print(f"Weight std: {non_pad_weights.std().item():.6f}")
-    print(f"Weight min: {non_pad_weights.min().item():.6f}")
-    print(f"Weight max: {non_pad_weights.max().item():.6f}")
-    
-    # Xavier initialization: std ≈ sqrt(2 / (vocab_size + embed_dim))
-    # Büyük vocab_size'larda std daha küçük olabilir (bu normal)
-    # Örnek: vocab_size=60312, embed_dim=512 için std ≈ sqrt(2/(60312+512)) ≈ 0.0057
+
+    # Not: _initialize_weights, seçilen init'ten (xavier vb.) sonra her token satırını
+    # L2 normu 0.15 olacak şekilde yeniden ölçekler. Bu yüzden eleman std'si
+    # vocab_size'dan bağımsız olarak ≈ 0.15 / sqrt(embed_dim)'dir
+    # (embed_dim=128 için ≈0.0133, embed_dim=512 için ≈0.0066).
+    # Alt sınır 0.001 bilinçli olarak gevşek tutulmuştur (büyük embed_dim'lerde std küçülür).
     weight_std = non_pad_weights.std().item()
-    # Test kriterini gevşetiyoruz: çok küçük vocab'ler için 0.01, büyük vocab'ler için daha küçük std normal
-    std_reasonable = 0.001 < weight_std < 1.0  # Daha gerçekçi kriter
-    mean_near_zero = abs(non_pad_weights.mean().item()) < 0.1
-    
-    print(f"\n✅ Weight std makul aralıkta mı? (0.001 < std < 1.0): {std_reasonable}")
-    print(f"  Not: Büyük vocab_size'larda std daha küçük olabilir (Xavier initialization)")
-    print(f"  Örnek: vocab_size=60312 için std≈0.0057 normal (Xavier: sqrt(2/(vocab_size+embed_dim)))")
-    print(f"✅ Weight mean sıfıra yakın mı? (|mean| < 0.1): {mean_near_zero}")
-    
+    weight_mean = non_pad_weights.mean().item()
+
+    assert 0.001 < weight_std < 1.0, (
+        f"Weight std makul aralıkta değil (0.001 < std < 1.0): std={weight_std:.6f}"
+    )
+    assert abs(weight_mean) < 0.1, (
+        f"Weight mean sıfıra yakın değil (|mean| < 0.1): mean={weight_mean:.6f}"
+    )
+
     # Padding token embedding sıfır olmalı
     pad_weight = weights[pad_id]
-    pad_is_zero = torch.allclose(pad_weight, torch.zeros_like(pad_weight), atol=1e-6)
-    print(f"✅ Padding weight sıfır mı? {pad_is_zero}")
-    
-    return std_reasonable and mean_near_zero and pad_is_zero
+    assert torch.allclose(pad_weight, torch.zeros_like(pad_weight), atol=1e-6), (
+        f"Padding weight sıfır değil! norm={pad_weight.norm().item():.6f}"
+    )
 
 
-def test_dropout(use_real_config=False):
+def test_dropout(use_real_config):
     """Test 5: Dropout kontrolü (training/eval mode)"""
-    print("\n" + "=" * 80)
-    print("TEST 5: Dropout Kontrolü (Training/Eval Mode)")
-    if use_real_config:
-        print("(Gerçek Model Konfigürasyonu ile)")
-    print("=" * 80)
-    
-    if use_real_config:
-        vocab_size = 60312
-        embed_dim = 512
-        pad_id = 0
-    else:
-        vocab_size = 1000
-        embed_dim = 128
-        pad_id = 0
-    
+    vocab_size, embed_dim, pad_id = _config(use_real_config)
+
     embedding = LanguageEmbedding(
         vocab_size=vocab_size,
         embed_dim=embed_dim,
@@ -278,59 +225,35 @@ def test_dropout(use_real_config=False):
         scale_by_sqrt=False,
         dropout=0.5  # Yüksek dropout, farkı görmek için
     )
-    
+
     test_input = torch.tensor([[100, 200, 300]])
-    
-    # Training mode
+
+    # Training mode: dropout aktif olmalı → ardışık iki forward farklı maskeler kullanır.
+    # Not: Eski test her forward'dan önce aynı seed'i (42) kuruyordu; iki maske birebir
+    # aynı olduğundan "farklı çıktı" kontrolü hiç sağlanamıyordu. Seed bir kez kurulur.
     embedding.train()
     torch.manual_seed(42)  # Reproducibility için
     emb_train_1 = embedding(test_input)
-    torch.manual_seed(42)
     emb_train_2 = embedding(test_input)
-    
-    # Eval mode
+
+    # Eval mode: dropout pasif olmalı (deterministic, aynı çıktı)
     embedding.eval()
     emb_eval_1 = embedding(test_input)
     emb_eval_2 = embedding(test_input)
-    
-    print(f"Dropout rate: 0.5")
-    print(f"Training mode - emb 1 mean: {emb_train_1.mean().item():.6f}")
-    print(f"Training mode - emb 2 mean: {emb_train_2.mean().item():.6f}")
-    print(f"Eval mode - emb 1 mean: {emb_eval_1.mean().item():.6f}")
-    print(f"Eval mode - emb 2 mean: {emb_eval_2.mean().item():.6f}")
-    
-    # Training mode'da dropout aktif olmalı (random, farklı olabilir)
-    # Eval mode'da dropout pasif olmalı (deterministic, aynı olmalı)
-    train_different = not torch.allclose(emb_train_1, emb_train_2, atol=1e-5)  # Dropout nedeniyle farklı olabilir
-    eval_same = torch.allclose(emb_eval_1, emb_eval_2, atol=1e-5)  # Eval mode'da aynı olmalı
-    
-    print(f"\n✅ Training mode'da dropout aktif mi? (farklı çıktılar): {train_different}")
-    print(f"✅ Eval mode'da dropout pasif mi? (aynı çıktılar): {eval_same}")
-    
-    if not eval_same:
-        print("⚠️  UYARI: Eval mode'da dropout aktif! Eval mode'da dropout pasif olmalı.")
-        return False
-    
-    return True
+
+    assert not torch.allclose(emb_train_1, emb_train_2, atol=1e-5), (
+        "Training mode'da dropout aktif değil! (iki forward birebir aynı çıktıyı verdi)"
+    )
+    assert torch.allclose(emb_eval_1, emb_eval_2, atol=1e-5), (
+        "Eval mode'da dropout aktif! Eval mode'da dropout pasif olmalı. "
+        f"max |fark|={(emb_eval_1 - emb_eval_2).abs().max().item():.3e}"
+    )
 
 
-def test_embedding_weight_shape(use_real_config=False):
+def test_embedding_weight_shape(use_real_config):
     """Test 6: Embedding weight shape kontrolü"""
-    print("\n" + "=" * 80)
-    print("TEST 6: Embedding Weight Shape Kontrolü")
-    if use_real_config:
-        print("(Gerçek Model Konfigürasyonu ile)")
-    print("=" * 80)
-    
-    if use_real_config:
-        vocab_size = 60312
-        embed_dim = 512
-        pad_id = 0
-    else:
-        vocab_size = 1000
-        embed_dim = 128
-        pad_id = 0
-    
+    vocab_size, embed_dim, pad_id = _config(use_real_config)
+
     embedding = LanguageEmbedding(
         vocab_size=vocab_size,
         embed_dim=embed_dim,
@@ -338,43 +261,19 @@ def test_embedding_weight_shape(use_real_config=False):
         scale_by_sqrt=False,
         dropout=0.0
     )
-    
-    weights = embedding.embedding.weight.data
-    
+
     expected_shape = (vocab_size, embed_dim)
-    actual_shape = weights.shape
-    
-    print(f"Expected shape: {expected_shape}")
-    print(f"Actual shape: {actual_shape}")
-    
-    shape_correct = actual_shape == expected_shape
-    
-    print(f"\n✅ Weight shape doğru mu? {shape_correct}")
-    
-    if not shape_correct:
-        print(f"⚠️  UYARI: Weight shape yanlış! Beklenen: {expected_shape}, Alınan: {actual_shape}")
-        return False
-    
-    return True
+    actual_shape = tuple(embedding.embedding.weight.shape)
+
+    assert actual_shape == expected_shape, (
+        f"Weight shape yanlış! Beklenen: {expected_shape}, Alınan: {actual_shape}"
+    )
 
 
-def test_padding_idx(use_real_config=False):
+def test_padding_idx(use_real_config):
     """Test 7: Padding_idx kontrolü"""
-    print("\n" + "=" * 80)
-    print("TEST 7: Padding_idx Kontrolü")
-    if use_real_config:
-        print("(Gerçek Model Konfigürasyonu ile)")
-    print("=" * 80)
-    
-    if use_real_config:
-        vocab_size = 60312
-        embed_dim = 512
-        pad_id = 0
-    else:
-        vocab_size = 1000
-        embed_dim = 128
-        pad_id = 0
-    
+    vocab_size, embed_dim, pad_id = _config(use_real_config)
+
     embedding = LanguageEmbedding(
         vocab_size=vocab_size,
         embed_dim=embed_dim,
@@ -382,144 +281,24 @@ def test_padding_idx(use_real_config=False):
         scale_by_sqrt=False,
         dropout=0.0
     )
-    
+
     # PyTorch nn.Embedding'de padding_idx set edilmiş mi kontrol et
     actual_padding_idx = embedding.embedding.padding_idx
-    
-    print(f"Expected padding_idx: {pad_id}")
-    print(f"Actual padding_idx: {actual_padding_idx}")
-    
-    padding_idx_correct = actual_padding_idx == pad_id
-    
-    print(f"\n✅ Padding_idx doğru set edilmiş mi? {padding_idx_correct}")
-    
-    if not padding_idx_correct:
-        print(f"⚠️  UYARI: Padding_idx yanlış! Beklenen: {pad_id}, Alınan: {actual_padding_idx}")
-        return False
-    
-    return True
 
-
-def main(use_real_config=False):
-    """Ana test fonksiyonu"""
-    print("=" * 80)
-    print("EMBEDDING LAYER ANALİZ TESTİ")
-    if use_real_config:
-        print("(Gerçek Model Konfigürasyonu: vocab_size=60312, embed_dim=512)")
-    else:
-        print("(Test Konfigürasyonu: vocab_size=1000, embed_dim=128)")
-    print("=" * 80)
-    print("\nTest Dosyası: src/neural_network_module/dil_katmani_module/language_embedding.py")
-    print("Sınıf: LanguageEmbedding")
-    print("\nBu test, LanguageEmbedding sınıfının endüstri standartlarına uygunluğunu kontrol eder.")
-    print("=" * 80)
-    
-    results = []
-    
-    # Test 1: Padding token embedding
-    try:
-        result = test_padding_token_embedding(use_real_config)
-        results.append(("Test 1: Padding Token Embedding", result))
-    except Exception as e:
-        print(f"\n❌ Test 1 HATA: {e}")
-        import traceback
-        traceback.print_exc()
-        results.append(("Test 1: Padding Token Embedding", False))
-    
-    # Test 2: Normal token embedding
-    try:
-        result = test_normal_token_embedding(use_real_config)
-        results.append(("Test 2: Normal Token Embedding", result))
-    except Exception as e:
-        print(f"\n❌ Test 2 HATA: {e}")
-        import traceback
-        traceback.print_exc()
-        results.append(("Test 2: Normal Token Embedding", False))
-    
-    # Test 3: Embedding scaling
-    try:
-        result = test_embedding_scaling(use_real_config)
-        results.append(("Test 3: Embedding Scaling", result))
-    except Exception as e:
-        print(f"\n❌ Test 3 HATA: {e}")
-        import traceback
-        traceback.print_exc()
-        results.append(("Test 3: Embedding Scaling", False))
-    
-    # Test 4: Weight initialization
-    try:
-        result = test_weight_initialization(use_real_config)
-        results.append(("Test 4: Weight Initialization", result))
-    except Exception as e:
-        print(f"\n❌ Test 4 HATA: {e}")
-        import traceback
-        traceback.print_exc()
-        results.append(("Test 4: Weight Initialization", False))
-    
-    # Test 5: Dropout
-    try:
-        result = test_dropout(use_real_config)
-        results.append(("Test 5: Dropout", result))
-    except Exception as e:
-        print(f"\n❌ Test 5 HATA: {e}")
-        import traceback
-        traceback.print_exc()
-        results.append(("Test 5: Dropout", False))
-    
-    # Test 6: Embedding weight shape
-    try:
-        result = test_embedding_weight_shape(use_real_config)
-        results.append(("Test 6: Embedding Weight Shape", result))
-    except Exception as e:
-        print(f"\n❌ Test 6 HATA: {e}")
-        import traceback
-        traceback.print_exc()
-        results.append(("Test 6: Embedding Weight Shape", False))
-    
-    # Test 7: Padding_idx
-    try:
-        result = test_padding_idx(use_real_config)
-        results.append(("Test 7: Padding_idx", result))
-    except Exception as e:
-        print(f"\n❌ Test 7 HATA: {e}")
-        import traceback
-        traceback.print_exc()
-        results.append(("Test 7: Padding_idx", False))
-    
-    # Sonuçlar
-    print("\n" + "=" * 80)
-    print("TEST SONUÇLARI ÖZETİ")
-    print("=" * 80)
-    
-    passed = sum(1 for _, result in results if result)
-    total = len(results)
-    
-    for test_name, result in results:
-        status = "✅ PASS" if result else "❌ FAIL"
-        print(f"{status}: {test_name}")
-    
-    print("=" * 80)
-    print(f"Toplam: {passed}/{total} test başarılı")
-    print("=" * 80)
-    
-    if passed == total:
-        print("\n🎉 TÜM TESTLER BAŞARILI!")
-        print("LanguageEmbedding endüstri standartlarına uygun çalışıyor.")
-    else:
-        print(f"\n⚠️  {total - passed} TEST BAŞARISIZ!")
-        print("LanguageEmbedding'de sorunlar bulundu. Detaylar için yukarıdaki çıktılara bakın.")
-    
-    return passed == total
+    assert actual_padding_idx == pad_id, (
+        f"Padding_idx yanlış! Beklenen: {pad_id}, Alınan: {actual_padding_idx}"
+    )
 
 
 if __name__ == "__main__":
     import argparse
-    
-    parser = argparse.ArgumentParser(description="Embedding Layer Test")
-    parser.add_argument("--real-config", action="store_true", 
-                       help="Gerçek model konfigürasyonu ile test et (vocab_size=60312, embed_dim=512)")
-    args = parser.parse_args()
-    
-    success = main(use_real_config=args.real_config)
-    sys.exit(0 if success else 1)
 
+    parser = argparse.ArgumentParser(description="Embedding Layer Test")
+    parser.add_argument("--real-config", action="store_true",
+                        help="Gerçek model konfigürasyonu ile test et (vocab_size=60312, embed_dim=512)")
+    args, pytest_args = parser.parse_known_args()
+    if args.real_config:
+        os.environ[REAL_CONFIG_ENV] = "1"
+
+    # Testleri pytest ile koştur (cache dizini repoya yazılmaz)
+    sys.exit(pytest.main([__file__, "-v", "-p", "no:cacheprovider", *pytest_args]))
