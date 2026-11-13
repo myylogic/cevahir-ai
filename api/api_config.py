@@ -16,36 +16,43 @@ Endüstri Standartları:
 - Performance optimization
 
 Modes, selected by FLASK_ENV:
-- unset: safe default. Debug off, rate limiting on, CORS limited to
-  http(s)://localhost, 127.0.0.1 and [::1] origins (any port).
-- development: explicit local development. Debug and pretty JSON on, rate
+- unset or "default": safe default. Debug off, rate limiting on, CORS limited
+  to http(s)://localhost, 127.0.0.1 and [::1] origins (any port).
+- development: explicit local development. DEBUG and pretty JSON on, rate
   limiting off, the same localhost CORS default. Only this mode and testing
   accept CEVAHIR_TRUST_X_USER_ID=1, which lets the X-User-ID header act as the
   caller's identity; otherwise identity comes only from a verified JWT.
-- testing: test runs; rate limiting and metrics off.
-- production: refuses to load without real PRODUCTION_SECRET_KEY and
-  JWT_SECRET_KEY values; no cross-origin access unless CORS_ORIGINS lists it.
-Unknown FLASK_ENV values are an error. Security settings are read from the
-environment when get_config() creates the configuration, not at import time.
+  python api/app_factory.py still serves with debug off unless --debug or
+  CEVAHIR_API_DEBUG=1 asks for it.
+- testing: test runs; DEBUG on, rate limiting and metrics off, and
+  CEVAHIR_TRUST_X_USER_ID=1 accepted as in development.
+- production: refuses to load unless PRODUCTION_SECRET_KEY and JWT_SECRET_KEY
+  are two different values of at least 32 characters that are not placeholders
+  shipped with this repository (whether a value is random cannot be checked);
+  no cross-origin access unless CORS_ORIGINS lists it.
+Other FLASK_ENV values are an error.
+
+Importing this module neither loads nor validates a configuration. get_config()
+reads the secret keys (SECRET_KEY, FLASK_SECRET_KEY, the mode's
+DEVELOPMENT_/TESTING_/PRODUCTION_SECRET_KEY and JWT_SECRET_KEY),
+CEVAHIR_TRUST_X_USER_ID, RATELIMIT_ENABLED and CORS_ORIGINS/CORS_METHODS/
+CORS_HEADERS each time it creates one. All other settings, including
+JWT_ALGORITHM, the JWT token lifetimes, RATELIMIT_DEFAULT,
+RATELIMIT_STORAGE_URI and ENABLE_SECURITY_HEADERS, are class attributes read
+once, when this module is imported.
 """
 
 import os
 import logging
 from pathlib import Path
 from typing import Optional
+from api.placeholder_secrets import PLACEHOLDER_SECRETS  # shared with api.security.jwt
 
 _ROOT = Path(__file__).resolve().parents[1]
 LOGGING_PATH = os.getenv("LOGGING_PATH", str(_ROOT / "logs"))
 MODEL_SAVE_PATH = os.getenv("MODEL_SAVE_PATH", str(_ROOT / "model" / "checkpoints"))
 DEVICE = os.getenv("CEVAHIR_DEVICE", "cpu")
 
-# Example values shipped in this repository; never acceptable as real secrets.
-PLACEHOLDER_SECRETS = frozenset({
-    "change-me",
-    "change-me-in-production",
-    "dev-secret-key-change-in-production",
-    "test-secret-key",
-})
 MIN_PRODUCTION_SECRET_LENGTH = 32
 
 # Default browser origins outside production: http(s) on localhost, any port.
@@ -336,8 +343,8 @@ class ProductionConfig(Config):
     
     Endüstri Standardı: Production best practices
     - Debug mode disabled
-    - Security hardened: real, distinct PRODUCTION_SECRET_KEY and JWT_SECRET_KEY
-      values are required when the configuration is loaded
+    - Security hardened: PRODUCTION_SECRET_KEY and JWT_SECRET_KEY must be two different,
+      non-placeholder values of at least 32 characters when the configuration is loaded
     - Rate limiting always enabled; no cross-origin access unless CORS_ORIGINS lists it
     - Performance optimized
     - Error-only logging
@@ -393,9 +400,20 @@ def get_config():
     env = os.getenv("FLASK_ENV", "").strip().lower()
     if env not in _CONFIGS:
         raise ConfigurationError(
-            f"Unknown FLASK_ENV {env!r}: use development, testing or production, or leave it unset"
+            f"Unknown FLASK_ENV {env!r}: use default, development, testing or production, or leave it unset"
         )
     return _CONFIGS[env]()
 
-# Importing configuration must not create log files or reset application logging.
-config = get_config()
+
+def __getattr__(name):
+    """
+    Build the module-level ``config`` on first use instead of at import time.
+
+    Importing this module must neither load nor validate a configuration (nor
+    create log files or reset application logging): an incomplete or unsafe
+    environment is reported by get_config() when a caller asks for it.
+    """
+    if name == "config":
+        value = globals()["config"] = get_config()
+        return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

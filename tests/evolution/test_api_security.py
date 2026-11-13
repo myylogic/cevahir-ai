@@ -1,16 +1,20 @@
 """Security contracts of the HTTP API: identity source, configuration modes, CORS,
 health-check disclosure and the development-server defaults.
 
-No language model is loaded; the data-access case uses a temporary SQLite file.
+No language model is loaded; the data-access case uses a temporary SQLite file, and
+the import cases run a short probe in a fresh interpreter.
 """
 import logging
+import os
 from pathlib import Path
+import subprocess
 import sys
 from types import SimpleNamespace
 
 import pytest
 
-deps = Path(__file__).resolve().parents[2] / ".evolution" / "deps"
+REPO = Path(__file__).resolve().parents[2]
+deps = REPO / ".evolution" / "deps"
 if deps.exists():
     sys.path.insert(0, str(deps))
 for _module in ("flask", "flask_cors", "flask_limiter", "jwt", "sqlalchemy", "bcrypt"):
@@ -171,6 +175,44 @@ def test_unset_flask_env_selects_the_safe_default(monkeypatch):
     assert app.debug is False
     client = app.test_client()
     assert [client.get("/api/v3/health").status_code for _ in range(3)] == [200, 200, 429]
+    monkeypatch.setenv("FLASK_ENV", "default")  # the documented spelling of the unset mode
+    assert type(get_config()) is api_config.DefaultConfig
+
+
+# Run in a fresh interpreter: these modules are already imported in this one.
+IMPORT_PROBE = """
+import sys
+import api.security
+from api.security.jwt import create_access_token, verify_token
+assert "api.api_config" not in sys.modules, "importing api.security loaded the API configuration"
+assert verify_token(create_access_token("alice"))["sub"] == "alice"
+from api import api_config
+assert "config" not in vars(api_config), "api_config.config was built at import time"
+try:
+    api_config.get_config()
+except api_config.ConfigurationError:
+    pass
+else:
+    raise AssertionError("get_config() accepted an environment it must refuse")
+"""
+
+
+@pytest.mark.parametrize("environment", [
+    {"FLASK_ENV": "production"},  # JWT_SECRET_KEY set, PRODUCTION_SECRET_KEY missing
+    {"FLASK_ENV": "staging"},
+    {"CEVAHIR_TRUST_X_USER_ID": "1"},
+], ids=["production-without-flask-secret", "unknown-mode", "opt-in-outside-development"])
+def test_importing_the_api_neither_loads_nor_validates_the_configuration(environment):
+    # Operators' token scripts import api.security.jwt, and a shell, tool or test run may hold
+    # settings that get_config() refuses; only loading the configuration may fail on them.
+    env = dict(os.environ, JWT_SECRET_KEY=JWT_KEY, PYTHONDONTWRITEBYTECODE="1", **environment)
+    paths = [str(REPO)] + ([str(deps)] if deps.exists() else [])
+    if env.get("PYTHONPATH"):
+        paths.append(env["PYTHONPATH"])
+    env["PYTHONPATH"] = os.pathsep.join(paths)
+    result = subprocess.run([sys.executable, "-c", IMPORT_PROBE], cwd=REPO, env=env,
+                            capture_output=True, text=True, timeout=120)
+    assert result.returncode == 0, result.stderr
 
 
 def test_explicit_development_mode_keeps_debug_but_not_wildcard_cors(monkeypatch):
@@ -261,6 +303,47 @@ def test_cors_wildcard_is_sent_literally_and_never_with_credentials(monkeypatch)
     assert "Access-Control-Allow-Credentials" not in response.headers
 
 
+def cors_warnings(caplog):
+    return [record.getMessage() for record in caplog.records
+            if record.name == "api.middleware.security" and "CORS_ORIGINS" in record.getMessage()]
+
+
+@pytest.mark.parametrize("entry", ["*", ".*", "^.*$", "(.+)"])
+def test_cors_entries_that_match_every_origin_send_a_literal_wildcard_and_warn(monkeypatch, caplog, entry):
+    monkeypatch.setenv("CORS_ORIGINS", entry)
+    with caplog.at_level(logging.WARNING, logger="api.middleware.security"):
+        client = make_app().test_client()
+    for origin in ("https://evil.example", "null"):
+        response = preflight(client, origin)
+        assert response.headers.getlist("Access-Control-Allow-Origin") == ["*"]
+        assert "Access-Control-Allow-Credentials" not in response.headers
+    assert len(cors_warnings(caplog)) == 1 and repr(entry) in cors_warnings(caplog)[0]
+
+
+def test_cors_pattern_admitting_any_website_is_logged(monkeypatch, caplog):
+    monkeypatch.setenv("CORS_ORIGINS", r"https://.*, https://app\.example")
+    with caplog.at_level(logging.WARNING, logger="api.middleware.security"):
+        client = make_app().test_client()
+    # It still answers only what it matches, echoing the Origin, but the operator is told.
+    assert preflight(client, "https://evil.example").headers.getlist("Access-Control-Allow-Origin") == [
+        "https://evil.example"]
+    assert "Access-Control-Allow-Origin" not in preflight(client, "http://evil.example").headers
+    assert len(cors_warnings(caplog)) == 1 and "'https://.*'" in cors_warnings(caplog)[0]
+
+
+def test_cors_bracketed_ipv6_origin_matches_only_itself(monkeypatch, caplog):
+    monkeypatch.setenv("CORS_ORIGINS", "http://[::1]:3000, https://[2001:db8::1]")
+    with caplog.at_level(logging.WARNING, logger="api.middleware.security"):
+        client = make_app().test_client()
+    assert cors_warnings(caplog) == []
+    for origin in ("http://[::1]:3000", "https://[2001:db8::1]"):
+        assert preflight(client, origin).headers.getlist("Access-Control-Allow-Origin") == [origin]
+    # Read as a regular expression, "[::1]" would be the character class ':' or '1'.
+    for origin in ("http://1:3000", "http://::3000", "http://[::1]:30000", "http://[::1]:3000.evil.example",
+                   "https://[2001:db8::1]:8443", "http://localhost:3000"):
+        assert "Access-Control-Allow-Origin" not in preflight(client, origin).headers
+
+
 # Health -----------------------------------------------------------------------
 
 def test_detailed_health_reports_generic_messages_and_logs_details(monkeypatch, caplog):
@@ -309,6 +392,33 @@ def test_detailed_health_reports_the_requesting_apps_own_components(monkeypatch)
     checks = lambda app: app.test_client().get("/api/v3/health/detailed").json["data"]["checks"]
     assert checks(first)["cevahir"] == {"status": "error", "message": "Cevahir not initialized"}
     assert checks(second)["cevahir"]["status"] == "ok"
+
+
+def test_health_status_without_registered_checks_is_an_error_not_healthy(monkeypatch):
+    import database
+    from flask import Flask
+    from api.monitoring import get_health_status
+
+    class BrokenUnitOfWork:
+        def __enter__(self):
+            raise RuntimeError("database down")
+
+        def __exit__(self, *exc):
+            return False
+
+    monkeypatch.setattr(database, "UnitOfWork", BrokenUnitOfWork)
+    app = make_app()
+    # There is no process-wide registry: outside an application nothing has been checked.
+    with pytest.raises(RuntimeError, match="needs an application"):
+        get_health_status()
+    statuses = [get_health_status(app)]
+    with app.app_context():
+        statuses.append(get_health_status())
+    for status in statuses:
+        assert status["status"] != "healthy"
+        assert status["checks"]["database"] == {"status": "error", "message": "Database unavailable"}
+    with Flask("bare").app_context(), pytest.raises(RuntimeError, match="register_health_checks"):
+        get_health_status()
 
 
 # Development server -----------------------------------------------------------

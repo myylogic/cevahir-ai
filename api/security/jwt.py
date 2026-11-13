@@ -12,7 +12,7 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 from flask import current_app, has_app_context
-from api.api_config import PLACEHOLDER_SECRETS
+from api.placeholder_secrets import PLACEHOLDER_SECRETS
 import logging
 
 logger = logging.getLogger(__name__)

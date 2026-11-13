@@ -7,12 +7,16 @@ Security headers, request IDs and the CORS policy.
 
 CORS, including preflight (OPTIONS) requests, is answered by Flask-CORS with
 the options from cors_options(); this module adds no CORS headers of its own.
-Only origins listed in CORS_ORIGINS are allowed: literal entries must match the
-Origin exactly, regular-expression entries must match all of it. A configured
-'*' is sent literally instead of echoing the caller's Origin, and credentials
+Only origins listed in CORS_ORIGINS are allowed. Literal entries, including
+bracketed IPv6 origins such as http://[::1]:3000, must match the Origin
+exactly; regular-expression entries must match all of it (inside a pattern,
+escape the brackets of an IPv6 host). '*', and any pattern that matches every
+origin (such as '.*'), is sent as a literal '*' instead of echoing the caller's
+Origin. Entries that admit any website are logged as a warning, and credentials
 are never allowed (the API authenticates with bearer tokens, not cookies).
 """
 
+import ipaddress
 import re
 from flask import Flask, request, g
 from api.api_config import DEFAULT_CORS_HEADERS, DEFAULT_CORS_METHODS, PLACEHOLDER_SECRETS
@@ -24,6 +28,13 @@ logger = logging.getLogger(__name__)
 
 # Characters that make Flask-CORS treat an origin string as a regular expression.
 _REGEX_HINTS = frozenset("*\\]?$^[]()")
+# A literal origin with an IPv6 host, which browsers send in brackets: http://[::1]:3000.
+_IPV6_ORIGIN = re.compile(r"[a-z][a-z0-9+.-]*://\[([0-9a-f:.]+)\](:[0-9]+)?\Z", re.IGNORECASE)
+# Origins that no allow-list means to admit: websites under the reserved .invalid
+# domain (RFC 2606) and the opaque origin 'null'. A pattern matching all of them
+# admits every origin; one matching either website admits arbitrary websites.
+_ARBITRARY_WEBSITES = ("https://cors-probe.invalid", "http://cors-probe.invalid:8080")
+_ARBITRARY_ORIGINS = _ARBITRARY_WEBSITES + ("null",)
 
 
 def _as_list(value):
@@ -34,11 +45,41 @@ def _as_list(value):
     return [item for item in items if item]
 
 
+def _is_ipv6_origin(origin):
+    match = _IPV6_ORIGIN.match(origin)
+    if match is None:
+        return False
+    try:
+        ipaddress.IPv6Address(match.group(1))
+    except ValueError:
+        return False
+    return True
+
+
 def _origin_pattern(origin):
-    """Keep literal origins and '*'; compile regular expressions to match the whole Origin."""
-    if not isinstance(origin, str) or origin == "*" or _REGEX_HINTS.isdisjoint(origin):
+    """
+    What Flask-CORS should match for one CORS_ORIGINS entry.
+
+    - '*' and patterns that match every origin (such as '.*') become '*', sent literally
+    - literal origins match exactly; a bracketed IPv6 origin is escaped, because Flask-CORS
+      would otherwise read its brackets as a regular-expression character class
+    - other regular expressions are compiled to match the whole Origin
+    """
+    if not isinstance(origin, str) or origin == "*":
         return origin
-    return re.compile(rf"(?:{origin})\Z", re.IGNORECASE)
+    if _is_ipv6_origin(origin):
+        return re.compile(re.escape(origin) + r"\Z", re.IGNORECASE)
+    if _REGEX_HINTS.isdisjoint(origin):
+        return origin
+    pattern = re.compile(rf"(?:{origin})\Z", re.IGNORECASE)
+    return "*" if all(pattern.match(probe) for probe in _ARBITRARY_ORIGINS) else pattern
+
+
+def _admits_any_website(origin):
+    """'*', or a compiled pattern that matches a website no allow-list means to admit."""
+    if origin == "*":
+        return True
+    return isinstance(origin, re.Pattern) and any(origin.match(probe) for probe in _ARBITRARY_WEBSITES)
 
 
 def cors_options(config) -> dict:
@@ -46,7 +87,8 @@ def cors_options(config) -> dict:
     Flask-CORS resource options for an application config.
 
     - only configured origins are answered; a non-matching Origin gets no CORS headers
-    - '*' is sent literally (send_wildcard), never as a reflected Origin
+    - '*', and a pattern that matches every origin, is sent literally (send_wildcard),
+      never as a reflected Origin
     - credentials are never allowed, so they cannot be combined with '*'
     - requests without an Origin header get no CORS headers
     """
@@ -72,8 +114,10 @@ def warn_about_risky_settings(config):
             "any caller can act as any user. Use this only on a local machine.",
             config.get("API_ENV"),
         )
-    if "*" in _as_list(config.get("CORS_ORIGINS")):
-        logger.warning("CORS_ORIGINS contains '*': any website may call this API from a browser")
+    for entry in _as_list(config.get("CORS_ORIGINS")):
+        if _admits_any_website(_origin_pattern(entry)):
+            logger.warning("CORS_ORIGINS entry %r admits any website: every site may call this API from a browser",
+                           entry)
     jwt_secret = config.get("JWT_SECRET_KEY") or config.get("SECRET_KEY")
     if not jwt_secret or jwt_secret in PLACEHOLDER_SECRETS:
         logger.warning(

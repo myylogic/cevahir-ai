@@ -8,10 +8,14 @@ Endüstri Standardı: Comprehensive health checks
 
 The detailed endpoint is unauthenticated, so results carry only fixed, generic
 messages; exception details are written to the server log, never to responses.
+
+Checks are registered per application. get_health_status() runs the checks of
+the given or current application and raises when there are none to run, rather
+than reporting an empty, healthy result.
 """
 
 from flask import Flask, current_app, has_app_context
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 import logging
 
@@ -65,10 +69,6 @@ class HealthCheck:
             "checks": results,
             "timestamp": datetime.utcnow().isoformat() + "Z"
         }
-
-
-# Fallback instance for code running outside an application context
-_health_check = HealthCheck()
 
 
 def register_health_checks(app: Flask):
@@ -125,13 +125,30 @@ def register_health_checks(app: Flask):
     logger.info("Health checks registered")
 
 
-def get_health_status() -> Dict[str, Any]:
+def get_health_status(app: Optional[Flask] = None) -> Dict[str, Any]:
     """
-    Get current health status.
-    
+    Run the health checks registered for an application.
+
+    Args:
+        app: Application to check; defaults to the current application.
+
     Returns:
         Health status dictionary
+
+    Raises:
+        RuntimeError: No application is given or active, or register_health_checks()
+            was not called for it. There is no process-wide registry to fall back on.
     """
-    health_check = current_app.extensions.get("cevahir_health") if has_app_context() else None
-    return (health_check or _health_check).run_checks()
+    if app is None:
+        if not has_app_context():
+            raise RuntimeError(
+                "get_health_status() needs an application: pass app= or call it in an application context"
+            )
+        app = current_app
+    health_check = app.extensions.get("cevahir_health")
+    if health_check is None:
+        raise RuntimeError(
+            "No health checks are registered for this application; call register_health_checks(app) first"
+        )
+    return health_check.run_checks()
 
