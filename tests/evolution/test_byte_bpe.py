@@ -41,8 +41,13 @@ def test_pretokenize_is_lossless_on_random_unicode():
 
 
 def test_apostrophe_separates_proper_noun_and_suffix():
-    assert pretokenize("Ankara'da") == ["Ankara", "'", "da"]
-    assert pretokenize(" İstanbul'un") == [" İstanbul", "'", "un"]
+    # Turkish proper-noun suffixes: the root and the apostrophe+suffix are separate chunks,
+    # so a root's tokens are identical in every case form ("Ankara" in Ankara, Ankara'da, Ankara'nın).
+    assert pretokenize("Ankara'da") == ["Ankara", "'da"]
+    assert pretokenize(" İstanbul'un") == [" İstanbul", "'un"]
+    assert pretokenize("Cevahir’e") == ["Cevahir", "’e"]
+    assert pretokenize("Ankara'dır.") == ["Ankara", "'dır", "."]
+    assert pretokenize(" Ali Kaya'nın")[:2] == pretokenize(" Ali Kaya")
 
 
 @pytest.mark.parametrize("text", CORPUS[:8] + HARD)

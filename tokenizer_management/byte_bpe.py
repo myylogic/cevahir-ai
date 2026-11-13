@@ -12,7 +12,9 @@ Nasıl çalışır?
     1. Ön bölütleme (pre-tokenization) metni harf dizileri, 1-3 haneli sayı grupları,
        noktalama dizileri ve boşluklar olarak parçalar. Tek bir öndeki boşluk sonraki
        parçaya eklenir (GPT-2 geleneği), böylece boşluk ayrı token harcamaz.
-       ``Ankara'da`` → ``Ankara`` + ``'`` + ``da``: özel ad ile ek kesme işaretinde ayrılır.
+       ``Ankara'da`` → ``Ankara`` + ``'da``: Türkçede kesme işareti özel adı ekinden ayırır;
+       kesme işareti (' veya ’) ve ardından gelen harfler tek parça olur, böylece kök ile ek
+       ayrı tokenlere düşer ve ek allomorfları (``'da``, ``'nın``) tek token olarak öğrenilebilir.
        Parçaların birleşimi her zaman girdinin kendisidir (kayıpsızlık burada başlar).
     2. Her parça UTF-8 baytlarına çevrilir; her bayt görünür bir karaktere eşlenir.
     3. Eğitim, sözcük sıklıkları üzerinden klasik BPE'dir: en sık bitişik çift birleştirilir,
@@ -40,8 +42,9 @@ SPECIAL_TOKENS: Tuple[str, ...] = ("<PAD>", "<UNK>", "<BOS>", "<EOS>")
 PAD_ID, UNK_ID, BOS_ID, EOS_ID = 0, 1, 2, 3
 
 # Harf: \w içinden rakam ve alt çizgi hariç her şey (çğıöşüâîû ve tüm Unicode harfleri).
+# Kesme işareti + harfler (Türkçe özel ad eki: 'da, ’nın) tek parçadır.
 # Sıra önemlidir; her karakter tam olarak bir seçeneğe düşer, böylece hiçbir karakter atlanmaz.
-PRETOKENIZE_PATTERN = r" ?[^\W\d_]+| ?\d{1,3}| ?_+| ?[^\s\w]+|\s+(?!\S)|\s+"
+PRETOKENIZE_PATTERN = r" ?[^\W\d_]+|['’][^\W\d_]+| ?\d{1,3}| ?_+| ?[^\s\w]+|\s+(?!\S)|\s+"
 _PRETOKENIZE = re.compile(PRETOKENIZE_PATTERN)
 
 
