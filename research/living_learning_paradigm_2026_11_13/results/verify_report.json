@@ -1,0 +1,63 @@
+{
+ "analysis_code": {
+  "current": {
+   "analyze.py": "9911f7887e25541a846e89141ccbdc25a9a66292c098662b4012689de035aa15",
+   "cev11/stats.py": "40d1f8f976159727920ba4eca2bea491aaf99626957645d04bc6b5daa7506589"
+  },
+  "ok": true,
+  "stored": {
+   "analyze.py": "9911f7887e25541a846e89141ccbdc25a9a66292c098662b4012689de035aa15",
+   "cev11/stats.py": "40d1f8f976159727920ba4eca2bea491aaf99626957645d04bc6b5daa7506589"
+  }
+ },
+ "decisions": {
+  "differences": [],
+  "n_differences": 0,
+  "ok": true,
+  "summary_recomputed": {
+   "H1": "supported",
+   "H2": "supported",
+   "H3": "supported",
+   "S1": "refuted",
+   "S2": "inconclusive",
+   "S3": "not run",
+   "S4": "refuted"
+  },
+  "summary_stored": {
+   "H1": "supported",
+   "H2": "supported",
+   "H3": "supported",
+   "S1": "refuted",
+   "S2": "inconclusive",
+   "S3": "not run",
+   "S4": "refuted"
+  }
+ },
+ "freeze": {
+  "freeze_manifest": "freeze_manifest.sha256",
+  "frozen": {
+   "analyze.py": "9911f7887e25541a846e89141ccbdc25a9a66292c098662b4012689de035aa15",
+   "cev11/stats.py": "40d1f8f976159727920ba4eca2bea491aaf99626957645d04bc6b5daa7506589"
+  },
+  "missing_in_freeze": [],
+  "ok": true,
+  "used_for_decisions": {
+   "analyze.py": "9911f7887e25541a846e89141ccbdc25a9a66292c098662b4012689de035aa15",
+   "cev11/stats.py": "40d1f8f976159727920ba4eca2bea491aaf99626957645d04bc6b5daa7506589"
+  }
+ },
+ "manifest": {
+  "manifest": "/workspace/cevahir-ai/research/living_learning_paradigm_2026_11_13/results/manifest.sha256",
+  "mismatched": [],
+  "missing": [],
+  "n_listed": 261,
+  "ok": true,
+  "unlisted": []
+ },
+ "ok": true,
+ "results_dir": "/workspace/cevahir-ai/research/living_learning_paradigm_2026_11_13/results",
+ "tables": {
+  "differences": [],
+  "ok": true
+ }
+}

@@ -1,0 +1,7 @@
+run,world,variant,order,layer,lam,n_facts,E_end,retraction_residue,correction_residue,Leak_RN,Leak_RD,used_in_decisions
+select,0,J,0,1,0.010000,75,0.024762,0.000000,0.000000,,1.000000,false
+select,0,J,0,1,0.100000,75,0.024762,0.000000,0.000000,,1.000000,false
+select,0,J,0,1,1.000000,75,0.026667,0.000000,0.000000,,1.000000,false
+select,1,J,0,1,0.010000,75,0.057143,0.000000,0.000000,,0.900000,false
+select,1,J,0,1,0.100000,75,0.057143,0.000000,0.000000,,0.900000,false
+select,1,J,0,1,1.000000,75,0.057143,0.000000,0.000000,,0.900000,false

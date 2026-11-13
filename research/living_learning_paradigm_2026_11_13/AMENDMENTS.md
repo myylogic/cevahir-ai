@@ -59,3 +59,9 @@ entries are not amendments.
   the S4 metric of one world. No decision, code, option or schedule depended on it; the analysis code is frozen by
   hash and computes the decisions mechanically. No other confirmatory hypothesis metric has been looked at; the
   confirmatory edit records are committed without being read.
+- 2026-11-13 13:45 UTC — schedule decision under PROTOCOL §14 (compute priority; no frozen file or record changed):
+  the eight confirmatory S3 lives (priority 4 in §14) are deferred behind H1-H3, S1-S2 and S4, because the owner
+  reallocated the container's CPU to a new research programme and the recorded diagnosis predicts that all three
+  life variants collapse at the preregistered settings. If they have not run when the report is written, S3 is
+  reported as 'not run' together with the discovery lives and the diagnosis; if they run later, they run unchanged
+  with the recorded life_lambda.

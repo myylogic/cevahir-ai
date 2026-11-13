@@ -1,0 +1,8 @@
+{
+ "figures": [],
+ "figures_note": "matplotlib not installed; figures skipped",
+ "matplotlib": null,
+ "numpy": "2.5.4",
+ "platform": "Linux-6.18.44-fc-v445-x86_64-with-glibc2.39",
+ "python": "3.13.18"
+}
