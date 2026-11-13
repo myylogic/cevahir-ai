@@ -41,7 +41,7 @@ from chatting_management import ChattingManager, ChattingConfig
 
 # API imports
 from api.middleware.error_handler import register_error_handlers
-from api.middleware.security import register_security_middleware
+from api.middleware.security import cors_options, register_security_middleware
 from api.middleware.request_id import register_request_id_middleware
 from api.monitoring.health import register_health_checks
 from api.monitoring.metrics import register_metrics
@@ -208,21 +208,9 @@ def create_app(config_overrides=None, *, cevahir=None, chatting_manager=None, in
     if config_overrides:
         app.config.update(config_overrides)
     
-    # CORS (config-based)
-    cors_origins = app.config.get("CORS_ORIGINS", ["*"])
-    cors_methods = app.config.get("CORS_METHODS", ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
-    cors_headers = app.config.get("CORS_HEADERS", ["Content-Type", "Authorization", "X-User-ID", "X-Request-ID"])
-    
-    CORS(
-        app,
-        resources={r"/*": {
-            "origins": cors_origins,
-            "methods": cors_methods,
-            "allow_headers": cors_headers,
-            "expose_headers": ["X-Request-ID"]
-        }}
-    )
-    logger.info(f"✅ CORS configured: origins={cors_origins}")
+    # CORS (config-based): only configured origins, '*' sent literally, never with credentials
+    CORS(app, resources={r"/*": cors_options(app.config)})
+    logger.info(f"✅ CORS configured: origins={app.config.get('CORS_ORIGINS')}")
     
     # Rate Limiting (config-based)
     if app.config.get("RATELIMIT_ENABLED", True):
@@ -386,12 +374,52 @@ def setup_logging():
     logging.info("Logging configured")
 
 
-if __name__ == '__main__':
+_LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+def parse_run_options(argv=None, environ=None):
+    """
+    Options for ``python api/app_factory.py`` (Flask's development server).
+
+    Defaults are local and safe: host 127.0.0.1, port 5000, debug off.
+    CEVAHIR_API_HOST, PORT and CEVAHIR_API_DEBUG=1 change them; --host, --port
+    and --debug/--no-debug override the environment.
+    """
+    import argparse
+
+    environ = os.environ if environ is None else environ
+    parser = argparse.ArgumentParser(description="Run the Cevahir API on Flask's development server.")
+    debug_env = environ.get("CEVAHIR_API_DEBUG", "").strip().lower()
+    if debug_env not in {"", "1", "0", "true", "false", "yes", "no", "on", "off"}:
+        parser.error(f"CEVAHIR_API_DEBUG must be 1/0, true/false, yes/no or on/off, not {debug_env!r}")
+    try:
+        default_port = int(environ.get("PORT") or 5000)
+    except ValueError:
+        parser.error(f"PORT must be an integer, not {environ.get('PORT')!r}")
+    parser.add_argument("--host", default=environ.get("CEVAHIR_API_HOST") or "127.0.0.1",
+                        help="interface to bind (default 127.0.0.1; 0.0.0.0 listens on every interface)")
+    parser.add_argument("--port", type=int, default=default_port, help="port (default 5000 or PORT)")
+    parser.add_argument("--debug", action=argparse.BooleanOptionalAction,
+                        default=debug_env in {"1", "true", "yes", "on"},
+                        help="Werkzeug debugger and reloader (default off; refused with FLASK_ENV=production)")
+    return parser.parse_args(argv)
+
+
+def main(argv=None):
+    """Run the API with Flask's development server; see parse_run_options()."""
+    options = parse_run_options(argv)
+    if options.debug and get_config().API_ENV == "production":
+        raise SystemExit("Refusing --debug with FLASK_ENV=production: "
+                         "the Werkzeug debugger runs code sent by clients.")
     setup_logging()
-    
-    PORT = int(os.getenv("PORT", 5000))
     app = create_app()
-    
-    logging.info(f"Starting Flask application on port {PORT}")
-    app.run(host='0.0.0.0', port=PORT, debug=True)
+    if options.debug and options.host not in _LOCAL_HOSTS:
+        logging.warning(f"Debug mode on {options.host}: the Werkzeug debugger is reachable from other machines")
+
+    logging.info(f"Starting Flask application on {options.host}:{options.port} (debug={options.debug})")
+    app.run(host=options.host, port=options.port, debug=options.debug)
+
+
+if __name__ == '__main__':
+    main()
 

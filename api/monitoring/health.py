@@ -5,10 +5,17 @@ Health Checks
 
 Detailed health check system.
 Endüstri Standardı: Comprehensive health checks
+
+The detailed endpoint is unauthenticated, so results carry only fixed, generic
+messages; exception details are written to the server log, never to responses.
+
+Checks are registered per application. get_health_status() runs the checks of
+the given or current application and raises when there are none to run, rather
+than reporting an empty, healthy result.
 """
 
-from flask import Flask, current_app
-from typing import Dict, Any, List
+from flask import Flask, current_app, has_app_context
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 import logging
 
@@ -53,7 +60,7 @@ class HealthCheck:
                 logger.error(f"Health check '{name}' failed: {e}", exc_info=True)
                 results[name] = {
                     "status": "error",
-                    "message": str(e)
+                    "message": "Health check failed (details in the server log)"
                 }
                 overall_status = "unhealthy"
         
@@ -64,17 +71,19 @@ class HealthCheck:
         }
 
 
-# Global health check instance
-_health_check = HealthCheck()
-
-
 def register_health_checks(app: Flask):
     """
     Register health checks for Flask app.
     
+    Each app gets its own registry (app.extensions["cevahir_health"]), so one
+    app's status is never reported by another app in the same process.
+
     Args:
         app: Flask application instance
     """
+    health_check = HealthCheck()
+    app.extensions["cevahir_health"] = health_check
+
     # Database health check
     def check_database():
         try:
@@ -84,9 +93,10 @@ def register_health_checks(app: Flask):
                 pass
             return {"status": "ok", "message": "Database connection healthy"}
         except Exception as e:
-            return {"status": "error", "message": f"Database error: {str(e)}"}
+            logger.error(f"Database health check failed: {e}", exc_info=True)
+            return {"status": "error", "message": "Database unavailable"}
     
-    _health_check.register_check("database", check_database)
+    health_check.register_check("database", check_database)
     
     # Cevahir health check
     def check_cevahir():
@@ -95,9 +105,10 @@ def register_health_checks(app: Flask):
                 return {"status": "ok", "message": "Cevahir initialized"}
             return {"status": "error", "message": "Cevahir not initialized"}
         except Exception as e:
-            return {"status": "error", "message": f"Cevahir error: {str(e)}"}
+            logger.error(f"Cevahir health check failed: {e}", exc_info=True)
+            return {"status": "error", "message": "Cevahir check failed"}
     
-    _health_check.register_check("cevahir", check_cevahir)
+    health_check.register_check("cevahir", check_cevahir)
     
     # ChattingManager health check
     def check_chatting_manager():
@@ -106,19 +117,38 @@ def register_health_checks(app: Flask):
                 return {"status": "ok", "message": "ChattingManager initialized"}
             return {"status": "error", "message": "ChattingManager not initialized"}
         except Exception as e:
-            return {"status": "error", "message": f"ChattingManager error: {str(e)}"}
+            logger.error(f"ChattingManager health check failed: {e}", exc_info=True)
+            return {"status": "error", "message": "ChattingManager check failed"}
     
-    _health_check.register_check("chatting_manager", check_chatting_manager)
+    health_check.register_check("chatting_manager", check_chatting_manager)
     
     logger.info("Health checks registered")
 
 
-def get_health_status() -> Dict[str, Any]:
+def get_health_status(app: Optional[Flask] = None) -> Dict[str, Any]:
     """
-    Get current health status.
-    
+    Run the health checks registered for an application.
+
+    Args:
+        app: Application to check; defaults to the current application.
+
     Returns:
         Health status dictionary
+
+    Raises:
+        RuntimeError: No application is given or active, or register_health_checks()
+            was not called for it. There is no process-wide registry to fall back on.
     """
-    return _health_check.run_checks()
+    if app is None:
+        if not has_app_context():
+            raise RuntimeError(
+                "get_health_status() needs an application: pass app= or call it in an application context"
+            )
+        app = current_app
+    health_check = app.extensions.get("cevahir_health")
+    if health_check is None:
+        raise RuntimeError(
+            "No health checks are registered for this application; call register_health_checks(app) first"
+        )
+    return health_check.run_checks()
 
