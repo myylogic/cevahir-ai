@@ -88,7 +88,7 @@
       "path": "cognitive_management/config.py",
       "symbol": "CognitiveManagerConfig",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 265
+      "line": 273
     },
     {
       "path": "cognitive_management/v2/components/memory_service_v2.py",

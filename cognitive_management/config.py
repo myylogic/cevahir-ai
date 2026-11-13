@@ -108,6 +108,11 @@ class MemoryConfig:
     max_history_tokens: int = 3072
     enable_session_summary: bool = True
     enable_salient_pruning: bool = True
+    # Episodic turns are kept per scope (user/session), each trimmed to its last 10
+    # turns after 20. At most this many scopes stay in process memory, the least
+    # recently written dropped first; clients open sessions at will, so this many new
+    # sessions still drop every other scope's turns (vector-store copies stay).
+    episodic_max_scopes: int = 1024
     
     # Phase 7.1: Vector Memory & RAG Configuration
     enable_vector_memory: bool = True  # Vector embeddings kullanımı
@@ -129,7 +134,10 @@ class MemoryConfig:
     # RAG Configuration
     enable_rag: bool = True  # Retrieval-Augmented Generation
     rag_top_k: int = 3  # Number of retrieved documents for RAG
-    rag_score_threshold: float = 0.7  # Minimum similarity score for retrieval
+    # Minimum score on the (1 + cos) / 2 scale of every store, i.e. cos >= 2t - 1.
+    # 0.893 (cos >= 0.786) keeps the default Chroma store as strict as its former
+    # 1 / (1 + d) score was at 0.7 (the memory store admitted cos >= 0.40 at 0.7).
+    rag_score_threshold: float = 0.893
     
     # Vector search configuration
     vector_search_top_k: int = 5  # Default top-k for vector search
@@ -382,6 +390,9 @@ class CognitiveManagerConfig:
         
         if not (0.0 <= self.memory.hybrid_search_alpha <= 1.0):
             raise ValueError(f"memory.hybrid_search_alpha [0,1] aralığında olmalı: {self.memory.hybrid_search_alpha}")
+
+        if self.memory.episodic_max_scopes < 1:
+            raise ValueError(f"memory.episodic_max_scopes >= 1 olmalı: {self.memory.episodic_max_scopes}")
 
         # default_decoding alanlarını da doğrula
         dd = self.default_decoding

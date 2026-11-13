@@ -44,8 +44,8 @@ import math
 
 
 # Score contract shared by every vector store: score = (1 + cos) / 2 in [0, 1].
-# A score threshold t therefore means cos >= 2t - 1 whatever the provider:
-# memory.rag_score_threshold = 0.7 keeps results with cos >= 0.40.
+# A score threshold t therefore means cos >= 2t - 1 whatever the provider: the
+# default memory.rag_score_threshold = 0.893 keeps results with cos >= 0.786.
 
 def cosine_to_score(cosine: float) -> float:
     """Map a cosine similarity in [-1, 1] to the shared score (1 + cos) / 2."""

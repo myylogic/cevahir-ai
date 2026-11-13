@@ -97,9 +97,9 @@ class MemoryServiceV2(IMemoryService):
         self.revision = 0
         # Working memory: a scope keeps its last N turns (trimmed when it exceeds 2N)
         self._working_memory_size = 10  # Keep last 10 turns
-        # At most this many scopes stay in process memory; the scope written least
-        # recently is dropped first (its vector-store records are kept).
-        self._max_scopes = 1024
+        # At most memory.episodic_max_scopes scopes stay in process memory; the scope
+        # written least recently is dropped first (its vector-store records are kept).
+        self._max_scopes = max(1, int(cfg.memory.episodic_max_scopes))
         
         # Phase 7.1: Vector Memory Enhancement
         self._embedding_adapter: Optional[BaseEmbeddingAdapter] = None
@@ -276,7 +276,7 @@ class MemoryServiceV2(IMemoryService):
                 vector_search_results = self._vector_store.search(
                     query_embedding=query_embedding,
                     top_k=top_k,
-                    score_threshold=self.cfg.memory.rag_score_threshold,  # (1+cos)/2: 0.7 -> cos >= 0.40
+                    score_threshold=self.cfg.memory.rag_score_threshold,  # (1+cos)/2: t -> cos >= 2t - 1
                     filter_metadata={"scope": current_scope()},
                 )
                 

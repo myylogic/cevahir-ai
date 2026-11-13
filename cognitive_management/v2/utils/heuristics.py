@@ -71,6 +71,7 @@ _SCIENCE_KW = frozenset([
 _LAW_KW = frozenset([
     # Türkçe
     "hukuk", "kanun", "yasa", "yasal", "mahkeme", "dava", "suç", "ceza",
+    "suçlu", "suçsuz", "suçla",
     "anayasa", "sözleşme", "hak", "özgürlük", "mevzuat", "tüzük",
     "yönetmelik", "avukat", "hakim", "savcı", "savunma", "dava",
     # İngilizce
@@ -118,7 +119,7 @@ _CODE_KW = frozenset([
     # İngilizce
     "code", "python", "javascript", "java", "function", "algorithm",
     "debug", "error", "class", "method", "api", "database", "sql",
-    "html", "css", "react", "git", "deploy", "framework", "library",
+    "html", "css", "react", "git", "github", "gitlab", "deploy", "framework", "library",
     "c++", "rust", "golang", "typescript", "bash", "linux",
 ])
 
@@ -135,8 +136,8 @@ _FACTUAL_KW = frozenset([
 _REASONING_KW = frozenset([
     # Türkçe — analiz / nedensellik
     "neden", "niçin", "nasıl", "analiz", "karşılaştır", "değerlendir",
-    "sonuç", "öner", "tavsiye", "mantık", "sebep", "etki", "ilişki",
-    "kanıtla", "destekle", "eleştir", "avantaj", "dezavantaj",
+    "sonuç", "öner", "öneriler", "tavsiye", "mantık", "sebep", "etki", "etkili",
+    "ilişki", "kanıtla", "destekle", "eleştir", "avantaj", "dezavantaj",
     # İngilizce
     "why", "analyze", "compare", "evaluate", "because", "therefore",
     "reason", "cause", "effect", "argue", "justify", "implications",
@@ -149,7 +150,7 @@ _CONVERSATIONAL_KW = frozenset([
     "evet", "hayır", "lütfen", "rica", "güzel", "iyi", "harika",
     # İngilizce
     "hello", "hi", "hey", "how are you", "thanks", "thank you",
-    "ok", "okay", "sure", "got it", "great", "nice", "awesome",
+    "ok", "okay", "okey", "sure", "got it", "great", "nice", "awesome",
 ])
 
 # Bağlaçlar — karmaşıklık hesabı için

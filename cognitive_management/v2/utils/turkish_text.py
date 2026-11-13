@@ -17,9 +17,12 @@ how many or gene.
 * A token matches a keyword when it equals the keyword or starts with it. For
   keywords shorter than :data:`FREE_PREFIX_MIN_LEN` letters the rest of the token
   must be a common inflectional ending (case, plural, possessive, copula, person,
-  a few verb request forms, English ``-s``); derivational extensions are rejected.
-  Longer keywords match any continuation (``"hesapla"`` -> ``"hesaplar mısın"``).
-  A final ``p/ç/t/k`` may soften before a vowel (``"ilaç"`` -> ``"ilacı"``).
+  the aorist with its person endings, a few verb request forms, English ``-s``);
+  derivational extensions are rejected, so a derived word that belongs to a list
+  (``"suçlu"`` next to ``"suç"``) has to be listed itself. Longer keywords match
+  any continuation (``"hesapla"`` -> ``"hesaplar mısın"``).
+  A final ``p/ç/t/k`` may soften before a vowel (``"ilaç"`` -> ``"ilacı"``), and a
+  listed loanword may double its last consonant (``"hak"`` -> ``"hakkım"``).
 * Multi-word keywords match consecutive tokens; only the last word may inflect.
 * Keywords without letters (``"%"``) or with symbols (``"c++"``) are plain substrings.
 
@@ -53,13 +56,18 @@ FREE_PREFIX_MIN_LEN = 5
 # "hi"le, "hey"ecan): only the whole token matches.
 _EXACT_ONLY = frozenset({"git", "hi", "hey", "ok"})
 
-# Valid inflections of a keyword that are, in practice, another word.
+# Valid inflections or continuations of a keyword that are, in practice, another word.
 _FALSE_FRIENDS = {
     "böl": ("bölüm",),                          # chapter / department, not "divide"
-    "tanı": ("tanım",),                         # definition, recognising, getting to know
-    "kaç": ("kaçm",),                           # kaçmak / kaçma: to escape
+    "tanı": ("tanım", "tanır"),                 # definition; tanır(ım): (I) know someone
+    "kaç": ("kaçm", "kaçarı", "kaçars"),        # kaçmak, kaçarım, kaçarsın: to escape
     "tamam": ("tamamen", "tamamı", "tamamla"),  # completely / all of it / complete
+    "edebi": ("edebil",),                       # edebilir(im): can do, not "literary"
+    "hak": ("hakkında", "hakkımda", "hakkımızda", "hakkınızda"),  # about him / me / us / you
 }
+
+# Loanwords that double their last consonant before a vowel (hak -> hakkı, hakkım).
+_GEMINATING = frozenset({"hak"})
 
 _COMBINING_DOT = "\u0307"
 _SOFTENING = {"p": "b", "ç": "c", "t": "d", "k": "ğ"}
@@ -80,7 +88,8 @@ _NOMINAL = (
 )
 _VERBAL = (
     f"y?{_V4}n(?:{_V4}z)?"                    # yazın, yazınız, söyleyin
-    f"|{_V2}?r|{_V4}r"                        # aorist: yazar (mısın), söyler, verir
+    f"|(?:{_V2}?r|{_V4}r)"                    # aorist: yazar (mısın), söyler, verir
+    f"(?:{_V4}m|s{_V4}n(?:{_V4}z)?|{_V4}z|l{_V2}r)?"  # + person: önerirsin, yazarım
     f"|y?{_V2}bil(?:{_V4}r)?"                 # yazabilir
     f"|m{_V2}(?:k|y{_V4}|n{_V4}|s{_V4})?"     # yazma, yazmak, yazmayı, yazmanı
     f"|s{_V2}n{_V2}|y?{_V2}l{_V4}m|y?{_V2}y{_V4}m"  # yazsana, yazalım, yazayım
@@ -135,6 +144,8 @@ def _compile(keyword: str):
         stems.append(last[:-1] + _SOFTENING[last[-1]])
     elif len(last) >= 4 and last.endswith("nk"):
         stems.append(last[:-1] + "g")
+    elif last in _GEMINATING:
+        stems.append(last + last[-1])
     return ("words", words, tuple(stems))
 
 
@@ -150,7 +161,7 @@ def _token_matches(token: str, keyword: str, stems: Sequence[str]) -> bool:
             continue
         rest = token[len(stem):]
         if index > 0 and rest[0] not in _VOWELS:
-            continue  # softened stems only before a vowel: ilacı, not ilacla
+            continue  # softened or doubled stems only before a vowel: ilacı, not ilacla
         if len(keyword) >= FREE_PREFIX_MIN_LEN or is_inflectional_ending(rest):
             return True
     return False

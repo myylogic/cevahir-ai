@@ -91,7 +91,7 @@
       ]
     },
     "cognitive_management/config.py": {
-      "sha256": "c42ae0c693719d5db885b76111124aa1eb54e4d866e44d5f3d97fc62dbb9316f",
+      "sha256": "4bd9790126cab62623e2b313bc358cae01151e4cf066d4b3353a306fffbf38de",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
@@ -134,7 +134,7 @@
       ]
     },
     "cognitive_management/v2/components/memory_service_v2.py": {
-      "sha256": "da944d44700f935373ab56408c9be795eda8f56e9414bd805c97ed04507e27a7",
+      "sha256": "02ca488db9146723558c43fddfe33680ec497e9c746c13169b5610c8b195243a",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
@@ -183,7 +183,7 @@
       ]
     },
     "cognitive_management/v2/components/vector_store/base.py": {
-      "sha256": "f6a976e7e4243b8981ae0b3cc14e75861e15abe00fd98ec1f0673585dcd35437",
+      "sha256": "e12a0e0921636afc4348c2ee40904915c2d45a5e348e6853cf55bdd9bc86791e",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
@@ -240,14 +240,14 @@
       ]
     },
     "cognitive_management/v2/utils/turkish_text.py": {
-      "sha256": "5273754b4b8dedbf8cec614c28a449e272fe860b7299a21b1c472a7ded187384",
+      "sha256": "cc3139e960b8e365c0f7ecafbabd1084048afc29f527903f7d9e7d22f06590f7",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
       ]
     },
     "cognitive_management/v2/utils/verdict_parsing.py": {
-      "sha256": "04ca28900047d7761cf3258c9cb7df8b2c10d40cf564cea3842ae61c0e1a3741",
+      "sha256": "06739fdb4f2dff1b916ae6505473a26e5f08c938935958279296ba1c1c110a92",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
@@ -1018,7 +1018,7 @@
       ]
     },
     "tests/evolution/test_cognitive_correctness.py": {
-      "sha256": "7865ca87a88bb5f25ea4a3fa56983bc157b8fec29a232be1c7a3c99c055c6543",
+      "sha256": "54ee3c4264a2a2a93ba95a67804b437ea2194e64894a96619998f446de82e72d",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
