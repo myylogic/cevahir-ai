@@ -1,0 +1,539 @@
+{
+ "G1": {
+  "value": {
+   "world": 1.0,
+   "heldout": 1.0
+  },
+  "threshold": 1.0,
+  "pass": true,
+  "n_world": 46800,
+  "n_world_fail": 0,
+  "n_heldout": 153,
+  "n_heldout_fail": 0,
+  "heldout_fail_idx": []
+ },
+ "G3": {
+  "value": 1.0,
+  "threshold": 0.95,
+  "pass": true,
+  "n": 600,
+  "n_correct": 600,
+  "by_case": {
+   "abl": {
+    "n": 81,
+    "n_correct": 81,
+    "value": 1.0
+   },
+   "acc": {
+    "n": 88,
+    "n_correct": 88,
+    "value": 1.0
+   },
+   "dat": {
+    "n": 96,
+    "n_correct": 96,
+    "value": 1.0
+   },
+   "gen": {
+    "n": 82,
+    "n_correct": 82,
+    "value": 1.0
+   },
+   "ins": {
+    "n": 73,
+    "n_correct": 73,
+    "value": 1.0
+   },
+   "loc": {
+    "n": 91,
+    "n_correct": 91,
+    "value": 1.0
+   },
+   "nom": {
+    "n": 89,
+    "n_correct": 89,
+    "value": 1.0
+   }
+  },
+  "by_rel": {
+   "A": {
+    "n": 202,
+    "n_correct": 202,
+    "value": 1.0
+   },
+   "B": {
+    "n": 192,
+    "n_correct": 192,
+    "value": 1.0
+   },
+   "C": {
+    "n": 206,
+    "n_correct": 206,
+    "value": 1.0
+   }
+  }
+ },
+ "G4": {
+  "value": 1.0,
+  "threshold": 0.8,
+  "pass": true,
+  "n": 120,
+  "n_correct": 120,
+  "by_case": {
+   "abl": {
+    "n": 11,
+    "n_correct": 11,
+    "value": 1.0
+   },
+   "acc": {
+    "n": 18,
+    "n_correct": 18,
+    "value": 1.0
+   },
+   "dat": {
+    "n": 12,
+    "n_correct": 12,
+    "value": 1.0
+   },
+   "gen": {
+    "n": 21,
+    "n_correct": 21,
+    "value": 1.0
+   },
+   "ins": {
+    "n": 13,
+    "n_correct": 13,
+    "value": 1.0
+   },
+   "loc": {
+    "n": 22,
+    "n_correct": 22,
+    "value": 1.0
+   },
+   "nom": {
+    "n": 23,
+    "n_correct": 23,
+    "value": 1.0
+   }
+  }
+ },
+ "G5": {
+  "value": 0.9966666666666667,
+  "threshold": 0.8,
+  "pass": true,
+  "n": 600,
+  "n_correct": 598,
+  "by_class": {
+   "FUSED": {
+    "n": 205,
+    "n_correct": 203,
+    "value": 0.9902439024390244
+   },
+   "IDENT": {
+    "n": 395,
+    "n_correct": 395,
+    "value": 1.0
+   },
+   "NONIDENT": {
+    "n": 205,
+    "n_correct": 203,
+    "value": 0.9902439024390244
+   }
+  },
+  "by_case": {
+   "abl": {
+    "n": 92,
+    "n_correct": 92,
+    "value": 1.0
+   },
+   "acc": {
+    "n": 108,
+    "n_correct": 107,
+    "value": 0.9907407407407407
+   },
+   "dat": {
+    "n": 107,
+    "n_correct": 106,
+    "value": 0.9906542056074766
+   },
+   "gen": {
+    "n": 89,
+    "n_correct": 89,
+    "value": 1.0
+   },
+   "ins": {
+    "n": 104,
+    "n_correct": 104,
+    "value": 1.0
+   },
+   "loc": {
+    "n": 100,
+    "n_correct": 100,
+    "value": 1.0
+   }
+  }
+ },
+ "G6": {
+  "value": 1.0,
+  "threshold": 0.8,
+  "pass": true,
+  "n": 600,
+  "n_correct": 600,
+  "by_ctx": {
+   "P1": {
+    "n": 305,
+    "n_correct": 305,
+    "value": 1.0
+   },
+   "P2": {
+    "n": 295,
+    "n_correct": 295,
+    "value": 1.0
+   }
+  },
+  "by_case": {
+   "abl": {
+    "n": 97,
+    "n_correct": 97,
+    "value": 1.0
+   },
+   "acc": {
+    "n": 79,
+    "n_correct": 79,
+    "value": 1.0
+   },
+   "dat": {
+    "n": 86,
+    "n_correct": 86,
+    "value": 1.0
+   },
+   "gen": {
+    "n": 87,
+    "n_correct": 87,
+    "value": 1.0
+   },
+   "ins": {
+    "n": 89,
+    "n_correct": 89,
+    "value": 1.0
+   },
+   "loc": {
+    "n": 85,
+    "n_correct": 85,
+    "value": 1.0
+   },
+   "nom": {
+    "n": 77,
+    "n_correct": 77,
+    "value": 1.0
+   }
+  }
+ },
+ "G7": {
+  "value": 280,
+  "threshold": 120,
+  "pass": true,
+  "n_probe": 280,
+  "n_formal_all7": 280
+ },
+ "boundary": {
+  "value": 1.0,
+  "threshold": 1.0,
+  "pass": true,
+  "n": 46800,
+  "n_fail": 0,
+  "examples": []
+ },
+ "editable": [
+  "Aban",
+  "Agül",
+  "Ahizür",
+  "Algıgü",
+  "Amuviş",
+  "Apay",
+  "Apüfçıf",
+  "Asumtay",
+  "Balçez",
+  "Baray",
+  "Bose",
+  "Boçkümay",
+  "Bübı",
+  "Bübıhu",
+  "Büsçük",
+  "Bıcarşu",
+  "Bıpun",
+  "Bıçpuf",
+  "Bıçpufyü",
+  "Cahcan",
+  "Cahya",
+  "Cedap",
+  "Ceyhan",
+  "Cilzuşun",
+  "Cufhahı",
+  "Cöfican",
+  "Cömi",
+  "Cörbüp",
+  "Cösci",
+  "Cösli",
+  "Cürıça",
+  "Cıcan",
+  "Depay",
+  "Deçbipda",
+  "Diner",
+  "Döşzişpi",
+  "Dıfdüçsu",
+  "Dıre",
+  "Dırepa",
+  "Dızlizhik",
+  "Ehtay",
+  "Elpel",
+  "Enur",
+  "Erhımtay",
+  "Eçra",
+  "Farhan",
+  "Fice",
+  "Fiçun",
+  "Fuhşüç",
+  "Furı",
+  "Fuyna",
+  "Fuynaluf",
+  "Förnur",
+  "Fücan",
+  "Fütduşı",
+  "Füçba",
+  "Fıkaç",
+  "Fıvim",
+  "Fızgirhan",
+  "Gazuçsu",
+  "Gefafe",
+  "Gidut",
+  "Gipne",
+  "Guhan",
+  "Gutimgeç",
+  "Göli",
+  "Göndüf",
+  "Gümcan",
+  "Güten",
+  "Güşu",
+  "Gıhir",
+  "Gınkışvi",
+  "Gısa",
+  "Heçüç",
+  "Hoçnit",
+  "Hoçnitgiz",
+  "Huzar",
+  "Hüşün",
+  "Hıfnur",
+  "Hılamse",
+  "Hılsil",
+  "Isha",
+  "Iszıçgül",
+  "Işep",
+  "Kehı",
+  "Kira",
+  "Koce",
+  "Komneç",
+  "Kukli",
+  "Kölaf",
+  "Köpeh",
+  "Köpehyüp",
+  "Kötün",
+  "Kümetra",
+  "Kıbe",
+  "Kıpgül",
+  "Lica",
+  "Ligül",
+  "Liryişgül",
+  "Litay",
+  "Loli",
+  "Loptube",
+  "Loscan",
+  "Loşifna",
+  "Löhnekna",
+  "Löhpe",
+  "Löna",
+  "Lörkı",
+  "Lıgey",
+  "Lısnur",
+  "Mahdu",
+  "Muklafus",
+  "Muşsu",
+  "Mörve",
+  "Müsu",
+  "Mınbebı",
+  "Mısay",
+  "Natduç",
+  "Natlızse",
+  "Niçi",
+  "Nurcan",
+  "Nömkes",
+  "Nömkespu",
+  "Nötu",
+  "Nötugı",
+  "Nöynal",
+  "Nöynalşus",
+  "Nüşbik",
+  "Okün",
+  "Olefta",
+  "Olye",
+  "Ombin",
+  "Ombincı",
+  "Ozgıhan",
+  "Ozra",
+  "Pesli",
+  "Piçten",
+  "Pocan",
+  "Pufit",
+  "Pufvüna",
+  "Pulez",
+  "Punsuzul",
+  "Puyzü",
+  "Puyzüfa",
+  "Pöna",
+  "Pülna",
+  "Pünmıra",
+  "Pımşu",
+  "Pıtli",
+  "Pıyu",
+  "Rakun",
+  "Ramnur",
+  "Ratazse",
+  "Rater",
+  "Resu",
+  "Reşümhum",
+  "Ririn",
+  "Rusu",
+  "Rusınte",
+  "Röfyazçur",
+  "Rülgül",
+  "Rıhra",
+  "Rırer",
+  "Samgül",
+  "Saru",
+  "Sazpuze",
+  "Saçnur",
+  "Sogühun",
+  "Sose",
+  "Sucaşna",
+  "Sugül",
+  "Söçgül",
+  "Süfi",
+  "Süsu",
+  "Süsün",
+  "Sıkutce",
+  "Sıtgeç",
+  "Tasnur",
+  "Tegat",
+  "Telenü",
+  "Tence",
+  "Tiçı",
+  "Torneziy",
+  "Toszı",
+  "Toçhan",
+  "Tuzıt",
+  "Töçşegül",
+  "Tüfına",
+  "Tüça",
+  "Tısbu",
+  "Ucan",
+  "Untay",
+  "Uslüf",
+  "Vaputap",
+  "Vavıli",
+  "Vebef",
+  "Vohçına",
+  "Vomrerçı",
+  "Vomsu",
+  "Votlila",
+  "Vukıse",
+  "Vumnif",
+  "Vödetam",
+  "Völşe",
+  "Vüknıp",
+  "Vünülüç",
+  "Vıpmelnam",
+  "Yihgal",
+  "Yihgalsın",
+  "Yimleç",
+  "Yimleçkın",
+  "Yirzür",
+  "Yirzürşas",
+  "Yoler",
+  "Yonazıs",
+  "Yovükce",
+  "Yöler",
+  "Yörpe",
+  "Yösehem",
+  "Yütizce",
+  "Yırun",
+  "Zalgül",
+  "Zeceker",
+  "Zeydeç",
+  "Zezcan",
+  "Zishü",
+  "Zobüş",
+  "Zobüşhu",
+  "Zocüh",
+  "Zutma",
+  "Zuyzüf",
+  "Zömpup",
+  "Zöyhan",
+  "Züfcir",
+  "Züfcirtü",
+  "Zıçiter",
+  "Çaşi",
+  "Çeşbıhmik",
+  "Çimcüs",
+  "Çimgül",
+  "Çinur",
+  "Çirnur",
+  "Çizle",
+  "Çizvirnur",
+  "Çiçhap",
+  "Çoften",
+  "Çoklu",
+  "Çuşliler",
+  "Çönyulce",
+  "Çöpli",
+  "Çümü",
+  "Çüşsehten",
+  "Çıbütgül",
+  "Öderı",
+  "Öpkü",
+  "Öpküçe",
+  "Ösli",
+  "Ötay",
+  "Öznü",
+  "Öznüneş",
+  "Ücif",
+  "Ükce",
+  "Ülahel",
+  "Ützi",
+  "Ützital",
+  "İfve",
+  "İhüşay",
+  "İkhan",
+  "İlsu",
+  "İtüf",
+  "Şayüh",
+  "Şemtü",
+  "Şezra",
+  "Şitfücür",
+  "Şonun",
+  "Şöpna",
+  "Şünız",
+  "Şünızyah",
+  "Şüziç",
+  "Şıkli"
+ ],
+ "all_pass": true,
+ "settings": {
+  "n_cells": 600,
+  "seed": 1006,
+  "max_new": 8,
+  "batch": 64,
+  "too_long_targets": 0,
+  "threads": 1,
+  "n_queries": 5560
+ }
+}
