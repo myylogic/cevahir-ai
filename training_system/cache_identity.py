@@ -51,3 +51,17 @@ RUNTIME_ONLY_TOKENIZER_KEYS = frozenset({
     "memory_monitoring", "memory_threshold", "gc_interval", "future_timeout",
     "log_interval", "progress_log_interval", "log_level", "verbose", "show_progress",
 })
+
+
+# Layout version of the formatted records that prepare_cache.py writes and training reads. It is part
+# of every cache key (training_system/data_cache.py and v3/data/cache_v3.py), so a cache written under an
+# older layout is rebuilt instead of silently reused. Bump it whenever cached records change meaning.
+# The tokenizer identity above is deliberately separate: checkpoints do not depend on the cache layout.
+#   1: BOS ... EOS around every record, including each chunk of a long document.
+#   2: BOS only where a document starts and EOS only where it ends; continuation chunks carry neither.
+CACHE_FORMAT_VERSION = 2
+
+
+def cache_format_tag():
+    """Cache-key component naming the formatted-record layout."""
+    return f"cache_format_{CACHE_FORMAT_VERSION}"

@@ -134,6 +134,7 @@ class DataCacheV3:
         formatted: bool = True,
     ) -> str:
         """Cache key oluştur — parametrelere göre deterministik."""
+        from training_system.cache_identity import cache_format_tag
         key_parts = [
             self._normalize_data_dir(),
             encode_mode,
@@ -144,6 +145,7 @@ class DataCacheV3:
             vocab_hash,
             alignment_format,
             f"formatted_{formatted}",
+            cache_format_tag(),  # Kayıt düzeni sürümü (DataCache ile aynı olmalı)
         ]
         key_string = "|".join(key_parts)
         return hashlib.md5(key_string.encode()).hexdigest()
@@ -204,6 +206,7 @@ class DataCacheV3:
         file_size_mb: float,
     ) -> None:
         """Human-readable metadata JSON dosyası oluştur."""
+        from training_system.cache_identity import CACHE_FORMAT_VERSION
         meta = {
             "version": "v3",
             "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -216,6 +219,7 @@ class DataCacheV3:
             "include_sep": include_sep,
             "max_seq_length": max_seq_length,
             "alignment_format": alignment_format,
+            "cache_format_version": CACHE_FORMAT_VERSION,
             "sample_count": sample_count,
             "file_size_mb": round(file_size_mb, 2),
         }
@@ -334,6 +338,7 @@ class DataCacheV3:
                 "    2. vocab_hash değişti (vocab dosyası güncellendi)",
                 "    3. alignment_format değişti",
                 "    4. data_hash değişti (eğitim verisi değişti)",
+                "    5. cache kayıt düzeni değişti (cache_identity.CACHE_FORMAT_VERSION)",
                 "",
             ]
 

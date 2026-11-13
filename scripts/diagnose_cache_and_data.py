@@ -3,6 +3,12 @@
 Cache ve Eğitim Verisi Tanı Script
 ===============================================
 EOS, BOS, PAD, format kontrolleri, veri kalitesi analizi
+
+Kayıt düzeni (training_system/record_format.py, CACHE_FORMAT_VERSION 2): BOS yalnız belgenin ilk
+kaydının girdisinde, EOS yalnız son kaydının hedefinde bulunur; uzun belgenin ara parçaları ikisini de
+almaz. Belge sınırları kayıt sırasından okunur (aynı source_id'nin ardışık kayıtları bir belgedir). Bu
+yüzden kontroller EOS/BOS'u her kayıtta değil, beklendiği kayıtlarda arar; eski düzende hazırlanmış
+(her kaydı EOS ile kapatan) cache "belge sürerken EOS" sorunu olarak raporlanır.
 """
 import os
 import sys
@@ -15,6 +21,7 @@ project_root = os.path.abspath(os.path.dirname(__file__) + "/..")
 sys.path.insert(0, project_root)
 
 from tokenizer_management.core.tokenizer_core import TokenizerCore
+from training_system.record_format import record_boundaries
 
 # ============================================================================
 # 1. TOKENIZER VE SPECIAL ID'LER
@@ -118,50 +125,68 @@ if isinstance(inp, (list, tuple)):
     print(f"  tgt[-10:]: {tgt[-10:]}")
 
 # ============================================================================
+# 3b. BELGE SINIRLARI
+# ============================================================================
+print("\n" + "="*80)
+print("3b. BELGE SINIRLARI (aynı source_id'nin ardışık kayıtları bir belgedir)")
+print("="*80)
+
+total = len(cached_data)
+try:
+    boundaries = record_boundaries(cached_data)
+except ValueError as e:
+    boundaries = None
+    print(f"[ERROR] Belge sınırları okunamadı: {e}")
+else:
+    documents = sum(1 for starts, _ in boundaries if starts)
+    print(f"Toplam örnek: {total}")
+    print(f"Belge sayısı: {documents}")
+    print(f"Belge sürerken biten kayıt (EOS almamalı): {sum(1 for _, ends in boundaries if not ends)}")
+
+
+def content_end(seq):
+    """Son PAD olmayan pozisyon (dizi tamamen PAD ise -1)."""
+    for i in range(len(seq) - 1, -1, -1):
+        if seq[i] != PAD_ID:
+            return i
+    return -1
+
+
+# ============================================================================
 # 4. EOS KONTROLÜ
 # ============================================================================
 print("\n" + "="*80)
-print("4. EOS KONTROLÜ (tüm örnekler)")
+print("4. EOS KONTROLÜ (EOS yalnız belgeyi bitiren kaydın hedefinde, son içerik pozisyonunda)")
 print("="*80)
 
-eos_count = 0
+eos_count = 0         # hedef içeriği EOS ile biten kayıt
 eos_positions = []
-eos_missing = 0
-eos_start_count = 0
-multiple_eos_count = 0
+eos_expected = 0      # belgeyi bitiren kayıt (EOS beklenir)
+eos_missing = 0       # belgeyi bitiriyor ama EOS ile bitmiyor
+eos_false = 0         # belge sürerken EOS ile bitiyor (sahte "metin bitti" hedefi)
+eos_inner = 0         # içeriğin ortasında EOS
 
 for idx, item in enumerate(cached_data):
-    if len(item) == 3:
-        inp, tgt, _ = item
-    else:
-        inp, tgt = item
-    
-    tgt_list = list(tgt) if not isinstance(tgt, list) else tgt
-    
-    # EOS sayısı
-    eos_in_tgt = tgt_list.count(EOS_ID)
-    
-    if eos_in_tgt > 0:
+    tgt_list = list(item[1])
+    last = content_end(tgt_list)
+    ends_with_eos = last >= 0 and tgt_list[last] == EOS_ID
+    if ends_with_eos:
         eos_count += 1
-        # EOS pozisyonunu bul
-        eos_pos = tgt_list.index(EOS_ID)
-        eos_positions.append(eos_pos)
-        
-        if eos_in_tgt > 1:
-            multiple_eos_count += 1
-    else:
-        eos_missing += 1
-    
-    # EOS başta mı?
-    if len(tgt_list) > 0 and tgt_list[0] == EOS_ID:
-        eos_start_count += 1
+        eos_positions.append(last)
+    if EOS_ID in tgt_list[:max(last, 0)]:
+        eos_inner += 1
+    if boundaries is not None:
+        ends_document = boundaries[idx][1]
+        eos_expected += ends_document
+        eos_missing += ends_document and not ends_with_eos
+        eos_false += ends_with_eos and not ends_document
 
-total = len(cached_data)
-print(f"Toplam örnek: {total}")
-print(f"EOS içeren: {eos_count}/{total} ({100*eos_count/total:.1f}%)")
-print(f"EOS missing: {eos_missing}")
-print(f"Multiple EOS: {multiple_eos_count}")
-print(f"EOS başta (sorunlu!): {eos_start_count}")
+print(f"EOS ile biten hedef: {eos_count}/{total}")
+if boundaries is not None:
+    print(f"Belgeyi bitiren kayıt (EOS beklenir): {eos_expected}")
+    print(f"  EOS'u eksik (sorunlu!): {eos_missing}")
+    print(f"  Belge sürerken EOS (sorunlu!): {eos_false}")
+print(f"İçeriğin ortasında EOS (sorunlu!): {eos_inner}")
 
 if eos_positions:
     avg_eos_pos = sum(eos_positions) / len(eos_positions)
@@ -172,65 +197,57 @@ if eos_positions:
 # 5. BOS KONTROLÜ
 # ============================================================================
 print("\n" + "="*80)
-print("5. BOS KONTROLÜ (input başlangıçları)")
+print("5. BOS KONTROLÜ (BOS yalnız belgeyi başlatan kaydın girdisinin başında)")
 print("="*80)
 
-bos_count = 0
-bos_start_count = 0
+bos_start_count = 0   # BOS ile başlayan girdi
+bos_expected = 0      # belgeyi başlatan kayıt (BOS beklenir)
+bos_missing = 0
+bos_false = 0         # belge ortasındaki kayıt BOS ile başlıyor
+bos_inner = 0         # girdinin ilk pozisyonu dışında BOS
 
 for idx, item in enumerate(cached_data):
-    if len(item) == 3:
-        inp, tgt, _ = item
-    else:
-        inp, tgt = item
-    
-    inp_list = list(inp) if not isinstance(inp, list) else inp
-    
-    if len(inp_list) > 0 and inp_list[0] == BOS_ID:
-        bos_start_count += 1
-    
-    if BOS_ID in inp_list:
-        bos_count += 1
+    inp_list = list(item[0])
+    starts_with_bos = bool(inp_list) and inp_list[0] == BOS_ID
+    bos_start_count += starts_with_bos
+    if BOS_ID in inp_list[1:]:
+        bos_inner += 1
+    if boundaries is not None:
+        starts_document = boundaries[idx][0]
+        bos_expected += starts_document
+        bos_missing += starts_document and not starts_with_bos
+        bos_false += starts_with_bos and not starts_document
 
-print(f"BOS içeren input: {bos_count}/{total}")
 print(f"BOS ile başlayan input: {bos_start_count}/{total}")
+if boundaries is not None:
+    print(f"Belgeyi başlatan kayıt (BOS beklenir): {bos_expected}")
+    print(f"  BOS'u eksik (sorunlu!): {bos_missing}")
+    print(f"  Belge ortasında BOS (sorunlu!): {bos_false}")
+print(f"Girdinin ortasında BOS (sorunlu!): {bos_inner}")
 
 # ============================================================================
 # 6. PAD KONTROLÜ
 # ============================================================================
 print("\n" + "="*80)
-print("6. PAD KONTROLÜ")
+print("6. PAD KONTROLÜ (PAD yalnız içerikten sonra)")
 print("="*80)
 
-pad_before_eos_count = 0
-pad_after_eos_count = 0
+pad_inside_content = 0  # girdi/hedef içeriğinin arasında PAD
+input_tail_not_pad = 0  # girdide içerik bittikten sonra PAD olmayan token
 max_seq_len = 0
 
-for idx, item in enumerate(cached_data):
-    if len(item) == 3:
-        inp, tgt, _ = item
-    else:
-        inp, tgt = item
-    
-    tgt_list = list(tgt) if not isinstance(tgt, list) else tgt
+for item in cached_data:
+    inp_list, tgt_list = list(item[0]), list(item[1])
     max_seq_len = max(max_seq_len, len(tgt_list))
-    
-    if EOS_ID in tgt_list:
-        eos_pos = tgt_list.index(EOS_ID)
-        
-        # EOS'tan önce PAD var mı?
-        before_eos = tgt_list[:eos_pos]
-        if PAD_ID in before_eos:
-            pad_before_eos_count += 1
-        
-        # EOS'tan sonra sadece PAD var mı?
-        after_eos = tgt_list[eos_pos+1:]
-        if after_eos and not all(t == PAD_ID for t in after_eos):
-            pad_after_eos_count += 1
+    last = content_end(tgt_list)
+    if PAD_ID in tgt_list[:last + 1] or PAD_ID in inp_list[:last + 1]:
+        pad_inside_content += 1
+    if any(t != PAD_ID for t in inp_list[last + 1:]):
+        input_tail_not_pad += 1
 
 print(f"Max sequence length: {max_seq_len}")
-print(f"EOS'tan ÖNCE PAD var (sorunlu!): {pad_before_eos_count}")
-print(f"EOS'tan SONRA PAD dışı token var (sorunlu!): {pad_after_eos_count}")
+print(f"İçerik arasında PAD (sorunlu!): {pad_inside_content}")
+print(f"Girdide içerikten SONRA PAD dışı token (sorunlu!): {input_tail_not_pad}")
 
 # ============================================================================
 # 6b. NEXT-TOKEN HİZALAMA (target[t] = input[t+1])
@@ -238,7 +255,7 @@ print(f"EOS'tan SONRA PAD dışı token var (sorunlu!): {pad_after_eos_count}")
 print("\n" + "="*80)
 print("6b. NEXT-TOKEN HİZALAMA KONTROLÜ (Autoregressive doğru mu?)")
 print("="*80)
-print("Doğru format: target[t] = input[t+1] (son pozisyonda target = EOS).")
+print("Doğru format: target[t] = input[t+1] (EOS yalnız belgenin son kaydının hedefinde).")
 print("Yanlış format: target = input (aynı dizi) → model 'sonraki token' değil 'mevcut token' öğrenir.")
 print()
 
@@ -305,11 +322,17 @@ for idx in range(min(3, len(cached_data))):
     
     print(f"  Input  length: {len(inp_list)}, ilk 10: {inp_list[:10]}, son 10: {inp_list[-10:]}")
     print(f"  Target length: {len(tgt_list)}, ilk 10: {tgt_list[:10]}, son 10: {tgt_list[-10:]}")
-    
-    # EOS pozisyonu
-    if EOS_ID in tgt_list:
-        eos_pos = tgt_list.index(EOS_ID)
-        print(f"  [OK] EOS'un pozisyonu: {eos_pos} (total: {len(tgt_list)})")
+
+    # EOS pozisyonu (yalnız belgeyi bitiren kayıtta beklenir)
+    ends_document = boundaries[idx][1] if boundaries is not None else None
+    last = content_end(tgt_list)
+    if last >= 0 and tgt_list[last] == EOS_ID:
+        if ends_document is False:
+            print(f"  [SORUN] EOS var ama belge sonraki kayıtta sürüyor (pozisyon {last})")
+        else:
+            print(f"  [OK] EOS'un pozisyonu: {last} (total: {len(tgt_list)})")
+    elif ends_document is False:
+        print(f"  [OK] EOS yok: belge sonraki kayıtta sürüyor")
     else:
         print(f"  [MISSING] EOS yok!")
 
@@ -322,17 +345,31 @@ print("="*80)
 
 issues = []
 
-if eos_count < total * 0.95:
-    issues.append(f"⚠ EOS kullanımı düşük: {eos_count}/{total} ({100*eos_count/total:.1f}%)")
+# EOS/BOS oranı tek başına ölçüt değildir: uzun belgenin ara parçaları ikisini de almaz.
+if boundaries is None:
+    issues.append("⚠ Belge sınırları bilinmiyor: aynı source_id'nin kayıtları ardışık değil")
+else:
+    if eos_missing:
+        issues.append(f"⚠ Belgeyi bitiren {eos_missing}/{eos_expected} kayıtta EOS yok")
+    if eos_false:
+        issues.append(f"⚠ Belge sürerken EOS ile biten kayıt: {eos_false} "
+                      f"(eski kayıt düzeni olabilir; prepare_cache.py ile yeniden hazırlayın)")
+    if bos_missing:
+        issues.append(f"⚠ Belgeyi başlatan {bos_missing}/{bos_expected} kayıtta BOS yok")
+    if bos_false:
+        issues.append(f"⚠ Belge ortasında BOS ile başlayan kayıt: {bos_false}")
 
-if pad_before_eos_count > 0:
-    issues.append(f"⚠ PAD EOS'tan ÖNCE var: {pad_before_eos_count} örnek (hata!)")
+if eos_inner:
+    issues.append(f"⚠ İçeriğin ortasında EOS: {eos_inner} örnek (sorunlu!)")
 
-if bos_start_count < total * 0.95:
-    issues.append(f"⚠ BOS başlangıç oranı düşük: {bos_start_count}/{total}")
+if bos_inner:
+    issues.append(f"⚠ Girdinin ortasında BOS: {bos_inner} örnek (sorunlu!)")
 
-if eos_start_count > 0:
-    issues.append(f"⚠ EOS başta var: {eos_start_count} örnek (sorunlu!)")
+if pad_inside_content:
+    issues.append(f"⚠ İçerik arasında PAD: {pad_inside_content} örnek (hata!)")
+
+if input_tail_not_pad:
+    issues.append(f"⚠ Girdide içerikten sonra PAD dışı token: {input_tail_not_pad} örnek (hata!)")
 
 if issues:
     print("SORUNLAR BULUNDU:")
@@ -340,8 +377,8 @@ if issues:
         print(f"  {issue}")
 else:
     print("[OK] Cache format kontrolleri başarılı!")
-    print("  - EOS'lar doğru pozisyonda ve sayıda")
-    print("  - BOS'lar giriş başında")
-    print("  - PAD'ler sadece EOS'tan sonra")
+    print(f"  - EOS yalnız belge sonlarında: {eos_count} kayıt, {documents} belge")
+    print(f"  - BOS yalnız belge başlarında: {bos_start_count} kayıt")
+    print("  - PAD'ler sadece içerikten sonra")
 
 print("\n" + "="*80)

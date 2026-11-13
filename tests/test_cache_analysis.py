@@ -9,12 +9,14 @@ Test Amacı:
 - Alignment kontrolü (BOS/EOS alignment)
 - Token distribution (cache'de yanlış pattern var mı?)
 
-Cache formatı (prepare_cache.py, alignment_format="autoregressive_v2"): cache artık BOS/EOS/PAD
+Cache formatı (prepare_cache.py, alignment_format="autoregressive_v2", kayıt düzeni
+cache_identity.CACHE_FORMAT_VERSION = 2, bkz. training_system/record_format.py): cache BOS/EOS/PAD
 eklenmiş, formatlanmış kayıtlar saklar:
     (seq_in, seq_tgt, source_id)
-    seq_in  = [BOS, t1, ..., tN, PAD, ...]   uzunluk = max_seq_length
-    seq_tgt = [t1, ..., tN, EOS, PAD, ...]   uzunluk = max_seq_length
-Yani target[i] == input[i+1] ve EOS, hedefteki son PAD olmayan token'dır.
+    tek kayda sığan belge:  seq_in  = [BOS, t1, ..., tN, PAD, ...]   uzunluk = max_seq_length
+                            seq_tgt = [t1, ..., tN, EOS, PAD, ...]   uzunluk = max_seq_length
+    uzun belgenin parçaları: BOS yalnız ilk parçanın başında, EOS yalnız son parçanın sonunda.
+Her kayıtta target[i] == input[i+1]; EOS yalnız belgenin son kaydında, hedefin son PAD olmayan token'ıdır.
 
 pytest altında cache, prepare_cache() ile geçici bir dizinde (tmp_path_factory) oluşturulur;
 depo ağacına hiçbir şey yazılmaz. Script olarak çalıştırıldığında
@@ -144,6 +146,8 @@ class CacheAnalysis:
         targets_with_extra_eos = 0
         empty_targets = 0
         bos_first = 0
+        inputs_with_inner_bos = 0
+        doc_flags = {}  # belge -> kayıt sırasıyla (BOS ile başlar mı, EOS ile biter mi)
         inputs_equal_targets = 0
         pad_inside_content = 0
         token_frequency = Counter()
@@ -162,12 +166,14 @@ class CacheAnalysis:
             # Kayıt formatı: (seq_in, seq_tgt, source_id); source_id'siz eski cache: (seq_in, seq_tgt)
             if len(item) == 3:
                 seq_in, seq_tgt, source_id = item
+                document = source_id
                 with_source_id += 1
                 source_ids.add(source_id)
                 if not isinstance(source_id, int):
                     non_int_source_id += 1
             elif len(item) == 2:
                 seq_in, seq_tgt = item
+                document = ("kaynaksız", idx)  # source_id'siz kayıt kendi başına bir belgedir
                 without_source_id += 1
             else:
                 invalid_records += 1
@@ -194,30 +200,32 @@ class CacheAnalysis:
                     error_samples.append(idx)
                 continue
             
-            # EOS pozisyonu kontrolü: EOS hedefin son PAD olmayan token'ı olmalı (ve tek EOS)
+            # EOS yalnız belgeyi bitiren kaydın hedefinde, son PAD olmayan token olarak bulunur; hedefin
+            # başka bir yerinde EOS olmamalı. BOS yalnız belgeyi başlatan kaydın ilk token'ıdır.
             target_last_tokens[seq_tgt[last]] += 1
-            if seq_tgt[last] == eos_id:
+            ends_with_eos = seq_tgt[last] == eos_id
+            starts_with_bos = bool(seq_in) and seq_in[0] == bos_id
+            if ends_with_eos:
                 eos_frequency += 1
                 eos_positions.append(last)
-            if seq_tgt.count(eos_id) > 1:
+            if eos_id in seq_tgt[:last]:
                 targets_with_extra_eos += 1
-            
-            if seq_in and seq_in[0] == bos_id:
+            if starts_with_bos:
                 bos_first += 1
+            if bos_id in seq_in[1:last + 1]:
+                inputs_with_inner_bos += 1
+            doc_flags.setdefault(document, []).append((starts_with_bos, ends_with_eos))
             # "target == input" hizalama hatası (TrainingService ilk kayıtta bunu "Data alignment bug" diye reddeder)
             if seq_in == seq_tgt:
                 inputs_equal_targets += 1
             # İçerik içinde PAD olmamalı (PAD yalnızca sondaki dolgu)
-            if pad_id in seq_in[1:last + 1]:
+            if pad_id in seq_in[:last + 1]:
                 pad_inside_content += 1
             
-            # Alignment kontrolü: Input[0] == BOS, Target[i] == Input[i+1] (i < EOS pozisyonu),
-            # EOS'tan sonra input da PAD. (Eski analiz cache'te ham (inp, tgt) çiftleri bekleyip
-            # BOS/EOS'u kendisi ekliyordu; formatlanmış cache'te bu çift BOS üretirdi.)
+            # Alignment kontrolü: Target[i] == Input[i+1] (i < son içerik pozisyonu), içerikten sonra
+            # input da PAD. BOS/EOS'un hangi kayıtlarda olduğu belge düzeyinde ayrıca denetlenir.
             is_aligned = (
                 len(seq_in) == len(seq_tgt)
-                and bool(seq_in) and seq_in[0] == bos_id
-                and seq_tgt[last] == eos_id
                 and seq_tgt[:last] == seq_in[1:last + 1]
                 and all(t == pad_id for t in seq_in[last + 1:])
             )
@@ -233,8 +241,18 @@ class CacheAnalysis:
                     logger.warning(f"  Target[:10]: {seq_tgt[:10]}")
         
         valid_records = samples_to_analyze - invalid_records
-        # EOS her zaman (içeriğin) son pozisyonunda mı?
-        eos_always_last = valid_records > 0 and eos_frequency == valid_records and targets_with_extra_eos == 0
+        # Belge düzeyi: her belgenin yalnız ilk kaydı BOS ile başlar, yalnız son kaydı EOS ile biter
+        documents = len(doc_flags)
+        documents_closed_once = sum(
+            [ends for _, ends in flags] == [False] * (len(flags) - 1) + [True] for flags in doc_flags.values()
+        )
+        documents_opened_once = sum(
+            [starts for starts, _ in flags] == [True] + [False] * (len(flags) - 1) for flags in doc_flags.values()
+        )
+        continuation_records = sum(not ends for flags in doc_flags.values() for _, ends in flags)
+        # EOS yalnız belge sonlarında ve (içeriğin) son pozisyonunda mı?
+        eos_always_last = (valid_records > 0 and documents_closed_once == documents
+                           and eos_frequency == documents and targets_with_extra_eos == 0)
         
         results = {
             "cache_file": str(cache_file),
@@ -266,8 +284,15 @@ class CacheAnalysis:
                 "inputs_equal_targets": inputs_equal_targets,
                 "pad_inside_content": pad_inside_content,
             },
+            "document_analysis": {
+                "documents": documents,
+                "documents_closed_once": documents_closed_once,
+                "documents_opened_once": documents_opened_once,
+                "continuation_records": continuation_records,
+            },
             "alignment_analysis": {
                 "bos_first": bos_first,
+                "inputs_with_inner_bos": inputs_with_inner_bos,
                 "correct_alignments": correct_alignments,
                 "alignment_errors": alignment_errors,
                 "alignment_accuracy": (correct_alignments / samples_to_analyze) * 100 if samples_to_analyze else 0.0,
@@ -368,25 +393,32 @@ def test_cache_records_have_expected_format(analysis):
         assert lengths["min"] == lengths["max"] == max_seq_length, f"{key}: {lengths}, beklenen: {max_seq_length}"
 
 
-def test_eos_closes_every_target(analysis):
-    """EOS her hedefte tam bir kez, son PAD olmayan pozisyonda olmalı"""
+def test_eos_closes_each_document_exactly_once(analysis):
+    """EOS yalnız belgenin son kaydında, hedefin son PAD olmayan pozisyonunda ve belge başına bir kez"""
     eos = analysis["eos_analysis"]
+    docs = analysis["document_analysis"]
     assert eos["empty_targets"] == 0, f"{eos['empty_targets']} hedef tamamen PAD"
-    assert eos["eos_frequency"] == analysis["examples_analyzed"], (
-        f"EOS frequency: {eos['eos_frequency']}/{analysis['examples_analyzed']} "
-        f"({eos['eos_frequency_percentage']:.2f}%), son token dağılımı: "
-        f"{analysis['token_analysis']['target_last_token_distribution']}"
+    assert docs["documents"] >= 2
+    # education/ uzun belgeler içerir: ara parçalar EOS almamalı (eskiden her parça EOS ile bitiyordu)
+    assert docs["continuation_records"] > 0, "Uzun belge parçası yok; belge ortası EOS kuralı sınanmadı"
+    assert docs["documents_closed_once"] == docs["documents"], (
+        f"{docs['documents'] - docs['documents_closed_once']}/{docs['documents']} belgede EOS son kayıtta tam "
+        f"bir kez değil; son token dağılımı: {analysis['token_analysis']['target_last_token_distribution']}"
     )
-    assert eos["targets_with_extra_eos"] == 0, f"{eos['targets_with_extra_eos']} hedefte birden fazla EOS var"
+    assert eos["eos_frequency"] == docs["documents"], f"EOS frequency {eos['eos_frequency']} != {docs['documents']} belge"
+    assert eos["targets_with_extra_eos"] == 0, f"{eos['targets_with_extra_eos']} hedefte içerik ortasında EOS var"
     assert eos["eos_always_last"]
 
 
 def test_targets_are_inputs_shifted_by_one(analysis):
-    """BOS/EOS alignment: Input[0] == BOS ve Target[i] == Input[i+1] (next-token hizalaması)"""
+    """Target[i] == Input[i+1] (next-token hizalaması); BOS yalnız belgenin ilk kaydının başında"""
     alignment = analysis["alignment_analysis"]
-    assert alignment["bos_first"] == analysis["examples_analyzed"], (
-        f"Input BOS ile başlamıyor: {analysis['examples_analyzed'] - alignment['bos_first']} kayıt"
+    docs = analysis["document_analysis"]
+    assert docs["documents_opened_once"] == docs["documents"], (
+        f"{docs['documents'] - docs['documents_opened_once']} belgede BOS yalnız ilk kayıtta değil"
     )
+    assert alignment["bos_first"] == docs["documents"], f"BOS ile başlayan kayıt sayısı: {alignment['bos_first']}"
+    assert alignment["inputs_with_inner_bos"] == 0
     assert alignment["alignment_errors"] == 0, (
         f"Alignment hatası: {alignment['alignment_errors']} kayıt "
         f"(accuracy {alignment['alignment_accuracy']:.2f}%), ilk hatalı örnekler: {alignment['error_samples']}"

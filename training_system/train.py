@@ -114,11 +114,16 @@ except ImportError:
 # =========================
 
 LOG_FMT = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-logging.basicConfig(level=logging.INFO, format=LOG_FMT)
-# Root handler seviyelerini INFO'ya düşür
-logging.getLogger().setLevel(logging.INFO)
-for h in logging.getLogger().handlers:
-    h.setLevel(logging.INFO)
+
+
+def configure_logging() -> None:
+    """Kök logger'ı yalnız giriş noktası (main) yapılandırır; modülü import etmek logging'i değiştirmez."""
+    logging.basicConfig(level=logging.INFO, format=LOG_FMT)
+    # Root handler seviyelerini INFO'ya düşür
+    logging.getLogger().setLevel(logging.INFO)
+    for h in logging.getLogger().handlers:
+        h.setLevel(logging.INFO)
+
 
 train_logger = logging.getLogger("TrainScript")
 #  Modül seviyesi loglar kaldırıldı (import sırasında çalışmaması için)
@@ -659,6 +664,7 @@ TRAIN_CONFIG: Dict[str, Any] = {
 # main
 # =========================
 def main() -> None:
+    configure_logging()
     try:
         # [MEM] CUDA bellek fragment azaltma — CUDA init ÖNCESINDE ayarlanmalı.
         # expandable_segments:True → PyTorch, OS'tan ihtiyaç kadar küçük bloklar ister,

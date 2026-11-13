@@ -12,7 +12,9 @@ Test Amacı:
 Eğitim verisi formatı (TokenizerCore.load_training_data):
     (inp_ids, tgt_ids, source_id) — BOS/EOS YOK (add_special_tokens=False) ve tgt_ids == inp_ids.
 BOS/EOS ve bir pozisyonluk kaydırma (target[i] == input[i+1]) eğitim formatlamasında eklenir
-(prepare_cache.format_data_func / TrainingService: Input = [BOS] + inp_ids, Target = tgt_ids + [EOS]).
+(training_system/record_format.py; tek kayda sığan belge: Input = [BOS] + inp_ids, Target = tgt_ids + [EOS];
+uzun belgenin parçalarında BOS yalnız ilk, EOS yalnız son parçadadır). Aşağıdaki analiz her ham kaydı
+tek kayıtlık belge gibi biçimler.
 
 pytest altında hiçbir dosya yazılmaz (JSON raporu yalnızca istenen yola, testte tmp_path'e).
 Script olarak çalıştırıldığında (python tests/test_training_data_analysis.py) raporu çalışma
