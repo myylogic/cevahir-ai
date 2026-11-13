@@ -53,3 +53,9 @@ entries are not amendments.
   test of joint versus independent state under capacity, and the report will say so. Per PROTOCOL §14 the lives run
   last (after H1-H3, S1-S2 and S4); any life run with a rescaled λ or a smaller step is exploratory. Diagnosis
   scripts and numbers: kept with the session's working files (code audit, numerical diagnosis, skeptic verdict).
+- 2026-11-13 12:45 UTC — deviation disclosed (PROTOCOL §14 "no hypothesis metric is inspected before all
+  confirmatory runs finish"): at 09:46 UTC, while checking that the first τ output was well formed, the lead printed
+  the per-layer medians of τ_RN for confirmatory world 1000 (layers 0-4: 0.631, 0.481, 0.525, 0.563, 0.628), which is
+  the S4 metric of one world. No decision, code, option or schedule depended on it; the analysis code is frozen by
+  hash and computes the decisions mechanically. No other confirmatory hypothesis metric has been looked at; the
+  confirmatory edit records are committed without being read.
