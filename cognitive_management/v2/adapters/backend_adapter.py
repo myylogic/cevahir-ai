@@ -36,7 +36,8 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 
 from __future__ import annotations
 from cognitive_management.research.runtime import BudgetExhausted, request_model_api
-from typing import Protocol
+from typing import Optional, Protocol
+import math
 
 # V1'den import
 import sys
@@ -150,14 +151,21 @@ class ModelAPIAdapter(FullModelBackend):
         self,
         text: str,
         **kwargs
-    ) -> float:
-        """Estimate entropy"""
+    ) -> Optional[float]:
+        """Normalized next-token entropy in [0, 1], or None when unavailable.
+
+        None means there is no measurement: the backend has no probe, the probe
+        failed, or ``entropy_details`` reported ``available=False`` (the bare
+        ``entropy_estimate`` then returns a neutral 0.5 placeholder, which must
+        not be routed on). Inside a research request errors still propagate so
+        the budget ledger records the failed probe.
+        """
         # Phase 8: Use connection pool if available
         if self._connection_pool:
             try:
                 conn = self._connection_pool.acquire()
                 try:
-                    return request_model_api(conn).entropy_estimate(text, **kwargs)
+                    return self._measure_entropy(conn, text, **kwargs)
                 finally:
                     self._connection_pool.release(conn)
             except BudgetExhausted:
@@ -166,15 +174,34 @@ class ModelAPIAdapter(FullModelBackend):
                 # Fallback to direct call if pool fails
                 pass
         try:
-            return request_model_api(self._v1_api).entropy_estimate(text, **kwargs)
+            return self._measure_entropy(self._v1_api, text, **kwargs)
         except BudgetExhausted:
             raise
         except Exception:
-            # Fallback
             from cognitive_management.research.runtime import current_runtime
             if current_runtime() is not None:
                 raise
-            return 0.8
+            return None
+
+    @staticmethod
+    def _measure_entropy(raw, text: str, **kwargs) -> Optional[float]:
+        from cognitive_management.research.runtime import current_runtime
+        if current_runtime() is not None:
+            # The budgeted proxy accounts the probe and rejects unavailable ones.
+            value = request_model_api(raw).entropy_estimate(text, **kwargs)
+        else:
+            details = getattr(raw, "entropy_details", None)
+            if callable(details):
+                result = details(text, **kwargs)
+                if not result.get("available", False):
+                    return None
+                value = result.get("value")
+            else:
+                value = raw.entropy_estimate(text, **kwargs)
+        if value is None or isinstance(value, bool):
+            return None
+        value = float(value)
+        return value if math.isfinite(value) else None
     
     # Optional: Multimodal support
     def process_audio(self, audio_data: bytes) -> str:

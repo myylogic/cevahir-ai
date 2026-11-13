@@ -346,7 +346,7 @@ def build_features(
 
     Döndürülen anahtarlar:
         input_length          : kelime sayısı
-        entropy_est           : belirsizlik kestirimi (0.0–3.0 ölçek)
+        entropy_est           : belirsizlik kestirimi (0.0–3.0 ölçek); None = ölçüm yok
         needs_recent_info     : güncel bilgi tetikleyicisi
         needs_calc_or_parse   : hesaplama/ayrıştırma tetikleyicisi
         has_claims            : iddia marker'ı
@@ -379,7 +379,7 @@ def build_features(
     # Temel özellik sözlüğü (karmaşıklık için gerekli)
     base_feats: Dict[str, Any] = {
         "input_length":        tokens,
-        "entropy_est":         float(entropy_est or 0.0),
+        "entropy_est":         None if entropy_est is None else float(entropy_est),
         "needs_recent_info":   needs_recent,
         "needs_calc_or_parse": needs_calc,
         "has_claims":          has_claim,
@@ -514,7 +514,10 @@ def mode_gates(cfg: CognitiveManagerConfig, features: Dict[str, Any]) -> Dict[st
         • debate_gate → entropy >= 2.5 veya input_length >= 200
         • tot_gate    → entropy >= 3.0 veya input_length >= 300
     """
-    ent        = float(features.get("entropy_est", 0.0))
+    ent_raw    = features.get("entropy_est", 0.0)
+    # None = entropi ölçülemedi. NaN ile her eşik karşılaştırması False olur;
+    # böylece başarısız bir ölçüm hiçbir kapıyı (SC dahil) açamaz.
+    ent        = float("nan") if ent_raw is None else float(ent_raw)
     length     = int(features.get("input_length", 0))
     query_type = features.get("query_type", "unknown")
     domain     = features.get("domain", "general")

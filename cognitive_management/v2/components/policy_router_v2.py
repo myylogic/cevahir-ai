@@ -59,7 +59,7 @@ class PolicyRouterV2(IPolicyRouter):
     V3 Policy Router — QueryType + DomainType + complexity farkındası.
 
     Mod Seçim Hiyerarşisi:
-        1. allow_inner_steps=False      → direkt
+        1. allow_inner_steps=False / entropi ölçülemedi (None) → direkt
         2. query_type=conversational    → direkt (kısa, sohbet)
         3. query_type=creative          → direkt (yüksek temp, debate yok)
         4. tot_gate açık                → tot
@@ -145,6 +145,12 @@ class PolicyRouterV2(IPolicyRouter):
         if not self.cfg.policy.allow_inner_steps:
             return "direct", 0
 
+        # --- Kural 0: Entropi ölçülemedi (None) → direkt ---
+        # Başarısız ölçüm yer tutucu bir sayıya çevrilip düşünme moduna karar
+        # verdirmez; mesaj en ucuz yoldan yanıtlanır.
+        if not features.get("entropy_available", True):
+            return "direct", 0
+
         query_type = features.get("query_type", "unknown")
         domain     = features.get("domain", "general")
         complexity = float(features.get("complexity_score", 0.0))
@@ -212,6 +218,9 @@ class PolicyRouterV2(IPolicyRouter):
             • Yaratıcı yazı: yüksek temperature → çeşitli, özgün
             • Risk yüksek: düşük temperature → muhafazakâr yanıtlar
             • ToT: orta temp → keşif-sömürü dengesi
+            • Entropi ölçülemediyse (None) en düşük belirsizlik (0) sayılmaz:
+              bütçe ve sıcaklıktaki entropi terimi _NEUTRAL_ENTROPY (0–3
+              ölçeğinin ortası) ile hesaplanır.
 
         Args:
             features:   Normalize edilmiş özellik vektörü.
@@ -227,7 +236,8 @@ class PolicyRouterV2(IPolicyRouter):
 
         query_type = features.get("query_type", "unknown")
         domain     = features.get("domain", "general")
-        entropy    = float(features.get("entropy_est", 0.0))
+        raw_entropy = features.get("entropy_est", 0.0)
+        entropy    = _NEUTRAL_ENTROPY if raw_entropy is None else float(raw_entropy)
         length     = int(features.get("input_length", 0))
         complexity = float(features.get("complexity_score", 0.0))
 
@@ -322,14 +332,24 @@ class PolicyRouterV2(IPolicyRouter):
 # Yardımcı — Normalize Edilmiş Özellik Vektörü
 # =============================================================================
 
+#: Ölçülemeyen entropinin yerine yalnız decoding hesabında kullanılan nötr
+#: değer: 0–3 ölçeğinin ortası. Mod seçimini etkilemez (ölçüm yoksa router
+#: 'direct' seçer), hiçbir kapıyı açmaz ve risk puanına katkı yapmaz.
+_NEUTRAL_ENTROPY = 1.5
+
+
 def _normalize_features(raw: Dict[str, Any]) -> Dict[str, Any]:
     """
     Eksik anahtarları güvenli varsayılan değerlerle doldurur.
     V3: query_type, domain, complexity_score, is_* kısayollar eklendi.
+    Açıkça None verilen entropi "ölçüm yok" demektir (anahtarın yokluğu değil)
+    ve None kalır; hiçbir tüketici onu 0.0 (en düşük belirsizlik) sanmaz.
     """
+    entropy = raw.get("entropy_est", 0.0)
     return {
         "input_length":        int(raw.get("input_length",        0)     or 0),
-        "entropy_est":         float(raw.get("entropy_est",       0.0)   or 0.0),
+        "entropy_est":         None if entropy is None else float(entropy or 0.0),
+        "entropy_available":   entropy is not None,
         "needs_recent_info":   bool(raw.get("needs_recent_info",  False)),
         "needs_calc_or_parse": bool(raw.get("needs_calc_or_parse",False)),
         "has_claims":          bool(raw.get("has_claims",         False)),

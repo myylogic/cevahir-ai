@@ -38,9 +38,11 @@ Telif Hakkı: © 2024 Muhammed Yasin Yılmaz. Tüm Hakları Saklıdır.
 from __future__ import annotations
 from cognitive_management.research.runtime import BudgetExhausted
 
+import inspect
 import logging
 import math
 import re
+import time
 from collections import Counter
 from typing import Dict, List, Optional, Protocol, Tuple
 
@@ -596,16 +598,30 @@ class CriticV2(ICritic):
         return 1.00       # İddia yok: nötr metin
 
     def _check_facts_enhanced(self, text: str) -> float:
-        """Harici fact-checker + LLM doğrulama (Phase 7.2)."""
+        """Harici fact-checker + LLM doğrulama (Phase 7.2).
+
+        Dış istekler bu çağrı, yani critic geçişi başına sınırlıdır (varsayılan
+        max_passes=1 ile yanıt başına): en çok fact_checking_max_claims iddia
+        sorgulanır; fact_checking_time_budget saniye dolunca yeni istek başlamaz
+        ve hiçbir isteğin zaman aşımı kalan süreyi geçmez. Bütçe istek başlatmanın
+        son tarihidir, kesin duvar saati sınırı değildir: zaman aşımı her soket
+        işlemine ayrı uygulanır ve DNS çözümlemesini kapsamaz. Sorgulanmayan
+        iddialar doğrulanmamış sayılır.
+        """
         claims = extract_claims(text, min_confidence=self.cfg.critic.claim_extraction_min_confidence)
         if not claims:
             return 1.0
 
+        limit = max(0, int(self.cfg.critic.fact_checking_max_claims))
+        deadline = time.monotonic() + float(self.cfg.critic.fact_checking_time_budget)
         verified_count = 0
-        for claim_obj in claims:
+        for claim_obj in claims[:limit]:
             for checker in self._fact_checkers:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
                 try:
-                    result = checker.verify(claim_obj.claim)
+                    result = self._verify_claim(checker, claim_obj.claim, remaining)
                     if result and result.is_verified is True:
                         verified_count += 1
                         break
@@ -625,6 +641,23 @@ class CriticV2(ICritic):
             return (base_score * 0.60) + (llm_score * 0.40)
 
         return base_score
+
+    @staticmethod
+    def _verify_claim(checker: FactChecker, claim: str, remaining: float):
+        """checker.verify(claim, timeout=remaining) çağırır.
+
+        timeout parametresi olmayan eski verify(claim) imzalı denetleyiciler
+        parametresiz çağrılır: TypeError ile sessizce "doğrulanmamış" sayılmazlar.
+        Kendi zaman aşımlarını bütçe kısaltamaz; bütçe yine de dolduktan sonra
+        onlar için de yeni istek başlatılmaz.
+        """
+        try:
+            params = inspect.signature(checker.verify).parameters.values()
+        except (TypeError, ValueError):  # imzası okunamayan çağrılabilir
+            params = ()
+        if any(p.name == "timeout" or p.kind is inspect.Parameter.VAR_KEYWORD for p in params):
+            return checker.verify(claim, timeout=remaining)
+        return checker.verify(claim)
 
     def _check_facts_llm(self, text: str, claims: List[ExtractedClaim]) -> float:
         """LLM tabanlı gerçek doğrulama."""

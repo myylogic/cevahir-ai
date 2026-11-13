@@ -78,7 +78,11 @@ class FakeModel(ModelAPI):
 
 @pytest.fixture()
 def cfg() -> CognitiveManagerConfig:
-    cfg = CognitiveManagerConfig()
+    # Bu testler strateji, critic ve revizyon akışlarını sınar: varsayılan 'lean'
+    # profil bunları kapattığı için 'full' profil açıkça seçilir. Ağ kullanan
+    # dış iddia doğrulaması testlerde kapalı tutulur.
+    cfg = CognitiveManagerConfig.full()
+    cfg.critic.enable_external_fact_checking = False
     # Testleri hızlandırmak için küçük bağlam bütçesi
     cfg.memory.max_history_tokens = 512
     cfg.memory.session_summary_every = 6

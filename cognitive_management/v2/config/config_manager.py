@@ -35,6 +35,7 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from copy import deepcopy
 from typing import Dict, Any, Optional, List, Callable, Type
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
@@ -187,13 +188,18 @@ class ConfigManager:
             
             # Set value
             current[keys[-1]] = value
+            if keys == ["profile"]:
+                # A profile is applied to the current config; inside a full dump
+                # the dump's own values would undo it (see _merged_dict).
+                config_dict = self._merged_dict(self._config, {"profile": value})
             
-            # Reconstruct config object
+            # Reconstruct config object (replaced only once it is valid)
             try:
-                self._config = CognitiveManagerConfig.from_dict(config_dict)
-                self._config.validate()
+                config = CognitiveManagerConfig.from_dict(config_dict)
+                config.validate()
             except Exception as e:
                 raise ConfigError(f"Invalid config value for '{key}': {e}") from e
+            self._config = config
             
             # Update cache
             self._update_cache()
@@ -263,16 +269,14 @@ class ConfigManager:
             updates: Dictionary of config updates (can be nested)
         """
         with self._lock:
-            # Merge updates
-            config_dict = asdict(self._config)
-            self._deep_merge(config_dict, updates)
-            
-            # Reconstruct config
+            # Merge updates into the current config ("profile" is applied first)
+            # and replace the config only once the result is valid
             try:
-                self._config = CognitiveManagerConfig.from_dict(config_dict)
-                self._config.validate()
+                config = CognitiveManagerConfig.from_dict(self._merged_dict(self._config, updates))
+                config.validate()
             except Exception as e:
                 raise ConfigError(f"Invalid config updates: {e}") from e
+            self._config = config
             
             # Update cache
             self._update_cache()
@@ -356,13 +360,13 @@ class ConfigManager:
                         f.seek(0)
                         config_dict = yaml.safe_load(f)
             
-            # Merge with default config
-            default_dict = asdict(self.default_config)
-            self._deep_merge(default_dict, config_dict)
+            # Merge with default config ("profile" is applied to it first)
+            merged = self._merged_dict(self.default_config, config_dict)
             
-            # Reconstruct config
-            self._config = CognitiveManagerConfig.from_dict(default_dict)
-            self._config.validate()
+            # Reconstruct config (replaced only once it is valid)
+            config = CognitiveManagerConfig.from_dict(merged)
+            config.validate()
+            self._config = config
             
             # Update cache
             self._update_cache()
@@ -425,6 +429,25 @@ class ConfigManager:
             except Exception as e:
                 # Don't let listener errors crash the system
                 print(f"Warning: Config change listener error: {e}")
+    
+    def _merged_dict(self, base: CognitiveManagerConfig, updates: Dict[str, Any]) -> Dict[str, Any]:
+        """Return asdict(base) deep-merged with updates.
+        
+        A top-level "profile" key ("lean" | "full") is applied to a copy of
+        base first and the other keys are merged over it, so a file holding
+        {"profile": "full", ...} gets the full profile plus its own overrides.
+        Merging the key into a complete dump instead would let the dump's
+        values (the base profile's switches) silently undo it.
+        """
+        if not isinstance(updates, dict):
+            raise ConfigError(f"Config must be a mapping, got {type(updates).__name__}")
+        updates = dict(updates)
+        profile = updates.pop("profile", None)
+        if profile is not None:
+            base = deepcopy(base).apply_profile(profile)
+        merged = asdict(base)
+        self._deep_merge(merged, updates)
+        return merged
     
     def _deep_merge(self, base: Dict[str, Any], updates: Dict[str, Any]) -> None:
         """Deep merge two dictionaries"""

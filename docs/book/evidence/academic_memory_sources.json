@@ -143,37 +143,37 @@
     {
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "DeliberationHandler._process",
-      "line": 317,
+      "line": 328,
       "chapter": "tr/09-bellek-bilis-araclar.md"
     },
     {
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "ContextBuildingHandler._process",
-      "line": 463,
+      "line": 474,
       "chapter": "tr/09-bellek-bilis-araclar.md"
     },
     {
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "GenerationHandler._process",
-      "line": 558,
+      "line": 569,
       "chapter": "tr/09-bellek-bilis-araclar.md"
     },
     {
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "SelfConsistencyHandler._process",
-      "line": 619,
+      "line": 631,
       "chapter": "tr/09-bellek-bilis-araclar.md"
     },
     {
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "CriticHandler._process",
-      "line": 728,
+      "line": 745,
       "chapter": "tr/09-bellek-bilis-araclar.md"
     },
     {
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "MemoryUpdateHandler._process",
-      "line": 796,
+      "line": 813,
       "chapter": "tr/09-bellek-bilis-araclar.md"
     },
     {
@@ -209,13 +209,13 @@
     {
       "path": "cognitive_management/cognitive_manager.py",
       "symbol": "CognitiveManager.handle",
-      "line": 512,
+      "line": 515,
       "chapter": "tr/09-bellek-bilis-araclar.md"
     },
     {
       "path": "cognitive_management/v2/adapters/backend_adapter.py",
       "symbol": "ModelAPIAdapter.generate",
-      "line": 101,
+      "line": 102,
       "chapter": "tr/09-bellek-bilis-araclar.md"
     },
     {
