@@ -3,14 +3,82 @@
 Security Middleware
 ===================
 
-Security headers and CSRF protection middleware.
+Security headers, request IDs and the CORS policy.
+
+CORS, including preflight (OPTIONS) requests, is answered by Flask-CORS with
+the options from cors_options(); this module adds no CORS headers of its own.
+Only origins listed in CORS_ORIGINS are allowed: literal entries must match the
+Origin exactly, regular-expression entries must match all of it. A configured
+'*' is sent literally instead of echoing the caller's Origin, and credentials
+are never allowed (the API authenticates with bearer tokens, not cookies).
 """
 
+import re
 from flask import Flask, request, g
+from api.api_config import DEFAULT_CORS_HEADERS, DEFAULT_CORS_METHODS, PLACEHOLDER_SECRETS
+from api.middleware.auth import trusts_user_id_header
 from api.security.headers import add_security_headers
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Characters that make Flask-CORS treat an origin string as a regular expression.
+_REGEX_HINTS = frozenset("*\\]?$^[]()")
+
+
+def _as_list(value):
+    """Config lists may also arrive as one comma-separated string."""
+    if isinstance(value, str):
+        value = value.split(",")
+    items = [item.strip() if isinstance(item, str) else item for item in value or []]
+    return [item for item in items if item]
+
+
+def _origin_pattern(origin):
+    """Keep literal origins and '*'; compile regular expressions to match the whole Origin."""
+    if not isinstance(origin, str) or origin == "*" or _REGEX_HINTS.isdisjoint(origin):
+        return origin
+    return re.compile(rf"(?:{origin})\Z", re.IGNORECASE)
+
+
+def cors_options(config) -> dict:
+    """
+    Flask-CORS resource options for an application config.
+
+    - only configured origins are answered; a non-matching Origin gets no CORS headers
+    - '*' is sent literally (send_wildcard), never as a reflected Origin
+    - credentials are never allowed, so they cannot be combined with '*'
+    - requests without an Origin header get no CORS headers
+    """
+    origins = [_origin_pattern(origin) for origin in _as_list(config.get("CORS_ORIGINS"))]
+    return {
+        "origins": origins,
+        "methods": _as_list(config.get("CORS_METHODS")) or list(DEFAULT_CORS_METHODS),
+        "allow_headers": _as_list(config.get("CORS_HEADERS")) or list(DEFAULT_CORS_HEADERS),
+        "expose_headers": ["X-Request-ID"],
+        "max_age": 3600,
+        "supports_credentials": False,
+        "send_wildcard": "*" in origins,
+        "always_send": False,
+        "vary_header": True,
+    }
+
+
+def warn_about_risky_settings(config):
+    """Log the security-relevant settings an operator should not miss."""
+    if trusts_user_id_header(config):
+        logger.warning(
+            "X-User-ID is accepted as identity (CEVAHIR_TRUST_X_USER_ID=1, %s configuration): "
+            "any caller can act as any user. Use this only on a local machine.",
+            config.get("API_ENV"),
+        )
+    if "*" in _as_list(config.get("CORS_ORIGINS")):
+        logger.warning("CORS_ORIGINS contains '*': any website may call this API from a browser")
+    jwt_secret = config.get("JWT_SECRET_KEY") or config.get("SECRET_KEY")
+    if not jwt_secret or jwt_secret in PLACEHOLDER_SECRETS:
+        logger.warning(
+            "JWT_SECRET_KEY is not configured: authenticated endpoints answer 401 until it is set"
+        )
 
 
 def register_security_middleware(app: Flask):
@@ -40,18 +108,6 @@ def register_security_middleware(app: Flask):
                 request_id = str(uuid.uuid4())
             g.request_id = request_id
     
-    # CORS preflight handling
-    @app.before_request
-    def handle_preflight():
-        """Handle CORS preflight requests"""
-        if request.method == "OPTIONS":
-            response = app.make_default_options_response()
-            headers = response.headers
-            headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
-            headers['Access-Control-Allow-Methods'] = ', '.join(app.config.get('CORS_METHODS', ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']))
-            headers['Access-Control-Allow-Headers'] = ', '.join(app.config.get('CORS_HEADERS', ['Content-Type', 'Authorization']))
-            headers['Access-Control-Max-Age'] = '3600'
-            return response
-    
+    warn_about_risky_settings(app.config)
     logger.info("Security middleware registered")
 

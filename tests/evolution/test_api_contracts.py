@@ -8,8 +8,8 @@ import pytest
 deps = Path(__file__).resolve().parents[2] / ".evolution" / "deps"
 if deps.exists():
     sys.path.insert(0, str(deps))
-pytest.importorskip("flask")
-pytest.importorskip("sqlalchemy")
+for _module in ("flask", "sqlalchemy", "flask_cors", "flask_limiter", "jwt", "bcrypt"):  # requirements-api.txt
+    pytest.importorskip(_module)
 
 from api.app_factory import create_app
 from database.models import Base, Session as ChatSession, Message

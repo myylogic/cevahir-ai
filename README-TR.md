@@ -238,6 +238,14 @@ Mimari ayarları [config_schema.py](model_management/config_schema.py) tarafınd
 
 Birleşik Flask giriş noktası [api.app_factory.create_app](api/app_factory.py) işlevidir. Modeli, ChattingManager'ı, servisleri, kimlik doğrulamayı, sağlık kontrollerini ve veritabanı erişimini bağlar. Uygulamayı başlatmadan önce veritabanını, açık bir `JWT_SECRET_KEY` değerini, model yolunu ve eşleşen tokenizer'ı yapılandırın. Model ayarları factory yapılandırmasındaki `CEVAHIR_MODEL_CONFIG` üzerinden verilebilir. Eski `api/app.py` kaldırılmış bir yapılandırma import'u taşır; önerilen giriş noktası değildir.
 
+İstekler bir kullanıcıya yalnız doğrulanmış bir `Authorization: Bearer <JWT>` başlığıyla bağlanır. API token'ları doğrular ama üretmez: giriş, kayıt veya token uç noktası yoktur; token'ları kendi kodunuz aynı `JWT_SECRET_KEY` ile `api.security.jwt.create_access_token` kullanarak üretmelidir. [api/api_config.py](api/api_config.py) modu `FLASK_ENV` değerinden seçer; başka bir değer hata verir:
+
+- **Tanımsız (varsayılan):** debug kapalı, hız sınırı açık, CORS yalnız `http(s)://localhost`, `127.0.0.1` ve `[::1]` kökenleri için (her port).
+- **`development`:** yerel çalışma için debug açık, hız sınırı kapalı; CORS varsayılandaki gibi. Buna `CEVAHIR_TRUST_X_USER_ID=1` eklenirse kimliği doğrulanmamış `X-User-ID` başlığı çağıranın kimliği sayılır ve her kullanımda uyarı loglanır. Bu durumda herhangi bir çağıran herhangi bir kullanıcı gibi davranabilir; bu yüzden ayar yalnız `development` ve `testing` modlarında kabul edilir, diğer modlarda yapılandırma yüklenmez.
+- **`production`:** `PRODUCTION_SECRET_KEY` ve `JWT_SECRET_KEY` en az 32 karakterlik, birbirinden farklı rastgele değerler değilse yüklenmeyi reddeder; `change-me-in-production` gibi yer tutucular kabul edilmez. Hız sınırı her zaman açıktır; tarayıcılar farklı kökenden yalnız `CORS_ORIGINS` içinde listelenen kökenler için erişebilir.
+
+Virgülle ayrılmış `CORS_ORIGINS` varsayılan kökenlerin yerine geçer. Eşleşmeyen bir `Origin` CORS başlığı almaz, `*` olduğu gibi gönderilir ve kimlik bilgilerine (credentials) hiçbir zaman izin verilmez. Hız sınırları, `RATELIMIT_STORAGE_URI` paylaşılan bir depo göstermedikçe süreç belleğinde tutulur. Kimlik doğrulaması istemeyen `/api/v3/health/detailed` yalnız genel bileşen mesajları döndürür; hata ayrıntıları sunucu loguna yazılır. `python api/app_factory.py`, Flask geliştirme sunucusunu debug kapalı olarak `127.0.0.1:5000` üzerinde başlatır; `--host`/`CEVAHIR_API_HOST`, `--port`/`PORT` ve `--debug`/`CEVAHIR_API_DEBUG=1` bunu değiştirir, production modunda debug reddedilir. Gerçek dağıtımlar yine de API'nin önünde bir üretim WSGI sunucusu ve TLS gerektirir. Bu davranışlar [tests/evolution/test_api_security.py](tests/evolution/test_api_security.py) sözleşme testleriyle denetlenir; dağıtılmış bir serviste veya sızma testiyle denetlenmemiştir.
+
 ## Repo haritası
 
 | Dizin | Sorumluluk |

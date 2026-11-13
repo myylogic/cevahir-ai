@@ -2,7 +2,7 @@
   "format_version": 1,
   "files": {
     "README-TR.md": {
-      "sha256": "eef9ab68f95327498aeca9f089fb1d24d5234c2b597be5e749aa168e8e2be02e",
+      "sha256": "fc70176351699f7dac887eebbc8734335f6e25fa481e33d13b32184bd06f4461",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README.md",
@@ -10,14 +10,14 @@
       ]
     },
     "README.md": {
-      "sha256": "890fb401edbcd6f196a6d5ee3525dcd2a3a2716c924b9bb0775c54e239078e07",
+      "sha256": "929998569b8e51491bf9c7711ec0fc1fb0e36c96f52721af8b725e8696d1db17",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README-en.md"
       ]
     },
     "api/app_factory.py": {
-      "sha256": "c76d929f6b93d3913f53f9eccfcc7ece33796a0bda09d557ccc2bfef43a78ac1",
+      "sha256": "b1ebeffda84db12ec7e5b70984265818e152697b02aaf92536583381452a9ea9",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/10-uctan-uca-sistem.md"
@@ -965,7 +965,7 @@
       ]
     },
     "tests/evolution/test_api_contracts.py": {
-      "sha256": "d30ec275a45757d3293ffea6d90d3b1d6a22ed677cacb21ebe368a10e9f276a5",
+      "sha256": "d75991f4edfd7516012192bf87237fc144f3d07e3fa2ea2ed7be4ba95949e8ea",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/10-uctan-uca-sistem.md"
