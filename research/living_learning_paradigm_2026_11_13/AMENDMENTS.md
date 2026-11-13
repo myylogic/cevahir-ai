@@ -17,3 +17,13 @@ entries are not amendments.
   results) and was stopped right after PARA-ORTH; ROOT, LAST and PRED/FT-L/FT-ALL then ran as separate
   `run_select.py --arms ...` processes, which resume from complete records. select_decide.py rejects incomplete or
   duplicated records, so the split cannot change the selection.
+- 2026-11-13 09:58 UTC — incident (no study code or record changed): a descriptive look with
+  `select_decide.py --allow-partial` while ROOT, LAST, PRED, FT-L and FT-ALL had no selection records yet WROTE
+  results/selection.json and results/tables/discovery_map.csv instead of only printing. Cause: the completeness
+  check compares the (layer, configuration) rows of the arms that have records and does not notice arms with no
+  records at all. Both files were deleted immediately; no job had read them (the discovery lives and every
+  confirmatory run depend on the scheduled select_decide.py runs that start only after all selection jobs have
+  finished successfully, and run_confirm.py refuses a selection that lacks an arm). The recorded selection is the
+  one written after the discovery lives, whose hash is appended below. The gap in the frozen script is reported
+  here and left unchanged. This qualifies the orchestration entry above: the split cannot change the selection
+  because the scheduled select_decide.py run starts only after all six selection jobs have exited successfully.
