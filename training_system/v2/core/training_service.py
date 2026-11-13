@@ -799,11 +799,13 @@ class TrainingService:
 
             Düzen prepare_cache.py ile aynıdır (training_system/record_format.py): BOS yalnız belgenin
             gerçek başında, EOS yalnız gerçek sonunda; uzun belgenin ara parçaları ikisini de almaz.
-            max_seq_len'e sığmayan kayıt kesilip sahte EOS ile kapatılmaz, ValueError verir.
+            max_seq_len'e sığmayan kayıt kesilip sahte EOS ile kapatılmaz, ValueError verir. Tahmin
+            edilecek token'ı olmayan kayıt (tek token'lık ara parça) prepare_cache.py'deki gibi atlanır.
             """
             from training_system.record_format import format_autoregressive_record, record_boundaries
             vocab_size = len(tokenizer_core.get_vocab())
             out = []
+            no_target = 0
             for item, (starts_document, ends_document) in zip(raw_data, record_boundaries(raw_data)):
                 if len(item) == 3:
                     inp_ids, tgt_ids, source_id = item
@@ -814,15 +816,22 @@ class TrainingService:
                     continue
                 if list(tgt_ids) != list(inp_ids):
                     raise ValueError("target must be the same token sequence as input (the shift happens here)")
-                seq_in, seq_tgt = format_autoregressive_record(
+                formatted = format_autoregressive_record(
                     list(inp_ids), starts_document=starts_document, ends_document=ends_document,
                     max_seq_length=max_seq_len, bos_id=BOS_ID, eos_id=EOS_ID, pad_id=PAD_ID,
                     vocab_size=vocab_size, unk_id=UNK_ID,
                 )
+                if formatted is None:
+                    no_target += 1
+                    continue
+                seq_in, seq_tgt = formatted
                 if source_id is not None:
                     out.append((seq_in, seq_tgt, source_id))
                 else:
                     out.append((seq_in, seq_tgt))
+            if no_target and self.logger:
+                self.logger.info(f"[Formatlama] {no_target} kayıt atlandı: tahmin edilecek token yok "
+                                 f"(tek token'lık ara parça)")
             return out
         
         if self.logger:

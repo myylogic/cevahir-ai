@@ -118,13 +118,13 @@
       "path": "training_system/record_format.py",
       "symbol": "format_autoregressive_record",
       "chapter": "tr/06-egitim.md",
-      "line": 39
+      "line": 44
     },
     {
       "path": "training_system/record_format.py",
       "symbol": "record_boundaries",
       "chapter": "tr/06-egitim.md",
-      "line": 16
+      "line": 20
     },
     {
       "path": "training_system/data_split.py",

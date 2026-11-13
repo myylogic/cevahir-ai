@@ -404,7 +404,7 @@
       ]
     },
     "docs/modules/training_system/README-en.md": {
-      "sha256": "cd2962ee46dcbd157a29aa0fa67f917520055f3b143de6004dd60e9b85e65258",
+      "sha256": "dd2fa5d766f08cdebd8e46d0097b8e6f89b5ec03cc60fff347d43f455a45d207",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -412,7 +412,7 @@
       ]
     },
     "docs/modules/training_system/README.md": {
-      "sha256": "f9c0baee3386f38cdedef00f3b8eb98839f9bc2eec6bb1e01a26153fed052b3f",
+      "sha256": "cac781dbc8524b3e1d37a435cf29b1e5ffd983223b194dfd77691ef4971983a7",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -1112,7 +1112,7 @@
       ]
     },
     "tokenizer_management/core/tokenizer_core.py": {
-      "sha256": "c538edcb9ff6e0b9d37ad38a9fd34f4f99ff2216e48df6d57fcdce846747a024",
+      "sha256": "3f31dd1ab227148a53beaf52ad43653d121e151491517b7da99a70121156bef3",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -1185,7 +1185,7 @@
       ]
     },
     "training_system/prepare_cache.py": {
-      "sha256": "acb74d3c813046d66365823bedf4f3be175b8114dab1b7b3f8886bcb791bee66",
+      "sha256": "35e91782e129d97f4b4f2ca5035f18676f72b74bc16eff6ef67b240c4c918b29",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -1194,7 +1194,7 @@
       ]
     },
     "training_system/record_format.py": {
-      "sha256": "cdd7299a57f4983c1dac072da9ddc1e49b9532fdbd9523d902f3fe88e0cef36d",
+      "sha256": "2f009517be3e13928daa8dda8b3aceabd55a364c38d0387ca6533044bb990d64",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/06-egitim.md"

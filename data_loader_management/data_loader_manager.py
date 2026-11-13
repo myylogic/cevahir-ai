@@ -91,6 +91,15 @@ class DataLoaderConfig:
     overlap_tokens: int = 20                # Parçalar arası örtüşme
 
 
+def continuation_question(question: str, part: int) -> str:
+    """Uzun bir cevabın ``part``. parçasının (2, 3, ...) sorusu: ``"<soru> (devam <part>)"``.
+
+    Bu çiftler aynı cevabın devamıdır; TokenizerCore.load_training_data onları ilk çiftin kaynak
+    kimliğiyle tek belge yapar, böylece EOS yalnız cevabın son parçasına konur.
+    """
+    return f"{question} (devam {part})"
+
+
 # ===========================
 # Ana Yönetici
 # ===========================
@@ -316,9 +325,8 @@ class DataLoaderManager:
                 # İlk parça: orijinal soru
                 qa_pairs.append((question, chunk))
             else:
-                # Sonraki parçalar: devam soruları
-                continuation_question = f"{question} (devam {i+1})"
-                qa_pairs.append((continuation_question, chunk))
+                # Sonraki parçalar: devam soruları (TokenizerCore bunları ilk çiftle tek belge yapar)
+                qa_pairs.append((continuation_question(question, i + 1), chunk))
         
         return qa_pairs
 

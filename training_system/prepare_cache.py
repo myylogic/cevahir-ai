@@ -203,6 +203,7 @@ def prepare_cache(
         #  YENİ: source_id kontrolü (varsa SAKLA - overlap önleme için kritik!)
         source_id_count = 0
         no_source_id_count = 0
+        no_target_count = 0  # tahmin edilecek token'ı olmadığı için atlanan kayıtlar (record_format.py)
         for idx, item in enumerate(raw_data):
             # Veri formatı: (inp_ids, tgt_ids) veya (inp_ids, tgt_ids, source_id)
             source_id = None  # Default
@@ -236,11 +237,16 @@ def prepare_cache(
                 if list(tgt_ids) != list(inp_ids):
                     raise ValueError("target input ile aynı token dizisi olmalı (kaydırma burada yapılır)")
                 starts_document, ends_document = boundaries[idx]
-                seq_in, seq_tgt = format_autoregressive_record(
+                formatted = format_autoregressive_record(
                     list(inp_ids), starts_document=starts_document, ends_document=ends_document,
                     max_seq_length=max_seq_length, bos_id=BOS_ID, eos_id=EOS_ID, pad_id=PAD_ID,
                     vocab_size=vocab_size, unk_id=UNK_ID,
                 )
+                if formatted is None:
+                    # Tek token'lık ara parçanın tahmin edilecek token'ı yok; V2 TrainingService de atlar
+                    no_target_count += 1
+                    continue
+                seq_in, seq_tgt = formatted
                 
                 #  OVERLAP KONTROLÜ: Formatlama sonrası hash (PAD olmadan)
                 post_hash = hash_sequence_no_pad(seq_in, pad_id=PAD_ID)
@@ -281,8 +287,11 @@ def prepare_cache(
         
         #  DEDUPLICATION istatistikleri
         total_processed = source_id_count + no_source_id_count
-        total_duplicates = total_processed - len(formatted_data)
+        total_duplicates = total_processed - len(formatted_data) - no_target_count
         logger.info(f"[Formatlama]  {len(formatted_data):,} örnek formatlandı (hazır)")
+        if no_target_count:
+            logger.info(f"[Formatlama] {no_target_count:,} kayıt atlandı: tahmin edilecek token yok "
+                        f"(tek token'lık ara parça; BOS/EOS almadığı için hedefi yok)")
         if total_duplicates > 0:
             logger.info(f"[Formatlama] 🗑️  {total_duplicates:,} duplicate chunk filtrelendi ({total_duplicates/total_processed*100:.2f}%)")
         logger.info(f"[Formatlama] 📊 source_id istatistikleri:")

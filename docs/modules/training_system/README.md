@@ -66,7 +66,7 @@ Bu belgeyi güncellemek için yeni eğitim çalıştırılmamıştır.
 
 - V3 eğitim servisi hazırlanmış cache kullanır; eksik cache'i ham veri işleyerek tamamlamaz.
 - Veri, tokenizer ve biçimlendirme ayarları cache kimliğine katılır.
-- Kayıt düzeni ([record_format.py](../../../training_system/record_format.py)): BOS yalnız belgenin ilk kaydının girdisinde, EOS yalnız son kaydının hedefindedir; uzun belgenin ara parçaları ikisini de almaz. `max_seq_length`'e sığmayan kayıt kesilmez, hata verir.
+- Kayıt düzeni ([record_format.py](../../../training_system/record_format.py)): BOS yalnız belgenin ilk kaydının girdisinde, EOS yalnız son kaydının hedefindedir; uzun belgenin ara parçaları ikisini de almaz. `max_seq_length`'e sığmayan kayıt kesilmez, hata verir. Tahmin edilecek tokenı olmayan tek tokenlık ara parçayı iki yazıcı da (`prepare_cache.py`, V2 `TrainingService`) atlar. Veri yükleyicinin uzun bir cevaptan ürettiği “(devam N)” çiftleri ilk çiftin kaynak kimliğini alır: cevap tek belgedir, EOS yalnız son parçasındadır.
 - Kayıt düzeni sürümü (`CACHE_FORMAT_VERSION`) cache anahtarına girer; eski düzende hazırlanmış cache yeniden kullanılmaz, `prepare_cache.py` yeniden çalıştırılır. Bu sürüm tokenizer kimliğine girmez.
 - Checksum dosya bütünlüğünü denetler; tek başına eğitim verisinin anlamsal doğruluğunu kanıtlamaz.
 - Aynı kaynak kimliğine ait parçalar aynı bölüme gider.

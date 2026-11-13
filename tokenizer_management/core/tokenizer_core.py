@@ -806,12 +806,23 @@ class TokenizerCore:
 
         # Tüm encoding verilerini hazırla: QA çiftleri + RAW text chunks
         all_encoding_data = []
-        qa_examples: List[Tuple[List[int], List[int]]] = []  # [OK] QA çiftleri için token ID'leri (ayrı işlenecek)
+        qa_examples: List[Tuple[List[int], List[int], int]] = []  # [OK] QA çiftleri: (token ID'leri, token ID'leri, QA belgesi)
         
         # [OK] DÜZELTME: QA çiftlerini ayrı encode et, <SEP> token ile birleştir
         logger.info(f"[TokenizerCore] QA çiftleri ayrı encode ediliyor... ({len(pairs)} çift)")
         qa_skipped = 0
-        for q, a in pairs:
+        # Veri yükleyici uzun bir cevabı "<soru> (devam N)" çiftlerine böler (continuation_question).
+        # Bu çiftler ilk çiftle tek QA belgesidir: aynı source_id'yi alırlar ki EOS yalnız cevabın son
+        # parçasına konsun (training_system/record_format.py). qa_split: (belgenin ilk çiftinin sırası,
+        # asıl soru, son parça numarası).
+        from data_loader_management.data_loader_manager import continuation_question
+        qa_split = None
+        for pair_index, (q, a) in enumerate(pairs):
+            if qa_split is not None and q == continuation_question(qa_split[1], qa_split[2] + 1):
+                qa_split = (qa_split[0], qa_split[1], qa_split[2] + 1)
+            else:
+                qa_split = (pair_index, q, 1)
+            
             # ✅ Boş text kontrolü - encode çağrısından ÖNCE
             if not q or not a or (not q.strip() and not a.strip()):
                 logger.warning(f"[TokenizerCore] Boş QA çifti atlandı (q='{q[:20] if q else ''}...', a='{a[:20] if a else ''}...')")
@@ -866,7 +877,7 @@ class TokenizerCore:
                     tgt_ids = q_ids + [sep_id] + a_ids  # Target = Input (autoregressive)
                     
                     # QA örneği olarak ekle
-                    qa_examples.append((inp_ids, tgt_ids))
+                    qa_examples.append((inp_ids, tgt_ids, qa_split[0]))
                     
                 except Exception as e:
                     logger.warning(f"[TokenizerCore] QA çifti encode hatası: {e}")
@@ -1047,8 +1058,9 @@ class TokenizerCore:
         # [OK] QA çiftlerini ekle (validation ile)
         logger.info(f"[TokenizerCore] QA çiftleri ekleniyor... ({len(qa_examples)} örnek)")
         qa_long_chunks_count = 0  # QA uzun chunk sayacı
+        previous_qa_doc = None  # son source_id'yi alan QA belgesi; "(devam N)" çiftleri onu sürdürür
         
-        for inp_ids, tgt_ids in qa_examples:
+        for inp_ids, tgt_ids, qa_doc in qa_examples:
             # Validation
             if not inp_ids or len(inp_ids) == 0:
                 logger.warning(f"[TokenizerCore] Boş QA sequence atlandı")
@@ -1078,9 +1090,12 @@ class TokenizerCore:
                 )
                 
                 # ✅ DÜZELTME: Uzun QA split - unique source_id (offset ile)
-                # QA split chunk'ları için aynı source_id (aynı QA'dan geliyorlar)
-                qa_source_id = 1000000 + current_source_id  # ✅ Offset: QA source_id'leri 1M'den başlar
-                current_source_id += 1
+                # QA split chunk'ları için aynı source_id (aynı QA'dan geliyorlar); "(devam N)" çifti
+                # önceki parçanın source_id'sini sürdürür
+                if qa_doc != previous_qa_doc:
+                    qa_source_id = 1000000 + current_source_id  # ✅ Offset: QA source_id'leri 1M'den başlar
+                    current_source_id += 1
+                    previous_qa_doc = qa_doc
                 
                 for split_inp_ids in split_chunks:
                     if not split_inp_ids or len(split_inp_ids) == 0:
@@ -1092,11 +1107,14 @@ class TokenizerCore:
                 continue  # Bu QA chunk işlendi, bir sonrakine geç
             
             # ✅ DÜZELTME: QA chunk için unique source_id
-            # QA çiftleri: Her QA ayrı bir "dokuman" gibi davranılır
+            # QA çiftleri: Her QA ayrı bir "dokuman" gibi davranılır; uzun cevabın "(devam N)" çiftleri
+            # aynı belgedir ve ilk çiftin source_id'sini alır (EOS yalnız cevabın son parçasında)
             # Her QA için benzersiz source_id (offset ile file_idx'lerle çakışmayı önle)
-            qa_source_id = 1000000 + current_source_id  # ✅ Offset: QA source_id'leri 1M'den başlar
+            if qa_doc != previous_qa_doc:
+                qa_source_id = 1000000 + current_source_id  # ✅ Offset: QA source_id'leri 1M'den başlar
+                current_source_id += 1
+                previous_qa_doc = qa_doc
             examples.append((inp_ids, tgt_ids, qa_source_id))
-            current_source_id += 1
             processed_examples += 1
         
         # ✅ DEDUPLICATION: Aynı source_id içinde duplicate'leri filtrele
