@@ -16,7 +16,7 @@ Beş bulgu, ağırlık yüklemeyen küçük kontrollerle yeniden üretildi. Bu k
 
 ### COG-01 — Sistem talimatı bağlamda kayboluyor
 
-**Öncelik: yüksek.** [ContextBuildingHandler](../../cognitive_management/v2/processing/handlers.py#L450) `system_prompt=None` geçiriyor. [Context pruner](../../cognitive_management/v2/utils/context_pruning.py#L181) varsayılanı seçse de [bağlamı oluştururken](../../cognitive_management/v2/utils/context_pruning.py#L209) talimatı dışarıda bırakıyor. GenerationHandler yalnız oluşan metni tüketiyor.
+**Öncelik: yüksek.** [ContextBuildingHandler](../../cognitive_management/v2/processing/handlers.py#L455) `system_prompt=None` geçiriyor. [Context pruner](../../cognitive_management/v2/utils/context_pruning.py#L181) varsayılanı seçse de [bağlamı oluştururken](../../cognitive_management/v2/utils/context_pruning.py#L209) talimatı dışarıda bırakıyor. GenerationHandler yalnız oluşan metni tüketiyor.
 
 Kontrolde istek ve varsayılan talimata ayrı işaretler verildi; sonuç yalnız `[USER]\nMerhaba` oldu. Uygulamanın dil/rol/format talimatları final üretime ulaşmıyor.
 

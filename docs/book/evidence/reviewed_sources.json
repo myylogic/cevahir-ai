@@ -2,7 +2,7 @@
   "format_version": 1,
   "files": {
     "README-TR.md": {
-      "sha256": "5d84fc8d504b6e48de70d402bb099136dd242e7ef1d740a8970d94341bf674db",
+      "sha256": "0e56bb95b825dc5a0167d3fa06c6c9ce2ed9da47eca9b54c1686f9e207da8448",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README.md",
@@ -10,7 +10,7 @@
       ]
     },
     "README.md": {
-      "sha256": "3359325ff5441bc6ffb3d62171d73cbd696408d0a5f3c04a96f03fe29eb5ce7d",
+      "sha256": "55a4d99331892e5452fc35bedcaf77a8d2b3c8d8ba16d5949c45b306ad9a3e7a",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README-en.md"
@@ -310,7 +310,7 @@
       ]
     },
     "docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md": {
-      "sha256": "5834041cb6d1aa716a1d0976b559d73dfe40db5847f4c78b507e4acdbda2d52d",
+      "sha256": "da71d519db8f257c50a15583340a5dc9017fe9403dfb73f0b0cb9ae35c7593d4",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md"
@@ -350,7 +350,7 @@
       ]
     },
     "docs/modules/cognitive_management/README-en.md": {
-      "sha256": "66a3ee48fb56647508f1525acd71aeeb477aa24fa2f260ca65adf76e93786899",
+      "sha256": "37e9066dd16f6885cb11095c6e9ff8c4fb4c166949759f15e1ac7da9cae1728a",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -358,7 +358,7 @@
       ]
     },
     "docs/modules/cognitive_management/README.md": {
-      "sha256": "ebc14f4446b913639ec11b21e2039a91b765e59ad37cfce9385d6d616e6c3c71",
+      "sha256": "d19e93245d4f05cfc5ab60c5dcf670282b3c05c773238d25a07fdf4cf564360d",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md"
@@ -1032,7 +1032,7 @@
       ]
     },
     "tests/evolution/test_cognitive_defaults.py": {
-      "sha256": "0e25313e9c3f40d92dfe7d065cff045c84e430793bf961f9f14d9a67a33ec9ed",
+      "sha256": "0713e6cac18e8205aba8a69d360ed483ee68d88c3694d7c87e3a3de5904faed0",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"

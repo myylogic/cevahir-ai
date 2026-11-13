@@ -12,6 +12,8 @@ with ``Backend("compliant")``, which also made 2 outbound Wikipedia attempts per
 message. Now: 2 calls per message for the lean default; 16-18 and 17 for the
 full profile (an unreadable judge reply abstains, so the untrained backend no
 longer adds 14 suggestions and a constitutional revision; 31-33 before that).
+A judge that flags every principle (``judge="0.8"``) still adds those 15 calls:
+31-33 and 32 for the full profile, 2 for the lean default.
 ``test_calls_per_message_lean_default_and_full_profile`` measures and prints the
 current numbers.
 """
@@ -58,6 +60,8 @@ PLAIN_MESSAGES = [
     "Bana kısa bir kitap önerir misin?",
 ]
 EVALUATION_PREFIX = "Aşağıdaki metnin şu prensibe"
+SUGGESTION_PREFIX = "Aşağıdaki metni şu prensibe uygun hale"
+REVISION_PREFIX = "Aşağıdaki metni şu prensiplere uygun hale"
 
 
 class Backend:
@@ -68,10 +72,12 @@ class Backend:
     with factual sentences. ``entropy`` may be a float, ``"raise"`` or
     ``"unavailable"`` (an ``entropy_details`` probe reporting available=False
     while ``entropy_estimate`` returns the 0.5 placeholder, as CevahirModelAPI does).
+    ``judge``, when given, is the reply to every constitutional evaluation
+    prompt: ``"0.8"`` reports each principle as violated.
     """
 
-    def __init__(self, kind="compliant", entropy=0.3, answer=None):
-        self.kind, self.entropy, self.answer = kind, entropy, answer
+    def __init__(self, kind="compliant", entropy=0.3, answer=None, judge=None):
+        self.kind, self.entropy, self.answer, self.judge = kind, entropy, answer, judge
         self.calls = collections.Counter()
         self.prompts = []
         self.decodings = []
@@ -80,6 +86,8 @@ class Backend:
         self.calls["generate"] += 1
         self.prompts.append(prompt)
         self.decodings.append(decoding_cfg)
+        if self.judge is not None and "Sadece sayıyı yaz" in prompt:
+            return self.judge
         if self.kind == "compliant":
             if "Sadece sayıyı yaz" in prompt:
                 return "0.0"
@@ -264,11 +272,14 @@ def test_debate_or_tot_without_inner_steps_warns_instead_of_failing_silently():
 
 # ---------------------------------------------------------------- calls per message
 
-@pytest.mark.parametrize("kind,entropy", [("untrained", 0.99), ("compliant", 0.3)])
-def test_calls_per_message_lean_default_and_full_profile(kind, entropy, network, capsys):
+@pytest.mark.parametrize("kind,entropy,judge", [
+    ("untrained", 0.99, None), ("compliant", 0.3, None),
+    ("untrained", 0.99, "0.8"), ("compliant", 0.3, "0.8"),
+])
+def test_calls_per_message_lean_default_and_full_profile(kind, entropy, judge, network, capsys):
     report = []
     for message in PLAIN_MESSAGES:
-        lean_backend, full_backend = Backend(kind, entropy), Backend(kind, entropy)
+        lean_backend, full_backend = Backend(kind, entropy, judge=judge), Backend(kind, entropy, judge=judge)
         network.clear()
         lean_out, _ = run(CognitiveManagerConfig(), lean_backend, message)
         lean_net = len(network)
@@ -284,14 +295,21 @@ def test_calls_per_message_lean_default_and_full_profile(kind, entropy, network,
         assert lean_out.used_mode == "direct"
         assert lean_net == 0
         assert not any(p.startswith(EVALUATION_PREFIX) for p in lean_backend.prompts)
-        # Full restores the multi-call behaviour, with each principle evaluated once.
+        # Full restores the multi-call behaviour, with each principle evaluated once:
+        # at least the answer plus one evaluation per principle, against lean's 2 at most.
         evaluations = sum(p.startswith(EVALUATION_PREFIX) for p in full_backend.prompts)
         assert evaluations == len(CONSTITUTIONAL_PRINCIPLES) == 14
-        assert full_backend.calls["generate"] >= 8 * lean_backend.calls["generate"]
+        assert full_backend.calls["generate"] >= 1 + len(CONSTITUTIONAL_PRINCIPLES)
+        # Each flagged principle adds a suggestion call and flagging adds a single
+        # constitutional revision; unreadable (untrained) and clean (compliant) verdicts add neither.
+        suggestions = sum(p.startswith(SUGGESTION_PREFIX) for p in full_backend.prompts)
+        revisions = sum(p.startswith(REVISION_PREFIX) for p in full_backend.prompts)
+        assert (suggestions, revisions) == ((len(CONSTITUTIONAL_PRINCIPLES), 1) if judge else (0, 0))
         if kind == "compliant":
             assert 0 < full_net <= CognitiveManagerConfig().critic.fact_checking_max_claims
     with capsys.disabled():
-        print(f"\n[{kind}] generate calls per message (lean / full, full network attempts):")
+        label = kind if judge is None else f"{kind}, judge {judge!r}"
+        print(f"\n[{label}] generate calls per message (lean / full, full network attempts):")
         for message, lean_calls, full_calls, full_net in report:
             print(f"  {message!r}: {lean_calls} / {full_calls} ({full_net})")
 

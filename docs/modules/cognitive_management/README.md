@@ -65,7 +65,9 @@ Wikipedia iddia sorguları critic geçişi başına (varsayılan tek geçiş) en
 ve on saniyelik bütçe dolunca yeni istek başlatmaz. Her isteğin zaman aşımı kalan süreyle sınırlanır;
 DNS çözümlemesi bunun dışında kaldığından bütçe kesin bir duvar saati sınırı değil, son tarihtir.
 `tests/evolution/test_cognitive_defaults.py` sayaçlı sahte modelle sade bir mesaj için
-lean'de 2, full'de 16–18 üretim çağrısı ölçer; bu düzeltmelerden önce varsayılanlar 31–64 çağrı yapıyordu.
+lean'de 2, full'de 16–18 üretim çağrısı ölçer; model her anayasal ilkede ihlal bildirirse
+full, her ilke için bir öneri çağrısı ve bir revizyon ekler; test bu durumda 31–33 çağrı ölçer.
+Bu düzeltmelerden önce varsayılanlar 31–64 çağrı yapıyordu.
 Başarısız veya ölçülemeyen entropi `None` olarak kaydedilir ve mesaj `direct` yola gider;
 cevabın token bütçesi ve sıcaklığı bu durumda sıfır entropiye göre değil,
 entropi ölçeğinin ortasına (0–3 ölçeğinde 1.5) göre hesaplanır.
