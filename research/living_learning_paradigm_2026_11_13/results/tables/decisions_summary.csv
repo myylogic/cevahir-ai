@@ -1,0 +1,8 @@
+hypothesis,family,margin,n_qualifying_worlds,mean_d,t_lo,t_hi,p_signflip,holm_rejected,boot_lo,boot_hi,decision
+H1,primary,0.150000,8,0.242708,0.210119,0.275298,0.003906,true,0.209268,0.277607,supported
+H2,primary,0.300000,8,0.697034,0.624998,0.769071,0.003906,true,0.623791,0.767168,supported
+H3,primary,0.050000,8,0.334135,0.291207,0.377062,0.003906,true,0.293562,0.381774,supported
+S1,secondary,0.100000,8,0.031250,0.015005,0.047495,1.000000,false,0.015833,0.048333,refuted
+S2,secondary,0.100000,8,0.123363,0.064463,0.182263,0.183594,false,0.065625,0.179762,inconclusive
+S3,secondary,0.100000,0,,,,,false,,,not run
+S4,secondary,0.150000,8,-0.086282,-0.133561,-0.039004,1.000000,false,-0.124173,-0.046435,refuted
