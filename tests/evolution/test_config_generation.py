@@ -116,7 +116,7 @@ class ToyManager:
 
     def forward(self, tokens, **kwargs):
         self.calls.append((tokens.clone(), kwargs))
-        logits = torch.zeros(1, tokens.shape[1], 4)
+        logits = torch.tensor([0., 1., 0., 0.]).repeat(1, tokens.shape[1], 1)  # untied runner-up
         logits[..., 3 if self.eos else 2] = 5
         return logits, None
 

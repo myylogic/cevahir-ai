@@ -323,7 +323,7 @@ class TrainingLogger:
 
         # JSONL writer
         self._jsonl_fp = None
-        if self.enable_jsonl:
+        if self.enable_jsonl and self.enable_file_logging:  # dosya kaydı kapalıysa JSONL de yazılmaz
             try:
                 # [OK] FIX: log_dir dizinini oluştur (JSONL için de gerekli)
                 os.makedirs(self.log_dir, exist_ok=True)

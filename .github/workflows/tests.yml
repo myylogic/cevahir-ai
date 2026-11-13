@@ -1,0 +1,40 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OMP_NUM_THREADS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install CPU PyTorch and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.5"
+          python -m pip install -r requirements-dev.txt
+      - name: Run the test suite
+        run: python -m pytest -q -p no:cacheprovider --timeout=900
+      - name: Tests must not write into the checkout
+        run: |
+          leftovers="$(git status --porcelain --ignored | grep -v '__pycache__' || true)"
+          if [ -n "$leftovers" ]; then
+            echo "Tests left files in the repository:"
+            echo "$leftovers"
+            exit 1
+          fi

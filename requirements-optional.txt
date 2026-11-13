@@ -1,0 +1,22 @@
+# Optional subsystems. Every import below is guarded in the code: without the package the
+# feature is disabled (with a warning), not the whole system. Install only what you use.
+
+# Training monitoring
+tensorboard>=2.18
+matplotlib>=3.9.2
+colorama>=0.4.6
+
+# Cognitive layer: vector memory / RAG (not yet verified on Python 3.13)
+PyYAML>=6.0.2
+watchdog>=5
+chromadb>=0.5
+sentence-transformers>=3
+
+# Data collection tools in data_processing/ (not yet verified on Python 3.13).
+# Check the licence of every source before training on or redistributing its text.
+pdfplumber
+pypdf
+pdf2docx
+Wikipedia-API
+
+# GPU-only accelerators: bitsandbytes, flash-attn (install for your CUDA version)

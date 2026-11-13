@@ -1,0 +1,7 @@
+# Tests: core runtime + pytest + the HTTP/database extras used by the API contract tests.
+#   python -m pip install -r requirements-dev.txt
+#   python -m pytest
+-r requirements.txt
+-r requirements-api.txt
+pytest>=8.0            # (9.2.0)
+pytest-timeout>=2.3    # (2.4.0)

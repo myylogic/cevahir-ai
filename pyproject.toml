@@ -1,0 +1,6 @@
+# Tool configuration only. Dependencies live in requirements*.txt (see README "Getting started").
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# A test that returns a value instead of asserting must fail, not pass silently.
+filterwarnings = ["error::pytest.PytestReturnNotNoneWarning"]

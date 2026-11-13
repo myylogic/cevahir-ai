@@ -80,11 +80,11 @@ from ..utils.data_loader_wrapper import create_dataloaders
 from training_system.data_cache import DataCache
 
 # Log yapılandırması
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# Kütüphane modülü kök logger'ı yapılandırmaz; giriş betiği (training_system/train.py) yapar.
 service_logger = logging.getLogger("TrainingServiceV2")
 
 MODEL_SAVE_PATH = os.path.join("saved_models", "cevahir_model.pth")
-os.makedirs(os.path.dirname(MODEL_SAVE_PATH), exist_ok=True)
+# Eski tek-dosya yolu yalnızca okunur; import sırasında dizin oluşturulmaz.
 
 
 class TrainingService:

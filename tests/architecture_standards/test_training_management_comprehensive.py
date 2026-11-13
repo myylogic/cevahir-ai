@@ -37,7 +37,7 @@ def mock_logger():
 
 
 @pytest.fixture
-def tm_config(minimal_model_config):
+def tm_config(minimal_model_config, tmp_path):
     """TrainingManager için gerekli config (minimal_model_config ile uyumlu)."""
     c = minimal_model_config.copy()
     c.update({
@@ -45,7 +45,7 @@ def tm_config(minimal_model_config):
         "device": torch.device("cpu"),
         "epochs": 2,
         "early_stopping_patience": 3,
-        "checkpoint_dir": "./checkpoints_test_tm",
+        "checkpoint_dir": str(tmp_path / "checkpoints_test_tm"),  # repo ağacına yazma
         "enable_file_logging": False,
         "max_grad_norm": 1.0,
         "track_memory": False,

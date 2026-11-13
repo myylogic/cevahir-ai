@@ -990,7 +990,7 @@
       ]
     },
     "tests/evolution/test_config_generation.py": {
-      "sha256": "5a2da7662d48b1de1a44fe936f7b83643340f5e9ce41c1bc31628db630dc5132",
+      "sha256": "ec447a16480ad288a881b6d38d5735c4de7da7d8f2c02e2631d3afca1a9be825",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/03-sinir-aglari.md",
