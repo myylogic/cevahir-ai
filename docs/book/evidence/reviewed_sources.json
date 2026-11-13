@@ -2,7 +2,7 @@
   "format_version": 1,
   "files": {
     "README-TR.md": {
-      "sha256": "484ea5bae342c22a3e17cb85e36daf6cc7b913d2d3b542da328ea577be355d8e",
+      "sha256": "eef9ab68f95327498aeca9f089fb1d24d5234c2b597be5e749aa168e8e2be02e",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README.md",
@@ -10,7 +10,7 @@
       ]
     },
     "README.md": {
-      "sha256": "670a79e4b99d38952eb3426190a088f343d5bba0bc09dd71c26493c2f4d80b57",
+      "sha256": "890fb401edbcd6f196a6d5ee3525dcd2a3a2716c924b9bb0775c54e239078e07",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README-en.md"

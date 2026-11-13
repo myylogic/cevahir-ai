@@ -148,17 +148,18 @@ Mevcut mimarinin dışına çıkan yetenek sorularını da araştırıyorum. Son
 
 ## Başlangıç
 
-Komutları repo kökünde çalıştırın. Hafif doğrulamaların kayıtlı ortamı **Windows, Python 3.14.3 ve PyTorch 2.10.0+cpu**'dur. Repoda şu anda kök düzeyinde `requirements.txt` veya `pyproject.toml` yoktur; [database/requirements.txt](database/requirements.txt) yalnız veritabanı modülünü kapsar.
+Komutları repo kökünde çalıştırın. Hafif doğrulamalar **Windows, Python 3.14.3 ve PyTorch 2.10.0+cpu** ile **Linux, Python 3.13 ve PyTorch 2.15 (CPU)** ortamlarında kaydedildi. Bağımlılıklar kök düzeyindeki manifestlerde gruplanmıştır: [requirements.txt](requirements.txt) (model, tokenizer, eğitim), [requirements-dev.txt](requirements-dev.txt) (HTTP sözleşme testleri dahil testler), [requirements-api.txt](requirements-api.txt) (HTTP servisleri ve veritabanı) ve [requirements-optional.txt](requirements-optional.txt) (izleme, vektör bellek, veri toplama).
 
 Aşağıdaki küçük çekirdek örneği için ortam oluşturup temel bağımlılıkları kurabilirsiniz. PowerShell:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install torch numpy
+python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.5"
+python -m pip install -r requirements.txt
 ```
 
-Linux/macOS'ta etkinleştirme komutu `source .venv/bin/activate` şeklindedir. Ek bağımlılıklar kullanılan alt sisteme bağlıdır: tokenizer/belge yollarında `tqdm`, `regex`, `python-docx`; eğitim izlemesinde `psutil`, `matplotlib`, `tensorboard`; HTTP servislerinde Flask, Flask-Cors, Flask-Limiter, SQLAlchemy ve PyJWT gibi paketler kullanılır. Bu gruplar yönlendirme içindir; tüm sürümleri sabitlenmiş eksiksiz bir kurulum manifesti değildir.
+Linux/macOS'ta etkinleştirme komutu `source .venv/bin/activate` şeklindedir. Manifestler alt sürüm sınırları verir; sürümleri sabitlenmiş bir ortam değildir. İsteğe bağlı alt sistemler, paketleri yoksa bir uyarıyla kendilerini devre dışı bırakır.
 
 ### CPU'da küçük bir model çalıştırma
 
@@ -263,12 +264,13 @@ Yaptığım model eğitimlerinden örnekleri yukarıda paylaştım. Güncel müh
 Küçük bir yaşam döngüsü doğrulama grubu ve ayrı çekirdek ölçümü için:
 
 ```powershell
-python -m pip install pytest
+python -m pip install -r requirements-dev.txt
 python -m pytest tests/evolution/test_lower_layer_contracts.py tests/evolution/test_checkpoint_lifecycle.py -q
+python -m pytest
 python benchmarks/core.py --label local --output benchmarks/results/core_local.json
 ```
 
-Bağımlılıkları ve daha geniş doğrulama yollarını [benchmark rehberinde](benchmarks/README.md) bulabilirsiniz. Paylaştığım sonuçlar hedefli kontrol gruplarına aittir; tarihsel test paketinin tamamı için geçer sonucu vermiyorum. Kayıpsız Unicode tokenizasyonu, tüm eğitim kayıtlarının hizalama kontrolü, yakın tekrar verilerin ayrılması, eşzamanlı model değiştirme/üretim ve retrieval/critic/ToT kalite değerlendirmesi üzerinde açık işlerim var. GPU çalışmasını, dağıtık eğitimi, uzun bağlam kalitesini ve gerçek derleme performansını ayrıca doğrulamak gerekiyor; yardımcı modüllerin bulunması etkin eğitim yoluna bağlandıkları anlamına gelmez.
+Daha geniş doğrulama yollarını [benchmark rehberinde](benchmarks/README.md) bulabilirsiniz. `python -m pytest`, `tests/` paketini çalıştırır: 13 Kasım 2026'da 529 geçen, 11 atlanan ve 1 beklenen başarısızlık verdi (Linux, Python 3.13, CPU, yaklaşık 4 dakika). Atlanan testler repoda bulunmayan eğitilmiş bir checkpoint veya üretilmiş eğitim cache'i ister; beklenen başarısızlık bilinen bir checkpoint yükleme hatasını sabitler. GitHub Actions bu paketi her push'ta çalıştırır ve bir test çalışma ağacına dosya bırakırsa başarısız olur. Paketlerin içindeki eski test klasörleri (örneğin `src/neural_network_module/test`) kaldırılmış modüllerin testlerini hâlâ içerir ve bu çalıştırmaya dahil değildir. Kayıpsız Unicode tokenizasyonunun ana eğitim yoluna taşınması (kayıpsız bayt düzeyinde BPE arka ucu artık [tokenizer_management/byte_bpe.py](tokenizer_management/byte_bpe.py) içinde, mevcut tokenizer'dan ayrı olarak bulunuyor), tüm eğitim kayıtlarının hizalama kontrolü, yakın tekrar verilerin ayrılması, eşzamanlı model değiştirme/üretim ve retrieval/critic/ToT kalite değerlendirmesi üzerinde açık işlerim var. GPU çalışmasını, dağıtık eğitimi, uzun bağlam kalitesini ve gerçek derleme performansını ayrıca doğrulamak gerekiyor; yardımcı modüllerin bulunması etkin eğitim yoluna bağlandıkları anlamına gelmez.
 
 ## Dokümantasyon, katkı ve iletişim
 

@@ -148,17 +148,18 @@ The earlier [representation witness audit](docs/research/REPRESENTATION_WITNESS_
 
 ## Getting started
 
-Run commands from the repository root. The recorded lightweight verification environment is **Windows, Python 3.14.3 and PyTorch 2.10.0+cpu**. The repository currently has no root-level `requirements.txt` or `pyproject.toml`; [database/requirements.txt](database/requirements.txt) covers only the database module.
+Run commands from the repository root. The lightweight checks have been recorded on **Windows, Python 3.14.3 and PyTorch 2.10.0+cpu** and on **Linux, Python 3.13 and PyTorch 2.15 (CPU)**. Dependencies are grouped in root-level manifests: [requirements.txt](requirements.txt) (model, tokenizer, training), [requirements-dev.txt](requirements-dev.txt) (tests, including the HTTP contract tests), [requirements-api.txt](requirements-api.txt) (HTTP services and database) and [requirements-optional.txt](requirements-optional.txt) (monitoring, vector memory, data collection).
 
 For the small core example below, create an environment and install the core dependencies. PowerShell:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install torch numpy
+python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.5"
+python -m pip install -r requirements.txt
 ```
 
-On Linux/macOS, activate it with `source .venv/bin/activate`. Additional dependencies depend on the subsystem: tokenizer/document paths use packages such as `tqdm`, `regex` and `python-docx`; training monitoring uses packages such as `psutil`, `matplotlib` and `tensorboard`; HTTP services use Flask, Flask-Cors, Flask-Limiter, SQLAlchemy and PyJWT. These groups are an orientation, not a complete locked installation manifest.
+On Linux/macOS, activate it with `source .venv/bin/activate`. The manifests give lower bounds, not a locked environment. Optional subsystems switch themselves off with a warning when their packages are missing.
 
 ### Run a small model on CPU
 
@@ -263,12 +264,13 @@ I've shared examples from my model training above. In current engineering checks
 For a small lifecycle verification group and a separate core measurement:
 
 ```powershell
-python -m pip install pytest
+python -m pip install -r requirements-dev.txt
 python -m pytest tests/evolution/test_lower_layer_contracts.py tests/evolution/test_checkpoint_lifecycle.py -q
+python -m pytest
 python benchmarks/core.py --label local --output benchmarks/results/core_local.json
 ```
 
-See [benchmark instructions](benchmarks/README.md) for dependencies and broader verification. My reported results cover targeted checks; I have not established that the entire historical test suite passes. I still have open work on lossless Unicode tokenization, full-record training alignment checks, near-duplicate data separation, concurrent model replacement/generation, and retrieval/critic/ToT quality evaluation. GPU execution, distributed training, long-context quality and real compilation performance require separate validation; the presence of helper modules does not imply integration into the active training path.
+See [benchmark instructions](benchmarks/README.md) for broader verification. `python -m pytest` runs the `tests/` suite: on 13 November 2026 it gave 529 passed, 11 skipped and 1 expected failure (Linux, Python 3.13, CPU, about 4 minutes). The skipped tests need a trained checkpoint or a generated training cache, which the repository does not ship; the expected failure pins a known checkpoint-loading bug. GitHub Actions runs this suite on every push and fails if a test leaves files in the checkout. Older test folders inside the packages (for example `src/neural_network_module/test`) still contain tests for removed modules and are not part of this run. I still have open work on bringing lossless Unicode tokenization into the main training path (a lossless byte-level BPE backend now exists in [tokenizer_management/byte_bpe.py](tokenizer_management/byte_bpe.py), separate from the shipped tokenizer), full-record training alignment checks, near-duplicate data separation, concurrent model replacement/generation, and retrieval/critic/ToT quality evaluation. GPU execution, distributed training, long-context quality and real compilation performance require separate validation; the presence of helper modules does not imply integration into the active training path.
 
 ## Documentation, contribution and contact
 
