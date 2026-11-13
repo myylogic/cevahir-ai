@@ -1,0 +1,15 @@
+{
+ "seed": 1000,
+ "name_hash": "19e0e53ee3f0cde8e099f673e4e22247d6dc0c14d4dd31431569fc29a5cd5d9d",
+ "n_names": 400,
+ "partition_sizes": {
+  "p3": 60,
+  "c0": 60,
+  "probe": 280
+ },
+ "objects": {
+  "A": 48,
+  "B": 30,
+  "C": 30
+ }
+}
