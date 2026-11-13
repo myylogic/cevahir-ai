@@ -3,3 +3,8 @@
 /research/** -text
 /docs/research/** -text
 /docs/publications/** -text
+# Roof code, governance data and roof tests: LF on every platform, so keys, golden files and
+# pins see the same bytes in a Windows (autocrlf) checkout and on CI.
+/cevahir_ai/** text eol=lf
+/governance/** text eol=lf
+/tests/evolution/test_cevahir_ai_*.py text eol=lf

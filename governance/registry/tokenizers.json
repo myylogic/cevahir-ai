@@ -1,0 +1,44 @@
+{
+ "format": "cevahir-tokenizer-registry",
+ "version": 1,
+ "note": "Tracked tokenizers: canonical key, file keys (utf8-lf) and the legacy tokenizer_digest v3 values that name the same tokenizer. Aliases only grow. Regenerate an entry with cevahir_ai.adapters.tokenizers.tracked_entry after a reviewed tokenizer change.",
+ "tokenizers": [
+  {
+   "name": "default",
+   "family": "cevahir-bpe",
+   "key": "cev:tok:bpe-sem-v1:d211997f8c7dd92723c27442eddc821eb9240a5a9792a420d28e4da5694af23b",
+   "vocab_size": 60000,
+   "merges": 24896,
+   "files": {
+    "data/vocab_lib/vocab.json": "cev:file:utf8lf-v1:c4c635b175abbb077054884e5c7acaa1c1ebe03ecb9d9c133bd31d003da10f20",
+    "data/merges_lib/merges.txt": "cev:file:utf8lf-v1:b5b0b9fcc04a73ea79ed1d3cee5f4f96860204cad6b020364ec9f20af4b080b1"
+   },
+   "aliases": [
+    {
+     "key": "cev:tok:legacy-v3:d9fb916955c2d1ce2e7e0e59f1cab438f7c73e7af8ee0af3142a8df459acb122",
+     "how": "read_only=False, merges=CRLF"
+    },
+    {
+     "key": "cev:tok:legacy-v3:73f4d2329144ae05d4b2c77169ea99ff50b21af902072fd1291dd4fef71bb01d",
+     "how": "read_only=False, merges=LF"
+    },
+    {
+     "key": "cev:tok:legacy-v3:48598fefe952d94bdf4e8102ff9565ac3861db9539b74ee8d39b9555d2b3a685",
+     "how": "read_only=True, merges=CRLF"
+    },
+    {
+     "key": "cev:tok:legacy-v3:a4b7193d72611ff18796791c8754e0c2f64ff10328bbf1ce01b648a93bab54e1",
+     "how": "read_only=True, merges=LF"
+    },
+    {
+     "key": "cev:tok:legacy-v3:bd8289196d795e402c2baf6bb669f490d24901d96e14c872130a6b41227a5292",
+     "how": "read_only=absent, merges=CRLF"
+    },
+    {
+     "key": "cev:tok:legacy-v3:6f0d439d79ad0dabd8ef45d3a6df182de825bb6697269e10b33c6b28b2a2ec63",
+     "how": "read_only=absent, merges=LF"
+    }
+   ]
+  }
+ ]
+}
