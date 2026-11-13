@@ -143,7 +143,7 @@ class MemoryConfig:
     # RAG
     enable_rag: bool = True
     rag_top_k: int = 3                   # Kaç bellek öğesi çekilir
-    rag_score_threshold: float = 0.7     # Minimum cosine benzerlik skoru
+    rag_score_threshold: float = 0.7     # (1+cos)/2 puanının alt sınırı: 0.7 → cos ≥ 0.40 (memory ve chroma)
 
     # Vektör arama
     vector_search_top_k: int = 5

@@ -94,19 +94,19 @@
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2.add_turn",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 135
+      "line": 149
     },
     {
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2.retrieve_context",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 215
+      "line": 240
     },
     {
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2._semantic_search",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 356
+      "line": 418
     },
     {
       "path": "cognitive_management/v2/components/vector_store/memory_vector_store.py",
@@ -196,7 +196,7 @@
       "path": "cognitive_management/v2/components/critic_v2.py",
       "symbol": "CriticV2.review_detailed",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 250
+      "line": 257
     },
     {
       "path": "cognitive_management/v2/adapters/backend_adapter.py",
@@ -376,19 +376,19 @@
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2.summarize_if_needed",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 521
+      "line": 581
     },
     {
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2.prune",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 664
+      "line": 724
     },
     {
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2.build_context",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 498
+      "line": 558
     },
     {
       "path": "cognitive_management/v2/components/tool_policy_v2.py",

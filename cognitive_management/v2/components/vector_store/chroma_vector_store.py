@@ -43,7 +43,7 @@ from pathlib import Path
 
 from cognitive_management.config import CognitiveManagerConfig
 from cognitive_management.exceptions import ValidationError, MemoryError
-from .base import BaseVectorStore, VectorStoreResult
+from .base import BaseVectorStore, VectorStoreResult, cosine_to_score, similarity_score
 
 
 class ChromaVectorStore(BaseVectorStore):
@@ -226,7 +226,8 @@ class ChromaVectorStore(BaseVectorStore):
         Args:
             query_embedding: Query embedding vector
             top_k: Number of results
-            score_threshold: Minimum similarity score (Chroma uses distance, so we convert)
+            score_threshold: Minimum score on the shared (1 + cos) / 2 scale, the
+                same as MemoryVectorStore: t means cos >= 2t - 1 (0.7 -> 0.40)
             filter_metadata: Optional metadata filters
             
         Returns:
@@ -252,25 +253,27 @@ class ChromaVectorStore(BaseVectorStore):
                 query_embeddings=[query_embedding],
                 n_results=top_k * 2,  # Get more results to filter by threshold
                 where=where_clause,
-                include=["documents", "metadatas", "distances"],
+                include=["documents", "metadatas", "distances", "embeddings"],
             )
             
             # Extract results
             vector_store_results = []
             
             if results["ids"] and len(results["ids"][0]) > 0:
+                returned = results.get("embeddings")
+                row = returned[0] if returned is not None and len(returned) > 0 else None
                 for i in range(len(results["ids"][0])):
                     doc_id = results["ids"][0][i]
                     doc_content = results["documents"][0][i]
                     doc_metadata = results["metadatas"][0][i]
                     distance = results["distances"][0][i]
                     
-                    # Convert distance to similarity score
-                    # Chroma uses L2 distance, we normalize to 0-1 similarity
-                    # For cosine similarity embeddings, we can use: similarity = 1 - distance
-                    # But L2 distance needs different normalization
-                    # Assuming normalized embeddings, we use: similarity = 1 / (1 + distance)
-                    similarity = 1.0 / (1.0 + distance)
+                    # Same score as MemoryVectorStore, (1 + cos) / 2, so a threshold
+                    # means the same cosine with both providers. (The former
+                    # 1 / (1 + d) on Chroma's squared-L2 distance meant cos >= 0.786
+                    # for a 0.7 threshold, against cos >= 0.40 in the memory store.)
+                    embedding = row[i] if row is not None and len(row) > i else None
+                    similarity = self._similarity(query_embedding, embedding, distance)
                     
                     # Apply score threshold
                     if score_threshold is not None and similarity < score_threshold:
@@ -300,6 +303,27 @@ class ChromaVectorStore(BaseVectorStore):
             
         except Exception as e:
             raise MemoryError(f"Chroma arama başarısız: {e}") from e
+    
+    def _distance_space(self) -> str:
+        """Distance function of the collection ('l2' is Chroma's default)."""
+        metadata = getattr(self._collection, "metadata", None)
+        space = metadata.get("hnsw:space") if isinstance(metadata, dict) else None
+        return str(space or "l2").lower()
+    
+    def _similarity(self, query_embedding: List[float], embedding, distance: float) -> float:
+        """
+        Score on the shared (1 + cos) / 2 scale (base.similarity_score).
+        
+        The cosine is computed from the stored embedding when Chroma returns it.
+        Otherwise it is recovered from the distance of the collection's space:
+        'l2' is the squared Euclidean distance, 2 - 2cos for unit vectors;
+        'cosine' is 1 - cos; 'ip' is 1 - q.d, the cosine for unit vectors.
+        """
+        if embedding is not None and len(embedding) == len(query_embedding):
+            return similarity_score(query_embedding, [float(x) for x in embedding])
+        if self._distance_space() in ("cosine", "ip"):
+            return cosine_to_score(1.0 - float(distance))
+        return cosine_to_score(1.0 - float(distance) / 2.0)
     
     def delete(self, ids: List[str]) -> None:
         """

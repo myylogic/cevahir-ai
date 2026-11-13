@@ -143,7 +143,7 @@ class MemoryConfig:
     # RAG
     enable_rag: bool = True
     rag_top_k: int = 3                   # Number of memory items to retrieve
-    rag_score_threshold: float = 0.7     # Minimum cosine similarity score
+    rag_score_threshold: float = 0.7     # Minimum (1+cos)/2 score: 0.7 means cos >= 0.40 (memory and chroma)
 
     # Vector search
     vector_search_top_k: int = 5

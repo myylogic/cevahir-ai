@@ -44,6 +44,7 @@ from cognitive_management.cognitive_types import ThoughtCandidate, DecodingConfi
 from cognitive_management.config import CognitiveManagerConfig
 from cognitive_management.exceptions import DeliberationError, ValidationError
 from cognitive_management.v2.interfaces.component_protocols import DeliberationEngine as IDeliberationEngine
+from cognitive_management.v2.utils.turkish_text import turkish_upper
 
 
 # === Model API Protocol ======================================================
@@ -247,13 +248,14 @@ class DeliberationEngineV2(IDeliberationEngine):
         Her alternatif farklı bir perspektiften düşünür.
         """
         perspective = "konservatif ve güvenli" if thought_index == 0 else "yaratıcı ve esnek"
+        label = turkish_upper(perspective)  # KONSERVATİF, not str.upper()'s KONSERVATIF
         
         return (
             f"[SYSTEM]\n{system_prompt}\n\n"
-            f"[ALTERNATIVE THOUGHT {thought_index + 1} - {perspective.upper()} PERSPECTIVE]\n"
-            "Aşağıdaki kullanıcı isteğini çözmek için {perspective} bir yaklaşım düşün:\n\n"
+            f"[ALTERNATIVE THOUGHT {thought_index + 1} - {label} PERSPECTIVE]\n"
+            f"Aşağıdaki kullanıcı isteğini çözmek için {perspective} bir yaklaşım düşün:\n\n"
             f"[USER REQUEST]\n{user_message}\n\n"
-            f"[YOUR {perspective.upper()} REASONING]\n"
+            f"[YOUR {label} REASONING]\n"
             "Bu perspektiften adım adım düşün:\n"
         )
 

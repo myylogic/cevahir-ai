@@ -59,6 +59,13 @@ from cognitive_management.v2.utils.claim_extraction import (
     extract_claims,
     ExtractedClaim,
 )
+from cognitive_management.v2.utils.verdict_parsing import (
+    FALSE,
+    PARTIAL,
+    TRUE,
+    UNCERTAIN,
+    parse_truth_verdict,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -622,12 +629,23 @@ class CriticV2(ICritic):
 
         if self.cfg.critic.enable_llm_fact_verification:
             llm_score = self._check_facts_llm(text, claims)
-            return (base_score * 0.60) + (llm_score * 0.40)
+            if llm_score is not None:  # None: unreadable judge reply -> abstain
+                return (base_score * 0.60) + (llm_score * 0.40)
 
         return base_score
 
-    def _check_facts_llm(self, text: str, claims: List[ExtractedClaim]) -> float:
-        """LLM tabanlı gerçek doğrulama."""
+    # Hakem kararı -> factuality puanı. Okunamayan karar puan üretmez (çekimser).
+    _LLM_FACT_SCORES: Dict[str, float] = {TRUE: 0.90, PARTIAL: 0.70, UNCERTAIN: 0.55, FALSE: 0.20}
+
+    def _check_facts_llm(self, text: str, claims: List[ExtractedClaim]) -> Optional[float]:
+        """
+        LLM tabanlı gerçek doğrulama.
+
+        Yanıt olumsuzluk ve çekince farkında okunur (verdict_parsing):
+        "Yanlış, doğru değil" -> yanlış, "Kısmen doğru" -> kısmen. Okunamayan
+        yanıt veya model hatası None döndürür; hakem çekimser kalır ve puanı ya
+        da revizyon kararını etkilemez.
+        """
         if not claims:
             return 1.0
         try:
@@ -643,21 +661,13 @@ class CriticV2(ICritic):
                 prompt,
                 DecodingConfig(max_new_tokens=20, temperature=0.20, top_p=0.80),
             )
-            rl = (response or "").lower()
-            if "doğru" in rl or "correct" in rl or "true" in rl:
-                return 0.90
-            if "kısmen" in rl or "partial" in rl:
-                return 0.70
-            if "belirsiz" in rl or "uncertain" in rl or "unknown" in rl:
-                return 0.55
-            if "yanlış" in rl or "false" in rl or "incorrect" in rl:
-                return 0.20
-            return 0.60
+            verdict = parse_truth_verdict(response or "")
+            return self._LLM_FACT_SCORES.get(verdict.label)
         except BudgetExhausted:
             raise
         except Exception as e:
             logger.debug(f"LLM fact verification başarısız: {e}")
-            return 0.60
+            return None
 
     def _fact_message(self, score: float) -> str:
         if score >= 0.85:
