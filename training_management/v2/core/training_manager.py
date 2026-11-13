@@ -53,7 +53,10 @@ from .batch_processor import BatchProcessor
 
 # Utils imports
 from ..metrics.metrics_tracker import MetricsTracker
-from ..utils.training_scheduler import TrainingScheduler, apply_continuation_learning_rate, mark_embedding_param_groups
+from ..utils.training_scheduler import (
+    TrainingScheduler, apply_continuation_learning_rate, find_plateau_scheduler, main_learning_rate,
+    mark_embedding_param_groups,
+)
 from ..utils.checkpoint_manager import CheckpointManager
 from ..utils.training_logger import TrainingLogger
 
@@ -263,6 +266,9 @@ class TrainingManager:
         # Training state
         self.current_epoch = self.start_epoch
         self.best_val_loss = float("inf")
+        # What best_val_loss (and the plateau scheduler's best) measures: "nll", or "objective" while
+        # a run resumed from an older checkpoint has not yet beaten the objective-scale best recorded there.
+        self.best_val_metric = "nll"
         self.training_history = {
             "train_loss": [],
             "val_loss": [],
@@ -281,6 +287,7 @@ class TrainingManager:
             "scheduler": self.scheduler.state_dict() if self.scheduler is not None else None,
             "loop": self.training_loop.state_dict(),
             "best_val_loss": self.best_val_loss,
+            "best_val_metric": self.best_val_metric,
             "early_stopping_counter": self.early_stopping_counter,
             "rng": {
                 "python": random.getstate(),
@@ -296,10 +303,19 @@ class TrainingManager:
         ``train()`` then runs epochs ``saved_epoch + 1`` .. ``config["epochs"]`` (a total target).
         ``config["continuation_learning_rate"]``, if set, is applied last: the optimizer and
         scheduler state restored here carry the checkpointed run's learning rate.
+
+        A checkpoint without ``best_val_metric`` was written while the reported validation loss
+        was the training objective, so its ``best_val_loss`` and plateau best are objective values.
+        Model selection then compares the validation objective until an epoch beats that best,
+        and validation NLL afterwards; a new NLL is never compared with an old objective value.
         """
         import random
         import numpy as np
         state = torch.load(path, map_location=self.device, weights_only=True)
+        extra = state.get("extra_state") or {}
+        best_val_metric = extra.get("best_val_metric", "objective")
+        if best_val_metric not in ("nll", "objective"):
+            raise ValueError(f"Unknown best_val_metric in checkpoint: {best_val_metric!r}")
         from model_management.checkpoint_contract import unpack_checkpoint, validate_model_identity, validate_state_shapes
         model_state, _, _, metadata = unpack_checkpoint(state)
         from model_management.checkpoint_contract import validate_tokenizer_identity
@@ -310,10 +326,15 @@ class TrainingManager:
         if hasattr(self.model, "clear_kv_cache"):
             self.model.clear_kv_cache()
         if "optimizer_state_dict" in state:
+            # load_state_dict replaces every param group with the saved one; keep the group names
+            # (e.g. the "embedding" warmup tag) that a checkpoint written without them would drop.
+            names = [group.get("name") for group in self.optimizer.param_groups]
             self.optimizer.load_state_dict(state["optimizer_state_dict"])
+            for group, name in zip(self.optimizer.param_groups, names):
+                if name is not None and "name" not in group:
+                    group["name"] = name
         self.start_epoch = int(state.get("epoch", 0)) + 1
         self.training_history = state.get("training_history", self.training_history)
-        extra = state.get("extra_state", {})
         if not extra:
             self.logger.log_warning("Legacy checkpoint has no RNG/scheduler/scaler state; exact resume is unavailable")
             self._apply_continuation_learning_rate()
@@ -323,6 +344,14 @@ class TrainingManager:
         self.training_loop.load_state_dict(extra.get("loop", {}))
         self.global_step = self.training_loop.optimizer_steps
         self.best_val_loss = float(extra.get("best_val_loss", float("inf")))
+        self.best_val_metric = best_val_metric
+        if best_val_metric == "objective":
+            self.logger.log_warning(
+                f"Checkpoint records best_val_loss={self.best_val_loss:.6f} as a validation objective value "
+                "(recorded before validation NLL drove model selection). The best checkpoint, early stopping "
+                "and the plateau scheduler compare the validation objective until an epoch beats it, "
+                "then validation NLL."
+            )
         self.early_stopping_counter = int(extra.get("early_stopping_counter", 0))
         rng = extra.get("rng", {})
         if rng:
@@ -352,6 +381,22 @@ class TrainingManager:
             f"state was restored (x{factor:.4g}); group LRs: {lrs}"
         )
         return factor
+
+    def _switch_model_selection_to_nll(self, val_nll: float) -> None:
+        """An epoch beat an older checkpoint's objective-scale best: compare validation NLL from now on.
+
+        The plateau scheduler's best is rebased to this epoch's NLL too, so that its next step
+        does not compare an NLL with an objective value.
+        """
+        self.best_val_metric = "nll"
+        plateau = find_plateau_scheduler(self.scheduler)
+        if plateau is not None:
+            plateau.best = float(val_nll)
+            plateau.num_bad_epochs = 0
+        self.logger.log_info(
+            f"[Model selection] The checkpoint's objective-scale best was beaten; the best checkpoint, "
+            f"early stopping and the plateau scheduler now compare validation NLL (NLL={val_nll:.6f})"
+        )
     
     def _is_warmup_finished(self) -> bool:
         """
@@ -442,9 +487,9 @@ class TrainingManager:
             
             self.logger.log_info(f"Epoch {epoch}/{last_epoch} başladı.")
             
-            # Epoch info logging — ana model LR'ı logla (param_groups[0] embedding olabilir, en düşük LR)
-            all_lrs = [pg.get("lr", 0.0) for pg in self.optimizer.param_groups]
-            current_lr = max(all_lrs) if all_lrs else self.optimizer.param_groups[0].get("lr", 0.0)
+            # Epoch info logging — ana model LR'ı: "embedding" etiketi olmayan ilk grup (warmup'ın izlediği
+            # LR; warmup dışında tutulan bir embedding grubu bundan yüksek olabilir)
+            current_lr = main_learning_rate(self.optimizer)
             total_batches = max(1, len(self.train_loader))
             val_batches = max(1, len(self.val_loader))
             
@@ -501,6 +546,12 @@ class TrainingManager:
             train_objective = train_stats.get("objective")
             val_objective = val_stats.get("objective")
             skipped_steps = int(train_stats.get("skipped_steps", 0) or 0)
+            # Model selection (best checkpoint, early stopping, plateau scheduler) compares validation NLL.
+            # After resuming an older checkpoint whose best is a validation objective value, it compares the
+            # validation objective until an epoch beats that best (see resume_from_checkpoint).
+            selection_loss = val_loss
+            if self.best_val_metric == "objective" and val_objective is not None:
+                selection_loss = float(val_objective)
 
             # Epoch summary
             loss_diff = train_loss - val_loss
@@ -596,16 +647,14 @@ class TrainingManager:
                         # Warmup bitmiş → ReduceLROnPlateau için metric-based step (epoch-based)
                         grad_norm_for_scheduler = avg_gradient_norm if math.isfinite(avg_gradient_norm) else None
                         if hasattr(self.scheduler, "step_epoch"):
-                            self.scheduler.step_epoch(metric=val_loss)
+                            self.scheduler.step_epoch(metric=selection_loss)
                         else:
-                            self.scheduler.step(metric=val_loss, gradient_norm=grad_norm_for_scheduler)
-                        all_lrs = [pg.get("lr", 0.0) for pg in self.optimizer.param_groups]
-                        lr_value = max(all_lrs) if all_lrs else 0.0
+                            self.scheduler.step(metric=selection_loss, gradient_norm=grad_norm_for_scheduler)
+                        lr_value = main_learning_rate(self.optimizer)
                         self.logger.log_info(f"LR güncellendi (main): {float(lr_value):.8f} (AvgGradNorm={avg_gradient_norm:.4f})")
                     else:
                         # Warmup devam ediyor → LR TrainingLoop'da batch-based güncelleniyor
-                        all_lrs = [pg.get("lr", 0.0) for pg in self.optimizer.param_groups]
-                        lr_value = max(all_lrs) if all_lrs else 0.0
+                        lr_value = main_learning_rate(self.optimizer)
                         self.logger.log_info(f"LR (warmup, main): {float(lr_value):.8f} (warmup devam ediyor)")
                     
                     # Log LR to TensorBoard
@@ -614,8 +663,7 @@ class TrainingManager:
                 except Exception as e:
                     raise RuntimeError(f"Scheduler failed at epoch {epoch}") from e
             if lr_value is None and self.tensorboard_manager.enabled:
-                all_lrs = [pg.get("lr", 0.0) for pg in self.optimizer.param_groups]
-                lr_value = max(all_lrs) if all_lrs else 0.0
+                lr_value = main_learning_rate(self.optimizer)
                 self.tensorboard_manager.log_scalar("LR", float(lr_value), epoch)
             
             # Memory tracking summary (epoch level)
@@ -657,8 +705,15 @@ class TrainingManager:
                     self.logger.log_warning(f"[Epoch {epoch}] Epoch callback hatası: {e}")
             
             # Save the completed epoch, including the state needed by the next epoch.
-            is_best = val_loss < self.best_val_loss
+            is_best = selection_loss < self.best_val_loss
+            if self.best_val_metric == "objective":
+                self.logger.log_info(
+                    f"  Model selection: validation objective {selection_loss:.6f} vs the checkpoint's "
+                    f"objective-scale best {self.best_val_loss:.6f}"
+                )
             if is_best:
+                if self.best_val_metric != "nll":
+                    self._switch_model_selection_to_nll(val_loss)
                 self.best_val_loss = val_loss
                 early_stopping_counter = 0
             else:
@@ -692,7 +747,7 @@ class TrainingManager:
             final_val_loss = self.training_history["val_loss"][-1]
             self.logger.log_info(f"Final Train Loss: {final_train_loss:.6f}")
             self.logger.log_info(f"Final Val Loss: {final_val_loss:.6f}")
-            self.logger.log_info(f"Best Val Loss: {self.best_val_loss:.6f}")
+            self.logger.log_info(f"Best Val Loss ({self.best_val_metric}): {self.best_val_loss:.6f}")
         
         return (
             float(train_loss if train_loss is not None else "inf"),

@@ -36,6 +36,11 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 from typing import Dict, Any, Optional
 
 
+def _optional_float(value: Any) -> float | None:
+    """None stays None (the setting is off); anything else must be a number."""
+    return None if value is None else float(value)
+
+
 class ConfigManager:
     """V2 TrainingManager için config hazırlayan manager"""
     
@@ -96,7 +101,8 @@ class ConfigManager:
             "unk_token_id": unk_token_id,
             "warmup_steps": int(base_config.get("warmup_steps", 0)),
             "warmup_start_factor": float(base_config.get("warmup_start_factor", 0.1)),
-            "embedding_warmup_factor": float(base_config.get("embedding_warmup_factor", 1.0)),
+            # None: embedding groups warm up like every other group (same rule as ConfigManagerV3)
+            "embedding_warmup_factor": _optional_float(base_config.get("embedding_warmup_factor")),
             "enable_training_analytics": bool(base_config.get("enable_training_analytics", False)),
             "max_checkpoints": int(base_config.get("max_checkpoints", 5)),
             "gradient_explosion_threshold": float(base_config.get("gradient_explosion_threshold", 10.0)),

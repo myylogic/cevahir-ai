@@ -53,6 +53,8 @@ are on this active path. [contracts.py](../../../training_management/contracts.p
   With the CUDA `fp16` GradScaler, nonfinite gradients skip the step, shrink the scale and are counted as `skipped_steps`; without a scaler training stops with an error.
 - Reported training / validation loss is the plain masked NLL (perplexity = exp(NLL)); the optimized objective is logged separately as `Objective/*`.
   The best checkpoint, early stopping and the plateau scheduler use validation NLL.
+  After resuming an older checkpoint without `best_val_metric` (its best is an objective value), they compare
+  the validation objective until an epoch beats that best; a new NLL is never compared with an old objective value.
 
 Precision options are `auto`, `fp32`, `fp16`, and `bf16`.
 CPU `fp16` requests fall back to `fp32`; explicit `bf16` uses CPU autocast.

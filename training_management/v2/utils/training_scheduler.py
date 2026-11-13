@@ -535,3 +535,21 @@ def apply_continuation_learning_rate(optimizer: torch.optim.Optimizer, target_lr
     if base is not None and hasattr(base, "_last_lr"):
         base._last_lr = [float(group["lr"]) for group in groups]
     return factor
+
+
+def main_learning_rate(optimizer: torch.optim.Optimizer) -> float:
+    """Learning rate of the main param group: the first group not tagged as an embedding group.
+
+    This is the LR that TrainingScheduler.get_last_lr() reports and that warmup ramps. It is not
+    the largest group LR: an embedding group kept out of warmup can sit above it.
+    """
+    groups = optimizer.param_groups
+    return float(groups[_main_group_index(groups)]["lr"])
+
+
+def find_plateau_scheduler(scheduler: Any) -> ReduceLROnPlateau | None:
+    """The ReduceLROnPlateau behind a TrainingScheduler and/or warmup wrapper, or None."""
+    inner = scheduler.scheduler if isinstance(scheduler, TrainingScheduler) else scheduler
+    if isinstance(inner, _LinearWarmupWrapper):
+        inner = inner.base_scheduler
+    return inner if isinstance(inner, ReduceLROnPlateau) else None

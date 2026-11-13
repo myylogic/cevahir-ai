@@ -53,6 +53,8 @@ Desteklenen arka ucu [contracts.py](../../../training_management/contracts.py) b
   CUDA `fp16` GradScaler etkinken sonlu olmayan gradyan adımı atlatır, ölçeği küçültür ve `skipped_steps` olarak sayılır; scaler yokken eğitim hatayla durur.
 - Raporlanan eğitim / doğrulama kaybı yalın maskeli NLL'dir (perplexity = exp(NLL)); optimize edilen amaç ayrıca `Objective/*` olarak kaydedilir.
   En iyi checkpoint, early stopping ve plateau scheduler doğrulama NLL'sini kullanır.
+  `best_val_metric` alanı olmayan eski bir kayıttan (en iyi değeri amaç değeridir) devam edilince bu üçü,
+  bir epoch o değeri amaç ölçeğinde geçene kadar doğrulama amacını karşılaştırır; yeni NLL eski amaç değeriyle karşılaştırılmaz.
 
 Precision seçenekleri `auto`, `fp32`, `fp16` ve `bf16` değerleridir.
 CPU üzerinde `fp16` isteği `fp32`ye döner; açık `bf16` isteği CPU autocast kullanır.

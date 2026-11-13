@@ -1,9 +1,11 @@
 """CPU regression tests for training-loop correctness on the supported V2 path.
 
-Covers resume semantics (continuation learning rate, total epoch target), fp16 GradScaler
-overflow handling (simulated with a CPU GradScaler), the warmup wrapper's embedding groups,
-and the reported metrics (plain NLL/perplexity, objective logged apart, batch timing and
-token throughput).
+Covers resume semantics (continuation learning rate, total epoch target, model selection after
+resuming a checkpoint whose best is an objective value, param group names), the shipped config
+on the V3 path and the V2 fallback, fp16 GradScaler overflow handling (simulated with a CPU
+GradScaler), the warmup wrapper's embedding groups and the reported main learning rate, and the
+reported metrics (plain NLL/perplexity, objective logged apart, analytics summary, batch timing
+and token throughput).
 """
 import copy
 import math
@@ -254,22 +256,185 @@ def test_epochs_is_the_total_target_when_resuming(tmp_path):
     assert any("already reaches the target epochs=3" in message for message in logger.messages("warning"))
 
 
+class SpecialIdsTokenizer:
+    def _special_ids(self):
+        return {"<PAD>": 0, "<BOS>": 1, "<EOS>": 2, "<UNK>": 3}
+
+    def get_vocab_size(self):
+        return VOCAB
+
+
 def test_config_manager_forwards_resume_and_warmup_options():
     from training_system.v3.core.config_manager_v3 import ConfigManagerV3
 
-    class Tokenizer:
-        def _special_ids(self):
-            return {"<PAD>": 0, "<BOS>": 1, "<EOS>": 2, "<UNK>": 3}
-
-        def get_vocab_size(self):
-            return VOCAB
-
     manager = ConfigManagerV3(logger_instance=QuietLogger())
-    defaults = manager.prepare_training_config({}, Tokenizer(), "cpu")
+    defaults = manager.prepare_training_config({}, SpecialIdsTokenizer(), "cpu")
     assert defaults["continuation_learning_rate"] is None and defaults["embedding_warmup_factor"] is None
     given = manager.prepare_training_config({"continuation_learning_rate": "5e-5", "embedding_warmup_factor": 0.5},
-                                            Tokenizer(), "cpu")
+                                            SpecialIdsTokenizer(), "cpu")
     assert given["continuation_learning_rate"] == 5e-5 and given["embedding_warmup_factor"] == 0.5
+
+
+def test_shipped_train_config_passes_through_both_config_managers():
+    from training_system.train import TRAIN_CONFIG, normalize_config
+    from training_system.v2.core.config_manager import ConfigManager
+    from training_system.v3.core.config_manager_v3 import ConfigManagerV3
+
+    precision = torch.get_float32_matmul_precision()
+    try:
+        shipped = normalize_config(TRAIN_CONFIG)  # what train.py hands to the V3 service or the V2 fallback
+    finally:
+        torch.set_float32_matmul_precision(precision)  # normalize_config changes this process-wide setting
+    v3 = ConfigManagerV3(logger_instance=QuietLogger()).prepare_training_config(shipped, SpecialIdsTokenizer(), "cpu")
+    v2 = ConfigManager().prepare_training_config(shipped, SpecialIdsTokenizer(), "cpu")
+    assert TRAIN_CONFIG["embedding_warmup_factor"] is None
+    assert v3["embedding_warmup_factor"] is None and v2["embedding_warmup_factor"] is None
+    given = ConfigManager().prepare_training_config({"embedding_warmup_factor": "0.5"}, SpecialIdsTokenizer(), "cpu")
+    assert given["embedding_warmup_factor"] == 0.5
+
+
+def test_v2_fallback_applies_the_continuation_lr_after_loading_the_weights(tmp_path, monkeypatch):
+    import training_system.v2.core.training_service as v2_service
+
+    model = TinyLM()
+    optimizer = two_group_optimizer(model, 1e-4, 2e-4)
+    loads = []
+
+    class WeightsOnlyModelManager:
+        def __init__(self):
+            self.model, self.optimizer = model, optimizer
+
+        def load(self, path, weights_only=None):
+            loads.append((path, weights_only))
+
+    def service(checkpoint_dir):
+        # Only what TrainingService._initialize_model uses; the rest of the service is not needed here.
+        instance = object.__new__(v2_service.TrainingService)
+        instance.config = {"checkpoint_dir": str(checkpoint_dir), "continuation_learning_rate": 5e-5}
+        instance.model_manager, instance.logger = WeightsOnlyModelManager(), QuietLogger()
+        return instance
+
+    monkeypatch.setattr(v2_service, "MODEL_SAVE_PATH", str(tmp_path / "missing.pth"))
+    service(tmp_path / "empty")._initialize_model()
+    assert loads == [] and [group["lr"] for group in optimizer.param_groups] == [1e-4, 2e-4]  # nothing loaded
+    found = tmp_path / "runs"
+    found.mkdir()
+    (found / "last.pth").write_bytes(b"")  # the stub manager does not read it
+    service(found)._initialize_model()
+    assert loads == [(str(found / "last.pth"), True)]
+    assert [group["lr"] for group in optimizer.param_groups] == [pytest.approx(2.5e-5), pytest.approx(5e-5)]
+
+
+def objective_scale_run(directory, loss_criterion):
+    """Train one epoch, then rewrite last.pth/best.pth the way the previous version wrote them.
+
+    That version reported the training objective as the validation loss: best_val_loss, the
+    history, the checkpoint metric and the plateau's best were objective values, and there was no
+    best_val_metric. Returns that recorded objective-scale best.
+    """
+    model = TinyLM()
+    make_manager(model, directory, 1, optimizer=torch.optim.SGD(model.parameters(), lr=0.05),
+                 loss_criterion=loss_criterion).train()
+    fresh = torch.load(directory / "last.pth", weights_only=True)
+    assert fresh["extra_state"]["best_val_metric"] == "nll"
+    assert fresh["extra_state"]["best_val_loss"] == fresh["training_history"]["val_loss"][-1]
+    recorded = None
+    for name in ("last.pth", "best.pth"):
+        payload = torch.load(directory / name, weights_only=True)
+        history, extra = payload["training_history"], payload["extra_state"]
+        history["train_loss"] = history.pop("train_objective")
+        history["val_loss"] = history.pop("val_objective")
+        recorded = history["val_loss"][-1]
+        del extra["best_val_metric"]
+        extra["best_val_loss"] = payload["metric"] = recorded
+        extra["scheduler"]["scheduler_state"]["best"] = recorded
+        torch.save(payload, directory / name)
+    return recorded
+
+
+def resume_objective_scale_run(directory, loss_criterion, logger=None, epochs=2):
+    model = TinyLM()
+    manager = make_manager(model, directory, epochs, optimizer=torch.optim.SGD(model.parameters(), lr=0.05),
+                           loss_criterion=loss_criterion, logger=logger)
+    manager.resume_from_checkpoint(directory / "last.pth")
+    return manager
+
+
+def test_an_older_checkpoints_objective_best_is_not_compared_with_nll(tmp_path):
+    # Label smoothing and an EOS weight put the objective well above the plain NLL.
+    regularized = criterion(label_smoothing=0.3, eos_weight=3.0)
+
+    # The same weights (LR 0): their NLL is below the recorded objective-scale best, so comparing
+    # the two would call the unchanged model a new best.
+    same = tmp_path / "same"
+    recorded = objective_scale_run(same, regularized)
+    best_before = (same / "best.pth").read_bytes()
+    logger = RecordingLogger()
+    resumed = resume_objective_scale_run(same, regularized, logger=logger)
+    assert resumed.best_val_metric == "objective" and resumed.best_val_loss == pytest.approx(recorded)
+    assert any("validation objective value" in message for message in logger.messages("warning"))
+    for group in resumed.optimizer.param_groups:
+        group["lr"] = 0.0
+    resumed.train()
+    assert resumed.training_history["val_loss"][-1] < recorded
+    assert (same / "best.pth").read_bytes() == best_before
+    assert resumed.early_stopping_counter == 1 and resumed.best_val_metric == "objective"
+    plateau = resumed.scheduler.scheduler
+    assert plateau.best == pytest.approx(recorded) and plateau.num_bad_epochs == 1
+    extra = torch.load(same / "last.pth", weights_only=True)["extra_state"]
+    assert extra["best_val_metric"] == "objective" and extra["best_val_loss"] == pytest.approx(recorded)
+
+    # A worse model (restored logits sharpened, LR 0): its NLL is above the old best's NLL and
+    # still below the recorded objective-scale best. It must not replace best.pth.
+    worse = tmp_path / "worse"
+    recorded = objective_scale_run(worse, regularized)
+    best_before = (worse / "best.pth").read_bytes()
+    resumed = resume_objective_scale_run(worse, regularized)
+    old_best_nll = reference_metrics(resumed.model, batches(), regularized)[0]
+    with torch.no_grad():
+        resumed.model.proj.weight.mul_(2.0)
+        resumed.model.proj.bias.mul_(2.0)
+    for group in resumed.optimizer.param_groups:
+        group["lr"] = 0.0
+    resumed.train()
+    assert old_best_nll < resumed.training_history["val_loss"][-1] < recorded
+    assert (worse / "best.pth").read_bytes() == best_before
+    assert resumed.early_stopping_counter == 1
+
+
+def test_beating_an_older_checkpoints_objective_best_switches_model_selection_to_nll(tmp_path):
+    regularized = criterion(label_smoothing=0.3, eos_weight=3.0)
+    recorded = objective_scale_run(tmp_path, regularized)
+    resumed = resume_objective_scale_run(tmp_path, regularized)
+    resumed.train()  # one more epoch at the same LR improves the model
+    history = resumed.training_history
+    assert history["val_objective"][-1] < recorded
+    nll = history["val_loss"][-1]
+    assert resumed.best_val_metric == "nll" and resumed.best_val_loss == nll and resumed.early_stopping_counter == 0
+    plateau = resumed.scheduler.scheduler
+    assert plateau.best == nll and plateau.num_bad_epochs == 0  # rebased onto the NLL scale
+    best = torch.load(tmp_path / "best.pth", weights_only=True)
+    assert best["epoch"] == 2
+    assert best["extra_state"]["best_val_metric"] == "nll" and best["extra_state"]["best_val_loss"] == nll
+    logger = RecordingLogger()
+    again = resume_objective_scale_run(tmp_path, regularized, logger=logger, epochs=3)
+    assert again.best_val_metric == "nll" and again.best_val_loss == nll
+    assert not any("validation objective value" in message for message in logger.messages("warning"))
+
+
+def test_resume_keeps_param_group_names_that_the_checkpoint_lacks(tmp_path):
+    source = TinyLM()
+    untagged = two_group_optimizer(source, 1e-4, 2e-4)  # saved without the "embedding" tag, as older runs did
+    path = tmp_path / "untagged.pth"
+    torch.save({"epoch": 1, "model_state_dict": source.state_dict(),
+                "optimizer_state_dict": untagged.state_dict()}, path)
+    model = TinyLM()
+    resumed = make_manager(model, tmp_path, 2, optimizer=two_group_optimizer(model, 1e-4, 2e-4), warmup_steps=2)
+    resumed.resume_from_checkpoint(path)
+    groups = resumed.optimizer.param_groups
+    assert [group.get("name") for group in groups] == [EMBEDDING_GROUP_NAME, None]
+    assert [group["lr"] for group in groups] == [pytest.approx(1e-4), pytest.approx(2e-4)]
+    assert resumed.scheduler.get_last_lr() == pytest.approx(2e-4)  # the main group, not the embedding group
 
 
 # --------------------------------------------------------------------------- P5: fp16 GradScaler overflow
@@ -392,6 +557,24 @@ def test_manager_applies_the_configured_embedding_warmup_factor(tmp_path):
     assert [group["lr"] for group in manager.optimizer.param_groups] == [pytest.approx(5e-5), pytest.approx(2e-5)]
 
 
+def test_logged_learning_rate_is_the_main_group_not_the_largest(tmp_path):
+    model = TinyLM()
+    board = FakeTensorBoard()
+    logger = RecordingLogger()
+    manager = make_manager(model, tmp_path, 1, optimizer=two_group_optimizer(model, 2e-4, 2e-4), warmup_steps=10,
+                           warmup_start_factor=0.1, embedding_warmup_factor=1.0, tensorboard_manager=board,
+                           logger=logger)
+    manager.train()
+    embedding_lr, main_lr = (group["lr"] for group in manager.optimizer.param_groups)
+    assert embedding_lr == pytest.approx(2e-4)  # kept out of warmup, above the main group
+    assert main_lr == pytest.approx(2e-5 + 0.3 * (2e-4 - 2e-5))  # 3 of 10 warmup steps
+    assert manager.scheduler.get_last_lr() == pytest.approx(main_lr)
+    assert board.scalars["LR"][1] == pytest.approx(main_lr)
+    info = logger.messages("info")
+    assert "  Learning Rate (main): 0.00002000" in info  # warmup start of the main group
+    assert f"LR (warmup, main): {main_lr:.8f} (warmup devam ediyor)" in info
+
+
 def test_v3_service_tags_embedding_groups_and_forwards_the_factor(tmp_path, monkeypatch):
     import training_system.v3.core.training_service_v3 as module
     from model_management.config_schema import tiny_model_config
@@ -496,6 +679,22 @@ def test_epochs_report_plain_nll_and_keep_the_objective_apart():
     val_loss, _ = loop.validate_epoch(batches())
     assert val_loss == pytest.approx(expected_nll, rel=1e-6)
     assert loop.last_val_stats["objective"] == pytest.approx(expected_objective, rel=1e-6)
+
+
+def test_training_analytics_summarizes_the_reported_nll(tmp_path):
+    regularized = criterion(label_smoothing=0.3, eos_weight=3.0)
+    model = TinyLM()
+    logger = RecordingLogger()
+    manager = make_manager(model, tmp_path, 1, optimizer=torch.optim.SGD(model.parameters(), lr=0.0),
+                           loss_criterion=regularized, logger=logger, enable_training_analytics=True,
+                           analytics_log_every_n_batches=1)
+    manager.train()
+    per_batch = [reference_metrics(model, [batch], regularized)[0] for batch in batches()]
+    assert manager.training_analytics.loss_history == pytest.approx(per_batch, rel=1e-6)
+    summary = next(message for message in logger.messages("info") if message.startswith("Loss: avg="))
+    average, lowest, highest = (float(part.split("=")[1]) for part in summary[len("Loss: "):].split(", "))
+    assert lowest <= average <= highest
+    assert average == pytest.approx(manager.training_history["train_loss"][-1], abs=1e-6)
 
 
 def test_validation_times_each_batch_once_with_actual_tokens():

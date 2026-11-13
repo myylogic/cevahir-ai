@@ -739,6 +739,20 @@ class TrainingService:
                 self.logger.info(f"   Aranan dizinler: {', '.join(searched_dirs)}")
         except Exception as e:
             raise RuntimeError(f"Training checkpoint could not be restored: {checkpoint_path}") from e
+        # Devam eğitimi: bu V2 yolu checkpoint'ten ağırlıkları yükler (optimizer durumunu değil) ve
+        # optimizer yapılandırılmış learning_rate ile kurulmuştur; train.py learning_rate'i artık
+        # değiştirmediği için continuation_learning_rate burada, gerçekten bir kayıt yüklendiyse uygulanır.
+        continuation_lr = self.config.get("continuation_learning_rate")
+        optimizer = self.model_manager.optimizer
+        if checkpoint_path and continuation_lr is not None and optimizer is not None:
+            from training_management.v2.utils.training_scheduler import (
+                apply_continuation_learning_rate,
+            )
+            factor = apply_continuation_learning_rate(optimizer, continuation_lr)
+            self.logger.info(
+                f"[Devam eğitimi] continuation_learning_rate={float(continuation_lr):.2e} uygulandı "
+                f"(x{factor:.4g}); warmup bu öğrenme oranına çıkar"
+            )
     
     def prepare_from_cache(
         self,

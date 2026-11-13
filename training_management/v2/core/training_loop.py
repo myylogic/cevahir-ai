@@ -440,9 +440,9 @@ class TrainingLoop:
                         if self.logger:
                             self.logger.log_warning(f"[METRICS] Token metrics computation failed at batch {batch_idx}: {e}")
                 
-                # Analytics: Log loss details
+                # Analytics: Log loss details (plain NLL, like the reported epoch loss and the perplexity)
                 if self.training_analytics:
-                    self.training_analytics.log_loss(batch_idx, loss, acc, ppl, logits)
+                    self.training_analytics.log_loss(batch_idx, nll, acc, ppl, logits)
                 
                 # NaN/Inf detection
                 if self.nan_inf_detector:
@@ -509,10 +509,10 @@ class TrainingLoop:
                 total_tokens += valid_tokens
                 processed_batches += 1
                 
-                # Progress bar update — ana model LR (embedding param_groups[0] en düşük olabilir)
+                # Progress bar update — ana model LR ("embedding" etiketi olmayan ilk grup, warmup'ın izlediği LR)
                 if self.use_progress_bar and TQDM_AVAILABLE:
-                    all_lrs = [pg.get("lr", 0.0) for pg in self.optimizer.param_groups]
-                    current_lr = max(all_lrs) if all_lrs else 0.0
+                    from ..utils.training_scheduler import main_learning_rate
+                    current_lr = main_learning_rate(self.optimizer)
                     epoch_pbar.set_postfix({
                         "loss": f"{nll:.4f}",
                         "acc": f"{float(acc):.4f}",

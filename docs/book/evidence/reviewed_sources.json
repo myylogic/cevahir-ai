@@ -275,7 +275,7 @@
       ]
     },
     "docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md": {
-      "sha256": "1f533523a1ab8449c9f33e8355b6e00bc3c834294ebd6d7c4949bcf1998ce3f5",
+      "sha256": "5834041cb6d1aa716a1d0976b559d73dfe40db5847f4c78b507e4acdbda2d52d",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md"
@@ -388,7 +388,7 @@
       ]
     },
     "docs/modules/training_management/README-en.md": {
-      "sha256": "7474a88a6b77983b0bb0e4c6bb1ef358b5dfba947db0f9cdd6941221fdd1fb54",
+      "sha256": "3bf99dfe92a57eb8fa216a1f76cd99d2f7a94474d511fb92f58d3a500e167a61",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -396,7 +396,7 @@
       ]
     },
     "docs/modules/training_management/README.md": {
-      "sha256": "35d601391605ead0b38ffcfea007c4486e81393859ed9f1e0f5f5454b2854766",
+      "sha256": "f639a53ce54ca007d8889692705fb324d4f90691cb59e93304574a34ad7bed13",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -1056,7 +1056,7 @@
       ]
     },
     "tests/evolution/test_training_loop_correctness.py": {
-      "sha256": "0678557c999147f0a98275b46198eecaa47b83b479947cdb6cda23a8c10e7500",
+      "sha256": "22b2d4a66c2443ad484394632291f7fa3959b51d38c23549ef5cd43721bd6ed9",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -1140,7 +1140,7 @@
       ]
     },
     "training_management/v2/core/training_loop.py": {
-      "sha256": "27c53f61ced3e083d564d98240b637a18e820d949f8ce8cc79c52da84603d826",
+      "sha256": "04c251587d87cfede7c4ba547860b92ecd922956eeb3804bbff1a1cba43b4efa",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -1149,7 +1149,7 @@
       ]
     },
     "training_management/v2/core/training_manager.py": {
-      "sha256": "e403acaf10e3bd5c0303d7f9c88f5a7789337f7b5a2bfdfedc37f3a71e71fba4",
+      "sha256": "c3092c8e60fc846c783236dadc4dc282bb8c7fa426876a03ecd63e2a971186f8",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/07-model-yasam-dongusu.md"
@@ -1163,7 +1163,7 @@
       ]
     },
     "training_management/v2/utils/training_scheduler.py": {
-      "sha256": "68c670a51192f91b43a08272221273bd7a75c0614212c73f03f3a5798c78f9a6",
+      "sha256": "d29c926b1742dfa39c799c189a4098e640628dce68b3b6926ef44fe51e00045b",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/06-egitim.md",
