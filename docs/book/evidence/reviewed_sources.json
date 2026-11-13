@@ -1154,7 +1154,7 @@
       ]
     },
     "training_system/cache_identity.py": {
-      "sha256": "909f78d16c7a33e536a8979dcd0c0cef23e0e68aade346c50932032d8f8793a0",
+      "sha256": "b476a4e4004fc35e6bb553f038ea10801875ba8ad957f53a8809af57c6f7a9c6",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/02-metin-tokenizer.md",
@@ -1180,7 +1180,7 @@
       ]
     },
     "training_system/train.py": {
-      "sha256": "03ae15ddf91ad1730b5e557776800ed710544aecb2f2e23b66bb06d384ed44fe",
+      "sha256": "35b9a13e52d0e6e697089e452c7bd1aa7cc95eee87ac1628f526cf801e768ed1",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/06-egitim.md"

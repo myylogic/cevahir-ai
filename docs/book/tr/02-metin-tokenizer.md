@@ -228,7 +228,7 @@ Eğitim tarafında [TokenizerCore.load_training_data](../../../tokenizer_managem
 
 Çıkarım tarafında [ModelManager.generate](../../../model_management/model_manager.py#L882) adlı basit üretim yolu `self.tokenizer.encode(prompt)` çağırır ve token kimliklerini modele geçirir. Bu metodun kendi gövdesi tek ileri geçiş ve argmax yapar. Tam autoregressive üretim adaptörünün çağrı zinciri [üretim bölümündedir](08-uretim.md). [TokenizerCore.decode](../../../tokenizer_management/core/tokenizer_core.py#L615), üretilmiş kimlikleri BPE çözme katmanına aktararak metin sonucunu verir; encode/decode dönüşlerinin her girdi için özgün metne eşit olduğu varsayılmaz.
 
-Sözlükte iki kimliğin yer değiştirmesi embedding tablosundaki iki satırın anlamını değiştirir. Bu nedenle sözlük büyüklüğünün eşitliği model uyumluluğu için yeterli değildir. [tokenizer_digest](../../../training_system/cache_identity.py#L27), sözlük, birleşim dosyası ve BPE yapılandırmasını kimliğe katar. Cache ve checkpoint sınırlarında bu kimlik kullanılır; [yaşam döngüsü bölümü](07-model-yasam-dongusu.md) bu denetimi tamamlar.
+Sözlükte iki kimliğin yer değiştirmesi embedding tablosundaki iki satırın anlamını değiştirir. Bu nedenle sözlük büyüklüğünün eşitliği model uyumluluğu için yeterli değildir. [tokenizer_digest](../../../training_system/cache_identity.py#L27), sözlük, birleşim dosyası ve BPE yapılandırmasının kodlamayı etkileyen kısmını kimliğe katar; batch boyutu, cihaz ve uzunluk sınırı gibi çalışma ayarları kimliğe girmez. Cache ve checkpoint sınırlarında bu kimlik kullanılır; [yaşam döngüsü bölümü](07-model-yasam-dongusu.md) bu denetimi tamamlar.
 
 ## Okumayı gerçek bir kontrole bağlamak
 

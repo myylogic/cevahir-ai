@@ -27,11 +27,27 @@ def data_directory_digest(directory):
 def tokenizer_digest(tokenizer_core):
     manager = getattr(tokenizer_core, "tokenizer", None)
     merges_path = getattr(tokenizer_core, "merges_path", None) or getattr(manager, "merges_file", None)
+    # Runtime knobs (batch sizes, device, length limits, caches, logging) do not change how text maps
+    # to ids. Hashing them made the identity depend on the caller: prepare_cache, train.py and the
+    # inference facade pass different batch sizes, so a cache or checkpoint built with byte-identical
+    # vocab/merges was rejected. Sequence length is part of the cache key separately (cache_v3).
+    bpe_config = {key: value for key, value in (getattr(manager, "config", None) or {}).items()
+                  if key not in RUNTIME_ONLY_TOKENIZER_KEYS}
     payload = {
-        "identity_version": 2,
+        "identity_version": 3,
         "vocab": tokenizer_core.get_vocab(),
         "merges": file_digest(merges_path) if merges_path else None,
-        "bpe_config": getattr(manager, "config", {}),
+        "bpe_config": bpe_config,
     }
     serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(serialized.encode()).hexdigest()
+
+
+# Keys of the tokenizer manager config that only affect throughput, devices or diagnostics.
+RUNTIME_ONLY_TOKENIZER_KEYS = frozenset({
+    "batch_size", "tokenizer_batch_size", "batch_merge_size", "adaptive_batch", "batch_log_interval",
+    "gpu_batch_size", "gpu_memory_fraction", "use_gpu", "use_tpu", "device", "parallel_workers",
+    "num_workers", "max_seq_length", "cache_size", "chunk_size", "pair_stats_chunk_size",
+    "memory_monitoring", "memory_threshold", "gc_interval", "future_timeout",
+    "log_interval", "progress_log_interval", "log_level", "verbose", "show_progress",
+})

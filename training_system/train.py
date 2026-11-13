@@ -289,6 +289,10 @@ def normalize_config(cfg: Dict[str, Any]) -> Dict[str, Any]:
                 out[key] = value
             elif key not in out:  # Diğer ayarlar sadece belirtilmemişse config'ten al
                 out[key] = value
+    # max_seq_length tokenizer config'ten gelince takma adı pe_max_len de eşitlenmeli; aksi hâlde
+    # ModelManager yeniden normalize ederken "Conflicting aliases pe_max_len and max_seq_length" verir.
+    if "max_seq_length" in out:
+        out["pe_max_len"] = out["max_seq_length"]
     # gradient_clip -> max_grad_norm eşlemesi
     if "gradient_clip" in out and "max_grad_norm" not in out:
         out["max_grad_norm"] = out.get("gradient_clip", 1.0)
@@ -786,6 +790,7 @@ def main() -> None:
         print("\nTensorBoard’ı açmak için:\n  tensorboard --logdir runs/cevahir_training --port 6006\n")
     except KeyboardInterrupt:
         train_logger.warning("Eğitim kullanıcı tarafından durduruldu (KeyboardInterrupt).")
+        raise SystemExit(130)
     except torch.cuda.OutOfMemoryError as oom:
         # Eğitim döngüsü dışında (örn. model build sırasında) CUDA OOM
         train_logger.error(
@@ -793,6 +798,7 @@ def main() -> None:
             f"batch_size veya max_seq_length küçültün. Hata: {oom}",
             exc_info=False,
         )
+        raise SystemExit(1)
     except Exception as e:
         # Typed model_management hatalarına ek açıklama ekle
         if _MM_EXCEPTIONS_AVAILABLE and CevahirModelError and isinstance(e, CevahirModelError):
@@ -802,6 +808,7 @@ def main() -> None:
             )
         else:
             train_logger.error(f"Eğitim sırasında hata oluştu: {str(e)}", exc_info=True)
+        raise SystemExit(1)  # başarısız eğitim sıfır olmayan çıkış koduyla bitmeli
 
 
 

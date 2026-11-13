@@ -32,7 +32,7 @@ Model kimliğini üç düzeyde okuyabiliriz: **yapısal kimlik**, hangi işlemle
 
 ### Tokenizer parmak izinin kapsamı
 
-[`tokenizer_digest`](../../../training_system/cache_identity.py#L27), kimlik sürümü, token→indis sözlüğü, varsa merge dosyasının byte özeti ve BPE yapılandırmasını düzenli JSON'a çevirip SHA-256 hesaplar. Sözlük büyüklüğü aynı kalırken iki tokenın indisleri yer değiştirebilir; embedding satırları aynı olsa bile metnin anlamlandırılması değişir. Bu yüzden `vocab_size` kontrolü parmak izinin yerini tutmaz.
+[`tokenizer_digest`](../../../training_system/cache_identity.py#L27), kimlik sürümü, token→indis sözlüğü, varsa merge dosyasının byte özeti ve BPE yapılandırmasını düzenli JSON'a çevirip SHA-256 hesaplar. Yapılandırmadan yalnız çalışma ayarları (`RUNTIME_ONLY_TOKENIZER_KEYS`: batch boyutu, cihaz, uzunluk sınırı, günlük) çıkarılır; aksi hâlde aynı sözlük ve merge dosyası, cache hazırlığı, eğitim ve çıkarım farklı batch boyutu verdiği için reddediliyordu. Sözlük büyüklüğü aynı kalırken iki tokenın indisleri yer değiştirebilir; embedding satırları aynı olsa bile metnin anlamlandırılması değişir. Bu yüzden `vocab_size` kontrolü parmak izinin yerini tutmaz.
 
 Parmak izi yalnız içine alınan alanları temsil eder. Tokenizer kodunun gelecekteki bütün davranış değişikliklerini, eğitim metninin tamamını veya modelin yazılım bağımlılıklarını kendiliğinden kapsamaz. Ayrıca merge dosyası byte düzeyinde özetlendiği için yalnız satır sonu dönüşümü bile özeti değiştirebilir. Böyle bir eşleşmeme mutlaka dilsel davranışın değiştiğini ispatlamaz; kaydın byte sözleşmesinin değiştiğini gösterir. Tekrarlanabilir deneyde kaynak kodu sürümü, veri bölümü ve tokenizer kimliği birlikte tutulur.
 
