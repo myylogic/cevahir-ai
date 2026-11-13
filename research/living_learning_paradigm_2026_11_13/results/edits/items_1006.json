@@ -1,0 +1,566 @@
+{
+ "world": 1006,
+ "sha256": "9fd5045e48a4e558a4ca53526a891870c66f48a33253091bb2bc089cdbd6d1ab",
+ "items": [
+  {
+   "edit_id": "w1006-e066",
+   "name": "Epgıkbıs",
+   "rel": "A",
+   "lived_case": "ins",
+   "old": "Müykent",
+   "new": "Vüçsu"
+  },
+  {
+   "edit_id": "w1006-e051",
+   "name": "Çoce",
+   "rel": "A",
+   "lived_case": "abl",
+   "old": "Leçalan",
+   "new": "Göybük"
+  },
+  {
+   "edit_id": "w1006-e049",
+   "name": "Çegül",
+   "rel": "A",
+   "lived_case": "loc",
+   "old": "Fultepe",
+   "new": "Ürova"
+  },
+  {
+   "edit_id": "w1006-e010",
+   "name": "Şüphüna",
+   "rel": "A",
+   "lived_case": "gen",
+   "old": "Izhisar",
+   "new": "Aktepe"
+  },
+  {
+   "edit_id": "w1006-e033",
+   "name": "Tucan",
+   "rel": "A",
+   "lived_case": "acc",
+   "old": "Tuzbük",
+   "new": "Sünyurt"
+  },
+  {
+   "edit_id": "w1006-e000",
+   "name": "İynihtu",
+   "rel": "A",
+   "lived_case": "nom",
+   "old": "Analan",
+   "new": "Gekyurt"
+  },
+  {
+   "edit_id": "w1006-e014",
+   "name": "Öhsu",
+   "rel": "A",
+   "lived_case": "gen",
+   "old": "Analan",
+   "new": "Fefova"
+  },
+  {
+   "edit_id": "w1006-e050",
+   "name": "Ömay",
+   "rel": "A",
+   "lived_case": "abl",
+   "old": "Üköy",
+   "new": "Çıhisar"
+  },
+  {
+   "edit_id": "w1006-e062",
+   "name": "Terçı",
+   "rel": "A",
+   "lived_case": "ins",
+   "old": "Üköy",
+   "new": "Sünyurt"
+  },
+  {
+   "edit_id": "w1006-e068",
+   "name": "Ihnuryüs",
+   "rel": "A",
+   "lived_case": "ins",
+   "old": "Çaçova",
+   "new": "Aktepe"
+  },
+  {
+   "edit_id": "w1006-e048",
+   "name": "Sişlıldüf",
+   "rel": "A",
+   "lived_case": "loc",
+   "old": "Bepınar",
+   "new": "Göybük"
+  },
+  {
+   "edit_id": "w1006-e043",
+   "name": "Nenu",
+   "rel": "A",
+   "lived_case": "loc",
+   "old": "Göybük",
+   "new": "Süçköy"
+  },
+  {
+   "edit_id": "w1006-e012",
+   "name": "Ohlüfap",
+   "rel": "A",
+   "lived_case": "gen",
+   "old": "Nifyazı",
+   "new": "İhpınar"
+  },
+  {
+   "edit_id": "w1006-e013",
+   "name": "Mepli",
+   "rel": "A",
+   "lived_case": "gen",
+   "old": "Müykent",
+   "new": "Fübük"
+  },
+  {
+   "edit_id": "w1006-e037",
+   "name": "Tuşçıçgü",
+   "rel": "A",
+   "lived_case": "acc",
+   "old": "Bepınar",
+   "new": "Müykent"
+  },
+  {
+   "edit_id": "w1006-e018",
+   "name": "Mazgül",
+   "rel": "A",
+   "lived_case": "gen",
+   "old": "Loyurt",
+   "new": "Tuzbük"
+  },
+  {
+   "edit_id": "w1006-e065",
+   "name": "Pıgis",
+   "rel": "A",
+   "lived_case": "ins",
+   "old": "Fökalan",
+   "new": "Bepınar"
+  },
+  {
+   "edit_id": "w1006-e029",
+   "name": "Çasay",
+   "rel": "A",
+   "lived_case": "dat",
+   "old": "Fökalan",
+   "new": "İhpınar"
+  },
+  {
+   "edit_id": "w1006-e004",
+   "name": "Eşay",
+   "rel": "A",
+   "lived_case": "nom",
+   "old": "Badere",
+   "new": "Lunova"
+  },
+  {
+   "edit_id": "w1006-e045",
+   "name": "Cızyu",
+   "rel": "A",
+   "lived_case": "loc",
+   "old": "Atkent",
+   "new": "Doktepe"
+  },
+  {
+   "edit_id": "w1006-e027",
+   "name": "Nohra",
+   "rel": "A",
+   "lived_case": "dat",
+   "old": "Nifyazı",
+   "new": "Loyurt"
+  },
+  {
+   "edit_id": "w1006-e040",
+   "name": "Cuhin",
+   "rel": "A",
+   "lived_case": "loc",
+   "old": "Göpdere",
+   "new": "Yompınar"
+  },
+  {
+   "edit_id": "w1006-e008",
+   "name": "Tapdüfçu",
+   "rel": "A",
+   "lived_case": "nom",
+   "old": "Nüptepe",
+   "new": "Türbük"
+  },
+  {
+   "edit_id": "w1006-e022",
+   "name": "Tirhis",
+   "rel": "A",
+   "lived_case": "dat",
+   "old": "Tuzbük",
+   "new": "Göybük"
+  },
+  {
+   "edit_id": "w1006-e060",
+   "name": "Ötzülvut",
+   "rel": "A",
+   "lived_case": "ins",
+   "old": "Doktepe",
+   "new": "Üköy"
+  },
+  {
+   "edit_id": "w1006-e023",
+   "name": "Fahrıten",
+   "rel": "A",
+   "lived_case": "dat",
+   "old": "Aktepe",
+   "new": "Badere"
+  },
+  {
+   "edit_id": "w1006-e031",
+   "name": "Gektuç",
+   "rel": "A",
+   "lived_case": "acc",
+   "old": "Lindere",
+   "new": "Sünyurt"
+  },
+  {
+   "edit_id": "w1006-e030",
+   "name": "Rişun",
+   "rel": "A",
+   "lived_case": "acc",
+   "old": "Loyurt",
+   "new": "Göpdere"
+  },
+  {
+   "edit_id": "w1006-e016",
+   "name": "Şusay",
+   "rel": "A",
+   "lived_case": "gen",
+   "old": "Pokent",
+   "new": "Nifyazı"
+  },
+  {
+   "edit_id": "w1006-e061",
+   "name": "Yünkusli",
+   "rel": "A",
+   "lived_case": "ins",
+   "old": "Tüsyazı",
+   "new": "Aktepe"
+  },
+  {
+   "edit_id": "w1006-e034",
+   "name": "Çizi",
+   "rel": "A",
+   "lived_case": "acc",
+   "old": "Nifyazı",
+   "new": "Ürova"
+  },
+  {
+   "edit_id": "w1006-e052",
+   "name": "Şördaten",
+   "rel": "A",
+   "lived_case": "abl",
+   "old": "Fultepe",
+   "new": "Röyazı"
+  },
+  {
+   "edit_id": "w1006-e041",
+   "name": "Şüszi",
+   "rel": "A",
+   "lived_case": "loc",
+   "old": "Nifyazı",
+   "new": "Ruzalan"
+  },
+  {
+   "edit_id": "w1006-e003",
+   "name": "Düymiş",
+   "rel": "A",
+   "lived_case": "nom",
+   "old": "Süçköy",
+   "new": "Analan"
+  },
+  {
+   "edit_id": "w1006-e064",
+   "name": "İyay",
+   "rel": "A",
+   "lived_case": "ins",
+   "old": "Gekyurt",
+   "new": "İhpınar"
+  },
+  {
+   "edit_id": "w1006-e046",
+   "name": "Mehme",
+   "rel": "A",
+   "lived_case": "loc",
+   "old": "Luhisar",
+   "new": "Fökalan"
+  },
+  {
+   "edit_id": "w1006-e009",
+   "name": "Bokyiş",
+   "rel": "A",
+   "lived_case": "nom",
+   "old": "Nüptepe",
+   "new": "Ersu"
+  },
+  {
+   "edit_id": "w1006-e019",
+   "name": "Gükleçbes",
+   "rel": "A",
+   "lived_case": "gen",
+   "old": "Cödere",
+   "new": "İhpınar"
+  },
+  {
+   "edit_id": "w1006-e042",
+   "name": "Ünhür",
+   "rel": "A",
+   "lived_case": "loc",
+   "old": "Apköy",
+   "new": "Fultepe"
+  },
+  {
+   "edit_id": "w1006-e032",
+   "name": "Ziyrifun",
+   "rel": "A",
+   "lived_case": "acc",
+   "old": "Fefova",
+   "new": "Göybük"
+  },
+  {
+   "edit_id": "w1006-e025",
+   "name": "Mofvühten",
+   "rel": "A",
+   "lived_case": "dat",
+   "old": "Ifyazı",
+   "new": "Çursu"
+  },
+  {
+   "edit_id": "w1006-e039",
+   "name": "Toray",
+   "rel": "A",
+   "lived_case": "acc",
+   "old": "Nüptepe",
+   "new": "Pokent"
+  },
+  {
+   "edit_id": "w1006-e067",
+   "name": "Hütsu",
+   "rel": "A",
+   "lived_case": "ins",
+   "old": "Gekyurt",
+   "new": "İhpınar"
+  },
+  {
+   "edit_id": "w1006-e035",
+   "name": "Solpese",
+   "rel": "A",
+   "lived_case": "acc",
+   "old": "Mizpınar",
+   "new": "Ersu"
+  },
+  {
+   "edit_id": "w1006-e026",
+   "name": "Tüshir",
+   "rel": "A",
+   "lived_case": "dat",
+   "old": "Aktepe",
+   "new": "Çursu"
+  },
+  {
+   "edit_id": "w1006-e069",
+   "name": "Rıhfi",
+   "rel": "A",
+   "lived_case": "ins",
+   "old": "Apköy",
+   "new": "Doktepe"
+  },
+  {
+   "edit_id": "w1006-e002",
+   "name": "Taci",
+   "rel": "A",
+   "lived_case": "nom",
+   "old": "Bepınar",
+   "new": "Cödere"
+  },
+  {
+   "edit_id": "w1006-e001",
+   "name": "Zurpayçar",
+   "rel": "A",
+   "lived_case": "nom",
+   "old": "Yompınar",
+   "new": "Müykent"
+  },
+  {
+   "edit_id": "w1006-e020",
+   "name": "Mungey",
+   "rel": "A",
+   "lived_case": "dat",
+   "old": "Fübük",
+   "new": "Türbük"
+  },
+  {
+   "edit_id": "w1006-e015",
+   "name": "Gıvayay",
+   "rel": "A",
+   "lived_case": "gen",
+   "old": "Leçalan",
+   "new": "Luhisar"
+  },
+  {
+   "edit_id": "w1006-e028",
+   "name": "Zeyurdil",
+   "rel": "A",
+   "lived_case": "dat",
+   "old": "Yompınar",
+   "new": "Göybük"
+  },
+  {
+   "edit_id": "w1006-e053",
+   "name": "Ciksu",
+   "rel": "A",
+   "lived_case": "abl",
+   "old": "Lindere",
+   "new": "Fefova"
+  },
+  {
+   "edit_id": "w1006-e024",
+   "name": "Epep",
+   "rel": "A",
+   "lived_case": "dat",
+   "old": "Aktepe",
+   "new": "Ürova"
+  },
+  {
+   "edit_id": "w1006-e038",
+   "name": "Yigükıt",
+   "rel": "A",
+   "lived_case": "acc",
+   "old": "Ifyazı",
+   "new": "Aktepe"
+  },
+  {
+   "edit_id": "w1006-e063",
+   "name": "Neser",
+   "rel": "A",
+   "lived_case": "ins",
+   "old": "Çursu",
+   "new": "Ersu"
+  },
+  {
+   "edit_id": "w1006-e021",
+   "name": "Uscan",
+   "rel": "A",
+   "lived_case": "dat",
+   "old": "Luhisar",
+   "new": "Vesu"
+  },
+  {
+   "edit_id": "w1006-e017",
+   "name": "Ceşçusyi",
+   "rel": "A",
+   "lived_case": "gen",
+   "old": "Fübük",
+   "new": "İhpınar"
+  },
+  {
+   "edit_id": "w1006-e058",
+   "name": "İsay",
+   "rel": "A",
+   "lived_case": "abl",
+   "old": "Bepınar",
+   "new": "Teçhisar"
+  },
+  {
+   "edit_id": "w1006-e011",
+   "name": "Suhsaz",
+   "rel": "A",
+   "lived_case": "gen",
+   "old": "Apköy",
+   "new": "Mizpınar"
+  },
+  {
+   "edit_id": "w1006-e005",
+   "name": "Cuçcü",
+   "rel": "A",
+   "lived_case": "nom",
+   "old": "Çıhisar",
+   "new": "Yompınar"
+  },
+  {
+   "edit_id": "w1006-e059",
+   "name": "Holtay",
+   "rel": "A",
+   "lived_case": "abl",
+   "old": "Nifyazı",
+   "new": "Loyurt"
+  },
+  {
+   "edit_id": "w1006-e047",
+   "name": "Putki",
+   "rel": "A",
+   "lived_case": "loc",
+   "old": "Fefova",
+   "new": "Izhisar"
+  },
+  {
+   "edit_id": "w1006-e007",
+   "name": "Femincıs",
+   "rel": "A",
+   "lived_case": "nom",
+   "old": "Ehyurt",
+   "new": "Üköy"
+  },
+  {
+   "edit_id": "w1006-e056",
+   "name": "Dıgasmüç",
+   "rel": "A",
+   "lived_case": "abl",
+   "old": "Göybük",
+   "new": "Lıkent"
+  },
+  {
+   "edit_id": "w1006-e036",
+   "name": "Vışcı",
+   "rel": "A",
+   "lived_case": "acc",
+   "old": "Nifyazı",
+   "new": "Mizpınar"
+  },
+  {
+   "edit_id": "w1006-e054",
+   "name": "Çöndus",
+   "rel": "A",
+   "lived_case": "abl",
+   "old": "Teçhisar",
+   "new": "Fübük"
+  },
+  {
+   "edit_id": "w1006-e057",
+   "name": "Cüçgül",
+   "rel": "A",
+   "lived_case": "abl",
+   "old": "Çursu",
+   "new": "Aktepe"
+  },
+  {
+   "edit_id": "w1006-e006",
+   "name": "Gükleç",
+   "rel": "A",
+   "lived_case": "nom",
+   "old": "Vüçsu",
+   "new": "Çursu"
+  },
+  {
+   "edit_id": "w1006-e044",
+   "name": "Ünduhriç",
+   "rel": "A",
+   "lived_case": "loc",
+   "old": "Çaçova",
+   "new": "Nifyazı"
+  },
+  {
+   "edit_id": "w1006-e055",
+   "name": "Omzi",
+   "rel": "A",
+   "lived_case": "abl",
+   "old": "Fökalan",
+   "new": "Apköy"
+  }
+ ]
+}
