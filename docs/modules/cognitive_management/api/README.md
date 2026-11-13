@@ -3,6 +3,11 @@
 **Modül:** `cognitive_management`
 **Son Güncelleme:** 2026-03-16
 
+**Varsayılanlar güncellendi:** 2026-11-13. `CognitiveManagerConfig()` artık lean profildir;
+`CognitiveManagerConfig.full()` önceki varsayılanları geri getirir. Aşağıdaki alan varsayılanları,
+profil metotları ve ortam değişkenleri buna göre güncellendi. Ölçülen çağrı sayıları
+[modül rehberindedir](../README.md#profiller-varsayılan-lean-istenirse-full).
+
 ---
 
 ## İçindekiler
@@ -58,10 +63,20 @@ d = config.to_dict()
 # Doğrula (geçersiz değerlerde ValueError)
 config.validate()
 
-# Ortam değişkenlerinden yükle
+# Ortam değişkenlerinden yükle (env=... verilirse yalnız o sözlük okunur)
 config = CognitiveManagerConfig.from_env()
 config = CognitiveManagerConfig.from_env(env={"CM_CRITIC_ENABLED": "true"})
+
+# Profiller: "lean" (varsayılan) veya "full" (bütün bilişsel aşamalar)
+config = CognitiveManagerConfig.full()
+config = CognitiveManagerConfig().override_with({"profile": "full", "critic": {"strictness": 0.8}})
+config.profile_name()          # "lean" | "full" | "custom"
+config.ineffective_settings()  # etkisi olamayan anahtarlar; validate() bunlar için uyarır
 ```
+
+Profil anahtarları `COGNITIVE_PROFILES` içinde listelenir; diğer bütün alanlar iki profilde aynıdır.
+`"profile"` anahtarı önce uygulanır, aynı sözlükteki diğer anahtarlar onun üzerine yazar.
+`CognitiveManager(..., config_path=...)` ile verilen yapılandırma dosyasında da böyle çalışır.
 
 ---
 
@@ -77,9 +92,11 @@ class CriticConfig:
     strictness: float = 0.5          # 0.0-1.0 (yüksek = daha katı revizyon)
     max_passes: int = 1              # Maksimum Self-Refine turu
 
-    # Dış gerçek doğrulama
-    enable_external_fact_checking: bool = True
+    # Dış gerçek doğrulama (en.wikipedia.org'a istek gönderir; lean: kapalı, full: açık)
+    enable_external_fact_checking: bool = False
     fact_checking_providers: tuple = ("wikipedia",)
+    fact_checking_max_claims: int = 3        # critic geçişi başına sorgulanan iddia
+    fact_checking_time_budget: float = 10.0  # critic geçişi başına saniye; sonra yeni istek başlamaz
     enable_wikipedia: bool = True
     wikipedia_max_results: int = 3
 
@@ -91,11 +108,11 @@ class CriticConfig:
     enable_wolfram: bool = False
     wolfram_api_key: str | None = None
 
-    # LLM tabanlı doğrulama
-    enable_llm_fact_verification: bool = True
+    # LLM tabanlı doğrulama (yalnız dış doğrulamayla birlikte; lean: kapalı, full: açık)
+    enable_llm_fact_verification: bool = False
 
-    # Constitutional AI
-    enable_constitutional_ai: bool = True
+    # Constitutional AI (lean: kapalı, full: açık; her ilke yanıtın dilinde bir kez)
+    enable_constitutional_ai: bool = False
     constitutional_strictness: float = 0.7   # 0.0-1.0
     custom_principles: tuple[str, ...] = ()  # Ek anayasal ilkeler
 
@@ -164,7 +181,7 @@ class MemoryConfig:
 ```python
 @dataclass
 class PolicyConfig:
-    debate_enabled: bool = True
+    debate_enabled: bool = False      # full: True; allow_inner_steps gerekir
 
     # Entropi eşikleri (0-3 normalize ölçek)
     entropy_gate_think: float = 1.5   # Bu eşiğin üstü CoT
@@ -175,16 +192,16 @@ class PolicyConfig:
     length_gate_debate: int = 200
     length_gate_tot: int = 300
 
-    allow_inner_steps: bool = True
+    allow_inner_steps: bool = False   # think1/debate2/tot ana anahtarı (full: True)
 
     # Tree of Thoughts
-    tot_enabled: bool = True
+    tot_enabled: bool = False         # full: True; allow_inner_steps gerekir
     tot_max_depth: int = 3
     tot_branching_factor: int = 3
     tot_top_k: int = 5
 
-    # Self-Consistency (Wang et al. 2022)
-    self_consistency_enabled: bool = True
+    # Self-Consistency (Wang et al. 2022): üretimden sonraki ayrı bir adım
+    self_consistency_enabled: bool = False  # full: True
     self_consistency_n: int = 3           # Örneklem sayısı (3-5 önerilir)
     self_consistency_method: str = "hybrid"  # "majority" | "score" | "hybrid"
 ```
@@ -474,15 +491,20 @@ except CognitiveError as e:
 
 | Değişken | Tip | Karşılık | Örnek |
 |----------|-----|----------|-------|
+| `CM_PROFILE` | `lean` veya `full` | profil; aşağıdaki değişkenlerden önce uygulanır | `full` |
 | `CM_CRITIC_ENABLED` | bool | `critic.enabled` | `true` |
 | `CM_TOOLS_ENABLE` | bool | `tools.enable_tools` | `false` |
-| `CM_DEBATE_ENABLED` | bool | `policy.debate_enabled` | `true` |
+| `CM_ALLOW_INNER_STEPS` | bool | `policy.allow_inner_steps` | `true` |
+| `CM_DEBATE_ENABLED` | bool | `policy.debate_enabled` (`CM_ALLOW_INNER_STEPS` veya `full` gerekir) | `true` |
 | `CM_MAX_NEW_TOKENS_LO` | int | `decoding_bounds.max_new_tokens_bounds[0]` | `32` |
 | `CM_MAX_NEW_TOKENS_HI` | int | `decoding_bounds.max_new_tokens_bounds[1]` | `512` |
 | `CM_TEMP_LO` | float | `decoding_bounds.temperature_bounds[0]` | `0.4` |
 | `CM_TEMP_HI` | float | `decoding_bounds.temperature_bounds[1]` | `0.9` |
 
 **bool için geçerli değerler:** `1`, `true`, `yes`, `on` → `True`; `0`, `false`, `no`, `off` → `False`
+
+`from_env(env={...})` yalnız verilen sözlüğü okur (boş sözlük = hiç değişken yok);
+`from_env()` `os.environ` okur.
 
 ---
 

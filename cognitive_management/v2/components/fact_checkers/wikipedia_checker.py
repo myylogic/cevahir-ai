@@ -84,7 +84,9 @@ class WikipediaFactChecker(BaseFactChecker):
         Args:
             claim: The claim to verify
             timeout: Remaining time budget in seconds; the request timeout is
-                min(5 s, timeout) and no request is made when it is <= 0
+                min(5 s, timeout) and no request is made when it is <= 0.
+                urllib applies the timeout to each socket operation and not to
+                DNS resolution, so one request can take longer than this value.
             
         Returns:
             FactCheckResult or None if verification unavailable

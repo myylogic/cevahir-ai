@@ -56,6 +56,7 @@ print(f"Tool used: {response.tool_used}")
     "allow": ["calculator", "search"]
   },
   "policy": {
+    "allow_inner_steps": true,
     "debate_enabled": true,
     "entropy_gate_think": 1.5
   }

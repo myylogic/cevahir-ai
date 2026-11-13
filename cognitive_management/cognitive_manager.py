@@ -436,6 +436,10 @@ class CognitiveManager:
             enabled_features.append("External Fact-Checking (network)")
         if cfg.critic.enable_constitutional_ai:
             enabled_features.append("Constitutional AI")
+        if cfg.policy.allow_inner_steps:
+            enabled_features.append("Inner Steps (think1)")
+        if cfg.policy.allow_inner_steps and cfg.policy.debate_enabled:
+            enabled_features.append("Debate")
         if cfg.policy.allow_inner_steps and cfg.policy.tot_enabled:
             enabled_features.append("Tree of Thoughts")
         if cfg.policy.self_consistency_enabled:
@@ -448,6 +452,8 @@ class CognitiveManager:
         self.log.info(f"Cognitive profile: {cfg.profile_name()}")
         if enabled_features:
             self.log.info(f"Enabled features: {', '.join(enabled_features)}")
+        for note in cfg.ineffective_settings():  # validate() also warns
+            self.log.warning(note)
     
     def _register_default_health_checks(self) -> None:
         """Register default health checks"""
@@ -1473,6 +1479,10 @@ class CognitiveManager:
         Reload config from file.
         
         Phase 6.2: Configuration Management API.
+        
+        Only self.cfg is replaced: components built in __init__ keep the
+        configuration they were built with, so structural switches such as
+        the cognitive profile take effect when a new manager is built.
         """
         if hasattr(self, '_config_manager') and self._config_manager:
             self._config_manager.reload()
@@ -1502,7 +1512,9 @@ class CognitiveManager:
         """
         Update config with dictionary of changes.
         
-        Phase 8: ConfigManager API completion.
+        Phase 8: ConfigManager API completion. As with reload_config, only
+        self.cfg is replaced; components keep the configuration they were
+        built with (rebuild the manager to switch the cognitive profile).
         
         Args:
             updates: Dictionary of config updates (can be nested)

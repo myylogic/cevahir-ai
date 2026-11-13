@@ -51,15 +51,27 @@ Temel factuality kontrolü iddia/belirsizlik kelimelerine bakar, doğruluğu kan
 her mesaj `direct` yoldan bir cevap üretimi, en fazla bir critic revizyonu
 (`critic.max_passes=1`) ve bir entropi ölçümüyle işlenir.
 Deliberation (`think1`/`debate2`/`tot`), self-consistency, anayasal eleştiri,
-LLM gerçek kararı ve dış iddia doğrulaması kapalıdır; ağ erişimi yoktur.
-`CognitiveManagerConfig.full()`, yapılandırma dosyasında `{"profile": "full"}`
-veya `from_env` ile `CM_PROFILE=full` önceki davranışı tek anahtarla geri getirir.
+LLM gerçek kararı ve dış iddia doğrulaması kapalıdır; critic Wikipedia'ya istek göndermez.
+Vektör bellek iki profilde de açıktır: isteğe bağlı `sentence-transformers` paketi kuruluysa
+kodlayıcı modeli, önbellekte yoksa ilk kullanımda Hugging Face'ten indirilir.
+`CognitiveManagerConfig.full()`, `config_path` ile verilen dosyada `{"profile": "full"}`
+veya `from_env` ile `CM_PROFILE=full` önceki davranışı tek anahtarla geri getirir;
+aynı dosyadaki ya da ortamdaki diğer anahtarlar profilin üzerine yazar.
+Profil, yönetici kurulurken okunur: `reload_config` ve `update_config` `cfg` nesnesini değiştirir,
+bileşenleri yeniden kurmaz.
 Full profilde her anayasal ilke yanıtın dilinde bir kez değerlendirilir;
 self-consistency yalnız router'ın orta-entropi kapısı açıkken çalışır;
-Wikipedia iddia sorguları yanıt başına en fazla üç iddiayı on saniyelik bütçe içinde gönderir.
+Wikipedia iddia sorguları critic geçişi başına (varsayılan tek geçiş) en fazla üç iddiayı sorgular
+ve on saniyelik bütçe dolunca yeni istek başlatmaz. Her isteğin zaman aşımı kalan süreyle sınırlanır;
+DNS çözümlemesi bunun dışında kaldığından bütçe kesin bir duvar saati sınırı değil, son tarihtir.
 `tests/evolution/test_cognitive_defaults.py` sayaçlı sahte modelle sade bir mesaj için
 lean'de 2, full'de 17–33 üretim çağrısı ölçer; bu düzeltmelerden önce varsayılanlar 31–64 çağrı yapıyordu.
-Başarısız veya ölçülemeyen entropi `None` olarak kaydedilir ve mesaj `direct` yola gider.
+Başarısız veya ölçülemeyen entropi `None` olarak kaydedilir ve mesaj `direct` yola gider;
+cevabın token bütçesi ve sıcaklığı bu durumda sıfır entropiye göre değil,
+entropi ölçeğinin ortasına (0–3 ölçeğinde 1.5) göre hesaplanır.
+`policy.allow_inner_steps`; `think1`, `debate2` ve `tot` için ana anahtardır:
+tek başına `debate_enabled` veya `tot_enabled` hiçbir şeyi değiştirmez ve `validate()` bunun için uyarır
+(ortamdan `CM_ALLOW_INNER_STEPS=true` ile açılır).
 Lean varsayılanlarda araştırma denetleyicisinin yürütebileceği tek strateji `direct`tir;
 strateji karşılaştırması `policy.allow_inner_steps=True` veya full profil gerektirir.
 

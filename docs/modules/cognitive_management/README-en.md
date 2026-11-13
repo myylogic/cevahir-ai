@@ -51,16 +51,28 @@ Updated on 13 November 2026. `CognitiveManagerConfig()` is the **lean** profile
 every message takes the `direct` path with one answer generation,
 at most one critic revision (`critic.max_passes=1`) and one entropy probe.
 Deliberation (`think1`/`debate2`/`tot`), self-consistency, constitutional critique,
-LLM fact verdicts and external fact-checking are off, so there is no network access.
-`CognitiveManagerConfig.full()`, `{"profile": "full"}` in a config file or `CM_PROFILE=full`
-with `from_env` restores the earlier behaviour with one switch.
+LLM fact verdicts and external fact-checking are off, so the critic sends no Wikipedia requests.
+Vector memory stays on in both profiles: if the optional `sentence-transformers` package is installed,
+its encoder model is downloaded from Hugging Face on first use unless it is already cached.
+`CognitiveManagerConfig.full()`, `{"profile": "full"}` in the file passed as `config_path`
+or `CM_PROFILE=full` with `from_env` restores the earlier behaviour with one switch;
+other keys in the same file or environment override the profile.
+The profile is read when the manager is built: `reload_config` and `update_config` replace `cfg`
+but do not rebuild the components.
 In full, each constitutional principle is evaluated once, worded in the response's language;
 self-consistency runs only when the router's mid-entropy gate is open;
-Wikipedia claim checks send at most three claims per response within a ten-second budget.
+Wikipedia claim checks query at most three claims per critic pass (one pass by default)
+and start no request once a ten-second budget is spent. Each request's timeout is capped by what is left,
+but DNS lookup is not covered, so the budget is a deadline rather than a hard wall-clock limit.
 With a counting fake model, `tests/evolution/test_cognitive_defaults.py` measures
 2 generation calls per plain message for lean and 17–33 for full;
 before these fixes the defaults cost 31–64.
-A failed or unavailable entropy probe is recorded as `None` and routes the message to `direct`.
+A failed or unavailable entropy probe is recorded as `None` and routes the message to `direct`;
+the answer's token budget and temperature then use the middle of the entropy scale (1.5 of 0–3)
+instead of the zero-entropy values.
+`policy.allow_inner_steps` is the master switch for `think1`, `debate2` and `tot`:
+`debate_enabled` or `tot_enabled` alone changes nothing, and `validate()` warns about it
+(`CM_ALLOW_INNER_STEPS=true` sets the switch from the environment).
 With lean defaults the research controller has only `direct` to execute;
 comparing strategies needs `policy.allow_inner_steps=True` or the full profile.
 
