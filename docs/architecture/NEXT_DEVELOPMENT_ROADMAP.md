@@ -16,7 +16,7 @@ Beş bulgu, ağırlık yüklemeyen küçük kontrollerle yeniden üretildi. Bu k
 
 ### COG-01 — Sistem talimatı bağlamda kayboluyor
 
-**Öncelik: yüksek.** [ContextBuildingHandler](../../cognitive_management/v2/processing/handlers.py#L450) `system_prompt=None` geçiriyor. [Context pruner](../../cognitive_management/v2/utils/context_pruning.py#L181) varsayılanı seçse de [bağlamı oluştururken](../../cognitive_management/v2/utils/context_pruning.py#L209) talimatı dışarıda bırakıyor. GenerationHandler yalnız oluşan metni tüketiyor.
+**Öncelik: yüksek.** [ContextBuildingHandler](../../cognitive_management/v2/processing/handlers.py#L455) `system_prompt=None` geçiriyor. [Context pruner](../../cognitive_management/v2/utils/context_pruning.py#L181) varsayılanı seçse de [bağlamı oluştururken](../../cognitive_management/v2/utils/context_pruning.py#L209) talimatı dışarıda bırakıyor. GenerationHandler yalnız oluşan metni tüketiyor.
 
 Kontrolde istek ve varsayılan talimata ayrı işaretler verildi; sonuç yalnız `[USER]\nMerhaba` oldu. Uygulamanın dil/rol/format talimatları final üretime ulaşmıyor.
 
@@ -99,7 +99,7 @@ Bu beş madde birlikte ele alınmalıdır: doğru talimat ve özellikler → do�
 
 ### TRAIN-02 — Resume parçalı başarısızlıktan geri alınmıyor
 
-[Aktif TrainingManager restore'u](../../training_management/v2/core/training_manager.py#L304) modelden sonra optimizer/scheduler/loop/RNG yükler. Sonraki hatada model çoktan değişmiştir. [Bağımsız CheckpointManager.load](../../training_management/v2/utils/checkpoint_manager.py#L278) optimizer hatasını ayrıca uyarıyla geçer.
+[Aktif TrainingManager restore'u](../../training_management/v2/core/training_manager.py#L325) modelden sonra optimizer/scheduler/loop/RNG yükler. Sonraki hatada model çoktan değişmiştir. [Bağımsız CheckpointManager.load](../../training_management/v2/utils/checkpoint_manager.py#L278) optimizer hatasını ayrıca uyarıyla geçer.
 
 **Geliştirme:** Ortak resume planı, tüm yüklerin ön doğrulaması ve düşük bellekli hata stratejisi. Kısmen restore edilmiş durum eğitim için kullanılmamalı; hata sonrası kullanılabilirlik açıkça tanımlanmalı. Aynı veriyi birden fazla biçimde yorumlayan yükleme yolları birleştirilmeli.
 

@@ -6,7 +6,7 @@ Cross-cutting concerns için middleware/interceptor pattern.
 """
 
 from .base import Middleware, BaseMiddleware
-from .error_handler import ErrorHandlingMiddleware, RetryConfig, CircuitBreakerConfig
+from .error_handler import ErrorHandlingMiddleware, CircuitBreakerConfig
 from .metrics import MetricsMiddleware, Metrics
 from .validation import ValidationMiddleware
 from .async_middleware import (
@@ -21,7 +21,6 @@ __all__ = [
     "Middleware",
     "BaseMiddleware",
     "ErrorHandlingMiddleware",
-    "RetryConfig",
     "CircuitBreakerConfig",
     "MetricsMiddleware",
     "Metrics",

@@ -170,7 +170,8 @@ def test_checkpoint_resume_matches_uninterrupted_dropout_training(tmp_path):
     payload = torch.load(path, weights_only=True)
     assert payload["epoch"] == 1
     assert payload["extra_state"]["loop"]["optimizer_steps"] == 2
-    resumed = manager(TinyLM(dropout=0.2), tmp_path / "split", 1)
+    # `epochs` is the total target: resuming after epoch 1 towards epochs=2 trains epoch 2 only.
+    resumed = manager(TinyLM(dropout=0.2), tmp_path / "split", 2)
     assert resumed.resume_from_checkpoint(path) == 2
     resumed.train()
     for a, b in zip(whole.model.parameters(), resumed.model.parameters()):

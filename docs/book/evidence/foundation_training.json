@@ -58,7 +58,7 @@
       "path": "tokenizer_management/bpe/bpe_manager.py",
       "symbol": "BPEManager._tokenize_with_punct",
       "chapter": "tr/02-metin-tokenizer.md",
-      "line": 388
+      "line": 401
     },
     {
       "path": "tokenizer_management/bpe/tokenization/pretokenizer.py",
@@ -115,6 +115,18 @@
       "line": 62
     },
     {
+      "path": "training_system/record_format.py",
+      "symbol": "format_autoregressive_record",
+      "chapter": "tr/06-egitim.md",
+      "line": 44
+    },
+    {
+      "path": "training_system/record_format.py",
+      "symbol": "record_boundaries",
+      "chapter": "tr/06-egitim.md",
+      "line": 20
+    },
+    {
       "path": "training_system/data_split.py",
       "symbol": "split_training_records",
       "chapter": "tr/06-egitim.md",
@@ -136,7 +148,7 @@
       "path": "training_management/v2/core/training_loop.py",
       "symbol": "TrainingLoop.train_epoch",
       "chapter": "tr/06-egitim.md",
-      "line": 283
+      "line": 310
     },
     {
       "path": "training_management/v2/core/loss_computation.py",
@@ -166,7 +178,19 @@
       "path": "training_management/v2/core/training_loop.py",
       "symbol": "TrainingLoop._finish_update",
       "chapter": "tr/06-egitim.md",
-      "line": 246
+      "line": 252
+    },
+    {
+      "path": "training_management/v2/core/loss_computation.py",
+      "symbol": "LossComputation.compute_loss_details",
+      "chapter": "tr/06-egitim.md",
+      "line": 105
+    },
+    {
+      "path": "training_management/v2/utils/training_scheduler.py",
+      "symbol": "mark_embedding_param_groups",
+      "chapter": "tr/06-egitim.md",
+      "line": 67
     },
     {
       "path": "training_management/contracts.py",
@@ -235,22 +259,40 @@
       "line": 56
     },
     {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "validate_scheduler_state",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 98
+    },
+    {
       "path": "training_management/v2/core/training_manager.py",
       "symbol": "TrainingManager._checkpoint_extra_state",
       "chapter": "tr/07-model-yasam-dongusu.md",
-      "line": 274
+      "line": 280
     },
     {
       "path": "training_management/v2/core/training_manager.py",
       "symbol": "TrainingManager.resume_from_checkpoint",
       "chapter": "tr/07-model-yasam-dongusu.md",
-      "line": 293
+      "line": 300
+    },
+    {
+      "path": "training_management/v2/core/training_manager.py",
+      "symbol": "TrainingManager._apply_continuation_learning_rate",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 367
+    },
+    {
+      "path": "training_management/v2/utils/training_scheduler.py",
+      "symbol": "apply_continuation_learning_rate",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 498
     },
     {
       "path": "training_system/v3/core/training_service_v3.py",
       "symbol": "TrainingServiceV3._find_checkpoint",
       "chapter": "tr/07-model-yasam-dongusu.md",
-      "line": 545
+      "line": 547
     },
     {
       "path": "model_management/model_manager.py",
@@ -286,25 +328,25 @@
       "path": "tokenizer_management/bpe/bpe_manager.py",
       "symbol": "BPEManager.encode",
       "chapter": "tr/02-metin-tokenizer.md",
-      "line": 463
+      "line": 476
     },
     {
       "path": "tokenizer_management/bpe/bpe_manager.py",
       "symbol": "BPEManager.decode",
       "chapter": "tr/02-metin-tokenizer.md",
-      "line": 793
+      "line": 808
     },
     {
       "path": "tokenizer_management/bpe/bpe_manager.py",
       "symbol": "BPEManager.train",
       "chapter": "tr/02-metin-tokenizer.md",
-      "line": 961
+      "line": 976
     },
     {
       "path": "tokenizer_management/bpe/bpe_manager.py",
       "symbol": "BPEManager._initialize_components",
       "chapter": "tr/02-metin-tokenizer.md",
-      "line": 303
+      "line": 316
     },
     {
       "path": "tokenizer_management/bpe/bpe_encoder.py",

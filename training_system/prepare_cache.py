@@ -54,8 +54,8 @@ from tokenizer_management.core.tokenizer_core import TokenizerCore
 from tokenizer_management.config import BPE_CONFIG, TOKENIZER_CONFIG, BPE_DETAILED_CONFIG
 import logging
 
-# Logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# Logging: kök logger'ı yalnız main() yapılandırır; modülü import etmek logging'i değiştirmez.
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 logger = logging.getLogger("PrepareCache")
 
 
@@ -174,15 +174,20 @@ def prepare_cache(
     global_pad_id = PAD_ID
     
     #  Formatlama fonksiyonu (cache'de tam formatlanmış veri saklamak için)
+    #  Kayıt düzeni (BOS/EOS yalnız gerçek belge sınırlarında) training_system/record_format.py'dedir.
+    from training_system.record_format import format_autoregressive_record, record_boundaries
+    
     def format_data_func(raw_data):
         """Cache'de tam formatlanmış veri saklamak için formatlama fonksiyonu"""
         logger.info(f"[Formatlama] {len(raw_data):,} örnek formatlanıyor (BOS/EOS/SEP/PAD ekleniyor, max_seq_len={max_seq_length} hizalanıyor)...")
         
         formatted_data = []
-        
-        def clamp_ids(seq, vocab_size, unk_id):
-            """OOV'leri UNK ile değiştir"""
-            return [i if 0 <= i < vocab_size else unk_id for i in seq]
+        # BOS yalnız belgenin gerçek başına, EOS yalnız gerçek sonuna (uzun belgenin ara parçaları ikisini de almaz)
+        boundaries = record_boundaries(raw_data)
+        logger.info(
+            f"[Formatlama] {sum(ends for _, ends in boundaries):,} kayıt belgeyi bitiriyor (EOS alır); "
+            f"{sum(not ends for _, ends in boundaries):,} parça belge sürerken bitiyor (EOS almaz)"
+        )
         
         #  OVERLAP KONTROLÜ: Hash tracking (formatlama öncesi)
         import hashlib
@@ -198,6 +203,7 @@ def prepare_cache(
         #  YENİ: source_id kontrolü (varsa SAKLA - overlap önleme için kritik!)
         source_id_count = 0
         no_source_id_count = 0
+        no_target_count = 0  # tahmin edilecek token'ı olmadığı için atlanan kayıtlar (record_format.py)
         for idx, item in enumerate(raw_data):
             # Veri formatı: (inp_ids, tgt_ids) veya (inp_ids, tgt_ids, source_id)
             source_id = None  # Default
@@ -224,94 +230,23 @@ def prepare_cache(
             pre_format_hashes[pre_hash].append((source_id, len(inp_ids), idx))
             
             try:
-                #  BASİT VE DOĞRU AUTOREGRESSIVE FORMAT
-                # Input: [BOS, t1, t2, ..., tN]
-                # Target: [t1, t2, ..., tN, EOS]
-                # Autoregressive: Input[i] → Target[i] (BOS → t1, t1 → t2, ..., tN → EOS)
-                
-                # 1. BOS/EOS ekle
-                seq_in = [BOS_ID] + list(inp_ids)
-                seq_tgt = list(tgt_ids) + [EOS_ID]  # tgt_ids = inp_ids (autoregressive)
-                
-                # 2. Truncate: max_seq_length'e kadar kes (EOS'u MUTLAKA koru)
-                if len(seq_in) > max_seq_length:
-                    seq_in = seq_in[:max_seq_length]
-                if len(seq_tgt) > max_seq_length:
-                    # EOS'u koru: son pozisyonda EOS olmalı
-                    seq_tgt = seq_tgt[:max_seq_length-1] + [EOS_ID]
-                
-                # 3. Alignment: Input ve Target aynı uzunlukta olmalı
-                # Autoregressive için: len(seq_in) == len(seq_tgt)
-                current_len = max(len(seq_in), len(seq_tgt))
-                
-                # Input'u uzat (son token'ı tekrarla)
-                if len(seq_in) < current_len:
-                    if len(seq_in) > 0:
-                        seq_in = seq_in + [seq_in[-1]] * (current_len - len(seq_in))
-                    else:
-                        seq_in = [BOS_ID] * current_len
-                
-                # Target'i uzat (EOS'u koru, sonra PAD ekle)
-                if len(seq_tgt) < current_len:
-                    # EOS'u kontrol et
-                    if len(seq_tgt) > 0 and seq_tgt[-1] == EOS_ID:
-                        # EOS var, sadece PAD ekle
-                        seq_tgt = seq_tgt + [PAD_ID] * (current_len - len(seq_tgt))
-                    else:
-                        # EOS yok, ekle ve PAD ekle
-                        seq_tgt = seq_tgt + [EOS_ID] + [PAD_ID] * (current_len - len(seq_tgt) - 1)
-                
-                # 4. Padding: max_seq_length'e kadar PAD ekle
-                if len(seq_in) < max_seq_length:
-                    seq_in += [PAD_ID] * (max_seq_length - len(seq_in))
-                
-                if len(seq_tgt) < max_seq_length:
-                    # EOS'u kontrol et
-                    if len(seq_tgt) > 0 and seq_tgt[-1] == EOS_ID:
-                        # EOS var, sadece PAD ekle
-                        seq_tgt += [PAD_ID] * (max_seq_length - len(seq_tgt))
-                    else:
-                        # EOS yok, ekle ve PAD ekle
-                        seq_tgt = seq_tgt + [EOS_ID] + [PAD_ID] * (max_seq_length - len(seq_tgt) - 1)
-                
-                # 5. FINAL CHECK: Target'ın içeriği ve EOS'u kontrol et
-                # Son PAD olmayan token'ı bul
-                last_non_pad_pos = None
-                for i in range(len(seq_tgt) - 1, -1, -1):
-                    if seq_tgt[i] != PAD_ID:
-                        last_non_pad_pos = i
-                        break
-                
-                # Eğer target tamamen PAD ise, içerik kaybolmuş - YENİDEN OLUŞTUR
-                if last_non_pad_pos is None:
-                    # İçerik kaybolmuş, yeniden oluştur
-                    seq_tgt = list(tgt_ids)[:max_seq_length-1] + [EOS_ID]
-                    if len(seq_tgt) < max_seq_length:
-                        seq_tgt += [PAD_ID] * (max_seq_length - len(seq_tgt))
-                    # Input'u da yeniden oluştur
-                    seq_in = [BOS_ID] + list(inp_ids)[:max_seq_length-1]
-                    if len(seq_in) < max_seq_length:
-                        seq_in += [PAD_ID] * (max_seq_length - len(seq_in))
-                # EOS yoksa ekle
-                elif seq_tgt[last_non_pad_pos] != EOS_ID:
-                    # EOS yok, ekle (son PAD olmayan token'dan sonra)
-                    seq_tgt = seq_tgt[:last_non_pad_pos+1] + [EOS_ID] + seq_tgt[last_non_pad_pos+2:]
-                    # Input'u da uzat
-                    if len(seq_in) < len(seq_tgt):
-                        seq_in = seq_in + [seq_in[-1] if len(seq_in) > 0 else BOS_ID] * (len(seq_tgt) - len(seq_in))
-                    # Tekrar truncate ve padding
-                    if len(seq_tgt) > max_seq_length:
-                        seq_tgt = seq_tgt[:max_seq_length]
-                    if len(seq_in) > max_seq_length:
-                        seq_in = seq_in[:max_seq_length]
-                    if len(seq_tgt) < max_seq_length:
-                        seq_tgt += [PAD_ID] * (max_seq_length - len(seq_tgt))
-                    if len(seq_in) < max_seq_length:
-                        seq_in += [PAD_ID] * (max_seq_length - len(seq_in))
-                
-                # OOV clamp
-                seq_in = clamp_ids(seq_in, vocab_size, UNK_ID)
-                seq_tgt = clamp_ids(seq_tgt, vocab_size, UNK_ID)
+                #  AUTOREGRESSIVE FORMAT (tek dizinin bir konum kaydırılmış hali):
+                #   tek parçalık belge: Input [BOS, t1..tN]   Target [t1..tN, EOS]
+                #   uzun belgenin ilk parçası BOS'la başlar, yalnız son parçası EOS'la biter;
+                #   ara parçalar ikisini de almaz (metin sürerken sahte "bitti" hedefi yok)
+                if list(tgt_ids) != list(inp_ids):
+                    raise ValueError("target input ile aynı token dizisi olmalı (kaydırma burada yapılır)")
+                starts_document, ends_document = boundaries[idx]
+                formatted = format_autoregressive_record(
+                    list(inp_ids), starts_document=starts_document, ends_document=ends_document,
+                    max_seq_length=max_seq_length, bos_id=BOS_ID, eos_id=EOS_ID, pad_id=PAD_ID,
+                    vocab_size=vocab_size, unk_id=UNK_ID,
+                )
+                if formatted is None:
+                    # Tek token'lık ara parçanın tahmin edilecek token'ı yok; V2 TrainingService de atlar
+                    no_target_count += 1
+                    continue
+                seq_in, seq_tgt = formatted
                 
                 #  OVERLAP KONTROLÜ: Formatlama sonrası hash (PAD olmadan)
                 post_hash = hash_sequence_no_pad(seq_in, pad_id=PAD_ID)
@@ -352,8 +287,11 @@ def prepare_cache(
         
         #  DEDUPLICATION istatistikleri
         total_processed = source_id_count + no_source_id_count
-        total_duplicates = total_processed - len(formatted_data)
+        total_duplicates = total_processed - len(formatted_data) - no_target_count
         logger.info(f"[Formatlama]  {len(formatted_data):,} örnek formatlandı (hazır)")
+        if no_target_count:
+            logger.info(f"[Formatlama] {no_target_count:,} kayıt atlandı: tahmin edilecek token yok "
+                        f"(tek token'lık ara parça; BOS/EOS almadığı için hedefi yok)")
         if total_duplicates > 0:
             logger.info(f"[Formatlama] 🗑️  {total_duplicates:,} duplicate chunk filtrelendi ({total_duplicates/total_processed*100:.2f}%)")
         logger.info(f"[Formatlama] 📊 source_id istatistikleri:")
@@ -612,6 +550,7 @@ def main():
     """Main function"""
     import argparse
     
+    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
     parser = argparse.ArgumentParser(description="Cache hazırlama scripti")
     parser.add_argument("--data-dir", type=str, default="education", help="Eğitim verisi dizini")
     parser.add_argument("--cache-dir", type=str, default=".cache/preprocessed_data", help="Cache dizini")

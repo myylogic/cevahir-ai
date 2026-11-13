@@ -92,6 +92,7 @@ class DataCache:
         except Exception:
             pass  # Hata durumunda orijinal path'i kullan
         
+        from training_system.cache_identity import cache_format_tag
         key_parts = [
             data_dir_str,  # Normalize edilmiş path
             encode_mode,
@@ -102,6 +103,7 @@ class DataCache:
             vocab_hash,
             alignment_format,  # [OK] YENİ: Alignment formatı cache key'e eklendi (format değişikliklerinde invalid olur)
             f"formatted_{formatted}",  # ✅ YENİ: Formatlanmış veri flag'i (BOS/EOS/PAD dahil)
+            cache_format_tag(),  # Kayıt düzeni sürümü: eski düzende yazılmış cache yeniden kullanılmaz
         ]
         key_string = "|".join(key_parts)
         return hashlib.md5(key_string.encode()).hexdigest()

@@ -739,6 +739,20 @@ class TrainingService:
                 self.logger.info(f"   Aranan dizinler: {', '.join(searched_dirs)}")
         except Exception as e:
             raise RuntimeError(f"Training checkpoint could not be restored: {checkpoint_path}") from e
+        # Devam eğitimi: bu V2 yolu checkpoint'ten ağırlıkları yükler (optimizer durumunu değil) ve
+        # optimizer yapılandırılmış learning_rate ile kurulmuştur; train.py learning_rate'i artık
+        # değiştirmediği için continuation_learning_rate burada, gerçekten bir kayıt yüklendiyse uygulanır.
+        continuation_lr = self.config.get("continuation_learning_rate")
+        optimizer = self.model_manager.optimizer
+        if checkpoint_path and continuation_lr is not None and optimizer is not None:
+            from training_management.v2.utils.training_scheduler import (
+                apply_continuation_learning_rate,
+            )
+            factor = apply_continuation_learning_rate(optimizer, continuation_lr)
+            self.logger.info(
+                f"[Devam eğitimi] continuation_learning_rate={float(continuation_lr):.2e} uygulandı "
+                f"(x{factor:.4g}); warmup bu öğrenme oranına çıkar"
+            )
     
     def prepare_from_cache(
         self,
@@ -753,7 +767,8 @@ class TrainingService:
         - get_or_process() cache'den (inp_list, tgt_list) veya (inp, tgt, source_id) döner.
         - Cache hazır ise (prepare_cache.py ile BOS/EOS/PAD eklenmiş): inp = [BOS, c0, ..., cK, PAD...],
           tgt = [c0, ..., cK, EOS, PAD...]. Pozisyon hizası: Input[i] -> bir sonraki token = Target[i];
-          yani Target[K] = EOS (cK'dan sonra EOS öğretilir). Loss'ta PAD maskelenir, EOS dahil tüm
+          yani Target[K] = EOS (cK'dan sonra EOS öğretilir). Uzun belgede BOS yalnız ilk parçada, EOS
+          yalnız son parçadadır (training_system/record_format.py). Loss'ta PAD maskelenir, EOS dahil tüm
           içerik pozisyonları kullanılır. Tokenizer Manager bu veriyi üretmez; cache'den gelen veri
           doğrudan tensor'a çevrilip DataLoader'a verilir, ek formatlama yapılmaz.
         - Cache yoksa: process_func() = load_training_data() çağrılır. format_func=None ise ham veri
@@ -791,11 +806,21 @@ class TrainingService:
         BOS_ID = special_ids.get("<BOS>", 1)
         EOS_ID = special_ids.get("<EOS>", 2)
         PAD_ID = special_ids.get("<PAD>", 0)
+        UNK_ID = special_ids.get("<UNK>", 1)
         
         def format_data_for_autoregressive(raw_data: list) -> list:
-            """Ham (inp, tgt) veya (inp, tgt, source_id) → BOS/EOS/PAD ile target[t]=input[t+1] hizalı veri."""
+            """Ham (inp, tgt) veya (inp, tgt, source_id) → BOS/EOS/PAD ile target[t]=input[t+1] hizalı veri.
+
+            Düzen prepare_cache.py ile aynıdır (training_system/record_format.py): BOS yalnız belgenin
+            gerçek başında, EOS yalnız gerçek sonunda; uzun belgenin ara parçaları ikisini de almaz.
+            max_seq_len'e sığmayan kayıt kesilip sahte EOS ile kapatılmaz, ValueError verir. Tahmin
+            edilecek token'ı olmayan kayıt (tek token'lık ara parça) prepare_cache.py'deki gibi atlanır.
+            """
+            from training_system.record_format import format_autoregressive_record, record_boundaries
+            vocab_size = len(tokenizer_core.get_vocab())
             out = []
-            for item in raw_data:
+            no_target = 0
+            for item, (starts_document, ends_document) in zip(raw_data, record_boundaries(raw_data)):
                 if len(item) == 3:
                     inp_ids, tgt_ids, source_id = item
                 elif len(item) == 2:
@@ -803,31 +828,24 @@ class TrainingService:
                     source_id = None
                 else:
                     continue
-                inp_ids = list(inp_ids)
-                tgt_ids = list(tgt_ids)
-                # Next-token: seq_in = [BOS, t1, ..., tN], seq_tgt = [t1, ..., tN, EOS]
-                seq_in = [BOS_ID] + inp_ids
-                seq_tgt = tgt_ids + [EOS_ID]
-                # Truncate
-                if len(seq_in) > max_seq_len:
-                    seq_in = seq_in[:max_seq_len]
-                if len(seq_tgt) > max_seq_len:
-                    seq_tgt = seq_tgt[:max_seq_len - 1] + [EOS_ID]
-                # Aynı uzunluk
-                current_len = max(len(seq_in), len(seq_tgt))
-                if len(seq_in) < current_len:
-                    seq_in = seq_in + [seq_in[-1]] * (current_len - len(seq_in)) if seq_in else [BOS_ID] * current_len
-                if len(seq_tgt) < current_len:
-                    seq_tgt = seq_tgt + [PAD_ID] * (current_len - len(seq_tgt)) if seq_tgt[-1] == EOS_ID else seq_tgt + [EOS_ID] + [PAD_ID] * (current_len - len(seq_tgt) - 1)
-                # Pad to max_seq_len
-                if len(seq_in) < max_seq_len:
-                    seq_in += [PAD_ID] * (max_seq_len - len(seq_in))
-                if len(seq_tgt) < max_seq_len:
-                    seq_tgt += [PAD_ID] * (max_seq_len - len(seq_tgt))
+                if list(tgt_ids) != list(inp_ids):
+                    raise ValueError("target must be the same token sequence as input (the shift happens here)")
+                formatted = format_autoregressive_record(
+                    list(inp_ids), starts_document=starts_document, ends_document=ends_document,
+                    max_seq_length=max_seq_len, bos_id=BOS_ID, eos_id=EOS_ID, pad_id=PAD_ID,
+                    vocab_size=vocab_size, unk_id=UNK_ID,
+                )
+                if formatted is None:
+                    no_target += 1
+                    continue
+                seq_in, seq_tgt = formatted
                 if source_id is not None:
                     out.append((seq_in, seq_tgt, source_id))
                 else:
                     out.append((seq_in, seq_tgt))
+            if no_target and self.logger:
+                self.logger.info(f"[Formatlama] {no_target} kayıt atlandı: tahmin edilecek token yok "
+                                 f"(tek token'lık ara parça)")
             return out
         
         if self.logger:

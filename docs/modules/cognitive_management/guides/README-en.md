@@ -131,6 +131,12 @@ Answer: In Istanbul today 18°C and partly cloudy weather is expected.
 
 ## Typical Usage Scenarios
 
+Since 2026-11-13 `CognitiveManagerConfig()` is the lean profile: every message takes the `direct`
+path and deliberation, self-consistency, constitutional critique and Wikipedia lookups are off, so
+Scenario 1 below mostly restates the default. Scenarios 2–4 rely on deliberation and start from
+`CognitiveManagerConfig.full()`, which restores the earlier defaults (including Wikipedia claim
+lookups and constitutional critique); with lean they would answer every message directly.
+
 ### Scenario 1: Chat Bot (Latency Priority)
 
 Minimize latency, use `direct` mode most of the time:
@@ -159,7 +165,7 @@ manager = CognitiveManager(model_manager=model, config=config)
 ### Scenario 2: Research Assistant (Accuracy Priority)
 
 ```python
-config = CognitiveManagerConfig()
+config = CognitiveManagerConfig.full()   # deliberation and self-consistency need the full profile
 
 # CoT with low threshold, always on
 config.policy.entropy_gate_think = 0.5
@@ -187,7 +193,7 @@ manager = CognitiveManager(model_manager=model, config=config)
 ### Scenario 3: Math / Code Solver
 
 ```python
-config = CognitiveManagerConfig()
+config = CognitiveManagerConfig.full()   # think1 needs policy.allow_inner_steps (full sets it)
 
 # CoT required
 config.policy.entropy_gate_think = 0.0
@@ -211,7 +217,7 @@ output = manager.handle("153 × 47 = ?")
 ### Scenario 4: Creative Content Generation
 
 ```python
-config = CognitiveManagerConfig()
+config = CognitiveManagerConfig.full()   # tot needs allow_inner_steps and tot_enabled
 
 # High temperature — diversity
 config.decoding_bounds.creative_temperature = 0.92
@@ -228,7 +234,8 @@ config.critic.enable_external_fact_checking = False
 
 manager = CognitiveManager(model_manager=model, config=config)
 output = manager.handle("Write a short story set on a winter night.")
-# expected: mode="tot", used_mode="tot"
+# note: the router sends requests it classifies as creative to `direct` in every profile,
+# so the ToT settings above only apply to requests that are not classified as creative
 ```
 
 ---
@@ -293,7 +300,7 @@ config.memory.vector_store_provider = "chroma"
 config.memory.vector_store_path = "./memory/episodic_store"  # Persist to disk
 config.memory.enable_rag = True
 config.memory.rag_top_k = 3
-config.memory.rag_score_threshold = 0.7
+config.memory.rag_score_threshold = 0.893     # (1+cos)/2 scale: cos >= 0.786 (the default)
 ```
 
 ### In-Memory (Development / Testing)

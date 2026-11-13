@@ -40,6 +40,9 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from collections import OrderedDict
+import hashlib
+import threading
 from uuid import uuid4
 from time import time
 from ..utils.request_scope import current_scope
@@ -85,13 +88,18 @@ class MemoryServiceV2(IMemoryService):
         if not isinstance(cfg, CognitiveManagerConfig):
             raise ValidationError("cfg tipi geçersiz (CognitiveManagerConfig bekleniyor).")
         self.cfg = cfg
-        # Basit episodik not alanı (kalıcı kısa notlar)
+        # Basit episodik not alanı (kalıcı kısa notlar), kapsam başına; retrieve_context arar
         self._notes: Dict[str, List[str]] = {}
-        # Episodic memory: Conversation turns with metadata
-        self._episodic_memory: List[Dict[str, Any]] = []
+        # Episodic memory: conversation turns, one list per memory scope (user/session).
+        # Capacity is per scope, so one user's traffic never evicts another user's turns.
+        self._episodic_by_scope: "OrderedDict[str, List[Dict[str, Any]]]" = OrderedDict()
+        self._episodic_lock = threading.RLock()
         self.revision = 0
-        # Working memory: Recent context (last N turns)
+        # Working memory: a scope keeps its last N turns (trimmed when it exceeds 2N)
         self._working_memory_size = 10  # Keep last 10 turns
+        # At most memory.episodic_max_scopes scopes stay in process memory; the scope
+        # written least recently is dropped first (its vector-store records are kept).
+        self._max_scopes = max(1, int(cfg.memory.episodic_max_scopes))
         
         # Phase 7.1: Vector Memory Enhancement
         self._embedding_adapter: Optional[BaseEmbeddingAdapter] = None
@@ -132,6 +140,12 @@ class MemoryServiceV2(IMemoryService):
                 logging.warning(f"Vector memory initialization başarısız, keyword search kullanılacak: {e}")
                 self._vector_memory_enabled = False
     
+    @property
+    def _episodic_memory(self) -> List[Dict[str, Any]]:
+        """Episodic turns of the current memory scope (a copy; storage is per scope)."""
+        with self._episodic_lock:
+            return list(self._episodic_by_scope.get(current_scope(), ()))
+    
     def add_turn(
         self,
         history: List[Dict[str, Any]],
@@ -165,16 +179,16 @@ class MemoryServiceV2(IMemoryService):
         turn = {"role": r, "content": c}
         history.append(turn)
         
-        # Add to episodic memory (for retrieval)
+        # Add to episodic memory (for retrieval), in the current scope's own list
+        scope = current_scope()
         memory_item = {
             "role": r,
             "content": c,
             "timestamp": time(),
-            "scope": current_scope(),
+            "scope": scope,
             "id": uuid4().hex,
         }
-        self._episodic_memory.append(memory_item)
-        self.revision += 1
+        self._remember(scope, memory_item)
         
         # Phase 7.1: Add to vector store if enabled
         if self._vector_memory_enabled and self._embedding_adapter and self._vector_store:
@@ -204,13 +218,24 @@ class MemoryServiceV2(IMemoryService):
                 import logging
                 logging.warning(f"Vector store'a ekleme başarısız: {e}")
         
-        # Maintain working memory size
-        if len(self._episodic_memory) > self._working_memory_size * 2:
-            # Keep only recent items (working memory optimization)
-            # Note: Vector store items are kept (they provide long-term memory)
-            self._episodic_memory = self._episodic_memory[-self._working_memory_size:]
-        
         return history
+    
+    def _remember(self, scope: str, memory_item: Dict[str, Any]) -> None:
+        """Append to the scope's episodic list and trim only that list."""
+        with self._episodic_lock:
+            items = self._episodic_by_scope.get(scope)
+            if items is None:
+                items = self._episodic_by_scope[scope] = []
+                while len(self._episodic_by_scope) > max(1, self._max_scopes):
+                    self._episodic_by_scope.popitem(last=False)
+            else:
+                self._episodic_by_scope.move_to_end(scope)
+            items.append(memory_item)
+            # Keep only recent items of this scope (working memory optimization).
+            # Note: Vector store items are kept (they provide long-term memory)
+            if len(items) > self._working_memory_size * 2:
+                del items[:-self._working_memory_size]
+            self.revision += 1
     
     def retrieve_context(
         self,
@@ -231,9 +256,11 @@ class MemoryServiceV2(IMemoryService):
             top_k: Number of relevant items to retrieve
             
         Returns:
-            List of relevant context items with relevance scores
+            List of relevant context items with relevance scores; each record
+            (same id or same text) appears at most once. Notes added with
+            add_note are searched together with the conversation turns.
         """
-        if not query or not query.strip():
+        if not query or not query.strip() or top_k <= 0:
             return []
         
         # Phase 7.1: Try vector search first if enabled
@@ -249,7 +276,7 @@ class MemoryServiceV2(IMemoryService):
                 vector_search_results = self._vector_store.search(
                     query_embedding=query_embedding,
                     top_k=top_k,
-                    score_threshold=self.cfg.memory.rag_score_threshold,
+                    score_threshold=self.cfg.memory.rag_score_threshold,  # (1+cos)/2: t -> cos >= 2t - 1
                     filter_metadata={"scope": current_scope()},
                 )
                 
@@ -292,12 +319,47 @@ class MemoryServiceV2(IMemoryService):
         
         # If still not enough results, use old semantic search as fallback
         if len(results) < top_k:
-            semantic_results = self._semantic_search(query, top_k - len(results))
-            results.extend(semantic_results)
+            results = results + self._semantic_search(query, top_k)
         
-        # Sort by relevance and return top_k
-        results.sort(key=lambda x: x.get("score", 0.0), reverse=True)
-        return results[:top_k]
+        # The searches overlap (one turn can come back from the vector store, the
+        # keyword search and this fallback): keep each record once, then rank.
+        return self._dedupe_hits(results)[:top_k]
+    
+    @staticmethod
+    def _dedupe_hits(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Keep the first hit per record (same id or same whitespace-normalized text)
+        and sort by score. Primary results come before the fallback's, so the
+        fallback only fills gaps and never replaces a hybrid score.
+        """
+        seen_ids, seen_texts, unique = set(), set(), []
+        for hit in results:
+            hit_id = hit.get("id") or None
+            text = " ".join(str(hit.get("content", "")).split()).casefold()
+            if (hit_id is not None and hit_id in seen_ids) or (text and text in seen_texts):
+                continue
+            if hit_id is not None:
+                seen_ids.add(hit_id)
+            if text:
+                seen_texts.add(text)
+            unique.append(hit)
+        unique.sort(key=lambda x: x.get("score", 0.0), reverse=True)
+        return unique
+    
+    @staticmethod
+    def _note_id(scope: str, text: str) -> str:
+        return "note_" + hashlib.sha256(f"{scope}\x00{text}".encode("utf-8")).hexdigest()[:24]
+    
+    def _scope_items(self) -> List[Dict[str, Any]]:
+        """Searchable records of the current scope: its notes, then its turns."""
+        scope = current_scope()
+        notes = [
+            {"role": "note", "content": text, "scope": scope, "id": self._note_id(scope, text)}
+            for text in self._notes.get(scope, ())
+        ]
+        with self._episodic_lock:
+            turns = list(self._episodic_by_scope.get(scope, ()))
+        return notes + turns
     
     def _combine_search_results(
         self,
@@ -367,16 +429,15 @@ class MemoryServiceV2(IMemoryService):
         Returns:
             List of relevant items with scores
         """
-        if not hasattr(self, '_episodic_memory') or not self._episodic_memory:
+        items = self._scope_items()
+        if not items:
             return []
         
         query_lower = query.lower()
         query_words = set(query_lower.split())
         
         results = []
-        for item in self._episodic_memory:
-            if item.get("scope", "local") != current_scope():
-                continue
+        for item in items:
             content = item.get("content", "")
             if not content:
                 continue
@@ -422,16 +483,15 @@ class MemoryServiceV2(IMemoryService):
         Returns:
             List of relevant items
         """
-        if not hasattr(self, '_episodic_memory') or not self._episodic_memory:
+        items = self._scope_items()
+        if not items:
             return []
         
         query_lower = query.lower()
         query_words = set(query_lower.split())
         
         results = []
-        for item in self._episodic_memory:
-            if item.get("scope", "local") != current_scope():
-                continue
+        for item in items:
             content = item.get("content", "")
             if not content:
                 continue
@@ -683,6 +743,9 @@ class MemoryServiceV2(IMemoryService):
     def add_note(self, text: str) -> None:
         """
         Kısa kalıcı not ekler (oturumlar arası taşımak istediğin bilgiler için).
+
+        Notlar geçerli kapsamda retrieve_context'in kelime araması ve fallback'i
+        ile aranır (Cevahir.search_memory); vektör deposuna yazılmaz.
         """
         t = (text or "").strip()
         if not t:

@@ -26,8 +26,9 @@ Güncel checkpoint sözleşmesi (model_management/checkpoint_contract.py, ModelM
 - Checkpoint mimarisi canlı modelle eşleşmeli; eşleşmeyen checkpoint hiçbir canlı parametre
   değişmeden RuntimeError ile reddedilir (asıl neden __cause__ içindedir).
 - Tam geri yükleme (varsayılan) transactional'dır: optimizer/scheduler state'i önce kopya
-  üzerinde doğrulanır, uyumsuzsa yükleme tümden reddedilir. Yalnızca model ağırlıkları için
-  weights_only=True kullanılır.
+  üzerinde doğrulanır, uyumsuzsa yükleme tümden reddedilir. Scheduler durumunun türe özgü
+  alanları ayrıca yapılandırılmış scheduler'ınkilerle karşılaştırılır (kopyada deneme yüklemesi
+  türü yakalayamaz). Yalnızca model ağırlıkları için weights_only=True kullanılır.
 """
 
 import copy
@@ -452,12 +453,14 @@ def test_model_weights_verification(real_checkpoint_path):
 
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "Ürün hatası: ModelManager.load scheduler durumunu derin kopyaya yükleyip istisna bekler; "
-    "torch scheduler.load_state_dict yalnızca __dict__.update yaptığı için yanlış türde bir "
-    "scheduler durumu (StepLR → ReduceLROnPlateau) sessizce kabul edilir. Düzeltilince XPASS olur."))
 def test_wrong_scheduler_type_is_rejected(tmp_path):
-    """Yanlış türde scheduler durumu içeren checkpoint reddedilmeli (şu an kabul ediliyor)."""
+    """Yanlış türde scheduler durumu içeren checkpoint reddedilmeli; canlı durum değişmemeli.
+
+    torch scheduler.load_state_dict yalnızca __dict__.update yapar: StepLR durumu ReduceLROnPlateau'ya
+    hatasız "yüklenir" ve melez bir nesne bırakır. Bu yüzden derin kopyada deneme yüklemesi türü
+    yakalayamaz; ModelManager.load durumun türe özgü alanlarını yapılandırılmış scheduler'ınkilerle
+    karşılaştırır (checkpoint_contract.validate_scheduler_state).
+    """
     from model_management.checkpoint_contract import model_config
 
     source = build_manager()
@@ -473,8 +476,71 @@ def test_wrong_scheduler_type_is_rejected(tmp_path):
     checkpoint_path = tmp_path / "foreign_scheduler.pth"
     torch.save(checkpoint, checkpoint_path)
     manager = build_manager()
-    with pytest.raises((RuntimeError, ValueError, TypeError, KeyError)):
+    before = snapshot_state(manager.model)
+    optimizer_before = copy.deepcopy(manager.optimizer.state_dict())
+    scheduler_before = copy.deepcopy(manager.scheduler.state_dict())
+    with pytest.raises(RuntimeError, match="yükleme") as excinfo:
         manager.load(str(checkpoint_path), strict=True)
+    cause = str(excinfo.value.__cause__)
+    assert "scheduler state does not match the configured ReduceLROnPlateau" in cause, cause
+    assert "step_size" in cause and "patience" in cause, cause
+    # Ret, model ağırlıkları ve optimizer durumu değişmeden önce gelir
+    changed = differing_tensors(manager.model, before)
+    assert not changed, f"Reddedilen yükleme canlı parametreleri değiştirdi: {changed[:5]}"
+    assert manager.optimizer.state_dict() == optimizer_before, "Reddedilen yükleme optimizer durumunu değiştirdi"
+    assert manager.scheduler.state_dict() == scheduler_before, "Reddedilen yükleme scheduler'ı değiştirdi"
+    assert not hasattr(manager.scheduler, "step_size"), "Yabancı scheduler alanları canlı nesneye sızdı"
+    assert manager.config.get("current_epoch") is None, "Reddedilen yükleme epoch'u değiştirdi"
+
+    # Desteklenen kaçış yolu: yalnızca model ağırlıkları
+    manager.load(str(checkpoint_path), strict=True, weights_only=True)
+    assert_weights_loaded(manager.model, checkpoint["state_dict"], before)
+
+
+@pytest.mark.parametrize(
+    "configured, saved, accepted",
+    [
+        ("step", "step", True),
+        ("step", "exponential", False),   # ExponentialLR alanları StepLR'ninkilerin alt kümesi
+        ("exponential", "step", False),   # fazladan step_size alanı
+        ("step", "reduce_on_plateau", False),
+        ("cosine", "cosine", True),
+    ],
+)
+def test_scheduler_state_must_match_configured_type(tmp_path, configured, saved, accepted):
+    """Yalnız aynı türdeki scheduler durumu geri yüklenir; tür eşleşince durum gerçekten yüklenir."""
+    from model_management.checkpoint_contract import model_config
+    from model_management.model_initializer import ModelInitializer
+
+    source = build_manager()
+    foreign = ModelInitializer.initialize_scheduler(source.optimizer, {**TOY_CONFIG, "scheduler_type": saved})
+    if isinstance(foreign, torch.optim.lr_scheduler.ReduceLROnPlateau):
+        foreign.step(1.0)
+    else:
+        source.optimizer.step()
+        foreign.step()  # last_epoch=1: taze bir scheduler'dan ayırt edilebilir
+    checkpoint = create_test_checkpoint(
+        model=source.model,
+        optimizer=source.optimizer,
+        scheduler=foreign,
+        epoch=2,
+        config=model_config(source.model),
+        format_type="standard",
+    )
+    checkpoint_path = tmp_path / f"{saved}_scheduler.pth"
+    torch.save(checkpoint, checkpoint_path)
+
+    manager = build_manager({**TOY_CONFIG, "scheduler_type": configured})
+    if accepted:
+        manager.load(str(checkpoint_path), strict=True)
+        assert manager.scheduler.state_dict()["last_epoch"] == 1, "Scheduler durumu yüklenmedi"
+        assert manager.config.get("current_epoch") == 2
+    else:
+        with pytest.raises(RuntimeError, match="yükleme") as excinfo:
+            manager.load(str(checkpoint_path), strict=True)
+        assert "scheduler state does not match" in str(excinfo.value.__cause__)
+        assert manager.config.get("current_epoch") is None
+
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

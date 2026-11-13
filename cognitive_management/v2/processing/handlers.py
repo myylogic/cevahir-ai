@@ -55,7 +55,7 @@ from cognitive_management.cognitive_types import (
     SelfConsistencyResult,
     CriticFeedback,
 )
-from cognitive_management.v2.utils.heuristics import build_features
+from cognitive_management.v2.utils.heuristics import build_features, mode_gates
 from .pipeline import BaseProcessingHandler, ProcessingContext
 
 # İsteğe bağlı: InMemoryCache
@@ -147,6 +147,12 @@ def _score_select(
     return candidates[best_idx], float(max(0.0, min(1.0, agreement)))
 
 
+def _finite_number(value) -> bool:
+    """True for a finite int/float (bool excluded); None/NaN/inf mean 'no measurement'."""
+    from math import isfinite
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and isfinite(value)
+
+
 # =============================================================================
 # 1. Feature Extraction Handler
 # =============================================================================
@@ -156,7 +162,8 @@ class FeatureExtractionHandler(BaseProcessingHandler):
     Girdi özelliklerini çıkarır.
 
     V3 Yenilikleri:
-        • Model logit entropy (Phase 9): backend.estimate_entropy() → 0-3 ölçek
+        • Model logit entropy (Phase 9): backend.estimate_entropy() → 0-3 ölçek;
+          ölçüm yoksa entropy_est=None ve router 'direct' seçer
         • QueryType + DomainType tespiti (heuristics.classify_query_type/detect_domain)
         • Complexity score hesaplaması
         • ReasoningTrace başlatma (context'e eklenir)
@@ -176,13 +183,16 @@ class FeatureExtractionHandler(BaseProcessingHandler):
         user_msg = context.request.user_message
 
         # --- Entropy Tahmini ---
-        entropy_raw = 0.8
+        # None = ölçüm yok (hata, bütçe reddi, desteklenmeyen backend veya
+        # available=False). Yer tutucu sayı uydurulmaz; router 'direct' seçer.
+        entropy_raw: Optional[float] = None
         uncertainty_source = "unavailable"
         try:
             if self._backend is not None and hasattr(self._backend, "estimate_entropy"):
                 logit_entropy = self._backend.estimate_entropy(user_msg)
-                entropy_raw = float(logit_entropy) * 3.0
-                uncertainty_source = "backend_estimate_uncalibrated"
+                if _finite_number(logit_entropy):
+                    entropy_raw = float(logit_entropy) * 3.0
+                    uncertainty_source = "backend_estimate_uncalibrated"
             else:
                 # Heuristik yedek: soru işareti + belirsizlik belirteçleri
                 q_count = user_msg.count("?")
@@ -194,9 +204,9 @@ class FeatureExtractionHandler(BaseProcessingHandler):
         except BudgetExhausted:
             uncertainty_source = "budget_denied"
         except Exception:
-            entropy_raw = 0.8
+            entropy_raw = None
 
-        entropy = min(3.0, max(0.0, entropy_raw))
+        entropy = None if entropy_raw is None else min(3.0, max(0.0, entropy_raw))
 
         # --- Bellek Geri Çağırma ---
         retrieved: list = []
@@ -232,12 +242,13 @@ class FeatureExtractionHandler(BaseProcessingHandler):
 
         # --- ReasoningTrace Başlatma ---
         # FeatureExtraction aşaması ilk adımdır (step=0)
+        entropy_text = "yok" if entropy is None else f"{entropy:.2f}"
         trace0 = ReasoningTrace(
             step=0,
             content=f"[Özellik Çıkarımı] query_type={features.get('query_type','unknown')} "
                     f"domain={features.get('domain','general')} "
                     f"complexity={features.get('complexity_score', 0.0):.2f} "
-                    f"entropy={entropy:.2f}",
+                    f"entropy={entropy_text}",
             score=1.0,
             source="feature_extraction",
         )
@@ -600,8 +611,9 @@ class SelfConsistencyHandler(BaseProcessingHandler):
     N farklı yanıt örnekler (yüksek temperature) ve en çok desteklenen
     yanıtı çoğunluk oyu veya model skoru ile seçer.
 
-    Aktivasyon: features["query_type"] reasoning/math/factual VE
-                self_consistency_gate açık (entropy orta aralık).
+    Aktivasyon: query_type sohbet/yaratıcı değil VE heuristics.mode_gates'in
+                self_consistency_gate'i açık (SC etkin, entropi ölçülmüş ve
+                entropy_gate_think <= e < entropy_gate_debate).
 
     Yöntemler:
         "majority" — bigram örtüşme tabanlı merkezi aday seçimi
@@ -691,9 +703,9 @@ class SelfConsistencyHandler(BaseProcessingHandler):
         return context
 
     def _should_activate(self, context: ProcessingContext) -> bool:
-        """Self-Consistency aktivasyon koşulları."""
-        # draft_text henüz üretilmemiş olmalı (bu handler GenerationHandler'dan ÖNCE çalışmaz)
-        # Veya draft_text varsa iyileştirmek için çalışır.
+        """Self-Consistency aktivasyon koşulları (router'ın kapısıyla aynı kural)."""
+        # Bu handler GenerationHandler'dan sonra çalışır; mevcut taslağı N
+        # örneklemle değiştirebilir. Kapı kapalıyken hiçbir ek çağrı yapılmaz.
         features = context.features or {}
         query_type = features.get("query_type", "unknown")
         # Yaratıcı ve konuşma modları için anlamsız
@@ -702,7 +714,12 @@ class SelfConsistencyHandler(BaseProcessingHandler):
         # Bağlam hazır olmalı
         if not context.context_text:
             return False
-        return True
+        cfg = self.cfg
+        if cfg is None:
+            # cfg'siz kurulan handler'ın varlığı SC'yi etkin sayar; eşikler varsayılan.
+            from cognitive_management.config import CognitiveManagerConfig
+            cfg = CognitiveManagerConfig().override_with({"policy": {"self_consistency_enabled": True}})
+        return bool(mode_gates(cfg, features)["self_consistency_gate"])
 
 
 # =============================================================================
@@ -827,9 +844,8 @@ class MemoryUpdateHandler(BaseProcessingHandler):
             context.state.last_mode = context.policy_output.mode
 
         if context.features:
-            context.state.last_entropy = float(
-                context.features.get("entropy_est", 0.0)
-            )
+            entropy = context.features.get("entropy_est", 0.0)
+            context.state.last_entropy = None if entropy is None else float(entropy)
             # V3: query_type ve domain state'e yansıt
             qt = context.features.get("query_type")
             dm = context.features.get("domain")

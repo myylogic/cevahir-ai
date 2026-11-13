@@ -1,0 +1,624 @@
+"""Cost, routing and resilience contracts of the cognitive layer's defaults.
+
+Counting fake backends and a tiny random model only: no training, no downloads,
+no network (``urllib.request.urlopen`` is replaced and counted).
+
+Measured before this change (commit 3aa1e47, library defaults, the same
+``Backend`` fakes and ``PLAIN_MESSAGES`` as below): 59-64 ``generate`` calls per
+message with ``Backend("untrained")`` (1 answer, 28 constitutional evaluations,
+28 suggestions, 1 constitutional revision, 1 self-refine, plus 3
+self-consistency samples and 2 debate thoughts on routed messages) and 31-34
+with ``Backend("compliant")``, which also made 2 outbound Wikipedia attempts per
+message. Now: 2 calls per message for the lean default; 16-18 and 17 for the
+full profile (an unreadable judge reply abstains, so the untrained backend no
+longer adds 14 suggestions and a constitutional revision; 31-33 before that).
+A judge that flags every principle (``judge="0.8"``) still adds those 15 calls:
+31-33 and 32 for the full profile, 2 for the lean default.
+``test_calls_per_message_lean_default_and_full_profile`` measures and prints the
+current numbers.
+"""
+import collections
+from datetime import datetime, timedelta
+import hashlib
+import json
+import time
+from types import SimpleNamespace
+import urllib.request
+import warnings
+
+import pytest
+import torch
+
+from cognitive_management.cognitive_manager import CognitiveManager
+from cognitive_management.cognitive_types import (
+    CognitiveInput, CognitiveOutput, CognitiveState, DecodingConfig, PolicyOutput,
+)
+from cognitive_management.config import COGNITIVE_PROFILES, CognitiveManagerConfig
+from cognitive_management.exceptions import CognitiveError, ConfigError
+from cognitive_management.v2.adapters.backend_adapter import ModelAPIAdapter
+from cognitive_management.v2.components.constitutional_critic import ConstitutionalCritic
+from cognitive_management.v2.components.critic_v2 import CriticV2
+from cognitive_management.v2.components.fact_checkers import WikipediaFactChecker
+from cognitive_management.v2.components.policy_router_v2 import PolicyRouterV2
+from cognitive_management.v2.config.config_manager import ConfigManager
+from cognitive_management.v2.config.constitutional_principles import (
+    CONSTITUTIONAL_PRINCIPLES, detect_principle_language, get_principles,
+)
+from cognitive_management.v2.middleware import error_handler
+from cognitive_management.v2.middleware.error_handler import (
+    CircuitBreakerConfig, CircuitState, ErrorHandlingMiddleware,
+)
+from cognitive_management.v2.processing.handlers import SelfConsistencyHandler
+from cognitive_management.v2.processing.pipeline import ProcessingContext
+from cognitive_management.v2.utils.heuristics import build_features, mode_gates
+
+WORDS = "ve bir bu için ile da de çok daha gibi olarak kadar sonra ancak ama zaman yıl gün insan".split()
+PLAIN_MESSAGES = [
+    "Merhaba, nasılsın?",
+    "Türkiye'nin başkenti neresidir?",
+    "Neden gökyüzü mavi görünür, açıklar mısın?",
+    "Bana kısa bir kitap önerir misin?",
+]
+EVALUATION_PREFIX = "Aşağıdaki metnin şu prensibe"
+SUGGESTION_PREFIX = "Aşağıdaki metni şu prensibe uygun hale"
+REVISION_PREFIX = "Aşağıdaki metni şu prensiplere uygun hale"
+
+
+class Backend:
+    """Counting ModelAPI fake.
+
+    ``untrained`` mimics a random-initialised model: token salad, score 0 and
+    near-maximal entropy. ``compliant`` follows every judge prompt and answers
+    with factual sentences. ``entropy`` may be a float, ``"raise"`` or
+    ``"unavailable"`` (an ``entropy_details`` probe reporting available=False
+    while ``entropy_estimate`` returns the 0.5 placeholder, as CevahirModelAPI does).
+    ``judge``, when given, is the reply to every constitutional evaluation
+    prompt: ``"0.8"`` reports each principle as violated.
+    """
+
+    def __init__(self, kind="compliant", entropy=0.3, answer=None, judge=None):
+        self.kind, self.entropy, self.answer, self.judge = kind, entropy, answer, judge
+        self.calls = collections.Counter()
+        self.prompts = []
+        self.decodings = []
+
+    def generate(self, prompt, decoding_cfg, **kwargs):
+        self.calls["generate"] += 1
+        self.prompts.append(prompt)
+        self.decodings.append(decoding_cfg)
+        if self.judge is not None and "Sadece sayıyı yaz" in prompt:
+            return self.judge
+        if self.kind == "compliant":
+            if "Sadece sayıyı yaz" in prompt:
+                return "0.0"
+            if "Tek kelimeyle" in prompt:
+                return "DOĞRU"
+            return self.answer or "Ankara Türkiye'nin başkentidir. Bu bilgi genel olarak doğrudur."
+        digest = int(hashlib.sha256((prompt + str(self.calls["generate"])).encode()).hexdigest(), 16)
+        return " ".join(WORDS[(digest >> (5 * i)) % len(WORDS)] for i in range(8 + digest % 12))
+
+    def score(self, prompt, candidate, **kwargs):
+        self.calls["score"] += 1
+        return 0.0 if self.kind == "untrained" else 0.8
+
+    def entropy_estimate(self, text, **kwargs):
+        self.calls["entropy"] += 1
+        if self.entropy == "raise":
+            raise RuntimeError("entropy probe failed")
+        if self.entropy == "unavailable":
+            return 0.5
+        return self.entropy
+
+    def __getattr__(self, name):
+        if name == "entropy_details" and self.__dict__.get("entropy") == "unavailable":
+            return lambda text, **kwargs: {"value": 0.5, "available": False,
+                                           "kind": "next_token_entropy", "calibrated": False}
+        raise AttributeError(name)
+
+
+class NoEntropyBackend:
+    """A valid ModelAPI without the optional entropy probe."""
+
+    def __init__(self):
+        self.inner = Backend("compliant")
+
+    def generate(self, prompt, decoding_cfg, **kwargs):
+        return self.inner.generate(prompt, decoding_cfg, **kwargs)
+
+    def score(self, prompt, candidate, **kwargs):
+        return self.inner.score(prompt, candidate, **kwargs)
+
+
+@pytest.fixture(autouse=True)
+def network(monkeypatch):
+    """Record every outbound urlopen attempt and fail it like a blocked network."""
+    attempts = []
+
+    def blocked(request, *args, **kwargs):
+        attempts.append({"url": getattr(request, "full_url", str(request)), "timeout": kwargs.get("timeout")})
+        raise OSError("network disabled in tests")
+
+    monkeypatch.setattr(urllib.request, "urlopen", blocked)
+    return attempts
+
+
+def offline(cfg):
+    """Keep tests independent of optional embedding packages and their warnings."""
+    cfg.memory.enable_vector_memory = False
+    cfg.memory.enable_rag = False
+    cfg.runtime.enable_auto_anomaly_check = False
+    return cfg
+
+
+def run(cfg, backend, message):
+    manager = CognitiveManager(backend, offline(cfg))
+    state = CognitiveState(session_id="s", metadata={"user_id": "u"})
+    return manager.handle(state, CognitiveInput(user_message=message)), state
+
+
+# --------------------------------------------------------------------------- profiles
+
+def test_lean_profile_is_the_documented_default():
+    default = CognitiveManagerConfig()
+    assert default.profile_name() == "lean"
+    assert CognitiveManagerConfig.lean() == default
+    for section, switches in COGNITIVE_PROFILES["lean"].items():
+        for key, value in switches.items():
+            assert getattr(getattr(default, section), key) == value
+    assert default.critic.enabled and default.critic.max_passes == 1
+
+    full = CognitiveManagerConfig.full()
+    assert full.profile_name() == "full"
+    assert full.policy.allow_inner_steps and full.policy.debate_enabled and full.policy.tot_enabled
+    assert full.policy.self_consistency_enabled
+    assert full.critic.enable_constitutional_ai and full.critic.enable_external_fact_checking
+    assert full.critic.enable_llm_fact_verification
+    # Only the profile switches differ; every other field keeps its default.
+    lean_dict, full_dict = default.to_dict(), full.to_dict()
+    for section, switches in COGNITIVE_PROFILES["full"].items():
+        for key in switches:
+            lean_dict[section].pop(key)
+            full_dict[section].pop(key)
+    assert lean_dict == full_dict
+
+    # One switch from a config file or the environment.
+    assert CognitiveManagerConfig().override_with({"profile": "full"}).profile_name() == "full"
+    mixed = CognitiveManagerConfig().override_with({"profile": "full", "critic": {"enable_external_fact_checking": False}})
+    assert mixed.profile_name() == "custom" and mixed.critic.enable_constitutional_ai
+    assert CognitiveManagerConfig.from_env({"CM_PROFILE": "full"}).profile_name() == "full"
+    assert CognitiveManagerConfig.from_env({}).profile_name() == "lean"
+    with pytest.raises(ValueError):
+        CognitiveManagerConfig().apply_profile("fast")
+    with pytest.raises(ValueError):
+        CognitiveManagerConfig.from_env({"CM_PROFILE": "ful"})
+    bad = CognitiveManagerConfig()
+    bad.critic.fact_checking_time_budget = 0
+    with pytest.raises(ValueError):
+        bad.validate()
+
+
+def test_from_env_reads_only_the_mapping_it_is_given(monkeypatch):
+    monkeypatch.setenv("CM_PROFILE", "full")
+    assert CognitiveManagerConfig.from_env({}).profile_name() == "lean"
+    assert CognitiveManagerConfig.from_env().profile_name() == "full"
+
+
+def test_profile_key_in_a_config_file_selects_the_profile(tmp_path):
+    """ConfigManager merges a file into a complete dump of its base config.
+
+    Before this fix the dump's lean switches overwrote {"profile": "full"}, so
+    CognitiveManager(model, config_path=...) silently stayed lean (2 calls).
+    """
+    offline_keys = {"memory": {"enable_vector_memory": False, "enable_rag": False},
+                    "runtime": {"enable_auto_anomaly_check": False}}
+    path = tmp_path / "cognitive.json"
+    path.write_text(json.dumps({"profile": "full", **offline_keys}), encoding="utf-8")
+    backend = Backend("compliant")
+    manager = CognitiveManager(backend, config_path=str(path))
+    assert manager.cfg.profile_name() == "full"
+    manager.handle(CognitiveState(session_id="s", metadata={"user_id": "u"}),
+                   CognitiveInput(user_message=PLAIN_MESSAGES[1]))
+    evaluations = sum(p.startswith(EVALUATION_PREFIX) for p in backend.prompts)
+    assert evaluations == len(CONSTITUTIONAL_PRINCIPLES) and backend.calls["generate"] > 2
+
+    # The file's other keys still override the profile it names.
+    path.write_text(json.dumps({"profile": "full", "critic": {"enable_external_fact_checking": False}}),
+                    encoding="utf-8")
+    mixed = ConfigManager(config_path=str(path), watch=False).get_config()
+    assert mixed.profile_name() == "custom"
+    assert mixed.policy.allow_inner_steps and mixed.critic.enable_constitutional_ai
+    assert not mixed.critic.enable_external_fact_checking
+
+    # update_config and set apply a profile to the current config the same way.
+    configs = ConfigManager(config_path=None, watch=False)
+    configs.update_config({"profile": "full"})
+    assert configs.get_config().profile_name() == "full"
+    configs.set("profile", "lean")
+    assert configs.get_config().profile_name() == "lean"
+    with pytest.raises(ConfigError):
+        configs.update_config({"profile": "fast"})
+    assert configs.get_config().profile_name() == "lean"
+    # override_with itself keeps its contract (explicit keys win), which is why
+    # a profile must not be merged into a complete dump.
+    dump = {**CognitiveManagerConfig().to_dict(), "profile": "full"}
+    assert CognitiveManagerConfig().override_with(dump).profile_name() == "lean"
+
+
+def test_debate_or_tot_without_inner_steps_warns_instead_of_failing_silently():
+    # A long, uncertain reasoning request (explicit features: independent of the
+    # keyword classifiers): it opens the debate gate.
+    features = {"input_length": 250, "entropy_est": 2.6, "query_type": "reasoning",
+                "domain": "general", "complexity_score": 0.3}
+    debate_only = CognitiveManagerConfig.from_env({"CM_DEBATE_ENABLED": "true"})
+    tot_only = CognitiveManagerConfig().override_with({"policy": {"tot_enabled": True}})
+    for cfg, switch in ((debate_only, "policy.debate_enabled"), (tot_only, "policy.tot_enabled")):
+        notes = cfg.ineffective_settings()
+        assert len(notes) == 1 and switch in notes[0] and "allow_inner_steps" in notes[0]
+        with pytest.warns(UserWarning, match="allow_inner_steps"):
+            cfg.validate()
+        assert PolicyRouterV2(cfg).route(features, CognitiveState()).mode == "direct"
+    with pytest.warns(UserWarning, match="policy.debate_enabled"):
+        CognitiveManager(Backend("compliant"), offline(debate_only))
+
+    # With the master switch the same request reaches the enabled strategy.
+    debate = CognitiveManagerConfig.from_env({"CM_DEBATE_ENABLED": "true", "CM_ALLOW_INNER_STEPS": "true"})
+    for cfg in (debate, CognitiveManagerConfig(), CognitiveManagerConfig.full()):
+        assert cfg.ineffective_settings() == []
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            cfg.validate()
+    assert PolicyRouterV2(debate).route(features, CognitiveState()).mode == "debate2"
+
+
+# ---------------------------------------------------------------- calls per message
+
+@pytest.mark.parametrize("kind,entropy,judge", [
+    ("untrained", 0.99, None), ("compliant", 0.3, None),
+    ("untrained", 0.99, "0.8"), ("compliant", 0.3, "0.8"),
+])
+def test_calls_per_message_lean_default_and_full_profile(kind, entropy, judge, network, capsys):
+    report = []
+    for message in PLAIN_MESSAGES:
+        lean_backend, full_backend = Backend(kind, entropy, judge=judge), Backend(kind, entropy, judge=judge)
+        network.clear()
+        lean_out, _ = run(CognitiveManagerConfig(), lean_backend, message)
+        lean_net = len(network)
+        network.clear()
+        run(CognitiveManagerConfig.full(), full_backend, message)
+        full_net = len(network)
+        report.append((message, lean_backend.calls["generate"], full_backend.calls["generate"], full_net))
+
+        # Lean: one answer generation plus at most one lexical-critic revision.
+        assert lean_backend.calls["generate"] <= 2
+        assert lean_backend.calls["score"] == 0
+        assert lean_backend.calls["entropy"] == 1
+        assert lean_out.used_mode == "direct"
+        assert lean_net == 0
+        assert not any(p.startswith(EVALUATION_PREFIX) for p in lean_backend.prompts)
+        # Full restores the multi-call behaviour, with each principle evaluated once:
+        # at least the answer plus one evaluation per principle, against lean's 2 at most.
+        evaluations = sum(p.startswith(EVALUATION_PREFIX) for p in full_backend.prompts)
+        assert evaluations == len(CONSTITUTIONAL_PRINCIPLES) == 14
+        assert full_backend.calls["generate"] >= 1 + len(CONSTITUTIONAL_PRINCIPLES)
+        # Each flagged principle adds a suggestion call and flagging adds a single
+        # constitutional revision; unreadable (untrained) and clean (compliant) verdicts add neither.
+        suggestions = sum(p.startswith(SUGGESTION_PREFIX) for p in full_backend.prompts)
+        revisions = sum(p.startswith(REVISION_PREFIX) for p in full_backend.prompts)
+        assert (suggestions, revisions) == ((len(CONSTITUTIONAL_PRINCIPLES), 1) if judge else (0, 0))
+        if kind == "compliant":
+            assert 0 < full_net <= CognitiveManagerConfig().critic.fact_checking_max_claims
+    with capsys.disabled():
+        label = kind if judge is None else f"{kind}, judge {judge!r}"
+        print(f"\n[{label}] generate calls per message (lean / full, full network attempts):")
+        for message, lean_calls, full_calls, full_net in report:
+            print(f"  {message!r}: {lean_calls} / {full_calls} ({full_net})")
+
+
+def test_tree_of_thoughts_route_only_runs_in_the_full_profile(capsys):
+    message = "Bu denklemi çöz ve adım adım hesapla: " + " ".join(["x + 2y = 10"] * 20)
+    lean, full = Backend("compliant"), Backend("compliant")
+    lean_out, _ = run(CognitiveManagerConfig(), lean, message)
+    full_out, _ = run(CognitiveManagerConfig.full(), full, message)
+    assert lean_out.used_mode == "direct"
+    assert lean.calls["generate"] <= 2 and lean.calls["score"] == 0
+    assert full_out.used_mode == "tot"
+    # Depth 3 x branching 3: 1 + 3 + 9 expansions, four scored candidates each.
+    assert full.calls["score"] == 52
+    assert full.calls["generate"] >= 52 + 1 + len(CONSTITUTIONAL_PRINCIPLES)
+    with capsys.disabled():
+        print(f"\n[tot route] lean: {dict(lean.calls)}; full: {dict(full.calls)}")
+
+
+def test_tiny_model_backend_lean_default_costs_at_most_two_generations():
+    """The real CevahirModelAPI with a tiny random model, counted at the adapter."""
+    from model.cevahir import CevahirModelAPI
+    from model_management.config_schema import tiny_model_config
+    from model_management.model_manager import ModelManager
+
+    class ToyTokenizer:
+        def encode(self, text, **kwargs):
+            return list(text[:4]), [5 + (ord(c) % 100) for c in text[:4]]
+
+        def get_vocab(self):
+            return {"<EOS>": 3}
+
+        def decode(self, ids, **kwargs):
+            return " ".join(str(i) for i in ids if i != 3)
+
+    torch.manual_seed(0)
+    manager = ModelManager(tiny_model_config(num_layers=1))
+    api = CevahirModelAPI(manager, ToyTokenizer())
+    counts = collections.Counter()
+    original_generate = api.generate
+
+    def counted(prompt, cfg, **kwargs):
+        counts["generate"] += 1
+        return original_generate(prompt, cfg, **kwargs)
+
+    api.generate = counted
+    cfg = CognitiveManagerConfig()
+    cfg.decoding_bounds.max_new_tokens_bounds = (2, 4)
+    out, state = run(cfg, api, "Merhaba, nasılsın?")
+    assert 1 <= counts["generate"] <= 2
+    assert out.used_mode == "direct"
+    assert state.last_entropy is not None  # the tiny model's entropy probe is a real measurement
+
+
+# ------------------------------------------------------------ constitutional principles
+
+def test_principles_are_deduplicated_and_selected_by_response_language():
+    assert len(CONSTITUTIONAL_PRINCIPLES) == 14
+    tr = get_principles(languages=("tr",))
+    en = get_principles(languages=("en",))
+    assert tr == [turkish for _, turkish in CONSTITUTIONAL_PRINCIPLES]
+    assert en == [english for english, _ in CONSTITUTIONAL_PRINCIPLES]
+    assert len(set(tr)) == len(tr) == 14
+    assert len(get_principles()) == 28  # historical flat list unchanged for importers
+    assert get_principles(("Kısa ol.",), languages=("tr", "tr"))[-1] == "Kısa ol."
+    assert len(get_principles(languages=("tr", "en"))) == 28
+    with pytest.raises(ValueError):
+        get_principles(languages=("de",))
+    assert detect_principle_language("Ankara Türkiye'nin başkentidir.") == "tr"
+    assert detect_principle_language("The capital of Turkey is Ankara.") == "en"
+    assert detect_principle_language("12345") is None
+
+    cfg = CognitiveManagerConfig.full()
+    cfg.critic.custom_principles = ("Kısa ol.",)
+    for answer, language in [("Ankara Türkiye'nin başkentidir.", "tr"),
+                             ("The capital of Turkey is Ankara.", "en"),
+                             ("12345", "tr")]:
+        backend = Backend("compliant")
+        critic = ConstitutionalCritic(cfg, backend)
+        text, details = critic.review_with_constitution("Başkent neresi?", answer)
+        evaluated = [p for p in backend.prompts if p.startswith(EVALUATION_PREFIX)]
+        expected = get_principles(("Kısa ol.",), languages=(language,))
+        assert len(evaluated) == backend.calls["generate"] == len(expected) == 15
+        assert all(f"PRENSİP: {principle}\n" in prompt for principle, prompt in zip(expected, evaluated))
+        assert text == answer and details["revised"] is False
+
+
+# ------------------------------------------------------------------ self-consistency
+
+@pytest.mark.parametrize("entropy,samples", [(0.3, 0), (0.6, 3), (None, 0), (0.9, 0)])
+def test_self_consistency_obeys_the_router_gate(entropy, samples):
+    cfg = CognitiveManagerConfig.full()
+    backend = Backend("compliant")
+    message = "Türkiye'nin başkenti neresidir?"
+    scaled = None if entropy is None else entropy * 3.0
+    features = build_features(cfg, user_message=message, entropy_est=scaled)
+    assert features["query_type"] not in ("creative", "conversational")
+    gate = mode_gates(cfg, features)["self_consistency_gate"]
+    assert gate is (samples > 0)
+    context = ProcessingContext(CognitiveState(), CognitiveInput(message))
+    context.features = features
+    context.context_text = "[USER]\n" + message
+    context.draft_text = "taslak"
+    context.policy_output = PolicyOutput(mode="direct", tool="none", decoding=DecodingConfig(max_new_tokens=8))
+    SelfConsistencyHandler(ModelAPIAdapter(backend), cfg)._process(context)
+    assert backend.calls["generate"] == samples
+    assert (context.self_consistency_result is not None) is (samples > 0)
+
+
+# --------------------------------------------------------------- unavailable entropy
+
+def router_decoding(cfg, message, entropy):
+    router = PolicyRouterV2(cfg)
+    return router.route(build_features(cfg, user_message=message, entropy_est=entropy), CognitiveState()).decoding
+
+
+@pytest.mark.parametrize("probe", ["raise", "unavailable", "missing"])
+def test_unavailable_entropy_routes_direct(probe):
+    backend = NoEntropyBackend() if probe == "missing" else Backend("compliant", entropy=probe)
+    message = "Türkiye'nin başkenti neresidir?"
+    out, state = run(CognitiveManagerConfig.full(), backend, message)
+    assert out.used_mode == "direct"
+    assert state.last_entropy is None
+    assert "[Özellik Çıkarımı]" in out.reasoning_chain[0].content
+    assert "entropy=yok" in out.reasoning_chain[0].content
+    # The answer is generated with the neutral-entropy budget, not the zero-entropy one.
+    answer_decoding = (backend.inner if probe == "missing" else backend).decodings[0]
+    assert answer_decoding.max_new_tokens == router_decoding(CognitiveManagerConfig.full(), message, None).max_new_tokens
+    assert answer_decoding.max_new_tokens > router_decoding(CognitiveManagerConfig.full(), message, 0.0).max_new_tokens
+    # Control: the same message with a measured entropy of 0.5 (1.5 on the router
+    # scale, exactly the think threshold) still takes the deliberation path.
+    measured, measured_state = run(CognitiveManagerConfig.full(), Backend("compliant", entropy=0.5), message)
+    assert measured.used_mode == "think1" and measured_state.last_entropy == pytest.approx(1.5)
+
+
+def test_adapter_reports_none_instead_of_placeholder_entropy():
+    from model.cevahir import CevahirModelAPI
+    from model_management.config_schema import tiny_model_config
+    from model_management.model_manager import ModelManager
+
+    class EmptyTokenizer:
+        def encode(self, text, **kwargs):
+            return [], []
+
+        def get_vocab(self):
+            return {"<EOS>": 3}
+
+        def decode(self, ids, **kwargs):
+            return ""
+
+    api = CevahirModelAPI(ModelManager(tiny_model_config(num_layers=1)), EmptyTokenizer())
+    assert api.entropy_details("metin")["available"] is False
+    assert api.entropy_estimate("metin") == 0.5  # placeholder, not a measurement
+    assert ModelAPIAdapter(api).estimate_entropy("metin") is None
+    assert ModelAPIAdapter(Backend(entropy="raise")).estimate_entropy("x") is None
+    assert ModelAPIAdapter(Backend(entropy=float("nan"))).estimate_entropy("x") is None
+    assert ModelAPIAdapter(Backend(entropy=0.25)).estimate_entropy("x") == 0.25
+
+    # Routing on explicit None: a math query would otherwise always think first.
+    router = PolicyRouterV2(CognitiveManagerConfig.full())
+    math_features = build_features(router.cfg, user_message="12*7 kaç eder?", entropy_est=None)
+    assert math_features["entropy_est"] is None
+    assert router.route(math_features, CognitiveState()).mode == "direct"
+    assert router.route({**math_features, "entropy_est": 0.3}, CognitiveState()).mode == "think1"
+
+
+def test_unavailable_entropy_uses_the_neutral_midpoint_for_decoding():
+    """None used to be normalised to 0.0: the smallest direct-answer budget and
+    the coolest general temperature, exactly as if uncertainty were measured as zero."""
+    cfg = CognitiveManagerConfig()
+    message = "Neden gökyüzü mavi görünür, açıklar mısın?"
+    unavailable, zero, middle = (router_decoding(cfg, message, entropy) for entropy in (None, 0.0, 1.5))
+    assert unavailable.max_new_tokens == middle.max_new_tokens > zero.max_new_tokens
+    assert unavailable.temperature > zero.temperature
+
+
+# ------------------------------------------------------------------ network egress
+
+FACTUAL_ANSWER = ("Ankara 1923 yılında başkent oldu. İstanbul nüfusu 15 milyon kişidir. "
+                  "Türkiye 81 ilden oluşur. Everest 8848 metre yüksekliğindedir.")
+
+
+def test_wikipedia_egress_is_off_by_default(network):
+    cfg = CognitiveManagerConfig()
+    critic = CriticV2(cfg, Backend("compliant", answer=FACTUAL_ANSWER))
+    assert critic._fact_checkers == []
+    critic.review("Türkiye hakkında bilgi ver.", FACTUAL_ANSWER)
+    out, _ = run(CognitiveManagerConfig(), Backend("compliant", answer=FACTUAL_ANSWER), "Türkiye hakkında bilgi ver.")
+    assert out.text and network == []
+
+
+def test_opt_in_wikipedia_checks_are_bounded_per_critic_pass(network, monkeypatch):
+    """One _check_facts call is one critic pass: one per response with the default max_passes=1."""
+    cfg = CognitiveManagerConfig()
+    cfg.critic.enable_external_fact_checking = True
+    critic = CriticV2(cfg, Backend("compliant"))
+    assert [type(c) for c in critic._fact_checkers] == [WikipediaFactChecker]
+
+    # Claim cap: four claims in the answer, three requests.
+    critic._check_facts(FACTUAL_ANSWER)
+    assert len(network) == cfg.critic.fact_checking_max_claims == 3
+    assert all(0 < attempt["timeout"] <= 5.0 for attempt in network)
+
+    # Time budget: each request "takes" 4 s on a fake clock; no request starts
+    # after the 10 s budget and none gets a timeout longer than what is left.
+    cfg.critic.fact_checking_max_claims = 10
+    network.clear()
+    clock = {"now": 1000.0}
+
+    def slow(request, *args, **kwargs):
+        network.append({"timeout": kwargs.get("timeout")})
+        clock["now"] += 4.0
+        raise OSError("timed out")
+
+    monkeypatch.setattr(urllib.request, "urlopen", slow)
+    monkeypatch.setattr(time, "monotonic", lambda: clock["now"])
+    critic._check_facts(FACTUAL_ANSWER)
+    assert [attempt["timeout"] for attempt in network] == [5.0, 5.0, pytest.approx(2.0)]
+
+
+def test_fact_checkers_without_a_timeout_parameter_are_still_called():
+    """A verify(claim) checker used to raise TypeError, swallowed as 'unverified'."""
+
+    class OldChecker:
+        def __init__(self):
+            self.claims = []
+
+        def verify(self, claim):
+            self.claims.append(claim)
+            return SimpleNamespace(is_verified=True)
+
+    class NewChecker(OldChecker):
+        def verify(self, claim, timeout=None):
+            self.claims.append((claim, timeout))
+            return SimpleNamespace(is_verified=True)
+
+    cfg = CognitiveManagerConfig()
+    cfg.critic.enable_external_fact_checking = True
+    critic = CriticV2(cfg, Backend("compliant"))
+    for checker in (OldChecker(), NewChecker()):
+        critic._fact_checkers = [checker]
+        assert critic._check_facts(FACTUAL_ANSWER) > 0.60  # 0.60 = no claim verified
+        assert len(checker.claims) == cfg.critic.fact_checking_max_claims
+    # The new-style checker receives the remaining budget as its timeout.
+    assert all(0 < timeout <= cfg.critic.fact_checking_time_budget for _, timeout in checker.claims)
+
+
+# ------------------------------------------------------------ error-handler honesty
+
+def test_error_handler_neither_retries_nor_claims_a_timeout(monkeypatch):
+    with pytest.raises(TypeError):
+        ErrorHandlingMiddleware(retry_config=object())
+    with pytest.raises(TypeError):
+        ErrorHandlingMiddleware(timeout=30.0)
+    middleware = ErrorHandlingMiddleware(CircuitBreakerConfig(failure_threshold=2, failure_window=60.0))
+    assert not hasattr(middleware, "retry_config") and not hasattr(middleware, "timeout")
+    monkeypatch.setattr(time, "sleep", lambda *_: pytest.fail("error handling must not sleep"))
+    response = middleware.on_error(CognitiveState(), CognitiveInput("x"), CognitiveError("bozuk"))
+    assert "bozuk" in response.text and middleware.circuit_state.failures == 1
+
+
+def test_circuit_breaker_counts_failures_in_a_sliding_window(monkeypatch):
+    """Only failures inside failure_window count. The first version only reset
+    the count when two consecutive failures were further apart than the window,
+    so five failures 59 s apart (236 s in all) still opened the circuit."""
+    start = datetime(2026, 11, 13, 12, 0, 0)
+    clock = {"now": start}
+
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return clock["now"]
+
+    monkeypatch.setattr(error_handler, "datetime", Clock)
+
+    def fail_at(middleware, seconds):
+        clock["now"] = start + timedelta(seconds=seconds)
+        middleware.on_error(CognitiveState(), CognitiveInput("x"), RuntimeError("hata"))
+        return middleware.circuit_state
+
+    spaced = ErrorHandlingMiddleware(CircuitBreakerConfig(failure_threshold=5, failure_window=60.0))
+    for i in range(5):
+        fail_at(spaced, 59 * i)
+    assert spaced.circuit_state.state == CircuitState.CLOSED and spaced.circuit_state.failures == 2
+
+    burst = ErrorHandlingMiddleware(CircuitBreakerConfig(failure_threshold=5, failure_window=60.0))
+    for i in range(5):
+        fail_at(burst, 10 * i)
+    assert burst.circuit_state.state == CircuitState.OPEN
+
+    pair = ErrorHandlingMiddleware(CircuitBreakerConfig(failure_threshold=2, failure_window=60.0))
+    assert fail_at(pair, 0).failures == 1
+    assert fail_at(pair, 61).failures == 1 and pair.circuit_state.state == CircuitState.CLOSED
+    pair.after(CognitiveState(), CognitiveInput("x"), CognitiveOutput(text="tamam", used_mode="direct"))
+    assert pair.circuit_state.failures == 0  # a success clears the window
+    assert fail_at(pair, 62).state == CircuitState.CLOSED
+    assert fail_at(pair, 63).state == CircuitState.OPEN
+
+
+def test_failed_pipeline_runs_once_and_answers_with_an_error(monkeypatch):
+    manager = CognitiveManager(Backend("compliant"), offline(CognitiveManagerConfig()))
+    runs = []
+
+    def broken(*args, **kwargs):
+        runs.append(1)
+        raise RuntimeError("pipeline failure")
+
+    monkeypatch.setattr(manager._orchestrator.pipeline, "process", broken)
+    monkeypatch.setattr(time, "sleep", lambda *_: pytest.fail("no retry back-off expected"))
+    out = manager.handle(CognitiveState(), CognitiveInput("Merhaba"))
+    assert runs == [1]
+    assert out.text == "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."

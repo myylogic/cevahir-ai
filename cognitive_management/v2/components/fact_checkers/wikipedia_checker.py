@@ -69,17 +69,24 @@ class WikipediaFactChecker(BaseFactChecker):
         super().__init__(source_name="wikipedia")
         self.cfg = cfg
         self.max_results = cfg.critic.wikipedia_max_results or 3
-        self.timeout = 5.0  # Request timeout in seconds
+        self.timeout = 5.0  # Upper bound for one request, in seconds
     
-    def verify(self, claim: str) -> Optional[FactCheckResult]:
+    def verify(self, claim: str, timeout: Optional[float] = None) -> Optional[FactCheckResult]:
         """
         Verify claim using Wikipedia.
         
         Searches Wikipedia for relevant articles and checks if claim
         can be verified or contradicted based on article content.
+        This makes one outbound HTTPS request to en.wikipedia.org; the
+        critic only creates this checker when external fact-checking is
+        explicitly enabled.
         
         Args:
             claim: The claim to verify
+            timeout: Remaining time budget in seconds; the request timeout is
+                min(5 s, timeout) and no request is made when it is <= 0.
+                urllib applies the timeout to each socket operation and not to
+                DNS resolution, so one request can take longer than this value.
             
         Returns:
             FactCheckResult or None if verification unavailable
@@ -97,7 +104,7 @@ class WikipediaFactChecker(BaseFactChecker):
                 return None
             
             # Search Wikipedia for relevant pages
-            relevant_pages = self._search_wikipedia(search_terms)
+            relevant_pages = self._search_wikipedia(search_terms, timeout=timeout)
             
             if not relevant_pages:
                 # No relevant pages found
@@ -154,17 +161,25 @@ class WikipediaFactChecker(BaseFactChecker):
         # Limit to top 3 terms
         return search_terms[:3]
     
-    def _search_wikipedia(self, search_terms: List[str]) -> List[Dict[str, Any]]:
+    def _search_wikipedia(
+        self,
+        search_terms: List[str],
+        timeout: Optional[float] = None,
+    ) -> List[Dict[str, Any]]:
         """
         Search Wikipedia for relevant pages.
         
         Args:
             search_terms: List of search terms
+            timeout: Optional remaining budget; caps the request timeout
             
         Returns:
             List of relevant Wikipedia page summaries
         """
         if not search_terms:
+            return []
+        request_timeout = self.timeout if timeout is None else min(self.timeout, timeout)
+        if request_timeout <= 0:
             return []
         
         # Use first term for primary search
@@ -183,7 +198,7 @@ class WikipediaFactChecker(BaseFactChecker):
                 headers={"User-Agent": "CognitiveManagement/1.0"}
             )
             
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+            with urllib.request.urlopen(request, timeout=request_timeout) as response:
                 data = json.loads(response.read().decode())
             
             # Extract relevant pages

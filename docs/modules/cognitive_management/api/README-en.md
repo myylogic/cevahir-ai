@@ -3,6 +3,11 @@
 **Module:** `cognitive_management`
 **Last Updated:** 2026-03-16
 
+**Defaults updated:** 2026-11-13. `CognitiveManagerConfig()` is now the lean profile and
+`CognitiveManagerConfig.full()` restores the earlier defaults; the field defaults, profile methods
+and environment variables below were updated for this. See the
+[module guide](../README-en.md#profiles-lean-by-default-full-on-request) for the measured call counts.
+
 ---
 
 ## Table of Contents
@@ -58,10 +63,20 @@ d = config.to_dict()
 # Validate (raises ValueError on invalid values)
 config.validate()
 
-# Load from environment variables
+# Load from environment variables (env=... reads only that mapping)
 config = CognitiveManagerConfig.from_env()
 config = CognitiveManagerConfig.from_env(env={"CM_CRITIC_ENABLED": "true"})
+
+# Profiles: "lean" (the default) or "full" (every cognitive stage)
+config = CognitiveManagerConfig.full()
+config = CognitiveManagerConfig().override_with({"profile": "full", "critic": {"strictness": 0.8}})
+config.profile_name()          # "lean" | "full" | "custom"
+config.ineffective_settings()  # switches that cannot take effect; validate() warns about them
 ```
+
+The profile switches are listed in `COGNITIVE_PROFILES`; every other field is the same in both.
+A `"profile"` key is applied first and the other keys of the same dictionary override it.
+In a config file passed as `CognitiveManager(..., config_path=...)` it works the same way.
 
 ---
 
@@ -77,9 +92,11 @@ class CriticConfig:
     strictness: float = 0.5          # 0.0-1.0 (higher = stricter revision)
     max_passes: int = 1              # Maximum Self-Refine rounds
 
-    # External fact-checking
-    enable_external_fact_checking: bool = True
+    # External fact-checking (sends requests to en.wikipedia.org; lean: off, full: on)
+    enable_external_fact_checking: bool = False
     fact_checking_providers: tuple = ("wikipedia",)
+    fact_checking_max_claims: int = 3        # claims queried per critic pass
+    fact_checking_time_budget: float = 10.0  # seconds per critic pass; no request starts after it
     enable_wikipedia: bool = True
     wikipedia_max_results: int = 3
 
@@ -91,11 +108,11 @@ class CriticConfig:
     enable_wolfram: bool = False
     wolfram_api_key: str | None = None
 
-    # LLM-based verification
-    enable_llm_fact_verification: bool = True
+    # LLM-based verification (only together with external fact-checking; lean: off, full: on)
+    enable_llm_fact_verification: bool = False
 
-    # Constitutional AI
-    enable_constitutional_ai: bool = True
+    # Constitutional AI (lean: off, full: on; each principle once, in the response's language)
+    enable_constitutional_ai: bool = False
     constitutional_strictness: float = 0.7   # 0.0-1.0
     custom_principles: tuple[str, ...] = ()  # Additional constitutional principles
 
@@ -124,6 +141,7 @@ class MemoryConfig:
     max_history_tokens: int = 3072       # Session history token limit
     enable_session_summary: bool = True
     enable_salient_pruning: bool = True
+    episodic_max_scopes: int = 1024      # In-process scopes kept (least recently written dropped first)
 
     # Vector memory and RAG
     enable_vector_memory: bool = True
@@ -143,7 +161,7 @@ class MemoryConfig:
     # RAG
     enable_rag: bool = True
     rag_top_k: int = 3                   # Number of memory items to retrieve
-    rag_score_threshold: float = 0.7     # Minimum cosine similarity score
+    rag_score_threshold: float = 0.893   # Minimum (1+cos)/2 score in both stores: 0.893 means cos >= 0.786
 
     # Vector search
     vector_search_top_k: int = 5
@@ -164,7 +182,7 @@ class MemoryConfig:
 ```python
 @dataclass
 class PolicyConfig:
-    debate_enabled: bool = True
+    debate_enabled: bool = False      # full: True; needs allow_inner_steps
 
     # Entropy thresholds (0–3 normalized scale)
     entropy_gate_think: float = 1.5   # Above this → CoT
@@ -175,16 +193,16 @@ class PolicyConfig:
     length_gate_debate: int = 200
     length_gate_tot: int = 300
 
-    allow_inner_steps: bool = True
+    allow_inner_steps: bool = False   # master switch for think1/debate2/tot (full: True)
 
     # Tree of Thoughts
-    tot_enabled: bool = True
+    tot_enabled: bool = False         # full: True; needs allow_inner_steps
     tot_max_depth: int = 3
     tot_branching_factor: int = 3
     tot_top_k: int = 5
 
-    # Self-Consistency (Wang et al. 2022)
-    self_consistency_enabled: bool = True
+    # Self-Consistency (Wang et al. 2022): a separate post-generation step
+    self_consistency_enabled: bool = False  # full: True
     self_consistency_n: int = 3           # Number of samples (3–5 recommended)
     self_consistency_method: str = "hybrid"  # "majority" | "score" | "hybrid"
 ```
@@ -474,15 +492,20 @@ except CognitiveError as e:
 
 | Variable | Type | Maps to | Example |
 |----------|------|---------|---------|
+| `CM_PROFILE` | `lean` or `full` | profile; applied before the variables below | `full` |
 | `CM_CRITIC_ENABLED` | bool | `critic.enabled` | `true` |
 | `CM_TOOLS_ENABLE` | bool | `tools.enable_tools` | `false` |
-| `CM_DEBATE_ENABLED` | bool | `policy.debate_enabled` | `true` |
+| `CM_ALLOW_INNER_STEPS` | bool | `policy.allow_inner_steps` | `true` |
+| `CM_DEBATE_ENABLED` | bool | `policy.debate_enabled` (needs `CM_ALLOW_INNER_STEPS` or `full`) | `true` |
 | `CM_MAX_NEW_TOKENS_LO` | int | `decoding_bounds.max_new_tokens_bounds[0]` | `32` |
 | `CM_MAX_NEW_TOKENS_HI` | int | `decoding_bounds.max_new_tokens_bounds[1]` | `512` |
 | `CM_TEMP_LO` | float | `decoding_bounds.temperature_bounds[0]` | `0.4` |
 | `CM_TEMP_HI` | float | `decoding_bounds.temperature_bounds[1]` | `0.9` |
 
 **Valid bool values:** `1`, `true`, `yes`, `on` → `True`; `0`, `false`, `no`, `off` → `False`
+
+`from_env(env={...})` reads only the given mapping (an empty mapping means no variables);
+`from_env()` reads `os.environ`.
 
 ---
 

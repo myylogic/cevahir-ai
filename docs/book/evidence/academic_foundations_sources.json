@@ -23,7 +23,7 @@
       "chapter": "tr/03-sinir-aglari.md",
       "path": "training_management/v2/core/training_loop.py",
       "symbol": "TrainingLoop._finish_update",
-      "line": 246
+      "line": 252
     },
     {
       "chapter": "tr/04-attention.md",
@@ -71,13 +71,13 @@
       "chapter": "tr/06-egitim.md",
       "path": "training_management/v2/core/training_loop.py",
       "symbol": "TrainingLoop._finish_update",
-      "line": 246
+      "line": 252
     },
     {
       "chapter": "tr/06-egitim.md",
       "path": "training_management/v2/core/training_loop.py",
       "symbol": "TrainingLoop._step_scheduler_for_warmup",
-      "line": 219
+      "line": 225
     }
   ],
   "chapter_sources": [

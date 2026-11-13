@@ -36,6 +36,7 @@ import re
 from typing import Dict, Any, Tuple
 
 from cognitive_management.config import CognitiveManagerConfig
+from cognitive_management.v2.utils.turkish_text import count_keyword_matches
 
 
 # =============================================================================
@@ -60,7 +61,7 @@ _SCIENCE_KW = frozenset([
     "atom", "molekül", "hücre", "evrim", "fizik", "kimya", "biyoloji",
     "foton", "elektron", "nötron", "proton", "manyetik", "elektrik",
     "enerji", "kuvvet", "hız", "ivme", "reaksiyon", "enzim", "dna",
-    "gen", "protein", "ekosistem", "termodinamik", "kuantum",
+    "gen", "genetik", "protein", "ekosistem", "termodinamik", "kuantum",
     # İngilizce
     "atom", "molecule", "cell", "evolution", "physics", "chemistry",
     "biology", "quantum", "relativity", "dna", "protein", "enzyme",
@@ -69,7 +70,8 @@ _SCIENCE_KW = frozenset([
 
 _LAW_KW = frozenset([
     # Türkçe
-    "hukuk", "kanun", "yasa", "mahkeme", "dava", "suç", "ceza",
+    "hukuk", "kanun", "yasa", "yasal", "mahkeme", "dava", "suç", "ceza",
+    "suçlu", "suçsuz", "suçla",
     "anayasa", "sözleşme", "hak", "özgürlük", "mevzuat", "tüzük",
     "yönetmelik", "avukat", "hakim", "savcı", "savunma", "dava",
     # İngilizce
@@ -112,12 +114,12 @@ _CREATIVE_KW = frozenset([
 
 _CODE_KW = frozenset([
     # Türkçe
-    "kod", "program", "fonksiyon", "algoritma", "hata", "değişken",
+    "kod", "kodla", "program", "fonksiyon", "algoritma", "hata", "değişken",
     "döngü", "koşul", "sınıf", "metot", "veritabanı", "api",
     # İngilizce
     "code", "python", "javascript", "java", "function", "algorithm",
     "debug", "error", "class", "method", "api", "database", "sql",
-    "html", "css", "react", "git", "deploy", "framework", "library",
+    "html", "css", "react", "git", "github", "gitlab", "deploy", "framework", "library",
     "c++", "rust", "golang", "typescript", "bash", "linux",
 ])
 
@@ -134,8 +136,8 @@ _FACTUAL_KW = frozenset([
 _REASONING_KW = frozenset([
     # Türkçe — analiz / nedensellik
     "neden", "niçin", "nasıl", "analiz", "karşılaştır", "değerlendir",
-    "sonuç", "öner", "tavsiye", "mantık", "sebep", "etki", "ilişki",
-    "kanıtla", "destekle", "eleştir", "avantaj", "dezavantaj",
+    "sonuç", "öner", "öneriler", "tavsiye", "mantık", "sebep", "etki", "etkili",
+    "ilişki", "kanıtla", "destekle", "eleştir", "avantaj", "dezavantaj",
     # İngilizce
     "why", "analyze", "compare", "evaluate", "because", "therefore",
     "reason", "cause", "effect", "argue", "justify", "implications",
@@ -148,7 +150,7 @@ _CONVERSATIONAL_KW = frozenset([
     "evet", "hayır", "lütfen", "rica", "güzel", "iyi", "harika",
     # İngilizce
     "hello", "hi", "hey", "how are you", "thanks", "thank you",
-    "ok", "okay", "sure", "got it", "great", "nice", "awesome",
+    "ok", "okay", "okey", "sure", "got it", "great", "nice", "awesome",
 ])
 
 # Bağlaçlar — karmaşıklık hesabı için
@@ -186,16 +188,18 @@ def _lower(s: str | None) -> str:
     return (s or "").strip().lower()
 
 
+# Anahtar kelimeler kelime başında, Türkçe büyük/küçük harf kurallarıyla ve
+# yalnız çekim ekleriyle eşleşir (turkish_text.keyword_in_text): "yaz" artık
+# "yazılım"ı, "hak" "hakkında"yı, "kaç" "kaçırdığım"ı, "gen" "genel"i saymaz.
+
 def _contains_any(text: str, needles: frozenset | Tuple[str, ...]) -> bool:
     if not text or not needles:
         return False
-    t = _lower(text)
-    return any(n in t for n in needles)
+    return count_keyword_matches(text, needles) > 0
 
 
 def _count_matches(text: str, needles: frozenset) -> int:
-    t = _lower(text)
-    return sum(1 for n in needles if n in t)
+    return count_keyword_matches(text, needles)
 
 
 def _token_len(text: str) -> int:
@@ -346,7 +350,7 @@ def build_features(
 
     Döndürülen anahtarlar:
         input_length          : kelime sayısı
-        entropy_est           : belirsizlik kestirimi (0.0–3.0 ölçek)
+        entropy_est           : belirsizlik kestirimi (0.0–3.0 ölçek); None = ölçüm yok
         needs_recent_info     : güncel bilgi tetikleyicisi
         needs_calc_or_parse   : hesaplama/ayrıştırma tetikleyicisi
         has_claims            : iddia marker'ı
@@ -360,7 +364,7 @@ def build_features(
         is_code_query         : bool kısayol
         n_question_marks      : soru işareti sayısı
     """
-    msg = _lower(user_message)
+    msg = user_message or ""   # ham metin: Türkçe küçük harfe çevirme eşleştiricide
     f_rules = cfg.features.tool_rules
     s_rules = cfg.safety
 
@@ -379,7 +383,7 @@ def build_features(
     # Temel özellik sözlüğü (karmaşıklık için gerekli)
     base_feats: Dict[str, Any] = {
         "input_length":        tokens,
-        "entropy_est":         float(entropy_est or 0.0),
+        "entropy_est":         None if entropy_est is None else float(entropy_est),
         "needs_recent_info":   needs_recent,
         "needs_calc_or_parse": needs_calc,
         "has_claims":          has_claim,
@@ -514,7 +518,10 @@ def mode_gates(cfg: CognitiveManagerConfig, features: Dict[str, Any]) -> Dict[st
         • debate_gate → entropy >= 2.5 veya input_length >= 200
         • tot_gate    → entropy >= 3.0 veya input_length >= 300
     """
-    ent        = float(features.get("entropy_est", 0.0))
+    ent_raw    = features.get("entropy_est", 0.0)
+    # None = entropi ölçülemedi. NaN ile her eşik karşılaştırması False olur;
+    # böylece başarısız bir ölçüm hiçbir kapıyı (SC dahil) açamaz.
+    ent        = float("nan") if ent_raw is None else float(ent_raw)
     length     = int(features.get("input_length", 0))
     query_type = features.get("query_type", "unknown")
     domain     = features.get("domain", "general")

@@ -164,7 +164,7 @@ class EntropyBackend(Protocol):
     def estimate_entropy(
         self,
         text: str
-    ) -> float:
+    ) -> Optional[float]:
         """
         Estimate text entropy (uncertainty).
         
@@ -172,7 +172,8 @@ class EntropyBackend(Protocol):
             text: Input text
             
         Returns:
-            Entropy value (0.0 - 3.0 typically)
+            Normalized entropy in [0, 1], or None when no measurement exists
+            (callers must treat None as unavailable, not as a neutral value)
         """
         ...
 

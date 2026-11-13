@@ -705,7 +705,7 @@ class ModelManager:
             map_location = self.device
 
         from .model_loader import _torch_load
-        from .checkpoint_contract import unpack_checkpoint, validate_model_identity, validate_state_shapes
+        from .checkpoint_contract import unpack_checkpoint, validate_model_identity, validate_scheduler_state, validate_state_shapes
         checkpoint = _torch_load(load_path, torch.device(map_location), weights_only=weights_only)
         try:
             if isinstance(checkpoint, nn.Module):
@@ -737,7 +737,7 @@ class ModelManager:
                 if sched_state is not None:
                     if self.scheduler is None:
                         raise ValueError("Checkpoint scheduler has no configured counterpart")
-                    copy.deepcopy(self.scheduler).load_state_dict(sched_state)
+                    validate_scheduler_state(self.scheduler, sched_state)  # type/keys, then a trial on a copy
             self.model.load_state_dict(state, strict=strict)
             self.model._tokenizer_identity = meta.get("tokenizer_identity")
             self.clear_kv_cache()

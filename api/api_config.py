@@ -14,32 +14,108 @@ Endüstri Standartları:
 - Security best practices
 - Monitoring & logging
 - Performance optimization
+
+Modes, selected by FLASK_ENV:
+- unset or "default": safe default. Debug off, rate limiting on, CORS limited
+  to http(s)://localhost, 127.0.0.1 and [::1] origins (any port).
+- development: explicit local development. DEBUG and pretty JSON on, rate
+  limiting off, the same localhost CORS default. Only this mode and testing
+  accept CEVAHIR_TRUST_X_USER_ID=1, which lets the X-User-ID header act as the
+  caller's identity; otherwise identity comes only from a verified JWT.
+  python api/app_factory.py still serves with debug off unless --debug or
+  CEVAHIR_API_DEBUG=1 asks for it.
+- testing: test runs; DEBUG on, rate limiting and metrics off, and
+  CEVAHIR_TRUST_X_USER_ID=1 accepted as in development.
+- production: refuses to load unless PRODUCTION_SECRET_KEY and JWT_SECRET_KEY
+  are two different values of at least 32 characters that are not placeholders
+  shipped with this repository (whether a value is random cannot be checked);
+  no cross-origin access unless CORS_ORIGINS lists it.
+Other FLASK_ENV values are an error.
+
+Importing this module neither loads nor validates a configuration. get_config()
+reads the secret keys (SECRET_KEY, FLASK_SECRET_KEY, the mode's
+DEVELOPMENT_/TESTING_/PRODUCTION_SECRET_KEY and JWT_SECRET_KEY),
+CEVAHIR_TRUST_X_USER_ID, RATELIMIT_ENABLED and CORS_ORIGINS/CORS_METHODS/
+CORS_HEADERS each time it creates one. All other settings, including
+JWT_ALGORITHM, the JWT token lifetimes, RATELIMIT_DEFAULT,
+RATELIMIT_STORAGE_URI and ENABLE_SECURITY_HEADERS, are class attributes read
+once, when this module is imported.
 """
 
 import os
 import logging
 from pathlib import Path
 from typing import Optional
+from api.placeholder_secrets import PLACEHOLDER_SECRETS  # shared with api.security.jwt
 
 _ROOT = Path(__file__).resolve().parents[1]
 LOGGING_PATH = os.getenv("LOGGING_PATH", str(_ROOT / "logs"))
 MODEL_SAVE_PATH = os.getenv("MODEL_SAVE_PATH", str(_ROOT / "model" / "checkpoints"))
 DEVICE = os.getenv("CEVAHIR_DEVICE", "cpu")
 
+MIN_PRODUCTION_SECRET_LENGTH = 32
+
+# Default browser origins outside production: http(s) on localhost, any port.
+# A regular expression (Flask-CORS compiles it), anchored at both ends and free of commas
+# so that it can also be written into the comma-separated CORS_ORIGINS variable.
+LOCALHOST_CORS_ORIGINS = (r"^https?://(localhost|127\.0\.0\.1|\[::1\])(:[0-9]+)?$",)
+DEFAULT_CORS_METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+DEFAULT_CORS_HEADERS = ("Content-Type", "Authorization", "X-Request-ID")
+
+# The only modes in which CEVAHIR_TRUST_X_USER_ID may make X-User-ID an identity source.
+TRUSTED_USER_HEADER_ENVS = frozenset({"development", "testing"})
+
+
+class ConfigurationError(ValueError):
+    """The selected API configuration is unsafe or incomplete."""
+
+
+def _env_flag(name: str, default: bool = False) -> bool:
+    value = os.getenv(name, "").strip().lower()
+    if not value:
+        return default
+    if value in {"1", "true", "yes", "on"}:
+        return True
+    if value in {"0", "false", "no", "off"}:
+        return False
+    raise ConfigurationError(f"{name} must be 1/0, true/false, yes/no or on/off, not {value!r}")
+
+
+def _env_list(name: str, default) -> list:
+    value = os.getenv(name, "").strip()
+    if not value:
+        return list(default)
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _secret_problems(name: str, value: Optional[str]) -> list:
+    value = (value or "").strip()
+    if not value:
+        return [f"{name} is not set"]
+    if value in PLACEHOLDER_SECRETS:
+        return [f"{name} uses the placeholder value {value!r} shipped with this repository"]
+    if len(value) < MIN_PRODUCTION_SECRET_LENGTH:
+        return [f"{name} is shorter than {MIN_PRODUCTION_SECRET_LENGTH} characters"]
+    return []
+
 
 class Config:
     """
-    Base configuration class.
+    Base configuration; its values are the safe default (DefaultConfig, FLASK_ENV unset).
     
     Endüstri Standardı: 12-Factor App
     - Configuration via environment variables
     - Type-safe configuration
     - Validation on initialization
+
+    SECRET_KEY, JWT_SECRET_KEY, RATELIMIT_ENABLED, TRUST_X_USER_ID and the
+    CORS_* lists are resolved in __init__, i.e. when get_config() is called.
     """
+    API_ENV = "default"
+
     # Flask Core
     DEBUG = False
     TESTING = False
-    SECRET_KEY = os.getenv("SECRET_KEY") or os.getenv("FLASK_SECRET_KEY", "change-me-in-production")
     
     # JSON Configuration
     JSONIFY_PRETTYPRINT_REGULAR = False
@@ -64,19 +140,16 @@ class Config:
     ERROR_LOG = os.path.join(LOGGING_PATH, 'api_errors.log')
     ACCESS_LOG = os.path.join(LOGGING_PATH, 'api_access.log')
     
-    # Security Configuration
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY") or SECRET_KEY
+    # Security Configuration (SECRET_KEY, JWT_SECRET_KEY and TRUST_X_USER_ID: see __init__)
     JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
     JWT_REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "30"))
     
-    # CORS Configuration
-    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
-    CORS_METHODS = os.getenv("CORS_METHODS", "GET,POST,PUT,PATCH,DELETE,OPTIONS").split(",")
-    CORS_HEADERS = os.getenv("CORS_HEADERS", "Content-Type,Authorization,X-User-ID").split(",")
+    # CORS Configuration: comma-separated CORS_ORIGINS, CORS_METHODS and CORS_HEADERS
+    # environment variables replace these defaults (see __init__).
+    cors_origins_default = LOCALHOST_CORS_ORIGINS
     
-    # Rate Limiting
-    RATELIMIT_ENABLED = os.getenv("RATELIMIT_ENABLED", "true").lower() == "true"
+    # Rate Limiting (RATELIMIT_ENABLED: see __init__)
     RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
     RATELIMIT_DEFAULT = os.getenv("RATELIMIT_DEFAULT", "200 per day, 50 per hour")
     
@@ -109,6 +182,42 @@ class Config:
     
     # Security Headers
     ENABLE_SECURITY_HEADERS = os.getenv("ENABLE_SECURITY_HEADERS", "true").lower() == "true"
+
+    def __init__(self):
+        problems = []
+        generic_secret = os.getenv("SECRET_KEY") or os.getenv("FLASK_SECRET_KEY") or "change-me-in-production"
+        self.SECRET_KEY = self._secret_key(generic_secret)
+        # api/security/jwt.py refuses placeholder secrets when signing or verifying, so a
+        # configuration without a real JWT_SECRET_KEY answers 401 on authenticated endpoints.
+        self.JWT_SECRET_KEY = self._jwt_secret_key(generic_secret)
+        self.RATELIMIT_ENABLED = self._ratelimit_enabled()
+        self.TRUST_X_USER_ID = _env_flag("CEVAHIR_TRUST_X_USER_ID")
+        if self.TRUST_X_USER_ID and self.API_ENV not in TRUSTED_USER_HEADER_ENVS:
+            problems.append(
+                "CEVAHIR_TRUST_X_USER_ID=1 lets any caller choose its identity and is accepted only "
+                "with FLASK_ENV=development or FLASK_ENV=testing"
+            )
+        self.CORS_ORIGINS = _env_list("CORS_ORIGINS", self.cors_origins_default)
+        self.CORS_METHODS = _env_list("CORS_METHODS", DEFAULT_CORS_METHODS)
+        identity_header = ("X-User-ID",) if self.TRUST_X_USER_ID else ()
+        self.CORS_HEADERS = _env_list("CORS_HEADERS", DEFAULT_CORS_HEADERS + identity_header)
+        self._validate(problems)
+        if problems:
+            raise ConfigurationError(
+                f"Refusing to load the {self.API_ENV!r} API configuration: " + "; ".join(problems) + "."
+            )
+
+    def _secret_key(self, generic_secret):
+        return generic_secret
+
+    def _jwt_secret_key(self, generic_secret):
+        return os.getenv("JWT_SECRET_KEY") or generic_secret
+
+    def _ratelimit_enabled(self):
+        return _env_flag("RATELIMIT_ENABLED", default=True)
+
+    def _validate(self, problems):
+        """Mode-specific checks append human-readable problems to ``problems``."""
     
     @staticmethod
     def init_logging():
@@ -168,24 +277,39 @@ class Config:
             ]
         )
 
+class DefaultConfig(Config):
+    """
+    Safe default used when FLASK_ENV is unset.
+
+    - Debug mode disabled
+    - Rate limiting enabled (RATELIMIT_ENABLED=false turns it off)
+    - CORS limited to localhost origins unless CORS_ORIGINS is set
+    - Identity only from a verified JWT
+    """
+
+
 class DevelopmentConfig(Config):
     """
-    Development environment configuration.
+    Explicit development configuration (FLASK_ENV=development).
     
     Endüstri Standardı: Development best practices
     - Debug mode enabled
     - Detailed logging
     - Pretty JSON responses
+    - Rate limiting disabled; CORS still limited to localhost unless CORS_ORIGINS is set
+    - CEVAHIR_TRUST_X_USER_ID=1 additionally accepts the X-User-ID header as identity
     """
+    API_ENV = "development"
     DEBUG = True
     TESTING = False
-    SECRET_KEY = os.getenv("DEVELOPMENT_SECRET_KEY", "dev-secret-key-change-in-production")
     JSONIFY_PRETTYPRINT_REGULAR = True
     LOG_LEVEL = "DEBUG"
     
-    # Development-specific
-    CORS_ORIGINS = ["*"]  # Allow all origins in development
-    RATELIMIT_ENABLED = False  # Disable rate limiting in development
+    def _secret_key(self, generic_secret):
+        return os.getenv("DEVELOPMENT_SECRET_KEY", "dev-secret-key-change-in-production")
+
+    def _ratelimit_enabled(self):
+        return False  # Disable rate limiting in development
 
 
 class TestingConfig(Config):
@@ -197,15 +321,20 @@ class TestingConfig(Config):
     - Minimal logging
     - Fast execution
     """
+    API_ENV = "testing"
     DEBUG = True
     TESTING = True
-    SECRET_KEY = os.getenv("TESTING_SECRET_KEY", "test-secret-key")
     MAX_CONTENT_LENGTH = int(os.getenv("TESTING_MAX_CONTENT_LENGTH", 8 * 1024 * 1024))  # 8 MB
     LOG_LEVEL = "WARNING"
     
     # Testing-specific
-    RATELIMIT_ENABLED = False
     ENABLE_METRICS = False
+
+    def _secret_key(self, generic_secret):
+        return os.getenv("TESTING_SECRET_KEY", "test-secret-key")
+
+    def _ratelimit_enabled(self):
+        return False
 
 
 class ProductionConfig(Config):
@@ -214,41 +343,77 @@ class ProductionConfig(Config):
     
     Endüstri Standardı: Production best practices
     - Debug mode disabled
-    - Security hardened
+    - Security hardened: PRODUCTION_SECRET_KEY and JWT_SECRET_KEY must be two different,
+      non-placeholder values of at least 32 characters when the configuration is loaded
+    - Rate limiting always enabled; no cross-origin access unless CORS_ORIGINS lists it
     - Performance optimized
     - Error-only logging
     """
+    API_ENV = "production"
     DEBUG = False
     TESTING = False
-    SECRET_KEY = os.getenv("PRODUCTION_SECRET_KEY")
     JSONIFY_PRETTYPRINT_REGULAR = False
     LOG_LEVEL = "ERROR"
     
     # Production-specific
-    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "").split(",") if os.getenv("CORS_ORIGINS") else []
-    RATELIMIT_ENABLED = True
+    cors_origins_default = ()
     ENABLE_SECURITY_HEADERS = True
     
-    def __init__(self):
-        super().__init__()
-        # Production validation
-        if not self.SECRET_KEY or self.SECRET_KEY == "change-me-in-production":
-            raise ValueError("PRODUCTION_SECRET_KEY must be set in production environment")
-        if not self.JWT_SECRET_KEY or self.JWT_SECRET_KEY == self.SECRET_KEY:
-            raise ValueError("JWT_SECRET_KEY must be set and different from SECRET_KEY in production")
+    def _secret_key(self, generic_secret):
+        return os.getenv("PRODUCTION_SECRET_KEY")
+
+    def _jwt_secret_key(self, generic_secret):
+        return os.getenv("JWT_SECRET_KEY")  # no fallback to SECRET_KEY or FLASK_SECRET_KEY
+
+    def _ratelimit_enabled(self):
+        return True
+
+    def _validate(self, problems):
+        secrets = _secret_problems("PRODUCTION_SECRET_KEY", self.SECRET_KEY)
+        secrets += _secret_problems("JWT_SECRET_KEY", self.JWT_SECRET_KEY)
+        if not secrets and self.SECRET_KEY == self.JWT_SECRET_KEY:
+            secrets.append("JWT_SECRET_KEY must differ from PRODUCTION_SECRET_KEY")
+        if secrets:
+            secrets[-1] += (
+                f" (set both to different random values of at least {MIN_PRODUCTION_SECRET_LENGTH} "
+                "characters, e.g. python -c \"import secrets; print(secrets.token_urlsafe(48))\")"
+            )
+        problems.extend(secrets)
+
+
+_CONFIGS = {
+    "": DefaultConfig,
+    "default": DefaultConfig,
+    "development": DevelopmentConfig,
+    "testing": TestingConfig,
+    "production": ProductionConfig,
+}
+
 
 def get_config():
     """
     FLASK_ENV ortam değişkenine göre yapılandırmayı döndürür.
-    Varsayılan olarak 'development' ortamını kullanır.
+    Değişken yoksa güvenli varsayılan (DefaultConfig) kullanılır: debug kapalı, hız
+    sınırı açık, CORS yalnız localhost kökenleri. Geliştirme modu yalnız açıkça
+    FLASK_ENV=development ile seçilir; bilinmeyen değerler hata verir.
     """
-    env = os.getenv("FLASK_ENV", "development").lower()
-    if env == "production":
-        return ProductionConfig()
-    elif env == "testing":
-        return TestingConfig()
-    else:
-        return DevelopmentConfig()
+    env = os.getenv("FLASK_ENV", "").strip().lower()
+    if env not in _CONFIGS:
+        raise ConfigurationError(
+            f"Unknown FLASK_ENV {env!r}: use default, development, testing or production, or leave it unset"
+        )
+    return _CONFIGS[env]()
 
-# Importing configuration must not create log files or reset application logging.
-config = get_config()
+
+def __getattr__(name):
+    """
+    Build the module-level ``config`` on first use instead of at import time.
+
+    Importing this module must neither load nor validate a configuration (nor
+    create log files or reset application logging): an incomplete or unsafe
+    environment is reported by get_config() when a caller asks for it.
+    """
+    if name == "config":
+        value = globals()["config"] = get_config()
+        return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

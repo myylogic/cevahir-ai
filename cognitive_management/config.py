@@ -21,6 +21,9 @@ KULLANIM:
 - Config yönetimi için
 - Config validation için
 - Config merge/override için
+- Profil seçimi: CognitiveManagerConfig() 'lean' profildir (mesaj başına tek
+  cevap üretimi, Wikipedia sorgusu yok); CognitiveManagerConfig.full() bütün
+  bilişsel aşamaları açar. Ayrıntı: COGNITIVE_PROFILES.
 
 BAĞIMLILIKLAR:
 - dataclasses: Dataclass tanımları
@@ -37,8 +40,10 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 from __future__ import annotations
+from copy import deepcopy
 from dataclasses import dataclass, field, asdict
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, List, Optional, Tuple
+import warnings
 
 # Yerel tipler
 from .cognitive_types import DecodingConfig
@@ -60,6 +65,10 @@ class CriticConfig:
     - External fact-checking support
     - Constitutional AI patterns
     - LLM-based fact verification
+
+    Varsayılanlar 'lean' profildir: sözcüksel kontroller ve en çok max_passes
+    model revizyonu açık; anayasal (constitutional) eleştiri, LLM gerçek kararı
+    ve ağ üzerinden iddia doğrulama kapalı. CognitiveManagerConfig.full() açar.
     """
     enabled: bool = True
     checks: Tuple[str, ...] = ("task_match", "safety", "claim_density")
@@ -67,10 +76,20 @@ class CriticConfig:
     max_passes: int = 1  # gerekirse 1 kez revizyon
     
     # Phase 7.2: External Fact-Checking Configuration
-    enable_external_fact_checking: bool = True  # External fact-checking APIs
+    # Ağ erişimi isteğe bağlıdır: True olduğunda yanıttaki iddiaların terimleri
+    # en.wikipedia.org'a gönderilir (lean: kapalı, full: açık).
+    enable_external_fact_checking: bool = False
     fact_checking_providers: Tuple[str, ...] = ("wikipedia",)  # "wikipedia" | "google" | "wolfram" | "llm"
+    # Etkinken critic geçişi başına sınırlar (varsayılan max_passes=1 ile yanıt
+    # başına): en çok bu kadar iddia sorgulanır; bütçe dolduktan sonra yeni
+    # istek başlamaz ve hiçbir istek kalan süreden uzun zaman aşımı almaz (tek
+    # istek için ayrıca en çok 5 s). Bütçe istek başlatmanın son tarihidir, kesin
+    # bir duvar saati sınırı değildir: zaman aşımı her soket işlemine ayrı
+    # uygulanır ve DNS çözümlemesini kapsamaz.
+    fact_checking_max_claims: int = 3
+    fact_checking_time_budget: float = 10.0  # saniye, critic geçişi başına
     
-    # Wikipedia fact-checking
+    # Wikipedia fact-checking (sağlayıcı seçimi; ağ anahtarı yukarıdaki alandır)
     enable_wikipedia: bool = True
     wikipedia_max_results: int = 3  # Number of Wikipedia pages to check
     
@@ -82,11 +101,12 @@ class CriticConfig:
     enable_wolfram: bool = False
     wolfram_api_key: Optional[str] = None
     
-    # LLM-based fact verification
-    enable_llm_fact_verification: bool = True  # Model-based fact checking
+    # LLM-based fact verification (harici doğrulama açıkken bir model çağrısı)
+    enable_llm_fact_verification: bool = False  # lean: kapalı, full: açık
     
     # Phase 7.2: Constitutional AI Configuration
-    enable_constitutional_ai: bool = True  # Constitutional AI patterns
+    # full: her ilke, yanıtın dilinde bir kez değerlendirilir (lean: kapalı).
+    enable_constitutional_ai: bool = False
     constitutional_strictness: float = 0.7  # Strictness for constitutional principles (0.0-1.0)
     custom_principles: Tuple[str, ...] = ()  # Custom constitutional principles
     
@@ -108,6 +128,11 @@ class MemoryConfig:
     max_history_tokens: int = 3072
     enable_session_summary: bool = True
     enable_salient_pruning: bool = True
+    # Episodic turns are kept per scope (user/session), each trimmed to its last 10
+    # turns after 20. At most this many scopes stay in process memory, the least
+    # recently written dropped first; clients open sessions at will, so this many new
+    # sessions still drop every other scope's turns (vector-store copies stay).
+    episodic_max_scopes: int = 1024
     
     # Phase 7.1: Vector Memory & RAG Configuration
     enable_vector_memory: bool = True  # Vector embeddings kullanımı
@@ -129,7 +154,10 @@ class MemoryConfig:
     # RAG Configuration
     enable_rag: bool = True  # Retrieval-Augmented Generation
     rag_top_k: int = 3  # Number of retrieved documents for RAG
-    rag_score_threshold: float = 0.7  # Minimum similarity score for retrieval
+    # Minimum score on the (1 + cos) / 2 scale of every store, i.e. cos >= 2t - 1.
+    # 0.893 (cos >= 0.786) keeps the default Chroma store as strict as its former
+    # 1 / (1 + d) score was at 0.7 (the memory store admitted cos >= 0.40 at 0.7).
+    rag_score_threshold: float = 0.893
     
     # Vector search configuration
     vector_search_top_k: int = 5  # Default top-k for vector search
@@ -150,20 +178,29 @@ class PolicyConfig:
         entropy_gate_think   : 1.5  → Hafif belirsizlik → CoT
         entropy_gate_debate  : 2.5  → Orta belirsizlik  → Self-Consistency
         entropy_gate_tot     : 3.0  → Yüksek belirsizlik → ToT
+
+    Varsayılanlar 'lean' profildir: allow_inner_steps=False olduğundan her mesaj
+    'direct' yoldan tek cevap üretimiyle yanıtlanır; debate, ToT ve
+    self-consistency de kapalıdır. CognitiveManagerConfig.full() hepsini açar.
+
+    allow_inner_steps, iç adımların (think1/debate2/tot) ana anahtarıdır:
+    debate_enabled ve tot_enabled yalnız allow_inner_steps=True iken etkilidir;
+    tek başlarına açılırlarsa validate() uyarır (ineffective_settings).
+    Self-consistency bundan bağımsız, üretimden sonraki bir seçim adımıdır.
     """
-    debate_enabled: bool = True
+    debate_enabled: bool = False
     entropy_gate_think: float = 1.5
     entropy_gate_debate: float = 2.5
     entropy_gate_tot: float = 3.0
     length_gate_debate: int = 200
     length_gate_tot: int = 300
-    allow_inner_steps: bool = True
-    tot_enabled: bool = True
+    allow_inner_steps: bool = False
+    tot_enabled: bool = False
     tot_max_depth: int = 3
     tot_branching_factor: int = 3
     tot_top_k: int = 5
     # V3: Self-Consistency (Wang et al. 2022)
-    self_consistency_enabled: bool = True    # N örneklem → çoğunluk oyu
+    self_consistency_enabled: bool = False   # N örneklem → çoğunluk oyu
     self_consistency_n: int = 3             # Örneklem sayısı (3–5 önerilir)
     self_consistency_method: str = "hybrid" # "majority" | "score" | "hybrid"
 
@@ -258,6 +295,52 @@ class RuntimeToggles:
     batch_timeout: float = 1.0  # Batch timeout in seconds
 
 # =========================
+# Profiller
+# =========================
+
+#: Profil anahtarları. Burada adı geçmeyen alanlar iki profilde de aynıdır.
+#:
+#: ``lean`` (dataclass varsayılanları): mesaj başına bir cevap üretimi, en çok
+#: ``critic.max_passes`` (=1) sözcüksel-critic revizyonu ve bir entropi ölçümü;
+#: düşünce/aday/örneklem üretimi, anayasal eleştiri, LLM gerçek kararı ve
+#: Wikipedia iddia sorgusu yoktur. Vektör bellek iki profilde de açıktır:
+#: isteğe bağlı sentence-transformers kuruluysa kodlayıcı modeli (varsayılan
+#: all-MiniLM-L6-v2) önbellekte yoksa ilk kullanımda Hugging Face'ten indirilir.
+#:
+#: ``full``: önceki varsayılan davranışı tek anahtarla geri getirir: iç adımlar
+#: (think1/debate2/ToT), self-consistency, anayasal eleştiri (her ilke yanıtın
+#: dilinde bir kez), LLM gerçek kararı ve en.wikipedia.org'a giden sınırlı
+#: iddia sorguları. Mesaj başına onlarca model çağrısı yapabilir.
+COGNITIVE_PROFILES: Dict[str, Dict[str, Dict[str, Any]]] = {
+    "lean": {
+        "policy": {
+            "allow_inner_steps": False,
+            "debate_enabled": False,
+            "tot_enabled": False,
+            "self_consistency_enabled": False,
+        },
+        "critic": {
+            "enable_constitutional_ai": False,
+            "enable_external_fact_checking": False,
+            "enable_llm_fact_verification": False,
+        },
+    },
+    "full": {
+        "policy": {
+            "allow_inner_steps": True,
+            "debate_enabled": True,
+            "tot_enabled": True,
+            "self_consistency_enabled": True,
+        },
+        "critic": {
+            "enable_constitutional_ai": True,
+            "enable_external_fact_checking": True,
+            "enable_llm_fact_verification": True,
+        },
+    },
+}
+
+# =========================
 # Ana Konfigürasyon
 # =========================
 
@@ -300,10 +383,64 @@ class CognitiveManagerConfig:
     # Yardımcı Metotlar
     # =========================
 
+    @classmethod
+    def lean(cls) -> "CognitiveManagerConfig":
+        """Varsayılan 'lean' profil; CognitiveManagerConfig() ile aynıdır."""
+        return cls().apply_profile("lean")
+
+    @classmethod
+    def full(cls) -> "CognitiveManagerConfig":
+        """Bütün bilişsel aşamalar açık 'full' profil (önceki varsayılanlar).
+
+        Dış iddia doğrulaması en.wikipedia.org'a istek gönderir; ağ istenmiyorsa
+        ``cfg.critic.enable_external_fact_checking = False`` yapılmalıdır.
+        """
+        return cls().apply_profile("full")
+
+    def apply_profile(self, name: str) -> "CognitiveManagerConfig":
+        """COGNITIVE_PROFILES[name] anahtarlarını uygular; diğer alanlar değişmez."""
+        if name not in COGNITIVE_PROFILES:
+            raise ValueError(f"Bilinmeyen bilişsel profil: {name!r} (lean|full)")
+        return self.override_with(deepcopy(COGNITIVE_PROFILES[name]))
+
+    def profile_name(self) -> str:
+        """Profil anahtarlarının hepsi eşleşiyorsa profil adı, yoksa 'custom'."""
+        for name, sections in COGNITIVE_PROFILES.items():
+            if all(getattr(getattr(self, section), key) == value
+                   for section, values in sections.items()
+                   for key, value in values.items()):
+                return name
+        return "custom"
+
+    def ineffective_settings(self) -> List[str]:
+        """Açık görünen ama başka bir anahtar kapalı olduğu için çalışmayan ayarlar.
+
+        validate() her birini UserWarning olarak bildirir; CognitiveManager
+        ayrıca loglar. Boş liste, böyle bir ayar olmadığı anlamına gelir.
+        """
+        notes: List[str] = []
+        policy = self.policy
+        if not policy.allow_inner_steps:
+            idle = [f"policy.{name}" for name in ("debate_enabled", "tot_enabled")
+                    if getattr(policy, name)]
+            if idle:
+                notes.append(
+                    f"{', '.join(idle)} etkisiz: policy.allow_inner_steps=False iken router "
+                    "her mesajı 'direct' yoldan yanıtlar. Debate/ToT için "
+                    "policy.allow_inner_steps=True (from_env: CM_ALLOW_INNER_STEPS=true) "
+                    "veya full profil gerekir."
+                )
+        return notes
+
     def override_with(self, updates: Dict[str, Any]) -> "CognitiveManagerConfig":
         """
         Dışarıdan gelen sözlükle alanları günceller (sığ/derin birleştirme).
         Dataclass içindeki dataclass alanları için rekürsif güncelleme yapar.
+        Üst düzey "profile" anahtarı ("lean" | "full") önce uygulanır; aynı
+        sözlükteki diğer alanlar profilin üzerine yazılır. Bu yüzden tam bir
+        döküm (to_dict/asdict) profilin bütün anahtarlarını geri yazar: dosyadan
+        okunan profil, ConfigManager'daki gibi önce temel yapılandırmaya
+        uygulanmalı, ardından yalnız dosyanın kendi anahtarları birleştirilmelidir.
         """
         def _merge(dc_obj, upd):
             if not isinstance(upd, dict):
@@ -322,7 +459,11 @@ class CognitiveManagerConfig:
                     setattr(dc_obj, f, new)
             return dc_obj
 
-        return _merge(self, dict(updates))  # type: ignore[return-value]
+        updates = dict(updates)
+        profile = updates.pop("profile", None)
+        if profile is not None:
+            self.apply_profile(profile)
+        return _merge(self, updates)  # type: ignore[return-value]
 
     def to_dict(self) -> Dict[str, Any]:
         """Konfigürasyonu sözlüğe döndür (serileştirme/telemetri için)."""
@@ -351,6 +492,12 @@ class CognitiveManagerConfig:
         
         if not (0.0 <= self.critic.claim_extraction_min_confidence <= 1.0):
             raise ValueError(f"critic.claim_extraction_min_confidence aralık dışı: {self.critic.claim_extraction_min_confidence}")
+
+        if self.critic.fact_checking_max_claims < 0:
+            raise ValueError("critic.fact_checking_max_claims negatif olamaz.")
+
+        if not self.critic.fact_checking_time_budget > 0:
+            raise ValueError("critic.fact_checking_time_budget > 0 olmalı.")
         
         if self.critic.enable_google_fact_check and not self.critic.google_fact_check_api_key:
             raise ValueError("critic.google_fact_check_api_key gerekli (enable_google_fact_check=True)")
@@ -383,6 +530,9 @@ class CognitiveManagerConfig:
         if not (0.0 <= self.memory.hybrid_search_alpha <= 1.0):
             raise ValueError(f"memory.hybrid_search_alpha [0,1] aralığında olmalı: {self.memory.hybrid_search_alpha}")
 
+        if self.memory.episodic_max_scopes < 1:
+            raise ValueError(f"memory.episodic_max_scopes >= 1 olmalı: {self.memory.episodic_max_scopes}")
+
         # default_decoding alanlarını da doğrula
         dd = self.default_decoding
         if dd.max_new_tokens <= 0:
@@ -402,18 +552,26 @@ class CognitiveManagerConfig:
         if self.policy.self_consistency_method not in {"majority", "score", "hybrid"}:
             raise ValueError("policy.self_consistency_method geçersiz (majority|score|hybrid).")
 
+        # Geçersiz değil ama etkisiz ayarlar sessizce yok sayılmaz.
+        for note in self.ineffective_settings():
+            warnings.warn(note, UserWarning, stacklevel=2)
+
     # Ortam değişkenlerinden hızlı yükleme (opsiyonel, hafif)
     @staticmethod
     def from_env(env: Optional[Dict[str, str]] = None) -> "CognitiveManagerConfig":
         """
         Minimal ortam değişkeni desteği (yoksa varsayılan). Sadece birkaç kritik anahtar okunur.
         Örn:
+          CM_PROFILE=lean|full   (önce uygulanır; diğer anahtarlar üzerine yazar)
           CM_CRITIC_ENABLED=true
           CM_TOOLS_ENABLE=true
+          CM_ALLOW_INNER_STEPS=true   (think1; debate/ToT için de gerekli)
           CM_DEBATE_ENABLED=false
+        env verilirse yalnız o sözlük okunur (boş sözlük = hiç değişken yok);
+        env=None ise os.environ okunur.
         """
         import os
-        e = env or os.environ
+        e = os.environ if env is None else env
 
         def _b(key: str, default: bool) -> bool:
             val = e.get(key, "").strip().lower()
@@ -422,8 +580,12 @@ class CognitiveManagerConfig:
             return default
 
         cfg = CognitiveManagerConfig()
+        profile = e.get("CM_PROFILE", "").strip().lower()
+        if profile:
+            cfg.apply_profile(profile)
         cfg.critic.enabled = _b("CM_CRITIC_ENABLED", cfg.critic.enabled)
         cfg.tools.enable_tools = _b("CM_TOOLS_ENABLE", cfg.tools.enable_tools)
+        cfg.policy.allow_inner_steps = _b("CM_ALLOW_INNER_STEPS", cfg.policy.allow_inner_steps)
         cfg.policy.debate_enabled = _b("CM_DEBATE_ENABLED", cfg.policy.debate_enabled)
 
         # Sınırlar (sayısal)
@@ -472,6 +634,7 @@ __all__ = [
     "SafetyConfig",
     "FeatureRules",
     "RuntimeToggles",
+    "COGNITIVE_PROFILES",
     "CognitiveManagerConfig",
     "DEFAULT_RULES",
 ]

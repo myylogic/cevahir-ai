@@ -40,6 +40,36 @@ from __future__ import annotations
 from typing import Protocol, List, Dict, Any, Optional
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
+import math
+
+
+# Score contract shared by every vector store: score = (1 + cos) / 2 in [0, 1].
+# A score threshold t therefore means cos >= 2t - 1 whatever the provider: the
+# default memory.rag_score_threshold = 0.893 keeps results with cos >= 0.786.
+
+def cosine_to_score(cosine: float) -> float:
+    """Map a cosine similarity in [-1, 1] to the shared score (1 + cos) / 2."""
+    return (max(-1.0, min(1.0, float(cosine))) + 1.0) / 2.0
+
+
+def score_threshold_to_cosine(threshold: float) -> float:
+    """The cosine a score threshold stands for: 2t - 1 (0.7 -> 0.4)."""
+    return 2.0 * float(threshold) - 1.0
+
+
+def similarity_score(vec1: List[float], vec2: List[float]) -> float:
+    """
+    Shared score of two vectors: (1 + cos) / 2, or 0.0 if either has zero norm
+    (the same values as MemoryVectorStore._cosine_similarity).
+    """
+    if len(vec1) != len(vec2):
+        raise ValueError("Vectors must have same dimension.")
+    dot = sum(a * b for a, b in zip(vec1, vec2))
+    norm1 = math.sqrt(sum(a * a for a in vec1))
+    norm2 = math.sqrt(sum(b * b for b in vec2))
+    if norm1 == 0.0 or norm2 == 0.0:
+        return 0.0
+    return cosine_to_score(dot / (norm1 * norm2))
 
 
 @dataclass
@@ -50,7 +80,8 @@ class VectorStoreResult:
     Attributes:
         content: Retrieved text content
         metadata: Additional metadata (role, timestamp, etc.)
-        score: Similarity score (0.0-1.0, higher is better)
+        score: Similarity score (0.0-1.0, higher is better); every store
+            reports (1 + cos) / 2, see cosine_to_score
         id: Unique identifier for the stored item
     """
     content: str
@@ -102,7 +133,8 @@ class VectorStore(Protocol):
         Args:
             query_embedding: Query embedding vector
             top_k: Number of results to return
-            score_threshold: Minimum similarity score (0.0-1.0)
+            score_threshold: Minimum similarity score (0.0-1.0) on the shared
+                (1 + cos) / 2 scale, i.e. cos >= 2 * score_threshold - 1
             filter_metadata: Optional metadata filters
             
         Returns:
@@ -257,5 +289,8 @@ __all__ = [
     "VectorStore",
     "VectorStoreResult",
     "BaseVectorStore",
+    "cosine_to_score",
+    "score_threshold_to_cosine",
+    "similarity_score",
 ]
 

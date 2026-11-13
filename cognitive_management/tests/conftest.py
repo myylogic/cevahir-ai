@@ -73,6 +73,23 @@ class MockModelAPI:
 # Pytest Fixtures
 # ============================================================================
 
+@pytest.fixture(autouse=True)
+def _offline(monkeypatch):
+    """
+    Unit tests stay offline. A critic with external fact-checking enabled (the
+    full profile, or an explicit opt-in; the lean default never does) sends
+    extracted claims to Wikipedia through urllib; fail such calls at once
+    instead of waiting on the network (the fact checker treats the error as
+    "not verified").
+    """
+    import urllib.request
+
+    def _refuse(*args, **kwargs):
+        raise OSError("network disabled in cognitive unit tests")
+
+    monkeypatch.setattr(urllib.request, "urlopen", _refuse)
+
+
 @pytest.fixture(scope="function")
 def mock_model_api() -> MockModelAPI:
     """

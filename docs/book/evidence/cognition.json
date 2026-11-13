@@ -82,31 +82,37 @@
       "path": "cognitive_management/cognitive_manager.py",
       "symbol": "CognitiveManager.handle",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 512
+      "line": 515
     },
     {
       "path": "cognitive_management/config.py",
       "symbol": "CognitiveManagerConfig",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 265
+      "line": 348
+    },
+    {
+      "path": "cognitive_management/config.py",
+      "symbol": "CognitiveManagerConfig.full",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 392
     },
     {
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2.add_turn",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 135
+      "line": 149
     },
     {
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2.retrieve_context",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 215
+      "line": 240
     },
     {
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2._semantic_search",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 356
+      "line": 418
     },
     {
       "path": "cognitive_management/v2/components/vector_store/memory_vector_store.py",
@@ -148,31 +154,43 @@
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "DeliberationHandler._process",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 317
+      "line": 328
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "FeatureExtractionHandler._process",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 180
     },
     {
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "ContextBuildingHandler._process",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 463
+      "line": 474
     },
     {
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "GenerationHandler._process",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 558
+      "line": 569
+    },
+    {
+      "path": "cognitive_management/v2/processing/handlers.py",
+      "symbol": "SelfConsistencyHandler._should_activate",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 705
     },
     {
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "CriticHandler._process",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 728
+      "line": 745
     },
     {
       "path": "cognitive_management/v2/processing/handlers.py",
       "symbol": "MemoryUpdateHandler._process",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 796
+      "line": 813
     },
     {
       "path": "cognitive_management/v2/components/tree_of_thoughts.py",
@@ -196,13 +214,25 @@
       "path": "cognitive_management/v2/components/critic_v2.py",
       "symbol": "CriticV2.review_detailed",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 250
+      "line": 259
+    },
+    {
+      "path": "cognitive_management/v2/components/constitutional_critic.py",
+      "symbol": "ConstitutionalCritic.principles_for",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 107
     },
     {
       "path": "cognitive_management/v2/adapters/backend_adapter.py",
       "symbol": "ModelAPIAdapter.generate",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 101
+      "line": 102
+    },
+    {
+      "path": "cognitive_management/v2/adapters/backend_adapter.py",
+      "symbol": "ModelAPIAdapter.estimate_entropy",
+      "chapter": "tr/09-bellek-bilis-araclar.md",
+      "line": 150
     },
     {
       "path": "cognitive_management/v2/processing/async_handlers.py",
@@ -376,19 +406,19 @@
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2.summarize_if_needed",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 521
+      "line": 581
     },
     {
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2.prune",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 664
+      "line": 724
     },
     {
       "path": "cognitive_management/v2/components/memory_service_v2.py",
       "symbol": "MemoryServiceV2.build_context",
       "chapter": "tr/09-bellek-bilis-araclar.md",
-      "line": 498
+      "line": 558
     },
     {
       "path": "cognitive_management/v2/components/tool_policy_v2.py",
@@ -414,6 +444,7 @@
     "Chapter 10 maps HTTP -> ChattingManager -> Cevahir, not fictitious reversed ownership; generation lock does not cover all model mutation paths.",
     "Primary literature consulted 2026-09-20: arxiv.org/abs/1904.09751;2309.17453;2005.11401;2305.10601. Code is authoritative for implemented mechanisms.",
     "Existing module architecture doc is linked as design history, not treated as current executable truth.",
-    "AST verification checks referenced symbol existence; this documentation edit does not claim runtime tests were rerun."
+    "AST verification checks referenced symbol existence; this documentation edit does not claim runtime tests were rerun.",
+    "2026-11-13: chapter 09 describes the lean default and full profile, None for unavailable entropy (direct route), the self-consistency gate, per-language constitutional principles and opt-in, bounded Wikipedia checks; moved line pins refreshed and the new symbols registered."
   ]
 }

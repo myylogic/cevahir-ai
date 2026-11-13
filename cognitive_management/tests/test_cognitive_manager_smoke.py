@@ -78,7 +78,11 @@ class FakeModel(ModelAPI):
 
 @pytest.fixture()
 def cfg() -> CognitiveManagerConfig:
-    cfg = CognitiveManagerConfig()
+    # Bu testler strateji, critic ve revizyon akışlarını sınar: varsayılan 'lean'
+    # profil bunları kapattığı için 'full' profil açıkça seçilir. Ağ kullanan
+    # dış iddia doğrulaması testlerde kapalı tutulur.
+    cfg = CognitiveManagerConfig.full()
+    cfg.critic.enable_external_fact_checking = False
     # Testleri hızlandırmak için küçük bağlam bütçesi
     cfg.memory.max_history_tokens = 512
     cfg.memory.session_summary_every = 6
@@ -156,7 +160,9 @@ def test_inner_thought_path(cm: CognitiveManager, state: CognitiveState, cfg: Co
     # Eşiği aşmak için HIGH_ENT ipucu
     msg = "Plan yapmam gerekebilir. HIGH_ENT"
     out = cm.handle(state, CognitiveInput(user_message=msg))
-    assert out.used_mode in {"think1", "debate2", "direct"}
+    # "tot" is an inner-thought mode too. This message used to be classified as
+    # conversational only because the substring "hi" occurs in "HIGH_ENT".
+    assert out.used_mode in {"think1", "debate2", "tot", "direct"}
     # FakeModel INTERNAL THOUGHT üretmiş olmalı; doğrudan görünmez, ama hata almamalıyız.
     assert isinstance(out.text, str) and len(out.text) > 0
 

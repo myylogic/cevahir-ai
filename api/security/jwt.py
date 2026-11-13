@@ -12,6 +12,7 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 from flask import current_app, has_app_context
+from api.placeholder_secrets import PLACEHOLDER_SECRETS
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 def _signing_settings():
     config = current_app.config if has_app_context() else {}
     secret = config.get("JWT_SECRET_KEY") or config.get("SECRET_KEY") or os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY")
-    if not secret or secret in {"change-me", "change-me-in-production", "dev-secret-key-change-in-production", "test-secret-key"}:
+    if not secret or secret.strip() in PLACEHOLDER_SECRETS:
         raise RuntimeError("Configure a non-default JWT_SECRET_KEY before issuing tokens")
     algorithm = config.get("JWT_ALGORITHM") or os.getenv("JWT_ALGORITHM", "HS256")
     return secret, algorithm

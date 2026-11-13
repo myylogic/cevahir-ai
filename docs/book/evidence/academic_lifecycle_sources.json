@@ -101,13 +101,13 @@
     {
       "path": "training_management/v2/core/training_manager.py",
       "symbol": "TrainingManager._checkpoint_extra_state",
-      "line": 274,
+      "line": 280,
       "chapter": "tr/07-model-yasam-dongusu.md"
     },
     {
       "path": "training_management/v2/core/training_manager.py",
       "symbol": "TrainingManager.resume_from_checkpoint",
-      "line": 293,
+      "line": 300,
       "chapter": "tr/07-model-yasam-dongusu.md"
     },
     {

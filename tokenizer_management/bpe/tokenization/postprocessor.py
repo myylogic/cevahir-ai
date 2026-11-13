@@ -45,7 +45,7 @@ from typing import List, Dict, Optional, Pattern, Tuple, Union
 from tokenizer_management.config import DEFAULT_SPECIAL_TOKENS, DEFAULT_PUNCTUATION_FIXES, TURKISH_CAPITALIZATION
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+# Kütüphane modülü kök logger'ı yapılandırmaz; giriş betikleri yapar.
 class PostProcessingError(Exception):
     """Postprocessing adımlarından herhangi birinde oluşan hata için özel istisna."""
     pass

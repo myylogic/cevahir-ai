@@ -38,9 +38,11 @@ Telif Hakkı: © 2024 Muhammed Yasin Yılmaz. Tüm Hakları Saklıdır.
 from __future__ import annotations
 from cognitive_management.research.runtime import BudgetExhausted
 
+import inspect
 import logging
 import math
 import re
+import time
 from collections import Counter
 from typing import Dict, List, Optional, Protocol, Tuple
 
@@ -58,6 +60,13 @@ from cognitive_management.v2.components.fact_checkers import (
 from cognitive_management.v2.utils.claim_extraction import (
     extract_claims,
     ExtractedClaim,
+)
+from cognitive_management.v2.utils.verdict_parsing import (
+    FALSE,
+    PARTIAL,
+    TRUE,
+    UNCERTAIN,
+    parse_truth_verdict,
 )
 
 logger = logging.getLogger(__name__)
@@ -596,16 +605,30 @@ class CriticV2(ICritic):
         return 1.00       # İddia yok: nötr metin
 
     def _check_facts_enhanced(self, text: str) -> float:
-        """Harici fact-checker + LLM doğrulama (Phase 7.2)."""
+        """Harici fact-checker + LLM doğrulama (Phase 7.2).
+
+        Dış istekler bu çağrı, yani critic geçişi başına sınırlıdır (varsayılan
+        max_passes=1 ile yanıt başına): en çok fact_checking_max_claims iddia
+        sorgulanır; fact_checking_time_budget saniye dolunca yeni istek başlamaz
+        ve hiçbir isteğin zaman aşımı kalan süreyi geçmez. Bütçe istek başlatmanın
+        son tarihidir, kesin duvar saati sınırı değildir: zaman aşımı her soket
+        işlemine ayrı uygulanır ve DNS çözümlemesini kapsamaz. Sorgulanmayan
+        iddialar doğrulanmamış sayılır.
+        """
         claims = extract_claims(text, min_confidence=self.cfg.critic.claim_extraction_min_confidence)
         if not claims:
             return 1.0
 
+        limit = max(0, int(self.cfg.critic.fact_checking_max_claims))
+        deadline = time.monotonic() + float(self.cfg.critic.fact_checking_time_budget)
         verified_count = 0
-        for claim_obj in claims:
+        for claim_obj in claims[:limit]:
             for checker in self._fact_checkers:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
                 try:
-                    result = checker.verify(claim_obj.claim)
+                    result = self._verify_claim(checker, claim_obj.claim, remaining)
                     if result and result.is_verified is True:
                         verified_count += 1
                         break
@@ -622,12 +645,40 @@ class CriticV2(ICritic):
 
         if self.cfg.critic.enable_llm_fact_verification:
             llm_score = self._check_facts_llm(text, claims)
-            return (base_score * 0.60) + (llm_score * 0.40)
+            if llm_score is not None:  # None: unreadable judge reply -> abstain
+                return (base_score * 0.60) + (llm_score * 0.40)
 
         return base_score
 
-    def _check_facts_llm(self, text: str, claims: List[ExtractedClaim]) -> float:
-        """LLM tabanlı gerçek doğrulama."""
+    @staticmethod
+    def _verify_claim(checker: FactChecker, claim: str, remaining: float):
+        """checker.verify(claim, timeout=remaining) çağırır.
+
+        timeout parametresi olmayan eski verify(claim) imzalı denetleyiciler
+        parametresiz çağrılır: TypeError ile sessizce "doğrulanmamış" sayılmazlar.
+        Kendi zaman aşımlarını bütçe kısaltamaz; bütçe yine de dolduktan sonra
+        onlar için de yeni istek başlatılmaz.
+        """
+        try:
+            params = inspect.signature(checker.verify).parameters.values()
+        except (TypeError, ValueError):  # imzası okunamayan çağrılabilir
+            params = ()
+        if any(p.name == "timeout" or p.kind is inspect.Parameter.VAR_KEYWORD for p in params):
+            return checker.verify(claim, timeout=remaining)
+        return checker.verify(claim)
+
+    # Hakem kararı -> factuality puanı. Okunamayan karar puan üretmez (çekimser).
+    _LLM_FACT_SCORES: Dict[str, float] = {TRUE: 0.90, PARTIAL: 0.70, UNCERTAIN: 0.55, FALSE: 0.20}
+
+    def _check_facts_llm(self, text: str, claims: List[ExtractedClaim]) -> Optional[float]:
+        """
+        LLM tabanlı gerçek doğrulama.
+
+        Yanıt olumsuzluk ve çekince farkında okunur (verdict_parsing):
+        "Yanlış, doğru değil" -> yanlış, "Kısmen doğru" -> kısmen. Okunamayan
+        yanıt veya model hatası None döndürür; hakem çekimser kalır ve puanı ya
+        da revizyon kararını etkilemez.
+        """
         if not claims:
             return 1.0
         try:
@@ -643,21 +694,13 @@ class CriticV2(ICritic):
                 prompt,
                 DecodingConfig(max_new_tokens=20, temperature=0.20, top_p=0.80),
             )
-            rl = (response or "").lower()
-            if "doğru" in rl or "correct" in rl or "true" in rl:
-                return 0.90
-            if "kısmen" in rl or "partial" in rl:
-                return 0.70
-            if "belirsiz" in rl or "uncertain" in rl or "unknown" in rl:
-                return 0.55
-            if "yanlış" in rl or "false" in rl or "incorrect" in rl:
-                return 0.20
-            return 0.60
+            verdict = parse_truth_verdict(response or "")
+            return self._LLM_FACT_SCORES.get(verdict.label)
         except BudgetExhausted:
             raise
         except Exception as e:
             logger.debug(f"LLM fact verification başarısız: {e}")
-            return 0.60
+            return None
 
     def _fact_message(self, score: float) -> str:
         if score >= 0.85:

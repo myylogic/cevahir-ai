@@ -64,7 +64,7 @@ from training_system.v2.core.criterion_manager import CriterionManager
 from training_system.v2.utils.warmup_calculator import calculate_warmup_steps
 
 logger = logging.getLogger("TrainingServiceV3")
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# Kütüphane modülü kök logger'ı yapılandırmaz; giriş betiği (training_system/train.py) yapar.
 
 
 class TrainingServiceV3:
@@ -433,7 +433,7 @@ class TrainingServiceV3:
         from training_management.v2.utils.checkpoint_manager import CheckpointManager
         from training_management.v2.monitoring.tensorboard_manager import TensorBoardManager
         from training_management.v2.utils.training_logger import TrainingLogger
-        from training_management.v2.utils.training_scheduler import TrainingScheduler
+        from training_management.v2.utils.training_scheduler import TrainingScheduler, mark_embedding_param_groups
 
         checkpoint_dir = training_config.get("checkpoint_dir", "./checkpoints")
         checkpoint_manager = CheckpointManager(
@@ -451,13 +451,15 @@ class TrainingServiceV3:
 
         training_logger = TrainingLogger(enable_file_logging=False)
 
+        # The warmup recognizes embedding groups only by an explicit tag, never by LR size.
+        mark_embedding_param_groups(optimizer, self.model_manager.model)
         training_scheduler = TrainingScheduler(
             optimizer=optimizer,
             scheduler_type=training_config.get("scheduler_type", "ReduceLROnPlateau"),
             logger=training_logger,
             warmup_steps=training_config.get("warmup_steps", 0),
             warmup_start_factor=training_config.get("warmup_start_factor", 0.1),
-            embedding_warmup_factor=training_config.get("embedding_warmup_factor", 1.0),
+            embedding_warmup_factor=training_config.get("embedding_warmup_factor"),
             **training_config.get("scheduler_kwargs", {}),
         )
 
