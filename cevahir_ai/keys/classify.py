@@ -8,6 +8,12 @@ ARCH_FIELD_CLASS_V1 classifies every ``ModelArchConfig`` field (and the extras t
   extra  added by the normaliser; ``architecture_version`` becomes the family version, the rest
          (device, log level, ...) identify nothing
 
+``max_seq_length`` has two roles. As a context limit it is a serving field (serveprof, check C11).
+The normaliser also copies it to ``pe_max_len``, the length of the positional table the constructor
+builds. With ``pe_mode="learned"`` that table is a weight (``pos_encoding.pe_embed.weight``), so
+``pe_max_len`` is function-defining there; for RoPE and sinusoidal encodings it is no weight and
+the key nulls it (``cevahir_ai.keys.schemes.arch.function_defining_fields``).
+
 TOKENIZER_KEY_CLASS_V1 classifies the legacy BPE manager's config keys. Only ``semantic`` keys can
 change how text maps to ids, so only they enter tok:bpe-sem-v1. An unclassified key counts as
 semantic: a new key can change the key, never cause a collision.
@@ -23,14 +29,14 @@ ARCH_FDF_V1 = {
     "rope_original_max_len": "int?", "sliding_window": "int?", "attn_logit_cap": "float",
     "tie_weights": "bool", "logit_soft_cap": "float",
     "use_moe": "bool", "num_experts": "int?", "moe_top_k": "int?",
+    "pe_max_len": "int?",
 }
 ARCH_TRAIN_V1 = ("dropout", "drop_path_rate", "pe_dropout", "use_gradient_checkpointing",
                  "use_advanced_checkpointing", "checkpointing_strategy", "moe_jitter_noise",
                  "moe_load_balance_alpha")
 ARCH_SERVE_V1 = ("quantization_type", "max_seq_length", "use_flash_attention", "use_pytorch_sdpa",
                  "use_kv_cache", "max_cache_len", "kv_eviction_strategy", "kv_num_sink_tokens")
-ARCH_EXTRA_V1 = ("config_version", "architecture_version", "pe_max_len", "device", "log_level",
-                 "learning_rate", "precision")
+ARCH_EXTRA_V1 = ("config_version", "architecture_version", "device", "log_level", "learning_rate", "precision")
 
 ARCH_FIELD_CLASS_V1 = {
     **{name: "fdf" for name in ARCH_FDF_V1},

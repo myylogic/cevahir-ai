@@ -67,9 +67,12 @@ def render(report):
         if keys.get("arch"):
             fields = explain["arch"]
             add(f"arch        {keys['arch']}")
+            table = f"[{fields['pe_max_len']}]" if fields.get("pe_max_len") is not None else ""
             add(f"  fields    vocab={fields['vocab_size']} d={fields['embed_dim']} layers={fields['num_layers']} "
                 f"heads={fields['num_heads']} kv_heads={fields['num_kv_heads']} ffn={fields['ffn_dim']} "
-                f"pe={fields['pe_mode']} tied={fields['tie_weights']} moe={fields['use_moe']}  [{explain['family_version']}]")
+                f"pe={fields['pe_mode']}{table} tied={fields['tie_weights']} moe={fields['use_moe']}  [{explain['family_version']}]")
+        elif explain.get("arch_undeclared"):
+            add(f"arch        unknown ({explain['arch_undeclared']})")
         else:
             add("arch        unknown (the file declares no architecture)")
         if keys.get("weights"):
@@ -110,7 +113,8 @@ def _cmd_inspect(args):
     report = inspect_checkpoint(args.file, level=args.level, purpose=args.purpose, target=_target(args),
                                 expect_file=args.expect_file, expect_weights=args.expect_weights)
     if args.json:
-        print(json.dumps(report.to_dict(tensors=args.tensors), ensure_ascii=False, indent=1, sort_keys=True))
+        # ``default=repr``: a stored value that is no JSON type (a tensor in a metadata field) is shown, not fatal.
+        print(json.dumps(report.to_dict(tensors=args.tensors), ensure_ascii=False, indent=1, sort_keys=True, default=repr))
     else:
         print(render(report))
     return 0 if report.verdict.ok else 5

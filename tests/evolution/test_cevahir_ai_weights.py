@@ -189,7 +189,7 @@ def test_golden_layout_snapshots_match_the_current_code():
     assert len(tiny["layout"]["tensors"]) == 25 and tiny["layout"]["aliases"] == [["embedding.embedding.weight", "output_layer.weight"]]
     assert tiny["non_persistent"] == ["pos_encoding.pos_idx", "pos_encoding.rope_freqs"]
     assert tiny["layout_key"] == "cev:wschema:layout-v1:f96311fd51ccd68dbd49718923ed53e6d1df7bf2066d73ad0cce04fa00ef1968"
-    assert tiny["arch"] == "cev:arch:cfg-v1:3fb0c6d99edf43409bc67d104b8f87a27823b5235479dd22474df4c5458ebf67"
+    assert tiny["arch"] == "cev:arch:cfg-v1:7ccdfc96fc5c534e31826c2a568e87bbc25932d594e8e554690aa8b161aa81fe"
     assert schemas.load_layout("cev11-primary")["arch_fields"]["num_heads"] == 4
     assert schemas.load_layout("train-default")["arch_fields"]["num_kv_heads"] == 2
     for preset in schemas.PRESETS:

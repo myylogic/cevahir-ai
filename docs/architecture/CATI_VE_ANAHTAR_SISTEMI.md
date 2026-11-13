@@ -13,9 +13,13 @@
 > compatibility gate used by the governed load path `cevahir_ai.model.checkpoint.open_checkpoint`;
 > (6) the CLI `python -m cevahir_ai.keys inspect <file>`, which answers for any checkpoint: is it
 > intact, which tokenizer and architecture, is it compatible with the current code, and if not,
-> why. The legacy loaders are unchanged and are not governed. The registry, audit log, policy
-> layer and the PowerShell-like console are later phases and do not exist yet. Limits are listed
-> in the last section.
+> why. The gate fails closed: a stored config that leaves a function-defining field to a default
+> declares no architecture, a target model whose architecture cannot be read is refused, a
+> tokenizer identity that nothing verified is refused, fp16 is never cast silently, and a load is
+> all or nothing (a failure after the gate puts the target model back as it was). The legacy
+> loaders are unchanged and are not governed. The registry, audit log, policy layer and the
+> PowerShell-like console are later phases and do not exist yet. Limits are listed in the last
+> section.
 
 Bu sayfa, çatı paketinin ilk iki aşamasında (P1: güvenlik ağı ve paket iskeleti, P2: anahtar
 sistemi ve uyumluluk kapısı) depoya girenleri anlatır. Yapılmayanlar son bölümdedir.
@@ -39,15 +43,15 @@ yapılandırmaz (ölçülen içe aktarma süresi yaklaşık 0,03 s). Eski içe a
 
 | Çatı adı | Bugünkü karşılığı |
 |---|---|
-| `cevahir_ai.neural.CevahirNeuralNetwork`, `resolve_ffn_dim` | `src.neural_network`, `src.neural_network_module.architecture_contracts` |
+| `cevahir_ai.neural.CevahirNeuralNetwork`, `resolve_ffn_dim`; katman sınıfları `TransformerEncoderLayer`, `MultiHeadAttention`, `FeedForwardNetwork`, `MixtureOfExperts`, `RMSNorm`, `LanguageEmbedding`, `PositionalEncoding` | `src.neural_network`, `src.neural_network_module.*` |
 | `cevahir_ai.model.ModelManager`, `ModelInitializer`, `ModelSaver`, `ModelLoader` | `model_management.*` |
 | `cevahir_ai.model.config.*` (`SystemConfig`, `normalize_model_config`, `tiny_model_config`, …) | `model_management.config_schema` (`SystemConfig` = oradaki `CevahirConfig`) |
 | `cevahir_ai.model.checkpoint.open_checkpoint`, `read_envelope`, `inspect_checkpoint` | **yeni** (kapıdan geçen yükleme); `unpack_checkpoint`, `validate_*` eski sözleşmedir |
 | `cevahir_ai.tokenizer.LegacyBPETokenizer`, `ByteLevelBPE`, `tokenizer_key` | `TokenizerCore`, `tokenizer_management.byte_bpe.ByteLevelBPE` |
-| `cevahir_ai.data.DataCache`, `StrictCache`, `split_training_records`, `record_format` | `training_system.data_cache`, `training_system.v3.data.cache_v3.DataCacheV3`, … |
-| `cevahir_ai.training.TrainingService`, `TrainingEngine`, `CheckpointManager`, `TrainingScheduler` | `training_system.v3…TrainingServiceV3`, `training_management.v2…` (canlı üyeler) |
-| `cevahir_ai.cognition.CognitiveManager`, `CognitiveManagerConfig` | `cognitive_management` |
-| `cevahir_ai.serving.Cevahir`, `FacadeConfig`, `create_app` | `model.cevahir` (`FacadeConfig` = oradaki `CevahirConfig`), `api.app_factory` |
+| `cevahir_ai.data.DataCache`, `StrictCache`, `split_training_records`, `record_format`, `DataLoaderManager` | `training_system.data_cache`, `training_system.v3.data.cache_v3.DataCacheV3`, …, `data_loader_management` |
+| `cevahir_ai.training.TrainingService`, `TrainingEngine`, `CheckpointManager`, `TrainingScheduler`, `validate_training_backend`, `resolve_precision` | `training_system.v3…TrainingServiceV3`, `training_management.v2…` (canlı üyeler), `training_management.contracts` |
+| `cevahir_ai.cognition.CognitiveManager`, `CognitiveManagerConfig`, `types` | `cognitive_management` (`types` = `cognitive_types` modülü) |
+| `cevahir_ai.serving.Cevahir`, `FacadeConfig`, `create_app`, `ChattingManager` | `model.cevahir` (`FacadeConfig` = oradaki `CevahirConfig`), `api.app_factory`, `chatting_management` |
 
 Kurallar (her biri `tests/evolution/test_cevahir_ai_roof.py` içinde bir testtir):
 
@@ -100,7 +104,7 @@ Altın vektörler `tests/evolution/test_cevahir_ai_keys.py` içindedir.
 | `cache:recipe-v1` | birincil | korpus anahtarı + tokenizer anahtarı + kodlama profili + kayıt biçimi + üretici sürümü |
 | `cache:md5-v2` | eski | `cached_data_<md5>_<veriözeti>.pkl` adındaki md5 |
 | `split:assign-v1` | birincil | önbellek anahtarı + oran + tohum + yöntem |
-| `arch:cfg-v1` | birincil | `normalize_model_config` çıktısının işlevi belirleyen 24 alana tipli izdüşümü |
+| `arch:cfg-v1` | birincil | `normalize_model_config` çıktısının işlevi belirleyen 25 alana tipli izdüşümü |
 | `arch:ctor-v0` | eski | checkpoint'teki `model_config` (kurucu argümanları), `device` hariç |
 | `serveprof:cfg-v1` | birincil | sunum zamanı alanları (niceleme, bağlam uzunluğu, KV önbelleği, dtype) |
 | `wschema:layout-v1`, `wschema:sd-v1` | birincil | `state_dict` adları + şekilleri + takma ad grupları (`sd-v1`: + dtype) |
@@ -118,15 +122,33 @@ Altın vektörler `tests/evolution/test_cevahir_ai_keys.py` içindedir.
 
 - **Tokenizer (`bpe-sem-v1`).** Kimlik: id'ler, birleştirmeler ve sıraları, `lowercase` gibi id
   anlamını etkileyen ayarlar, sınıflandırılmamış her yeni ayar. Kimlik değil: `read_only`,
-  toplu iş boyutu, cihaz, çözümleme ve tanılama ayarları, `merges.txt` satır sonları, BOM,
+  toplu iş boyutu, cihaz, çözümleme ve tanılama ayarları, `merges.txt` satır sonları,
   token başına frekans istatistikleri. Sınıflar `cevahir_ai/keys/classify.py` içindedir.
-- **Mimari (`cfg-v1`).** 24 alan (ör. `num_heads`, `num_kv_heads`, `ffn_dim`, `pe_mode`,
-  `parallel_residual`, `sliding_window`, `tie_weights`). Türetilen alanlar kurucunun yaptığı gibi
-  çözülür (`num_kv_heads = num_heads`, `ffn_dim = resolve_ffn_dim(...)`); kapalı özelliklerin
-  alanları (MoE kapalıyken `num_experts`) boşaltılır. `dropout`, `device`, `max_seq_length`,
-  `quantization_type` mimari anahtarına girmez. `normalize_model_config` **değiştirilmedi**;
-  anahtar onu sarar. `config_schema.py` yalnız standart kütüphane kullandığı için mimari anahtarı
-  torch'suz hesaplanır.
+  Dosyalar eski tokenizer'ın okuduğu gibi okunur, kusuruyla birlikte: `merges.txt` başındaki BOM
+  eski okuyucuda ilk birleştirmenin parçası olur (o birleştirme hiç uygulanmaz), yani tokenizer
+  başka davranır; bu yüzden BOM burada **kimliktir** ve BOM'lu dosya başka anahtar alır.
+  `vocab.json` başındaki BOM'u eski okuyucu okuyamaz; burada da hatadır. (Metin anahtarlarında,
+  TEXT-LF-1'de, BOM kimlik değildir; iki kural bilerek ayrıdır.)
+- **Mimari (`cfg-v1`).** 25 alan: `ModelArchConfig`'in 24 alanı (ör. `num_heads`, `num_kv_heads`,
+  `ffn_dim`, `pe_mode`, `parallel_residual`, `sliding_window`, `tie_weights`) ve konum tablosunun
+  uzunluğu `pe_max_len`. Türetilen alanlar kurucunun yaptığı gibi çözülür
+  (`num_kv_heads = num_heads`, `ffn_dim = resolve_ffn_dim(...)`); kapalı özelliklerin alanları
+  (MoE kapalıyken `num_experts`) boşaltılır. `dropout`, `device`, `quantization_type` mimari
+  anahtarına girmez. `max_seq_length` iki iş görür: bağlam sınırı olarak sunum alanıdır (C11);
+  normalleştirici onu ayrıca `pe_max_len`'e kopyalar. `pe_mode="learned"` iken bu uzunluk bir
+  ağırlığın şeklidir (`pos_encoding.pe_embed.weight`), dolayısıyla anahtara girer; RoPE ve
+  sinüzoidal kodlamada konum tablosu ağırlık değildir, alan boşaltılır ve 32 ile 64 uzunluk aynı
+  anahtarı verir. `normalize_model_config` **değiştirilmedi**; anahtar onu sarar.
+  `config_schema.py` yalnız standart kütüphane kullandığı için mimari anahtarı torch'suz
+  hesaplanır.
+- **Beyan tam olmalıdır.** Dosyanın yanında bulunan bir yapılandırma, işlevi belirleyen her
+  alanı kendisi söylüyorsa mimari beyanıdır (kapalı özelliklerin alanları hariç; eski adlar ve
+  iç içe bölümler normalleştiricinin çözdüğü gibi çözülür). Normalleştirici eksik alanı bugünkü
+  varsayılanla doldurur; bu, modeli kurmak üzere olan biri için doğrudur, ağırlıkların yanında
+  bulunan bir yapılandırma için yanlıştır: varsayılan, o ağırlıkları yazan model hakkında bir
+  şey söylemez. `num_heads` yazmayan bir yapılandırma "8 başlı" diye okunmaz; mimari
+  **bilinmiyor** sayılır. Bugünkü yazıcıların sakladığı `model_config` (kurucu kaydı) ve CEV-11
+  `cfg.config` tamdır.
 - **Ağırlıklar (`sha256-v1`).** dtype kimliktir (fp16 kopyası başka anahtardır); ad ve şekil
   kimliktir; bellek düzeni ve cihaz değildir; bağlı ağırlıklar bir kez özetlenir. Aynı ağırlıklar
   eğitim checkpoint'inde, `ModelManager.save` dosyasında ve çıplak `state_dict` içinde **aynı**
@@ -151,8 +173,12 @@ değerler üretir: `read_only=True`, `read_only=False` ve bayrağın hiç verilm
 hesaplatır. Eşleşen değer "aynı tokenizer, özet kayması" olarak kabul edilir.
 `governance/registry/tokenizers.json` depoda izlenen tokenizer'ın kanonik anahtarını, dosya
 anahtarlarını ve altı eski özetini tutar; böylece tokenizer verilmeden de eski bir checkpoint'in
-hangi tokenizer'la eğitildiği söylenebilir. Bu altı adaydan hiçbiriyle eşleşmeyen bir değer
-(ör. frekans istatistikleri yenilenmiş bir sözlük) çözülemez; kapı bunu "bilinmiyor" sayar.
+hangi tokenizer'la eğitildiği söylenebilir. "İzlenen" bir aramadan ibaret değildir: kapı,
+kayıttaki dosya anahtarlarını bu çalışma kopyasındaki `vocab.json` ve `merges.txt` ile
+karşılaştırır (satır sonu farkı sayılmaz, BOM sayılır); dosyalar değişmişse C7 başarısızdır.
+Adaylar yalnız satır sonu ve `read_only` bakımından değişir; BOM'lu `merges.txt` başka bir
+tokenizer'dır, aday değildir. Bu altı adaydan hiçbiriyle eşleşmeyen bir değer (ör. frekans
+istatistikleri yenilenmiş bir sözlük) çözülemez: tokenizer verilmedikçe kapı yüklemeyi reddeder.
 
 ## 6. Ağırlık şeması kaydı
 
@@ -184,20 +210,20 @@ okumaz, torch kullanmaz. Olguları `cevahir_ai.adapters.inspection` üretir.
 |---|---|---|
 | C1 | `file.integrity` | dosya baytları ↔ `.sha256` yan dosyası ya da verilen anahtar |
 | C3 | `weights.digest` | yeniden hesaplanan ağırlık özeti ↔ beyan edilen (CEV-11) ya da verilen anahtar |
-| C4 | `wschema.match` | dosyadaki düzen ↔ beyan edilen mimari için **bugünkü kodun** kurduğu düzen; bağ bozulması; kısmi yükleme yok |
-| C5 | `arch.declared` | checkpoint'in mimari anahtarı ↔ hedef modelinki; mimari yoksa "bilinmiyor" |
-| C7 | `tok.identity` | tokenizer kimliği ↔ hedef tokenizer (şemaya göre; eski özet için uzlaştırma) |
-| C9 | `dtype` | saklanan dtype ↔ hedef; sessiz dönüştürme yok; nicelenmiş → desteklenmiyor |
-| C10 | `resume.signatures` | optimizer ve zamanlayıcı yapısı |
-| C11 | `context.window` | sunum bağlam uzunluğu ≤ eğitimdeki |
-| C12 | `envelope.safety` | pickle'ın içe aktaracağı adlar `weights_only` güvenli kümesinde mi (dosya açılmadan) |
+| C4 | `wschema.match` | dosyadaki düzen ↔ beyan edilen mimari için **bugünkü kodun** kurduğu düzen **ve** verilmişse canlı hedef modelin kendi düzeni; bağ bozulması; kısmi yükleme yok |
+| C5 | `arch.declared` | checkpoint'in mimari anahtarı ↔ hedef modelinki; beyan yoksa ya da tam değilse "bilinmiyor"; hedef modelin mimarisi okunamıyorsa (kurucu kaydı yok, sarmalayıcı) yine "bilinmiyor" |
+| C7 | `tok.identity` | tokenizer kimliği ↔ verilen tokenizer (şemaya göre; eski özet için uzlaştırma), CEV-11 dosyasının yanındaki tokenizer dosyası ya da izlenen kayıt. Dosyada kimlik hiç yoksa "bilinmiyor"; kimlik var ama hiçbir şeyle doğrulanmadıysa **başarısız** |
+| C9 | `dtype` | saklanan dtype ↔ hedef; sessiz dönüştürme yok (yalnız çağıran izin verirse yukarı dönüştürme); nicelenmiş → desteklenmiyor |
+| C10 | `resume.signatures` | optimizer ve zamanlayıcı yapısı ↔ durumu alacak nesneler |
+| C11 | `context.window` | sunum bağlam uzunluğu ≤ eğitimdeki. Sunum uzunluğu: istenen; yoksa hedef modelinki; o da yoksa eğitimdeki |
+| C12 | `envelope.safety` | pickle'ın içe aktaracağı adlar `weights_only` güvenli kümesinde mi (dosya açılmadan, pickle yığını izlenerek) |
 
 | Amaç | Gerekenler | "Bilinmiyor" ne demek |
 |---|---|---|
 | `inspect` | C12, C1 | C1 → uyarı |
-| `evaluate`, `finetune` | C12, C1, C3, C4, **C5**, C7 | C1, C3, C7 → uyarı; **C4, C5 → ret** |
+| `evaluate`, `finetune` | C12, C1, C3, C4, **C5**, C7, **C9** | C1, C3, C7 → uyarı; **C4, C5 → ret** |
 | `resume` | yukarıdakiler + C10 | C10 → ret (yalnız ağırlık dosyası sürdürülemez) |
-| `serve`, `publish` | evaluate + C9, C11 | her "bilinmiyor" → ret |
+| `serve`, `publish` | evaluate + C11 | her "bilinmiyor" → ret |
 | `export` | C12, C1 | C1 → ret |
 
 **Mimarisi bilinmeyen ağırlık modele yüklenmez.** Çıplak 4 başlı `state_dict`, 8 başlı hedefte
@@ -207,10 +233,50 @@ olur. Mimarisi beyan edilmiş 4 başlı bir checkpoint 8 başlı hedefte C5'ten
 ağırlık özeti bulunmadığı için bu eksiklikler çalışma amaçlarında yalnız uyarıdır; aksi hâlde
 bugünkü bütün checkpoint'ler geçersiz olurdu.
 
+Kapı kapalı tarafa düşer; ilk sürümün bağımsız incelemesinde bulunan açıklar bu kurallarla
+kapandı (her biri `tests/evolution/test_cevahir_ai_gate_review.py` içinde, incelemenin kanıtı
+yeniden üretilerek sabitlendi):
+
+- **Yazılmamış başlık sayısı beyan değildir.** `num_heads` içermeyen bir `config`,
+  `additional_info.config` ya da `train_config` eskiden varsayılanla (8) doldurulup "beyan
+  edilmiş" sayılıyordu; 4 başlı ağırlık 8 başlı modele yükleniyordu. Artık mimari anahtarı
+  üretilmez, C5 "bilinmiyor"dur, yükleme reddedilir. `tm3` zarfındaki `train_config` ayrıca
+  yalnız model yapılandırması olmalıdır: şemanın tanımadığı bir alan onu mimari beyanı olmaktan
+  çıkarır.
+- **Okunamayan hedef "hedef yok" değildir.** Kurucu kaydı (`_ctor_cfg`) boş ya da eksik bir
+  model, ya da modeli saran bir `nn.Module` verildiğinde C5 "bilinmiyor"dur ve yükleme reddedilir.
+- **Kimliği doğrulanmamış tokenizer ret sebebidir.** Parmak izi taşıyan bir checkpoint,
+  tokenizer verilmeden yüklenmez (eski `ModelManager.load` de reddeder). İstisna, kimliğin kapı
+  tarafından doğrulanabildiği iki durumdur: CEV-11 dosyasının yanındaki tokenizer dosyası ve
+  dosyaları değişmemiş izlenen tokenizer. Hiç kimlik taşımayan eski dosya yüklenir, karar
+  uyarılıdır ve eski yükleyicinin verdiği `RuntimeWarning` verilir.
+- **fp16 hiçbir amaçta sessizce dönüştürülmez.** C9 artık ağırlık yükleyen her amaç için
+  gereklidir; `allow_cast=True` yalnız yukarı dönüştürmeye izin verir ve bu, denetimin
+  ayrıntısında yazar.
+- **Öğrenilen konum tablosunun uzunluğu mimaridir** (yukarıda); 32 uzunlukla eğitilmiş dosya 64
+  uzunluklu hedefe C4 ve C5'ten reddedilir.
+
 **Yükleme yolu:** `cevahir_ai.model.checkpoint.open_checkpoint(path, model=…, tokenizer=…,
 purpose=…)` dosyayı açmadan koklar, `weights_only=True` ile okur, kapıyı çalıştırır, ret hâlinde
 hedef modele **dokunmadan** `IncompatibleCheckpoint` fırlatır, kabul hâlinde katı yükler ve
 modeldeki ağırlıkları yeniden özetleyip kapıdan geçenle karşılaştırır.
+
+- **Ya hep ya hiç.** Kapı geçtikten sonra yükleme yine de başarısız olursa (ağırlıkları
+  reddeden model, durumunu reddeden optimizer, tutmayan doğrulama) model, optimizer ve
+  zamanlayıcı eski hâline döndürülür ve hata ret olarak (`IncompatibleCheckpoint`, C4 ya da
+  C10) verilir; yarısı ezilmiş model kalmaz. Bedeli: hedef ağırlıkların yükleme süresince bir
+  kopyası bellekte tutulur.
+- **Yalnız yükleme amaçları.** `purpose` `evaluate`, `finetune`, `resume`, `serve`, `publish`
+  olabilir. `inspect` ve `export` yalnız dosya düzeyi denetim ister; bu amaçlarla ağırlık
+  yüklemek kapının etrafından dolaşmak olurdu, `ValueError` verilir.
+- **Sürdürme zamanlayıcıyı gerçekten geri yükler.** Eğitim zarfı zamanlayıcıyı
+  `{"scheduler_type", "scheduler_state"}` sarmalıyla saklar; düz bir torch zamanlayıcısına iç
+  durum, sarmalayıcıya (`TrainingScheduler`) sarmalı durum verilir. `load_state_dict` hata
+  vermeden hiçbir şey yüklemeyebildiği için (torch'ta sözlük güncellemesi, sarmalayıcıda yutulan
+  hata) yüklenen durum geri okunup karşılaştırılır; tutmuyorsa sürdürme reddedilir.
+- **Eski yükleyicilerin yükleme sonrası adımları:** KV önbelleği temizlenir ve modelin
+  `_tokenizer_identity` özniteliği checkpoint'in eski tokenizer özetine (yoksa `None`) ayarlanır;
+  eski yazıcılar bir sonraki checkpoint'i bu değerle damgalar.
 
 ## 8. Komut satırı
 
@@ -226,7 +292,9 @@ python -m cevahir_ai.keys schemes
 ```
 
 Çıkış kodları: 0 başarılı, 1 hata, 2 kullanım hatası, 5 doğrulama başarısız. `--level file`
-torch gerektirmez. Varsayılan `--level compat --purpose evaluate` şu dört soruyu yanıtlar:
+torch gerektirmez; o düzeyde C12 pickle'ın durağan taramasıdır (hangi adları içe aktaracağı),
+torch'un kendi `weights_only` okuyucusunun dosyayı kabul edip etmediği `weights` düzeyinde
+ölçülür. Varsayılan `--level compat --purpose evaluate` şu dört soruyu yanıtlar:
 sağlam mı, hangi tokenizer, hangi mimari, bugünkü kodla uyumlu mu (değilse neden). Gerçek bir
 CEV-11 taban checkpoint'i için çıktı (kısaltılmış):
 
@@ -235,7 +303,7 @@ intact      yes / evet
   C3  weights.digest     recomputed weight digest equals the declared CEV-11 model_sha256
 envelope    cev11-v1
 tokenizer   cev:tok:bytebpe-v1:4db9febe26c3…
-arch        cev:arch:cfg-v1:088c6e7a1801…
+arch        cev:arch:cfg-v1:f0f74189ddf5…
   fields    vocab=4096 d=192 layers=6 heads=4 kv_heads=4 ffn=512 pe=rope tied=True moe=False
 weights     cev:weights:sha256-v1:2e5a4aa6dbdd…
   layout    cev:wschema:layout-v1:361855d0bb73…  (preset cev11-primary)
@@ -252,6 +320,17 @@ verdict     compatible-with-warnings  (purpose: evaluate, level: compat)
 `saver-4.1` (`ModelSaver.save_checkpoint`, yan dosyalı), `bare` (yalnız ağırlık), `tm3`,
 `cev11-v1`, `cev11-ledger-v1`. `module` (pickle'lanmış `nn.Module`) okunmadan reddedilir. Eski
 `unpack_checkpoint` `tm3` ve CEV-11 zarflarını tanımaz; orada kimlikleri kaybolur.
+
+- **Güvenlik koklaması pickle yığınını izler.** `STACK_GLOBAL`'in içe aktaracağı ad, gerçek
+  çözücünün yığından çekeceği iki öğedir, akışa en son yazılan iki dizge değil. Araya yazılıp
+  geri atılan sahte adlar, memo üzerinden dolaştırma, `DUP`, işaret (`MARK`) hileleri ve
+  protokol 2 bayt dizgeleri adı gizleyemez (testte her biri gerçek çözücünün içe aktardığıyla
+  karşılaştırılır). Durağan çözülemeyen her şey (çalışma anında hesaplanan ad, uzantı kodu,
+  bozuk akış) güvenli küme dışında sayılır. `torch._utils._rebuild_*` yalnız düz öznitelik
+  adıyla güvenlidir; noktalı kuyruk (`..._rebuild_tensor_v2.__globals__`) öznitelik yürüyüşüdür.
+- **Bozuk zarf bütünüyle reddedilir.** Eşlem olması gereken yerde liste (`extra_state`,
+  `param_groups`, CEV-11 `cfg`, …) hata izi değil karar üretir: C12 "malformed envelope", çıkış
+  kodu 5. Yanlış türde `epoch`/`metric` gibi betimleyici alanlar yok sayılır.
 
 ## 10. CEV-11 güvencesi
 
@@ -275,7 +354,8 @@ verdict     compatible-with-warnings  (purpose: evaluate, level: compat)
   gerçek modelin ürettiği yanıtlar yoksa `production_ready` her zaman `False`, çıkış kodu 1.
 - `scripts/check_publications.py` yalnız `assert` kullanıyordu; `python -O` altında bütün
   denetimler siliniyor ve betik yine "passed" yazıyordu. Her denetim artık `_require` ile
-  `SystemExit` fırlatır.
+  `SystemExit` fırlatır. `scripts/build_publications.py`'nin `--write`'sız denetim kipi de tek bir
+  `assert`'ti; o da `SystemExit` oldu.
 
 ## 12. Sınırlar (açıkça)
 
@@ -287,7 +367,23 @@ verdict     compatible-with-warnings  (purpose: evaluate, level: compat)
   koşuları henüz `run`/`runspec` anahtarı üretmez, `prepare_cache` `cache:recipe-v1` yazmaz.
 - **C2, C6, C8, C13, C14, C15 uygulanmadı** (imza, canlı mimari okuması, tokenizer davranış
   parmak izi, köken, değerlendirme eşiği, korunan yollar). `arch:live-v1` ve `tok:probe-v1`
-  şemaları yok.
+  şemaları yok. C6 olmadığı için kurucu kaydı (`_ctor_cfg`) elle değiştirilmiş bir hedef model
+  C5'i yanıltabilir; C4 yalnız şekli değişen farkları yakalar.
+- **Tasarımda adı geçip yapılmayan çatı adları:** `cevahir_ai.tokenizer.Tokenizer` (Protocol) ve
+  `open_tokenizer`, `cevahir_ai.cognition.ModelAPI` (tek yapısal Protocol; beş ayrı tanım
+  duruyor), `cevahir_ai._deprecations`, `adapters/research.py`, `_compat/{locks, ids, clock,
+  console_io}.py`, `workers/`. Bunlar kayıt ve konsol aşamalarının parçalarıdır.
+- **İzlenen tokenizer ve yan dosya, tokenizer argümanının yerini tutar ama aynı şey değildir.**
+  Kapı checkpoint'in hangi tokenizer'a bağlı olduğunu ve o dosyaların yerinde durduğunu
+  doğrular; çağıranın modeli sonradan o tokenizer'la kullanıp kullanmadığını göremez. Kesinlik
+  isteyen `tokenizer=` verir.
+- **Sıkı beyan kuralı eski dosyaları dışarıda bırakabilir.** Mimari alanlarının bir kısmını
+  yazmayan eski ya da yabancı zarflar (yalnız `config` taşıyan eski kayıtlar, `tm3`) artık
+  kapıdan geçmez; eski yükleyicilerle hâlâ yüklenebilirler. Sahibinin onayıyla mimari beyan
+  etme komutu (tasarımdaki `-AssertArch`) henüz yok.
+- **torch'un `weights_only` okuyucusu pickle protokolü 4 ve 5 ile yazılmış dosyaları
+  okuyamayabilir** (ölçülen sürümde reddediyor). Bu durumda dosya düzeyinde C12 geçer, ağırlık
+  düzeyinde başarısız olur; `torch.save`'in varsayılanı protokol 2'dir.
 - Eski checkpoint'ler dosya ve ağırlık özeti taşımadığı için `serve`/`publish` amacı, beklenen
   anahtarlar elle verilmedikçe her zaman reddeder.
 - `training_management/v3` **bütün olarak silinmedi**: canlı giriş noktası
@@ -296,7 +392,22 @@ verdict     compatible-with-warnings  (purpose: evaluate, level: compat)
   kanıtı tam değil. Yalnız `training_management/v3/monitoring/` (5 dosya, 2.117 satır) silindi:
   hiçbir modül (v3'ün kendisi dahil), test, betik ya da kitap kanıtı onu içe aktarmıyordu. Kimin
   neyi içe aktardığı testle sabitlendi. Kalan v3 `TrainingManager` belge dizgileri hâlâ bu alt
-  paketin sınıf adlarını anar (ölü kod; dokunulmadı).
+  paketin sınıf adlarını anar (ölü kod; dokunulmadı). Silinen beş dosya ayrıca tarihli araştırma
+  kayıtlarında özetleriyle listelidir (`research/*/results/preservation_baseline.json`, 15
+  dosya) ve `scripts/verify_research_archive_2026_10_13.py` bu listeyi denetler. O doğrulayıcı
+  silmeden önce de kırmızıydı (bu sayfa yazılırken main'de 1149 yoldan 153'ü değişmişti; bu
+  işle 163: beş silinen dosya, `health_check.py`, iki yayın betiği, `.gitattributes` ve
+  `.gitignore`); silme yeni bir kırılma getirmez ama o kayıtlarla fark büyür. Silme, çatı
+  paketini getiren commit'in içindedir, ayrı bir commit değildir. Tek başına geri almak için
+  silen commit bulunur (`git log --diff-filter=D --format=%h -1 --
+  training_management/v3/monitoring/__init__.py`) ve dizin onun ebeveyninden alınır
+  (`git checkout <commit>^ -- training_management/v3/monitoring`).
+- **Kapanış sabitindeki bayt kayması test paketinde yalnız uyarıdır** (`CEVAHIR_CLOSURE_STRICT=1`
+  ile hata). Sıkı kipi CI'da açmak sahibin kararıdır: açılırsa, CEV-11'in eriştiği 33 modülden
+  birine dokunan her dal, davranış aynı kalsa bile, yeniden sabitlenene kadar kırmızı olur.
+- **Düzenlenebilir olmayan kurulum yalnız saf anahtarlar için yeterlidir.** Çatı adları, mimari
+  anahtarı ve tokenizer kaydı çalışma kopyasını ister (`pip install -e .`); aksi hâlde "not
+  running from a Cevahir AI checkout" hatası verilir.
 - `health_check.py` artık yanlış "hazır" demez ama üretim (`tm2`) checkpoint'lerini de
   değerlendiremez: `model_state` anahtarını bekler ve modeli hatalı argümanla kurar.
 - Bağlı ağırlıkları ayrı depolarda saklayan bir dosyanın `weights` anahtarı, aynı değerleri

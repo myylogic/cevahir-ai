@@ -48,7 +48,8 @@ SCHEMES = _table(
     ("evalset", "files-v1", "primary", 64, False, "lf", f"{_S}.corpus:evalset_files_key",
      "as corpus:files-v1, for an evaluation set"),
     ("tok", "bpe-sem-v1", "primary", 64, False, "lf", f"{_S}.tok:tok_bpe_sem_key",
-     "token->id map, ordered merges, specials and the id-semantic config keys of the legacy BPE"),
+     "token->id map, ordered merges, specials and the id-semantic config keys of the legacy BPE "
+     "(files read as the legacy reader reads them: line endings do not count, a BOM does)"),
     ("tok", "bytebpe-v1", "primary", 64, False, "n/a", f"{_S}.tok:tok_bytebpe_key",
      "ByteLevelBPE.identity() verbatim (every CEV-11 artefact is already keyed by it)"),
     ("tok", "legacy-v3", "legacy", 64, True, "bytes", f"{_A}.tokenizers:tok_legacy_v3_key",
@@ -60,7 +61,7 @@ SCHEMES = _table(
     ("split", "assign-v1", "primary", 64, False, "n/a", f"{_S}.cache:split_assign_key",
      "cache key + validation ratio + seed + method"),
     ("arch", "cfg-v1", "primary", 64, False, "n/a", f"{_S}.arch:arch_cfg_key",
-     "typed projection of normalize_model_config onto the 24 function-defining fields"),
+     "typed projection of normalize_model_config onto the 25 function-defining fields"),
     ("arch", "ctor-v0", "legacy", 64, False, "n/a", f"{_S}.arch:arch_ctor_v0_key",
      "a stored model_config (constructor arguments + tie_weights) minus device"),
     ("serveprof", "cfg-v1", "primary", 64, False, "n/a", f"{_S}.arch:serve_profile_key",

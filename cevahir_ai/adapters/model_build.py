@@ -49,12 +49,64 @@ def arch_of_config(config):
     return key, fields, normalized
 
 
+# How the normaliser spells a field: nested sections are merged, old names are renamed, and
+# ``pe_max_len`` is always a copy of ``max_seq_length``. A test keeps this equal to its behaviour.
+_SECTIONS = ("arch", "model", "training", "checkpoint", "extras")
+_ALIASES = {"d_model": "embed_dim", "n_heads": "num_heads", "n_layers": "num_layers", "ff_dim": "ffn_dim",
+            "drop_rate": "dropout", "pe_max_len": "max_seq_length", "max_seq_length": "pe_max_len"}
+
+
+def stated_names(config):
+    """Names of the fields a raw config states itself (sections flattened, old names resolved).
+
+    ``normalize_model_config`` fills every other field with a default. That is right for a config
+    somebody is about to build from, and wrong for a config found next to weights: a default is
+    not a statement about the model that wrote them.
+    """
+    names = set()
+    for key, value in dict(config or {}).items():
+        if key in _SECTIONS and isinstance(value, dict):
+            names.update(str(name) for name in value)
+        else:
+            names.add(str(key))
+    return names | {new for old, new in _ALIASES.items() if old in names}
+
+
+def undeclared_fields(config, fields, *, strict=False):
+    """Why a stored config is no complete declaration of an architecture: a list, empty when it is.
+
+    Every function-defining field must be stated, except fields of a feature the config switches
+    off (``fields`` is its typed projection). With ``strict`` the config must also be nothing but
+    a model config: a field the schema does not know makes it something else (a training config).
+    """
+    from cevahir_ai.keys.classify import ARCH_FDF_V1
+    from cevahir_ai.keys.schemes.arch import inactive_fields
+    stated, inactive = stated_names(config), inactive_fields(fields)
+    gaps = sorted(name for name in ARCH_FDF_V1 if name not in stated and name not in inactive)
+    findings = [f"it does not state {', '.join(gaps)}"] if gaps else []
+    if strict:
+        try:
+            config_schema().normalize_model_config(config, strict=True, legacy_profile="model_manager")
+        except ValueError as error:
+            findings.append(f"it is not a model config ({error})")
+    return findings
+
+
 def arch_of_model(model):
-    """Architecture of a live model, from its construction truth (``checkpoint_contract.model_config``)."""
+    """Architecture of a live model, from its construction truth (``checkpoint_contract.model_config``).
+
+    Returns ``(key, fields, normalised)``. Raises ``ValueError`` when the model carries no complete
+    construction record: its architecture is then unknown, which is not the same as "no target".
+    """
     stored = import_legacy("model_management.checkpoint_contract").model_config(model)
     if not stored:
-        return None, None, None
-    return arch_of_config(stored)
+        raise ValueError(f"{type(model).__name__} carries no construction record (_ctor_cfg); pass the "
+                         "CevahirNeuralNetwork itself, not a wrapper around it")
+    key, fields, normalized = arch_of_config(stored)
+    gaps = undeclared_fields(stored, fields)
+    if gaps:
+        raise ValueError(f"the construction record of {type(model).__name__} is incomplete: {'; '.join(gaps)}")
+    return key, fields, normalized
 
 
 @contextlib.contextmanager

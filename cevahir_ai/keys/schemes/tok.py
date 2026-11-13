@@ -5,6 +5,11 @@ token->id map, the ordered merges, the specials and the id-semantic config keys.
 legacy ``tokenizer_digest`` (identity_version 3) wrongly included: the ``read_only`` flag, CRLF vs
 LF bytes of ``merges.txt``, per-token frequency statistics, decode-only and diagnostic settings.
 
+The files are read as the legacy tokenizer reads them, defects included. It opens both as plain
+UTF-8, so a byte-order mark is not dropped: in ``merges.txt`` it becomes part of the first merge
+(which then never applies), in ``vocab.json`` it makes the file unreadable. A BOM is therefore
+identity here, unlike in text keys (TEXT-LF-1), where it is not.
+
 ``tok:bytebpe-v1`` is ``ByteLevelBPE.identity()`` verbatim.
 """
 import hashlib
@@ -14,18 +19,24 @@ from pathlib import Path
 from cevahir_ai.keys.canonical import structured_digest
 from cevahir_ai.keys.classify import tokenizer_semantic_config
 from cevahir_ai.keys.grammar import Key
-from cevahir_ai.keys.text import text_lf
 
 BPE_FAMILY, BPE_PIPELINE = "cevahir-bpe", "cevahir-bpe-pipeline/1"
 BPE_SPECIALS = ("<PAD>", "<UNK>", "<BOS>", "<EOS>")
 BYTE_BPE_FORMAT, BYTE_BPE_VERSION = "cevahir-byte-bpe", 1
 
 
+def legacy_text(data):
+    """File bytes as the legacy tokenizer's ``open(path, "r", encoding="utf-8")`` reads them:
+    universal newlines, and a byte-order mark kept as the character U+FEFF."""
+    return data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+
+
 def read_merges(path):
-    """Merges as ordered pairs. Same rule as ``BPEManager._read_merges_file`` (two whitespace-separated
-    fields per line, other lines skipped), on TEXT-LF-1 text, so CRLF, LF and a BOM give one result."""
+    """Merges as ordered pairs: the rule of ``BPEManager._read_merges_file`` (two whitespace-separated
+    fields per line, other lines skipped). CRLF and LF give one result. A BOM does not: the legacy
+    reader keeps it in the first merge, and so does this one."""
     pairs = []
-    for line in text_lf(Path(path).read_bytes()).decode("utf-8").split("\n"):
+    for line in legacy_text(Path(path).read_bytes()).split("\n"):
         parts = line.strip().split()
         if len(parts) == 2:
             pairs.append([parts[0], parts[1]])
@@ -36,7 +47,7 @@ def read_vocab_ids(path_or_vocab):
     """``{token: id}`` from ``vocab.json`` or a ``get_vocab()`` mapping; frequency statistics are dropped."""
     vocab = path_or_vocab
     if not isinstance(vocab, dict):
-        vocab = json.loads(text_lf(Path(path_or_vocab).read_bytes()).decode("utf-8"))
+        vocab = json.loads(legacy_text(Path(path_or_vocab).read_bytes()))     # a BOM is an error, as in the legacy reader
     ids = {}
     for token, entry in vocab.items():
         value = entry.get("id") if isinstance(entry, dict) else entry

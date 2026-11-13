@@ -229,10 +229,10 @@ def test_bpe_sem_key_depends_only_on_id_semantics(tmp_path):
     key, explain = tok.tok_bpe_sem_key(vocab, merges, config)
     assert explain["merges"] == 2 and explain["specials"] == {"<PAD>": 0, "<UNK>": 1, "<BOS>": 2, "<EOS>": 3}
     assert explain["id_config"] == {"include_whole_words": True, "lowercase": False}
-    # Not identity: read_only, runtime, decode, diagnostic and training settings; CRLF; BOM; frequency statistics.
+    # Not identity: read_only, runtime, decode, diagnostic and training settings; CRLF; frequency statistics.
     other = {**config, "read_only": False, "batch_size": 1, "use_gpu": True, "capitalize_sentence": False,
              "max_unk_ratio": 0.5, "max_iter": 1}
-    crlf = _tokenizer_files(tmp_path / "crlf", newline="\r\n", bom=True)
+    crlf = _tokenizer_files(tmp_path / "crlf", newline="\r\n")
     refreshed = {token: {**entry, "total_freq": entry["total_freq"] + 100} for token, entry in VOCAB.items()}
     stats = _tokenizer_files(tmp_path / "stats", vocab=refreshed)
     assert {tok.tok_bpe_sem_key(vocab, merges, other)[0], tok.tok_bpe_sem_key(*crlf, config)[0],
@@ -245,16 +245,33 @@ def test_bpe_sem_key_depends_only_on_id_semantics(tmp_path):
                tok.tok_bpe_sem_key(vocab, merges, {**config, "lowercase": True})[0],
                tok.tok_bpe_sem_key(vocab, merges, {**config, "brand_new_setting": 1})[0]]
     assert key not in changed and len(set(changed)) == 5
+    # A byte-order mark in merges.txt is identity too. The legacy reader keeps it inside the first
+    # merge, which then never applies: the tokenizer behaves differently, so it has another key.
+    marked = _tokenizer_files(tmp_path / "bom", bom=True)
+    assert tok.read_merges(marked[1])[0] == ["\ufeffa", "b</w>"] and tok.read_merges(merges)[0] == ["a", "b</w>"]
+    assert tok.tok_bpe_sem_key(*marked, config)[0] != key
+    # In vocab.json a BOM makes the file unreadable for the legacy reader; it is no key here either.
+    (tmp_path / "bom" / "vocab.json").write_bytes(b"\xef\xbb\xbf" + vocab.read_bytes())
+    with pytest.raises(ValueError, match="BOM"):
+        tok.tok_bpe_sem_key(*marked, config)
 
 
-def test_merges_parser_matches_the_legacy_reader_on_lf_and_crlf(tmp_path):
+def test_merges_parser_matches_the_legacy_reader_on_lf_crlf_and_bom(tmp_path):
     pytest.importorskip("torch")
     from tokenizer_management.bpe.bpe_manager import BPEManager
-    for name, newline in (("lf", "\n"), ("crlf", "\r\n")):
-        _, merges = _tokenizer_files(tmp_path / name, newline=newline)
+    from tokenizer_management.bpe.bpe_manager_utils import read_json
+    for name, newline, bom in (("lf", "\n", False), ("crlf", "\r\n", False), ("bom", "\n", True), ("bom-crlf", "\r\n", True)):
+        vocab, merges = _tokenizer_files(tmp_path / name, newline=newline, bom=bom)
         stand_in = object.__new__(BPEManager)
         stand_in.merges_file = str(merges)
-        assert tok.read_merges(merges) == [list(pair) for pair in BPEManager._read_merges_file(stand_in)]
+        legacy = [list(pair) for pair in BPEManager._read_merges_file(stand_in)]
+        assert tok.read_merges(merges) == legacy and len(legacy) == 2
+        assert legacy[0][0].startswith("\ufeff") == bom
+        assert tok.read_vocab_ids(vocab) == {token: entry["id"] for token, entry in read_json(str(vocab)).items()}
+    (tmp_path / "bom" / "vocab.json").write_bytes(b"\xef\xbb\xbf" + (tmp_path / "lf" / "vocab.json").read_bytes())
+    for reader in (lambda path: read_json(str(path)), tok.read_vocab_ids):         # both refuse a BOM in the vocabulary
+        with pytest.raises(ValueError, match="BOM"):
+            reader(tmp_path / "bom" / "vocab.json")
     tracked = ROOT / "data/merges_lib/merges.txt"
     stand_in.merges_file = str(tracked)
     assert tok.read_merges(tracked) == [list(pair) for pair in BPEManager._read_merges_file(stand_in)]
@@ -358,9 +375,12 @@ def test_arch_classification_covers_every_config_field():
     from cevahir_ai.adapters.model_build import config_schema
     from cevahir_ai.keys.classify import ARCH_EXTRA_V1, ARCH_FDF_V1, ARCH_FIELD_CLASS_V1, ARCH_SERVE_V1, ARCH_TRAIN_V1
     names = {entry.name for entry in fields(config_schema().ModelArchConfig)}
-    assert len(names) == 40 and names == set(ARCH_FDF_V1) | set(ARCH_TRAIN_V1) | set(ARCH_SERVE_V1)
-    assert (len(ARCH_FDF_V1), len(ARCH_TRAIN_V1), len(ARCH_SERVE_V1)) == (24, 8, 8)
-    assert set(_normalized()) == names | set(ARCH_EXTRA_V1) == set(ARCH_FIELD_CLASS_V1)
+    # 24 dataclass fields define the function; the 25th, pe_max_len, is the normaliser's copy of
+    # max_seq_length under the name the constructor takes (the positional table length).
+    assert len(names) == 40 and names == (set(ARCH_FDF_V1) - {"pe_max_len"}) | set(ARCH_TRAIN_V1) | set(ARCH_SERVE_V1)
+    assert (len(ARCH_FDF_V1), len(ARCH_TRAIN_V1), len(ARCH_SERVE_V1), len(ARCH_EXTRA_V1)) == (25, 8, 8, 6)
+    assert set(_normalized()) == names | set(ARCH_EXTRA_V1) | {"pe_max_len"} == set(ARCH_FIELD_CLASS_V1)
+    assert len(ARCH_FIELD_CLASS_V1) == 47 and "max_seq_length" in ARCH_SERVE_V1
 
 
 FDF_CHANGES = {
@@ -401,6 +421,82 @@ def test_every_function_defining_field_changes_the_arch_key_and_nothing_else_doe
     assert arch.arch_cfg_key(_normalized(rope_scaling_type="yarn", rope_scaling_factor=4.0))[0] != yarn
 
 
+def test_context_length_is_architecture_exactly_when_the_positional_table_is_a_weight():
+    """max_seq_length sizes pos_encoding.pe_embed.weight under pe_mode="learned"; nowhere else is it a weight."""
+    for mode in ("rope", "sinusoidal"):
+        short, long = (arch.arch_cfg_key(_normalized(pe_mode=mode, max_seq_length=n))[0] for n in (32, 64))
+        assert short == long, mode
+        assert arch.function_defining_fields(_normalized(pe_mode=mode, max_seq_length=32))["pe_max_len"] is None
+    short, short_fields = arch.arch_cfg_key(_normalized(pe_mode="learned", max_seq_length=32))
+    long, long_fields = arch.arch_cfg_key(_normalized(pe_mode="learned", max_seq_length=64))
+    assert short != long and (short_fields["pe_max_len"], long_fields["pe_max_len"]) == (32, 64)
+    assert arch.diff_fields(short_fields, long_fields) == {"pe_max_len": (32, 64)}
+    # The constructor's own name for it gives the same key (a stored model_config carries pe_max_len only).
+    stored = {name: value for name, value in _normalized(pe_mode="learned", max_seq_length=32).items() if name != "max_seq_length"}
+    from cevahir_ai.adapters.model_build import arch_of_config
+    assert arch_of_config(stored)[0] == short
+    assert arch.inactive_fields(short_fields) == {"rope_scaling_type", "rope_scaling_factor", "rope_original_max_len",
+                                                  "num_experts", "moe_top_k"}
+    with pytest.raises(ValueError, match="positional table"):
+        arch.function_defining_fields({**_normalized(pe_mode="learned"), "pe_max_len": None, "max_seq_length": None})
+
+
+def test_learned_positional_table_has_the_declared_length():
+    """The claim behind the key field, read from the constructor: the table is [pe_max_len, embed_dim]."""
+    pytest.importorskip("torch")
+    from cevahir_ai.adapters.model_build import expected_layout
+    for length in (32, 64):
+        shapes = {name: shape for name, shape, _ in expected_layout(_normalized(pe_mode="learned", max_seq_length=length))["tensors"]}
+        assert shapes["pos_encoding.pe_embed.weight"] == [length, 32]
+    for mode in ("rope", "sinusoidal"):                                # no persistent positional tensor at all
+        layouts = [expected_layout(_normalized(pe_mode=mode, max_seq_length=length)) for length in (32, 64)]
+        assert layouts[0]["tensors"] == layouts[1]["tensors"]
+        assert not [name for name, _, _ in layouts[0]["tensors"] if name.startswith("pos_encoding.")]
+
+
+def test_stated_names_follow_the_normaliser():
+    """A field counts as stated exactly where the normaliser would take its value from the config."""
+    from cevahir_ai.adapters.model_build import config_schema, stated_names, undeclared_fields
+    from cevahir_ai.keys.classify import ARCH_FDF_V1
+    normalize = config_schema().normalize_model_config
+    default = normalize({}, legacy_profile="model_manager")
+    probes = {"embed_dim": 96, "num_heads": 2, "num_layers": 3, "ffn_dim": 128, "dropout": 0.25, "max_seq_length": 48}
+    spellings = [
+        {"d_model": 96, "n_heads": 2, "n_layers": 3, "ff_dim": 128, "drop_rate": 0.25, "pe_max_len": 48},     # old names
+        {"arch": {"embed_dim": 96, "num_heads": 2}, "model": {"num_layers": 3, "ffn_dim": 128},
+         "training": {"dropout": 0.25}, "extras": {"max_seq_length": 48}},                                    # sections
+        dict(probes),                                                                                         # flat
+    ]
+    for config in spellings:
+        normalized, stated = normalize(config, legacy_profile="model_manager"), stated_names(config)
+        for name, value in probes.items():
+            assert normalized[name] == value != default[name] and name in stated, (name, config)
+        assert "pe_max_len" in stated and normalized["pe_max_len"] == 48
+        assert not stated & {"vocab_size", "pe_mode", "tie_weights", "use_moe"}
+    assert stated_names(None) == set() and stated_names({"arch": "not a mapping"}) == {"arch"}
+    # A complete declaration: what tiny_model_config() and a stored model_config carry.
+    complete = _normalized()
+    fields = arch.function_defining_fields(complete)
+    assert undeclared_fields(complete, fields) == [] and undeclared_fields(complete, fields, strict=True) == []
+    # Fields of a feature that is off need no statement; every other missing field is named.
+    off = {name: value for name, value in complete.items()
+           if name not in ("num_experts", "moe_top_k", "rope_scaling_factor", "rope_original_max_len", "pe_max_len", "max_seq_length")}
+    assert undeclared_fields(off, fields) == []
+    for name in sorted(set(ARCH_FDF_V1) - arch.inactive_fields(fields)):
+        partial = {key: value for key, value in complete.items() if key != name}
+        assert undeclared_fields(partial, arch.function_defining_fields(normalize(partial)))[0] == f"it does not state {name}", name
+    learned = _normalized(pe_mode="learned")
+    partial = {key: value for key, value in learned.items() if key not in ("pe_max_len", "max_seq_length")}
+    assert undeclared_fields(partial, arch.function_defining_fields(normalize(partial))) == ["it does not state pe_max_len"]
+    training = {"batch_size": 8, "epochs": 3}                         # a training config: every architecture field missing
+    gaps = undeclared_fields(training, arch.function_defining_fields(normalize(training)), strict=True)
+    assert len(gaps) == 1 and "num_heads" in gaps[0] and "vocab_size" in gaps[0] and "batch_size" not in gaps[0]
+    foreign = {**complete, "swa_anneal_strategy": "cos"}              # complete, but with a field no model config has
+    assert undeclared_fields(foreign, fields) == []
+    strict = undeclared_fields(foreign, fields, strict=True)
+    assert len(strict) == 1 and "not a model config" in strict[0] and "swa_anneal_strategy" in strict[0]
+
+
 def test_arch_key_resolves_derived_fields_like_the_constructor():
     from src.neural_network_module.architecture_contracts import resolve_ffn_dim
     for embed_dim in (32, 96, 192, 512, 768):
@@ -438,9 +534,13 @@ def test_arch_key_agrees_with_the_legacy_identity_check():
         assert arch.arch_cfg_key(changed)[0] != arch.arch_cfg_key(base)[0]
     validate_model_identity(Stub(base), _normalized(dropout=0.5, max_seq_length=128))
     assert arch.arch_cfg_key(_normalized(dropout=0.5, max_seq_length=128))[0] == arch.arch_cfg_key(base)[0]
-    # Documented delta: the legacy check ignores ffn_dim; the key does not.
+    # Documented deltas: the legacy check ignores ffn_dim and the length of a learned positional
+    # table (both are weight shapes); the key does not.
     validate_model_identity(Stub(base), _normalized(ffn_dim=128))
     assert arch.arch_cfg_key(_normalized(ffn_dim=128))[0] != arch.arch_cfg_key(base)[0]
+    learned = _normalized(pe_mode="learned")
+    validate_model_identity(Stub(learned), _normalized(pe_mode="learned", max_seq_length=128))
+    assert arch.arch_cfg_key(_normalized(pe_mode="learned", max_seq_length=128))[0] != arch.arch_cfg_key(learned)[0]
 
 
 def test_ctor_v0_and_serve_profile_keys():
@@ -579,6 +679,14 @@ def _facts(**statuses):
 ALL_PASS = dict(C1="pass", C3="pass", C4="pass", C5="pass", C7="pass", C9="pass", C10="pass", C11="pass", C12="pass")
 
 
+def test_every_purpose_that_loads_weights_requires_the_shape_architecture_and_dtype_checks():
+    for purpose in ("evaluate", "finetune", "resume", "serve", "publish"):
+        assert {"C4", "C5", "C7", "C9"} <= set(DEFAULT_GATE_POLICY.required[purpose]), purpose
+        for check_id in ("C4", "C5", "C9"):                              # none of them can be waved through as unknown
+            assert DEFAULT_GATE_POLICY.unknown_action(purpose, check_id) == "fail", (purpose, check_id)
+    assert "C10" in DEFAULT_GATE_POLICY.required["resume"] and "C11" in DEFAULT_GATE_POLICY.required["serve"]
+
+
 def test_gate_is_pure_and_every_purpose_has_a_requirement_row():
     assert set(DEFAULT_GATE_POLICY.required) == set(PURPOSES)
     for purpose, required in DEFAULT_GATE_POLICY.required.items():
@@ -609,7 +717,12 @@ GATE_TABLE = [
     ("evaluate", {"C7": "fail"}, "incompatible", ("C7",)),
     ("evaluate", {"C1": "fail"}, "incompatible", ("C1",)),                       # tampered file
     ("evaluate", {"C3": "fail"}, "incompatible", ("C3",)),
-    ("evaluate", {"C9": "fail", "C10": "unknown"}, "compatible", ()),            # dtype and resume state not required
+    ("evaluate", {"C10": "unknown", "C11": "fail"}, "compatible", ()),           # resume state and context not required
+    ("evaluate", {"C9": "fail"}, "incompatible", ("C9",)),                       # fp16 into fp32: never a silent cast,
+    ("finetune", {"C9": "fail"}, "incompatible", ("C9",)),                       # whatever the purpose
+    ("resume", {"C9": "fail"}, "incompatible", ("C9",)),
+    ("evaluate", {"C9": "unsupported"}, "incompatible", ("C9",)),
+    ("inspect", {"C9": "fail"}, "compatible", ()),                               # nothing is loaded
     ("finetune", {"C10": "unknown"}, "compatible", ()),
     ("finetune", {"C5": "unknown"}, "incompatible", ("C5",)),
     ("resume", {"C10": "unknown"}, "incompatible", ("C10",)),                    # weights-only export cannot resume
@@ -638,12 +751,12 @@ def test_gate_decision_table(purpose, overrides, expected, failing):
 def test_gate_missing_fact_is_unverifiable_and_policy_can_tighten():
     partial = {name: status for name, status in ALL_PASS.items() if name in ("C1", "C12")}
     verdict = check_compatibility(_facts(**partial), "evaluate")
-    assert verdict.verdict == "unverifiable" and not verdict.ok and set(verdict.failing) == {"C3", "C4", "C5", "C7"}
+    assert verdict.verdict == "unverifiable" and not verdict.ok and set(verdict.failing) == {"C3", "C4", "C5", "C7", "C9"}
     assert check_compatibility(_facts(**partial), "inspect").verdict == "compatible"
-    strict = GatePolicy(required={**DEFAULT_GATE_POLICY.required, "evaluate": DEFAULT_GATE_POLICY.required["evaluate"] + ("C9",)},
+    strict = GatePolicy(required={**DEFAULT_GATE_POLICY.required, "evaluate": DEFAULT_GATE_POLICY.required["evaluate"] + ("C11",)},
                         on_unknown={})
-    facts = _facts(**{**ALL_PASS, "C7": "unknown", "C9": "fail"})
+    facts = _facts(**{**ALL_PASS, "C7": "unknown", "C11": "fail"})
     assert check_compatibility(facts, "evaluate").verdict == "compatible-with-warnings"
-    assert check_compatibility(facts, "evaluate", strict).failing == ("C7", "C9")
+    assert check_compatibility(facts, "evaluate", strict).failing == ("C7", "C11")
     document = check_compatibility(facts, "evaluate", strict).to_dict()
     assert json.loads(json.dumps(document))["checks"][0]["name"] == "envelope.safety"

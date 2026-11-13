@@ -66,7 +66,7 @@ print(key, len(normalized), fields["num_heads"])
 """
     result = run(code)
     assert result.returncode == 0, result.stderr
-    assert result.stdout.split() == ["cev:arch:cfg-v1:3fb0c6d99edf43409bc67d104b8f87a27823b5235479dd22474df4c5458ebf67", "47", "4"]
+    assert result.stdout.split() == ["cev:arch:cfg-v1:7ccdfc96fc5c534e31826c2a568e87bbc25932d594e8e554690aa8b161aa81fe", "47", "4"]
 
 
 def test_version_entry_point():

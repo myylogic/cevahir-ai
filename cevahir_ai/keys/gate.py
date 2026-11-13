@@ -14,10 +14,14 @@ A required check with no fact at all (its provider did not run) makes the verdic
 
 Built-in policy. A missing architecture denies every purpose that loads weights into a model:
 a bare state dict of a 4-head model has the shapes of an 8-head model, so shapes prove nothing.
+The dtype check (C9) is required by every such purpose as well: ``load_state_dict`` casts an fp16
+file into an fp32 model without a word, so a dtype difference loads only when the caller allows
+the up-cast. For C7, ``unknown`` means the file carries no tokenizer identity at all (a legacy
+file, a warning for working purposes); an identity that nothing verified is a ``fail``.
 """
 from cevahir_ai.domain.verdicts import CHECKS, PURPOSES, CheckResult, GatePolicy, Verdict
 
-_WEIGHTS = ("C12", "C1", "C3", "C4", "C5", "C7")
+_WEIGHTS = ("C12", "C1", "C3", "C4", "C5", "C7", "C9")
 
 DEFAULT_GATE_POLICY = GatePolicy(
     required={
@@ -26,13 +30,14 @@ DEFAULT_GATE_POLICY = GatePolicy(
         "evaluate": _WEIGHTS,
         "finetune": _WEIGHTS,
         "resume": _WEIGHTS + ("C10",),
-        "serve": _WEIGHTS + ("C9", "C11"),
-        "publish": _WEIGHTS + ("C9", "C11"),
+        "serve": _WEIGHTS + ("C11",),
+        "publish": _WEIGHTS + ("C11",),
     },
     on_unknown={
         ("inspect", "C1"): "warn",
-        # Legacy checkpoints carry no file or weight digest. Refusing them would invalidate every
-        # existing checkpoint, so for working purposes the absence is a warning, not a denial.
+        # Legacy checkpoints carry no file digest, no weight digest and often no tokenizer identity.
+        # Refusing them would invalidate every existing checkpoint, so for working purposes the
+        # absence is a warning, not a denial.
         ("evaluate", "C1"): "warn", ("evaluate", "C3"): "warn", ("evaluate", "C7"): "warn",
         ("finetune", "C1"): "warn", ("finetune", "C3"): "warn", ("finetune", "C7"): "warn",
         ("resume", "C1"): "warn", ("resume", "C3"): "warn", ("resume", "C7"): "warn",

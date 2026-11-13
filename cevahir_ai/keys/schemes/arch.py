@@ -1,11 +1,15 @@
 """Architecture keys.
 
 ``arch:cfg-v1`` is the typed projection of a *normalised* model config (the unchanged output of
-``model_management.config_schema.normalize_model_config``) onto the 24 fields that define the
-function or the weight layout. Derived fields are resolved the way the constructor resolves them,
-and fields of inactive features are nulled, so two configs that build the same function have one
-key and two configs that differ in, say, ``num_heads`` never do, even when every weight has the
-same shape.
+``model_management.config_schema.normalize_model_config``) onto the 25 fields that define the
+function or the weight layout: 24 ``ModelArchConfig`` fields and ``pe_max_len``, the length of the
+positional table. Derived fields are resolved the way the constructor resolves them, and fields of
+inactive features are nulled, so two configs that build the same function have one key and two
+configs that differ in, say, ``num_heads`` never do, even when every weight has the same shape.
+
+``pe_max_len`` counts only for ``pe_mode="learned"``, where it is the shape of a weight
+(``pos_encoding.pe_embed.weight``). RoPE and sinusoidal tables are not weights; their context
+length is a serving matter (``max_seq_length``, check C11).
 """
 from cevahir_ai.keys.canonical import COERCE, structured_digest
 from cevahir_ai.keys.classify import ARCH_FDF_V1, ARCH_SERVE_V1
@@ -25,6 +29,24 @@ def resolve_ffn_dim(embed_dim, ffn_dim=None, *, gated=True):
     return ((raw + 255) // 256) * 256
 
 
+def inactive_fields(fields):
+    """Names of the fields that belong to a feature ``fields`` switches off.
+
+    They are nulled in the key, so two configs that differ only there have one key; and a stored
+    config need not state them to be a complete declaration.
+    """
+    inactive = set()
+    if fields["pe_mode"] != "rope":
+        inactive.add("rope_scaling_type")
+    if fields["pe_mode"] != "rope" or fields["rope_scaling_type"] in (None, "none"):
+        inactive.update(("rope_scaling_factor", "rope_original_max_len"))
+    if not fields["use_moe"]:
+        inactive.update(("num_experts", "moe_top_k"))
+    if fields["pe_mode"] != "learned":
+        inactive.add("pe_max_len")
+    return inactive
+
+
 def function_defining_fields(normalized):
     """FDF-v1 of a normalised config: resolved, conditionally nulled and typed."""
     cfg = dict(normalized)
@@ -33,12 +55,12 @@ def function_defining_fields(normalized):
     fields["num_kv_heads"] = fields["num_kv_heads"] or fields["num_heads"]
     fields["ffn_dim"] = resolve_ffn_dim(fields["embed_dim"], fields["ffn_dim"], gated=bool(fields["use_swiglu"]))
     fields["tie_weights"] = bool(fields["tie_weights"]) and fields["seq_proj_dim"] == fields["embed_dim"]
-    if fields["pe_mode"] != "rope":
-        fields["rope_scaling_type"] = None
-    if fields["rope_scaling_type"] in (None, "none"):
-        fields["rope_scaling_factor"] = fields["rope_original_max_len"] = None
-    if not fields["use_moe"]:
-        fields["num_experts"] = fields["moe_top_k"] = None
+    if fields["pe_max_len"] is None:
+        fields["pe_max_len"] = cfg.get("max_seq_length")
+    for name in inactive_fields(fields):
+        fields[name] = None
+    if fields["pe_mode"] == "learned" and fields["pe_max_len"] is None:
+        raise ValueError("a learned positional table needs its length (pe_max_len or max_seq_length)")
     return {name: COERCE[kind](fields[name], name) for name, kind in ARCH_FDF_V1.items()}
 
 

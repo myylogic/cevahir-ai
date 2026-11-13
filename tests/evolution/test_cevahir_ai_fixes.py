@@ -129,6 +129,33 @@ def test_health_check_keeps_crlf_line_endings():
 
 
 # -------------------------------------------------------------------------- publication checks
+def test_publication_build_check_fails_on_a_stale_edition_even_under_python_O(tmp_path):
+    """build_publications.py without --write is a check (PUBLISHING.md step 6); it was one bare assert."""
+    tree = ast.parse((ROOT / "scripts/build_publications.py").read_text(encoding="utf-8"))
+    assert not [node for node in ast.walk(tree) if isinstance(node, ast.Assert)]
+    scripts, publications = tmp_path / "scripts", tmp_path / "docs" / "publications"
+    scripts.mkdir()
+    (publications / "papers").mkdir(parents=True)
+    shutil.copyfile(ROOT / "scripts/build_publications.py", scripts / "build_publications.py")
+    catalog = json.loads((ROOT / "docs/publications/catalog.json").read_text(encoding="utf-8"))
+    paper = catalog["papers"][0]
+    (publications / "catalog.json").write_text(json.dumps({**catalog, "papers": [paper]}, ensure_ascii=False), encoding="utf-8")
+    source = ROOT / paper["source"]
+    (tmp_path / paper["source"]).parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, tmp_path / paper["source"])
+    command = [sys.executable, str(scripts / "build_publications.py")]
+    assert subprocess.run([*command, "--write"], cwd=tmp_path, env=ENV, capture_output=True, text=True).returncode == 0
+    edition = publications / "papers" / paper["file"]
+    for flags in ([], ["-O"]):
+        fresh = subprocess.run([sys.executable, *flags, *command[1:]], cwd=tmp_path, env=ENV, capture_output=True, text=True)
+        assert fresh.returncode == 0 and json.loads(fresh.stdout)["mode"] == "check", fresh.stderr
+    edition.write_text(edition.read_text(encoding="utf-8") + "\nedited by hand\n", encoding="utf-8")
+    for flags in ([], ["-O"], ["-OO"]):
+        stale = subprocess.run([sys.executable, *flags, *command[1:]], cwd=tmp_path, env=ENV, capture_output=True, text=True)
+        assert stale.returncode != 0 and "publication edition differs from its build" in stale.stderr, flags
+        assert "check" not in stale.stdout
+
+
 def test_check_publications_has_no_assert_statements():
     tree = ast.parse((ROOT / "scripts/check_publications.py").read_text(encoding="utf-8"))
     assert not [node for node in ast.walk(tree) if isinstance(node, ast.Assert)]

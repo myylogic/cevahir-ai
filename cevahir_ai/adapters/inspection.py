@@ -7,7 +7,11 @@ and if not, why. Levels:
   file     torch-free: file key, sidecar, safety sniff of the pickle
   weights  loads with ``weights_only=True``: envelope, keys of weights, architecture, tokenizer ...
   compat   also derives the layout the *current code* builds for the declared architecture and
-           compares against the target (model config, tokenizer, optimizer, scheduler) if given
+           compares against the target (model, tokenizer, optimizer, scheduler) if given
+
+The providers fail closed. A stored config that leaves function-defining fields to defaults is no
+declared architecture; a target model whose architecture cannot be read is an unknown target, not
+an absent one; a tokenizer identity that nothing verified is a failed check, not a warning.
 """
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -105,20 +109,31 @@ def _file_facts(report, path, expect_file):
         _fact(report, "C12", "fail", "loading needs code execution (pickled module or arbitrary object); "
               "globals outside the weights-only safe set: " + ", ".join(sniff["unsafe"][:6]))
     else:
-        _fact(report, "C12", "pass", f"weights-only loadable ({len(sniff['globals'])} pickle globals, all in the safe set)")
+        # A static scan of the pickle: it names what the file would import. Whether torch's own
+        # weights-only reader accepts the stream is established when the file is read (level weights).
+        _fact(report, "C12", "pass", f"the pickle imports {len(sniff['globals'])} globals, all in the weights-only safe set")
 
 
 def _arch_facts(report, view):
-    """Declared architecture -> keys. Returns (arch key, fields, normalised) or (None, None, None)."""
-    from cevahir_ai.adapters.model_build import arch_of_config
+    """Declared architecture -> keys. Returns (arch key, fields, normalised) or (None, None, None).
+
+    A stored config is a declaration only when it is complete (``model_build.undeclared_fields``).
+    The normaliser would fill a missing ``num_heads`` with today's default, and a default says
+    nothing about the weights in the file: such a config leaves the architecture unknown.
+    """
+    from cevahir_ai.adapters.model_build import arch_of_config, undeclared_fields
     from cevahir_ai.keys.schemes.arch import arch_ctor_v0_key
     if not view.model_config:
         return None, None, None
     try:
         key, fields, normalized = arch_of_config(view.model_config)
+        gaps = undeclared_fields(view.model_config, fields, strict=view.envelope == "tm3")
     except Exception as error:
-        report.notes.append(f"stored architecture config ({view.config_source}) is rejected by the current "
-                            f"normaliser: {type(error).__name__}: {error}")
+        gaps = [f"the current normaliser rejects it: {type(error).__name__}: {error}"]
+    if gaps:
+        reason = f"the stored config ({view.config_source}) declares no architecture: {'; '.join(gaps)}"
+        report.explain["arch_undeclared"] = reason
+        report.notes.append(reason + " (defaults are not a declaration)")
         return None, None, None
     report.keys["arch"] = key
     report.explain["arch"] = fields
@@ -138,6 +153,8 @@ def _tokenizer_facts(report, view, path):
     from cevahir_ai.adapters.tokenizers import lookup_legacy
     if view.tokenizer is None:
         report.explain["tokenizer"] = {"identity": None}
+        if view.tokenizer_problem:
+            report.explain["tokenizer"]["unverifiable"] = view.tokenizer_problem
         return None
     scheme, digest = view.tokenizer
     key = Key("tok", scheme, digest)
@@ -182,7 +199,7 @@ def _weights_facts(report, view, expect_weights):
         ok = legacy == declared
         _fact(report, "C3", "pass" if ok else "fail",
               "recomputed weight digest equals the declared CEV-11 model_sha256" if ok else
-              f"weights differ from the declared CEV-11 model_sha256 ({declared[:12]}…)", key, alias)
+              f"weights differ from the declared CEV-11 model_sha256 ({str(declared)[:12]}…)", key, alias)
     elif expect_weights is not None:
         ok = _as_hex(expect_weights) == key.digest
         _fact(report, "C3", "pass" if ok else "fail",
@@ -210,6 +227,7 @@ def _rank(name):
 
 
 def _signature_facts(report, view):
+    from cevahir_ai.adapters.envelopes import unwrap_scheduler_state
     from cevahir_ai.keys.schemes.ckpt import optim_sig_key, sched_sig_key
     from cevahir_ai.keys.torchkeys.optim import optim_content_key, sched_content_key, tstate_content_key
     if isinstance(view.optimizer_state, dict) and "param_groups" in view.optimizer_state:
@@ -218,9 +236,8 @@ def _signature_facts(report, view):
         report.explain["optimizer"] = sig
     stored = view.scheduler_state
     if isinstance(stored, dict) and stored:
-        wrapper = "TrainingScheduler" if "scheduler_type" in stored and "scheduler_state" in stored else None
-        inner = stored.get("scheduler_state") or {} if wrapper else stored
-        report.keys["sched_sig"], sig = sched_sig_key(inner, stored.get("scheduler_type") if wrapper else None, wrapper)
+        inner, scheduler_type, wrapper = unwrap_scheduler_state(stored)
+        report.keys["sched_sig"], sig = sched_sig_key(inner, scheduler_type, wrapper)
         report.keys["sched"] = sched_content_key(stored)
         report.explain["scheduler"] = sig
     if view.extra_state:
@@ -243,55 +260,77 @@ def _member_keys(report):
         report.notes.append("no model key: a servable identity needs a known architecture and a canonical tokenizer key")
 
 
-def _layout_fact(report, view, instance, target, target_arch):
-    """C4: the stored layout against the layout the current code builds."""
+def _layout_fact(report, view, instance, target):
+    """C4: the stored layout against every layout it has to fit.
+
+    The layout the current code builds for the declared architecture says whether the file is what
+    it claims to be. The layout of the live target model says what ``load_state_dict`` will be
+    asked to do: both are compared, so a load that passes C4 cannot fail half-way on a shape.
+    """
     from cevahir_ai.adapters.model_build import expected_layout
     from cevahir_ai.keys import schemas
-    from cevahir_ai.keys.torchkeys.migrate import apply_migration
-    from cevahir_ai.keys.torchkeys.wschema import broken_ties, compare_layouts, layout_keys, layout_of_module, layout_of_state
-    source = None
+    from cevahir_ai.keys.torchkeys.wschema import layout_keys, layout_of_module
+    expectations = []
     try:
         if "arch" in report.keys:
-            expected, source = expected_layout(view.model_config), "the declared architecture"
-        elif target.model is not None:
-            expected, source = layout_of_module(target.model), "the target model (no declared architecture)"
-        elif target.config is not None:
-            expected, source = expected_layout(target.config), "the target architecture (no declared architecture)"
-        else:
-            _fact(report, "C4", "unknown", "no declared architecture and no target: the expected layout is unknown")
-            return
+            expectations.append((expected_layout(view.model_config), "the declared architecture"))
+        if target.model is not None:
+            expectations.append((layout_of_module(target.model), "the target model"))
+        elif not expectations and target.config is not None:
+            expectations.append((expected_layout(target.config), "the target architecture (no declared architecture)"))
     except Exception as error:
         _fact(report, "C4", "fail", f"the current code cannot build the architecture: {type(error).__name__}: {error}")
         return
-    expected_key = layout_keys(expected)[0]
-    report.explain["expected_layout"] = {"key": str(expected_key), "source": source,
+    if not expectations:
+        _fact(report, "C4", "unknown", "no declared architecture and no target: the expected layout is unknown")
+        return
+    expected_key = layout_keys(expectations[0][0])[0]
+    report.explain["expected_layout"] = {"key": str(expected_key), "source": expectations[0][1],
                                          "preset": schemas.preset_of_layout_key(expected_key)}
+    migrated = []
+    for expected, source in expectations:
+        problem, instance = _layout_problem(report, view, instance, expected, source, target, migrated)
+        if problem:
+            _fact(report, "C4", "fail", problem, expected_key)
+            return
+    detail = "names, shapes and ties match " + " and ".join(source for _, source in expectations)
+    _fact(report, "C4", "pass", detail + "".join(f" after migration {name}" for name in migrated), expected_key)
+
+
+def _layout_problem(report, view, instance, expected, source, target, migrated):
+    """Why ``view.state`` does not fit ``expected`` (None when it does), and its possibly migrated layout."""
+    from cevahir_ai.keys import schemas
+    from cevahir_ai.keys.torchkeys.migrate import apply_migration
+    from cevahir_ai.keys.torchkeys.wschema import broken_ties, compare_layouts, layout_of_state
     findings = compare_layouts(instance, expected)
     if findings:
         for migration_id in schemas.migration_ids():
-            migrated, applied = apply_migration(view.state, schemas.load_migration(migration_id))
-            if applied and not compare_layouts(layout_of_state(migrated), expected):
+            state, applied = apply_migration(view.state, schemas.load_migration(migration_id))
+            if applied and not compare_layouts(layout_of_state(state), expected):
                 if migration_id in target.allow_migrations:
-                    view.state = migrated
+                    view.state, instance, findings = state, layout_of_state(state), []
+                    migrated.append(migration_id)
                     report.notes.append(f"migration {migration_id} applied in memory")
-                    _fact(report, "C4", "pass", f"layout matches {source} after migration {migration_id}", expected_key)
-                    return
-                findings.append(f"the layout matches after migration {migration_id}: convert the file or allow it")
+                else:
+                    findings.append(f"the layout matches after migration {migration_id}: convert the file or allow it")
                 break
-        _fact(report, "C4", "fail", f"layout differs from {source}: " + "; ".join(findings), expected_key)
-        return
+    if findings:
+        return f"layout differs from {source}: " + "; ".join(findings), instance
     ties = broken_ties(view.state, expected)
     if ties:
-        _fact(report, "C4", "fail", "tie broken in file: " + ", ".join(f"{a} != {b}" for a, b in ties), expected_key)
-        return
-    _fact(report, "C4", "pass", f"names, shapes and ties match {source}", expected_key)
+        return f"tie of {source} broken in file: " + ", ".join(f"{a} != {b}" for a, b in ties), instance
+    return None, instance
 
 
-def _arch_fact(report, view, fields, target_arch):
+def _arch_fact(report, view, fields, target_arch, target_problem):
     from cevahir_ai.keys.schemes.arch import diff_fields
     if "arch" not in report.keys:
-        _fact(report, "C5", "unknown", f"architecture unknown (envelope {report.envelope} declares none): "
-              "identical shapes do not prove an identical function")
+        why = report.explain.get("arch_undeclared") or f"envelope {report.envelope} declares none"
+        _fact(report, "C5", "unknown", f"architecture unknown ({why}): identical shapes do not prove an identical function")
+        return
+    if target_problem:
+        _fact(report, "C5", "unknown", f"the architecture of the target model is unknown ({target_problem}): "
+              "identical shapes do not prove an identical function", report.keys["arch"])
         return
     if target_arch is None:
         _fact(report, "C5", "pass", "declared architecture is accepted by the current code "
@@ -306,15 +345,37 @@ def _arch_fact(report, view, fields, target_arch):
     _fact(report, "C5", "fail", f"architecture differs from the target: {differences}", report.keys["arch"], target_key)
 
 
+_UNVERIFIED = ("a tokenizer identity that nothing verified is refused, as ModelManager.load refuses it: "
+               "supply the tokenizer")
+
+
 def _tokenizer_fact(report, view, path, target):
+    """C7. ``unknown`` only when the file carries no identity at all (a legacy file).
+
+    A file that does carry one is bound to a tokenizer. The binding is verified against the
+    tokenizer supplied, the tokenizer file next to a CEV-11 checkpoint, or the tracked registry;
+    when none of them applies the check fails. The legacy contract has the same rule
+    (``checkpoint_contract.validate_tokenizer_identity``).
+    """
     from cevahir_ai.adapters import tokenizers
     from cevahir_ai.keys.schemes.tok import tok_bytebpe_key
+    live = target.tokenizer
     if view.tokenizer is None:
-        _fact(report, "C7", "unknown", "the checkpoint carries no tokenizer identity: token semantics cannot be verified")
+        if not view.tokenizer_problem:
+            _fact(report, "C7", "unknown", "the checkpoint carries no tokenizer identity: token semantics cannot be verified")
+            return
+        declared = view.declared
+        same = (live is not None and callable(getattr(live, "identity", None))
+                and type(live).__name__ == declared.get("tokenizer_class")
+                and live.identity() == declared.get("tokenizer_identity"))
+        if same:
+            _fact(report, "C7", "pass", f"identity equals the target tokenizer ({view.tokenizer_problem}: no tokenizer key)")
+        else:
+            _fact(report, "C7", "fail", f"{view.tokenizer_problem}: " +
+                  ("the supplied tokenizer does not have the stored identity" if live is not None else _UNVERIFIED))
         return
     scheme, digest = view.tokenizer
     key = report.keys["tok"]
-    live = target.tokenizer
     if live is not None:
         is_byte = hasattr(live, "identity") and callable(live.identity)
         if scheme == "bytebpe-v1":
@@ -334,12 +395,12 @@ def _tokenizer_fact(report, view, path, target):
     if scheme == "bytebpe-v1":
         sibling = Path(path).parent / view.tokenizer_file if view.tokenizer_file else None
         if sibling is None or not sibling.is_file():
-            _fact(report, "C7", "unknown", "tokenizer file next to the checkpoint is missing; supply the tokenizer", key)
+            _fact(report, "C7", "fail", f"the tokenizer file next to the checkpoint is missing; {_UNVERIFIED}", key)
             return
         try:
             ok = tok_bytebpe_key(sibling) == key
-        except ValueError as error:
-            _fact(report, "C7", "fail", str(error), key)
+        except (ValueError, KeyError, TypeError) as error:
+            _fact(report, "C7", "fail", f"tokenizer file {sibling.name} is unreadable: {error}", key)
             return
         _fact(report, "C7", "pass" if ok else "fail",
               f"tokenizer file {sibling.name} has the declared identity" if ok else
@@ -347,52 +408,72 @@ def _tokenizer_fact(report, view, path, target):
         return
     tracked = report.explain["tokenizer"].get("tracked")
     if tracked:
-        _fact(report, "C7", "pass", f"legacy digest is the tracked tokenizer '{tracked}' "
-              f"({report.explain['tokenizer']['how']})", key, report.keys.get("tok_canonical"))
+        changed = tokenizers.tracked_files_changed(tracked)
+        if changed:
+            _fact(report, "C7", "fail", f"legacy digest names the tracked tokenizer '{tracked}', but its files in this "
+                  f"checkout are not the recorded ones: {', '.join(changed)}", key, report.keys.get("tok_canonical"))
+        else:
+            _fact(report, "C7", "pass", f"legacy digest is the tracked tokenizer '{tracked}' "
+                  f"({report.explain['tokenizer']['how']}); its files in this checkout are the recorded ones",
+                  key, report.keys.get("tok_canonical"))
     else:
-        _fact(report, "C7", "unknown", "legacy tokenizer digest is not a tracked tokenizer; supply the tokenizer to verify it", key)
+        _fact(report, "C7", "fail", f"the legacy tokenizer digest is not a tracked tokenizer; {_UNVERIFIED}", key)
 
 
 def _resume_fact(report, view, target):
+    """C10: the stored optimizer and scheduler state against the objects that would take it."""
+    from cevahir_ai.adapters.envelopes import unwrap_scheduler_state
     from cevahir_ai.keys.schemes.ckpt import optimizer_signature, scheduler_signature
     if "optim_sig" not in report.keys:
         _fact(report, "C10", "unknown", "no optimizer state: a weights-only export cannot resume training")
         return
-    problems = []
+    problems, compared = [], []
     if target.optimizer is not None:
         live, stored = optimizer_signature(target.optimizer.state_dict()), report.explain["optimizer"]
         if [g["n_params"] for g in live["groups"]] != [g["n_params"] for g in stored["groups"]]:
             problems.append("optimizer parameter groups differ")
         elif [g["hyper"] for g in live["groups"]] != [g["hyper"] for g in stored["groups"]]:
             problems.append("optimizer type differs (hyperparameter names)")
+        compared.append("optimizer")
+    stored = report.explain.get("scheduler")
     if target.scheduler is not None:
-        live_state = target.scheduler.state_dict()
-        live_type = live_state.get("scheduler_type") if "scheduler_state" in live_state else None
-        live_keys = scheduler_signature(live_state.get("scheduler_state") or {} if "scheduler_state" in live_state else live_state)
-        stored = report.explain.get("scheduler")
+        inner, live_type, _ = unwrap_scheduler_state(target.scheduler.state_dict())
+        live_keys = scheduler_signature(inner)
         if stored is None:
             problems.append("the checkpoint has no scheduler state")
         elif stored["type_keys"] != live_keys or (stored["type"] and live_type and stored["type"] != live_type):
             problems.append(f"scheduler type differs: checkpoint {stored['type'] or stored['type_keys']}, "
                             f"target {live_type or live_keys}")
+        compared.append("scheduler")
     if problems:
         _fact(report, "C10", "fail", "; ".join(problems), report.keys["optim_sig"])
-    else:
-        compared = "compared with the target" if (target.optimizer is not None or target.scheduler is not None) \
-            else "present; no target optimizer or scheduler given"
-        _fact(report, "C10", "pass", f"optimizer and scheduler state {compared}", report.keys["optim_sig"],
-              report.keys.get("sched_sig"))
+        return
+    detail = (f"{' and '.join(compared)} state fits the target" if compared
+              else "optimizer state present; no target optimizer or scheduler given")
+    if stored is not None and target.scheduler is None and target.optimizer is not None:
+        detail += "; the stored scheduler state has no target and will not be restored"
+    _fact(report, "C10", "pass", detail, report.keys["optim_sig"], report.keys.get("sched_sig"))
 
 
-def _context_fact(report, normalized, target):
-    if target.max_seq_length is None or normalized is None:
-        _fact(report, "C11", "skipped", "no serving context length given" if normalized else "trained context length unknown")
+def _context_fact(report, normalized, target, target_normalized):
+    """C11. The serving context is the one requested, else the target's own, else the trained one."""
+    if normalized is None:
+        _fact(report, "C11", "unknown", "trained context length unknown (no declared architecture)")
         return
     trained = normalized.get("max_seq_length")
+    if target.max_seq_length is not None:
+        serving, origin = target.max_seq_length, "requested"
+    elif target_normalized is not None:
+        serving, origin = target_normalized.get("max_seq_length"), "of the target"
+    else:
+        serving, origin = trained, "none requested: the trained context applies"
     scaled = normalized.get("pe_mode") == "rope" and normalized.get("rope_scaling_type") not in (None, "none")
-    ok = target.max_seq_length <= trained or scaled
+    if not isinstance(serving, int) or not isinstance(trained, int):
+        _fact(report, "C11", "unknown", f"context lengths are not comparable (serving {serving!r}, trained {trained!r})")
+        return
+    ok = serving <= trained or scaled
     _fact(report, "C11", "pass" if ok else "fail",
-          f"serving context {target.max_seq_length} vs trained {trained}" + (" (RoPE scaling declared)" if scaled else ""))
+          f"serving context {serving} ({origin}) vs trained {trained}" + (" (RoPE scaling declared)" if scaled else ""))
 
 
 def inspect_checkpoint(path, *, level="compat", purpose="evaluate", target=None, expect_file=None,
@@ -412,9 +493,23 @@ def inspect_checkpoint(path, *, level="compat", purpose="evaluate", target=None,
     return report
 
 
+def _target_arch(target):
+    """``(key, fields)``, the normalised target config and, for an unreadable target, the reason."""
+    from cevahir_ai.adapters.model_build import arch_of_config, arch_of_model
+    if target.model is not None:
+        try:
+            key, fields, normalized = arch_of_model(target.model)
+        except Exception as error:
+            return None, None, str(error) or type(error).__name__
+        return (key, fields), normalized, None
+    if target.config is not None:
+        key, fields, normalized = arch_of_config(target.config)
+        return (key, fields), normalized, None
+    return None, None, None
+
+
 def _load_facts(report, path, level, target, expect_weights):
     from cevahir_ai.adapters.envelopes import read_envelope
-    from cevahir_ai.adapters.model_build import arch_of_config, arch_of_model
     from cevahir_ai.errors import EnvelopeError
     try:
         view = read_envelope(path)
@@ -435,17 +530,11 @@ def _load_facts(report, path, level, target, expect_weights):
     if instance is not None:
         _dtype_fact(report, target)
     if level == "compat" and instance is not None:
-        target_arch = None
-        if target.model is not None:
-            key, target_fields, _ = arch_of_model(target.model)
-            target_arch = (key, target_fields) if key else None
-        elif target.config is not None:
-            key, target_fields, _ = arch_of_config(target.config)
-            target_arch = (key, target_fields)
-        _layout_fact(report, view, instance, target, target_arch)
-        _arch_fact(report, view, fields, target_arch)
+        target_arch, target_normalized, target_problem = _target_arch(target)
+        _layout_fact(report, view, instance, target)
+        _arch_fact(report, view, fields, target_arch, target_problem)
         _tokenizer_fact(report, view, path, target)
         _resume_fact(report, view, target)
-        _context_fact(report, normalized, target)
+        _context_fact(report, normalized, target, target_normalized)
     _member_keys(report)
     report.state = view.state

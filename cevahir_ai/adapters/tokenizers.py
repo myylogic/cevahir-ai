@@ -13,7 +13,6 @@ from pathlib import Path
 from cevahir_ai._compat.repo import import_legacy, repo_root
 from cevahir_ai.keys.grammar import Key
 from cevahir_ai.keys.schemes.tok import tok_bpe_sem_key, tok_bytebpe_key
-from cevahir_ai.keys.text import text_lf
 
 REGISTRY_PATH = ("governance", "registry", "tokenizers.json")
 
@@ -69,7 +68,9 @@ def legacy_candidates(core):
     if not merges:
         return {_digest(core): "as is"}
     vocab = core.get_vocab()
-    lf = text_lf(Path(merges).read_bytes())
+    # Only the newline form varies. A BOM stays where it is: the legacy reader keeps it in the first
+    # merge, so the same merges without it are another tokenizer, not a variant of this one.
+    lf = Path(merges).read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
     forms = {"LF": lf, "CRLF": lf.replace(b"\n", b"\r\n")}
     candidates = {}
     with tempfile.TemporaryDirectory(prefix="cevahir-tok-") as directory:
@@ -127,6 +128,38 @@ def tracked_registry(root=None):
     """``governance/registry/tokenizers.json``: tracked tokenizers with their canonical key and legacy aliases."""
     path = Path(root or repo_root()).joinpath(*REGISTRY_PATH)
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+_UNCHANGED = {}     # (path, size, mtime_ns) -> utf8-lf key; the tracked vocabulary is several megabytes
+
+
+def tracked_files_changed(name, root=None):
+    """Files of the tracked tokenizer ``name`` that are no longer the files the registry recorded.
+
+    The registry pins each file by its utf8-lf key, which ignores line endings (they do not change
+    the tokenizer) and a BOM (which does), so a BOM counts as a change of its own. An empty list
+    means: the tokenizer files in this checkout are the tracked tokenizer.
+    """
+    from cevahir_ai.keys.schemes.file import file_utf8lf_key
+    root = Path(root or repo_root())
+    entry = next((entry for entry in tracked_registry(root)["tokenizers"] if entry["name"] == name), None)
+    if entry is None:
+        raise KeyError(f"no tracked tokenizer named {name!r}")
+    changed = []
+    for relative, recorded in entry["files"].items():
+        path = root / relative
+        if not path.is_file():
+            changed.append(relative)
+            continue
+        stat = path.stat()
+        token = (str(path), stat.st_size, stat.st_mtime_ns)
+        if token not in _UNCHANGED:
+            with open(path, "rb") as stream:
+                bom = stream.read(3) == b"\xef\xbb\xbf"
+            _UNCHANGED[token] = None if bom else str(file_utf8lf_key(path))
+        if _UNCHANGED[token] != recorded:
+            changed.append(relative)
+    return sorted(changed)
 
 
 def lookup_legacy(saved_hex, root=None):

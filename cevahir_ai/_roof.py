@@ -12,6 +12,14 @@ EXPORTS = {
     "neural": {
         "CevahirNeuralNetwork": "src.neural_network:CevahirNeuralNetwork",
         "resolve_ffn_dim": "src.neural_network_module.architecture_contracts:resolve_ffn_dim",
+        "TransformerEncoderLayer": "src.neural_network_module.ortak_katman_module.transformer_encoder_layer:TransformerEncoderLayer",
+        "MultiHeadAttention":
+            "src.neural_network_module.ortak_katman_module.attention_manager_module.multi_head_attention:MultiHeadAttention",
+        "FeedForwardNetwork": "src.neural_network_module.ortak_katman_module.feed_forward_network:FeedForwardNetwork",
+        "MixtureOfExperts": "src.neural_network_module.ortak_katman_module.mixture_of_experts:MixtureOfExperts",
+        "RMSNorm": "src.neural_network_module.ortak_katman_module.rms_norm:RMSNorm",
+        "LanguageEmbedding": "src.neural_network_module.dil_katmani_module.language_embedding:LanguageEmbedding",
+        "PositionalEncoding": "src.neural_network_module.dil_katmani_module.positional_encoding:PositionalEncoding",
     },
     "model": {
         "ModelManager": "model_management.model_manager:ModelManager",
@@ -48,6 +56,7 @@ EXPORTS = {
         "StrictCache": "training_system.v3.data.cache_v3:DataCacheV3",
         "split_training_records": "training_system.data_split:split_training_records",
         "record_format": "training_system.record_format",
+        "DataLoaderManager": "data_loader_management.data_loader_manager:DataLoaderManager",
     },
     "training": {
         "TrainingService": "training_system.v3.core.training_service_v3:TrainingServiceV3",
@@ -55,15 +64,18 @@ EXPORTS = {
         "CheckpointManager": "training_management.v2.utils.checkpoint_manager:CheckpointManager",
         "TrainingScheduler": "training_management.v2.utils.training_scheduler:TrainingScheduler",
         "validate_training_backend": "training_management.contracts:validate_training_backend",
+        "resolve_precision": "training_management.contracts:resolve_precision",
     },
     "cognition": {
         "CognitiveManager": "cognitive_management.cognitive_manager:CognitiveManager",
         "CognitiveManagerConfig": "cognitive_management.config:CognitiveManagerConfig",
+        "types": "cognitive_management.cognitive_types",
     },
     "serving": {
         "Cevahir": "model.cevahir:Cevahir",
         "FacadeConfig": "model.cevahir:CevahirConfig",
         "create_app": "api.app_factory:create_app",
+        "ChattingManager": "chatting_management.chatting_manager:ChattingManager",
     },
 }
 
@@ -112,12 +124,15 @@ RESPONSIBILITIES = (
                    ("tokenizer_management.core.tokenizer_core", "tokenizer_management.byte_bpe"), "facade"),
     Responsibility("R-CACHE", "Training data cache", "cevahir_ai.data",
                    ("training_system.data_cache", "training_system.v3.data.cache_v3"), "facade"),
+    Responsibility("R-DATA-LOAD", "Batching and data loading", "cevahir_ai.data",
+                   ("data_loader_management.data_loader_manager",), "facade"),
     Responsibility("R-TRAIN-ORCH", "Training orchestration", "cevahir_ai.training",
                    ("training_system.v3.core.training_service_v3",), "facade"),
     Responsibility("R-TRAIN-ENGINE", "Training engine", "cevahir_ai.training",
                    ("training_management.v2.core.training_manager",), "facade"),
     Responsibility("R-COGNITION", "Cognition", "cevahir_ai.cognition", ("cognitive_management.cognitive_manager",), "facade"),
-    Responsibility("R-SERVE", "Serving", "cevahir_ai.serving", ("model.cevahir", "api.app_factory"), "facade"),
+    Responsibility("R-SERVE", "Serving", "cevahir_ai.serving",
+                   ("model.cevahir", "api.app_factory", "chatting_management.chatting_manager"), "facade"),
     Responsibility("R-AUDIT", "Registry, audit log and lineage", "cevahir_ai.store", (), "planned"),
     Responsibility("R-POLICY", "Policy and approvals", "cevahir_ai.gov", ("training_management.contracts",), "planned"),
     Responsibility("R-OPERATOR", "Operator console", "cevahir_ai.console", (), "planned"),

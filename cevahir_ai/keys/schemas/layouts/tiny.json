@@ -4,7 +4,7 @@
   "bfloat16",
   "float16"
  ],
- "arch": "cev:arch:cfg-v1:3fb0c6d99edf43409bc67d104b8f87a27823b5235479dd22474df4c5458ebf67",
+ "arch": "cev:arch:cfg-v1:7ccdfc96fc5c534e31826c2a568e87bbc25932d594e8e554690aa8b161aa81fe",
  "arch_fields": {
   "attn_logit_cap": 0.0,
   "causal_mask": true,
@@ -17,6 +17,7 @@
   "num_kv_heads": 4,
   "num_layers": 2,
   "parallel_residual": false,
+  "pe_max_len": null,
   "pe_mode": "rope",
   "pre_norm": true,
   "rope_original_max_len": null,

@@ -4,6 +4,9 @@ Checkpoints are written by the real writers (training CheckpointManager, ModelMa
 ModelSaver, the CEV-11 writer) into temporary directories, then inspected and loaded through the
 gate. Regressions pinned here: a different head count with identical shapes, a bare state dict,
 an fp16 copy, a tampered file, a stripped tokenizer identity, a pickled module.
+
+The holes an independent review found in the first version of the gate are pinned next door, in
+``test_cevahir_ai_gate_review.py``.
 """
 import copy
 import hashlib
@@ -35,8 +38,15 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 STUDY = ROOT / "research" / "living_learning_paradigm_2026_11_13"
 BASES = STUDY / "results" / "bases"
 TOKENS = torch.tensor([[1, 7, 9, 3]])
+REGISTRY = json.loads((ROOT / "governance/registry/tokenizers.json").read_text(encoding="utf-8"))["tokenizers"][0]
+# What production training stamps on a checkpoint for the tokenizer tracked in this repository
+# (a writable core: no read_only key), and the fingerprint of a tokenizer nobody has.
+TRACKED_TOK = next(alias["key"].rsplit(":", 1)[1] for alias in REGISTRY["aliases"] if alias["how"] == "read_only=absent, merges=LF")
 LEGACY_TOK = "ab" * 32
 PURPOSES = ("inspect", "evaluate", "finetune", "resume", "serve", "publish", "export")
+# Loading a file that carries no tokenizer identity warns, as the legacy loader does; the tests
+# that are about that warning assert it with pytest.warns.
+pytestmark = pytest.mark.filterwarnings("ignore:checkpoint has no tokenizer identity:RuntimeWarning")
 
 
 def manager(seed=0, optimizer=True, **overrides):
@@ -70,12 +80,15 @@ def files(tmp_path_factory):
     source = manager()
     paths = {"source": source}
     trained = manager()
-    trained.model._tokenizer_identity = LEGACY_TOK                 # what the training service stamps on the model
-    extra = {"format_version": 1, "tokenizer_identity": LEGACY_TOK,
-             "scheduler": {"scheduler_type": "cosine", "scheduler_state": trained.scheduler.state_dict()},
-             "loop": {"global_step": 3}, "best_val_loss": 1.0, "rng": {"torch": torch.get_rng_state()}}
-    paths["tm2"] = CheckpointManager(checkpoint_model_dir=str(directory / "tm2")).save(
-        trained.model, trained.optimizer, 3, metric=1.5, extra_state=extra)
+    for _ in range(7):                                             # a scheduler that has a history to restore
+        trained.scheduler.step(1.0)
+    for name, identity in (("tm2", TRACKED_TOK), ("tm2-foreign", LEGACY_TOK)):
+        trained.model._tokenizer_identity = identity               # what the training service stamps on the model
+        extra = {"format_version": 1, "tokenizer_identity": identity,
+                 "scheduler": {"scheduler_type": "ReduceLROnPlateau", "scheduler_state": trained.scheduler.state_dict()},
+                 "loop": {"global_step": 3}, "best_val_loss": 1.0, "rng": {"torch": torch.get_rng_state()}}
+        paths[name] = CheckpointManager(checkpoint_model_dir=str(directory / name)).save(
+            trained.model, trained.optimizer, 3, metric=1.5, extra_state=extra)
     paths["mm-save"] = source.save(str(directory / "mm.pth"), epoch=2)
     paths["saver-4.1"] = ModelSaver.save_checkpoint(source.model, optimizer=source.optimizer, scheduler=source.scheduler,
                                                     epoch=1, save_dir=str(directory / "saver"))
@@ -105,9 +118,10 @@ def test_envelope_reader_recognises_every_shape(files):
         assert view.envelope == name and len(view.state) == 25
     assert read_envelope(files["cev11-ledger-v1"]).envelope == "cev11-ledger-v1"
     tm2 = read_envelope(files["tm2"])
-    assert tm2.tokenizer == ("legacy-v3", LEGACY_TOK) and tm2.epoch == 3 and tm2.metric == 1.5
+    assert tm2.tokenizer == ("legacy-v3", TRACKED_TOK) and tm2.epoch == 3 and tm2.metric == 1.5
+    assert read_envelope(files["tm2-foreign"]).tokenizer == ("legacy-v3", LEGACY_TOK)
     assert tm2.config_source == "model_config" and tm2.model_config["num_heads"] == 4
-    assert tm2.optimizer_state["param_groups"] and tm2.scheduler_state["scheduler_type"] == "cosine"
+    assert tm2.optimizer_state["param_groups"] and tm2.scheduler_state["scheduler_type"] == "ReduceLROnPlateau"
     saver = read_envelope(files["saver-4.1"])
     assert saver.declared["cevahir_version"] == "4.1" and saver.declared["checkpoint_format"] == 2
     assert any("self-referential" in note for note in saver.notes)
@@ -126,6 +140,13 @@ def test_tm3_fixture_has_the_key_set_of_the_real_v3_writer(files):
     assert declared == set(tm3_envelope(files["source"]))
     view = read_envelope(files["tm3"])
     assert view.epoch == 4 and view.optimizer_state["param_groups"] and view.tokenizer is None
+
+
+def assert_same_state(model, before):
+    live = model.state_dict()
+    assert sorted(live) == sorted(before)
+    for name, tensor in live.items():
+        assert torch.equal(tensor, before[name]), name
 
 
 def test_envelope_reader_agrees_with_the_legacy_unpacker_on_the_shapes_it_knows(files):
@@ -176,6 +197,7 @@ W, C, X = "compatible-with-warnings", "compatible", "incompatible"
 MATRIX = {
     #             inspect evaluate finetune resume serve publish export
     "tm2":       (W,      W,       W,       W,     X,    X,      X),
+    "tm2-foreign": (W,    X,       X,       X,     X,    X,      X),   # a tokenizer identity nothing verifies
     "mm-save":   (W,      W,       W,       W,     X,    X,      X),
     "saver-4.1": (C,      W,       W,       W,     X,    X,      C),
     "bare":      (W,      X,       X,       X,     X,    X,      X),
@@ -199,6 +221,11 @@ def test_envelope_purpose_matrix(files, name):
         assert inspect_checkpoint(files[name], purpose="resume").verdict.failing == ("C10",)
     if name == "saver-4.1":
         assert report.facts["C1"].status == "pass" and report.intact == "yes"
+    if name == "tm2":
+        assert report.facts["C7"].status == "pass" and "tracked tokenizer 'default'" in report.facts["C7"].detail
+        assert report.verdict.warnings == ("C1", "C3")
+    if name == "tm2-foreign":
+        assert report.verdict.failing == ("C7",) and "nothing verified" in report.verdict.summary_en
 
 
 def test_same_weights_have_one_key_in_every_container(files):
@@ -279,6 +306,10 @@ def test_fp16_weights_are_not_silently_cast(files, tmp_path):
     report = inspect_checkpoint(path, purpose="serve")
     assert report.facts["C9"].status == "fail" and "float16" in report.facts["C9"].detail and "C9" in report.verdict.failing
     assert report.keys["weights"] != inspect_checkpoint(files["mm-save"], purpose="inspect").keys["weights"]
+    for purpose in ("evaluate", "finetune", "resume"):                                # not only when serving
+        assert "C9" in inspect_checkpoint(path, purpose=purpose).verdict.failing, purpose
+    with pytest.raises(IncompatibleCheckpoint, match="loading would cast silently"):
+        open_checkpoint(path)
     allowed = inspect_checkpoint(path, purpose="serve", target=Target(allow_cast=True))
     assert allowed.facts["C9"].status == "pass"
     down = inspect_checkpoint(files["mm-save"], purpose="serve", target=Target(dtype="float16", allow_cast=True))
@@ -320,7 +351,8 @@ def test_cev11_weight_digest_and_tokenizer_file_are_verified(files, tmp_path):
     other.save(directory / "model.tokenizer.json")
     assert inspect_checkpoint(path, purpose="evaluate").facts["C7"].status == "fail"
     (directory / "model.tokenizer.json").unlink()
-    assert inspect_checkpoint(path, purpose="evaluate").facts["C7"].status == "unknown"
+    missing = inspect_checkpoint(path, purpose="evaluate")                            # bound to a tokenizer nobody showed
+    assert missing.facts["C7"].status == "fail" and "missing" in missing.facts["C7"].detail and not missing.verdict.ok
     live = inspect_checkpoint(path, purpose="evaluate", target=Target(tokenizer=files["cev11_tokenizer"]))
     assert live.facts["C7"].status == "pass"
     assert inspect_checkpoint(path, purpose="evaluate", target=Target(tokenizer=other)).facts["C7"].status == "fail"
@@ -433,9 +465,11 @@ def test_post_load_attestation_detects_a_substitution(files, monkeypatch):
             self.output_norm.scale.add_(1.0)
         return result
 
+    before = copy.deepcopy(target.model.state_dict())
     monkeypatch.setattr(type(target.model), "load_state_dict", corrupt)
     with pytest.raises(AttestationError, match="output_norm.scale"):
         open_checkpoint(files["tm2"], model=target.model)
+    assert_same_state(target.model, before)                                           # and nothing unverified stays behind
 
 
 # -------------------------------------------------------------- legacy tokenizer identities
@@ -513,7 +547,7 @@ def test_checkpoint_with_a_legacy_tokenizer_identity_resolves_to_the_canonical_k
     live = inspect_checkpoint(path, purpose="evaluate", target=Target(tokenizer=core))
     assert live.facts["C7"].status == "pass" and "drift" in live.facts["C7"].detail
     assert live.keys["model"] == offline.keys["model"]
-    unknown = inspect_checkpoint(files["tm2"], purpose="evaluate", target=Target(tokenizer=core))
+    unknown = inspect_checkpoint(files["tm2-foreign"], purpose="evaluate", target=Target(tokenizer=core))
     assert unknown.facts["C7"].status == "fail"                                        # "abab…" is not this tokenizer
     wrong_family = inspect_checkpoint(path, purpose="evaluate", target=Target(tokenizer=files["cev11_tokenizer"]))
     assert wrong_family.facts["C7"].status == "fail"
@@ -523,9 +557,12 @@ def test_checkpoint_with_a_legacy_tokenizer_identity_resolves_to_the_canonical_k
 def test_cli_inspect_answers_the_four_questions(files, capsys):
     assert keys_cli(["inspect", files["tm2"]]) == 0
     text = capsys.readouterr().out
-    for expected in ("intact      unknown", "envelope    tm2", f"tokenizer   cev:tok:legacy-v3:{LEGACY_TOK}",
-                     "arch        cev:arch:cfg-v1:", "heads=4", "verdict     compatible-with-warnings", "uyarılarla uyumlu"):
+    for expected in ("intact      unknown", "envelope    tm2", f"tokenizer   cev:tok:legacy-v3:{TRACKED_TOK}",
+                     f"canonical {REGISTRY['key']}  (tracked: default)", "arch        cev:arch:cfg-v1:", "heads=4",
+                     "verdict     compatible-with-warnings", "uyarılarla uyumlu"):
         assert expected in text
+    assert keys_cli(["inspect", files["tm2-foreign"]]) == 5
+    assert "C7 tok.identity" in capsys.readouterr().out
     assert keys_cli(["inspect", files["tm2"], "--target", "cev11-primary"]) == 5
     text = capsys.readouterr().out
     assert "verdict     incompatible" in text and "why not:" in text and "num_layers: checkpoint=2, target=6" in text
@@ -549,7 +586,7 @@ def test_cli_verify_explain_diff_and_schemes(files, tmp_path, capsys):
     assert keys_cli(["verify", files["mm-save"], str(report.keys["file"])]) == 5
     assert keys_cli(["verify", files["tm2"], "not-a-key"]) == 2
     capsys.readouterr()
-    assert keys_cli(["explain", str(report.keys["tok"])]) == 0
+    assert keys_cli(["explain", f"cev:tok:legacy-v3:{LEGACY_TOK}"]) == 0
     explained = capsys.readouterr().out
     assert "legacy" in explained and "not a tracked tokenizer" in explained
     tracked = tokenizers.tracked_registry()["tokenizers"][0]
