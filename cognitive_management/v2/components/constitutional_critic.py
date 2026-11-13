@@ -49,6 +49,7 @@ from cognitive_management.v2.config.constitutional_principles import (
     detect_principle_language,
     get_principles,
 )
+from cognitive_management.v2.utils.verdict_parsing import parse_violation_verdict
 
 
 class ModelAPI(Protocol):
@@ -132,19 +133,22 @@ class ConstitutionalCritic:
             principles: Optional explicit principles (default: principles_for)
             
         Returns:
-            Tuple of (revised_text, violations_dict)
+            Tuple of (revised_text, violations_dict). ``violations_dict["unparseable"]``
+            counts principles whose judge reply could not be read; they abstain and
+            never cause a revision.
         """
         if not draft_text or not draft_text.strip():
-            return draft_text, {"violations": [], "revised": False}
+            return draft_text, {"violations": [], "revised": False, "unparseable": 0}
         
         principles = principles or self.principles_for(draft_text, user_message)
         
         # Evaluate against principles
-        violations = self._evaluate_principles(draft_text, principles, user_message)
+        stats: Dict[str, int] = {"unparseable": 0}
+        violations = self._evaluate_principles(draft_text, principles, user_message, stats)
         
         if not violations:
             # No violations - return original text
-            return draft_text, {"violations": [], "revised": False}
+            return draft_text, {"violations": [], "revised": False, "unparseable": stats["unparseable"]}
         
         # Apply constitutional revision
         revised_text = self._apply_constitutional_revision(
@@ -163,13 +167,15 @@ class ConstitutionalCritic:
                 for v in violations
             ],
             "revised": True,
+            "unparseable": stats["unparseable"],
         }
     
     def _evaluate_principles(
         self,
         text: str,
         principles: List[str],
-        user_message: str
+        user_message: str,
+        stats: Optional[Dict[str, int]] = None,
     ) -> List[PrincipleViolation]:
         """
         Evaluate text against constitutional principles.
@@ -178,6 +184,8 @@ class ConstitutionalCritic:
             text: Text to evaluate
             principles: List of principles to check
             user_message: Original user message
+            stats: Optional counter; ``stats["unparseable"]`` is incremented for
+                every principle whose judge reply could not be read
             
         Returns:
             List of violations
@@ -186,6 +194,11 @@ class ConstitutionalCritic:
         
         for principle in principles:
             violation_score = self._evaluate_principle(text, principle, user_message)
+            if violation_score is None:
+                # Unreadable judge reply: abstain, never a violation.
+                if stats is not None:
+                    stats["unparseable"] = stats.get("unparseable", 0) + 1
+                continue
             
             # Apply strictness threshold
             threshold = 1.0 - self.strictness  # Higher strictness = lower threshold
@@ -211,7 +224,7 @@ class ConstitutionalCritic:
         text: str,
         principle: str,
         user_message: str
-    ) -> float:
+    ) -> Optional[float]:
         """
         Evaluate text against a single principle.
         
@@ -223,7 +236,8 @@ class ConstitutionalCritic:
             user_message: Original user message
             
         Returns:
-            Violation score (0.0 = no violation, 1.0 = severe violation)
+            Violation score (0.0 = no violation, 1.0 = severe violation), or
+            None when the model's reply cannot be read (abstention)
         """
         try:
             # Use model to evaluate principle adherence
@@ -285,40 +299,22 @@ Bu cevap metni yukarıdaki prensibe ne kadar uygun?
 0.0-1.0 arası bir skor ver (0.0 = tamamen uygun, 1.0 = ciddi ihlal).
 Sadece sayıyı yaz:"""
     
-    def _parse_violation_score(self, response: str) -> float:
+    def _parse_violation_score(self, response: str) -> Optional[float]:
         """
         Parse violation score from model response.
+        
+        A score ("0.8", "0,8", "%80", "8/10") is used first; otherwise the verbal
+        verdict is read with negations and hedges ("uygun değil, ihlal var" -> 0.8,
+        "ihlal yok" -> 0.0, "kısmen" -> 0.5). See verdict_parsing.
         
         Args:
             response: Model response
             
         Returns:
-            Violation score (0.0-1.0)
+            Violation score (0.0-1.0), or None when the reply is empty or cannot
+            be read. None is an abstention, not a moderate violation.
         """
-        # Extract number from response
-        import re
-        numbers = re.findall(r'\d+\.?\d*', response)
-        
-        if numbers:
-            try:
-                score = float(numbers[0])
-                # Normalize to 0.0-1.0 range
-                if score > 1.0:
-                    score = score / 10.0  # Assume scale of 10
-                return min(1.0, max(0.0, score))
-            except ValueError:
-                pass
-        
-        # Fallback: parse keywords
-        response_lower = response.lower()
-        if "uygun" in response_lower or "compliant" in response_lower or "good" in response_lower:
-            return 0.2
-        elif "kısmen" in response_lower or "partial" in response_lower or "moderate" in response_lower:
-            return 0.5
-        elif "ihlal" in response_lower or "violation" in response_lower or "bad" in response_lower:
-            return 0.8
-        else:
-            return 0.5  # Default: moderate
+        return parse_violation_verdict(response or "").score
     
     def _evaluate_principle_heuristic(
         self,

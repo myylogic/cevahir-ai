@@ -9,9 +9,11 @@ message with ``Backend("untrained")`` (1 answer, 28 constitutional evaluations,
 28 suggestions, 1 constitutional revision, 1 self-refine, plus 3
 self-consistency samples and 2 debate thoughts on routed messages) and 31-34
 with ``Backend("compliant")``, which also made 2 outbound Wikipedia attempts per
-message. Now: 2 calls per message for the lean default; 31-33 and 17 for the
-full profile. ``test_calls_per_message_lean_default_and_full_profile`` measures
-and prints the current numbers.
+message. Now: 2 calls per message for the lean default; 16-18 and 17 for the
+full profile (an unreadable judge reply abstains, so the untrained backend no
+longer adds 14 suggestions and a constitutional revision; 31-33 before that).
+``test_calls_per_message_lean_default_and_full_profile`` measures and prints the
+current numbers.
 """
 import collections
 from datetime import datetime, timedelta

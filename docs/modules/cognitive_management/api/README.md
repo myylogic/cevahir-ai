@@ -141,6 +141,7 @@ class MemoryConfig:
     max_history_tokens: int = 3072       # Oturum geçmişi token sınırı
     enable_session_summary: bool = True
     enable_salient_pruning: bool = True
+    episodic_max_scopes: int = 1024      # Süreç içinde tutulan kapsam sayısı (en eski yazılan önce düşer)
 
     # Vektör bellek ve RAG
     enable_vector_memory: bool = True
@@ -160,7 +161,7 @@ class MemoryConfig:
     # RAG
     enable_rag: bool = True
     rag_top_k: int = 3                   # Kaç bellek öğesi çekilir
-    rag_score_threshold: float = 0.7     # Minimum cosine benzerlik skoru
+    rag_score_threshold: float = 0.893   # (1+cos)/2 puanının iki depoda da alt sınırı: 0.893 → cos ≥ 0.786
 
     # Vektör arama
     vector_search_top_k: int = 5

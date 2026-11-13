@@ -65,7 +65,7 @@ Wikipedia claim checks query at most three claims per critic pass (one pass by d
 and start no request once a ten-second budget is spent. Each request's timeout is capped by what is left,
 but DNS lookup is not covered, so the budget is a deadline rather than a hard wall-clock limit.
 With a counting fake model, `tests/evolution/test_cognitive_defaults.py` measures
-2 generation calls per plain message for lean and 17–33 for full;
+2 generation calls per plain message for lean and 16–18 for full;
 before these fixes the defaults cost 31–64.
 A failed or unavailable entropy probe is recorded as `None` and routes the message to `direct`;
 the answer's token budget and temperature then use the middle of the entropy scale (1.5 of 0–3)

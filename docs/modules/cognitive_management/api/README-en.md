@@ -141,6 +141,7 @@ class MemoryConfig:
     max_history_tokens: int = 3072       # Session history token limit
     enable_session_summary: bool = True
     enable_salient_pruning: bool = True
+    episodic_max_scopes: int = 1024      # In-process scopes kept (least recently written dropped first)
 
     # Vector memory and RAG
     enable_vector_memory: bool = True
@@ -160,7 +161,7 @@ class MemoryConfig:
     # RAG
     enable_rag: bool = True
     rag_top_k: int = 3                   # Number of memory items to retrieve
-    rag_score_threshold: float = 0.7     # Minimum cosine similarity score
+    rag_score_threshold: float = 0.893   # Minimum (1+cos)/2 score in both stores: 0.893 means cos >= 0.786
 
     # Vector search
     vector_search_top_k: int = 5

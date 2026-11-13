@@ -112,6 +112,10 @@ class RAGEnhancer:
                 top_k=top_k
             )
         
+        # Records the prompt already carries (recent history, the question itself)
+        # are not repeated as references; each remaining record appears once.
+        retrieved_items = self._new_items(retrieved_items, existing_context)
+        
         # If no retrieved items, return existing context
         if not retrieved_items:
             return existing_context or user_message
@@ -179,9 +183,14 @@ class RAGEnhancer:
         """
         parts = []
         
+        # A context built by build_context already ends with the current user turn:
+        # put the references before it instead of repeating the question.
+        split = self._split_question(existing_context, user_message)
+        head = split[0] if split else existing_context
+        
         # Add existing context if present
-        if existing_context and existing_context.strip():
-            parts.append(existing_context)
+        if head and head.strip():
+            parts.append(head)
         
         # Add retrieved context
         if retrieved_context and retrieved_context.strip():
@@ -192,13 +201,44 @@ class RAGEnhancer:
                 "[END RETRIEVED CONTEXT]"
             )
         
-        # Add user message
-        parts.append(f"[CURRENT USER MESSAGE]\n{user_message}")
+        # Add user message (exactly once, last)
+        parts.append(split[1] if split else f"[CURRENT USER MESSAGE]\n{user_message}")
         
         # Combine with separator
         enhanced_context = "\n\n".join(parts)
         
         return enhanced_context
+    
+    @staticmethod
+    def _new_items(
+        retrieved_items: List[Dict[str, Any]],
+        existing_context: Optional[str],
+    ) -> List[Dict[str, Any]]:
+        """Retrieved items whose text is not already in the prompt, each once."""
+        present = " ".join((existing_context or "").split())
+        seen, fresh = set(), []
+        for item in retrieved_items or []:
+            text = " ".join(str(item.get("content", "")).split())
+            if not text or text in seen or (present and text in present):
+                continue
+            seen.add(text)
+            fresh.append(item)
+        return fresh
+    
+    @staticmethod
+    def _split_question(existing_context: Optional[str], user_message: str):
+        """
+        (head, question_turn) when ``existing_context`` ends with the current user
+        turn as context_pruning.build_context renders it ("[USER]\n<message>");
+        otherwise None.
+        """
+        if not existing_context or not user_message or not user_message.strip():
+            return None
+        turn = f"[USER]\n{user_message.strip()}"
+        body = existing_context.rstrip()
+        if body.endswith(turn):
+            return body[:-len(turn)].rstrip(), turn
+        return None
     
     def enhance_context_minimal(
         self,
@@ -234,6 +274,7 @@ class RAGEnhancer:
             top_k=top_k
         )
         
+        retrieved_items = self._new_items(retrieved_items, existing_context)
         if not retrieved_items:
             return existing_context or user_message
         
@@ -253,7 +294,12 @@ class RAGEnhancer:
         # Create minimal format
         references_text = " | ".join(references)
         
-        # Combine
+        # Combine (the current message closes the prompt exactly once)
+        split = self._split_question(existing_context, user_message)
+        if split:
+            head, question = split
+            prefix = f"{head}\n\n" if head else ""
+            return f"{prefix}[Relevant context: {references_text}]\n\n{question}"
         if existing_context:
             return f"{existing_context}\n\n[Relevant context: {references_text}]\n\n{user_message}"
         else:

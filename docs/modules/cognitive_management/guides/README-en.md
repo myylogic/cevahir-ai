@@ -300,7 +300,7 @@ config.memory.vector_store_provider = "chroma"
 config.memory.vector_store_path = "./memory/episodic_store"  # Persist to disk
 config.memory.enable_rag = True
 config.memory.rag_top_k = 3
-config.memory.rag_score_threshold = 0.7
+config.memory.rag_score_threshold = 0.893     # (1+cos)/2 scale: cos >= 0.786 (the default)
 ```
 
 ### In-Memory (Development / Testing)
