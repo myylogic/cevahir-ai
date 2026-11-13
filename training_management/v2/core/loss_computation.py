@@ -38,7 +38,7 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 """
 
 import math
-from typing import Tuple, Optional, Any
+from typing import Tuple, Optional, Any, NamedTuple
 import torch
 import torch.nn.functional as F
 
@@ -91,7 +91,32 @@ class LossComputation:
             pad_id: Padding token ID (None if no padding)
             
         Returns:
-            Tuple of (loss_tensor, accuracy_float, perplexity_float)
+            Tuple of (loss_tensor, accuracy_float, perplexity_float). ``loss_tensor`` is the
+            training objective (it drives backward); the perplexity is exp(min(20, NLL)) of
+            the plain masked negative log-likelihood, not of the objective. Use
+            compute_loss_details() to also get that NLL.
+
+        Raises:
+            ValueError: If shapes don't match
+        """
+        details = self.compute_loss_details(logits, targets, pad_id)
+        return details.loss, details.accuracy, details.perplexity
+
+    def compute_loss_details(
+        self,
+        logits: torch.Tensor,
+        targets: torch.Tensor,
+        pad_id: Optional[int] = None,
+    ) -> "LossDetails":
+        """
+        Compute the training objective together with the plain masked NLL.
+
+        ``loss`` is the differentiable objective: cross-entropy with the criterion's class
+        weights and label smoothing, minus ``entropy_coeff`` x mean prediction entropy.
+        ``nll`` is the unweighted, unsmoothed mean negative log-likelihood of the valid
+        targets, without the entropy term, and ``perplexity`` is exp(min(20, nll)).
+        Reports use ``nll`` so that "loss" and "perplexity" keep their standard meaning
+        when the objective is regularized; the objective itself is unchanged.
             
         Raises:
             ValueError: If shapes don't match
@@ -161,23 +186,37 @@ class LossComputation:
         mask_flat = mask.view(-1).float()
         denom = mask_flat.sum().clamp_min(1.0)
         loss = (loss_flat * mask_flat).sum() / denom
+        token_objective = loss
         entropy_coeff = float(getattr(self.criterion, "entropy_coeff", 0.0))
+        log_probs = None
         if entropy_coeff:
             log_probs = F.log_softmax(logits_flat, dim=-1)
             entropy = -(log_probs.exp() * log_probs).sum(dim=-1)
             loss = loss - entropy_coeff * (entropy * mask_flat).sum() / denom
         
-        # Compute accuracy (masked)
         with torch.no_grad():
+            # Compute accuracy (masked)
             preds = torch.argmax(logits, dim=-1)
             correct = (preds == targets) & mask
             acc = correct.float().sum().item() / float(denom.item())
         
-        # Compute perplexity
-        loss_val = float(loss.item())
-        ppl = math.exp(min(20.0, loss_val)) if math.isfinite(loss_val) else float("inf")
+            # Plain NLL for reporting. Without class weights and label smoothing the
+            # per-token cross-entropy above already is -log p(target); otherwise read
+            # -log p(target) from the log-softmax (reused from the entropy term if present).
+            if label_smoothing == 0 and (weight is None or bool(torch.all(weight == 1))):
+                nll = float(token_objective.item())
+            else:
+                picked = targets_flat.clamp_min(0).unsqueeze(1)
+                if log_probs is not None:
+                    nll_flat = -log_probs.gather(1, picked).squeeze(1)
+                else:
+                    nll_flat = torch.logsumexp(logits_flat, dim=-1) - logits_flat.gather(1, picked).squeeze(1)
+                nll = float(((nll_flat * mask_flat).sum() / denom).item())
         
-        return loss, float(acc), float(ppl)
+        # Perplexity of the plain NLL (not of the regularized objective)
+        ppl = math.exp(min(20.0, nll)) if math.isfinite(nll) else float("inf")
+
+        return LossDetails(loss, float(acc), float(ppl), nll)
     
     def compute_accuracy(
         self,
@@ -208,4 +247,12 @@ class LossComputation:
             acc = correct.float().sum().item() / mask.float().sum().clamp_min(1.0).item()
             
             return float(acc)
+
+
+class LossDetails(NamedTuple):
+    """Result of LossComputation.compute_loss_details()."""
+    loss: torch.Tensor  # differentiable training objective (drives backward)
+    accuracy: float  # masked next-token accuracy
+    perplexity: float  # exp(min(20, nll))
+    nll: float  # plain masked mean negative log-likelihood: the reported loss
 

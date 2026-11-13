@@ -148,7 +148,7 @@
       "path": "training_management/v2/core/training_loop.py",
       "symbol": "TrainingLoop.train_epoch",
       "chapter": "tr/06-egitim.md",
-      "line": 283
+      "line": 310
     },
     {
       "path": "training_management/v2/core/loss_computation.py",
@@ -178,7 +178,19 @@
       "path": "training_management/v2/core/training_loop.py",
       "symbol": "TrainingLoop._finish_update",
       "chapter": "tr/06-egitim.md",
-      "line": 246
+      "line": 252
+    },
+    {
+      "path": "training_management/v2/core/loss_computation.py",
+      "symbol": "LossComputation.compute_loss_details",
+      "chapter": "tr/06-egitim.md",
+      "line": 105
+    },
+    {
+      "path": "training_management/v2/utils/training_scheduler.py",
+      "symbol": "mark_embedding_param_groups",
+      "chapter": "tr/06-egitim.md",
+      "line": 67
     },
     {
       "path": "training_management/contracts.py",
@@ -256,19 +268,31 @@
       "path": "training_management/v2/core/training_manager.py",
       "symbol": "TrainingManager._checkpoint_extra_state",
       "chapter": "tr/07-model-yasam-dongusu.md",
-      "line": 274
+      "line": 280
     },
     {
       "path": "training_management/v2/core/training_manager.py",
       "symbol": "TrainingManager.resume_from_checkpoint",
       "chapter": "tr/07-model-yasam-dongusu.md",
-      "line": 293
+      "line": 300
+    },
+    {
+      "path": "training_management/v2/core/training_manager.py",
+      "symbol": "TrainingManager._apply_continuation_learning_rate",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 367
+    },
+    {
+      "path": "training_management/v2/utils/training_scheduler.py",
+      "symbol": "apply_continuation_learning_rate",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 498
     },
     {
       "path": "training_system/v3/core/training_service_v3.py",
       "symbol": "TrainingServiceV3._find_checkpoint",
       "chapter": "tr/07-model-yasam-dongusu.md",
-      "line": 545
+      "line": 547
     },
     {
       "path": "model_management/model_manager.py",

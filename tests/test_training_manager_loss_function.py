@@ -260,10 +260,15 @@ class TestTrainingManagerLossFunction:
             "KRİTİK HATA: TrainingManager criterion kullanmıyor, düz F.cross_entropy kullanıyor"
         )
 
-        # Accuracy ve perplexity aynı (maskeli) loss'tan türetilir
+        # Perplexity eğitim amacından (EOS weight + label smoothing) değil, aynı maskeli hedeflerin
+        # yalın NLL'inden türetilir; böylece exp(NLL) standart anlamını korur.
         assert 0.0 <= acc_tm <= 1.0, f"Accuracy aralık dışı: {acc_tm}"
-        assert math.isclose(ppl_tm, math.exp(min(20.0, loss_tm.item())), rel_tol=1e-6), (
-            f"Perplexity ({ppl_tm}) loss'tan türetilmemiş (exp(loss)={math.exp(min(20.0, loss_tm.item()))})"
+        plain_nll = loss_f_cross_entropy.item()  # PAD maskeli, ağırlıksız, smoothing'siz NLL
+        assert math.isclose(ppl_tm, math.exp(min(20.0, plain_nll)), rel_tol=1e-6), (
+            f"Perplexity ({ppl_tm}) yalın NLL'den türetilmemiş (exp(NLL)={math.exp(min(20.0, plain_nll))})"
+        )
+        assert not math.isclose(ppl_tm, math.exp(min(20.0, loss_tm.item())), rel_tol=1e-6), (
+            "Perplexity hâlâ EOS weight / label smoothing içeren eğitim amacından türetiliyor"
         )
 
     def test_gradient_impact(self):

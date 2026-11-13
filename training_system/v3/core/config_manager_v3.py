@@ -28,6 +28,11 @@ from typing import Dict, Any, Optional
 logger = logging.getLogger(__name__)
 
 
+def _optional_float(value: Any) -> Optional[float]:
+    """None stays None (the setting is off); anything else must be a number."""
+    return None if value is None else float(value)
+
+
 class ConfigManagerV3:
     """
     Config Manager V3 — Eksiksiz parametre aktarımı.
@@ -94,6 +99,8 @@ class ConfigManagerV3:
             "checkpoint_dir": str(base_config.get("checkpoint_dir", "./checkpoints")),
             "max_checkpoints": int(base_config.get("max_checkpoints", 5)),
             "save_every_n_epochs": int(base_config.get("save_every_n_epochs", 10)),
+            # Resume: applied after the checkpoint's optimizer/scheduler state is restored
+            "continuation_learning_rate": _optional_float(base_config.get("continuation_learning_rate")),
 
             # TensorBoard
             "enable_tensorboard": bool(
@@ -115,7 +122,8 @@ class ConfigManagerV3:
             # Warmup
             "warmup_steps": int(base_config.get("warmup_steps", 0)),
             "warmup_start_factor": float(base_config.get("warmup_start_factor", 0.1)),
-            "embedding_warmup_factor": float(base_config.get("embedding_warmup_factor", 1.0)),
+            # None: embedding groups warm up like every other group
+            "embedding_warmup_factor": _optional_float(base_config.get("embedding_warmup_factor")),
 
             # Data
             "train_val_split": float(base_config.get("train_val_split", 0.8)),
