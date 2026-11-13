@@ -5,12 +5,18 @@ Bir yaşam: 60 yoklama-havuzu varlığı üzerinde tohumlu sırada 100 işlem �
 15 ikinci ilişki yazımı (C; A'sı yazılmış varlıklar), 15 A düzeltmesi, 10 A geri alması (düzeltilenlerden ayrık).
 Aynı akış üç durum biçimine uygulanır (STD anahtarı, seçilmiş katman ve STD yapılandırması):
   J: float64 defter, varlık başına tek anahtar ve inanılan tüm olgular için W0'a karşı ortak v* (MEMIT-Merge).
-     A geri alınınca: varlığın C'si yoksa kaydı silinir (o anahtarda model W0'a döner); varsa ortak değer A = temel
-     nesneyle yeniden çözülür.
+     A geri alınınca inanılan A temel nesne olur: varlığın başka inanılan olgusu (C) yoksa kaydı silinir (o anahtarda
+     model W0'a döner); varsa ortak değer A = temel nesneyle yeniden çözülür. C, A'nın geri alınmasından SONRA
+     yazılırsa da ortak değer A = temel nesneyi içerir (sıradan bağımsız: son durum yalnız son inanç kümesine bağlı).
   I: olgu başına bağımsız ROME farkları (W0'a karşı); düzeltme = değiştir, geri alma = çıkar.
   Q: güncel ağırlıklar üzerinde sıralı ROME (v* güncel modele karşı); geri alma = o anahtara W0·k geri yazılır;
      4 rastgele sırada (betimsel yayılım).
 Yaşam sonunda her inanılan olgu (geri alınan A'lar için inanılan = temel nesne) 7 biçimsel kalıpta ölçülür.
+max_tau (S3 Spearman koşulu): olgunun anahtarı k_f'nin diğer CANLI anahtarlara τ'su, τ(k_f, k_m) =
+k_fᵀC0⁻¹k_m / k_mᵀC0⁻¹k_m (k_m'deki yazımın k_f'de ne kadar ateşlendiği); canlı = yazılmış ve geri alınmamış bir olgusu
+olan varlık; I ve Q'da aynı varlığın diğer canlı olgusu aynı anahtarı paylaşır (τ = 1).
+Doğrulayıcı koşu (--run confirm) seçimdeki life_lambda'yı kullanır (--lams yasak) ve kapıları geçmemiş tabanı
+reddeder (çıkış 3); --run select yalnız keşif dünyaları 0/1 içindir (varsayılan λ ızgarası 0.01, 0.1, 1).
 
 Kullanım: python run_life.py --base results/bases/confirm_w1000_K20 --world 1000 --variants J I Q
           python run_life.py --base results/bases/discovery_w0_K20 --world 0 --run select --variants J --lams 0.01 0.1 1
@@ -85,6 +91,10 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     if args.run == "confirm" and args.world in (0, 1):
         raise SystemExit("discovery worlds cannot produce confirmatory life records")
+    if args.run == "select" and args.world not in (0, 1):
+        raise SystemExit("selection lives (ledger lambda) run only on discovery worlds 0 and 1")
+    if args.run == "confirm" and args.lams is not None:
+        raise SystemExit("confirmatory lives use the discovery-selected life_lambda; --lams is for --run select")
     from cev11 import experiment as E
     from cev11.keysites import prose_subset, site_prompts, std_key
     from cev11.memory import EntityJointLedger, Ledger, make_identity
@@ -99,8 +109,17 @@ def main(argv=None) -> int:
     layer = std["layer"]
     hp = {k: float(v) for k, v in (p.split("=") for p in std["config"].split(","))}
     base_dir = pathlib.Path(args.base)
+    if args.run == "confirm":
+        if "life_lambda" not in selection:
+            raise SystemExit("selection.json has no life_lambda: run the discovery lives and select_decide.py first")
+        lams = [float(selection["life_lambda"])]
+    else:
+        lams = args.lams or [0.01, 0.1, 1.0]
     base = E.load_base(base_dir if base_dir.is_absolute() else STUDY / base_dir, REPO)
     gates = json.loads((base.base_dir / "gates.json").read_text(encoding="utf-8"))
+    if args.run == "confirm" and not gates.get("all_pass"):
+        print(f"[life w{args.world}] gates failed -> use the next reserve world", flush=True)
+        return 3
     w, tok, model = base.world, base.tok, base.model
     st = E.layer_stats(base, layer, args.world)
     W0, C0 = st["W"], st["C0"]
@@ -131,7 +150,18 @@ def main(argv=None) -> int:
     rd_prefixes = [frame_prefix(n, "A", c, "formal", "none") for n in rd_ents for c in
                    ("nom", "gen", "dat", "acc", "loc", "abl", "ins")]
     answers = E.Answers(base)
-    rd_base = [answers(p) for p in rd_prefixes]
+    # RD probes at the BASE state (memory empty): true-greedy base answers, the raw continuation where there is no
+    # '.', and the base self-consistency flags of the batched check (same rule as the per-edit leak families).
+    from cev11.decode import greedy_text
+    rd_probes = []
+    for p in rd_prefixes:
+        a = answers(p)
+        rd_probes.append({"prefix": p, "base_answer": a,
+                          **({"base_text": greedy_text(model, tok, p)} if a is None else {})})
+    E.mark_base_consistency(base, rd_probes)
+    Cinv = st["C0_inv"]
+    key_u = {e: Cinv @ keys[e] for e in ents}                 # C0⁻¹ k_m
+    key_den = {e: float(keys[e] @ key_u[e]) for e in ents}    # k_mᵀ C0⁻¹ k_m
 
     def evaluate(variant, believed_end, retracted, corrected_old, order, lam):
         """Kurulu durumda yaşam sonu ölçümü; believed_end: {(e, rel): obj}."""
@@ -142,19 +172,19 @@ def main(argv=None) -> int:
             for c in CASES:
                 pre.append(frame_prefix(e, rel, c, "formal", "none")); obj.append(o)
         res = exact_check_batch(model, tok, pre, obj)
-        live_keys = {e: keys[e] for (e, _r) in believed_end if (e, "A") not in retracted or (e, "C") in believed_end}
-        Cinv = st["C0_inv"]
+        # live facts carry a write: every believed fact except a retracted A (believed = base object, no delta)
+        live = {(e, r) for (e, r) in believed_end if not (r == "A" and e in retracted)}
+        live_ents = sorted({e for (e, _r) in live})
         for i, ((e, rel), o) in enumerate(sorted(believed_end.items())):
             corr = int(sum(res[7 * i: 7 * i + 7]))
-            k = keys[e]; u = Cinv @ k; den = float(k @ u)
-            others = [float(keys[m] @ u) / den for m in live_keys if m != e]
-            same_entity_live = sum(1 for (m, r) in believed_end if m == e) > 1 and variant != "J"
+            k = keys[e]
+            # τ(k_f, k_m): how strongly the write at another live key k_m fires at this fact's key k_f
+            others = [float(k @ key_u[m]) / key_den[m] for m in live_ents if m != e]
+            same_entity_live = variant != "J" and any((e, r2) in live for r2 in ("A", "C") if r2 != rel)
             mt = max(others + ([1.0] if same_entity_live else [])) if (others or same_entity_live) else None
             facts.append({"fact_id": f"{e}|{rel}", "entity": e, "rel": rel, "believed": o, "correct": corr, "n": 7,
                           "max_tau": mt})
-        keep = exact_check_batch(model, tok, [p for p, a in zip(rd_prefixes, rd_base) if a is not None],
-                                 [a for a in rd_base if a is not None])
-        rd_changed = sum(1 for k_ in keep if not k_)
+        rd_changed, rd_n, _ = E._changed(base, rd_probes)
         r_old = [(e, o) for (e, o) in retracted.items()]
         rres = exact_check_batch(model, tok, [frame_prefix(e, "A", c, "formal", "none") for e, _ in r_old for c in CASES],
                                  [o for _, o in r_old for _ in CASES]) if r_old else []
@@ -164,12 +194,11 @@ def main(argv=None) -> int:
                 "layer": layer, "lam": lam, "facts": facts,
                 "retraction_residue": (sum(rres) / len(rres)) if rres else 0.0,
                 "correction_residue": (sum(cres) / len(cres)) if cres else 0.0,
-                "leak": {"RD": {"changed": rd_changed, "n": len(keep), "entities": len(rd_ents)}}}
+                "leak": {"RD": {"changed": rd_changed, "n": rd_n, "entities": len(rd_ents)}}}
 
     out_dir = pathlib.Path(args.out); out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{args.run}_{args.world}.jsonl"
     t0 = time.time()
-    lams = args.lams or [selection.get("life_lambda", 0.1)]
 
     def finalize_believed():
         believed, retracted, corrected_old, first_written = {}, {}, {}, {}
@@ -214,11 +243,19 @@ def main(argv=None) -> int:
                             facts = {r: (o, beliefs[(e, r)][1]) for r, o in believed_rel_obj.items()}
                             d, _ = delta_for(e, facts)
                             return d          # residual v* - W0 k = delta (v* = W0 k + delta)
+                        retracted_case = {}   # entity -> lived case of its retracted A (believed = base object)
                         for op, e, rel, o, case in ops:
                             if op in ("write", "correct"):
+                                if e in retracted_case and (e, "A") not in beliefs:
+                                    # A was retracted while nothing else was believed (record removed). The entity's
+                                    # believed A is the base object again, so it joins the joint value exactly as
+                                    # when C is written before the retraction (order-independent end state).
+                                    beliefs[(e, "A")] = (w.facts[(e, "A")], retracted_case[e])
+                                    jl.write(e, "A", w.facts[(e, "A")], solve, key=keys[e])
                                 beliefs[(e, rel)] = (o, case)
                                 jl.write(e, rel, o, solve, key=keys[e])
                             else:
+                                retracted_case[e] = beliefs[(e, "A")][1]
                                 if (e, "C") in beliefs:
                                     beliefs[(e, "A")] = (w.facts[(e, "A")], beliefs[(e, "A")][1])
                                     jl.write(e, "A", w.facts[(e, "A")], solve, key=keys[e])

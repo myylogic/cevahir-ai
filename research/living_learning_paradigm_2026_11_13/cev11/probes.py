@@ -16,6 +16,12 @@ Yaşanan cümle, yaşanan hâlin biçimsel, cümle başı kalıbıdır. Yoklama 
 - PX: önek-uzantı eşi (keşif amaçlı).
 
 Sızıntı aileleri (RN, RD, SS, RB, RC, PX) temel modelin kendi açgözlü cevabına göre "değişen cevap" oranıyla ölçülür.
+
+INTERFACES.md'den sapmalar (belgelenmiş): ``probe_families(world, tok, item, targets, neigh, classify_informal)`` —
+hedef hâller (``target_cases``) ve komşu kümeleri (``neighbour_sets``) önceden hesaplanıp verilir; temel cevaplar
+yoklamalara ``experiment.prepare_item`` içinde eklenir. ``edit_items`` isteğe bağlı ``relation`` alır. Biçimsel
+yazımda kök sonunda token sınırı olmayan tokenizer'larda (keşif amaçlı F_freq) ``suffix_token`` ve
+``tokenizers.classify_informal`` hata verir; bu aileler o tokenizer için tanımsızdır.
 """
 from __future__ import annotations
 

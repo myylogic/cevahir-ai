@@ -126,22 +126,43 @@ class Answers:
 
 
 # ------------------------------------------------------------------------------------------------ item preparation
+LEAK_FAMILIES = ("RN", "RD", "SS", "RB", "RC", "PX")
+
+
+def mark_base_consistency(base: Base, probes: List[dict]) -> int:
+    """TEMEL durumda çağrılır: toplu tam-üretim denetimi, temel modelin kendi açgözlü cevabını (gerçek çözümlemeyle
+    bulunmuş) yeniden üretmiyorsa yoklamayı ``exact_ok = False`` diye işaretler (ör. kanonik olmayan token dizisi ya
+    da toplu/tekil kayan nokta farkıyla argmax eşitliği). ``_changed`` bu yoklamalarda gerçek açgözlü cevabı
+    karşılaştırır; böylece temel modelin "değişen cevap" sayısı tanım gereği 0 olur (BASE kolu, seçim kısıtı
+    Leak_RD ≤ %1). ``_changed`` ile aynı liste ve aynı toplu bileşim kullanılır. Döner: işaretlenen yoklama sayısı."""
+    clean = [d for d in probes if d["base_answer"] is not None]
+    keep = _exact(base, [d["prefix"] for d in clean], [d["base_answer"] for d in clean])
+    bad = 0
+    for d, k in zip(clean, keep):
+        d["exact_ok"] = bool(k)
+        bad += int(not k)
+    return bad
+
+
 def prepare_item(base: Base, item: dict, answers: Answers, seed: int) -> dict:
     from .probes import neighbour_sets, probe_families, target_cases
     from .tokenizers import classify_informal, last_root_token
+    if answers.locked:
+        raise RuntimeError("prepare_item must run on the BASE model (an edit is installed)")
     rnd = random.Random(f"{seed}|{item['edit_id']}")
     targets = target_cases(item, answers)
     neigh = neighbour_sets(base.world, base.tok, item, rnd, last_root_token)
     fam = probe_families(base.world, base.tok, item, targets, neigh, classify_informal)
     from .decode import greedy_text
-    for f in ("RN", "RD", "SS", "RB", "RC", "PX"):
+    for f in LEAK_FAMILIES:
         for d in fam[f]:
             d["base_answer"] = answers(d["prefix"])
             if d["base_answer"] is None:      # no '.' within 8 tokens: keep the raw base continuation
                 d["base_text"] = greedy_text(base.model, base.tok, d["prefix"])
+    n_inconsistent = sum(mark_base_consistency(base, fam[f]) for f in LEAK_FAMILIES)
     for d in fam["PF6"]:
         d["base_answer"] = answers(d["prefix"])
-    return {"item": item, "targets": targets, "neigh": neigh, "fam": fam}
+    return {"item": item, "targets": targets, "neigh": neigh, "fam": fam, "base_inconsistent": n_inconsistent}
 
 
 # --------------------------------------------------------------------------------------------------- measurement
@@ -158,11 +179,18 @@ def _exact(base: Base, prefixes: List[str], objects: List[Optional[str]]) -> Lis
 
 def _changed(base: Base, probes: List[dict]) -> Tuple[int, int, int]:
     """(changed, n, adopted_unused): temel cevabı artık üretmeyen yoklama sayısı. Temel cevabı None olan (8 token
-    içinde '.' üretmeyen) yoklamalar gerçek açgözlü metinle karşılaştırılır."""
-    from .decode import greedy_text
+    içinde '.' üretmeyen) yoklamalar gerçek açgözlü metinle karşılaştırılır; temel modelin toplu denetimde kendi
+    cevabını yeniden üretemediği yoklamalar (``exact_ok`` False, bkz. ``mark_base_consistency``) gerçek açgözlü
+    cevapla karşılaştırılır."""
+    from .decode import greedy_answer, greedy_text
     clean = [d for d in probes if d["base_answer"] is not None]
     keep = _exact(base, [d["prefix"] for d in clean], [d["base_answer"] for d in clean])
-    changed = sum(1 for k in keep if not k)
+    changed = 0
+    for d, k in zip(clean, keep):
+        if d.get("exact_ok", True):
+            changed += int(not k)
+        else:
+            changed += int(greedy_answer(base.model, base.tok, d["prefix"]) != d["base_answer"])
     for d in probes:
         if d["base_answer"] is None:
             changed += int(greedy_text(base.model, base.tok, d["prefix"]) != d["base_text"])
@@ -354,6 +382,9 @@ def run_arm(base: Base, inst: Installer, answers: Answers, prep: dict, arm: str,
                 ir = _exact(base, [b["prefix"]], [item["new"]])[0]
                 tg.append({"case": a["case"], "cls": b["cls"], "formal": int(fr), "informal": int(ir)})
             res["targets"] = tg
+            if bpb_texts is not None:      # bpb under the write measured on the other families (all 13 variants)
+                inst.set_M(layer, w["M_all"])
+                res["bpb"] = {"base": base.layer_cache["bpb_base"], "edited": bits_per_byte(base, bpb_texts)}
             inst.zero_all()
         else:
             w = compute_write(base, item, "STD" if arm == "NORM" else arm, layer, hp, world_seed, memo)
@@ -370,11 +401,17 @@ def run_arm(base: Base, inst: Installer, answers: Answers, prep: dict, arm: str,
             if with_tau and arm in ("STD", "ROOT", "LAST") and res.get("targets"):
                 for t, extra in zip(res["targets"], tau_for_targets(base, prep, arm, layer, w["k"], world_seed)):
                     t.update(extra)
+    except BaseException:
+        # never leave a write installed after a failure: hooks are invisible to the final model_sha256 check, so a
+        # caller that skipped a failing item would otherwise measure every later item and arm under this write
+        inst.restore()
+        raise
     finally:
         answers.locked = False
     diag = {k: (float(v) if isinstance(v, (int, float)) else v) for k, v in diag.items()
             if isinstance(v, (int, float, str, bool))}
     diag["seconds"] = round(time.time() - t0, 3)
+    diag["base_inconsistent"] = int(prep.get("base_inconsistent", 0))
     targets = res.get("targets", [])
     pf6 = res.get("PF6", {})
     cf14 = res.get("CF14", {"P1": {}, "P2": {}})
@@ -393,9 +430,9 @@ def run_arm(base: Base, inst: Installer, answers: Answers, prep: dict, arm: str,
 def tau_for_targets(base: Base, prep: dict, arm: str, layer: int, k: torch.Tensor, world_seed: int) -> list:
     """Betimsel τ (PROTOCOL §9): her hedef hâlin biçimsel/gündelik yoklamasında kolun anahtar konumundaki τ ve
     yoklamanın tüm konumları üzerindeki en büyük τ. Anahtar konumu tanımsızsa (kaynaşık gündelik biçimde ROOT) ilgili
-    alan yazılmaz."""
+    alan yazılmaz. ``sites(..., strict=False)``: ROOT tanımsız olsa da STD/LAST konumlarının τ'su yazılır."""
     from tokenizer_management.byte_bpe import BOS_ID
-    from .keysites import SiteUndefined, fc2_inputs, sites
+    from .keysites import fc2_inputs, sites
     st = layer_stats(base, layer, world_seed)
     u = st["C0_inv"] @ k.double()
     denom = float(k.double() @ u)
@@ -408,12 +445,9 @@ def tau_for_targets(base: Base, prep: dict, arm: str, layer: int, k: torch.Tenso
             H = fc2_inputs(base.model, layer, [ids])[0].double()        # [T, f]
             taus = (H @ u) / denom
             entry[f"tau_{tag}_max"] = float(taus[1:].max())
-            try:
-                pos = sites(base.tok, d["prefix"], d["name"], d["ctx"], strict=True)[site]
-                if pos is not None:
-                    entry[f"tau_{tag}"] = float(taus[pos])
-            except SiteUndefined:
-                pass
+            pos = sites(base.tok, d["prefix"], d["name"], d["ctx"], strict=False)[site]
+            if pos is not None:
+                entry[f"tau_{tag}"] = float(taus[pos])
         out.append(entry)
     return out
 

@@ -27,7 +27,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--base", required=True)
     ap.add_argument("--world", type=int, required=True)
-    ap.add_argument("--run", default="confirm")
+    ap.add_argument("--run", default="confirm", choices=["confirm", "map", "pilot", "select", "ffreq"])
     ap.add_argument("--layers", type=int, nargs="+", default=[0, 1, 2, 3, 4])
     ap.add_argument("--out", default=str(STUDY / "results" / "tau"))
     args = ap.parse_args(argv)
@@ -39,6 +39,11 @@ def main(argv=None) -> int:
     from cev11.world import frame_prefix
     base_dir = pathlib.Path(args.base)
     base = E.load_base(base_dir if base_dir.is_absolute() else STUDY / base_dir, REPO)
+    if args.run == "confirm":
+        gates = json.loads((base.base_dir / "gates.json").read_text(encoding="utf-8"))
+        if not gates.get("all_pass"):
+            print(f"[tau w{args.world}] gates failed -> use the next reserve world", flush=True)
+            return 3
     w, tok = base.world, base.tok
     probe = sorted(n for n, p in w.partition.items() if p == "probe")
     lrt = {n: last_root_token(tok, n) for n in probe}

@@ -51,6 +51,14 @@ def main(argv=None) -> int:
     from cev11 import probes as P
 
     selection = json.loads((STUDY / "results" / "selection.json").read_text(encoding="utf-8"))
+    if args.run == "confirm" and selection.get("map_only"):
+        # PROTOCOL §8 map-only switch: STD's discovery WE < 50% -> H1-H3 not testable and the confirmatory budget runs
+        # the binding-site map instead of the confirmatory edit arms.
+        raise SystemExit("selection.json has map_only = true: the confirmatory budget runs the binding-site map "
+                         "(PROTOCOL §8, §10.5), not run_confirm.py")
+    missing = [a for a in args.arms if a != "BASE" and a not in selection.get("arms", {})]
+    if missing:
+        raise SystemExit(f"no discovery selection for arms {missing} in selection.json")
     base_dir = pathlib.Path(args.base)
     base = E.load_base(base_dir if base_dir.is_absolute() else STUDY / base_dir, REPO)
     gates = json.loads((base.base_dir / "gates.json").read_text(encoding="utf-8"))
@@ -58,6 +66,24 @@ def main(argv=None) -> int:
         print(f"[confirm w{args.world}] gates failed -> use the next reserve world", flush=True)
         return 3
     items = P.edit_items(base.world, gates["editable"], seed=args.world + 2, per_case=10)
+    # Edit-list record (hash) and the V10 contamination check: no edit target (entity + new object, relation A) and
+    # no P3-held cell may occur in any training text (world sentences of one pass cover every trained cell string;
+    # prose and the lead-in pool are checked as they are).
+    import hashlib
+    import random as _random
+    from cev11 import leadins as LI
+    from cev11.keysites import PROSE_PREFIXES
+    from cev11.world import contamination, pass_sentences
+    items_blob = json.dumps(items, ensure_ascii=False, sort_keys=True)
+    (pathlib.Path(args.out)).mkdir(parents=True, exist_ok=True)
+    (pathlib.Path(args.out) / f"items_{args.world}.json").write_text(json.dumps(
+        {"world": args.world, "sha256": hashlib.sha256(items_blob.encode("utf-8")).hexdigest(), "items": items},
+        ensure_ascii=False, indent=1), encoding="utf-8")
+    texts = [t for t, _ in pass_sentences(base.world, 0, _random.Random(args.world + 1))]
+    texts += list(base.prose_train) + LI.leadin_pool(base.prose_train, base.tok, exclude=PROSE_PREFIXES)
+    viol = contamination(base.world, [(it["name"], "A", it["new"]) for it in items], texts)
+    if viol:
+        raise SystemExit(f"V10 contamination: {len(viol)} violations, e.g. {viol[:3]}")
     out_dir = pathlib.Path(args.out); out_dir.mkdir(parents=True, exist_ok=True)
     answers = E.Answers(base); inst = E.Installer(base); memo: dict = {}
     t0 = time.time()

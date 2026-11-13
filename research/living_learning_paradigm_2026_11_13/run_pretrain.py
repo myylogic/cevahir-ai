@@ -5,8 +5,10 @@ Kullanım (repo kökünden, tek iş parçacığı):
     OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/living_learning_paradigm_2026_11_13/run_pretrain.py \
         --world 0 --passes 20 [--layers 6] [--names 400] [--prose-share 0.20] [--d 192] [--tag discovery]
 
-Çıktılar: results/bases/<tag>_w<world>_K<passes>/ altında model.pt, tokenizer, curve.jsonl, exposure.json,
-gates.json, world.json (dünya özeti ve hash), segmentation.json. Derlem örnekleri hiçbir yerde yazdırılmaz.
+Çıktılar: results/bases/<tag>_w<world>_K<passes>[_N..][_P..][_D..][_L..][_V..]/ altında model.pt, tokenizer,
+curve.jsonl, exposure.json, gates.json, world.json (dünya özeti ve hash), segmentation.json. Köşeli ekler yalnız
+protokol varsayılanından farklı merdiven basamaklarında (ad sayısı, düzyazı payı, d, katman, sözlük) eklenir; böylece
+farklı yapılandırmalar aynı dizine yazılmaz. Derlem örnekleri hiçbir yerde yazdırılmaz.
 """
 from __future__ import annotations
 
@@ -43,7 +45,13 @@ def main(argv=None) -> int:
     from cev11 import train as TR
     from cev11.morph_tr import INFLECTED
 
-    out = pathlib.Path(args.out_root) / f"{args.tag}_w{args.world}_K{args.passes}"
+    # Fallback-ladder rungs (PROTOCOL §6: 300 names, prose share 10%, embed_dim 256; §2: 4 layers) get their own
+    # directory; with the protocol defaults the name stays <tag>_w<world>_K<passes>.
+    rung = "".join(tag for tag, on in ((f"_N{args.names}", args.names != 400),
+                                       (f"_P{args.prose_share:g}", args.prose_share != 0.20),
+                                       (f"_D{args.d}", args.d != 192), (f"_L{args.layers}", args.layers != 6),
+                                       (f"_V{args.vocab}", args.vocab != 4096)) if on)
+    out = pathlib.Path(args.out_root) / f"{args.tag}_w{args.world}_K{args.passes}{rung}"
     out.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     prose_train, prose_held = W.load_prose(REPO)

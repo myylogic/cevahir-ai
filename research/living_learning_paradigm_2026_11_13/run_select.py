@@ -56,6 +56,8 @@ def main(argv=None) -> int:
 
     base = E.load_base(STUDY / args.base if not pathlib.Path(args.base).is_absolute() else args.base, REPO)
     gates = json.loads((base.base_dir / "gates.json").read_text(encoding="utf-8"))
+    if not gates.get("all_pass"):
+        raise SystemExit("discovery base failed its gates: apply the fallback ladder (PROTOCOL §6) first")
     editable = gates["G7"].get("editable") or gates.get("editable")
     if not editable:
         raise SystemExit("no editable list in gates.json")
