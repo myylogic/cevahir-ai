@@ -6,10 +6,15 @@ CEVAHIR-AI PROJESİ
 
 Dosya: error_handler.py
 Modül: cognitive_management/v2/middleware
-Görev: Error Handling Middleware - Retry, circuit breaker, timeout, graceful
-       degradation. CircuitState, CircuitBreaker, RetryPolicy ve ErrorHandlerMiddleware
-       sınıflarını içerir. Retry logic, circuit breaker pattern, timeout handling
-       ve graceful degradation işlemlerini yapar.
+Görev: Error Handling Middleware - circuit breaker ve hata yanıtı (graceful
+       degradation). Pipeline'dan taşan hata devre kesiciye işlenir ve kısa bir
+       hata yanıtı döner.
+
+       Bu middleware isteği YENİDEN DENEMEZ ve istek zaman aşımı UYGULAMAZ:
+       pipeline oturum durumunu değiştirir, model çağrıları pahalıdır ve senkron
+       bir model çağrısı ortasında kesilemez. Eski "retry" döngüsü ilk turda
+       hata yanıtı dönüyordu ve 30 s zaman aşımı hiç uygulanmıyordu; bu sahte
+       iddialar kaldırıldı. Maliyeti 'lean' profil ve araştırma bütçesi sınırlar.
 
 MİMARİ:
 - SOLID Prensipleri: Single Responsibility (error handling middleware),
@@ -18,10 +23,8 @@ MİMARİ:
 - Endüstri Standartları: Error handling best practices
 
 KULLANIM:
-- Retry logic için
 - Circuit breaker için
-- Timeout handling için
-- Graceful degradation için
+- Graceful degradation (hata yanıtı) için
 
 BAĞIMLILIKLAR:
 - BaseMiddleware: Base middleware
@@ -39,7 +42,6 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 
 from __future__ import annotations
 from typing import Optional, Callable, Any
-import time
 import logging
 from enum import Enum
 from dataclasses import dataclass, field
@@ -65,22 +67,12 @@ class CircuitState(Enum):
 
 
 @dataclass
-class RetryConfig:
-    """Retry configuration"""
-    max_retries: int = 3
-    initial_delay: float = 1.0  # seconds
-    max_delay: float = 10.0  # seconds
-    exponential_base: float = 2.0
-    retryable_exceptions: tuple[type[Exception], ...] = (Exception,)
-
-
-@dataclass
 class CircuitBreakerConfig:
     """Circuit breaker configuration"""
     failure_threshold: int = 5  # Open circuit after N failures
     success_threshold: int = 2  # Close circuit after N successes
     timeout: float = 60.0  # seconds to wait before half-open
-    failure_window: float = 60.0  # seconds for failure counting
+    failure_window: float = 60.0  # a failure later than this after the previous one restarts the count
 
 
 @dataclass
@@ -96,22 +88,19 @@ class CircuitBreakerState:
 class ErrorHandlingMiddleware(BaseMiddleware):
     """
     Error handling middleware.
-    - Retry mechanisms
-    - Circuit breaker
-    - Timeout handling
-    - Graceful degradation
+    - Circuit breaker: failure_threshold hata failure_window içinde art arda
+      gelirse devre açılır ve istekler timeout saniye reddedilir
+    - Graceful degradation: hata, kısa bir CognitiveOutput yanıtına çevrilir
+
+    Yeniden deneme ve istek zaman aşımı yoktur (modül açıklamasına bakın).
     """
     
     def __init__(
         self,
-        retry_config: Optional[RetryConfig] = None,
         circuit_breaker_config: Optional[CircuitBreakerConfig] = None,
-        timeout: Optional[float] = None,
     ):
         super().__init__("ErrorHandling")
-        self.retry_config = retry_config or RetryConfig()
         self.circuit_config = circuit_breaker_config or CircuitBreakerConfig()
-        self.timeout = timeout or 30.0  # Default 30 seconds
         self.circuit_state = CircuitBreakerState()
     
     def _before(
@@ -148,39 +137,14 @@ class ErrorHandlingMiddleware(BaseMiddleware):
         request: CognitiveInput,
         error: Exception,
     ) -> Optional[CognitiveOutput]:
-        """Handle errors with retry and circuit breaker"""
-        # Update circuit breaker
+        """Record the failure in the circuit breaker and answer with an error response.
+
+        The request is not retried: the pipeline is not idempotent (it updates
+        session history) and a budget denial must never be retried.
+        """
         self._record_failure()
-        
-        # Check if retryable
-        if not self._is_retryable(error):
-            return self._create_error_response(error)
-        
-        # Retry logic
-        last_error = error
-        for attempt in range(self.retry_config.max_retries):
-            try:
-                # Calculate delay
-                delay = min(
-                    self.retry_config.initial_delay * (self.retry_config.exponential_base ** attempt),
-                    self.retry_config.max_delay
-                )
-                
-                if attempt > 0:
-                    logger.info(f"Retry attempt {attempt + 1}/{self.retry_config.max_retries} after {delay}s")
-                    time.sleep(delay)
-                
-                # Retry (this will be handled by orchestrator)
-                # For now, return error response
-                return self._create_error_response(error)
-                
-            except Exception as retry_error:
-                last_error = retry_error
-                self._record_failure()
-        
-        # All retries failed
-        logger.error(f"All retries failed: {last_error}")
-        return self._create_error_response(last_error)
+        logger.warning("Cognitive request failed (%s); returning error response", type(error).__name__)
+        return self._create_error_response(error)
     
     def _after(
         self,
@@ -192,14 +156,15 @@ class ErrorHandlingMiddleware(BaseMiddleware):
         self._record_success()
         return response
     
-    def _is_retryable(self, error: Exception) -> bool:
-        """Check if error is retryable"""
-        return isinstance(error, self.retry_config.retryable_exceptions)
-    
     def _record_failure(self) -> None:
         """Record failure in circuit breaker"""
+        now = datetime.now()
+        last = self.circuit_state.last_failure_time
+        if last is not None and (now - last).total_seconds() > self.circuit_config.failure_window:
+            # The previous failure is outside the window: start counting again.
+            self.circuit_state.failures = 0
         self.circuit_state.failures += 1
-        self.circuit_state.last_failure_time = datetime.now()
+        self.circuit_state.last_failure_time = now
         
         if self.circuit_state.state == CircuitState.HALF_OPEN:
             # Half-open -> Open
@@ -246,7 +211,6 @@ class ErrorHandlingMiddleware(BaseMiddleware):
 
 __all__ = [
     "ErrorHandlingMiddleware",
-    "RetryConfig",
     "CircuitBreakerConfig",
     "CircuitState",
 ]

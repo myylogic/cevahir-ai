@@ -44,6 +44,26 @@ Self-consistency is a separately enabled selection step.
 Most policy and critic scores use rules; there is no separate trained judge model.
 Basic factuality checking looks for claim and uncertainty markers and does not establish factual correctness.
 
+## Profiles: lean by default, full on request
+
+Updated on 13 November 2026. `CognitiveManagerConfig()` is the **lean** profile
+(`COGNITIVE_PROFILES["lean"]` in the [configuration](../../../cognitive_management/config.py)):
+every message takes the `direct` path with one answer generation,
+at most one critic revision (`critic.max_passes=1`) and one entropy probe.
+Deliberation (`think1`/`debate2`/`tot`), self-consistency, constitutional critique,
+LLM fact verdicts and external fact-checking are off, so there is no network access.
+`CognitiveManagerConfig.full()`, `{"profile": "full"}` in a config file or `CM_PROFILE=full`
+with `from_env` restores the earlier behaviour with one switch.
+In full, each constitutional principle is evaluated once, worded in the response's language;
+self-consistency runs only when the router's mid-entropy gate is open;
+Wikipedia claim checks send at most three claims per response within a ten-second budget.
+With a counting fake model, `tests/evolution/test_cognitive_defaults.py` measures
+2 generation calls per plain message for lean and 17–33 for full;
+before these fixes the defaults cost 31–64.
+A failed or unavailable entropy probe is recorded as `None` and routes the message to `direct`.
+With lean defaults the research controller has only `direct` to execute;
+comparing strategies needs `policy.allow_inner_steps=True` or the full profile.
+
 ## Application integration
 
 [CognitiveManager](../../../cognitive_management/cognitive_manager.py) accepts a ModelAPI:
@@ -74,7 +94,7 @@ def create_conversation(model_api):
 
 These settings start integration with a single generation path.
 Enable strategies, tools, RAG and critic options through [configuration](../../../cognitive_management/config.py) as needed.
-The defaults enable more components and may introduce additional model calls and dependencies.
+The lean defaults still enable vector memory with RAG (optional embedding packages; without them retrieval falls back to keyword search) and the calculator tool; the model-call budget is described under Profiles above.
 `CognitiveOutput` carries the response, selected mode, successful tool use and evaluation information.
 
 ## Memory, tools and caching
@@ -88,6 +108,8 @@ The defaults enable more components and may introduce additional model calls and
 - **Tools:** The built-in tool is a restricted AST calculator supporting `+`, `-`, `*`, `/`.
   Applications must supply search and file tools through `register_tool` and include them in the allow list.
   A tool is reported as used only after execution succeeds.
+- **Errors:** The error middleware records a failed request in a circuit breaker and returns a short error response.
+  It does not retry requests or enforce a request timeout; a running model call cannot be interrupted.
 - **Caching:** Exact response keys include identity, history, decoding settings, configuration and memory revision.
   A semantic-cache class exists, but that path is disabled for normal scoped orchestrator requests.
   Response caching stores reusable text outputs and is separate from the model's KV cache.

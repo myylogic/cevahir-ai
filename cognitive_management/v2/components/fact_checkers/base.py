@@ -68,12 +68,14 @@ class FactChecker(Protocol):
     Fact checkers verify factual claims using external sources.
     """
     
-    def verify(self, claim: str) -> Optional[FactCheckResult]:
+    def verify(self, claim: str, timeout: Optional[float] = None) -> Optional[FactCheckResult]:
         """
         Verify a factual claim.
         
         Args:
             claim: The claim to verify
+            timeout: Optional upper bound in seconds for any external request
+                made for this claim (None: the checker's own default)
             
         Returns:
             FactCheckResult or None if verification failed/unavailable
@@ -110,12 +112,13 @@ class BaseFactChecker(ABC):
         self.source_name = source_name
     
     @abstractmethod
-    def verify(self, claim: str) -> Optional[FactCheckResult]:
+    def verify(self, claim: str, timeout: Optional[float] = None) -> Optional[FactCheckResult]:
         """
         Verify a factual claim.
         
         Args:
             claim: The claim to verify
+            timeout: Optional upper bound in seconds for external requests
             
         Returns:
             FactCheckResult or None

@@ -45,7 +45,10 @@ from dataclasses import dataclass
 from cognitive_management.config import CognitiveManagerConfig
 from cognitive_management.exceptions import ValidationError
 from cognitive_management.cognitive_types import DecodingConfig
-from cognitive_management.v2.config.constitutional_principles import get_principles
+from cognitive_management.v2.config.constitutional_principles import (
+    detect_principle_language,
+    get_principles,
+)
 
 
 class ModelAPI(Protocol):
@@ -95,9 +98,24 @@ class ConstitutionalCritic:
         self.cfg = cfg
         self.mm = model_api
         
-        # Get constitutional principles
+        # All available wordings (historical list). A review evaluates only
+        # principles_for(...): each principle once, in the response's language.
         self.principles = get_principles(cfg.critic.custom_principles)
         self.strictness = cfg.critic.constitutional_strictness
+
+    def principles_for(self, draft_text: str, user_message: str = "") -> List[str]:
+        """
+        Principles evaluated for one response.
+
+        Each default principle once, worded in the response's language (falling
+        back to the user message's language, then Turkish), followed by the
+        configured custom principles. Evaluating both the English and Turkish
+        wording of the same principle doubled the model calls for no new check.
+        """
+        language = (detect_principle_language(draft_text)
+                    or detect_principle_language(user_message)
+                    or "tr")
+        return get_principles(self.cfg.critic.custom_principles, languages=(language,))
     
     def review_with_constitution(
         self,
@@ -111,7 +129,7 @@ class ConstitutionalCritic:
         Args:
             user_message: Original user message
             draft_text: Draft text to review
-            principles: Optional custom principles (defaults to config)
+            principles: Optional explicit principles (default: principles_for)
             
         Returns:
             Tuple of (revised_text, violations_dict)
@@ -119,7 +137,7 @@ class ConstitutionalCritic:
         if not draft_text or not draft_text.strip():
             return draft_text, {"violations": [], "revised": False}
         
-        principles = principles or self.principles
+        principles = principles or self.principles_for(draft_text, user_message)
         
         # Evaluate against principles
         violations = self._evaluate_principles(draft_text, principles, user_message)

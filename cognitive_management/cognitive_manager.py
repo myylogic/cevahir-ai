@@ -75,7 +75,6 @@ from .v2.middleware import (
     ErrorHandlingMiddleware,
     MetricsMiddleware,
     ValidationMiddleware,
-    RetryConfig,
     CircuitBreakerConfig,
 )
 from .v2.events.event_bus import EventBus
@@ -298,18 +297,13 @@ class CognitiveManager:
             )
         
         middleware_chain.extend([
+            # Circuit breaker + error response only: no retries, no request timeout.
             ErrorHandlingMiddleware(
-                retry_config=RetryConfig(
-                    max_retries=3,
-                    initial_delay=1.0,
-                    max_delay=10.0,
-                ),
                 circuit_breaker_config=CircuitBreakerConfig(
                     failure_threshold=5,
                     success_threshold=2,
                     timeout=60.0,
                 ),
-                timeout=30.0,
             ),
             MetricsMiddleware(),
         ])
@@ -439,16 +433,19 @@ class CognitiveManager:
         if cfg.memory.enable_vector_memory:
             enabled_features.append("Vector Memory & RAG")
         if cfg.critic.enable_external_fact_checking:
-            enabled_features.append("External Fact-Checking")
-        if hasattr(cfg.critic, 'constitutional_ai') and cfg.critic.constitutional_ai.enable_constitutional_ai:
+            enabled_features.append("External Fact-Checking (network)")
+        if cfg.critic.enable_constitutional_ai:
             enabled_features.append("Constitutional AI")
-        if cfg.policy.tot_enabled:
+        if cfg.policy.allow_inner_steps and cfg.policy.tot_enabled:
             enabled_features.append("Tree of Thoughts")
+        if cfg.policy.self_consistency_enabled:
+            enabled_features.append("Self-Consistency")
         if cache_enabled:
             enabled_features.append("Caching")
         if tracing_enabled:
             enabled_features.append("Distributed Tracing")
         
+        self.log.info(f"Cognitive profile: {cfg.profile_name()}")
         if enabled_features:
             self.log.info(f"Enabled features: {', '.join(enabled_features)}")
     

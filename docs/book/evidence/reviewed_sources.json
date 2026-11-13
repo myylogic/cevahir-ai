@@ -2,7 +2,7 @@
   "format_version": 1,
   "files": {
     "README-TR.md": {
-      "sha256": "eef9ab68f95327498aeca9f089fb1d24d5234c2b597be5e749aa168e8e2be02e",
+      "sha256": "37951763254aaf1c3f8819fe0ab01d9375ebbfad9e0cda44f7bda51728ff991d",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README.md",
@@ -10,7 +10,7 @@
       ]
     },
     "README.md": {
-      "sha256": "890fb401edbcd6f196a6d5ee3525dcd2a3a2716c924b9bb0775c54e239078e07",
+      "sha256": "b43afd5b8e1ac9d6f30b1a8de181dfc30e7bad3da41c630beeccb9e928155983",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README-en.md"
@@ -83,7 +83,7 @@
       ]
     },
     "cognitive_management/cognitive_manager.py": {
-      "sha256": "6989c16b746e6edb001b800cee42cc2cc50af5a0ed31f5b5beb6aff9a41abc9d",
+      "sha256": "b86e04e1008f6e36c7935350deb829cc1a8dac46d9da6a41c8f9461e30d5ec1e",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -91,7 +91,7 @@
       ]
     },
     "cognitive_management/config.py": {
-      "sha256": "c42ae0c693719d5db885b76111124aa1eb54e4d866e44d5f3d97fc62dbb9316f",
+      "sha256": "42ec80cfed7355bdf65ab0b2c4ace6406260dec4e54e38946df963e5030b35ef",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
@@ -113,14 +113,21 @@
       ]
     },
     "cognitive_management/v2/adapters/backend_adapter.py": {
-      "sha256": "520d1903ccba867a2ac2306796cbcce1f81a920b07a2d474de6e02a8878fd054",
+      "sha256": "45040e53a8008cdc9b7b892d3b32ffe399b53f640e3498798f0fc9c520452de9",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
+      ]
+    },
+    "cognitive_management/v2/components/constitutional_critic.py": {
+      "sha256": "b22816e32a5837dd75a6fc3a9681b1150db665c3c36ab2a7a7d9278f9347a28c",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
       ]
     },
     "cognitive_management/v2/components/critic_v2.py": {
-      "sha256": "2946e5d36d7f5ee02bba6f3ad8869674814e02e3a77f1d1c6440a09fadc80a68",
+      "sha256": "4a1ee2b9cfb3afd6b57a94c2799ff37dfc78a3262cc12572ca78568170801e69",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
@@ -141,7 +148,7 @@
       ]
     },
     "cognitive_management/v2/components/policy_router_v2.py": {
-      "sha256": "59d063bfe09df3f6c673fc9f128f67f9c0775cd4231f6771d38164c466ab2f64",
+      "sha256": "e8f8e7056562eaa4962803c4e3f8209b83571d8489eac0b90c8e759a29196f7b",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
@@ -204,7 +211,7 @@
       ]
     },
     "cognitive_management/v2/processing/handlers.py": {
-      "sha256": "d21a54f4352c0f842cce677d9e92387d7656dde71d82a18b59da5269280a4f7e",
+      "sha256": "d9a017beada8cb03c5457c4f69bb423c75bf885e6f0322663d5ae65dac5f6ef4",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/09-bellek-bilis-araclar.md"
@@ -315,7 +322,7 @@
       ]
     },
     "docs/modules/cognitive_management/README-en.md": {
-      "sha256": "8480e0acd67d6a3a4dc8c89d183a2138bafdd8c8ae7a35f1cce97ef3f1f996ad",
+      "sha256": "1fea5343a0200d419d1ae5936d272c1d4d04babdabab3ec64ab88e69f2d1cc26",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -323,7 +330,7 @@
       ]
     },
     "docs/modules/cognitive_management/README.md": {
-      "sha256": "e4cdec5525b8b00e9a6cbb03a39b902906f1686ee857171422a4e622cc9b70d7",
+      "sha256": "48cad623cc74849ffa2bc5f5a1f8b4ac2cf784a50920e86a57c563e70b39a327",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md"
@@ -987,6 +994,13 @@
       "chapters": [
         "KAYNAK_HARITASI.md",
         "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "tests/evolution/test_cognitive_defaults.py": {
+      "sha256": "445167b24a84fc7b71b69146085736615fb5286bd14b60dea4a8af7ca5d74928",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/09-bellek-bilis-araclar.md"
       ]
     },
     "tests/evolution/test_config_generation.py": {

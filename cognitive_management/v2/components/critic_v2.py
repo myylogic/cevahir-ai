@@ -41,6 +41,7 @@ from cognitive_management.research.runtime import BudgetExhausted
 import logging
 import math
 import re
+import time
 from collections import Counter
 from typing import Dict, List, Optional, Protocol, Tuple
 
@@ -596,16 +597,27 @@ class CriticV2(ICritic):
         return 1.00       # İddia yok: nötr metin
 
     def _check_facts_enhanced(self, text: str) -> float:
-        """Harici fact-checker + LLM doğrulama (Phase 7.2)."""
+        """Harici fact-checker + LLM doğrulama (Phase 7.2).
+
+        Dış istekler yanıt başına sınırlıdır: en çok fact_checking_max_claims
+        iddia sorgulanır; fact_checking_time_budget saniye dolunca yeni istek
+        başlamaz ve hiçbir isteğin zaman aşımı kalan süreyi geçmez. Sorgulanmayan
+        iddialar doğrulanmamış sayılır.
+        """
         claims = extract_claims(text, min_confidence=self.cfg.critic.claim_extraction_min_confidence)
         if not claims:
             return 1.0
 
+        limit = max(0, int(self.cfg.critic.fact_checking_max_claims))
+        deadline = time.monotonic() + float(self.cfg.critic.fact_checking_time_budget)
         verified_count = 0
-        for claim_obj in claims:
+        for claim_obj in claims[:limit]:
             for checker in self._fact_checkers:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
                 try:
-                    result = checker.verify(claim_obj.claim)
+                    result = checker.verify(claim_obj.claim, timeout=remaining)
                     if result and result.is_verified is True:
                         verified_count += 1
                         break

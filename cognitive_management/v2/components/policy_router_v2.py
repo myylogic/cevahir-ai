@@ -59,7 +59,7 @@ class PolicyRouterV2(IPolicyRouter):
     V3 Policy Router — QueryType + DomainType + complexity farkındası.
 
     Mod Seçim Hiyerarşisi:
-        1. allow_inner_steps=False      → direkt
+        1. allow_inner_steps=False / entropi ölçülemedi (None) → direkt
         2. query_type=conversational    → direkt (kısa, sohbet)
         3. query_type=creative          → direkt (yüksek temp, debate yok)
         4. tot_gate açık                → tot
@@ -143,6 +143,12 @@ class PolicyRouterV2(IPolicyRouter):
             (mode, inner_steps)
         """
         if not self.cfg.policy.allow_inner_steps:
+            return "direct", 0
+
+        # --- Kural 0: Entropi ölçülemedi (None) → direkt ---
+        # Başarısız ölçüm yer tutucu bir sayıya çevrilip düşünme moduna karar
+        # verdirmez; mesaj en ucuz yoldan yanıtlanır.
+        if not features.get("entropy_available", True):
             return "direct", 0
 
         query_type = features.get("query_type", "unknown")
@@ -330,6 +336,8 @@ def _normalize_features(raw: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "input_length":        int(raw.get("input_length",        0)     or 0),
         "entropy_est":         float(raw.get("entropy_est",       0.0)   or 0.0),
+        # Açıkça None verilen entropi "ölçüm yok" demektir (anahtarın yokluğu değil).
+        "entropy_available":   raw.get("entropy_est", 0.0) is not None,
         "needs_recent_info":   bool(raw.get("needs_recent_info",  False)),
         "needs_calc_or_parse": bool(raw.get("needs_calc_or_parse",False)),
         "has_claims":          bool(raw.get("has_claims",         False)),
