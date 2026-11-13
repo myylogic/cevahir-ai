@@ -1,0 +1,8 @@
+{
+ "p": 0.2,
+ "pool_size": 4490,
+ "min_words": 3,
+ "max_words": 16,
+ "max_tokens": 20,
+ "pool_sha256": "c4a4bdfad3531718e6e3cd822cbcca784de50e3ca294082fb5727841e1dd225b"
+}
