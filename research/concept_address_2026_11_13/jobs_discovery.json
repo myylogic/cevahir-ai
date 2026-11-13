@@ -1,0 +1,31 @@
+[
+ {
+  "id": "ka_disc_w0",
+  "cmd": ": \"${CEV_BASES:?set CEV_BASES to the folder holding the CEV-11 bases}\" && OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_world.py --run discovery --world 0 --base \"$CEV_BASES/discovery_w0_K20\"",
+  "deps": [],
+  "log": "research/concept_address_2026_11_13/ka_discovery_w0.log"
+ },
+ {
+  "id": "ka_disc_w1",
+  "cmd": ": \"${CEV_BASES:?set CEV_BASES to the folder holding the CEV-11 bases}\" && OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_world.py --run discovery --world 1 --base \"$CEV_BASES/discovery_w1_K20\"",
+  "deps": [],
+  "log": "research/concept_address_2026_11_13/ka_discovery_w1.log"
+ },
+ {
+  "id": "ka_disc_records",
+  "cmd": "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/verify.py --records --results research/concept_address_2026_11_13/results/discovery",
+  "deps": [
+   "ka_disc_w0",
+   "ka_disc_w1"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_discovery_records.log"
+ },
+ {
+  "id": "ka_select",
+  "cmd": "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_select.py --results research/concept_address_2026_11_13/results/discovery --out research/concept_address_2026_11_13/results/selection.json",
+  "deps": [
+   "ka_disc_records"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_select.log"
+ }
+]

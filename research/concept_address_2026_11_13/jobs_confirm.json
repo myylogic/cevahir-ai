@@ -1,0 +1,103 @@
+[
+ {
+  "id": "ka_pre",
+  "cmd": "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/verify.py --preconditions",
+  "deps": [],
+  "log": "research/concept_address_2026_11_13/ka_preconditions.log"
+ },
+ {
+  "id": "ka_conf_w1000",
+  "cmd": ": \"${CEV_BASES:?set CEV_BASES to the folder holding the CEV-11 bases}\" && OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_world.py --run confirm --world 1000 --base \"$CEV_BASES/confirm_w1000_K20\"",
+  "deps": [
+   "ka_pre"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_confirm_w1000.log"
+ },
+ {
+  "id": "ka_conf_w1001",
+  "cmd": ": \"${CEV_BASES:?set CEV_BASES to the folder holding the CEV-11 bases}\" && OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_world.py --run confirm --world 1001 --base \"$CEV_BASES/confirm_w1001_K20\"",
+  "deps": [
+   "ka_pre"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_confirm_w1001.log"
+ },
+ {
+  "id": "ka_conf_w1002",
+  "cmd": ": \"${CEV_BASES:?set CEV_BASES to the folder holding the CEV-11 bases}\" && OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_world.py --run confirm --world 1002 --base \"$CEV_BASES/confirm_w1002_K20\"",
+  "deps": [
+   "ka_pre"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_confirm_w1002.log"
+ },
+ {
+  "id": "ka_conf_w1003",
+  "cmd": ": \"${CEV_BASES:?set CEV_BASES to the folder holding the CEV-11 bases}\" && OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_world.py --run confirm --world 1003 --base \"$CEV_BASES/confirm_w1003_K20\"",
+  "deps": [
+   "ka_pre"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_confirm_w1003.log"
+ },
+ {
+  "id": "ka_conf_w1004",
+  "cmd": ": \"${CEV_BASES:?set CEV_BASES to the folder holding the CEV-11 bases}\" && OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_world.py --run confirm --world 1004 --base \"$CEV_BASES/confirm_w1004_K20\"",
+  "deps": [
+   "ka_pre"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_confirm_w1004.log"
+ },
+ {
+  "id": "ka_conf_w1005",
+  "cmd": ": \"${CEV_BASES:?set CEV_BASES to the folder holding the CEV-11 bases}\" && OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_world.py --run confirm --world 1005 --base \"$CEV_BASES/confirm_w1005_K20\"",
+  "deps": [
+   "ka_pre"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_confirm_w1005.log"
+ },
+ {
+  "id": "ka_conf_w1006",
+  "cmd": ": \"${CEV_BASES:?set CEV_BASES to the folder holding the CEV-11 bases}\" && OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_world.py --run confirm --world 1006 --base \"$CEV_BASES/confirm_w1006_K20\"",
+  "deps": [
+   "ka_pre"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_confirm_w1006.log"
+ },
+ {
+  "id": "ka_conf_w1007",
+  "cmd": ": \"${CEV_BASES:?set CEV_BASES to the folder holding the CEV-11 bases}\" && OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/run_world.py --run confirm --world 1007 --base \"$CEV_BASES/confirm_w1007_K20\"",
+  "deps": [
+   "ka_pre"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_confirm_w1007.log"
+ },
+ {
+  "id": "ka_conf_records",
+  "cmd": "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/verify.py --records --results research/concept_address_2026_11_13/results/confirm",
+  "deps": [
+   "ka_conf_w1000",
+   "ka_conf_w1001",
+   "ka_conf_w1002",
+   "ka_conf_w1003",
+   "ka_conf_w1004",
+   "ka_conf_w1005",
+   "ka_conf_w1006",
+   "ka_conf_w1007"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_confirm_records.log"
+ },
+ {
+  "id": "ka_analyze",
+  "cmd": "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/analyze.py --results research/concept_address_2026_11_13/results/confirm --selection research/concept_address_2026_11_13/results/selection.json",
+  "deps": [
+   "ka_conf_records"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_analyze.log"
+ },
+ {
+  "id": "ka_rerun",
+  "cmd": "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 python research/concept_address_2026_11_13/verify.py --rerun --results research/concept_address_2026_11_13/results/confirm",
+  "deps": [
+   "ka_analyze"
+  ],
+  "log": "research/concept_address_2026_11_13/ka_rerun.log"
+ }
+]
