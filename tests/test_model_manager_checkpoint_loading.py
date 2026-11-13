@@ -17,32 +17,45 @@ Endüstri Standartları:
 Test Senaryoları:
 1. ✅ Normal checkpoint yükleme (tüm bileşenler mevcut)
 2. ✅ Model state dict yükleme (optimizer/scheduler yok)
-3. ✅ Optimizer state dict uyumsuzluğu (exception handle edilmeli)
-4. ✅ Scheduler state dict uyumsuzluğu (exception handle edilmeli)
-5. ✅ Checkpoint format kontrolü (hangi key'ler var?)
-6. ✅ Yükleme sonrası doğrulama (model weights kontrolü)
-7. ✅ Partial yükleme (sadece model weights)
+3. ✅ Optimizer state dict uyumsuzluğu (tam yükleme reddedilir, weights_only=True ile model yüklenir)
+4. ✅ Farklı mimariden (oyuncak SimpleModel) checkpoint reddedilmeli
+5. ✅ Gerçek checkpoint format analizi (tests/test_checkpoints/*.pth; yoksa skip)
+6. ✅ Yükleme sonrası doğrulama (gerçek checkpoint ile model weights kontrolü; yoksa skip)
+
+Güncel checkpoint sözleşmesi (model_management/checkpoint_contract.py, ModelManager.load):
+- Checkpoint mimarisi canlı modelle eşleşmeli; eşleşmeyen checkpoint hiçbir canlı parametre
+  değişmeden RuntimeError ile reddedilir (asıl neden __cause__ içindedir).
+- Tam geri yükleme (varsayılan) transactional'dır: optimizer/scheduler state'i önce kopya
+  üzerinde doğrulanır, uyumsuzsa yükleme tümden reddedilir. Yalnızca model ağırlıkları için
+  weights_only=True kullanılır.
 """
 
+import copy
+import logging
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import pytest
 import torch
 import torch.nn as nn
-import sys
-import os
-from pathlib import Path
-from typing import Dict, Any, Optional
-import tempfile
-import shutil
 
 # Root dizini path'e ekle
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
 
-import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
 logger = logging.getLogger(__name__)
+
+# Gerçek (eğitilmiş) test checkpoint'leri repo'da tutulmaz; yol CWD'den bağımsızdır
+TEST_CHECKPOINTS_DIR = REPO_ROOT / "tests" / "test_checkpoints"
+
+# ModelManager bu config ile oyuncak boyutlu bir CevahirNeuralNetwork kurar
+TOY_CONFIG = {
+    "vocab_size": 1000,
+    "embed_dim": 128,
+    "learning_rate": 0.001,
+    "device": "cpu",
+}
 
 
 class SimpleModel(nn.Module):
@@ -51,7 +64,7 @@ class SimpleModel(nn.Module):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         self.linear = nn.Linear(embed_dim, vocab_size)
-    
+
     def forward(self, x):
         x = self.embedding(x)
         x = self.linear(x.mean(dim=1))
@@ -68,14 +81,14 @@ def create_test_checkpoint(
 ) -> Dict[str, Any]:
     """
     Test checkpoint'i oluştur
-    
+
     format_type:
     - "standard": {"state_dict", "optimizer_state_dict", "scheduler_state_dict", "epoch", "config"}
     - "alternative": {"model_state_dict", "optimizer_state", "scheduler_state", "epoch", "config"}
     - "minimal": {"state_dict", "epoch"}
     """
     checkpoint = {}
-    
+
     if format_type == "standard":
         checkpoint["state_dict"] = model.state_dict()
         if optimizer is not None:
@@ -97,14 +110,14 @@ def create_test_checkpoint(
     elif format_type == "minimal":
         checkpoint["state_dict"] = model.state_dict()
         checkpoint["epoch"] = epoch
-    
+
     return checkpoint
 
 
-def test_checkpoint_format_analysis(checkpoint_path: str) -> Dict[str, Any]:
+def analyze_checkpoint_format(checkpoint_path: str) -> Dict[str, Any]:
     """Checkpoint format'ını analiz et"""
     checkpoint = torch.load(checkpoint_path, map_location="cpu")
-    
+
     analysis = {
         "keys": list(checkpoint.keys()),
         "has_state_dict": "state_dict" in checkpoint,
@@ -117,34 +130,34 @@ def test_checkpoint_format_analysis(checkpoint_path: str) -> Dict[str, Any]:
         "has_config": "config" in checkpoint,
         "has_additional_info": "additional_info" in checkpoint,
     }
-    
+
     return analysis
 
 
-def test_model_weights_loaded(model: nn.Module, checkpoint_path: str) -> Dict[str, Any]:
+def check_model_weights_loaded(model: nn.Module, checkpoint_path: str) -> Dict[str, Any]:
     """Model weights'lerin gerçekten yüklenip yüklenmediğini kontrol et"""
     # Checkpoint'ten model weights'leri yükle
     checkpoint = torch.load(checkpoint_path, map_location="cpu")
-    
+
     state_dict = checkpoint.get("state_dict") or checkpoint.get("model_state_dict")
     if state_dict is None:
         return {"error": "Model state dict bulunamadı"}
-    
+
     # Model'in ilk parametresini al
     first_param = next(iter(model.parameters()))
     param_before = first_param.data.clone()
-    
+
     # State dict'i yükle
     model.load_state_dict(state_dict, strict=True)
-    
+
     # Model'in ilk parametresini tekrar al
     param_after = next(iter(model.parameters()))
-    
+
     # Karşılaştır
     weights_changed = not torch.equal(param_before, param_after)
     param_mean = param_after.mean().item()
     param_std = param_after.std().item()
-    
+
     return {
         "weights_changed": weights_changed,
         "param_mean": param_mean,
@@ -153,343 +166,315 @@ def test_model_weights_loaded(model: nn.Module, checkpoint_path: str) -> Dict[st
     }
 
 
-def test_standard_checkpoint_loading():
+def build_manager(config: Optional[Dict[str, Any]] = None):
+    """Model, optimizer, criterion ve scheduler'ı kurulmuş ModelManager"""
+    from model_management.model_manager import ModelManager
+
+    model_manager = ModelManager(dict(config or TOY_CONFIG))
+    model_manager.initialize()
+    return model_manager
+
+
+def snapshot_state(model: nn.Module) -> Dict[str, torch.Tensor]:
+    """State'in bağımsız kopyası (load_state_dict tensörleri yerinde değiştirir)"""
+    return {name: tensor.detach().clone() for name, tensor in model.state_dict().items()}
+
+
+def differing_tensors(model: nn.Module, reference: Dict[str, torch.Tensor]) -> List[str]:
+    """Canlı state'te referanstan farklı olan tensörlerin adları (key kümeleri aynı olmalı)"""
+    live = model.state_dict()
+    assert live.keys() == reference.keys(), (
+        f"State key'leri farklı: eksik={sorted(reference.keys() - live.keys())[:5]}, "
+        f"fazla={sorted(live.keys() - reference.keys())[:5]}"
+    )
+    return [name for name in reference if not torch.equal(live[name], reference[name])]
+
+
+def assert_weights_loaded(
+    model: nn.Module,
+    expected: Dict[str, torch.Tensor],
+    before: Dict[str, torch.Tensor],
+) -> None:
+    """Yükleme sonrası doğrulama: canlı ağırlıklar checkpoint'tekilerle birebir aynı olmalı"""
+    # Kontrol boşa geçmesin: hedef model yüklemeden önce checkpoint'ten farklı olmalı
+    assert any(not torch.equal(before[name], expected[name]) for name in expected), (
+        "Hedef model yüklemeden önce de checkpoint ile aynıydı; yükleme doğrulanamaz"
+    )
+    mismatched = differing_tensors(model, expected)
+    assert not mismatched, (
+        f"Model weights yüklenmedi: {len(mismatched)}/{len(expected)} tensör checkpoint'ten farklı "
+        f"(ilk 5: {mismatched[:5]})"
+    )
+
+
+def test_standard_checkpoint_loading(tmp_path):
     """Test 1: Normal checkpoint yükleme (tüm bileşenler mevcut)"""
-    logger.info("=" * 80)
-    logger.info("TEST 1: Normal Checkpoint Yükleme")
-    logger.info("=" * 80)
-    
-    try:
-        from model_management.model_manager import ModelManager
-        
-        # Test model ve optimizer oluştur
-        model = SimpleModel(vocab_size=1000, embed_dim=128)
-        optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-        
-        # Checkpoint oluştur
-        checkpoint = create_test_checkpoint(
-            model=model,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            epoch=5,
-            config={"learning_rate": 0.001, "vocab_size": 1000},
-            format_type="standard"
-        )
-        
-        # Geçici dosyaya kaydet
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pth") as f:
-            checkpoint_path = f.name
-            torch.save(checkpoint, checkpoint_path)
-        
-        try:
-            # ModelManager oluştur ve yükle
-            config = {
-                "vocab_size": 1000,
-                "embed_dim": 128,
-                "learning_rate": 0.001,
-                "device": "cpu",
-            }
-            
-            model_manager = ModelManager(config)
-            model_manager.initialize()
-            
-            # Checkpoint yükle
-            model_manager.load(checkpoint_path, strict=True)
-            
-            # Doğrulama
-            assert model_manager.config.get("current_epoch") == 5, "Epoch bilgisi yüklenemedi"
-            logger.info("✅ TEST 1 BAŞARILI: Normal checkpoint yüklendi")
-            return True
-            
-        finally:
-            os.unlink(checkpoint_path)
-            
-    except Exception as e:
-        logger.error(f"❌ TEST 1 BAŞARISIZ: {e}", exc_info=True)
-        return False
+    from model_management.checkpoint_contract import model_config
+
+    # Eski test checkpoint'i oyuncak SimpleModel'den üretiyordu; ModelManager ise
+    # CevahirNeuralNetwork kurar ve güncel sözleşme farklı mimariyi (doğru olarak) reddeder
+    # (bkz. test_foreign_architecture_checkpoint_rejected). Kaynak bu yüzden aynı mimaride
+    # ikinci bir ModelManager.
+    source = build_manager()
+    # Optimizer/scheduler durumunu taze nesnelerden ayırt edilebilir yap; aksi hâlde
+    # hiç yüklenmeseler de eşit görünürlerdi.
+    for group in source.optimizer.param_groups:
+        group["lr"] = 0.000123
+    source.scheduler.step(1.0)  # Varsayılan ReduceLROnPlateau: best=1.0
+
+    checkpoint = create_test_checkpoint(
+        model=source.model,
+        optimizer=source.optimizer,
+        scheduler=source.scheduler,
+        epoch=5,
+        # Sözleşme kaydedilen config'i mimarinin kaynağı sayar ve eksik alanları varsayılanla
+        # doldurur: eski {"learning_rate", "vocab_size"} config'i "embed_dim: checkpoint=512,
+        # model=128" ile reddedilir. ModelManager.save gibi tam kuruluş config'i kaydedilir.
+        config=model_config(source.model),
+        format_type="standard",
+    )
+    checkpoint_path = tmp_path / "standard_checkpoint.pth"
+    torch.save(checkpoint, checkpoint_path)
+
+    # ModelManager oluştur ve yükle
+    model_manager = build_manager()
+    before = snapshot_state(model_manager.model)
+    model_manager.load(str(checkpoint_path), strict=True)
+
+    # Doğrulama
+    assert model_manager.config.get("current_epoch") == 5, "Epoch bilgisi yüklenemedi"
+    assert_weights_loaded(model_manager.model, checkpoint["state_dict"], before)
+    lrs = [group["lr"] for group in model_manager.optimizer.param_groups]
+    assert lrs == [0.000123] * len(lrs), f"Optimizer state dict yüklenmedi: lr={lrs}"
+    scheduler_best = model_manager.scheduler.state_dict()["best"]
+    assert scheduler_best == 1.0, f"Scheduler state dict yüklenmedi: best={scheduler_best}"
 
 
-def test_model_only_checkpoint_loading():
+def test_model_only_checkpoint_loading(tmp_path):
     """Test 2: Model state dict yükleme (optimizer/scheduler yok)"""
-    logger.info("=" * 80)
-    logger.info("TEST 2: Model Only Checkpoint Yükleme")
-    logger.info("=" * 80)
-    
-    try:
-        from model_management.model_manager import ModelManager
-        
-        # Test model oluştur
-        model = SimpleModel(vocab_size=1000, embed_dim=128)
-        
-        # Minimal checkpoint oluştur (sadece model weights)
-        checkpoint = create_test_checkpoint(
-            model=model,
-            epoch=3,
-            format_type="minimal"
+    # Kaynak, hedefle aynı mimaride (bkz. Test 1 notu)
+    source = build_manager()
+
+    # Minimal checkpoint oluştur (sadece model weights)
+    checkpoint = create_test_checkpoint(
+        model=source.model,
+        epoch=3,
+        format_type="minimal"
+    )
+    checkpoint_path = tmp_path / "minimal_checkpoint.pth"
+    torch.save(checkpoint, checkpoint_path)
+
+    # ModelManager oluştur ve yükle
+    model_manager = build_manager()
+    before = snapshot_state(model_manager.model)
+    model_manager.load(str(checkpoint_path), strict=True)
+
+    # Doğrulama
+    assert model_manager.config.get("current_epoch") == 3, "Epoch bilgisi yüklenemedi"
+    assert_weights_loaded(model_manager.model, checkpoint["state_dict"], before)
+
+
+def test_optimizer_mismatch_handling(tmp_path):
+    """Test 3: Optimizer state dict uyumsuzluğu"""
+    # Kaynak model hedefle aynı mimaride (bkz. Test 1 notu)
+    source = build_manager()
+    # Farklı parameter groups ile optimizer oluştur (ModelManager'ın optimizer'ı 3 grup kurar)
+    params = list(source.model.parameters())
+    optimizer2 = torch.optim.AdamW([
+        {"params": params[:2], "lr": 0.001},
+        {"params": params[2:], "lr": 0.002}
+    ])
+
+    # Checkpoint oluştur (optimizer2 ile)
+    checkpoint = create_test_checkpoint(
+        model=source.model,
+        optimizer=optimizer2,
+        epoch=5,
+        format_type="standard"
+    )
+    checkpoint_path = tmp_path / "optimizer_mismatch.pth"
+    torch.save(checkpoint, checkpoint_path)
+
+    model_manager = build_manager()
+    before = snapshot_state(model_manager.model)
+
+    # Eski beklenti: tam yükleme uyumsuz optimizer state'ini atlayıp modeli yine de yükler.
+    # Güncel ModelManager.load optimizer/scheduler state'ini önce kopya üzerinde doğrular ve
+    # uyumsuzlukta yüklemeyi tümden reddeder: eğitim taze optimizer ile sessizce "devam
+    # ediyormuş" gibi yarım geri yüklenmez ve hiçbir canlı parametre değişmez.
+    with pytest.raises(RuntimeError, match="yükleme") as excinfo:
+        model_manager.load(str(checkpoint_path), strict=True)
+    assert "parameter groups" in str(excinfo.value.__cause__), (
+        f"Beklenmeyen ret nedeni: {excinfo.value.__cause__!r}"
+    )
+    changed = differing_tensors(model_manager.model, before)
+    assert not changed, f"Reddedilen yükleme canlı parametreleri değiştirdi: {changed[:5]}"
+    assert model_manager.config.get("current_epoch") is None, "Reddedilen yükleme epoch'u değiştirdi"
+
+    # Optimizer yüklenemese bile model yüklenebilmeli: desteklenen yol weights_only=True
+    model_manager.load(str(checkpoint_path), strict=True, weights_only=True)
+    assert model_manager.config.get("current_epoch") == 5, "Epoch bilgisi yüklenemedi"
+    assert_weights_loaded(model_manager.model, checkpoint["state_dict"], before)
+
+
+@pytest.mark.parametrize(
+    "format_type, expected_cause",
+    [
+        # Kısmi config, eksik alanları varsayılanla doldurularak karşılaştırılır (embed_dim 512 != 128)
+        ("standard", "architecture mismatch"),
+        # Config yok; state key'leri CevahirNeuralNetwork'ünkilerle eşleşmez
+        ("minimal", "state keys mismatch"),
+    ],
+)
+def test_foreign_architecture_checkpoint_rejected(tmp_path, format_type, expected_cause):
+    """Test 4: Farklı mimariden checkpoint (eski Test 1/2'nin SimpleModel'i) reddedilmeli"""
+    model = SimpleModel(vocab_size=1000, embed_dim=128)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+    checkpoint = create_test_checkpoint(
+        model=model,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        epoch=5,
+        config={"learning_rate": 0.001, "vocab_size": 1000},
+        format_type=format_type,
+    )
+    checkpoint_path = tmp_path / f"simple_model_{format_type}.pth"
+    torch.save(checkpoint, checkpoint_path)
+
+    # Dosya sağlam: kendi mimarisine strict yüklenir, yani ret mimari farkından kaynaklanmalı
+    own_load = check_model_weights_loaded(SimpleModel(vocab_size=1000, embed_dim=128), str(checkpoint_path))
+    assert own_load.get("weights_changed"), f"SimpleModel checkpoint'i kendi mimarisine yüklenemedi: {own_load}"
+
+    model_manager = build_manager()
+    before = snapshot_state(model_manager.model)
+    with pytest.raises(RuntimeError, match="yükleme") as excinfo:
+        model_manager.load(str(checkpoint_path), strict=True)
+    assert expected_cause in str(excinfo.value.__cause__), (
+        f"Beklenmeyen ret nedeni: {excinfo.value.__cause__!r}"
+    )
+    changed = differing_tensors(model_manager.model, before)
+    assert not changed, f"Reddedilen checkpoint canlı parametreleri değiştirdi: {changed[:5]}"
+    assert model_manager.config.get("current_epoch") is None, "Reddedilen checkpoint epoch'u değiştirdi"
+
+
+@pytest.fixture(scope="module")
+def real_checkpoint_path() -> Path:
+    """tests/test_checkpoints altındaki ilk gerçek checkpoint; yoksa testler atlanır"""
+    checkpoint_files = sorted(TEST_CHECKPOINTS_DIR.glob("*.pth"))
+    if not checkpoint_files:
+        pytest.skip(
+            "Gerçek test checkpoint'i yok: tests/test_checkpoints/*.pth bulunamadı "
+            "(eğitilmiş checkpoint'ler repo'da tutulmaz)"
         )
-        
-        # Geçici dosyaya kaydet
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pth") as f:
-            checkpoint_path = f.name
-            torch.save(checkpoint, checkpoint_path)
-        
-        try:
-            # ModelManager oluştur ve yükle
-            config = {
-                "vocab_size": 1000,
-                "embed_dim": 128,
-                "device": "cpu",
-            }
-            
-            model_manager = ModelManager(config)
-            model_manager.initialize()
-            
-            # Checkpoint yükle
-            model_manager.load(checkpoint_path, strict=True)
-            
-            # Doğrulama
-            assert model_manager.config.get("current_epoch") == 3, "Epoch bilgisi yüklenemedi"
-            logger.info("✅ TEST 2 BAŞARILI: Model only checkpoint yüklendi")
-            return True
-            
-        finally:
-            os.unlink(checkpoint_path)
-            
-    except Exception as e:
-        logger.error(f"❌ TEST 2 BAŞARISIZ: {e}", exc_info=True)
-        return False
+    logger.info(f"Checkpoint: {checkpoint_files[0]}")
+    return checkpoint_files[0]
 
 
-def test_optimizer_mismatch_handling():
-    """Test 3: Optimizer state dict uyumsuzluğu (exception handle edilmeli)"""
-    logger.info("=" * 80)
-    logger.info("TEST 3: Optimizer Mismatch Handling")
-    logger.info("=" * 80)
-    
-    try:
-        from model_management.model_manager import ModelManager
-        
-        # Test model oluştur
-        model1 = SimpleModel(vocab_size=1000, embed_dim=128)
-        optimizer1 = torch.optim.AdamW(model1.parameters(), lr=0.001)
-        
-        # Farklı optimizer ile checkpoint oluştur (farklı parameter groups)
-        model2 = SimpleModel(vocab_size=1000, embed_dim=128)
-        # Farklı learning rate ile optimizer oluştur (farklı parameter groups oluşturur)
-        optimizer2 = torch.optim.AdamW([
-            {"params": list(model2.parameters())[:2], "lr": 0.001},
-            {"params": list(model2.parameters())[2:], "lr": 0.002}
-        ])
-        
-        # Checkpoint oluştur (optimizer2 ile)
-        checkpoint = create_test_checkpoint(
-            model=model2,
-            optimizer=optimizer2,
-            epoch=5,
-            format_type="standard"
-        )
-        
-        # Geçici dosyaya kaydet
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pth") as f:
-            checkpoint_path = f.name
-            torch.save(checkpoint, checkpoint_path)
-        
-        try:
-            # ModelManager oluştur (optimizer1 ile - farklı parameter groups)
-            config = {
-                "vocab_size": 1000,
-                "embed_dim": 128,
-                "learning_rate": 0.001,
-                "device": "cpu",
-            }
-            
-            model_manager = ModelManager(config)
-            model_manager.initialize()
-            
-            # Checkpoint yükle (optimizer mismatch olmalı ama exception fırlatmamalı)
-            model_manager.load(checkpoint_path, strict=True)
-            
-            # Doğrulama: Model weights yüklenmiş olmalı
-            # (Optimizer yüklenemese bile model yüklenmeli)
-            logger.info("✅ TEST 3 BAŞARILI: Optimizer mismatch handle edildi, model yüklendi")
-            return True
-            
-        finally:
-            os.unlink(checkpoint_path)
-            
-    except Exception as e:
-        logger.error(f"❌ TEST 3 BAŞARISIZ: {e}", exc_info=True)
-        return False
+def test_checkpoint_format_analysis_real(real_checkpoint_path):
+    """Test 5: Gerçek checkpoint format analizi"""
+    analysis = analyze_checkpoint_format(str(real_checkpoint_path))
+
+    logger.info("Checkpoint Format Analizi:")
+    for key, value in analysis.items():
+        logger.info(f"  {key}: {value}")
+
+    # Analiz en azından model state dict'i (standart 1, KRİTİK) bulmalı
+    assert analysis["has_state_dict"] or analysis["has_model_state_dict"], (
+        f"Checkpoint'te model state dict yok: {real_checkpoint_path.name}, keys={analysis['keys']}"
+    )
 
 
-def test_checkpoint_format_analysis_real():
-    """Test 4: Gerçek checkpoint format analizi"""
-    logger.info("=" * 80)
-    logger.info("TEST 4: Gerçek Checkpoint Format Analizi")
-    logger.info("=" * 80)
-    
-    try:
-        # Test checkpoint'leri bul
-        test_checkpoints_dir = Path("tests/test_checkpoints")
-        if not test_checkpoints_dir.exists():
-            logger.warning("⚠️ Test checkpoint'leri bulunamadı: tests/test_checkpoints")
-            return False
-        
-        checkpoint_files = list(test_checkpoints_dir.glob("*.pth"))
-        if not checkpoint_files:
-            logger.warning("⚠️ Test checkpoint dosyası bulunamadı")
-            return False
-        
-        # İlk checkpoint'i analiz et
-        checkpoint_path = checkpoint_files[0]
-        logger.info(f"Checkpoint analiz ediliyor: {checkpoint_path}")
-        
-        analysis = test_checkpoint_format_analysis(str(checkpoint_path))
-        
-        logger.info("Checkpoint Format Analizi:")
-        for key, value in analysis.items():
-            logger.info(f"  {key}: {value}")
-        
-        logger.info("✅ TEST 4 BAŞARILI: Checkpoint format analizi tamamlandı")
-        return True
-        
-    except Exception as e:
-        logger.error(f"❌ TEST 4 BAŞARISIZ: {e}", exc_info=True)
-        return False
+def test_model_weights_verification(real_checkpoint_path):
+    """Test 6: Model weights doğrulama (gerçek checkpoint ile)"""
+    from model_management.checkpoint_contract import unpack_checkpoint
+    from model_management.model_manager import ModelManager
+    from tokenizer_management.core.tokenizer_core import TokenizerCore
+    # Config yükle (train.py'deki gibi)
+    from training_system.train import TRAIN_CONFIG, load_tokenizer_config
+
+    config = copy.deepcopy(TRAIN_CONFIG)
+    config.update(load_tokenizer_config())
+    # TensorBoard bu testin konusu değil; tensorboard kuruluysa model kurulumu repo'ya runs/ yazar
+    config["use_tensorboard"] = False
+
+    # TRAIN_CONFIG vocab_size içermez; train.py gibi TokenizerCore'dan alınır. Sözleşme, tokenizer
+    # kimliği kayıtlı checkpoint'lerde tokenizer'ı zorunlu kılar ("requires a tokenizer").
+    # Vocab için veri yükleyici gerekmez; göreli data_dir ('education') CWD'ye bağlıdır.
+    tokenizer_core = TokenizerCore({k: v for k, v in config.items() if k != "data_dir"})
+    config["vocab_size"] = tokenizer_core.get_vocab_size()
+
+    # ModelManager oluştur
+    model_manager = ModelManager(config, tokenizer=tokenizer_core)
+    model_manager.initialize()
+
+    # Model weights'i kontrol et (yüklemeden önce). Eski test parametre nesnesinin kendisini
+    # saklıyordu; load_state_dict yerinde kopyaladığı için "önce" ve "sonra" hep aynı tensördü
+    # ve weights_changed asla True olamazdı.
+    first_param_before = next(iter(model_manager.model.parameters())).detach().clone()
+    logger.info(f"Yükleme öncesi: mean={first_param_before.mean().item():.6f}, std={first_param_before.std().item():.6f}")
+
+    # Checkpoint yükle
+    model_manager.load(str(real_checkpoint_path), strict=False)
+
+    # Model weights'i kontrol et (yüklemeden sonra)
+    first_param_after = next(iter(model_manager.model.parameters()))
+    param_mean_after = first_param_after.mean().item()
+    param_std_after = first_param_after.std().item()
+    logger.info(f"Yükleme sonrası: mean={param_mean_after:.6f}, std={param_std_after:.6f}")
+
+    # Doğrulama
+    weights_changed = not torch.equal(first_param_before, first_param_after)
+    assert weights_changed, (
+        "Model weights değişmedi (yükleme başarısız olabilir): "
+        f"mean={param_mean_after:.6f}, std={param_std_after:.6f}"
+    )
+
+    # Eski "random weights" sezgisi (|mean| < 0.001 ve std < 0.15) yüklemenin başarısız olup
+    # olmadığını tahmin ediyordu; taze init'in std'si ~0.007'dir ve eğitilmiş embedding'ler de bu
+    # eşiklerin altında kalabilir. Bunun yerine yüklenen tensörler checkpoint'tekilerle birebir
+    # karşılaştırılır (kesin kontrol).
+    state, _, _, _ = unpack_checkpoint(torch.load(real_checkpoint_path, map_location="cpu"))
+    live = model_manager.model.state_dict()
+    common = sorted(
+        name for name in live.keys() & state.keys()
+        if isinstance(live[name], torch.Tensor) and isinstance(state[name], torch.Tensor)
+    )
+    assert common, "Checkpoint ile model arasında ortak state key'i yok"
+    mismatched = [
+        name for name in common
+        if not torch.equal(live[name].cpu(), state[name].to(dtype=live[name].dtype))
+    ]
+    assert not mismatched, (
+        f"Model weights checkpoint'ten yüklenmedi: {len(mismatched)}/{len(common)} tensör farklı "
+        f"(ilk 5: {mismatched[:5]})"
+    )
 
 
-def test_model_weights_verification():
-    """Test 5: Model weights doğrulama (gerçek checkpoint ile)"""
-    logger.info("=" * 80)
-    logger.info("TEST 5: Model Weights Doğrulama")
-    logger.info("=" * 80)
-    
-    try:
-        from model_management.model_manager import ModelManager
-        
-        # Test checkpoint'leri bul
-        test_checkpoints_dir = Path("tests/test_checkpoints")
-        if not test_checkpoints_dir.exists():
-            logger.warning("⚠️ Test checkpoint'leri bulunamadı: tests/test_checkpoints")
-            return False
-        
-        checkpoint_files = list(test_checkpoints_dir.glob("*.pth"))
-        if not checkpoint_files:
-            logger.warning("⚠️ Test checkpoint dosyası bulunamadı")
-            return False
-        
-        checkpoint_path = checkpoint_files[0]
-        logger.info(f"Checkpoint yükleniyor: {checkpoint_path}")
-        
-        # Config yükle (train.py'deki gibi)
-        try:
-            from training_system.train import TRAIN_CONFIG
-            config = TRAIN_CONFIG.copy()
-        except Exception as e:
-            logger.warning(f"TRAIN_CONFIG yüklenemedi: {e}")
-            config = {
-                "device": "cpu",
-                "vocab_size": 60312,
-                "embed_dim": 512,
-            }
-        
-        # ModelManager oluştur
-        model_manager = ModelManager(config)
-        model_manager.initialize()
-        
-        # Model weights'i kontrol et (yüklemeden önce)
-        first_param_before = next(iter(model_manager.model.parameters()))
-        param_mean_before = first_param_before.mean().item()
-        param_std_before = first_param_before.std().item()
-        
-        logger.info(f"Yükleme öncesi: mean={param_mean_before:.6f}, std={param_std_before:.6f}")
-        
-        # Checkpoint yükle
-        model_manager.load(str(checkpoint_path), strict=False)
-        
-        # Model weights'i kontrol et (yüklemeden sonra)
-        first_param_after = next(iter(model_manager.model.parameters()))
-        param_mean_after = first_param_after.mean().item()
-        param_std_after = first_param_after.std().item()
-        
-        logger.info(f"Yükleme sonrası: mean={param_mean_after:.6f}, std={param_std_after:.6f}")
-        
-        # Doğrulama
-        weights_changed = not torch.equal(first_param_before, first_param_after)
-        is_random_weights = abs(param_mean_after) < 0.001 and param_std_after < 0.15
-        
-        logger.info(f"Weights değişti mi: {weights_changed}")
-        logger.info(f"Random weights göstergesi: {is_random_weights}")
-        
-        if weights_changed and not is_random_weights:
-            logger.info("✅ TEST 5 BAŞARILI: Model weights gerçekten yüklendi")
-            return True
-        elif is_random_weights:
-            logger.warning("⚠️ TEST 5 UYARI: Model weights random weights gibi görünüyor (yükleme başarısız olabilir)")
-            return False
-        else:
-            logger.warning("⚠️ TEST 5 UYARI: Model weights değişmedi (yükleme başarısız olabilir)")
-            return False
-        
-    except Exception as e:
-        logger.error(f"❌ TEST 5 BAŞARISIZ: {e}", exc_info=True)
-        return False
 
+@pytest.mark.xfail(strict=True, reason=(
+    "Ürün hatası: ModelManager.load scheduler durumunu derin kopyaya yükleyip istisna bekler; "
+    "torch scheduler.load_state_dict yalnızca __dict__.update yaptığı için yanlış türde bir "
+    "scheduler durumu (StepLR → ReduceLROnPlateau) sessizce kabul edilir. Düzeltilince XPASS olur."))
+def test_wrong_scheduler_type_is_rejected(tmp_path):
+    """Yanlış türde scheduler durumu içeren checkpoint reddedilmeli (şu an kabul ediliyor)."""
+    from model_management.checkpoint_contract import model_config
 
-def main():
-    """Ana test fonksiyonu"""
-    logger.info("=" * 80)
-    logger.info("FAZE 5.1.1: MODELMANAGER CHECKPOINT LOADING - ENDÜSTRİ STANDARTLARI TESTİ")
-    logger.info("=" * 80)
-    logger.info("\nBu test, ModelManager'ın checkpoint yükleme mekanizmasının")
-    logger.info("endüstri standartlarına uygunluğunu test eder.")
-    logger.info("=" * 80)
-    
-    results = []
-    
-    # Test 1: Normal checkpoint yükleme
-    results.append(("Test 1: Normal Checkpoint Yükleme", test_standard_checkpoint_loading()))
-    
-    # Test 2: Model only checkpoint yükleme
-    results.append(("Test 2: Model Only Checkpoint Yükleme", test_model_only_checkpoint_loading()))
-    
-    # Test 3: Optimizer mismatch handling
-    results.append(("Test 3: Optimizer Mismatch Handling", test_optimizer_mismatch_handling()))
-    
-    # Test 4: Checkpoint format analizi
-    results.append(("Test 4: Checkpoint Format Analizi", test_checkpoint_format_analysis_real()))
-    
-    # Test 5: Model weights doğrulama
-    results.append(("Test 5: Model Weights Doğrulama", test_model_weights_verification()))
-    
-    # Özet
-    logger.info("\n" + "=" * 80)
-    logger.info("TEST SONUÇLARI ÖZETİ")
-    logger.info("=" * 80)
-    
-    passed = sum(1 for _, result in results if result)
-    total = len(results)
-    
-    for test_name, result in results:
-        status = "✅ PASS" if result else "❌ FAIL"
-        logger.info(f"{status}: {test_name}")
-    
-    logger.info("=" * 80)
-    logger.info(f"Toplam: {passed}/{total} test başarılı")
-    logger.info("=" * 80)
-    
-    if passed == total:
-        logger.info("\n🎉 TÜM TESTLER BAŞARILI!")
-        logger.info("ModelManager checkpoint yükleme endüstri standartlarına uygun.")
-    else:
-        logger.info(f"\n⚠️ {total - passed} test başarısız!")
-        logger.info("ModelManager checkpoint yükleme mekanizmasında sorunlar tespit edildi.")
-        logger.info("Test sonuçlarına göre ModelManager güncellenmeli.")
-    
-    return passed == total
-
+    source = build_manager()
+    foreign = torch.optim.lr_scheduler.StepLR(source.optimizer, step_size=3, gamma=0.5)
+    checkpoint = create_test_checkpoint(
+        model=source.model,
+        optimizer=source.optimizer,
+        scheduler=foreign,
+        epoch=1,
+        config=model_config(source.model),
+        format_type="standard",
+    )
+    checkpoint_path = tmp_path / "foreign_scheduler.pth"
+    torch.save(checkpoint, checkpoint_path)
+    manager = build_manager()
+    with pytest.raises((RuntimeError, ValueError, TypeError, KeyError)):
+        manager.load(str(checkpoint_path), strict=True)
 
 if __name__ == "__main__":
-    success = main()
-
+    sys.exit(pytest.main([__file__, "-v"]))
