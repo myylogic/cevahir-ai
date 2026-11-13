@@ -13,45 +13,90 @@ ENDÜSTRİ STANDARTLARI:
 KRİTİK SORU:
 - TrainingService'te EOS weight'li criterion oluşturuluyor
 - AMA TrainingManager'da kullanılıyor mu?
-- _compute_masked_loss_and_acc'de F.cross_entropy kullanılıyor - criterion kullanılmıyor mu?
+- Eski TrainingManager'ın _compute_masked_loss_and_acc metodu F.cross_entropy kullanıyordu -
+  criterion kullanılmıyor muydu?
+
+GÜNCEL DURUM (V2):
+- TrainingManager training_management/v2/core/training_manager.py'ye taşındı.
+- Loss artık LossComputation.compute_loss ile hesaplanıyor (_compute_masked_loss_and_acc'nin
+  yerini aldı); criterion'ın weight ve label_smoothing değerlerini kullanır, PAD'i maskeler ve
+  geçerli token sayısına böler (token-ortalaması). nn.CrossEntropyLoss(reduction="mean") ise
+  ağırlıklı ortalama alır (hedeflerin weight toplamına böler); bu yüzden iki değer EOS weight
+  1.0'dan farklıyken birebir eşit değildir, aynı token terimlerini kullanırlar.
 """
 
-import os
-import sys
-import json
+import copy
 import logging
-import torch
-import torch.nn.functional as F
-from datetime import datetime
-from typing import Dict, List, Tuple, Any
+import math
+import sys
 from pathlib import Path
 
-# Proje kök dizinini sys.path'e ekle
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from training_management.training_manager import TrainingManager
+import pytest
+import torch
+import torch.nn.functional as F
 from torch.nn import CrossEntropyLoss
 from torch.utils.data import DataLoader, TensorDataset
 
-# Logger setup
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
-)
+# Proje kök dizinini sys.path'e ekle (dosya doğrudan çalıştırıldığında da import'lar çalışsın)
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+# Eski yol training_management/training_manager.py artık yok; V2 TrainingManager
+from training_management.v2.core.training_manager import TrainingManager
+from training_management.v2.core.loss_computation import LossComputation
+
+# Modül seviyesinde logging.basicConfig yok; standart logger yeterli (pytest yakalar).
 logger = logging.getLogger("TrainingManagerLossFunctionTest")
 
+# float32 toplamlarında beklenen sayısal hata ~1e-6
+TOLERANCE = 1e-5
 
-class TrainingManagerLossFunctionTest:
+
+class _StdTrainingLogger(logging.LoggerAdapter):
+    """TrainingManager bileşenlerinin beklediği log_* arayüzü, standart logging'e yazar.
+
+    Varsayılan TrainingLogger süreç genelinde tekildir (singleton) ve tensorboard
+    kuruluysa ./logs/tb altına yazar; testler repo ağacına yazmamalı.
+    """
+
+    def __init__(self, name: str):
+        super().__init__(logging.getLogger(name), {})
+
+    def log_info(self, msg, *args, **kwargs):
+        self.info(msg)
+
+    def log_warning(self, msg, *args, **kwargs):
+        self.warning(msg)
+
+    def log_error(self, msg, *args, exc_info=False, **kwargs):
+        self.error(msg, exc_info=exc_info)
+
+    def log_debug(self, msg, *args, **kwargs):
+        self.debug(msg)
+
+
+@pytest.fixture(autouse=True)
+def _seeded_rng():
+    """Mock model ve dummy veri deterministik olsun; global RNG durumu test sonrası geri yüklenir."""
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(1234)
+        yield
+
+
+class TestTrainingManagerLossFunction:
     """TrainingManager loss function doğrulama testi"""
-    
-    def __init__(self):
+
+    def setup_method(self):
         self.vocab_size = 60000
         self.eos_id = 3
         self.pad_id = 0
         self.bos_id = 2
+        # Ürün varsayılanı artık eos_token_weight=1.0 (CriterionManager: 0.1 EOS öğrenimini
+        # bozuyordu). 1.0 ağırlık etkisizdir; mekanizmanın gözlenebilmesi için 0.1 kullanılır.
         self.eos_weight = 0.1
         self.label_smoothing = 0.1
-        
+
     def create_mock_model(self):
         """Mock model oluştur"""
         class MockModel(torch.nn.Module):
@@ -60,50 +105,50 @@ class TrainingManagerLossFunctionTest:
                 self.vocab_size = vocab_size
                 self.embedding = torch.nn.Embedding(1000, 512)
                 self.linear = torch.nn.Linear(512, vocab_size)
-                
+
             def forward(self, inputs):
                 # Basit forward pass - [B, T] → [B, T, V]
-                B, T = inputs.shape
                 x = self.embedding(inputs)  # [B, T, 512]
                 logits = self.linear(x)  # [B, T, V]
                 return logits
-        
+
         return MockModel(self.vocab_size)
-    
+
     def create_criterion_with_eos_weight(self):
         """EOS weight'li criterion oluştur (TrainingService gibi)"""
-        device = torch.device("cpu")
-        loss_weights = torch.ones(self.vocab_size, device=device)
-        
-        if self.eos_id is not None and 0 <= self.eos_id < self.vocab_size:
-            loss_weights[self.eos_id] = self.eos_weight
-            logger.info(f"✅ EOS weight uygulandı: eos_id={self.eos_id}, weight={self.eos_weight}")
-        
-        criterion = CrossEntropyLoss(
+        loss_weights = torch.ones(self.vocab_size)
+        loss_weights[self.eos_id] = self.eos_weight
+
+        return CrossEntropyLoss(
             weight=loss_weights,
             label_smoothing=self.label_smoothing,
             ignore_index=self.pad_id,
             reduction="mean"
         )
-        
-        return criterion
-    
-    def test_training_manager_loss_computation(self) -> Dict[str, Any]:
+
+    def create_dummy_batch(self, batch_size: int = 4, seq_len: int = 10):
+        """Dummy input/target; her satırın son içerik pozisyonu EOS, bir satırda PAD dolgusu var."""
+        inputs = torch.randint(0, 1000, (batch_size, seq_len))
+        # Özel token'ları (0-4) rastgele içerikten hariç tut; EOS/PAD yerleri belirli olsun
+        targets = torch.randint(5, self.vocab_size, (batch_size, seq_len))
+        targets[:, -1] = self.eos_id  # Son pozisyona EOS koy
+        # Kısa bir örnek: EOS'tan sonra PAD (criterion ignore_index / TrainingManager maskesi)
+        targets[1, seq_len - 4] = self.eos_id
+        targets[1, seq_len - 3:] = self.pad_id
+        return inputs, targets
+
+    def test_training_manager_loss_computation(self, tmp_path):
         """
         TrainingManager'ın loss hesaplamasını test et
-        KRİTİK: _compute_masked_loss_and_acc'de F.cross_entropy kullanılıyor mu?
-        Criterion kullanılıyor mu?
+        KRİTİK: TrainingManager criterion'ın EOS weight'ini ve label smoothing'ini kullanıyor mu,
+        yoksa düz F.cross_entropy mi?
         """
-        logger.info("\n" + "=" * 80)
-        logger.info("TRAINING MANAGER LOSS COMPUTATION TESTİ")
-        logger.info("=" * 80)
-        
         # Mock model
         model = self.create_mock_model()
-        
+
         # EOS weight'li criterion (TrainingService gibi)
         criterion = self.create_criterion_with_eos_weight()
-        
+
         # TrainingManager config
         config = {
             "vocab_size": self.vocab_size,
@@ -113,24 +158,21 @@ class TrainingManagerLossFunctionTest:
             "grad_accum_steps": 1,
             "max_grad_norm": 1.0,
             "epochs": 1,
-            "enable_file_logging": False
+            "enable_file_logging": False,
+            # Repo ağacına yazmamak için: varsayılan ./checkpoints ve ./runs yerine
+            "checkpoint_dir": str(tmp_path / "checkpoints"),
+            "enable_tensorboard": False,
         }
-        
+
         # Dummy data
-        batch_size = 4
-        seq_len = 10
-        
-        inputs = torch.randint(0, 1000, (batch_size, seq_len))
-        targets = torch.randint(0, self.vocab_size, (batch_size, seq_len))
-        targets[:, -1] = self.eos_id  # Son pozisyona EOS koy
-        
+        inputs, targets = self.create_dummy_batch()
         dataset = TensorDataset(inputs, targets)
-        train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
-        val_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
-        
+        train_loader = DataLoader(dataset, batch_size=inputs.size(0), shuffle=False)
+        val_loader = DataLoader(dataset, batch_size=inputs.size(0), shuffle=False)
+
         # Optimizer
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-        
+
         # TrainingManager oluştur
         training_manager = TrainingManager(
             model=model,
@@ -138,246 +180,151 @@ class TrainingManagerLossFunctionTest:
             val_loader=val_loader,
             optimizer=optimizer,
             criterion=criterion,  # EOS weight'li criterion veriyoruz
-            config=config
+            config=config,
+            logger=_StdTrainingLogger(logger.name),
         )
-        
-        # KRİTİK TEST: _compute_masked_loss_and_acc metodunu incele
-        # Bu metod F.cross_entropy kullanıyor mu? Criterion kullanıyor mu?
-        
+
+        # KRİTİK: Training loop'un kullandığı loss hesaplayıcı, verdiğimiz criterion'ı taşıyor mu?
+        assert training_manager.loss_computation.criterion is criterion, (
+            "TrainingManager verilen (EOS weight'li) criterion'ı kullanmıyor"
+        )
+        assert training_manager.training_loop.loss_computation is training_manager.loss_computation, (
+            "Training loop, TrainingManager'ın LossComputation'ını kullanmıyor"
+        )
+
         # Model'den logits al
         model.eval()
         with torch.no_grad():
             outputs = model(inputs)
-            if isinstance(outputs, tuple):
-                logits = outputs[0]
-            else:
-                logits = outputs
-        
-        # TrainingManager'ın loss hesaplama metodunu çağır
-        loss_tm, acc_tm, ppl_tm = training_manager._compute_masked_loss_and_acc(
+            logits = outputs[0] if isinstance(outputs, tuple) else outputs
+
+        # TrainingManager'ın loss hesaplama yolu (eski _compute_masked_loss_and_acc)
+        loss_tm, acc_tm, ppl_tm = training_manager.loss_computation.compute_loss(
             logits=logits,
             targets=targets,
             pad_id=self.pad_id
         )
-        
-        # MANUEL HESAPLAMA: Criterion ile (EOS weight'li)
+
         logits_flat = logits.view(-1, self.vocab_size)
         targets_flat = targets.view(-1)
+        valid = targets_flat != self.pad_id
+        num_valid = int(valid.sum())
+
+        # MANUEL HESAPLAMA: Criterion ile (EOS weight'li, hedef weight toplamına bölünmüş ortalama)
         loss_criterion = criterion(logits_flat, targets_flat)
-        
-        # MANUEL HESAPLAMA: F.cross_entropy ile (EOS weight YOK)
-        loss_f_cross_entropy = F.cross_entropy(
-            logits_flat,
-            targets_flat,
-            reduction="mean"
+
+        # MANUEL HESAPLAMA: F.cross_entropy ile (EOS weight YOK, label smoothing YOK)
+        loss_f_cross_entropy = F.cross_entropy(logits_flat, targets_flat, ignore_index=self.pad_id)
+
+        # MANUEL HESAPLAMA: criterion'ın token terimleri (weight + label smoothing), token-ortalaması
+        per_token_weighted = F.cross_entropy(
+            logits_flat, targets_flat,
+            weight=criterion.weight, label_smoothing=self.label_smoothing, reduction="none",
         )
-        
-        # MANUEL HESAPLAMA: F.cross_entropy + weight ile (EOS weight VAR)
-        loss_weights = torch.ones(self.vocab_size)
-        loss_weights[self.eos_id] = self.eos_weight
-        loss_f_cross_entropy_weighted = F.cross_entropy(
-            logits_flat,
-            targets_flat,
-            weight=loss_weights,
-            reduction="mean"
+        expected_tm_loss = per_token_weighted[valid].sum() / num_valid
+
+        # Aynı hesap EOS weight olmadan (label smoothing aynı) - tek fark EOS weight
+        per_token_unweighted = F.cross_entropy(
+            logits_flat, targets_flat, label_smoothing=self.label_smoothing, reduction="none",
         )
-        
-        # EOS pozisyonlarındaki loss'u analiz et
-        eos_positions = (targets_flat == self.eos_id).nonzero(as_tuple=True)[0]
-        non_eos_positions = (targets_flat != self.eos_id).nonzero(as_tuple=True)[0]
-        
-        # EOS pozisyonlarındaki loss (criterion ile)
-        if len(eos_positions) > 0:
-            eos_loss_criterion = F.cross_entropy(
-                logits_flat[eos_positions],
-                targets_flat[eos_positions],
-                weight=loss_weights,
-                reduction="mean"
-            )
-        else:
-            eos_loss_criterion = torch.tensor(0.0)
-        
-        # Non-EOS pozisyonlarındaki loss
-        if len(non_eos_positions) > 0:
-            non_eos_loss_criterion = F.cross_entropy(
-                logits_flat[non_eos_positions],
-                targets_flat[non_eos_positions],
-                weight=loss_weights,
-                reduction="mean"
-            )
-        else:
-            non_eos_loss_criterion = torch.tensor(0.0)
-        
-        results = {
-            "training_manager_loss": float(loss_tm.item()),
-            "criterion_loss": float(loss_criterion.item()),
-            "f_cross_entropy_loss": float(loss_f_cross_entropy.item()),
-            "f_cross_entropy_weighted_loss": float(loss_f_cross_entropy_weighted.item()),
-            "loss_difference_tm_vs_criterion": float(abs(loss_tm.item() - loss_criterion.item())),
-            "loss_difference_tm_vs_f_cross_entropy": float(abs(loss_tm.item() - loss_f_cross_entropy.item())),
-            "loss_difference_tm_vs_f_cross_entropy_weighted": float(abs(loss_tm.item() - loss_f_cross_entropy_weighted.item())),
-            "eos_positions_count": len(eos_positions),
-            "non_eos_positions_count": len(non_eos_positions),
-            "eos_loss_criterion": float(eos_loss_criterion.item()),
-            "non_eos_loss_criterion": float(non_eos_loss_criterion.item()),
-            "eos_weight_applied": self.eos_weight,
-            "label_smoothing_applied": self.label_smoothing,
-            "kritik_bulgu": {
-                "training_manager_uses_f_cross_entropy": abs(loss_tm.item() - loss_f_cross_entropy.item()) < 1e-5,
-                "training_manager_uses_criterion": abs(loss_tm.item() - loss_criterion.item()) < 1e-5,
-                "training_manager_uses_weighted_f_cross_entropy": abs(loss_tm.item() - loss_f_cross_entropy_weighted.item()) < 1e-5,
-                "eos_weight_actually_applied": abs(loss_criterion.item() - loss_f_cross_entropy.item()) > 1e-5
-            }
-        }
-        
-        logger.info(f"\n📊 Loss Karşılaştırması:")
-        logger.info(f"  TrainingManager loss: {results['training_manager_loss']:.6f}")
-        logger.info(f"  Criterion loss (EOS weight'li): {results['criterion_loss']:.6f}")
-        logger.info(f"  F.cross_entropy loss (EOS weight YOK): {results['f_cross_entropy_loss']:.6f}")
-        logger.info(f"  F.cross_entropy weighted loss (EOS weight VAR): {results['f_cross_entropy_weighted_loss']:.6f}")
-        logger.info(f"\n📊 Farklar:")
-        logger.info(f"  TM vs Criterion: {results['loss_difference_tm_vs_criterion']:.6f}")
-        logger.info(f"  TM vs F.cross_entropy: {results['loss_difference_tm_vs_f_cross_entropy']:.6f}")
-        logger.info(f"  TM vs F.cross_entropy weighted: {results['loss_difference_tm_vs_f_cross_entropy_weighted']:.6f}")
-        
-        logger.info(f"\n🔍 KRİTİK BULGU:")
-        logger.info(f"  TrainingManager F.cross_entropy kullanıyor mu? {results['kritik_bulgu']['training_manager_uses_f_cross_entropy']}")
-        logger.info(f"  TrainingManager Criterion kullanıyor mu? {results['kritik_bulgu']['training_manager_uses_criterion']}")
-        logger.info(f"  TrainingManager Weighted F.cross_entropy kullanıyor mu? {results['kritik_bulgu']['training_manager_uses_weighted_f_cross_entropy']}")
-        logger.info(f"  EOS weight gerçekten uygulanıyor mu? {results['kritik_bulgu']['eos_weight_actually_applied']}")
-        
-        return results
-    
-    def test_gradient_impact(self) -> Dict[str, Any]:
+        expected_without_eos_weight = per_token_unweighted[valid].sum() / num_valid
+
+        eos_positions = int((targets_flat == self.eos_id).sum())
+        logger.info(
+            "Loss karşılaştırması: TM=%.6f, criterion=%.6f, F.cross_entropy=%.6f, "
+            "beklenen (weight'li token-ortalaması)=%.6f, EOS weight'siz=%.6f, EOS pozisyonu=%d/%d",
+            loss_tm.item(), loss_criterion.item(), loss_f_cross_entropy.item(),
+            expected_tm_loss.item(), expected_without_eos_weight.item(), eos_positions, num_valid,
+        )
+
+        # 1) TrainingManager loss'u = criterion'ın weight + label smoothing'iyle token-ortalaması
+        assert math.isclose(loss_tm.item(), expected_tm_loss.item(), rel_tol=TOLERANCE, abs_tol=TOLERANCE), (
+            f"TrainingManager loss'u ({loss_tm.item():.6f}) criterion'ın weight/label_smoothing'iyle "
+            f"beklenen değerden ({expected_tm_loss.item():.6f}) farklı"
+        )
+
+        # 2) Criterion ile aynı token terimleri: criterion weight toplamına, TM geçerli token sayısına böler
+        weight_sum = float(criterion.weight[targets_flat[valid]].sum())
+        assert math.isclose(loss_tm.item() * num_valid, loss_criterion.item() * weight_sum, rel_tol=TOLERANCE), (
+            f"TM toplam loss ({loss_tm.item() * num_valid:.6f}) criterion'ın toplam loss'una "
+            f"({loss_criterion.item() * weight_sum:.6f}) eşit değil - criterion terimleri kullanılmıyor"
+        )
+
+        # 3) EOS weight gerçekten uygulanıyor: EOS weight'siz aynı hesaptan farklı
+        assert abs(loss_tm.item() - expected_without_eos_weight.item()) > TOLERANCE, (
+            "TrainingManager loss'u EOS weight'siz loss ile aynı - EOS weight UYGULANMIYOR"
+        )
+
+        # 4) TrainingManager düz F.cross_entropy kullanmıyor (eski V1 hatası)
+        assert abs(loss_tm.item() - loss_f_cross_entropy.item()) > TOLERANCE, (
+            "KRİTİK HATA: TrainingManager criterion kullanmıyor, düz F.cross_entropy kullanıyor"
+        )
+
+        # Accuracy ve perplexity aynı (maskeli) loss'tan türetilir
+        assert 0.0 <= acc_tm <= 1.0, f"Accuracy aralık dışı: {acc_tm}"
+        assert math.isclose(ppl_tm, math.exp(min(20.0, loss_tm.item())), rel_tol=1e-6), (
+            f"Perplexity ({ppl_tm}) loss'tan türetilmemiş (exp(loss)={math.exp(min(20.0, loss_tm.item()))})"
+        )
+
+    def test_gradient_impact(self):
         """
-        EOS weight'in gradient'lere etkisini test et
+        EOS weight'in gradient'lere etkisini test et (TrainingManager'ın loss hesaplama yolu ile)
         """
-        logger.info("\n" + "=" * 80)
-        logger.info("GRADIENT IMPACT TESTİ")
-        logger.info("=" * 80)
-        
-        # Mock model
+        # Mock model. Karşılaştırma aynı başlangıç ağırlıklarıyla yapılmalı: eski test ikinci
+        # modeli ayrıca rastgele başlatıyordu, gradient farkı EOS weight'ten değil init'ten geliyordu.
         model = self.create_mock_model()
-        
+        model2 = copy.deepcopy(model)
+
         # EOS weight'li criterion
         criterion = self.create_criterion_with_eos_weight()
-        
-        # Dummy data
-        batch_size = 4
-        seq_len = 10
-        inputs = torch.randint(0, 1000, (batch_size, seq_len))
-        targets = torch.randint(0, self.vocab_size, (batch_size, seq_len))
-        targets[:, -1] = self.eos_id  # Son pozisyona EOS koy
-        
-        # Model forward
-        model.train()
-        logits = model(inputs)
-        if isinstance(logits, tuple):
-            logits = logits[0]
-        
-        # Loss hesapla (criterion ile - EOS weight'li)
-        logits_flat = logits.view(-1, self.vocab_size)
-        targets_flat = targets.view(-1)
-        loss = criterion(logits_flat, targets_flat)
-        
-        # Gradient hesapla
-        model.zero_grad()
-        loss.backward()
-        
-        # Gradient'leri topla
-        total_grad_norm = 0.0
-        param_grads = {}
-        for name, param in model.named_parameters():
-            if param.grad is not None:
-                grad_norm = param.grad.norm().item()
-                total_grad_norm += grad_norm ** 2
-                param_grads[name] = grad_norm
-        
-        total_grad_norm = total_grad_norm ** 0.5
-        
-        # EOS weight olmadan loss hesapla (karşılaştırma için)
+
+        # EOS weight olmadan criterion (karşılaştırma için). Label smoothing aynı tutulur ki
+        # tek fark EOS weight olsun (eski test label smoothing'i de kaldırıyordu).
         criterion_no_weight = CrossEntropyLoss(
             reduction="mean",
-            ignore_index=self.pad_id
+            ignore_index=self.pad_id,
+            label_smoothing=self.label_smoothing,
         )
-        
-        model2 = self.create_mock_model()
-        logits2 = model2(inputs)
-        if isinstance(logits2, tuple):
-            logits2 = logits2[0]
-        
-        loss2 = criterion_no_weight(logits2.view(-1, self.vocab_size), targets_flat)
-        model2.zero_grad()
-        loss2.backward()
-        
-        total_grad_norm2 = 0.0
-        for name, param in model2.named_parameters():
-            if param.grad is not None:
-                total_grad_norm2 += param.grad.norm().item() ** 2
-        total_grad_norm2 = total_grad_norm2 ** 0.5
-        
-        results = {
-            "loss_with_eos_weight": float(loss.item()),
-            "loss_without_eos_weight": float(loss2.item()),
-            "grad_norm_with_eos_weight": float(total_grad_norm),
-            "grad_norm_without_eos_weight": float(total_grad_norm2),
-            "grad_norm_difference": float(abs(total_grad_norm - total_grad_norm2)),
-            "param_grads": param_grads
-        }
-        
-        logger.info(f"\n📊 Gradient Analizi:")
-        logger.info(f"  Loss (EOS weight'li): {results['loss_with_eos_weight']:.6f}")
-        logger.info(f"  Loss (EOS weight YOK): {results['loss_without_eos_weight']:.6f}")
-        logger.info(f"  Grad norm (EOS weight'li): {results['grad_norm_with_eos_weight']:.6f}")
-        logger.info(f"  Grad norm (EOS weight YOK): {results['grad_norm_without_eos_weight']:.6f}")
-        logger.info(f"  Grad norm farkı: {results['grad_norm_difference']:.6f}")
-        
-        return results
-    
-    def run_full_test(self) -> Dict[str, Any]:
-        """Tüm testleri çalıştır"""
-        logger.info("=" * 80)
-        logger.info("TRAINING MANAGER LOSS FUNCTION TESTİ BAŞLATIYOR")
-        logger.info("=" * 80)
-        
-        results = {
-            "test_date": datetime.now().isoformat(),
-            "loss_computation_test": self.test_training_manager_loss_computation(),
-            "gradient_impact_test": self.test_gradient_impact()
-        }
-        
-        # Sonuçları kaydet
-        output_file = "test_training_manager_loss_function_results.json"
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(results, f, ensure_ascii=False, indent=2)
-        
-        logger.info("\n" + "=" * 80)
-        logger.info(f"✅ Test sonuçları kaydedildi: {output_file}")
-        logger.info("=" * 80)
-        
-        return results
+
+        # Dummy data
+        inputs, targets = self.create_dummy_batch()
+
+        def loss_and_grad_norm(net, crit):
+            net.train()
+            net.zero_grad()
+            # TrainingManager/TrainingLoop'un kullandığı LossComputation
+            loss, _, _ = LossComputation(crit).compute_loss(net(inputs), targets, pad_id=self.pad_id)
+            loss.backward()
+            grads = {name: p.grad.detach().clone() for name, p in net.named_parameters() if p.grad is not None}
+            total_norm = math.sqrt(sum(g.norm().item() ** 2 for g in grads.values()))
+            return loss.item(), total_norm, grads
+
+        loss_w, grad_norm_w, grads_w = loss_and_grad_norm(model, criterion)
+        loss_nw, grad_norm_nw, grads_nw = loss_and_grad_norm(model2, criterion_no_weight)
+
+        logger.info(
+            "Gradient analizi: loss (EOS weight'li)=%.6f, loss (EOS weight YOK)=%.6f, "
+            "grad norm (EOS weight'li)=%.6f, grad norm (EOS weight YOK)=%.6f",
+            loss_w, loss_nw, grad_norm_w, grad_norm_nw,
+        )
+
+        assert math.isfinite(loss_w) and math.isfinite(loss_nw), f"Loss sonlu değil: {loss_w}, {loss_nw}"
+        assert math.isfinite(grad_norm_w) and math.isfinite(grad_norm_nw), (
+            f"Gradient norm sonlu değil: {grad_norm_w}, {grad_norm_nw}"
+        )
+        assert set(grads_w) == set(grads_nw) == {name for name, _ in model.named_parameters()}, (
+            "Tüm parametreler gradient almalı"
+        )
+
+        # EOS weight loss'u ve gradient'leri değiştirmeli
+        assert abs(loss_w - loss_nw) > TOLERANCE, "EOS weight loss'u değiştirmiyor"
+        assert abs(grad_norm_w - grad_norm_nw) > TOLERANCE, (
+            f"EOS weight gradient norm'unu değiştirmiyor ({grad_norm_w:.6f} vs {grad_norm_nw:.6f})"
+        )
+        assert not torch.allclose(grads_w["linear.weight"], grads_nw["linear.weight"]), (
+            "EOS weight çıkış katmanı gradient'lerini değiştirmiyor"
+        )
 
 
 if __name__ == "__main__":
-    tester = TrainingManagerLossFunctionTest()
-    results = tester.run_full_test()
-    
-    print("\n" + "=" * 80)
-    print("ÖZET")
-    print("=" * 80)
-    
-    kritik = results["loss_computation_test"]["kritik_bulgu"]
-    print(f"\nKRITIK BULGU:")
-    print(f"  TrainingManager F.cross_entropy kullanıyor mu? {kritik['training_manager_uses_f_cross_entropy']}")
-    print(f"  TrainingManager Criterion kullanıyor mu? {kritik['training_manager_uses_criterion']}")
-    print(f"  EOS weight gerçekten uygulanıyor mu? {kritik['eos_weight_actually_applied']}")
-    
-    if kritik['training_manager_uses_f_cross_entropy'] and not kritik['training_manager_uses_criterion']:
-        print("\nKRITIK HATA TESPIT EDILDI!")
-        print("  TrainingManager criterion kullanmiyor, F.cross_entropy kullaniyor!")
-        print("  Bu durumda EOS weight UYGULANMIYOR!")
-    elif kritik['training_manager_uses_criterion']:
-        print("\nTrainingManager criterion kullaniyor - EOS weight uygulaniyor")
-    else:
-        print("\nBelirsiz durum - daha fazla analiz gerekiyor")
-
+    raise SystemExit(pytest.main([__file__, "-q"]))

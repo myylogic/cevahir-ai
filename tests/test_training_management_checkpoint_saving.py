@@ -8,551 +8,359 @@ Hedef:
 - TrainingManager'ın hangi model instance'ını kullandığını doğrula
 - CheckpointManager'ın hangi model state_dict'ini kaydettiğini doğrula
 - Basit 3 keyli modelin nereden geldiğini bul
+
+Notlar:
+- Testler eğitim config'inin (training_system/train.py TRAIN_CONFIG) tam boyutlu
+  modelini kurar; model modül başına bir kez kurulur ve testler arasında paylaşılır.
+- Checkpoint'ler ve veri önbelleği pytest'in geçici dizinlerine yazılır; repo
+  ağacına hiçbir şey yazılmaz. Eski sürümdeki sonuç JSON'u
+  (tests/test_results_training_management.json) artık üretilmez; teşhis bilgisi
+  assert mesajlarında.
 """
 
-import torch
-import sys
-import os
-import json
-from pathlib import Path
-from typing import Dict, Any, Optional
 import logging
-import tempfile
+import os
 import shutil
-from datetime import datetime
+import sys
+from pathlib import Path
 
-# Root dizini path'e ekle
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import pytest
+import torch
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
+# Root dizini path'e ekle (dosya doğrudan çalıştırıldığında da import'lar çalışsın)
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+# Modül seviyesinde logging.basicConfig yok: kök logger'ı yapılandırmak test
+# oturumunun geri kalanını etkiliyordu. Standart logger yeterli (pytest yakalar).
 logger = logging.getLogger(__name__)
 
-# Test sonuçları için global dict
-test_results = {
-    "test_timestamp": datetime.now().isoformat(),
-    "tests": {}
-}
+# CheckpointManager.save() ve TrainingService ile aynı "SimpleModel" ölçütü
+SIMPLE_MODEL_KEYS = ("embed.weight", "proj.weight", "proj.bias")
+
+
+def is_simple_model(keys) -> bool:
+    """3 keyli test modeli (SimpleModel) state_dict'i mi?"""
+    keys = list(keys)
+    return len(keys) == 3 and all(k in keys for k in SIMPLE_MODEL_KEYS)
+
+
+class _StdTrainingLogger(logging.LoggerAdapter):
+    """TrainingManager bileşenlerinin beklediği log_* arayüzü, standart logging'e yazar.
+
+    Varsayılan TrainingLogger süreç genelinde tekildir (singleton) ve tensorboard
+    kuruluysa ./logs/tb altına yazar; testler repo ağacına yazmamalı.
+    """
+
+    def __init__(self, name: str):
+        super().__init__(logging.getLogger(name), {})
+
+    def log_info(self, msg, *args, **kwargs):
+        self.info(msg)
+
+    def log_warning(self, msg, *args, **kwargs):
+        self.warning(msg)
+
+    def log_error(self, msg, *args, exc_info=False, **kwargs):
+        self.error(msg, exc_info=exc_info)
+
+    def log_debug(self, msg, *args, **kwargs):
+        self.debug(msg)
 
 
 def load_config():
-    """Config dosyasını yükle"""
+    """Config dosyasını yükle (eğitim config'i + tokenizer config'i)"""
+    from training_system.train import TRAIN_CONFIG
+    config = TRAIN_CONFIG.copy()
+
+    # Tokenizer config'i yükle
     try:
-        from training_system.train import TRAIN_CONFIG
-        config = TRAIN_CONFIG.copy()
-        
-        # Tokenizer config'i yükle
-        try:
-            from tokenizer_management.config import (
-                get_bpe_detailed_config,
-                TOKENIZER_CONFIG,
-                BPE_CONFIG
-            )
-            bpe_config = get_bpe_detailed_config()
-            tokenizer_config = TOKENIZER_CONFIG.copy()
-            bpe_legacy = BPE_CONFIG.copy()
-            
-            tokenizer_config_for_merge = {
-                "max_seq_length": tokenizer_config.get("max_seq_length", 512),
-                "vocab_path": (
-                    bpe_config.get("vocab_path") or
-                    bpe_config.get("vocab_file") or
-                    bpe_legacy.get("vocab_file") or
-                    "data/vocab_lib/vocab.json"
-                ),
-                "merges_path": (
-                    bpe_config.get("merges_path") or
-                    bpe_config.get("merges_file") or
-                    bpe_legacy.get("merges_file") or
-                    "data/merges_lib/merges.txt"
-                ),
-                "bpe_rebuild": False,
-                "bpe_max_merges": bpe_config.get("target_merges", bpe_config.get("merge_operations", bpe_legacy.get("merge_operations", 50000))),
-                "bpe_min_frequency": bpe_config.get("min_frequency", bpe_legacy.get("min_frequency", 2)),
-                "bpe_max_iter": bpe_config.get("max_iter", bpe_legacy.get("max_iter", 60000)),
-                "bpe_include_syllables": bpe_config.get("include_syllables", False),
-                "bpe_include_whole_words": bpe_config.get("include_whole_words", True),
-                "bpe_include_sep": bpe_config.get("include_sep", False),
-                "train_include_whole_words": bpe_config.get("train_include_whole_words", True),
-                "train_include_syllables": bpe_config.get("train_include_syllables", False),
-                "train_include_sep": bpe_config.get("train_include_sep", False),
-                "use_gpu": torch.cuda.is_available(),
-                "tokenizer_batch_size": tokenizer_config.get("batch_size", 32),
-                "vocab_size": tokenizer_config.get("vocab_size", None),
-            }
-            config.update(tokenizer_config_for_merge)
-        except ImportError:
-            logger.warning("tokenizer_management.config import edilemedi, varsayılanlar kullanılıyor")
-        
-        return config
-    except Exception as e:
-        logger.error(f"Config yüklenemedi: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
-
-
-def test_training_manager_model_instance():
-    """TrainingManager'ın hangi model instance'ını kullandığını test et"""
-    test_name = "test_1_model_manager"
-    logger.info("=" * 80)
-    logger.info("TEST 1: TrainingManager Model Instance Kontrolü")
-    logger.info("=" * 80)
-    
-    result = {
-        "test_name": test_name,
-        "status": "failed",
-        "model_type": None,
-        "is_cevahir_neural_network": False,
-        "state_dict_keys_count": 0,
-        "is_simple_model": False,
-        "first_10_keys": [],
-        "error": None
-    }
-    
-    config = load_config()
-    if config is None:
-        result["error"] = "Config yüklenemedi"
-        test_results["tests"][test_name] = result
-        return False
-    
-    try:
-        from model_management.model_manager import ModelManager
-        from src.neural_network import CevahirNeuralNetwork
-        
-        # ModelManager oluştur
-        model_manager = ModelManager(config)
-        model_manager.initialize(
-            build_optimizer=True,
-            build_criterion=True,
-            build_scheduler=True
+        from tokenizer_management.config import (
+            get_bpe_detailed_config,
+            TOKENIZER_CONFIG,
+            BPE_CONFIG
         )
-        
-        # Model instance'ını kontrol et
-        model = model_manager.model
-        if model is None:
-            logger.error("❌ ModelManager.model None!")
-            return
-        
-        logger.info(f"✅ ModelManager.model type: {type(model).__name__}")
-        logger.info(f"✅ ModelManager.model class: {model.__class__}")
-        logger.info(f"✅ Is CevahirNeuralNetwork? {isinstance(model, CevahirNeuralNetwork)}")
-        
-        # Model state dict'ini kontrol et
-        model_state_dict = model.state_dict()
-        model_keys = list(model_state_dict.keys())
-        logger.info(f"✅ Model state dict keys: {len(model_keys)}")
-        logger.info(f"   İlk 10 key: {model_keys[:10]}")
-        
-        # SimpleModel kontrolü
-        is_simple_model = (
-            len(model_keys) == 3 and 
-            all(k in model_keys for k in ["embed.weight", "proj.weight", "proj.bias"])
-        )
-        logger.info(f"❌ SimpleModel mi? {is_simple_model}")
-        
-        # Sonuçları kaydet
-        result["status"] = "passed" if not is_simple_model else "failed"
-        result["model_type"] = type(model).__name__
-        result["is_cevahir_neural_network"] = isinstance(model, CevahirNeuralNetwork)
-        result["state_dict_keys_count"] = len(model_keys)
-        result["is_simple_model"] = is_simple_model
-        result["first_10_keys"] = model_keys[:10]
-        
-        if is_simple_model:
-            logger.error("🚨 KRİTİK: ModelManager, SimpleModel instance'ı oluşturmuş!")
-            result["error"] = "SimpleModel instance'ı oluşturulmuş"
-        else:
-            logger.info("✅ ModelManager, CevahirNeuralNetwork instance'ı oluşturmuş")
-            
-        test_results["tests"][test_name] = result
-        return not is_simple_model
-            
-    except Exception as e:
-        logger.error(f"❌ Test hatası: {e}", exc_info=True)
-        result["error"] = str(e)
-        test_results["tests"][test_name] = result
-        return False
+        bpe_config = get_bpe_detailed_config()
+        tokenizer_config = TOKENIZER_CONFIG.copy()
+        bpe_legacy = BPE_CONFIG.copy()
+
+        tokenizer_config_for_merge = {
+            "max_seq_length": tokenizer_config.get("max_seq_length", 512),
+            "vocab_path": (
+                bpe_config.get("vocab_path") or
+                bpe_config.get("vocab_file") or
+                bpe_legacy.get("vocab_file") or
+                "data/vocab_lib/vocab.json"
+            ),
+            "merges_path": (
+                bpe_config.get("merges_path") or
+                bpe_config.get("merges_file") or
+                bpe_legacy.get("merges_file") or
+                "data/merges_lib/merges.txt"
+            ),
+            "bpe_rebuild": False,
+            "bpe_max_merges": bpe_config.get("target_merges", bpe_config.get("merge_operations", bpe_legacy.get("merge_operations", 50000))),
+            "bpe_min_frequency": bpe_config.get("min_frequency", bpe_legacy.get("min_frequency", 2)),
+            "bpe_max_iter": bpe_config.get("max_iter", bpe_legacy.get("max_iter", 60000)),
+            "bpe_include_syllables": bpe_config.get("include_syllables", False),
+            "bpe_include_whole_words": bpe_config.get("include_whole_words", True),
+            "bpe_include_sep": bpe_config.get("include_sep", False),
+            "train_include_whole_words": bpe_config.get("train_include_whole_words", True),
+            "train_include_syllables": bpe_config.get("train_include_syllables", False),
+            "train_include_sep": bpe_config.get("train_include_sep", False),
+            "use_gpu": torch.cuda.is_available(),
+            "tokenizer_batch_size": tokenizer_config.get("batch_size", 32),
+            "vocab_size": tokenizer_config.get("vocab_size", None),
+        }
+        config.update(tokenizer_config_for_merge)
+    except ImportError:
+        logger.warning("tokenizer_management.config import edilemedi, varsayılanlar kullanılıyor")
+
+    return config
 
 
-def test_training_service_to_training_manager():
+def load_checkpoint_state_dict(checkpoint_path):
+    """Kaydedilen checkpoint'i yükle ve model state_dict'ini döndür."""
+    # Ürünün resume yolu da weights_only=True ile yükler (training_manager.resume_from_checkpoint)
+    checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+    state_dict = checkpoint.get("model_state_dict", checkpoint.get("state_dict", None))
+    assert state_dict is not None, (
+        f"Checkpoint'te model_state_dict yok! Anahtarlar: {sorted(checkpoint)}"
+    )
+    return state_dict
+
+
+def assert_checkpoint_matches_model(checkpoint_state_dict, model_state_dict, saver):
+    """Checkpoint'teki state_dict, kaydedilen modelin state_dict'i mi?"""
+    checkpoint_keys = list(checkpoint_state_dict.keys())
+    assert not is_simple_model(checkpoint_keys), (
+        f"KRİTİK: {saver}, SimpleModel state_dict kaydetmiş! "
+        f"Bu, model instance'ının yanlış olduğunu gösteriyor. Keys: {checkpoint_keys}"
+    )
+
+    missing = set(model_state_dict) - set(checkpoint_keys)
+    unexpected = set(checkpoint_keys) - set(model_state_dict)
+    assert not missing and not unexpected, (
+        f"{saver}: checkpoint key'leri modelinkiyle eşleşmiyor. "
+        f"Missing ({len(missing)}, ilk 10): {sorted(missing)[:10]}; "
+        f"Unexpected ({len(unexpected)}, ilk 10): {sorted(unexpected)[:10]}"
+    )
+
+    # Aynı mimarideki başka bir instance da aynı key'lere sahip olurdu; değerler de aynı olmalı.
+    different = [
+        key for key, value in model_state_dict.items()
+        if not torch.equal(checkpoint_state_dict[key], value.detach().cpu())
+    ]
+    assert not different, (
+        f"{saver}: checkpoint'teki ağırlıklar modelin ağırlıklarından farklı "
+        f"({len(different)} tensör, ilk 10): {different[:10]}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Fixture'lar
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def config():
+    return load_config()
+
+
+@pytest.fixture(scope="module")
+def model_manager(config):
+    """Eğitim config'iyle ModelManager (tam boyutlu model) kur; modül içinde paylaşılır."""
+    from model_management.model_manager import ModelManager
+
+    manager = ModelManager(dict(config))
+    manager.initialize(
+        build_optimizer=True,
+        build_criterion=True,
+        build_scheduler=True
+    )
+    return manager
+
+
+@pytest.fixture
+def checkpoint_dir(tmp_path):
+    """Geçici checkpoint dizini; tam boyutlu checkpoint'ler (~3 x 200 MB) test sonunda silinir."""
+    path = tmp_path / "checkpoints"
+    path.mkdir()
+    yield path
+    shutil.rmtree(path, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
+# Testler
+# ---------------------------------------------------------------------------
+
+def test_training_manager_model_instance(model_manager):
+    """TrainingManager'ın hangi model instance'ını kullandığını test et
+    (ModelManager eğitim config'inden CevahirNeuralNetwork kurmalı, 3 keyli SimpleModel değil)."""
+    from src.neural_network import CevahirNeuralNetwork
+
+    model = model_manager.model
+    assert model is not None, "ModelManager.model None!"
+
+    model_keys = list(model.state_dict().keys())
+    logger.info("ModelManager.model type: %s, state dict keys: %d, ilk 10: %s",
+                type(model).__name__, len(model_keys), model_keys[:10])
+
+    assert not is_simple_model(model_keys), (
+        f"KRİTİK: ModelManager, SimpleModel instance'ı oluşturmuş! Keys: {model_keys}"
+    )
+    assert isinstance(model, CevahirNeuralNetwork), (
+        f"ModelManager.model beklenen CevahirNeuralNetwork değil: {type(model).__name__} "
+        f"(ilk 10 key: {model_keys[:10]})"
+    )
+
+
+def test_training_service_to_training_manager(config, tmp_path):
     """TrainingService'ten TrainingManager'a geçilen model instance'ını test et"""
-    logger.info("\n" + "=" * 80)
-    logger.info("TEST 2: TrainingService → TrainingManager Model Geçişi")
-    logger.info("=" * 80)
-    
-    config = load_config()
-    if config is None:
-        return
-    
-    try:
-        from training_system.v2.core.training_service import TrainingService
-        from src.neural_network import CevahirNeuralNetwork
-        
-        # TrainingService oluştur
-        training_service = TrainingService(config)
-        
-        # ModelManager'dan model'i kontrol et
-        model_manager = training_service.model_manager
-        if model_manager is None or model_manager.model is None:
-            logger.error("❌ TrainingService.model_manager.model None!")
-            return False
-        
-        model = model_manager.model
-        logger.info(f"✅ TrainingService.model_manager.model type: {type(model).__name__}")
-        logger.info(f"✅ Is CevahirNeuralNetwork? {isinstance(model, CevahirNeuralNetwork)}")
-        
-        # Model state dict'ini kontrol et
-        model_state_dict = model.state_dict()
-        model_keys = list(model_state_dict.keys())
-        logger.info(f"✅ Model state dict keys: {len(model_keys)}")
-        
-        # SimpleModel kontrolü
-        is_simple_model = (
-            len(model_keys) == 3 and 
-            all(k in model_keys for k in ["embed.weight", "proj.weight", "proj.bias"])
-        )
-        logger.info(f"❌ SimpleModel mi? {is_simple_model}")
-        
-        if is_simple_model:
-            logger.error("🚨 KRİTİK: TrainingService, SimpleModel instance'ı oluşturmuş!")
-            return False
-        else:
-            logger.info("✅ TrainingService, CevahirNeuralNetwork instance'ı oluşturmuş")
-            return True
-            
-    except Exception as e:
-        logger.error(f"❌ Test hatası: {e}", exc_info=True)
-        return False
+    from training_system.v2.core.training_service import TrainingService
+    from src.neural_network import CevahirNeuralNetwork
+
+    service_config = dict(config)
+    # Varsayılan cache_dir (".cache/preprocessed_data") çalışma dizinine, yani repo ağacına
+    # yazıyordu; önbellek geçici dizinde tutulur. data_dir çalışma dizininden bağımsız olsun.
+    service_config["cache_dir"] = str(tmp_path / "preprocessed_data")
+    service_config["data_dir"] = str(ROOT / config["data_dir"])
+
+    # TrainingService oluştur
+    training_service = TrainingService(service_config)
+
+    # ModelManager'dan model'i kontrol et
+    model_manager = training_service.model_manager
+    assert model_manager is not None and model_manager.model is not None, (
+        "TrainingService.model_manager.model None!"
+    )
+
+    model = model_manager.model
+    model_keys = list(model.state_dict().keys())
+    logger.info("TrainingService.model_manager.model type: %s, state dict keys: %d",
+                type(model).__name__, len(model_keys))
+
+    assert not is_simple_model(model_keys), (
+        f"KRİTİK: TrainingService, SimpleModel instance'ı oluşturmuş! Keys: {model_keys}"
+    )
+    assert isinstance(model, CevahirNeuralNetwork), (
+        f"TrainingService modeli beklenen CevahirNeuralNetwork değil: {type(model).__name__}"
+    )
 
 
-def test_checkpoint_manager_save():
+def test_checkpoint_manager_save(model_manager, checkpoint_dir):
     """CheckpointManager'ın hangi model state_dict'ini kaydettiğini test et"""
-    logger.info("\n" + "=" * 80)
-    logger.info("TEST 3: CheckpointManager Save Süreci")
-    logger.info("=" * 80)
-    
-    config = load_config()
-    if config is None:
-        return
-    
-    try:
-        from model_management.model_manager import ModelManager
-        from training_management.v2.utils.checkpoint_manager import CheckpointManager
-        from src.neural_network import CevahirNeuralNetwork
-        import tempfile
-        import shutil
-        
-        # Geçici checkpoint dizini oluştur
-        temp_dir = tempfile.mkdtemp()
-        checkpoint_dir = os.path.join(temp_dir, "checkpoints")
-        os.makedirs(checkpoint_dir, exist_ok=True)
-        
-        try:
-            # ModelManager oluştur
-            model_manager = ModelManager(config)
-            model_manager.initialize(
-                build_optimizer=True,
-                build_criterion=True,
-                build_scheduler=True
-            )
-            
-            model = model_manager.model
-            if model is None:
-                logger.error("❌ Model None!")
-                return False
-            
-            logger.info(f"✅ Model type: {type(model).__name__}")
-            logger.info(f"✅ Is CevahirNeuralNetwork? {isinstance(model, CevahirNeuralNetwork)}")
-            
-            # Model state dict'ini al (kaydetmeden önce)
-            model_state_dict_before = model.state_dict()
-            model_keys_before = list(model_state_dict_before.keys())
-            logger.info(f"✅ Model state dict keys (before save): {len(model_keys_before)}")
-            logger.info(f"   İlk 10 key: {model_keys_before[:10]}")
-            
-            # CheckpointManager oluştur
-            checkpoint_manager = CheckpointManager(
-                checkpoint_model_dir=checkpoint_dir,
-                max_checkpoints=5
-            )
-            
-            # Checkpoint kaydet
-            checkpoint_manager.save(
-                model=model,
-                optimizer=model_manager.optimizer,
-                epoch=1,
-                metric=0.5,
-                training_history={"train_loss": [1.0], "val_loss": [0.5]},
-                with_optimizer=True
-            )
-            
-            # Kaydedilen checkpoint'i yükle
-            checkpoint_path = os.path.join(checkpoint_dir, "checkpoint_epoch_1.pth")
-            if not os.path.exists(checkpoint_path):
-                # Best veya last checkpoint'i kontrol et
-                best_path = os.path.join(checkpoint_dir, "best.pth")
-                last_path = os.path.join(checkpoint_dir, "last.pth")
-                if os.path.exists(best_path):
-                    checkpoint_path = best_path
-                elif os.path.exists(last_path):
-                    checkpoint_path = last_path
-                else:
-                    logger.error(f"❌ Checkpoint dosyası bulunamadı: {checkpoint_dir}")
-                    return False
-            
-            logger.info(f"✅ Checkpoint kaydedildi: {checkpoint_path}")
-            checkpoint = torch.load(checkpoint_path, map_location="cpu")
-            
-            # Checkpoint'teki model state dict'i kontrol et
-            checkpoint_state_dict = checkpoint.get("model_state_dict", checkpoint.get("state_dict", None))
-            if checkpoint_state_dict is None:
-                logger.error("❌ Checkpoint'te model_state_dict yok!")
-                return False
-            
-            checkpoint_keys = list(checkpoint_state_dict.keys())
-            logger.info(f"✅ Checkpoint state dict keys: {len(checkpoint_keys)}")
-            logger.info(f"   Keys: {checkpoint_keys}")
-            
-            # SimpleModel kontrolü
-            is_simple_model = (
-                len(checkpoint_keys) == 3 and 
-                all(k in checkpoint_keys for k in ["embed.weight", "proj.weight", "proj.bias"])
-            )
-            
-            if is_simple_model:
-                logger.error("🚨 KRİTİK: CheckpointManager, SimpleModel state_dict kaydetmiş!")
-                logger.error("   Bu, model instance'ının yanlış olduğunu gösteriyor!")
-                return False
-            else:
-                logger.info("✅ CheckpointManager, doğru model state_dict kaydetmiş")
-                
-                # Keys eşleşmesi kontrolü
-                keys_match = set(model_keys_before) == set(checkpoint_keys)
-                logger.info(f"✅ Keys eşleşmesi: {keys_match}")
-                if not keys_match:
-                    missing = set(model_keys_before) - set(checkpoint_keys)
-                    unexpected = set(checkpoint_keys) - set(model_keys_before)
-                    logger.warning(f"   Missing keys: {len(missing)}")
-                    logger.warning(f"   Unexpected keys: {len(unexpected)}")
-                    if missing:
-                        logger.warning(f"   Missing (ilk 10): {list(missing)[:10]}")
-                    if unexpected:
-                        logger.warning(f"   Unexpected (ilk 10): {list(unexpected)[:10]}")
-                
-                return True
-                
-        finally:
-            # Geçici dizini temizle
-            shutil.rmtree(temp_dir, ignore_errors=True)
-            
-    except Exception as e:
-        logger.error(f"❌ Test hatası: {e}", exc_info=True)
-        return False
+    from training_management.v2.utils.checkpoint_manager import CheckpointManager
+
+    model = model_manager.model
+    assert model is not None, "Model None!"
+
+    # Model state dict'ini al (kaydetmeden önce)
+    model_state_dict_before = model.state_dict()
+
+    # CheckpointManager oluştur
+    checkpoint_manager = CheckpointManager(
+        checkpoint_model_dir=str(checkpoint_dir),
+        max_checkpoints=5
+    )
+
+    # Checkpoint kaydet
+    checkpoint_path = checkpoint_manager.save(
+        model=model,
+        optimizer=model_manager.optimizer,
+        epoch=1,
+        metric=0.5,
+        training_history={"train_loss": [1.0], "val_loss": [0.5]},
+        with_optimizer=True
+    )
+
+    # Eski test sabit "checkpoint_epoch_1.pth" adını arıyordu; dosya adı kalıbı artık
+    # checkpoint_epoch_{epoch:04d}.pth. save() kaydettiği dosyanın yolunu döndürür.
+    assert os.path.isfile(checkpoint_path), (
+        f"Checkpoint dosyası bulunamadı: {checkpoint_path} (dizin: {sorted(os.listdir(checkpoint_dir))})"
+    )
+
+    # Kaydedilen checkpoint'i yükle ve model state dict'iyle karşılaştır
+    checkpoint_state_dict = load_checkpoint_state_dict(checkpoint_path)
+    assert_checkpoint_matches_model(checkpoint_state_dict, model_state_dict_before, "CheckpointManager")
 
 
-def test_training_manager_checkpoint_save():
+def test_training_manager_checkpoint_save(model_manager, config, checkpoint_dir):
     """TrainingManager'ın checkpoint kaydetme sürecini test et"""
-    logger.info("\n" + "=" * 80)
-    logger.info("TEST 4: TrainingManager Checkpoint Save Süreci")
-    logger.info("=" * 80)
-    
-    config = load_config()
-    if config is None:
-        return
-    
-    try:
-        from model_management.model_manager import ModelManager
-        from training_management.v2.core.training_manager import TrainingManager
-        from training_management.v2.utils.checkpoint_manager import CheckpointManager
-        from src.neural_network import CevahirNeuralNetwork
-        from torch.utils.data import DataLoader, TensorDataset
-        import tempfile
-        import shutil
-        
-        # Geçici checkpoint dizini oluştur
-        temp_dir = tempfile.mkdtemp()
-        checkpoint_dir = os.path.join(temp_dir, "checkpoints")
-        os.makedirs(checkpoint_dir, exist_ok=True)
-        
-        try:
-            # ModelManager oluştur
-            model_manager = ModelManager(config)
-            model_manager.initialize(
-                build_optimizer=True,
-                build_criterion=True,
-                build_scheduler=True
-            )
-            
-            model = model_manager.model
-            if model is None:
-                logger.error("❌ Model None!")
-                return False
-            
-            logger.info(f"✅ Model type: {type(model).__name__}")
-            logger.info(f"✅ Is CevahirNeuralNetwork? {isinstance(model, CevahirNeuralNetwork)}")
-            
-            # Model state dict'ini al (kaydetmeden önce)
-            model_state_dict_before = model.state_dict()
-            model_keys_before = list(model_state_dict_before.keys())
-            logger.info(f"✅ Model state dict keys (before save): {len(model_keys_before)}")
-            
-            # Dummy DataLoader'lar oluştur
-            dummy_data = torch.randint(0, 100, (10, 20))
-            dummy_targets = torch.randint(0, 100, (10, 20))
-            dataset = TensorDataset(dummy_data, dummy_targets)
-            train_loader = DataLoader(dataset, batch_size=2)
-            val_loader = DataLoader(dataset, batch_size=2)
-            
-            # CheckpointManager oluştur
-            checkpoint_manager = CheckpointManager(
-                checkpoint_model_dir=checkpoint_dir,
-                max_checkpoints=5
-            )
-            
-            # TrainingManager oluştur (TrainingService'in yaptığı gibi)
-            training_manager = TrainingManager(
-                model=model,  # ModelManager.model'i geçir
-                train_loader=train_loader,
-                val_loader=val_loader,
-                optimizer=model_manager.optimizer,
-                criterion=model_manager.criterion,
-                config=config,
-                checkpoint_manager=checkpoint_manager
-            )
-            
-            logger.info(f"✅ TrainingManager.model type: {type(training_manager.model).__name__}")
-            logger.info(f"✅ TrainingManager.model is same instance? {training_manager.model is model}")
-            
-            # TrainingManager'ın model state dict'ini kontrol et
-            training_manager_state_dict = training_manager.model.state_dict()
-            training_manager_keys = list(training_manager_state_dict.keys())
-            logger.info(f"✅ TrainingManager.model state dict keys: {len(training_manager_keys)}")
-            
-            # Keys eşleşmesi kontrolü
-            keys_match = set(model_keys_before) == set(training_manager_keys)
-            logger.info(f"✅ ModelManager ve TrainingManager keys eşleşmesi: {keys_match}")
-            
-            if not keys_match:
-                logger.error("🚨 KRİTİK: TrainingManager, farklı bir model instance'ı kullanıyor!")
-                return False
-            
-            # Checkpoint kaydet (TrainingManager'ın yaptığı gibi)
-            checkpoint_manager.save(
-                model=training_manager.model,
-                optimizer=training_manager.optimizer,
-                epoch=1,
-                metric=0.5,
-                training_history={"train_loss": [1.0], "val_loss": [0.5]},
-                with_optimizer=True
-            )
-            
-            # Kaydedilen checkpoint'i yükle
-            checkpoint_path = os.path.join(checkpoint_dir, "best.pth")
-            if not os.path.exists(checkpoint_path):
-                checkpoint_path = os.path.join(checkpoint_dir, "last.pth")
-            
-            if not os.path.exists(checkpoint_path):
-                logger.error(f"❌ Checkpoint dosyası bulunamadı: {checkpoint_dir}")
-                return False
-            
-            logger.info(f"✅ Checkpoint kaydedildi: {checkpoint_path}")
-            checkpoint = torch.load(checkpoint_path, map_location="cpu")
-            
-            # Checkpoint'teki model state dict'i kontrol et
-            checkpoint_state_dict = checkpoint.get("model_state_dict", checkpoint.get("state_dict", None))
-            if checkpoint_state_dict is None:
-                logger.error("❌ Checkpoint'te model_state_dict yok!")
-                return False
-            
-            checkpoint_keys = list(checkpoint_state_dict.keys())
-            logger.info(f"✅ Checkpoint state dict keys: {len(checkpoint_keys)}")
-            
-            # SimpleModel kontrolü
-            is_simple_model = (
-                len(checkpoint_keys) == 3 and 
-                all(k in checkpoint_keys for k in ["embed.weight", "proj.weight", "proj.bias"])
-            )
-            
-            if is_simple_model:
-                logger.error("🚨 KRİTİK: TrainingManager, SimpleModel state_dict kaydetmiş!")
-                logger.error("   Bu, model instance'ının yanlış olduğunu gösteriyor!")
-                return False
-            else:
-                logger.info("✅ TrainingManager, doğru model state_dict kaydetmiş")
-                return True
-                
-        finally:
-            # Geçici dizini temizle
-            shutil.rmtree(temp_dir, ignore_errors=True)
-            
-    except Exception as e:
-        logger.error(f"❌ Test hatası: {e}", exc_info=True)
-        return False
+    from training_management.v2.core.training_manager import TrainingManager
+    from training_management.v2.utils.checkpoint_manager import CheckpointManager
+    from torch.utils.data import DataLoader, TensorDataset
 
+    model = model_manager.model
+    assert model is not None, "Model None!"
 
-def save_results_to_json(output_path: str = "tests/test_results_training_management.json"):
-    """Test sonuçlarını JSON dosyasına kaydet"""
-    # Özet istatistikler
-    total_tests = len(test_results["tests"])
-    passed_tests = sum(1 for t in test_results["tests"].values() if t.get("status") == "passed")
-    failed_tests = total_tests - passed_tests
-    
-    test_results["summary"] = {
-        "total_tests": total_tests,
-        "passed": passed_tests,
-        "failed": failed_tests,
-        "all_passed": failed_tests == 0
-    }
-    
-    # JSON dosyasına kaydet
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(test_results, f, indent=2, ensure_ascii=False)
-    
-    logger.info(f"\n✅ Test sonuçları kaydedildi: {output_path}")
-    return output_path
+    # Model state dict'ini al (kaydetmeden önce)
+    model_state_dict_before = model.state_dict()
 
+    # Dummy DataLoader'lar oluştur
+    dummy_data = torch.randint(0, 100, (10, 20))
+    dummy_targets = torch.randint(0, 100, (10, 20))
+    dataset = TensorDataset(dummy_data, dummy_targets)
+    train_loader = DataLoader(dataset, batch_size=2)
+    val_loader = DataLoader(dataset, batch_size=2)
 
-def main():
-    """Ana test fonksiyonu"""
-    logger.info("=" * 80)
-    logger.info("FAZE 2: TRAINING MANAGEMENT CHECKPOINT KAYDETME TESTİ")
-    logger.info("=" * 80)
-    logger.info("")
-    
-    results = {}
-    
-    # Test 1: ModelManager model instance
-    results["test_1_model_manager"] = test_training_manager_model_instance()
-    
-    # Test 2: TrainingService → TrainingManager
-    results["test_2_training_service"] = test_training_service_to_training_manager()
-    
-    # Test 3: CheckpointManager save
-    results["test_3_checkpoint_manager"] = test_checkpoint_manager_save()
-    
-    # Test 4: TrainingManager checkpoint save
-    results["test_4_training_manager"] = test_training_manager_checkpoint_save()
-    
-    # Sonuçları JSON'a kaydet
-    json_path = save_results_to_json()
-    
-    # Özet
-    logger.info("\n" + "=" * 80)
-    logger.info("TEST ÖZETİ")
-    logger.info("=" * 80)
-    
-    for test_name, result in results.items():
-        status = "✅ BAŞARILI" if result else "❌ BAŞARISIZ"
-        logger.info(f"{test_name}: {status}")
-    
-    all_passed = all(results.values())
-    logger.info(f"\n{'✅ TÜM TESTLER BAŞARILI' if all_passed else '❌ BAZI TESTLER BAŞARISIZ'}")
-    logger.info(f"📄 Detaylı sonuçlar: {json_path}")
-    
-    return all_passed
+    # CheckpointManager oluştur
+    checkpoint_manager = CheckpointManager(
+        checkpoint_model_dir=str(checkpoint_dir),
+        max_checkpoints=5
+    )
+
+    # TensorBoard kapalı ve logger enjekte: varsayılanlar ./runs ve (tensorboard kuruluysa)
+    # ./logs/tb altına, yani repo ağacına yazar. Kontrol edilen model/checkpoint davranışını etkilemez.
+    tm_config = dict(config)
+    tm_config.update(enable_tensorboard=False, checkpoint_dir=str(checkpoint_dir))
+
+    # TrainingManager oluştur (TrainingService'in yaptığı gibi)
+    training_manager = TrainingManager(
+        model=model,  # ModelManager.model'i geçir
+        train_loader=train_loader,
+        val_loader=val_loader,
+        optimizer=model_manager.optimizer,
+        criterion=model_manager.criterion,
+        config=tm_config,
+        logger=_StdTrainingLogger(__name__),
+        checkpoint_manager=checkpoint_manager
+    )
+
+    assert training_manager.model is model, (
+        f"KRİTİK: TrainingManager farklı bir model instance'ı kullanıyor "
+        f"({type(training_manager.model).__name__})"
+    )
+
+    # TrainingManager'ın model state dict'ini kontrol et
+    training_manager_keys = set(training_manager.model.state_dict().keys())
+    assert training_manager_keys == set(model_state_dict_before), (
+        "KRİTİK: TrainingManager, farklı bir model instance'ı kullanıyor! "
+        f"Yalnız ModelManager'da: {sorted(set(model_state_dict_before) - training_manager_keys)[:10]}, "
+        f"yalnız TrainingManager'da: {sorted(training_manager_keys - set(model_state_dict_before))[:10]}"
+    )
+
+    # Checkpoint kaydet (TrainingManager'ın yaptığı gibi)
+    checkpoint_manager.save(
+        model=training_manager.model,
+        optimizer=training_manager.optimizer,
+        epoch=1,
+        metric=0.5,
+        training_history={"train_loss": [1.0], "val_loss": [0.5]},
+        with_optimizer=True
+    )
+
+    # Kaydedilen checkpoint'i yükle
+    checkpoint_path = checkpoint_dir / "best.pth"
+    if not checkpoint_path.exists():
+        checkpoint_path = checkpoint_dir / "last.pth"
+    assert checkpoint_path.exists(), (
+        f"Checkpoint dosyası bulunamadı: {checkpoint_dir} (içerik: {sorted(os.listdir(checkpoint_dir))})"
+    )
+
+    checkpoint_state_dict = load_checkpoint_state_dict(checkpoint_path)
+    assert_checkpoint_matches_model(checkpoint_state_dict, model_state_dict_before, "TrainingManager")
 
 
 if __name__ == "__main__":
-    main()
-
+    raise SystemExit(pytest.main([__file__, "-q"]))
