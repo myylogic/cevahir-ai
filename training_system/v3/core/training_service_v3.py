@@ -64,7 +64,7 @@ from training_system.v2.core.criterion_manager import CriterionManager
 from training_system.v2.utils.warmup_calculator import calculate_warmup_steps
 
 logger = logging.getLogger("TrainingServiceV3")
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# Kütüphane modülü kök logger'ı yapılandırmaz; giriş betiği (training_system/train.py) yapar.
 
 
 class TrainingServiceV3:

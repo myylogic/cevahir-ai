@@ -84,3 +84,31 @@ def tokenizer_identity(tokenizer):
         return None
     from training_system.cache_identity import tokenizer_digest
     return tokenizer_digest(tokenizer)
+
+
+# Public scheduler entries that every type has, or that PyTorch adds/removes between releases.
+# Private entries (leading "_") are implementation details and are ignored as well.
+_GENERIC_SCHEDULER_KEYS = frozenset({"last_epoch", "base_lrs", "verbose", "default_min_lr"})
+
+
+def _scheduler_signature(state):
+    return {key for key in state if not str(key).startswith("_")} - _GENERIC_SCHEDULER_KEYS
+
+
+def validate_scheduler_state(scheduler, state):
+    """Reject a scheduler state written by another scheduler type, without touching ``scheduler``.
+
+    ``LRScheduler.load_state_dict`` is only ``self.__dict__.update(state)``: a StepLR state loads
+    into ReduceLROnPlateau without an error and leaves a hybrid object, so a trial load on a copy
+    cannot detect the wrong type. The state's type-specific entries (hyperparameters such as
+    ``step_size`` or ``patience``) must equal those of the configured scheduler.
+    """
+    if not isinstance(state, Mapping):
+        raise ValueError(f"Checkpoint scheduler state must be a mapping, not {type(state).__name__}")
+    expected, found = _scheduler_signature(scheduler.state_dict()), _scheduler_signature(state)
+    if expected != found:
+        raise ValueError(
+            f"Checkpoint scheduler state does not match the configured {type(scheduler).__name__}: "
+            f"missing={sorted(expected - found)}, unexpected={sorted(found - expected)}. Configure the "
+            "scheduler that wrote the checkpoint, or load with weights_only=True to restore weights only")
+    deepcopy(scheduler).load_state_dict(deepcopy(state))

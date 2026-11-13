@@ -66,6 +66,8 @@ No new training run was performed to update this document.
 
 - The V3 service requires prepared cache data; it does not fill a missing cache by processing raw data.
 - Data, tokenizer, and formatting settings contribute to cache identity.
+- Record layout ([record_format.py](../../../training_system/record_format.py)): BOS appears only in the input of a document's first record and EOS only in the target of its last record; the middle chunks of a long document carry neither. A record that does not fit `max_seq_length` is rejected, not cut.
+- The layout version (`CACHE_FORMAT_VERSION`) is part of the cache key; a cache prepared under an older layout is not reused, so run `prepare_cache.py` again. The version is not part of the tokenizer identity.
 - Checksums verify file integrity, not the semantic correctness of training examples.
 - Chunks sharing a source identity remain on the same side of the split.
 - Identical input / target contents also connect different sources and keep them together.

@@ -1,6 +1,7 @@
 """Real shipped vocabulary regressions; no tokenizer training or asset writes."""
 import hashlib
 import json
+import logging
 from pathlib import Path
 
 import pytest
@@ -70,8 +71,16 @@ def test_strict_text_loss_policy_rejects_dropped_characters(text):
 
 
 def test_loss_warning_exposes_codepoints_without_echoing_private_text(caplog):
-    bpe = manager(text_loss_policy="warn")
-    bpe.encode("private-secret 🧬", add_special_tokens=False)
+    # An earlier module in the full run (test_cev11_memory._tiny_model, frozen with its experiment)
+    # calls logging.disable(logging.WARNING) and never undoes it; this test asserts on a warning,
+    # so it lifts that process-wide switch for its own duration only.
+    previous = logging.root.manager.disable
+    logging.disable(logging.NOTSET)
+    try:
+        bpe = manager(text_loss_policy="warn")
+        bpe.encode("private-secret 🧬", add_special_tokens=False)
+    finally:
+        logging.disable(previous)
     assert "U+1F9EC" in caplog.text
     assert "private-secret" not in caplog.text
 

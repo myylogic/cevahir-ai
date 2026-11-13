@@ -8,7 +8,7 @@ Bir Transformer'ın doğru boyutta logits üretmesi, yararlı bir dil modeli old
 
 Tokenizer eğitimi sözlüğü ve birleşim kurallarını; dil modeli eğitimi bu kimliklerden sonraki kimlikleri öngören ağırlıkları belirler. İkisi aynı işlem değildir. Cevahir'in dil modeli eğitimi sırasında sözlüğü serbestçe büyüttüğünü varsayamayız. [`TokenizerCore.load_training_data`](../../../tokenizer_management/core/tokenizer_core.py#L720) mevcut tokenizer ile metinleri kodlar. Soru-cevap verisinde soru ve cevap arasına SEP yerleştirir, ham metni parçalara ayırır ve kaynak kimliğini taşır. Bu aşamadaki girdi/hedef listeleri hazırlanmış next-token batch'i ile karıştırılmamalıdır.
 
-[`prepare_cache`](../../../training_system/prepare_cache.py#L62) içindeki `format_data_func`, normal kayıtta aynı token dizisinden şu çifti oluşturur:
+[`prepare_cache`](../../../training_system/prepare_cache.py#L62) içindeki `format_data_func`, her kaydı [`format_autoregressive_record`](../../../training_system/record_format.py#L39) ile tek bir token dizisinin bir konum kaydırılmış hâline çevirir. Tek kayda sığan bir belge şu çifti verir:
 
 ```text
 Metnin ID'leri:  [t1,  t2, t3]
@@ -16,16 +16,16 @@ Model girdisi:  [BOS, t1, t2, t3]
 Hedef:         [t1,  t2, t3, EOS]
 ```
 
-Her giriş konumunun çıktısı aynı konumdaki hedefe karşılaştırılır. Model `t2`yi girdide gördüğü konumda `t3`ü öngörür; nedensel attention gelecekteki konumlara erişimi engeller. Hazırlama kodundaki bağlantı:
+Her giriş konumunun çıktısı aynı konumdaki hedefe karşılaştırılır. Model `t2`yi girdide gördüğü konumda `t3`ü öngörür; nedensel attention gelecekteki konumlara erişimi engeller. Ortak biçimleme kodundaki bağlantı:
 
 ```python
-seq_in = [BOS_ID] + list(inp_ids)
-seq_tgt = list(tgt_ids) + [EOS_ID]
+sequence = ([bos_id] if starts_document else []) + ids + ([eos_id] if ends_document else [])
+return sequence[:-1] + padding, sequence[1:] + padding
 ```
 
-Ardından uzunluk sınırı, EOS'un korunması ve PAD uygulanır. Uzun diziyi kesip son hedefi EOS yapmak, orijinal belgenin bitişiyle aynı olay değildir; hazırlama politikası öğrenilen durma davranışını etkiler. Eğitim döngüsü hedefleri **yeniden kaydırmaz**. Soru-cevap biçimi de kendiliğinden yalnız cevap tokenlarının kaybını hesaplayan bir maske demek değildir: hangi hedeflerin dışlandığı batch ve loss maskesinden okunur.
+Uzun bir belge örtüşen parçalara bölünür; parçalar belgenin kaynak kimliğini paylaşır ve metin sırasıyla ardışık gelir. [`record_boundaries`](../../../training_system/record_format.py#L16) belge sınırlarını bu sıradan okur: BOS yalnız ilk parçanın girdisine, EOS yalnız son parçanın hedefine konur. `[t5, t6, t7]` ara parçası için girdi `[t5, t6]`, hedef `[t6, t7]` olur; ilk token yalnız bağlamdır, önceki parçayla örtüşme onu zaten hedeflemiştir. Önceki biçim her parçayı EOS ile kapatıyordu: 13,7 KB'lık tek bir belgenin 35 parçasından 34'ü metin sürerken “metin bitti” hedefi öğretiyordu. Sığmayan kayıt kesilip EOS ile kapatılmaz, hata verir; uzun diziyi kesip son hedefi EOS yapmak orijinal belgenin bitişiyle aynı olay değildir. Hazırlama politikası öğrenilen durma davranışını etkiler; bu düzeltmenin modeldeki etkisi yeni bir eğitimle ölçülmedi. Eğitim döngüsü hedefleri **yeniden kaydırmaz**. Soru-cevap biçimi de kendiliğinden yalnız cevap tokenlarının kaybını hesaplayan bir maske demek değildir: hangi hedeflerin dışlandığı batch ve loss maskesinden okunur.
 
-Cache, tokenlaştırmayı her epoch'ta yinelememek içindir. [`cache_identity.py`](../../../training_system/cache_identity.py) kaynak içeriğini, vocabulary/merges ve ilgili kodlama ayarlarını parmak izine katar. V3 tüketim yolu cache kimliği ve bütünlüğünü kontrol eder; aynı dosya adı aynı veri anlamına gelmez. Hazırlama komutunun varsayılan temizleme davranışı mevcut cache'i etkileyebilir; ayrıntılar için [hazırlama rehberi](../../modules/training_system/README.md) ve komutun gerçek seçenekleri birlikte okunmalıdır.
+Cache, tokenlaştırmayı her epoch'ta yinelememek içindir. [`cache_identity.py`](../../../training_system/cache_identity.py) kaynak içeriğini, vocabulary/merges ve ilgili kodlama ayarlarını parmak izine katar. Cache anahtarı ayrıca kayıt düzeni sürümünü (`CACHE_FORMAT_VERSION`, şu an 2) taşır: düzen değişince eski cache yeniden kullanılmaz ve V3 eğitimi, hazırlama komutu yeniden çalıştırılana kadar cache bulamaz. Bu sürüm tokenizer kimliğine girmez; checkpoint'lerin tokenizer denetimi etkilenmez. V3 tüketim yolu cache kimliği ve bütünlüğünü kontrol eder; aynı dosya adı aynı veri anlamına gelmez. Hazırlama komutunun varsayılan temizleme davranışı mevcut cache'i etkileyebilir; ayrıntılar için [hazırlama rehberi](../../modules/training_system/README.md) ve komutun gerçek seçenekleri birlikte okunmalıdır.
 
 ## Değerlendirme verisi gerçekten ayrı mı?
 

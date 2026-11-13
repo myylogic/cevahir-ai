@@ -170,12 +170,12 @@ class TokenizerCore:
                 raise TokenizerCoreError(
                     f"Vocab path parent directory does not exist: {vocab_parent} (resolved from: {self.vocab_path})"
                 )
-            if not os.access(vocab_parent, os.W_OK):
+            if not config.get("read_only", False) and not os.access(vocab_parent, os.W_OK):
                 raise TokenizerCoreError(
                     f"Vocab path parent directory is not writable: {vocab_parent}"
                 )
-        else:
-            # For relative paths, try to create parent directory
+        elif not config.get("read_only", False):
+            # Relative path: create the parent directory (read_only writes nothing, not even directories)
             try:
                 os.makedirs(vocab_parent, exist_ok=True)
             except (OSError, PermissionError) as e:
@@ -192,12 +192,12 @@ class TokenizerCore:
                 raise TokenizerCoreError(
                     f"Merges path parent directory does not exist: {merges_parent} (resolved from: {self.merges_path})"
                 )
-            if not os.access(merges_parent, os.W_OK):
+            if not config.get("read_only", False) and not os.access(merges_parent, os.W_OK):
                 raise TokenizerCoreError(
                     f"Merges path parent directory is not writable: {merges_parent}"
                 )
-        else:
-            # For relative paths, try to create parent directory
+        elif not config.get("read_only", False):
+            # Relative path: create the parent directory (read_only writes nothing, not even directories)
             try:
                 os.makedirs(merges_parent, exist_ok=True)
             except (OSError, PermissionError) as e:

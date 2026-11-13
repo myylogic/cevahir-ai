@@ -5,10 +5,10 @@ TrainingService'in cache'den gelen verileri nasıl işlediğini test eder.
 
 Test Amacı:
 - Cache'den yüklenen örneklerin doğru işlenip işlenmediği
-- EOS ekleme mekanizması (her target'in sonunda EOS var mı?)
-- BOS ekleme mekanizması (her input'un başında BOS var mı?)
+- EOS ekleme mekanizması (EOS yalnız belgenin son kaydının hedef sonunda mı?)
+- BOS ekleme mekanizması (BOS yalnız belgenin ilk kaydının başında mı?)
 - Alignment kontrolü (autoregressive format doğru mu?)
-- Truncation sonrası EOS korunuyor mu?
+- max_seq_length'e sığmayan kayıt kesilip sahte EOS ile kapatılmak yerine reddediliyor mu?
 - Loss function'da EOS weight uygulanıyor mu?
 
 GÜNCEL AKIŞ:
@@ -16,10 +16,11 @@ Eski test, cache'deki ham (inp, inp) çiftlerine BOS/EOS ekleyen eski
 TrainingService._prepare_data mantığını test içinde yeniden yazıp (simüle edip) uyguluyordu.
 Bu formatlama artık cache'e yazılmadan ÖNCE yapılıyor (TrainingService.prepare_from_cache →
 format_data_for_autoregressive; training_system/prepare_cache.py da aynı biçimi üretir).
-Cache'deki kayıtlar bu yüzden zaten formatlıdır:
-    input  = [BOS, t1, ..., tN, PAD, ...]
-    target = [t1, ..., tN, EOS, PAD, ...]     (target[t] == input[t+1])
-Uzun örnekler kesildiğinde target son pozisyonda yine EOS ile biter. Testler bu biçimi
+Cache'deki kayıtlar bu yüzden zaten formatlıdır (training_system/record_format.py):
+    input  = [BOS, t1, ..., tN, PAD, ...]     (BOS yalnız belgenin ilk kaydında)
+    target = [t1, ..., tN, EOS, PAD, ...]     (EOS yalnız belgenin son kaydında; target[t] == input[t+1])
+Uzun belgenin ara parçaları BOS da EOS da almaz. max_seq_length'e sığmayan kayıt kesilip EOS ile
+kapatılmaz (bu belgenin sonunu sahte yere taşırdı); ValueError verilir. Testler bu biçimi
 doğrudan doğrular:
 - Ürünün kendi formatlama/önbellek yolunu küçük bir geçici korpusla çalıştırarak (her ortamda),
 - Varsa yerel eğitim cache'indeki kayıtlar üzerinde (.cache/preprocessed_data, repo'da yok;
@@ -58,7 +59,7 @@ MAX_ANALYZED_EXAMPLES = 1000  # İlk 1000 örneği işle (hızlı test için)
 
 # Tokenizer örnekleri en fazla SERVICE_MAX_SEQ_LEN - 2 içerik token'ına böler (BOS/EOS payı).
 SERVICE_MAX_SEQ_LEN = 64
-# Formatlayıcıya daha kısa bir uzunluk verilince kesme (truncation) yolu çalışır.
+# Formatlayıcıya daha kısa bir uzunluk verilince kayıtlar sığmaz; kesilmez, reddedilir.
 TRUNCATED_MAX_SEQ_LEN = 16
 
 # Ürün varsayılanı artık eos_token_weight=1.0 (CriterionManager: 0.1 EOS öğrenimini bozuyordu).
@@ -99,37 +100,49 @@ def special_token_ids(tokenizer_core) -> Dict[str, int]:
     return {"pad_id": _id_of("<PAD>"), "bos_id": _id_of("<BOS>"), "eos_id": _id_of("<EOS>")}
 
 
-def find_format_problems(inp: Sequence[int], tgt: Sequence[int], *, pad_id: int, bos_id: int, eos_id: int) -> List[str]:
-    """Formatlı bir eğitim örneğindeki sorunları listele (boş liste = doğru format)."""
+def find_format_problems(inp: Sequence[int], tgt: Sequence[int], *, pad_id: int, bos_id: int, eos_id: int,
+                         starts_document: bool = True, ends_document: bool = True) -> List[str]:
+    """Formatlı bir eğitim örneğindeki sorunları listele (boş liste = doğru format).
+
+    BOS yalnız belgeyi başlatan kaydın, EOS yalnız belgeyi bitiren kaydın içinde bulunur.
+    """
     inp = [int(t) for t in inp]
     tgt = [int(t) for t in tgt]
     if len(inp) != len(tgt):
         return [f"Alignment hatası - Input len={len(inp)} != Target len={len(tgt)}"]
 
     problems = []
-    if not inp or inp[0] != bos_id:
-        problems.append(f"Input BOS ile başlamıyor (ilk token={inp[0] if inp else None})")
+    if not inp or (inp[0] == bos_id) != starts_document:
+        expected = "başlamalı" if starts_document else "başlamamalı (belge ortası)"
+        problems.append(f"Input BOS ile {expected} (ilk token={inp[0] if inp else None})")
 
     content = [i for i, token in enumerate(tgt) if token != pad_id]
     if not content:
         return problems + ["Target tamamen PAD"]
-    last = content[-1]  # EOS pozisyonu (kesilmiş örnekte son pozisyon)
-    if tgt[last] != eos_id:
-        problems.append(f"Target'in son PAD-dışı token'ı EOS değil (pozisyon {last}, id={tgt[last]})")
+    last = content[-1]  # son içerik pozisyonu (belge bitiyorsa EOS)
+    if (tgt[last] == eos_id) != ends_document:
+        expected = "EOS olmalı" if ends_document else "EOS olmamalı (belge sürüyor)"
+        problems.append(f"Target'in son PAD-dışı token'ı {expected} (pozisyon {last}, id={tgt[last]})")
+    if eos_id in tgt[:last] or bos_id in inp[1:last + 1]:
+        problems.append("İçeriğin ortasında BOS/EOS var")
     if len(content) != last + 1:
-        problems.append("Target'ta EOS'tan önce PAD var")
+        problems.append("Target'ta içerik arasında PAD var")
     if inp[1:last + 1] != tgt[:last]:
         problems.append("Autoregressive alignment hatası: target[t] != input[t+1]")
     if any(token != pad_id for token in inp[last + 1:]):
-        problems.append("Input, EOS pozisyonundan sonra PAD-dışı token içeriyor")
+        problems.append("Input, içerikten sonra PAD-dışı token içeriyor")
     return problems
 
 
 def collect_format_failures(records, ids: Dict[str, int]) -> List[Tuple[int, List[str]]]:
-    """(input, target[, source_id]) kayıtlarından hatalı formatlı olanları döndür."""
+    """Cache sırasındaki (input, target[, source_id]) kayıtlarından hatalı formatlı olanları döndür.
+
+    Belge sınırları kayıt sırasından okunur: aynı source_id'nin ardışık kayıtları bir belgedir.
+    """
+    from training_system.record_format import record_boundaries
     failures = []
-    for idx, item in enumerate(records):
-        problems = find_format_problems(item[0], item[1], **ids)
+    for idx, (item, (starts, ends)) in enumerate(zip(records, record_boundaries(records))):
+        problems = find_format_problems(item[0], item[1], **ids, starts_document=starts, ends_document=ends)
         if problems:
             failures.append((idx, problems))
     return failures
@@ -205,16 +218,12 @@ def training_service(corpus_dir, tmp_path_factory):
 # Testler
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize(
-    "max_seq_len",
-    [SERVICE_MAX_SEQ_LEN, TRUNCATED_MAX_SEQ_LEN],
-    ids=["tam-uzunluk", "truncation"],
-)
-def test_prepare_from_cache_formats_cached_examples(training_service, corpus_dir, tmp_path, max_seq_len):
+def test_prepare_from_cache_formats_cached_examples(training_service, corpus_dir, tmp_path):
     """
-    TrainingService.prepare_from_cache: cache'e yazılan ve eğitime verilen örneklerde input BOS ile
-    başlıyor, target EOS ile bitiyor, target[t] == input[t+1] ve kesilen örneklerde EOS korunuyor mu?
+    TrainingService.prepare_from_cache: cache'e yazılan ve eğitime verilen örneklerde BOS yalnız belgenin
+    ilk kaydının başında, EOS yalnız son kaydının hedef sonunda ve target[t] == input[t+1] mi?
     """
+    max_seq_len = SERVICE_MAX_SEQ_LEN
     ids = special_token_ids(training_service.tokenizer_core)
     cache_dir = tmp_path / "preprocessed_data"
     data_cache = DataCache(data_dir=str(corpus_dir), cache_dir=str(cache_dir), cache_enabled=True)
@@ -241,18 +250,39 @@ def test_prepare_from_cache_formats_cached_examples(training_service, corpus_dir
     lengths = {len(item[0]) for item in cached}
     assert lengths == {max_seq_len}, f"Örnekler max_seq_length={max_seq_len} uzunluğa PAD'lenmeli: {lengths}"
 
-    # Eğitime verilen (train/val split sonrası) tensörler: cache'deki örneklerin tamamı, aynı formatta
-    split_examples = [(x.tolist(), y.tolist()) for x, y in list(train_data) + list(val_data)]
-    assert len(split_examples) == len(cached), (
-        f"Split sonrası örnek sayısı ({len(split_examples)}) cache'dekinden ({len(cached)}) farklı"
-    )
-    failures = collect_format_failures(split_examples, ids)
-    assert not failures, f"{len(failures)} eğitim örneği hatalı formatlı; ilk 5: {failures[:5]}"
+    # Uzun düz metin birden çok kayda bölünür: belge başına tek BOS (ilk kayıt) ve tek EOS (son kayıt)
+    per_source = {}
+    for inp, tgt, source_id in cached:
+        per_source.setdefault(source_id, []).append(
+            (int(inp[0]) == ids["bos_id"], ids["eos_id"] in [int(t) for t in tgt]))
+    assert max(len(flags) for flags in per_source.values()) >= 2, "Uzun metin tek kayda sığdı; parça sınırı sınanmadı"
+    for source_id, flags in per_source.items():
+        assert [bos for bos, _ in flags] == [True] + [False] * (len(flags) - 1), (source_id, flags)
+        assert [eos for _, eos in flags] == [False] * (len(flags) - 1) + [True], (source_id, flags)
 
-    if max_seq_len == TRUNCATED_MAX_SEQ_LEN:
-        # Kesme yolu gerçekten çalışmış olmalı: içerik tüm uzunluğu doldurur, son token EOS
-        truncated = sum(1 for item in cached if int(item[1][-1]) == ids["eos_id"])
-        assert truncated > 0, "Hiçbir örnek kesilmedi; truncation sonrası EOS korunumu sınanmadı"
+    # Eğitime verilen (train/val split sonrası) tensörler: cache'deki kayıtların aynısı (yalnız sıra değişir)
+    split_examples = sorted((x.tolist(), y.tolist()) for x, y in list(train_data) + list(val_data))
+    assert split_examples == sorted(([int(t) for t in item[0]], [int(t) for t in item[1]]) for item in cached), (
+        f"Split sonrası örnekler ({len(split_examples)}) cache'deki {len(cached)} kayıtla aynı değil"
+    )
+
+
+def test_prepare_from_cache_rejects_records_longer_than_max_seq_len(training_service, corpus_dir, tmp_path):
+    """
+    Tokenizer kayıtları SERVICE_MAX_SEQ_LEN'e göre parçalar; daha kısa bir max_seq_length ile biçimlemek
+    kayıtları sığdıramaz. Eski kod kesip son hedefi EOS yapıyordu (belgenin sonunu sahte yere taşıyan,
+    kuyruğu sessizce atan bir kayıt); şimdi hata verilir ve cache yazılmaz.
+    """
+    cache_dir = tmp_path / "preprocessed_data"
+    data_cache = DataCache(data_dir=str(corpus_dir), cache_dir=str(cache_dir), cache_enabled=True)
+    config = dict(training_service.config, max_seq_length=TRUNCATED_MAX_SEQ_LEN)
+    with pytest.raises(ValueError, match="chunk it first"):
+        training_service.prepare_from_cache(
+            data_cache=data_cache,
+            tokenizer_core=training_service.tokenizer_core,
+            config=config,
+        )
+    assert not list(cache_dir.glob("cached_data_*.pkl")), "Reddedilen biçimleme cache yazmamalı"
 
 
 def test_local_training_cache_examples_are_formatted(request):

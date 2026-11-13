@@ -58,7 +58,7 @@
       "path": "tokenizer_management/bpe/bpe_manager.py",
       "symbol": "BPEManager._tokenize_with_punct",
       "chapter": "tr/02-metin-tokenizer.md",
-      "line": 388
+      "line": 401
     },
     {
       "path": "tokenizer_management/bpe/tokenization/pretokenizer.py",
@@ -113,6 +113,18 @@
       "symbol": "prepare_cache",
       "chapter": "tr/06-egitim.md",
       "line": 62
+    },
+    {
+      "path": "training_system/record_format.py",
+      "symbol": "format_autoregressive_record",
+      "chapter": "tr/06-egitim.md",
+      "line": 39
+    },
+    {
+      "path": "training_system/record_format.py",
+      "symbol": "record_boundaries",
+      "chapter": "tr/06-egitim.md",
+      "line": 16
     },
     {
       "path": "training_system/data_split.py",
@@ -235,6 +247,12 @@
       "line": 56
     },
     {
+      "path": "model_management/checkpoint_contract.py",
+      "symbol": "validate_scheduler_state",
+      "chapter": "tr/07-model-yasam-dongusu.md",
+      "line": 98
+    },
+    {
       "path": "training_management/v2/core/training_manager.py",
       "symbol": "TrainingManager._checkpoint_extra_state",
       "chapter": "tr/07-model-yasam-dongusu.md",
@@ -286,25 +304,25 @@
       "path": "tokenizer_management/bpe/bpe_manager.py",
       "symbol": "BPEManager.encode",
       "chapter": "tr/02-metin-tokenizer.md",
-      "line": 463
+      "line": 476
     },
     {
       "path": "tokenizer_management/bpe/bpe_manager.py",
       "symbol": "BPEManager.decode",
       "chapter": "tr/02-metin-tokenizer.md",
-      "line": 793
+      "line": 808
     },
     {
       "path": "tokenizer_management/bpe/bpe_manager.py",
       "symbol": "BPEManager.train",
       "chapter": "tr/02-metin-tokenizer.md",
-      "line": 961
+      "line": 976
     },
     {
       "path": "tokenizer_management/bpe/bpe_manager.py",
       "symbol": "BPEManager._initialize_components",
       "chapter": "tr/02-metin-tokenizer.md",
-      "line": 303
+      "line": 316
     },
     {
       "path": "tokenizer_management/bpe/bpe_encoder.py",

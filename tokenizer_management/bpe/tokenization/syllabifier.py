@@ -44,7 +44,7 @@ from tokenizer_management.config import get_turkish_config
 from tokenizer_management.bpe.tokenization._syllabifier_utils import strip_diacritics, syllabify_word
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+# Kütüphane modülü kök logger'ı yapılandırmaz; giriş betikleri yapar.
 class SyllabificationError(Exception):
     """Heceleme sırasında oluşan hatalar için özel istisna."""
     pass

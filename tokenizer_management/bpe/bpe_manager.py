@@ -97,6 +97,10 @@ class TokenizerTextLossError(BPETokenError):
         super().__init__(f"Tokenizer preprocessing drops characters: {self.dropped_codepoints}")
 
 
+class TokenizerReadOnlyError(BPETokenError):
+    """A read_only tokenizer was asked to write its files or to change its vocabulary."""
+
+
 class BPEManager(BaseTokenizerManager):
     """
     Orkestrasyon katmanı:
@@ -218,7 +222,15 @@ class BPEManager(BaseTokenizerManager):
     def _read_json(self, path: str) -> Any:
         return read_json(path)
 
+    def _require_writable(self, action: str) -> None:
+        """read_only means the tokenizer files are never written and the vocabulary stays fixed."""
+        if getattr(self, "read_only", False):
+            raise TokenizerReadOnlyError(
+                f"read_only tokenizer cannot {action} (vocab={self.vocab_file}, merges={self.merges_file})"
+            )
+
     def _write_json(self, path: str, obj: Any) -> None:
+        self._require_writable(f"write {path}")
         write_json(path, obj)
 
     def _ensure_vocab_file(self) -> None:
@@ -266,6 +278,7 @@ class BPEManager(BaseTokenizerManager):
         Windows’ta arada dosya kilitleri yaşanabildiği için küçük bir retry/backoff uygula,
         son çare olarak shutil.move dene. Başarısız olursa orijinal hatayı yükselt.
         """
+        self._require_writable(f"write {self.merges_file}")
         os.makedirs(os.path.dirname(self.merges_file), exist_ok=True)
         tmp = f"{self.merges_file}.tmp"
         # tmp'yi yaz
@@ -577,8 +590,9 @@ class BPEManager(BaseTokenizerManager):
         # ============================================================================
         # Sabit vocab stratejisi: auto_vocab_update=False (config'te)
         # Dinamik vocab stratejisi: auto_vocab_update=True (nadiren kullanılır)
+        # read_only: sözlük sabittir; encode ne belleği ne dosyaları değiştirir.
         # ============================================================================
-        if mode == "train" and self.config.get("auto_vocab_update", False) and (include_whole_words or include_syllables):
+        if not self.read_only and mode == "train" and self.config.get("auto_vocab_update", False) and (include_whole_words or include_syllables):
             # Vocab limit kontrolü
             current_vocab_size = len(self._vocab)
             max_vocab_size = self.config.get("max_vocab_size", 60000)
@@ -605,7 +619,8 @@ class BPEManager(BaseTokenizerManager):
                     logger.error(f"[BPEManager] auto_update_vocab hatası: {e}")
 
         # Yalnız heceleme kullanılıyorsa (whole-word yoksa) heceleri vocab'a ekle ki decode reconstruct edebilsin
-        if include_syllables and not include_whole_words:
+        # (read_only'de atlanır: bilinmeyen heceler mevcut sözlükteki parçalara düşer)
+        if include_syllables and not include_whole_words and not self.read_only:
             syll_cands = [
                 t for t in tokens
                 if t not in ("<BOS>", "<EOS>", "<SEP>") and not (t.startswith("<") and t.endswith(">"))
@@ -978,6 +993,8 @@ class BPEManager(BaseTokenizerManager):
         import time
         import psutil
         
+        # Eğitim vocab.json ve merges.txt dosyalarını yeniden yazar; read_only'de hiçbir iş yapılmadan reddedilir.
+        self._require_writable("be trained (training rewrites vocab.json and merges.txt)")
         if not corpus:
             raise ValueError("Train: corpus boş olamaz.")
 
@@ -1343,6 +1360,7 @@ class BPEManager(BaseTokenizerManager):
         return self.trainer.get_merges()
 
     def set_vocab(self, new_vocab: Dict[str, Union[int, dict]]) -> None:
+        self._require_writable("replace its vocabulary")
         self._vocab = normalize_vocab(new_vocab)
         self._write_json(self.vocab_file, self._vocab)
         self._sync_components()
@@ -1353,6 +1371,7 @@ class BPEManager(BaseTokenizerManager):
         logger.info("Yeni vocab yüklendi ve senkronize edildi. size=%d", len(self._vocab))
 
     def reset(self) -> None:
+        self._require_writable("be reset")
         self._vocab = default_vocab()
         self._write_json(self.vocab_file, self._vocab)
         self._write_merges_atomic([])  # merges temizle
@@ -1361,6 +1380,7 @@ class BPEManager(BaseTokenizerManager):
         logger.info("BPEManager sıfırlandı: default vocab & temiz merges")
 
     def finalize(self) -> None:
+        self._require_writable("save vocab.json and merges.txt")
         self.save_vocab()
         self.save_merges()
         self._sync_components()
@@ -1483,7 +1503,10 @@ class BPEManager(BaseTokenizerManager):
         
         ✅ DÜZELTME: get_base_alphabet() kullan (tutarlılık için)
         ⚠️ NOT: Vocab küçük harflerle oluşturulmuş, bu yüzden get_base_alphabet() sadece küçük harfleri döndürüyor
+        read_only: sözlük sabittir; ne bellekte ne diskte token eklenir (0 döner).
         """
+        if getattr(self, 'read_only', False):
+            return 0
         # ✅ get_base_alphabet() kullan (tutarlılık için)
         from tokenizer_management.bpe.bpe_manager_utils import get_base_alphabet
         base = get_base_alphabet()  # Küçük harfler, rakamlar, noktalama, boşluk, </w>
@@ -1531,7 +1554,10 @@ class BPEManager(BaseTokenizerManager):
         """
         YENİ: Yaygın heceler, morfemler ve kelimeleri vocab'a ekle.
         Bu, ilk eğitim sırasında bilinmeyen token sorununu çözer.
+        read_only: sözlük sabittir; hiçbir şey eklenmez (0 döner).
         """
+        if getattr(self, 'read_only', False):
+            return 0
         from tokenizer_management.bpe.tokenization.syllabifier import Syllabifier
         from tokenizer_management.bpe.tokenization.morphology import Morphology
         from tokenizer_management.bpe.tokenization.pretokenizer import Pretokenizer
@@ -1658,6 +1684,7 @@ class BPEManager(BaseTokenizerManager):
         unseen = sorted(t for t in filtered if t not in self._vocab)
         if not unseen:
             return 0
+        self._require_writable(f"add {len(unseen)} token(s) to its vocabulary")
 
         added = 0
         for tok in unseen:
