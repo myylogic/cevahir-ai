@@ -65,3 +65,7 @@ entries are not amendments.
   life variants collapse at the preregistered settings. If they have not run when the report is written, S3 is
   reported as 'not run' together with the discovery lives and the diagnosis; if they run later, they run unchanged
   with the recorded life_lambda.
+- 2026-11-13 14:16 UTC — recorded output (not an amendment): the frozen analyze.py on confirmatory worlds 1000-1007
+  wrote results/decisions.json (sha256 1d01e757393d8243be922fba34b793d00f9264f04dd2a748d163fec004dfb426); verify.py --manifest and --rerun --freeze agree
+  (results/manifest.sha256 sha256 750cb02a5d26d7560741990374561c0f8663e6a06490d99391097dd6a89955e0, 261 files; results/verify_report.json sha256 07ecc5b3914f49002d7ad3cf9620131a9b0548758e4ceb82ecda387f9cec6a74: recomputed decisions and
+  tables identical, analysis code equal to the frozen hashes). The confirmatory analysis is complete; S3 is 'not run'.
