@@ -1,0 +1,246 @@
+{
+ "allowed_dtypes": [
+  "float32",
+  "bfloat16",
+  "float16"
+ ],
+ "arch": "cev:arch:cfg-v1:7ccdfc96fc5c534e31826c2a568e87bbc25932d594e8e554690aa8b161aa81fe",
+ "arch_fields": {
+  "attn_logit_cap": 0.0,
+  "causal_mask": true,
+  "embed_dim": 32,
+  "ffn_dim": 64,
+  "logit_soft_cap": 30.0,
+  "moe_top_k": null,
+  "num_experts": null,
+  "num_heads": 4,
+  "num_kv_heads": 4,
+  "num_layers": 2,
+  "parallel_residual": false,
+  "pe_max_len": null,
+  "pe_mode": "rope",
+  "pre_norm": true,
+  "rope_original_max_len": null,
+  "rope_scaling_factor": null,
+  "rope_scaling_type": "none",
+  "seq_proj_dim": 32,
+  "sliding_window": null,
+  "tie_weights": true,
+  "use_moe": false,
+  "use_qk_norm": false,
+  "use_rmsnorm": true,
+  "use_swiglu": true,
+  "vocab_size": 128
+ },
+ "default_dtype": "float32",
+ "family": "cevahir-decoder",
+ "family_version": "cevahir-capabilities-1",
+ "format": "cevahir-wschema-layout",
+ "layout": {
+  "aliases": [
+   [
+    "embedding.embedding.weight",
+    "output_layer.weight"
+   ]
+  ],
+  "tensors": [
+   [
+    "embedding.embedding.weight",
+    [
+     128,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "embedding.norm.bias",
+    [
+     32
+    ],
+    "float32"
+   ],
+   [
+    "embedding.norm.weight",
+    [
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.0.attn.key_proj.weight",
+    [
+     32,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.0.attn.norm.bias",
+    [
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.0.attn.norm.weight",
+    [
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.0.attn.out_proj.weight",
+    [
+     32,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.0.attn.query_proj.weight",
+    [
+     32,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.0.attn.value_proj.weight",
+    [
+     32,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.0.ffn.fc2.weight",
+    [
+     32,
+     64
+    ],
+    "float32"
+   ],
+   [
+    "layers.0.ffn.gate_up_proj.weight",
+    [
+     128,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.0.norm1.scale",
+    [
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.0.norm2.scale",
+    [
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.1.attn.key_proj.weight",
+    [
+     32,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.1.attn.norm.bias",
+    [
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.1.attn.norm.weight",
+    [
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.1.attn.out_proj.weight",
+    [
+     32,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.1.attn.query_proj.weight",
+    [
+     32,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.1.attn.value_proj.weight",
+    [
+     32,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.1.ffn.fc2.weight",
+    [
+     32,
+     64
+    ],
+    "float32"
+   ],
+   [
+    "layers.1.ffn.gate_up_proj.weight",
+    [
+     128,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.1.norm1.scale",
+    [
+     32
+    ],
+    "float32"
+   ],
+   [
+    "layers.1.norm2.scale",
+    [
+     32
+    ],
+    "float32"
+   ],
+   [
+    "output_layer.weight",
+    [
+     128,
+     32
+    ],
+    "float32"
+   ],
+   [
+    "output_norm.scale",
+    [
+     32
+    ],
+    "float32"
+   ]
+  ]
+ },
+ "layout_key": "cev:wschema:layout-v1:f96311fd51ccd68dbd49718923ed53e6d1df7bf2066d73ad0cce04fa00ef1968",
+ "non_persistent": [
+  "pos_encoding.pos_idx",
+  "pos_encoding.rope_freqs"
+ ],
+ "preset": "tiny",
+ "sd_key": "cev:wschema:sd-v1:ea868ed66ad2f7e93651eb89c7a07cb3130fb1e52dbafd5aaf700c0016d8f636",
+ "version": 1
+}

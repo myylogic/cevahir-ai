@@ -1,0 +1,12 @@
+{
+ "format": "cevahir-wschema-migration",
+ "version": 1,
+ "id": "strip-wrapper-prefixes/1",
+ "applies_to": {"family": "cevahir-decoder", "family_version": "*"},
+ "function_preserving": true,
+ "ops": [
+  {"op": "strip_prefix", "prefix": "module."},
+  {"op": "strip_prefix", "prefix": "_orig_mod."}
+ ],
+ "notes": "DataParallel/DDP (module.) and torch.compile (_orig_mod.) wrappers prefix every state_dict name; the tensors are unchanged. Preventive: no such file has been seen so far."
+}

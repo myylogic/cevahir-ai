@@ -84,8 +84,9 @@ def main():
         if args.write:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(expected, encoding="utf-8", newline="\n")
-        else:
-            assert path.read_text(encoding="utf-8") == expected, str(path)
+        elif path.read_text(encoding="utf-8") != expected:
+            # Not an assert: ``python -O`` removes asserts, and the check would then pass on anything.
+            raise SystemExit(f"publication edition differs from its build: {path} (run with --write)")
     print(json.dumps({"publication_editions": len(catalog["papers"]), "mode": "write" if args.write else "check"}))
 
 

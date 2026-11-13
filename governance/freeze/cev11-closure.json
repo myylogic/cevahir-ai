@@ -1,0 +1,184 @@
+{
+ "format": "cevahir-closure-pin",
+ "version": 1,
+ "study": "CEV-11",
+ "study_root": "research/living_learning_paradigm_2026_11_13",
+ "rule": "product modules reachable from the study's .py files by any import edge (eager, lazy, guarded); excluding TYPE_CHECKING and __main__ blocks; package __init__ included",
+ "digest": "utf8-lf",
+ "modules": [
+  {
+   "module": "model_management",
+   "path": "model_management/__init__.py",
+   "sha256": "fcd9eec9d327ee34a208c84809c84a476c965511e2519c1c0e8785a8bef9b652"
+  },
+  {
+   "module": "model_management.checkpoint_contract",
+   "path": "model_management/checkpoint_contract.py",
+   "sha256": "0a8e76a3e4d527dd4ae9a78759ce993da5fb96037d218978e2e59e3e2a55f2a1"
+  },
+  {
+   "module": "model_management.compilation",
+   "path": "model_management/compilation.py",
+   "sha256": "437a3c5f0b1cf4ab96402822b24063c422a6c0f90b63697b0b4ae402f1872e6c"
+  },
+  {
+   "module": "model_management.config_schema",
+   "path": "model_management/config_schema.py",
+   "sha256": "51b8e183341340e7216048f518128bbabbdbf2d07476f430a8d97f19889cd696"
+  },
+  {
+   "module": "model_management.exceptions",
+   "path": "model_management/exceptions.py",
+   "sha256": "5448083dd97e50983eb7187554822a907d9ec102b0d7c4eef12d659206edc65f"
+  },
+  {
+   "module": "model_management.health_monitor",
+   "path": "model_management/health_monitor.py",
+   "sha256": "d197286af734639758d3fc25a7f751f9003b2a66cba12add1628553404c60911"
+  },
+  {
+   "module": "model_management.model_initializer",
+   "path": "model_management/model_initializer.py",
+   "sha256": "7ac9c6f217f1b1f1bcb8dd5b15430a1ffbbff6a19246df7b9707288ea0dc400e"
+  },
+  {
+   "module": "model_management.model_loader",
+   "path": "model_management/model_loader.py",
+   "sha256": "29a966df65047593593e6006fbab1465cc6cfab2f7720b8030e833d7aa059355"
+  },
+  {
+   "module": "model_management.model_manager",
+   "path": "model_management/model_manager.py",
+   "sha256": "fcca2c0b4042fa61545a649c9fc7ebfce70f033872ff22228353553d85ce6fd0"
+  },
+  {
+   "module": "model_management.model_saver",
+   "path": "model_management/model_saver.py",
+   "sha256": "8acc4eff540ea9fa49be4f820f5d4710794d575d3fd7c1a9e4275ee9a28709ed"
+  },
+  {
+   "module": "model_management.model_updater",
+   "path": "model_management/model_updater.py",
+   "sha256": "dea54fc78bc2f2117513f063277bac686dc817f7cdc1d7547df79a3014925a2d"
+  },
+  {
+   "module": "model_management.profiler",
+   "path": "model_management/profiler.py",
+   "sha256": "b2efcb340d8dd2a7c0aa3b6f83fe2f8fe0d53ff34e4c48ac67d183113cf6ceac"
+  },
+  {
+   "module": "src",
+   "path": "src/__init__.py",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "module": "src.neural_network",
+   "path": "src/neural_network.py",
+   "sha256": "0eb7cacfa5cb6dce33652065f9d86f858754cb2d508295336ae303fc09ae4f91"
+  },
+  {
+   "module": "src.neural_network_module",
+   "path": "src/neural_network_module/__init__.py",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "module": "src.neural_network_module.architecture_contracts",
+   "path": "src/neural_network_module/architecture_contracts.py",
+   "sha256": "7cc14c8f9eebfaf7db49da09bd3a959b18153326118bb46b10273d890bd4cc75"
+  },
+  {
+   "module": "src.neural_network_module.dil_katmani_module",
+   "path": "src/neural_network_module/dil_katmani_module/__init__.py",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "module": "src.neural_network_module.dil_katmani_module.language_embedding",
+   "path": "src/neural_network_module/dil_katmani_module/language_embedding.py",
+   "sha256": "f9e1857708b276bbcd42032999068dc4566a97019f5c7bddb7c566520bf04188"
+  },
+  {
+   "module": "src.neural_network_module.dil_katmani_module.positional_encoding",
+   "path": "src/neural_network_module/dil_katmani_module/positional_encoding.py",
+   "sha256": "ca7098381696e61a601d81302d2b9424c9e0875f6b33460f0dbc23909425ae16"
+  },
+  {
+   "module": "src.neural_network_module.ortak_katman_module",
+   "path": "src/neural_network_module/ortak_katman_module/__init__.py",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "module": "src.neural_network_module.ortak_katman_module.advanced_checkpointing",
+   "path": "src/neural_network_module/ortak_katman_module/advanced_checkpointing.py",
+   "sha256": "90cb1434ff63c42c71e65b34b76cbde6bebcef46101f3a983fdea4764f282707"
+  },
+  {
+   "module": "src.neural_network_module.ortak_katman_module.attention_manager_module",
+   "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/__init__.py",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "module": "src.neural_network_module.ortak_katman_module.attention_manager_module.multi_head_attention",
+   "path": "src/neural_network_module/ortak_katman_module/attention_manager_module/multi_head_attention.py",
+   "sha256": "8c0fce2354a4520b7dadacb1340c8e23f8ebe3490b1cffc23d4d2a2e377a2688"
+  },
+  {
+   "module": "src.neural_network_module.ortak_katman_module.feed_forward_network",
+   "path": "src/neural_network_module/ortak_katman_module/feed_forward_network.py",
+   "sha256": "762bb5f56f36737f371961ed8e4b4f1ca008ce39ab1a5d4873e9825c55ddba84"
+  },
+  {
+   "module": "src.neural_network_module.ortak_katman_module.kv_cache",
+   "path": "src/neural_network_module/ortak_katman_module/kv_cache.py",
+   "sha256": "1428e9dc65eaf1477330658db2c4627733dc095860efce511022fc4c2750d74a"
+  },
+  {
+   "module": "src.neural_network_module.ortak_katman_module.mixture_of_experts",
+   "path": "src/neural_network_module/ortak_katman_module/mixture_of_experts.py",
+   "sha256": "9f2cd371bb77702d0e0948f1e472b2f6aec1779edfe589e66705766a9f53c937"
+  },
+  {
+   "module": "src.neural_network_module.ortak_katman_module.quantization_manager",
+   "path": "src/neural_network_module/ortak_katman_module/quantization_manager.py",
+   "sha256": "41009ad342c2f82ec02fff331a8390af100dba99ca022d14115a136816373d87"
+  },
+  {
+   "module": "src.neural_network_module.ortak_katman_module.rms_norm",
+   "path": "src/neural_network_module/ortak_katman_module/rms_norm.py",
+   "sha256": "b2a7dc5c4810024079d9555dbb029f97fb2e0488d17a89c31ec46947cf94281e"
+  },
+  {
+   "module": "src.neural_network_module.ortak_katman_module.transformer_encoder_layer",
+   "path": "src/neural_network_module/ortak_katman_module/transformer_encoder_layer.py",
+   "sha256": "71578eeb58c709dbb59e8bca3f0215f036c7004ba558b00f860d2e5f1d7aa7f7"
+  },
+  {
+   "module": "tokenizer_management",
+   "path": "tokenizer_management/__init__.py",
+   "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+  },
+  {
+   "module": "tokenizer_management.byte_bpe",
+   "path": "tokenizer_management/byte_bpe.py",
+   "sha256": "b5510b39a01da6e4e827c1c04d5a67317334be1210ee6fef5e9424224ed8ea21"
+  },
+  {
+   "module": "training_system",
+   "path": "training_system/__init__.py",
+   "sha256": "17f9469982c77ff2b9dbd9ceaa2c23d8f1d13c32a2b0db7d641337734adc3875"
+  },
+  {
+   "module": "training_system.cache_identity",
+   "path": "training_system/cache_identity.py",
+   "sha256": "10b29af69f894af3cb0384a51f32acf33fcf4a220c413b85b6a5bd99730c6d4f"
+  }
+ ],
+ "closure_key": "cev:code:tree-v1:c1289a775fefd56e9bc65d195c2663eec493742288fc2a7600a1ccd74f4568a3",
+ "history": [
+  {
+   "closure_key": "cev:code:tree-v1:c1289a775fefd56e9bc65d195c2663eec493742288fc2a7600a1ccd74f4568a3",
+   "modules": 33,
+   "reason": "initial pin at main 0f9be09; equals the closure key computed for the roof specification (33 modules)",
+   "commit": "0f9be09"
+  }
+ ]
+}
