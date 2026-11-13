@@ -35,7 +35,7 @@ Desteklenen arka ucu [contracts.py](../../../training_management/contracts.py) b
 |---|---|
 | [TrainingManager](../../../training_management/v2/core/training_manager.py) | Epoch akışı, doğrulama, early stopping, callback ve resume |
 | [TrainingLoop](../../../training_management/v2/core/training_loop.py) | Batch işleme, autocast, accumulation ve optimizer adımları |
-| [LossComputation](../../../training_management/v2/core/loss_computation.py) | Token kaybı, PAD / `-100` maskelemesi, accuracy ve kayıptan türetilen perplexity |
+| [LossComputation](../../../training_management/v2/core/loss_computation.py) | Eğitim amacı, PAD / `-100` maskelemesi, accuracy ve yalın maskeli NLL ile onun perplexity'si |
 | [GradientManager](../../../training_management/v2/core/gradient_manager.py) | Gradyan kırpma ve norm takibi |
 | [TrainingScheduler](../../../training_management/v2/utils/training_scheduler.py) | Warmup ve epoch / metrik tabanlı öğrenme oranı takibi |
 | [CheckpointManager](../../../training_management/v2/utils/checkpoint_manager.py) | Eğitim checkpoint'i, best / last kayıtları ve saklama sınırı |
@@ -48,11 +48,16 @@ Desteklenen arka ucu [contracts.py](../../../training_management/contracts.py) b
 - Modelin ağırlıklandırılmış MoE yardımcı kaybı aynı ileri geçişin eğitim hedefine bir kez eklenir.
 - Accumulation, geçerli hedef token sayısıyla normalize edilir; son eksik grup da güncellenir.
 - Warmup sayacı tamamlanan optimizer adımlarını izler; sampler epoch başında güncellenir.
+  Embedding parametre grupları yalnız açık `name="embedding"` etiketiyle tanınır; öğrenme oranının büyüklüğünden tahmin edilmez.
 - Sonlu olmayan toplam hedef veya gradyan geçersiz optimizer güncellemesine yol açmamalıdır.
+  CUDA `fp16` GradScaler etkinken sonlu olmayan gradyan adımı atlatır, ölçeği küçültür ve `skipped_steps` olarak sayılır; scaler yokken eğitim hatayla durur.
+- Raporlanan eğitim / doğrulama kaybı yalın maskeli NLL'dir (perplexity = exp(NLL)); optimize edilen amaç ayrıca `Objective/*` olarak kaydedilir.
+  En iyi checkpoint, early stopping ve plateau scheduler doğrulama NLL'sini kullanır.
 
 Precision seçenekleri `auto`, `fp32`, `fp16` ve `bf16` değerleridir.
 CPU üzerinde `fp16` isteği `fp32`ye döner; açık `bf16` isteği CPU autocast kullanır.
-CUDA `bf16` desteği denetlenir; CUDA `fp16` için GradScaler kullanılır.
+CUDA `bf16` desteği denetlenir; CUDA `fp16` için GradScaler kullanılır ve taşan adımlar atlanır
+(bu davranış CPU'da benzetilmiş bir scaler ile sınandı, GPU üzerinde değil).
 Bu seçenekler donanıma göre seçilir; burada GPU performans ölçümü iddia edilmez.
 
 ## Checkpoint ve eğitime devam
@@ -63,7 +68,10 @@ sayacı ve Python / NumPy / Torch rastgelelik durumlarını kapsar.
 
 `resume_from_checkpoint()` model kimliğini, ağırlık şekillerini ve tokenizer kimliğini
 kontrol eder; başarılı yüklemeden sonra sonraki epoch'tan devam eder.
-`epochs`, devam edilecek ilave epoch sayısıdır. Batch ortasından devam sunulmaz.
+`epochs` toplam hedef epoch sayısıdır: k. epoch'tan sonra devam eden koşu k+1 … `epochs` aralığını eğitir,
+kayıt hedefe zaten ulaşmışsa eğitim yapmaz. `continuation_learning_rate`, optimizer ve scheduler durumu
+yüklendikten sonra uygulanır; bütün gruplar tek çarpanla ölçeklenir ve scheduler çapaları da aynı çarpanla güncellenir.
+Batch ortasından devam sunulmaz.
 Eski kayıtlar kullanılabilir; ek durum yoksa tam devamın mümkün olmadığı bildirilir.
 Eğitim sürdürme, yalnız ağırlıkları yükleyip çıkarım yapmaktan farklı bir işlemdir.
 
@@ -85,7 +93,6 @@ bu özelliklerin desteklenen eğitim zincirine entegre olduğu anlamına gelmez.
 1. Resume sırasında kısmi durum değişimini önlemek ve yardımcı yükleme yolunun hata davranışını eşitlemek.
 2. Eğitim checkpoint yazıcısındaki tam bellek tamponunu ve sabit geçici dosya adını kaldırmak.
 3. Deneysel V3 yardımcılarının etkin V2 yoluyla ilişkisini haritalamak; seçilecek özellikler için açık entegrasyon ve uyumluluk sözleşmesi hazırlamak.
-4. Değişen kayıp bileşenlerini ölçüm raporunda ayırmak; perplexity yorumunu kullanılan hedefle eşleştirmek.
 
 Bu işler [geliştirme yol haritasında](../../architecture/NEXT_DEVELOPMENT_ROADMAP.md)
 çekirdek ve bilişsel sistem çalışmalarıyla birlikte önceliklendirilir.

@@ -143,7 +143,7 @@ Gerçek Cevahir çekirdeğinin CPU örneğinde `V=41,D=16,H=4,L=2,F=24`, dropout
 | Hesap hangi modüllerden oluşuyor? | [neural_network.py — CevahirNeuralNetwork.__init__](../../../src/neural_network.py#L111) | Yapılandırma → embedding, katmanlar, norm ve bağlı/bağımsız çıkış ağırlıkları. |
 | Tokenlar hangi şekilleri izliyor? | [CevahirNeuralNetwork.forward](../../../src/neural_network.py#L725) | `[B,T]` → `[B,T,D]` → `[B,T,V]`. |
 | Logit hangi hedefle karşılaştırılıyor? | [loss_computation.py — LossComputation.compute_loss](../../../training_management/v2/core/loss_computation.py#L76) | Logit ve maskeli hedef → skaler kayıp ve raporlanan ölçüler. |
-| Gradyanı kim parametreye uyguluyor? | [training_loop.py — TrainingLoop._finish_update](../../../training_management/v2/core/training_loop.py#L246) | Birikmiş türev → ölçek/clipping/optimizer → sonraki çağrının parametreleri. |
+| Gradyanı kim parametreye uyguluyor? | [training_loop.py — TrainingLoop._finish_update](../../../training_management/v2/core/training_loop.py#L252) | Birikmiş türev → ölçek/clipping/optimizer → sonraki çağrının parametreleri. |
 
 ## Çözümlü alıştırmalar
 

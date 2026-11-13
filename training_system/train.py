@@ -386,13 +386,13 @@ TRAIN_CONFIG: Dict[str, Any] = {
     "training_history_path": "saved_models/training_history.json",
     "model_save_path": "saved_models/cevahir_model.pth",
     # === Eğitim Parametreleri ===
-    "epochs": 100,#100 için artırıldı - daha fazla epoch ile daha iyi öğrenme
+    "epochs": 100,  # TOPLAM hedef epoch (ek epoch değil): checkpoint'ten devam eden koşu kayıtlı epoch+1'den bu sayıya kadar sürer
     # [V6 OOM FIX] batch_size 32 → 16: Dense causal mask fix sonrası 16 güvenli,
     # efektif batch = 16×8 = 128 (önceki 32×4=128 ile aynı) — grad_accum artırıldı
     "batch_size": 64,  # 32 → 16: OOM güvenlik marjı (H100 94 GB ama fragmentation riski)
     "grad_accum_steps": 8,  # 4 → 8: efektif batch = 16×8 = 128 (aynı kalır)
     "learning_rate": 0.0002,  #  DÜZELTME: 0.0001 → 0.0002 (2x artış, model daha hızlı öğrenir)
-    "continuation_learning_rate": None,  # Devam eğitimi: set edilirse (örn. 1e-4) checkpoint varken LR bu değere çekilir
+    "continuation_learning_rate": None,  # Devam eğitimi: set edilirse (örn. 5e-5) checkpoint'ten devam edilince, optimizer/scheduler durumu yüklendikten SONRA ana LR bu değere çekilir (grup oranları korunur); yeni koşu learning_rate kullanır
     "weight_decay": 0.01,  # NEW: L2 regularization (standard for Adam optimizer)
     # ==========================================================================
     # Optimizer Seçimi
@@ -431,10 +431,10 @@ TRAIN_CONFIG: Dict[str, Any] = {
     "gradient_clip": 1.0,  #  KRİTİK DÜZELTME: 5.0 → 1.0 (gradient explosion önleme, MaxGrad=1228.51 çok yüksek!)
     # Embedding LR scale: 1.0 = embedding ana model ile aynı LR (endüstri standardı; ayrı scale yok).
     "embedding_lr_scale": 1.0,
-    # [OK] GRADIENT FIX: Embedding için warmup yok (sabit LR)
-    # Embedding base LR zaten düşük (0.00001), warmup'ta daha da düşürmemek için
-    # embedding_warmup_factor=1.0 → Embedding LR warmup'tan geçmez, sabit kalır
-    "embedding_warmup_factor": 1.0,  # 1.0 = warmup yok (embedding LR sabit: 0.00001)
+    # Embedding warmup: yalnız açıkça "embedding" adı verilen optimizer grupları etkilenir (LR
+    # büyüklüğünden tahmin yapılmaz). None → embedding grubu da warmup_start_factor ile ısınır
+    # (embedding_lr_scale=1.0 iken embedding grubu ana LR'dedir); f → f×LR'den başlar (1.0 = warmup yok).
+    "embedding_warmup_factor": None,
     # === GPU Tokenizer Desteği ===
     # NOT: use_gpu ve tokenizer_batch_size normalize_config() içinde BPE_DETAILED_CONFIG'ten alınacak
     # Hardcoded değerler YOK - config'ten alınır!
@@ -687,20 +687,16 @@ def main() -> None:
         )
         # Config normalizasyonu
         effective_cfg = normalize_config(TRAIN_CONFIG)
-        # Devam eğitimi: checkpoint varsa ve continuation_learning_rate set edilmişse LR'yi düşür
+        # Devam eğitimi: continuation_learning_rate burada learning_rate'i DEĞİŞTİRMEZ. Yeni kurulan
+        # optimizer'ın LR'si checkpoint'in optimizer durumu yüklenince zaten ezilirdi; bu yüzden değer
+        # TrainingManager.resume_from_checkpoint içinde, optimizer/scheduler durumu yüklendikten sonra
+        # ve yalnız gerçekten bir checkpoint'ten devam edildiğinde uygulanır.
         continuation_lr = effective_cfg.get("continuation_learning_rate")
         if continuation_lr is not None:
-            root = Path(project_root)
-            chk_dir = effective_cfg.get("checkpoint_dir", "saved_models/checkpoints/")
-            model_path = effective_cfg.get("model_save_path", "saved_models/cevahir_model.pth")
-            checkpoint_exists = (
-                (root / model_path).exists()
-                or (root / chk_dir.rstrip("/").rstrip("\\") / "last.pth").exists()
-                or (root / chk_dir.rstrip("/").rstrip("\\") / "best.pth").exists()
+            train_logger.info(
+                f"[Devam eğitimi] continuation_learning_rate={continuation_lr}: checkpoint'ten devam edilirse "
+                "optimizer/scheduler durumu yüklendikten sonra uygulanacak"
             )
-            if checkpoint_exists:
-                effective_cfg["learning_rate"] = float(continuation_lr)
-                train_logger.info(f"[Devam eğitimi] Checkpoint bulundu, LR override: learning_rate={continuation_lr}")
         # Etkin kısa özet
         train_logger.info(
             "EFFECTIVE CONFIG (özet):\n" + pformat(

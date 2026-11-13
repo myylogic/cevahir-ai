@@ -126,6 +126,7 @@ class TrainingLoop:
         if self.grad_accum_steps < 1:
             raise ValueError("grad_accum_steps must be positive")
         self.optimizer_steps = 0
+        self.skipped_steps = 0  # updates skipped by the fp16 GradScaler (non-finite gradients)
         self.pad_token_id = config.get("pad_token_id")
         from training_management.contracts import resolve_precision
         self.precision = resolve_precision(config, device)
@@ -203,6 +204,11 @@ class TrainingLoop:
         # Scheduler: For batch-based warmup
         self.scheduler = scheduler
     
+        # Per-epoch summaries read by TrainingManager: reported NLL, training objective,
+        # optimizer/skipped step counts and measured throughput.
+        self.last_train_stats: Dict[str, Any] = {}
+        self.last_val_stats: Dict[str, Any] = {}
+    
     def _forward_inputs(self, inputs):
         # Input validity belongs to the router objective. Shifted target PAD/-100
         # masks belong to the language loss and must not erase a valid input EOS.
@@ -244,8 +250,14 @@ class TrainingLoop:
             self.scheduler.step()
 
     def _finish_update(self, token_count):
+        """Apply one optimizer update; return its gradient norm, or None if no step was taken.
+
+        With a GradScaler (CUDA fp16), non-finite gradients are the scaler's overflow signal:
+        the step is skipped, the scale backs off, ``skipped_steps`` grows and training goes on.
+        Without a scaler they mean the objective diverged, so FloatingPointError is raised.
+        """
         if token_count <= 0:
-            return 0.0
+            return None
         if self.scaler is not None:
             self.scaler.unscale_(self.optimizer)
         for parameter in self.model.parameters():
@@ -254,9 +266,12 @@ class TrainingLoop:
         finite = all(torch.isfinite(p.grad).all().item() for p in self.model.parameters() if p.grad is not None)
         if not finite:
             self.optimizer.zero_grad(set_to_none=True)
-            if self.scaler is not None:
-                self.scaler.update()
-            raise FloatingPointError("Nonfinite gradients: optimizer update aborted")
+            if self.scaler is None:
+                raise FloatingPointError("Nonfinite gradients (no loss scaler active): optimizer update aborted")
+            previous_scale = self.scaler.get_scale()
+            self.scaler.update()  # unscale_ recorded the overflow, so the scale backs off
+            self._record_skipped_step(previous_scale)
+            return None
         grad_norm = self.gradient_manager.clip_gradients(self.model)
         if self.scaler is not None:
             previous_scale = self.scaler.get_scale()
@@ -269,14 +284,26 @@ class TrainingLoop:
         if did_step:
             self.optimizer_steps += 1
             self._step_scheduler_for_warmup()
+        else:
+            self._record_skipped_step(previous_scale)
         self.optimizer.zero_grad(set_to_none=True)
-        return float(grad_norm or 0.0)
+        return float(grad_norm or 0.0) if did_step else None
+
+    def _record_skipped_step(self, previous_scale):
+        self.skipped_steps += 1
+        if self.logger:
+            self.logger.log_warning(
+                f"[AMP] Non-finite fp16 gradients: optimizer step skipped "
+                f"(total skipped: {self.skipped_steps}); loss scale {previous_scale:g} -> {self.scaler.get_scale():g}"
+            )
 
     def state_dict(self):
-        return {"optimizer_steps": self.optimizer_steps, "scaler": self.scaler.state_dict() if self.scaler else None}
+        return {"optimizer_steps": self.optimizer_steps, "skipped_steps": self.skipped_steps,
+                "scaler": self.scaler.state_dict() if self.scaler else None}
 
     def load_state_dict(self, state):
         self.optimizer_steps = int(state.get("optimizer_steps", 0))
+        self.skipped_steps = int(state.get("skipped_steps", 0))
         if self.scaler is not None and state.get("scaler") is not None:
             self.scaler.load_state_dict(state["scaler"])
     
@@ -305,6 +332,9 @@ class TrainingLoop:
         gradient_norm_batches = 0
         micro = 0  # Gradient accumulation counter
         accumulation_tokens = 0
+        running_objective = 0.0
+        steps_before, skipped_before = self.optimizer_steps, self.skipped_steps
+        perf_mark = len(self.performance_tracker.batch_times) if self.performance_tracker else 0
         
         total_batches = max(1, len(train_loader))
         
@@ -357,12 +387,14 @@ class TrainingLoop:
                             self.logger.log_error(f"Validation error in batch {batch_idx}: {e}")
                         raise ValueError("Invalid logits shape") from e
                 
-                # Compute loss (CRITICAL: Uses criterion with EOS weight, label smoothing)
-                loss, acc, ppl = self.loss_computation.compute_loss(
+                # Training objective (criterion EOS weight, label smoothing, entropy term)
+                # drives backward; the plain masked NLL is what gets reported as "loss".
+                details = self.loss_computation.compute_loss_details(
                     logits=logits,
                     targets=targets,
                     pad_id=self.pad_token_id
                 )
+                loss, acc, ppl, nll = details.loss, details.accuracy, details.perplexity, details.nll
                 
                 # [CRITICAL FIX] Advanced Token Metrics - EOS/BOS/PAD tracking
                 if batch_idx % 10 == 0:  # Her 10 batch'te log
@@ -389,7 +421,7 @@ class TrainingLoop:
                         self.enhanced_logger.log_batch_with_token_metrics(
                             epoch=epoch,
                             batch_idx=batch_idx,
-                            loss=float(loss.item()),
+                            loss=nll,
                             overall_acc=overall_acc,
                             special_accs=special_accs,
                             top5_acc=top5_acc,
@@ -450,26 +482,29 @@ class TrainingLoop:
                 # Gradient accumulation: step only every N batches
                 if micro >= self.grad_accum_steps:
                     grad_norm = self._finish_update(accumulation_tokens)
-                    total_gradient_norm += grad_norm
-                    gradient_norm_batches += 1
+                    if grad_norm is not None:  # None: fp16 overflow, step skipped
+                        total_gradient_norm += grad_norm
+                        gradient_norm_batches += 1
                     if self.training_analytics:
                         self.training_analytics.track_weight_updates(batch_idx)
                     micro = 0
                     accumulation_tokens = 0
 
-                # Performance tracking: End batch timing
+                # Performance tracking: End batch timing (actual non-pad target tokens)
                 if self.performance_tracker:
                     perf_stats = self.performance_tracker.end_batch(
                         batch_size=inputs.shape[0],
-                        seq_len=inputs.shape[1] if inputs.dim() > 1 else 1
+                        seq_len=inputs.shape[1] if inputs.dim() > 1 else 1,
+                        tokens=valid_tokens,
                     )
                 
                 # Memory tracking (every 10 batches)
                 if self.memory_tracker and batch_idx % 10 == 0:
                     self.memory_tracker.track()
                 
-                # Accumulate metrics
-                running_loss += float(loss.item()) * valid_tokens
+                # Accumulate metrics: reported loss is the plain NLL; the objective is kept apart
+                running_loss += nll * valid_tokens
+                running_objective += float(loss.item()) * valid_tokens
                 running_acc += float(acc) * valid_tokens
                 total_tokens += valid_tokens
                 processed_batches += 1
@@ -479,7 +514,7 @@ class TrainingLoop:
                     all_lrs = [pg.get("lr", 0.0) for pg in self.optimizer.param_groups]
                     current_lr = max(all_lrs) if all_lrs else 0.0
                     epoch_pbar.set_postfix({
-                        "loss": f"{float(loss.item()):.4f}",
+                        "loss": f"{nll:.4f}",
                         "acc": f"{float(acc):.4f}",
                         "ppl": f"{float(ppl):.2f}",
                         "lr": f"{current_lr:.2e}"
@@ -494,8 +529,10 @@ class TrainingLoop:
                 raise RuntimeError(f"Training stopped at batch {batch_idx}: {e}") from e
         
         if micro > 0:
-            total_gradient_norm += self._finish_update(accumulation_tokens)
-            gradient_norm_batches += 1
+            grad_norm = self._finish_update(accumulation_tokens)
+            if grad_norm is not None:
+                total_gradient_norm += grad_norm
+                gradient_norm_batches += 1
 
         # Close progress bar
         if self.use_progress_bar and TQDM_AVAILABLE:
@@ -509,9 +546,22 @@ class TrainingLoop:
         if total_tokens == 0:
             raise ValueError("No valid tokens were processed in this epoch")
         denom = total_tokens
-        avg_loss = running_loss / denom
+        avg_loss = running_loss / denom  # plain NLL per valid target token
         avg_acc = running_acc / denom
-        avg_gradient_norm = total_gradient_norm / gradient_norm_batches if gradient_norm_batches > 0 else 0.0
+        # NaN when every update of the epoch was skipped: there is no applied gradient to measure.
+        avg_gradient_norm = total_gradient_norm / gradient_norm_batches if gradient_norm_batches > 0 else float("nan")
+        epoch_skipped = self.skipped_steps - skipped_before
+        self.last_train_stats = {
+            "nll": avg_loss,
+            "perplexity": math.exp(min(20.0, avg_loss)),
+            "objective": running_objective / denom,
+            "accuracy": avg_acc,
+            "tokens": total_tokens,
+            "batches": processed_batches,
+            "optimizer_steps": self.optimizer_steps - steps_before,
+            "skipped_steps": epoch_skipped,
+            "performance": self.performance_tracker.summary(perf_mark) if self.performance_tracker else None,
+        }
         
         # [NEW] Epoch summary with advanced token metrics (from last batch)
         overall_epoch_acc = self.last_batch_metrics.get("overall_acc", avg_acc)
@@ -547,9 +597,15 @@ class TrainingLoop:
         
         if self.logger:
             self.logger.log_info(
-                f"Epoch tamamlandı. Ortalama Loss: {avg_loss:.4f}, "
+                f"Epoch tamamlandı. Ortalama Loss (NLL): {avg_loss:.4f}, "
+                f"Objective: {self.last_train_stats['objective']:.4f}, "
                 f"Accuracy: {avg_acc:.4f}, AvgGradNorm: {avg_gradient_norm:.4f}"
             )
+            if epoch_skipped:
+                self.logger.log_warning(
+                    f"Epoch: {epoch_skipped} optimizer step(s) skipped by the fp16 GradScaler "
+                    f"({self.last_train_stats['optimizer_steps']} applied)"
+                )
         
         return float(avg_loss), float(avg_acc), float(avg_gradient_norm)
     
@@ -570,9 +626,11 @@ class TrainingLoop:
         """
         self.model.eval()
         running_loss = 0.0
+        running_objective = 0.0
         running_acc = 0.0
         processed_batches = 0
         total_tokens = 0
+        perf_mark = len(self.performance_tracker.batch_times) if self.performance_tracker else 0
         
         total_batches = max(1, len(val_loader))
         
@@ -591,6 +649,10 @@ class TrainingLoop:
         with torch.no_grad():
             for batch_idx, batch in enumerate(epoch_pbar, start=1):
                 try:
+                    # Performance tracking: Start batch timing
+                    if self.performance_tracker:
+                        self.performance_tracker.start_batch()
+
                     # Parse batch
                     inputs, targets = self.batch_processor.parse_batch(batch)
                     inputs, targets = inputs.to(self.device, non_blocking=True), targets.to(self.device, non_blocking=True)
@@ -617,12 +679,13 @@ class TrainingLoop:
                                 self.logger.log_error(f"Validation error in val batch {batch_idx}: {e}")
                             raise ValueError("Invalid logits shape") from e
                     
-                    # Compute loss (CRITICAL: Uses criterion with EOS weight, label smoothing)
-                    loss, acc, ppl = self.loss_computation.compute_loss(
+                    # Objective (criterion weights / smoothing / entropy) and plain masked NLL
+                    details = self.loss_computation.compute_loss_details(
                         logits=logits,
                         targets=targets,
                         pad_id=self.pad_token_id
                     )
+                    loss, acc, ppl, nll = details.loss, details.accuracy, details.perplexity, details.nll
                     
                     # [CRITICAL FIX] Advanced Token Metrics - EOS/BOS/PAD tracking
                     if batch_idx % 10 == 0:  # Her 10 batch'te log
@@ -649,7 +712,7 @@ class TrainingLoop:
                             self.enhanced_logger.log_batch_with_token_metrics(
                                 epoch=epoch,
                                 batch_idx=batch_idx,
-                                loss=float(loss.item()),
+                                loss=nll,
                                 overall_acc=overall_acc,
                                 special_accs=special_accs,
                                 top5_acc=top5_acc,
@@ -668,11 +731,17 @@ class TrainingLoop:
                             if self.logger:
                                 self.logger.log_warning(f"[METRICS] Token metrics computation failed at val batch {batch_idx}: {e}")
                     
-                    # Performance tracking: End batch timing
+                    valid = targets != -100
+                    if self.pad_token_id is not None:
+                        valid = valid & (targets != self.pad_token_id)
+                    valid_tokens = int(valid.sum().item())
+
+                    # Performance tracking: End batch timing (once per batch, actual non-pad tokens)
                     if self.performance_tracker:
                         self.performance_tracker.end_batch(
                             batch_size=inputs.shape[0],
-                            seq_len=inputs.shape[1] if inputs.dim() > 1 else 1
+                            seq_len=inputs.shape[1] if inputs.dim() > 1 else 1,
+                            tokens=valid_tokens,
                         )
                     
                     # NaN/Inf detection
@@ -684,18 +753,7 @@ class TrainingLoop:
                                 )
                             continue
                     
-                    # Performance tracking: End batch timing
-                    if self.performance_tracker:
-                        self.performance_tracker.end_batch(
-                            batch_size=inputs.shape[0],
-                            seq_len=inputs.shape[1] if inputs.dim() > 1 else 1
-                        )
-                    
                     # Accumulate metrics
-                    valid = targets != -100
-                    if self.pad_token_id is not None:
-                        valid = valid & (targets != self.pad_token_id)
-                    valid_tokens = int(valid.sum().item())
                     if not valid_tokens:
                         continue
                     from training_management.contracts import consume_model_auxiliary_loss
@@ -704,7 +762,8 @@ class TrainingLoop:
                         loss = loss + auxiliary_loss
                     if not torch.isfinite(loss).item():
                         raise FloatingPointError("Nonfinite validation objective")
-                    running_loss += float(loss.item()) * valid_tokens
+                    running_loss += nll * valid_tokens
+                    running_objective += float(loss.item()) * valid_tokens
                     running_acc += float(acc) * valid_tokens
                     total_tokens += valid_tokens
                     processed_batches += 1
@@ -712,7 +771,7 @@ class TrainingLoop:
                     # Progress bar update
                     if self.use_progress_bar and TQDM_AVAILABLE:
                         epoch_pbar.set_postfix({
-                            "loss": f"{float(loss.item()):.4f}",
+                            "loss": f"{nll:.4f}",
                             "acc": f"{float(acc):.4f}",
                             "ppl": f"{float(ppl):.2f}"
                         })
@@ -733,8 +792,17 @@ class TrainingLoop:
         if total_tokens == 0:
             raise ValueError("No valid tokens were processed in this epoch")
         denom = total_tokens
-        avg_loss = running_loss / denom
+        avg_loss = running_loss / denom  # plain NLL per valid target token
         avg_acc = running_acc / denom
+        self.last_val_stats = {
+            "nll": avg_loss,
+            "perplexity": math.exp(min(20.0, avg_loss)),
+            "objective": running_objective / denom,
+            "accuracy": avg_acc,
+            "tokens": total_tokens,
+            "batches": processed_batches,
+            "performance": self.performance_tracker.summary(perf_mark) if self.performance_tracker else None,
+        }
         
         # [NEW] Validation epoch summary with advanced token metrics (from last batch)
         overall_val_acc = self.last_batch_metrics.get("overall_acc", avg_acc)
@@ -757,7 +825,8 @@ class TrainingLoop:
         
         if self.logger:
             self.logger.log_info(
-                f"Validation tamamlandı. Ortalama Loss: {avg_loss:.4f}, "
+                f"Validation tamamlandı. Ortalama Loss (NLL): {avg_loss:.4f}, "
+                f"Objective: {self.last_val_stats['objective']:.4f}, "
                 f"Accuracy: {avg_acc:.4f}"
             )
         

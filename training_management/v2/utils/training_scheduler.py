@@ -37,6 +37,7 @@ Kullanım: Bu dosya Cevahir-AI projesinin bir parçasıdır.
 
 from __future__ import annotations
 
+import math
 from typing import Any, Dict, Optional
 
 import torch
@@ -52,10 +53,47 @@ from torch.optim.lr_scheduler import (
 from training_management.v2.utils.training_logger import TrainingLogger
 
 
+#: An optimizer param group whose ``name`` is this value holds embedding weights. Groups are
+#: tagged explicitly (see mark_embedding_param_groups); nothing is inferred from the size of a
+#: group's learning rate, so a low fine-tuning LR does not turn a group into an embedding group.
+EMBEDDING_GROUP_NAME = "embedding"
+
+
+def is_embedding_group(group: Dict[str, Any]) -> bool:
+    """True when an optimizer param group is explicitly tagged as an embedding group."""
+    return group.get("name") == EMBEDDING_GROUP_NAME
+
+
+def mark_embedding_param_groups(optimizer: torch.optim.Optimizer, model: torch.nn.Module) -> int:
+    """Tag the param groups that hold only ``nn.Embedding`` weights of ``model``; return how many.
+
+    A group that already has a ``name`` keeps it, and a group that mixes embedding weights
+    with other parameters is not an embedding group.
+    """
+    embedding_ids = {id(module.weight) for module in model.modules() if isinstance(module, torch.nn.Embedding)}
+    tagged = 0
+    for group in optimizer.param_groups:
+        params = list(group.get("params", []))
+        if "name" not in group and params and all(id(p) in embedding_ids for p in params):
+            group["name"] = EMBEDDING_GROUP_NAME
+            tagged += 1
+    return tagged
+
+
+def _main_group_index(param_groups) -> int:
+    """Index of the first param group that is not an embedding group (0 if all are)."""
+    for index, group in enumerate(param_groups):
+        if not is_embedding_group(group):
+            return index
+    return 0
+
+
 class _LinearWarmupWrapper:
     """
     Lineer warmup + altta yatan gerçek scheduler (isteğe bağlı).
     warmup_steps boyunca LR, base_lr * warmup_start_factor'dan base_lr'a lineer artar.
+    Açıkça "embedding" adı verilmiş gruplar, embedding_warmup_factor verilmişse
+    base_lr * embedding_warmup_factor'dan başlar (1.0 = warmup yok).
     Sonrasında alttaki scheduler devreye girer.
     """
 
@@ -66,6 +104,7 @@ class _LinearWarmupWrapper:
         warmup_steps: int,
         base_scheduler: Optional[Any] = None,
         start_factor: float = 0.1,
+        embedding_warmup_factor: Optional[float] = None,
         logger: Optional[TrainingLogger] = None,
     ) -> None:
         if warmup_steps <= 0:
@@ -91,32 +130,29 @@ class _LinearWarmupWrapper:
         # Başlangıç LR'ları kaydet
         self._base_lrs = [pg["lr"] for pg in self.optimizer.param_groups]
         
-        # [OK] GRADIENT FIX: Embedding için özel warmup start_factor
-        # Embedding base LR zaten düşük (0.00001), warmup'ta daha da düşürmemek için
-        # Embedding için start_factor=1.0 (warmup yok) - embedding LR sabit kalır
-        embedding_warmup_factor = float(getattr(self, "embedding_warmup_factor", 1.0))
+        # Embedding grupları yalnız açık etiketle tanınır (param group "name" == "embedding",
+        # bkz. mark_embedding_param_groups); LR büyüklüğünden tahmin yapılmaz, böylece 1e-5 ile
+        # fine-tuning yapılan gruplar da normal warmup alır. embedding_warmup_factor=None ise
+        # embedding grupları da start_factor ile ısınır.
+        if embedding_warmup_factor is not None:
+            embedding_warmup_factor = float(embedding_warmup_factor)
+            if not math.isfinite(embedding_warmup_factor) or embedding_warmup_factor < 0:
+                raise ValueError(f"embedding_warmup_factor must be a finite number >= 0, got {embedding_warmup_factor}")
+        self.embedding_warmup_factor = embedding_warmup_factor
         
-        # Warmup başlangıç LR'ları (embedding için özel, diğerleri için normal)
+        # Warmup başlangıç LR'ları (etiketli embedding grupları için özel çarpan, diğerleri için normal)
         self._warmup_start_lrs = []
-        for i, pg in enumerate(self.optimizer.param_groups):
-            base_lr = pg["lr"]
-            
-            # Embedding tespiti: Base LR çok düşükse (<0.00002) embedding grubudur
-            # Embedding LR = 0.00001 (base_lr × 0.05), normal LR = 0.0002
-            is_embedding = (base_lr < 0.00002)  # Threshold: 2e-5
-            
-            # Embedding parametreleri için özel warmup (warmup yok, sabit LR)
-            if is_embedding:
-                warmup_lr = base_lr * embedding_warmup_factor  # 1.0 = warmup yok, sabit LR
-                if i == 0:  # İlk grup için log
-                    self.logger.log_info(
-                        f"[Warmup] Embedding warmup factor: {embedding_warmup_factor:.2f} "
-                        f"(embedding LR sabit: {warmup_lr:.2e}, base_lr={base_lr:.2e})"
-                    )
-            else:
-                # Diğer parametreler için normal warmup
-                warmup_lr = base_lr * self.start_factor
-            self._warmup_start_lrs.append(warmup_lr)
+        for pg in self.optimizer.param_groups:
+            factor = self.start_factor
+            if embedding_warmup_factor is not None and is_embedding_group(pg):
+                factor = embedding_warmup_factor
+            self._warmup_start_lrs.append(pg["lr"] * factor)
+        embedding_groups = sum(1 for pg in self.optimizer.param_groups if is_embedding_group(pg))
+        if embedding_groups and embedding_warmup_factor is not None:
+            self.logger.log_info(
+                f"[Warmup] {embedding_groups} embedding grubu: start factor {embedding_warmup_factor:.2f} "
+                f"(diğer gruplar {self.start_factor:.2f})"
+            )
         
         # param gruplarını warmup başlangıcına ayarla
         for pg, lr in zip(self.optimizer.param_groups, self._warmup_start_lrs):
@@ -127,15 +163,9 @@ class _LinearWarmupWrapper:
         )
 
     def get_last_lr(self) -> float:
-        # [OK] GRADIENT FIX: Normal parametreler için LR döndür (embedding değil)
-        # Embedding LR sabit (0.00001), diğer parametreler için LR warmup'tan geçiyor
-        # İkinci parametre grubu normal params (ilk grup embedding olabilir)
-        if len(self.optimizer.param_groups) > 1:
-            # Normal parametreler için LR (warmup'tan geçen)
-            return float(self.optimizer.param_groups[1]["lr"])
-        else:
-            # Sadece bir grup varsa onu kullan
-            return float(self.optimizer.param_groups[0]["lr"])
+        # Ana LR: açıkça etiketlenmiş bir embedding grubu olmayan ilk grup
+        groups = self.optimizer.param_groups
+        return float(groups[_main_group_index(groups)]["lr"])
 
     def step(self, *args, **kwargs) -> None:
         """
@@ -203,7 +233,7 @@ class TrainingScheduler:
         logger: Optional[TrainingLogger] = None,
         warmup_steps: int = 0,
         warmup_start_factor: float = 0.1,
-        embedding_warmup_factor: float = 1.0,  # [OK] Embedding için warmup factor (1.0 = warmup yok)
+        embedding_warmup_factor: Optional[float] = None,  # None: embedding grupları da start_factor ile ısınır
         **kwargs: Any,
     ) -> None:
         """
@@ -213,7 +243,8 @@ class TrainingScheduler:
             logger: TrainingLogger (opsiyonel)
             warmup_steps: >0 ise lineer warmup etkin
             warmup_start_factor: warmup başlangıç çarpanı (0-1)
-            embedding_warmup_factor: Embedding için warmup factor (1.0 = warmup yok, sabit LR)
+            embedding_warmup_factor: "embedding" adlı param gruplarının warmup başlangıç çarpanı
+                (1.0 = warmup yok); None ise bu gruplar da warmup_start_factor kullanır
             **kwargs: ilgili scheduler parametreleri
         """
         # ✅ SOLID: Logger dependency injection (TrainingManager'dan geçirilir)
@@ -245,10 +276,9 @@ class TrainingScheduler:
                 warmup_steps=warmup_steps,
                 base_scheduler=base_scheduler,
                 start_factor=warmup_start_factor,
+                embedding_warmup_factor=embedding_warmup_factor,
                 logger=self.logger,
             )
-            # [OK] GRADIENT FIX: Embedding warmup factor'ü wrapper'a aktar
-            wrapper.embedding_warmup_factor = float(embedding_warmup_factor)
             self.scheduler = wrapper
             self.logger.log_info(
                 f"{scheduler_type} için lineer warmup etkin: steps={warmup_steps}, start_factor={warmup_start_factor}"
@@ -428,15 +458,9 @@ class TrainingScheduler:
         Mevcut öğrenme oranını döndürür (normal parametreler için LR, embedding değil).
         """
         try:
-            # [OK] GRADIENT FIX: Normal parametreler için LR döndür (embedding değil)
-            # Embedding LR sabit (0.00001), diğer parametreler için LR warmup'tan geçiyor
-            # İkinci parametre grubu normal params (ilk grup embedding olabilir)
-            if len(self.optimizer.param_groups) > 1:
-                # Normal parametreler için LR (warmup'tan geçen)
-                lr = float(self.optimizer.param_groups[1]["lr"])
-            else:
-                # Sadece bir grup varsa onu kullan
-                lr = float(self.optimizer.param_groups[0]["lr"])
+            # Ana LR: açıkça etiketlenmiş bir embedding grubu olmayan ilk grup
+            groups = self.optimizer.param_groups
+            lr = float(groups[_main_group_index(groups)]["lr"])
         except Exception as e:
             self.logger.log_error(f"Öğrenme oranı alınırken hata oluştu: {e}")
             raise
@@ -463,3 +487,51 @@ class TrainingScheduler:
             self.logger.log_info("Scheduler state başarıyla yüklendi.")
         except Exception as e:
             self.logger.log_error(f"Scheduler state yüklenemedi: {e}")
+
+
+def _scaled_lr(value: Any, factor: float) -> Any:
+    if isinstance(value, torch.Tensor):
+        return value.mul_(factor)
+    return float(value) * factor
+
+
+def apply_continuation_learning_rate(optimizer: torch.optim.Optimizer, target_lr: float, scheduler: Optional[Any] = None) -> float:
+    """Make ``target_lr`` the main learning rate of a resumed run; return the factor applied.
+
+    Call after the optimizer and scheduler state were restored: that state carries the
+    checkpointed run's learning rate. Every param group is multiplied by one factor,
+    ``target_lr / reference``, so per-group ratios (e.g. ``embedding_lr_scale``) survive. The
+    reference is the largest group LR, or the largest warmup target while warmup is still in
+    progress, so that the remaining ramp ends at ``target_lr``. Warmup anchors, ``initial_lr``
+    and the base scheduler's ``base_lrs``/``_last_lr`` are scaled by the same factor, so a later
+    scheduler step continues from the new LR instead of returning to the old one. Absolute
+    floors (``min_lr``, ``eta_min``) and the plateau history (best metric, patience) are kept.
+    """
+    target = float(target_lr)
+    if not math.isfinite(target) or target <= 0:
+        raise ValueError(f"continuation_learning_rate must be a positive finite number, got {target_lr!r}")
+    inner = scheduler.scheduler if isinstance(scheduler, TrainingScheduler) else scheduler
+    wrapper = inner if isinstance(inner, _LinearWarmupWrapper) else None
+    base = wrapper.base_scheduler if wrapper is not None else inner
+    if isinstance(base, OneCycleLR):
+        raise ValueError("OneCycleLR defines its own learning-rate curve; continuation_learning_rate cannot override it")
+    groups = optimizer.param_groups
+    if wrapper is not None and wrapper.step_count < wrapper.warmup_steps:
+        reference = max(float(lr) for lr in wrapper._base_lrs)
+    else:
+        reference = max(float(group["lr"]) for group in groups)
+    if reference <= 0:
+        raise ValueError("Cannot rescale a zero learning rate to continuation_learning_rate")
+    factor = target / reference
+    for group in groups:
+        for key in ("lr", "initial_lr"):
+            if key in group:
+                group[key] = _scaled_lr(group[key], factor)
+    if wrapper is not None:
+        wrapper._base_lrs = [float(lr) * factor for lr in wrapper._base_lrs]
+        wrapper._warmup_start_lrs = [float(lr) * factor for lr in wrapper._warmup_start_lrs]
+    if base is not None and hasattr(base, "base_lrs"):
+        base.base_lrs = [float(lr) * factor for lr in base.base_lrs]
+    if base is not None and hasattr(base, "_last_lr"):
+        base._last_lr = [float(group["lr"]) for group in groups]
+    return factor

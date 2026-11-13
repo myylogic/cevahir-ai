@@ -388,7 +388,7 @@
       ]
     },
     "docs/modules/training_management/README-en.md": {
-      "sha256": "abede21dd433aa95ecf1c5e3e2037c76295dd7b0998162bbe88323b67d10e03f",
+      "sha256": "7474a88a6b77983b0bb0e4c6bb1ef358b5dfba947db0f9cdd6941221fdd1fb54",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -396,7 +396,7 @@
       ]
     },
     "docs/modules/training_management/README.md": {
-      "sha256": "ffdf3c80605b2b13f2063827ea290f45ff36402f3ff20a43b1f3f57599da9d06",
+      "sha256": "35d601391605ead0b38ffcfea007c4486e81393859ed9f1e0f5f5454b2854766",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -1047,7 +1047,16 @@
       ]
     },
     "tests/evolution/test_training_contracts.py": {
-      "sha256": "b456cb429fb345903cab3d0ff925a817e130a5e49cb4c4c0fdac5f863f66b38e",
+      "sha256": "574691a6128a5b97beeb4bcdb2b0fc97f2791ab0bc4c09484ec6b6c2667c48d4",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "KAYNAK_HARITASI.md",
+        "tr/06-egitim.md",
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "tests/evolution/test_training_loop_correctness.py": {
+      "sha256": "0678557c999147f0a98275b46198eecaa47b83b479947cdb6cda23a8c10e7500",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -1123,7 +1132,7 @@
       ]
     },
     "training_management/v2/core/loss_computation.py": {
-      "sha256": "227e2f3cfb6b75a07f136a9aac3481d08643c0f5f86827a7639c5f63a7519e56",
+      "sha256": "32aa75f541f557634096f2217ad4b9fa0fb2a41ca03b3a19e440e435cc160066",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/03-sinir-aglari.md",
@@ -1131,7 +1140,7 @@
       ]
     },
     "training_management/v2/core/training_loop.py": {
-      "sha256": "41c09119cd82476ec79aa1baabe2537a1bd53b78bc6193c5b3248743e8f95ff2",
+      "sha256": "27c53f61ced3e083d564d98240b637a18e820d949f8ce8cc79c52da84603d826",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",
@@ -1140,7 +1149,7 @@
       ]
     },
     "training_management/v2/core/training_manager.py": {
-      "sha256": "9dfe0406cb840b2bede26beaabd25ed6d19e6a620fa2d1e8d06fb575d52b475b",
+      "sha256": "e403acaf10e3bd5c0303d7f9c88f5a7789337f7b5a2bfdfedc37f3a71e71fba4",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/07-model-yasam-dongusu.md"
@@ -1150,6 +1159,14 @@
       "sha256": "da89ac970978f74592ae4fc2b45ed7c872962f40389af56ec447ea0c91eff44d",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
+        "tr/07-model-yasam-dongusu.md"
+      ]
+    },
+    "training_management/v2/utils/training_scheduler.py": {
+      "sha256": "68c670a51192f91b43a08272221273bd7a75c0614212c73f03f3a5798c78f9a6",
+      "fingerprint_mode": "utf8-lf",
+      "chapters": [
+        "tr/06-egitim.md",
         "tr/07-model-yasam-dongusu.md"
       ]
     },
@@ -1180,14 +1197,14 @@
       ]
     },
     "training_system/train.py": {
-      "sha256": "35b9a13e52d0e6e697089e452c7bd1aa7cc95eee87ac1628f526cf801e768ed1",
+      "sha256": "cf9364df61238345e16252b9ecd5df33c1b858911b22be65c4923f5cf3ac5feb",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/06-egitim.md"
       ]
     },
     "training_system/v3/core/training_service_v3.py": {
-      "sha256": "6cff7b5e8b2f32e0b12f9c47cebc8950eff7f77e7acd76eba2b7141e9a52b50a",
+      "sha256": "5ec034fa75f6aa1f587e30524d77071a7d0ba0de4f2d1731b23634a7e7d0f30c",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "KAYNAK_HARITASI.md",

@@ -53,7 +53,7 @@ from .batch_processor import BatchProcessor
 
 # Utils imports
 from ..metrics.metrics_tracker import MetricsTracker
-from ..utils.training_scheduler import TrainingScheduler
+from ..utils.training_scheduler import TrainingScheduler, apply_continuation_learning_rate, mark_embedding_param_groups
 from ..utils.checkpoint_manager import CheckpointManager
 from ..utils.training_logger import TrainingLogger
 
@@ -190,10 +190,10 @@ class TrainingManager:
         if scheduler is None:
             scheduler_type = config.get("scheduler_type", "ReduceLROnPlateau")
             scheduler_kwargs = config.get("scheduler_kwargs", {})
-            # Warmup parametreleri config'ten al
+            mark_embedding_param_groups(self.optimizer, self.model)  # embedding grupları açık "name" etiketiyle tanınır
             warmup_steps = config.get("warmup_steps", 0)
             warmup_start_factor = config.get("warmup_start_factor", 0.1)
-            embedding_warmup_factor = config.get("embedding_warmup_factor", 1.0)  # [OK] Embedding warmup yok (sabit LR)
+            embedding_warmup_factor = config.get("embedding_warmup_factor")  # None: embedding grupları da normal warmup alır
             self.scheduler = TrainingScheduler(
                 optimizer=self.optimizer,
                 scheduler_type=scheduler_type,
@@ -291,7 +291,12 @@ class TrainingManager:
         }
 
     def resume_from_checkpoint(self, path):
-        """Resume at the next epoch; legacy weights remain usable with an explicit warning."""
+        """Resume at the next epoch; legacy weights remain usable with an explicit warning.
+
+        ``train()`` then runs epochs ``saved_epoch + 1`` .. ``config["epochs"]`` (a total target).
+        ``config["continuation_learning_rate"]``, if set, is applied last: the optimizer and
+        scheduler state restored here carry the checkpointed run's learning rate.
+        """
         import random
         import numpy as np
         state = torch.load(path, map_location=self.device, weights_only=True)
@@ -311,6 +316,7 @@ class TrainingManager:
         extra = state.get("extra_state", {})
         if not extra:
             self.logger.log_warning("Legacy checkpoint has no RNG/scheduler/scaler state; exact resume is unavailable")
+            self._apply_continuation_learning_rate()
             return self.start_epoch
         if self.scheduler is not None and extra.get("scheduler") is not None:
             self.scheduler.load_state_dict(extra["scheduler"])
@@ -326,7 +332,26 @@ class TrainingManager:
             torch.set_rng_state(rng["torch"].cpu())
             if rng.get("cuda") and torch.cuda.is_available():
                 torch.cuda.set_rng_state_all([r.cpu() for r in rng["cuda"]])
+        self._apply_continuation_learning_rate()
         return self.start_epoch
+
+    def _apply_continuation_learning_rate(self):
+        """Override the restored learning rate with ``config["continuation_learning_rate"]``.
+
+        Building the optimizer with a different LR has no effect on a resumed run, because
+        ``optimizer.load_state_dict`` restores the checkpointed LR; the override therefore runs
+        after the optimizer and scheduler state are loaded. Returns the factor applied, or None.
+        """
+        value = self.config.get("continuation_learning_rate")
+        if value is None:
+            return None
+        factor = apply_continuation_learning_rate(self.optimizer, value, self.scheduler)
+        lrs = ", ".join(f"{float(group['lr']):.2e}" for group in self.optimizer.param_groups)
+        self.logger.log_info(
+            f"[Resume] continuation_learning_rate={float(value):.2e} applied after the optimizer/scheduler "
+            f"state was restored (x{factor:.4g}); group LRs: {lrs}"
+        )
+        return factor
     
     def _is_warmup_finished(self) -> bool:
         """
@@ -391,8 +416,23 @@ class TrainingManager:
         val_accuracy = None
         early_stopping_counter = self.early_stopping_counter
         
-        # Main training loop
-        for epoch in range(self.start_epoch, self.start_epoch + self.epochs):
+        # Main training loop. `epochs` is the total target epoch count: a fresh run trains
+        # 1..epochs, a run resumed from checkpoint epoch k trains k+1..epochs.
+        last_epoch = self.epochs
+        if self.start_epoch > last_epoch:
+            self.logger.log_warning(
+                f"Checkpoint epoch {self.start_epoch - 1} already reaches the target epochs={last_epoch}; "
+                "nothing to train. Raise 'epochs' to continue training."
+            )
+            if self.tensorboard_manager.enabled:
+                self.tensorboard_manager.close()
+            history_train = self.training_history.get("train_loss") or []
+            history_val = self.training_history.get("val_loss") or []
+            return (
+                float(history_train[-1]) if history_train else float("inf"),
+                float(history_val[-1]) if history_val else float("inf"),
+            )
+        for epoch in range(self.start_epoch, last_epoch + 1):
             self.current_epoch = epoch
             sampler = getattr(self.train_loader, "batch_sampler", None)
             if not hasattr(sampler, "set_epoch"):
@@ -400,7 +440,7 @@ class TrainingManager:
             if hasattr(sampler, "set_epoch"):
                 sampler.set_epoch(epoch)
             
-            self.logger.log_info(f"Epoch {epoch}/{self.start_epoch + self.epochs - 1} başladı.")
+            self.logger.log_info(f"Epoch {epoch}/{last_epoch} başladı.")
             
             # Epoch info logging — ana model LR'ı logla (param_groups[0] embedding olabilir, en düşük LR)
             all_lrs = [pg.get("lr", 0.0) for pg in self.optimizer.param_groups]
@@ -409,7 +449,7 @@ class TrainingManager:
             val_batches = max(1, len(self.val_loader))
             
             self.logger.log_info("=" * 80)
-            self.logger.log_info(f"EPOCH {epoch}/{self.start_epoch + self.epochs - 1} BAŞLIYOR")
+            self.logger.log_info(f"EPOCH {epoch}/{last_epoch} BAŞLIYOR")
             self.logger.log_info("=" * 80)
             self.logger.log_info(f"  Training Batches: {total_batches} | Validation Batches: {val_batches}")
             self.logger.log_info(f"  Learning Rate (main): {current_lr:.8f}")
@@ -454,6 +494,14 @@ class TrainingManager:
             if self.training_analytics:
                 self.training_analytics.log_epoch_summary(epoch, train_loss, train_accuracy)
             
+            # Reported train/val loss is the plain masked NLL (perplexity = exp(NLL)); the
+            # optimized objective (label smoothing, entropy term, MoE auxiliary loss) is logged apart.
+            train_stats = getattr(self.training_loop, "last_train_stats", None) or {}
+            val_stats = getattr(self.training_loop, "last_val_stats", None) or {}
+            train_objective = train_stats.get("objective")
+            val_objective = val_stats.get("objective")
+            skipped_steps = int(train_stats.get("skipped_steps", 0) or 0)
+
             # Epoch summary
             loss_diff = train_loss - val_loss
             train_acc_pct = train_accuracy * 100 if train_accuracy else 0.0
@@ -463,11 +511,22 @@ class TrainingManager:
             self.logger.log_info(f"EPOCH {epoch} ÖZET")
             self.logger.log_info("=" * 80)
             self.logger.log_info(f"  Training:")
-            self.logger.log_info(f"    Loss:     {train_loss:.6f}")
+            self.logger.log_info(f"    Loss (NLL): {train_loss:.6f} | Perplexity: {math.exp(min(20.0, train_loss)):.2f}")
+            if train_objective is not None:
+                self.logger.log_info(f"    Objective:  {train_objective:.6f} (optimize edilen amaç)")
             self.logger.log_info(f"    Accuracy: {train_accuracy:.4f} ({train_acc_pct:.2f}%)")
-            self.logger.log_info(f"    GradNorm: {avg_gradient_norm:.4f}" if math.isfinite(avg_gradient_norm) else "    GradNorm: (NaN — bir batch'te gradient sayısal patlama)")
+            if math.isfinite(avg_gradient_norm):
+                self.logger.log_info(f"    GradNorm: {avg_gradient_norm:.4f}")
+            elif skipped_steps:
+                self.logger.log_info("    GradNorm: (yok — bu epoch'taki bütün optimizer adımları fp16 taşması nedeniyle atlandı)")
+            else:
+                self.logger.log_info("    GradNorm: (NaN — bir batch'te gradient sayısal patlama)")
+            if skipped_steps:
+                self.logger.log_warning(f"    Atlanan fp16 adımı: {skipped_steps} (GradScaler ölçeği küçülttü)")
             self.logger.log_info(f"  Validation:")
-            self.logger.log_info(f"    Loss:     {val_loss:.6f}")
+            self.logger.log_info(f"    Loss (NLL): {val_loss:.6f} | Perplexity: {math.exp(min(20.0, val_loss)):.2f}")
+            if val_objective is not None:
+                self.logger.log_info(f"    Objective:  {val_objective:.6f}")
             self.logger.log_info(f"    Accuracy: {val_accuracy:.4f} ({val_acc_pct:.2f}%)")
             self.logger.log_info(f"  Fark (Train - Val): {loss_diff:.6f}")
             
@@ -486,18 +545,28 @@ class TrainingManager:
                 accuracy=val_accuracy
             )
             
-            # Update training history
+            # Update training history (train_loss / val_loss: plain NLL)
             self.training_history["train_loss"].append(train_loss)
             self.training_history["val_loss"].append(val_loss)
             self.training_history["accuracy"].append(val_accuracy)
+            if train_objective is not None:
+                self.training_history.setdefault("train_objective", []).append(train_objective)
+            if val_objective is not None:
+                self.training_history.setdefault("val_objective", []).append(val_objective)
             
             # TensorBoard logging (epoch level)
             if self.tensorboard_manager.enabled:
                 try:
                     self.tensorboard_manager.log_scalar("Loss/Train", train_loss, epoch)
                     self.tensorboard_manager.log_scalar("Loss/Validation", val_loss, epoch)
+                    if train_objective is not None:
+                        self.tensorboard_manager.log_scalar("Objective/Train", train_objective, epoch)
+                    if val_objective is not None:
+                        self.tensorboard_manager.log_scalar("Objective/Validation", val_objective, epoch)
+                    if skipped_steps:
+                        self.tensorboard_manager.log_scalar("Train/SkippedSteps", skipped_steps, epoch)
                     
-                    # Perplexity
+                    # Perplexity of the plain NLL (not of the regularized objective)
                     if math.isfinite(train_loss):
                         train_ppl = math.exp(min(20.0, train_loss))
                         self.tensorboard_manager.log_scalar("Perplexity/Train", train_ppl, epoch)
@@ -562,19 +631,16 @@ class TrainingManager:
                     if self.logger:
                         self.logger.log_debug(f"[Memory] Tracking error: {e}")
             
-            # Performance tracking summary (epoch level)
+            # Performance tracking summary (epoch level): this epoch's training batches only,
+            # measured with the samples and non-pad target tokens they actually contained
+            # (not the configured batch_size x seq_len).
             if self.track_performance and self.training_loop.performance_tracker:
                 try:
-                    perf_tracker = self.training_loop.performance_tracker
-                    if perf_tracker.batch_times and self.tensorboard_manager.enabled:
-                        avg_batch_time = sum(perf_tracker.batch_times) / len(perf_tracker.batch_times)
-                        samples_per_sec = self.config.get("batch_size", 1) / avg_batch_time if avg_batch_time > 0 else 0
-                        seq_len = self.config.get("seq_len", 1)
-                        tokens_per_sec = samples_per_sec * seq_len
-                        
-                        self.tensorboard_manager.log_scalar("Performance/AvgBatchTime", avg_batch_time, epoch)
-                        self.tensorboard_manager.log_scalar("Performance/SamplesPerSec", samples_per_sec, epoch)
-                        self.tensorboard_manager.log_scalar("Performance/TokensPerSec", tokens_per_sec, epoch)
+                    perf = train_stats.get("performance")
+                    if perf and self.tensorboard_manager.enabled:
+                        self.tensorboard_manager.log_scalar("Performance/AvgBatchTime", perf["avg_batch_time_sec"], epoch)
+                        self.tensorboard_manager.log_scalar("Performance/SamplesPerSec", perf["samples_per_sec"], epoch)
+                        self.tensorboard_manager.log_scalar("Performance/TokensPerSec", perf["tokens_per_sec"], epoch)
                 except Exception as e:
                     if self.logger:
                         self.logger.log_debug(f"[Performance] Tracking error: {e}")

@@ -35,7 +35,7 @@ are on this active path. [contracts.py](../../../training_management/contracts.p
 |---|---|
 | [TrainingManager](../../../training_management/v2/core/training_manager.py) | Epoch lifecycle, validation, early stopping, callbacks, and resume |
 | [TrainingLoop](../../../training_management/v2/core/training_loop.py) | Batch processing, autocast, accumulation, and optimizer updates |
-| [LossComputation](../../../training_management/v2/core/loss_computation.py) | Token loss, PAD / `-100` masking, accuracy, and loss-derived perplexity |
+| [LossComputation](../../../training_management/v2/core/loss_computation.py) | Training objective, PAD / `-100` masking, accuracy, and the plain masked NLL with its perplexity |
 | [GradientManager](../../../training_management/v2/core/gradient_manager.py) | Gradient clipping and norm tracking |
 | [TrainingScheduler](../../../training_management/v2/utils/training_scheduler.py) | Warmup and epoch / metric based learning rate scheduling |
 | [CheckpointManager](../../../training_management/v2/utils/checkpoint_manager.py) | Training checkpoints, best / last aliases, and retention |
@@ -48,11 +48,16 @@ are on this active path. [contracts.py](../../../training_management/contracts.p
 - The model's already weighted MoE auxiliary loss enters the training objective once per forward pass.
 - Accumulation is normalized by valid target tokens, including the final incomplete group.
 - Warmup tracks completed optimizer updates; epoch changes are passed to the sampler.
+  Embedding parameter groups are recognized only by an explicit `name="embedding"` tag, never by the size of their learning rate.
 - Nonfinite total objectives or gradients must not produce an invalid optimizer update.
+  With the CUDA `fp16` GradScaler, nonfinite gradients skip the step, shrink the scale and are counted as `skipped_steps`; without a scaler training stops with an error.
+- Reported training / validation loss is the plain masked NLL (perplexity = exp(NLL)); the optimized objective is logged separately as `Objective/*`.
+  The best checkpoint, early stopping and the plateau scheduler use validation NLL.
 
 Precision options are `auto`, `fp32`, `fp16`, and `bf16`.
 CPU `fp16` requests fall back to `fp32`; explicit `bf16` uses CPU autocast.
-CUDA `bf16` capability is checked; CUDA `fp16` uses GradScaler.
+CUDA `bf16` capability is checked; CUDA `fp16` uses GradScaler and skips overflowing steps
+(tested with a simulated CPU scaler, not on a GPU).
 These are device-dependent capabilities, not GPU performance measurements.
 
 ## Checkpoints and resume
@@ -63,7 +68,10 @@ optimizer step count, best loss, early stopping, and Python / NumPy / Torch RNG 
 
 `resume_from_checkpoint()` checks model identity, tensor shapes, and tokenizer identity.
 After successful restoration, training continues at the next epoch.
-`epochs` is the number of additional epochs. Mid-batch resume is not provided.
+`epochs` is the total target epoch count: a run resumed after epoch k trains k+1 … `epochs`,
+and trains nothing if the checkpoint already reached the target. `continuation_learning_rate` is applied
+after the optimizer and scheduler state are restored; every group is rescaled by one factor and the scheduler anchors follow.
+Mid-batch resume is not provided.
 Legacy records remain usable; missing extra state produces a warning about incomplete resume.
 Resuming training is distinct from loading only model weights for inference.
 
@@ -85,7 +93,6 @@ does not establish integration of those features into the supported training pat
 1. Prevent partial restoration during resume and unify error handling with the helper loading path.
 2. Remove full-memory serialization and the fixed temporary filename from the training checkpoint writer.
 3. Map experimental V3 helpers to the active V2 path and define integration and compatibility contracts for selected features.
-4. Report loss components separately and relate perplexity interpretation to the actual objective.
 
 The [development roadmap](../../architecture/NEXT_DEVELOPMENT_ROADMAP.md)
 prioritizes this work alongside model-core and cognitive-system development.
