@@ -1,0 +1,69 @@
+# Zihin prototype — first life measurements (2026-11-14)
+
+Runner: `run.py --n 600` (600 experiences = 2400 moments per life). Records: `results/life_<domain>_<seed>_<variant>.jsonl`.
+Lives that exist: nitelik × seeds 0–4 × changed, nitelik × seeds 0–3 × as_written, iliski × seeds 0–4 × changed
+(iliski as_written and nitelik seed 4 as_written were not run). "changed" = the six fixes F1–F6 of NOTES.md.
+Numbers below are means over seeds at the end of the life (at = 600), with [min, max] over seeds. Words are random
+per (seed, domain); the core never sees the world's truth tables. These are tests of the design, not a claim.
+
+## T1 — weak first storage, refinement without deletion (white box)
+
+Own conviction c of a told fact by number of hearings (changed):
+
+| hearings | nitelik c | nitelik e | iliski c | iliski e |
+|---|---|---|---|---|
+| 1 | 0.399 [0.396, 0.403] | 0.700 | 0.410 [0.405, 0.414] | 0.705 |
+| 2 | 0.571 | 0.785 | — | — |
+| 3 | 0.666 | 0.833 | — | — |
+| ≥4 | 0.762 | 0.881 | 0.784 | 0.892 |
+
+Monotone in hearings, as designed. Learned trust in "told" rises from 0.53 (at 60) to 0.67 (nitelik) / 0.70 (iliski).
+Lies and corrections (40 per domain, changed): after the lie the false value has e 0.68, c 0.36; after a correction
+the false value falls to e 0.45 (sensed correction) / 0.51 (told correction) while its c RISES to 0.55–0.62 (more has
+been lived) and the true value reaches e 0.79 / 0.74. In 120 of 120 corrections the positive evidence of the lie is
+bit-identical before and after: refinement adds negative evidence, it deletes nothing.
+Honest weakness: a told correction leaves the false value at e ≈ 0.51, i.e. not yet below ½.
+
+## T2 — categories formed from instances (against the world's hidden classes)
+
+Best Jaccard between an emergent category and each hidden class (end of life):
+entity classes 1.000 in both domains and both variants (at 60 experiences: 0.43 nitelik, 0.55 iliski);
+the set of all entities 1.000; dimensions 0.80; value sets 0.41–0.47 (values of a dimension are NOT grouped into
+one category — open). Changed variant makes many more frames (nitelik 1047 vs 61) — growth to watch.
+
+## T3 — support from category to instance; exceptions
+
+| (changed, end) | nitelik | iliski |
+|---|---|---|
+| members told, top & > ½ | 1.000 (e 0.90) | 0.991 (e 0.91) |
+| exceptions kept over the rule | 1.000 (e 0.90 vs rule 0.50) | 1.000 (e 0.94 vs rule 0.46) |
+| held-out instance, told rule | 0.667 [0.33, 1.0], e 0.57 vs other 0.53 | 0.550, e 0.57 vs 0.57 |
+| held-out instance, induced rule | 0.467, e 0.54 vs 0.54 | 0.650, e 0.59 vs 0.58 |
+
+As written (no fixes) T3 fails completely: every probe reads 0 (the summed votes swamp the specific value) — this
+was finding F2. With the fixes, members and exceptions are right. **The decisive negative: support from a category
+to an instance never seen with that dimension does not work** — the right value is barely above the best wrong one
+(≈ chance among 4–5 values). White box: the held-out instance has no own tie and its effective expectation stays
+at ½, i.e. the category rule does not reach it. This is the next thing to fix (§ next).
+
+## T5 — no collapse, no forgetting, no lookup outside the core
+
+Changed, end of life: facts told once in the first fifth and never again: recalled 0.98 (nitelik) / 0.96 (iliski);
+their evidence is bit-identical to the moment they were learned in 100% of cases; all evidence finite; exact
+(ledger sum = state); units ≈ 1460 / 1010, ties ≈ 9770 / 6470, core 2.4 / 1.6 MB; 8.4 / 7.7 ms per moment.
+As written: early recall 0.00 and 20 ms per moment — F1–F6 are what make it work.
+Open: the log of increments (needed for exact retraction) is 3.7–6.7× the core and grows linearly.
+
+## T9 — exact retraction of one experience
+
+Changed, one random early fact per life: after subtracting its logged increments its own evidence is exactly 0,
+every untouched tie is bit-identical, the state equals the sum of the other moments' ledgers, other early facts
+unchanged (5/5 lives, both domains). Against the counterfactual life lived without that experience: the retracted
+fact's own expectation matches exactly (gap 0.0000); the rest of the mind differs a little (mean gap 0.005, max
+0.07–0.14) and has 7 more units / 46–54 more ties — structure created by that experience remains (units are not
+removed). Retraction is exact for evidence, not for structure (same law as "same predictions ≠ same future").
+
+## What is not yet measured
+
+T4 (questions), T6 (transfer to an unseen domain), T7 (imitation and detaching), T8 (imagination with reality
+score), and the Transformer baselines on the identical stream. These remain the decisive tests of the design.
