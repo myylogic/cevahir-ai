@@ -143,11 +143,14 @@ def sniff_pickle_globals(path):
     path = Path(path)
     if not zipfile.is_zipfile(path):
         return {"container": "unknown", "globals": [], "unsafe": []}
-    with zipfile.ZipFile(path) as archive:
-        members = [name for name in archive.namelist() if name.endswith("/data.pkl") or name == "data.pkl"]
-        if len(members) != 1:
-            return {"container": "unknown", "globals": [], "unsafe": []}
-        found = _pickle_globals(archive.read(members[0]))
+    try:
+        with zipfile.ZipFile(path) as archive:
+            members = [name for name in archive.namelist() if name.endswith("/data.pkl") or name == "data.pkl"]
+            if len(members) != 1:
+                return {"container": "unknown", "globals": [], "unsafe": []}
+            found = _pickle_globals(archive.read(members[0]))
+    except zipfile.BadZipFile:           # a damaged archive (cut or overwritten) is not a readable checkpoint
+        return {"container": "unknown", "globals": [], "unsafe": []}
     unique = sorted(set(found))
     return {"container": "torch-zip", "globals": unique, "unsafe": [name for name in unique if not is_safe_global(name)]}
 

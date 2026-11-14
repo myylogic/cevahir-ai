@@ -1,7 +1,8 @@
 """Error hierarchy of the roof. Every error carries a category and a process exit code.
 
-Exit codes: 1 terminating error, 2 usage or format error, 5 verification failed
-(integrity, digest or compatibility).
+Exit codes: 1 terminating error (includes not found), 2 parse or usage error, 3 policy denied,
+4 approval required (reserved for the policy layer), 5 verification failed (integrity, digest,
+audit chain or compatibility), 130 interrupted.
 """
 
 
@@ -60,3 +61,38 @@ class AttestationError(CvError):
     """Weights in the model after loading are not the weights that passed the gate."""
     category = "SecurityError"
     exit_code = 5
+
+
+class NotFound(CvError, LookupError):
+    """A key, reference, path or command does not exist."""
+    category = "ObjectNotFound"
+
+
+class AmbiguousReference(CvError, LookupError):
+    """A short reference matches more than one artefact."""
+    category = "InvalidArgument"
+    exit_code = 2
+
+
+class StoreError(CvError):
+    """The registry under ``CEVAHIR_HOME`` holds something that is not what its name says."""
+    category = "InvalidData"
+    exit_code = 5
+
+
+class AuditError(CvError):
+    """The audit chain cannot be extended or does not verify."""
+    category = "SecurityError"
+    exit_code = 5
+
+
+class BundleError(CvError):
+    """A ``.cvb`` bundle is malformed, incomplete or does not match its own digests."""
+    category = "InvalidData"
+    exit_code = 5
+
+
+class PolicyDenied(CvError):
+    """The policy refused the action."""
+    category = "PermissionDenied"
+    exit_code = 3

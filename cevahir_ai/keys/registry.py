@@ -98,6 +98,10 @@ SCHEMES = _table(
      "sorted [path, utf8-lf digest] of a declared file set"),
     ("env", "rt-v1", "primary", 64, False, "n/a", f"{_S}.code:env_rt_key",
      "python, platform, machine and package versions (no host or user names)"),
+    ("manifest", "sha256-v1", "primary", 64, False, "n/a", "cevahir_ai.store.core:manifest_key",
+     "content address of a registry manifest: sha256 of its CJSON-1 bytes"),
+    ("bundle", "sha256-v1", "primary", 64, False, "bytes", "cevahir_ai.store.bundles:bundle_key",
+     "a .cvb bundle: sha256 of its bundle.json, which lists the digest of every member"),
 )
 
 

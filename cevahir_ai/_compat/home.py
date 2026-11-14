@@ -1,7 +1,9 @@
 """``CEVAHIR_HOME``: the state directory of the roof, always outside the git checkout.
 
-Nothing in this phase writes there; the resolver exists so that the registry, the audit log and
-the lineage store of the next phase have one definition of where state lives.
+The registry (manifests, locations), the audit chains and the console history live there
+(``cevahir_ai.store``). Windows: ``%LOCALAPPDATA%\\Cevahir``; Linux and macOS:
+``${XDG_STATE_HOME:-~/.local/state}/cevahir``; Colab: on Drive when it is mounted. The
+``CEVAHIR_HOME`` environment variable overrides the default.
 """
 import os
 import sys
@@ -28,8 +30,22 @@ def cevahir_home(environ=None):
     environ = os.environ if environ is None else environ
     home = Path(environ["CEVAHIR_HOME"]).expanduser() if environ.get("CEVAHIR_HOME") else default_home(environ)
     home = home.resolve()
-    root = repo_root().resolve()
+    try:
+        root = repo_root().resolve()
+    except RuntimeError:                 # installed without a checkout: there is no checkout to protect
+        return home
     if (home == root or root in home.parents) and environ.get("CEVAHIR_ALLOW_HOME_IN_REPO") != "1":
         raise RuntimeError(f"CEVAHIR_HOME must be outside the checkout ({home} is inside {root}); "
                            "set CEVAHIR_ALLOW_HOME_IN_REPO=1 to override")
     return home
+
+
+def host_file(home, environ=None):
+    """Where this machine's identity is kept. On Colab it is per VM, not on the shared Drive home,
+    so two runtimes that share one home never append to one audit chain."""
+    environ = os.environ if environ is None else environ
+    if environ.get("CEVAHIR_HOST_FILE"):
+        return Path(environ["CEVAHIR_HOST_FILE"]).expanduser()
+    if environ.get("COLAB_RELEASE_TAG"):
+        return Path("/content/.cevahir-host.json")
+    return Path(home) / "host.json"

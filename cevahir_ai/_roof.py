@@ -133,7 +133,7 @@ RESPONSIBILITIES = (
     Responsibility("R-COGNITION", "Cognition", "cevahir_ai.cognition", ("cognitive_management.cognitive_manager",), "facade"),
     Responsibility("R-SERVE", "Serving", "cevahir_ai.serving",
                    ("model.cevahir", "api.app_factory", "chatting_management.chatting_manager"), "facade"),
-    Responsibility("R-AUDIT", "Registry, audit log and lineage", "cevahir_ai.store", (), "planned"),
+    Responsibility("R-AUDIT", "Registry, audit log and lineage", "cevahir_ai.store", (), "owned"),
     Responsibility("R-POLICY", "Policy and approvals", "cevahir_ai.gov", ("training_management.contracts",), "planned"),
     Responsibility("R-OPERATOR", "Operator console", "cevahir_ai.console", (), "planned"),
 )
