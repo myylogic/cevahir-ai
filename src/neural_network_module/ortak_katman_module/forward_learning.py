@@ -37,9 +37,9 @@ What it does when it is used (one teacher-forced read of externally supplied tok
    per class of stored keys).
 
 Supported configuration: pre-norm, sequential residual, RMSNorm, no MoE, standard softmax attention (no
-attention operator), eval mode. Anything else is refused.
-The fast state is kept on the CPU in float64 and the module has been exercised on CPU float32/float64 models
-only. What it is not: it is not wired into generation, training or serving, it has no learned parameters, and
+attention operator), plain floating-point ``ffn.fc2`` layers on the CPU (no quantized layers), eval mode.
+Anything else is refused. The fast state is kept on the CPU in float64. The learner's own forward passes leave
+the host model's step counter and diagnostics snapshot as they were. What it is not: it is not wired into generation, training or serving, it has no learned parameters, and
 whether its writes are useful is a research question (the study folder measures it), not a property of this code.
 
 Prior work (see research/forward_learning_2026_11_13/PROTOCOL.md for the full list): the closed-form output
@@ -601,8 +601,16 @@ class ForwardLearner:
                 raise ForwardLearningError(f"block {i}: parallel residual blocks are not supported")
             if not (_is_rmsnorm(getattr(layer, "norm1", None)) and _is_rmsnorm(getattr(layer, "norm2", None))):
                 raise ForwardLearningError(f"block {i}: norm1 and norm2 must be RMSNorm")
-            if getattr(getattr(layer, "ffn", None), "fc2", None) is None:
+            fc2 = getattr(getattr(layer, "ffn", None), "fc2", None)
+            if fc2 is None:
                 raise ForwardLearningError(f"block {i}: ffn.fc2 not found")
+            weight = getattr(fc2, "weight", None)
+            if not (isinstance(weight, torch.Tensor) and weight.dim() == 2 and weight.is_floating_point()):
+                raise ForwardLearningError(f"block {i}: ffn.fc2 is not a plain floating-point linear layer "
+                                           f"(quantized or wrapped layers are not supported)")
+            if weight.device.type != "cpu":
+                raise ForwardLearningError(f"block {i}: ffn.fc2 is on {weight.device}; the fast state is kept on "
+                                           f"the CPU and only CPU models are supported")
             operator = getattr(getattr(layer, "attn", None), "attention_operator", "standard")
             if operator != "standard":
                 raise ForwardLearningError(f"block {i}: attention operator {operator!r} is not supported "
@@ -634,6 +642,19 @@ class ForwardLearner:
         fn = getattr(self.model, "clear_kv_cache", None)
         if callable(fn):
             fn()
+
+    @contextmanager
+    def _own_forward(self):
+        """The learner's own forward passes (reads, step search, calibration) must not show up in the host
+        model's bookkeeping: its step counter and last diagnostics snapshot are put back afterwards."""
+        missing = object()
+        saved = {name: getattr(self.model, name, missing) for name in ("_global_step", "_last_snapshot")}
+        try:
+            yield
+        finally:
+            for name, value in saved.items():
+                if value is not missing:
+                    setattr(self.model, name, value)
 
     # --------------------------------------------------------------------------------------------------- read
     def _make_hook(self, b: int):
@@ -696,14 +717,15 @@ class ForwardLearner:
             hooks.append(layer.ffn.fc2.register_forward_hook(grab(b)))
         excl = torch.tensor(sorted(set(int(i) for i in exclude_ids)), dtype=torch.long)
         try:
-            for seq in sequences:
-                x = torch.as_tensor(list(seq), dtype=torch.long).unsqueeze(0)
-                keep = ~torch.isin(x[0], excl) if excl.numel() else torch.ones(x.shape[1], dtype=torch.bool)
-                if not bool(keep.any()):
-                    continue
-                keep_holder["keep"] = keep
-                self.model(x)
-                count += int(keep.sum())
+            with self._own_forward():
+                for seq in sequences:
+                    x = torch.as_tensor(list(seq), dtype=torch.long).unsqueeze(0)
+                    keep = ~torch.isin(x[0], excl) if excl.numel() else torch.ones(x.shape[1], dtype=torch.bool)
+                    if not bool(keep.any()):
+                        continue
+                    keep_holder["keep"] = keep
+                    self.model(x)
+                    count += int(keep.sum())
         finally:
             for h in hooks:
                 h.remove()
@@ -771,7 +793,7 @@ class ForwardLearner:
 
     def _score(self, tok: torch.Tensor, pos: Tuple[int, ...]) -> Tuple[float, bool]:
         """(mean target NLL, argmax reproduces every target) at the learned positions on the standard path."""
-        with torch.no_grad():
+        with torch.no_grad(), self._own_forward():
             logits = self.model(tok[:-1].unsqueeze(0))[0][0]
         idx = torch.as_tensor(pos, dtype=torch.long)
         y = tok[1:][idx]
@@ -795,7 +817,7 @@ class ForwardLearner:
         pos = self._positions(tok, learn_positions)
         idx = torch.as_tensor(pos, dtype=torch.long)
         need_att = rule in _ROUTED_RULES
-        with ForwardTape(self.model, need_attention=need_att) as tape:
+        with ForwardTape(self.model, need_attention=need_att) as tape, self._own_forward():
             logits = self.model(tok[:-1].unsqueeze(0), return_attention_weights=need_att)[0][0]
         y = tok[1:][idx]
         x_final = tape.x_final[0]
@@ -986,6 +1008,7 @@ class ForwardLearner:
                     tag: Optional[str] = None, rule: str = "terms") -> int:
         """Low-level write: per block, values R [n, D], gain vectors Z [n, F] and keys K [n, F]; adds
         sum_i r_i z_i^T to F and xi sum_i k_i k_i^T to C. Returns the write id. No step search, no guard."""
+        self._check_eval()
         entry: Dict[int, Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = {}
         for b, (R, Z, K) in terms.items():
             st = self._blocks[int(b)]

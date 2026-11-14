@@ -494,7 +494,10 @@ def test_unsupported_configurations_are_refused(overrides, needle):
     model = build(seed=0, perturb=0.0, **overrides)
     with pytest.raises(fl.ForwardLearningError, match=needle):
         fl.ForwardLearner(model)
-    assert all(len(layer.ffn._forward_hooks) == 0 for layer in model.layers)
+    # a refused model carries no hook of the learner (it registers on ffn.fc2; MoE blocks have no fc2)
+    for layer in model.layers:
+        fc2 = getattr(layer.ffn, "fc2", None)
+        assert fc2 is None or len(fc2._forward_hooks) == 0
 
 
 def test_a_non_standard_attention_operator_is_refused():
@@ -503,6 +506,60 @@ def test_a_non_standard_attention_operator_is_refused():
     with pytest.raises(fl.ForwardLearningError, match="attention operator"):
         fl.ForwardLearner(model)
     assert all(len(layer.ffn.fc2._forward_hooks) == 0 for layer in model.layers)
+
+
+def test_quantized_and_non_cpu_layers_are_refused_with_the_modules_own_error():
+    model = build(seed=0, perturb=0.0)
+
+    class Packed(torch.nn.Module):                            # like a dynamically quantized Linear:
+        def __init__(self, linear):                           # ``weight`` is a method, not a tensor
+            super().__init__()
+            self.inner = linear
+
+        def weight(self):
+            return self.inner.weight
+
+        def forward(self, x):
+            return self.inner(x)
+
+    plain = model.layers[1].ffn.fc2
+    model.layers[1].ffn.fc2 = Packed(plain)
+    with pytest.raises(fl.ForwardLearningError, match="quantized"):
+        fl.ForwardLearner(model)
+    model.layers[1].ffn.fc2 = plain
+    model.layers[2].ffn.fc2.to("meta")                        # any non-CPU device
+    with pytest.raises(fl.ForwardLearningError, match="CPU"):
+        fl.ForwardLearner(model)
+    assert all(len(layer.ffn.fc2._forward_hooks) == 0 for layer in model.layers)
+
+
+def test_the_learners_own_forwards_leave_the_host_bookkeeping_and_a_closed_learner_takes_no_write():
+    model = build(seed=1)
+    learner = fl.ForwardLearner(model, fl.ForwardLearningConfig(rule="FEC-A", guard="off", step_grid=WIDE_GRID,
+                                                                install="greedy", n0=5.0))
+    tok = tokens()
+    with torch.no_grad():
+        model(tok[:-1].unsqueeze(0))
+    step, snapshot = model._global_step, model._last_snapshot
+    learner.calibrate(reference(n_seq=20))
+    result = learner.write(learner.read(tok, [8, 9, 10]))
+    assert result.installed and result.n_forward > 1          # many forward passes were made ...
+    assert model._global_step == step and model._last_snapshot is snapshot      # ... none of them is counted
+    with torch.no_grad():
+        model(tok[:-1].unsqueeze(0))
+    assert model._global_step == step + 1                      # the caller's own forwards still are
+    top = len(model.layers) - 1
+    f = learner.fast_weight(top).shape[1]
+    terms = {top: (torch.ones(1, 32), torch.ones(1, f), torch.ones(1, f))}
+    model.train()
+    with pytest.raises(fl.ForwardLearningError, match="eval"):
+        learner.write_terms(terms)
+    model.eval()
+    before = learner.fingerprint()
+    learner.close()
+    with pytest.raises(fl.ForwardLearningError, match="closed"):
+        learner.write_terms(terms)
+    assert learner.fingerprint() == before
 
 
 def test_training_mode_and_bad_arguments_are_refused():
