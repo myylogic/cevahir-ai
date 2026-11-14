@@ -242,6 +242,21 @@ F16. (2026-11-14) Speaking from what was read. Two parts. (1) Turn ends are perc
    "zürafa nedir" -> "zürafa" and silence (nothing known). The start comes from F12 (SELF, NEXT), the rest from the
    continuation of its own words. A toy demonstration, not yet a multi-seed test.
 
+F17. (2026-11-14) A life that continues across sessions, the internet as a channel, and a first steering of its own
+   learning. (1) One mind per computer lives in a home folder ($CEVAHIR_HOME/zihin, default ~/.cevahir/zihin); a
+   session loads it, talks (chat mode at a terminal), and keeps what it learned at the end of every conversation (and
+   every 50 answers), also on Ctrl+C; within a session single experiences stay exactly retractable, across sessions the
+   substance is kept without the ledger. cevahir.ps1 starts it from PowerShell. (2) Feelings as computed (surprise,
+   relief, conflict, load, drive) can be shown after each answer. (3) Internet (zihin/web.py, an adapter, no core code):
+   on the owner's command the session reads Wikipedia pages about a topic as speech of others; "improve yourself"
+   picks topics by the mind's drive (used often, held with little conviction; the most frequent words left out by
+   frequency, no list). (4) Ways of reading (a short summary, a deep read) are internal acts on the mind's own channel;
+   after each reading the gain (new ties on the topic held with conviction >= 1/2, per 100 moments) is evidence on
+   "way -> relief" with the same rule, and the way with the higher expectation is chosen next (an untried way first).
+   Tested offline with a stub source only (this container may not reach Wikipedia); the live run is on the owner's
+   computer. Weakness stated: the gain scale is absolute (a repetition that taught little still counts as mostly good);
+   the outcome should be judged relative to what the mind expected from that way.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit

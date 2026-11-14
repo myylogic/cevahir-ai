@@ -96,6 +96,13 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
     for name, default in (("trace", list), ("value_sign", dict)):   # minds saved before these existed
         if not hasattr(mind, name):
             setattr(mind, name, default())
+    import dataclasses
+    for f in dataclasses.fields(type(mind.cfg)):                      # settings added after the mind was saved
+        if f.name not in mind.cfg.__dict__:
+            value = f.default if f.default is not dataclasses.MISSING else f.default_factory()
+            setattr(mind.cfg, f.name, value)
+    if mind.cfg.support == "members" and mind.cfg.bind_repeats:      # a speaking mind reads with today's rules
+        mind.cfg.backoff = True
     if not ledger:
         mind.S.log, mind.S.keep_log = {}, False
         mind.cfg.keep_log, mind.cfg.log_path = False, None

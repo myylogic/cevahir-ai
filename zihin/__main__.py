@@ -11,6 +11,9 @@ Commands (Turkish, with English aliases):
     !oku <dosya|klasor>  / !read    watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
                                     .pdf with pypdf): sentences of documents as speech of others (imitated)
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
+    !arastir <konu>      / !research  on your command: look the topic up in Wikipedia and read it (pages are printed)
+    !kendini_gelistir [n] / !improve  the mind picks n topics it wants to know (high drive) and researches them; it
+                                    measures what each way of reading gave it and chooses its way by that
     !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
                                     the path that led to it is remembered and weighed next time, L5)
 Turn taking (while you speak the mind listens, then it may speak until it falls silent) is set by the session, not
@@ -337,16 +340,48 @@ class Session:
         return "  böyle bir numara yok"
 
 
+def home_mind() -> str:
+    """Where the one mind of this computer lives: $CEVAHIR_HOME/zihin/cevahir (default ~/.cevahir)."""
+    import os
+    home = os.environ.get("CEVAHIR_HOME") or os.path.join(os.path.expanduser("~"), ".cevahir")
+    folder = os.path.join(home, "zihin")
+    os.makedirs(folder, exist_ok=True)
+    return os.path.join(folder, "cevahir")
+
+
+def _exists(path: str) -> bool:
+    import os
+    base = path[:-6] if path.endswith(".zihin") else path
+    return os.path.exists(base + ".zihin") or os.path.exists(base + ".zihin.gz")
+
+
+def feelings(mind: Mind) -> str:
+    """The mind's own state as it computed it in the last moment (functional signals, see design section 2.6)."""
+    f = getattr(mind, "felt", None) or {}
+    names = (("surprise", "şaşkınlık"), ("relief", "rahatlama"), ("conflict", "çatışma"), ("load", "yük"))
+    parts = ["%s %.2f" % (tr, float(f.get(en, 0.0))) for en, tr in names]
+    parts.append("dürtü %.1f" % float(f.get("drive", 0.0)))
+    return "  (his: " + ", ".join(parts) + ")"
+
+
 def main(argv=None) -> None:
+    import os
     ap = argparse.ArgumentParser(prog="python -m zihin")
-    ap.add_argument("--load")
+    ap.add_argument("--load", help="a saved mind to live on (otherwise the mind of this computer's home folder)")
+    ap.add_argument("--yeni", action="store_true", help="start a new, empty mind")
+    ap.add_argument("--kayit", help="where the mind is kept (default: the home folder, see home_mind)")
+    ap.add_argument("--kaydetme", action="store_true", help="do not save what was learned in this session")
+    ap.add_argument("--his", action="store_true", help="show the mind's feelings after each answer")
     ap.add_argument("--parca", help="subword tokenizer (ByteLevelBPE json): word pieces enter as facets")
     ap.add_argument("--defter-yok", dest="no_ledger", action="store_true",
                     help="no experience ledger: smaller and faster, but !unut cannot retract")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
     args = ap.parse_args(argv)
-    if args.load:
-        mind = load(args.load, ledger=not args.no_ledger)
+    keep_at = args.kayit or home_mind()
+    source = None if args.yeni else (args.load or (keep_at if _exists(keep_at) else None))
+    if source:
+        print("zihin yükleniyor: %s ..." % source, flush=True)
+        mind = load(source, ledger=not args.no_ledger)
         if not args.no_ledger and not mind.S.keep_log:      # a mind saved without a ledger: keep one from now on
             from .store import DiskLog
             mind.cfg.keep_log, mind.cfg.log_path = True, _log_path()
@@ -363,15 +398,45 @@ def main(argv=None) -> None:
         from tokenizer_management.byte_bpe import ByteLevelBPE
         pieces = ByteLevelBPE.load(args.parca)
     session = Session(mind, pieces)
-    chat = False
-    print("Zihin — anlat, sor (?...), !neden, !unut, !kaydet, !cik. %d an yaşanmış." % mind.t)
-    for line in sys.stdin if not sys.stdin.isatty() else iter(lambda: input("> "), None):
+    interactive = sys.stdin.isatty()
+    chat = interactive                                   # at a terminal you talk to it right away
+    autosave = not args.kaydetme
+    turns_since_save = 0
+
+    saved_at = [mind.t]
+
+    def keep(reason: str) -> None:
+        if not autosave or session.mind.t == saved_at[0]:   # nothing new was lived: nothing to keep
+            return
+        saved_at[0] = session.mind.t
+        started = __import__("time").time()
+        export_portable(session.mind, keep_at)           # the substance as it is now; atomic
+        print("  öğrendiklerim kaydedildi (%s): %s.zihin, %d an, %.0f sn" % (
+            reason, keep_at, session.mind.t, __import__("time").time() - started), flush=True)
+
+    print("Cevahir — %d an yaşamış bir zihin. %s" % (
+        mind.t, "Yaz, konuşalım. Komutlar: !his !yas !dogru !yanlis !unut !cik" if chat else
+        "anlat, sor (?...), !konus, !neden, !unut, !kaydet, !cik"))
+    if autosave:
+        print("  (her sohbetin sonunda öğrendikleri kendiliğinden kaydedilir: %s.zihin)" % keep_at)
+    lines = sys.stdin if not interactive else iter(lambda: input("> "), None)
+    try:
+        _session_loop(session, lines, chat, args, keep)
+    except (KeyboardInterrupt, EOFError):
+        print()
+    finally:
+        keep("sohbet sonu")
+
+
+def _session_loop(session, lines, chat, args, keep) -> None:
+    turns_since_save = 0
+    for line in lines:
         line = line.strip()
         if not line:
             continue
         try:
             if not line.lstrip("!").split(" ")[0] in ("dogru", "doğru", "good", "iyi", "yanlis", "yanlış", "bad", "kotu",
-                                                       "kötü") or not line.startswith("!"):
+                                                       "kötü", "his", "feel") or not line.startswith("!"):
                 session.close_turn()                     # any other input ends the answered turn first
             if line.startswith("?") and not chat:
                 print(session.ask(line[1:].strip()))
@@ -415,6 +480,21 @@ def main(argv=None) -> None:
                         print("  %3d  %s" % (number, text))
                 elif cmd in ("unut", "forget"):
                     print(session.forget(int(rest)))
+                elif cmd in ("arastir", "araştır", "research"):
+                    from .web import research
+                    report = research(session, rest.strip())
+                    print("  okudum: %s" % report)
+                elif cmd in ("kendini_gelistir", "kendini_geliştir", "improve"):
+                    from .web import research, wanted_topics
+                    topics = wanted_topics(session.mind, CHANNEL, int(rest) if rest.strip().isdigit() else 3)
+                    print("  merak ettiklerim: %s" % ", ".join(topics))
+                    for topic in topics:
+                        report = research(session, topic)
+                        print("  %s: %s yoluyla %s cümle, kazanç %s (yollar: %s)" % (
+                            topic, report.get("way"), report.get("sentences"), report.get("gain_per_100_moments"),
+                            report.get("ways")))
+                elif cmd in ("his", "feel"):
+                    print(feelings(session.mind))
                 elif cmd in ("yas", "yaş", "age"):
                     print(profile(session.mind))
                 elif cmd in ("boyut", "size"):
@@ -424,12 +504,19 @@ def main(argv=None) -> None:
                 elif cmd in ("tasinabilir", "portable"):
                     print("  taşınabilir kopya: %s" % export_portable(session.mind, rest.strip()))
                 elif cmd in ("yukle", "load"):
-                    session = Session(load(rest.strip()), session.pieces)
+                    fresh = Session(load(rest.strip()), session.pieces)
+                    session.__dict__.update(fresh.__dict__)     # the same session object: autosave follows it
                     print("  yüklendi: %d an" % session.mind.t)
                 else:
                     print("  bilinmeyen komut")
             elif chat:
                 print("  zihin: %s" % session.reply(line))
+                if args.his:
+                    print(feelings(session.mind))
+                turns_since_save += 1
+                if turns_since_save >= 50:               # a long conversation is kept along the way too
+                    keep("ara kayıt")
+                    turns_since_save = 0
             else:
                 session.live(line, TOLD)
         except Exception as exc:  # keep the session alive
