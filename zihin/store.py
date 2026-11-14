@@ -18,6 +18,8 @@ that no other moment gave evidence or use to is removed (tombstoned, or truncate
 from __future__ import annotations
 
 import hashlib
+import os
+import pickle
 from typing import Dict, List, Optional, Tuple
 
 import torch
@@ -32,6 +34,112 @@ ATOMIC, COMPOSED, SLOTTED, CATEGORY, INDUCED = 1, 2, 4, 8, 16
 W_POS, W_NEG, C_POS, C_NEG = 0, 1, 2, 3  # the four additive per-class tables of a tie
 
 F64, I64 = torch.float64, torch.int64
+
+
+class DiskLog:
+    """The experience log kept on disk (a ledger is an archive, not working memory).
+
+    The most recent ``keep`` moments stay in memory (undo needs the latest one with its working state); older
+    entries are appended to one file and found by offset. Retraction reads an entry back; which moments were
+    retracted is kept in memory. Behaves like the in-memory dict for get, [], in, del, len, iteration and items.
+    """
+
+    def __init__(self, path: str, keep: int = 4) -> None:
+        self.path, self.keep = path, keep
+        self.ram: Dict[int, "MomentLog"] = {}
+        self.index: Dict[int, Tuple[int, int]] = {}
+        self.retracted: set = set()
+
+    def __setitem__(self, m: int, entry: "MomentLog") -> None:
+        self.ram[m] = entry
+        while len(self.ram) > self.keep:
+            old = min(self.ram)
+            e = self.ram.pop(old)
+            e.undo = None
+            data = pickle.dumps(self._pack(e), protocol=pickle.HIGHEST_PROTOCOL)
+            with open(self.path, "ab") as f:
+                offset = f.tell()
+                f.write(data)
+            self.index[old] = (offset, len(data))
+
+    def get(self, m: int, default=None):
+        if m in self.ram:
+            return self.ram[m]
+        if m in self.index:
+            offset, length = self.index[m]
+            with open(self.path, "rb") as f:
+                f.seek(offset)
+                e = self._unpack(pickle.loads(f.read(length)))
+            e.retracted = m in self.retracted
+            return e
+        return default
+
+    def __getitem__(self, m: int) -> "MomentLog":
+        e = self.get(m)
+        if e is None:
+            raise KeyError(m)
+        return e
+
+    @staticmethod
+    def _pack(e: "MomentLog") -> tuple:
+        """Plain numbers and raw array bytes (no per-tensor pickling overhead)."""
+        arr = lambda t: (t.numpy().tobytes(), str(t.dtype), tuple(t.shape))
+        return (e.m, e.units0, e.ties0, e.units1, e.ties1, e.alpha0,
+                [(table, slot, arr(i), arr(a)) for table, slot, i, a in e.ev],
+                [(arr(i), arr(a)) for i, a in e.tie_use], [(arr(i), arr(a)) for i, a in e.unit_use],
+                None if e.last is None else (arr(e.last[0]), arr(e.last[1])))
+
+    @staticmethod
+    def _unpack(p) -> "MomentLog":
+        if isinstance(p, MomentLog):                        # entries written before the raw-array format
+            return p
+        import numpy as np
+        types = {"torch.int64": (np.int64, torch.int64), "torch.float64": (np.float64, torch.float64),
+                 "torch.int32": (np.int32, torch.int32)}
+        def ten(x):
+            raw, dtype, shape = x
+            npt, _ = types[dtype]
+            return torch.from_numpy(np.frombuffer(raw, dtype=npt).copy().reshape(shape))
+        m, u0, t0, u1, t1, alpha, ev, tu, uu, last = p
+        e = MomentLog(m, u0, t0, alpha)
+        e.units1, e.ties1 = u1, t1
+        e.ev = [(table, slot, ten(i), ten(a)) for table, slot, i, a in ev]
+        e.tie_use = [(ten(i), ten(a)) for i, a in tu]
+        e.unit_use = [(ten(i), ten(a)) for i, a in uu]
+        e.last = None if last is None else (ten(last[0]), ten(last[1]))
+        return e
+
+    def mark_retracted(self, m: int) -> None:
+        self.retracted.add(m)
+        if m in self.ram:
+            self.ram[m].retracted = True
+
+    def __contains__(self, m) -> bool:
+        return m in self.ram or m in self.index
+
+    def __delitem__(self, m: int) -> None:
+        if m in self.ram:
+            del self.ram[m]
+        else:
+            del self.index[m]
+
+    def __len__(self) -> int:
+        return len(self.ram) + len(self.index)
+
+    def __iter__(self):
+        return iter(sorted(set(self.ram) | set(self.index)))
+
+    def keys(self):
+        return list(iter(self))
+
+    def items(self):
+        return [(m, self[m]) for m in self]
+
+    def values(self):
+        return [self[m] for m in self]
+
+    def disk_bytes(self) -> int:
+        return os.path.getsize(self.path) if os.path.exists(self.path) else 0
 
 
 class MomentLog:
@@ -254,9 +362,26 @@ class Substance:
                 cur.last = (ids, self.t_last[ids].clone())
             self.t_last[ids] = cur.m
         if self.keep_log:
+            self._compact(cur)
             self.log[cur.m] = cur
         self.cur = None
         return cur
+
+    @staticmethod
+    def _compact(cur: MomentLog) -> None:
+        """Merge a finished moment's many small increments into one array per (table, class) and one per use
+        table. Amounts are grid-snapped, so sums do not depend on order: retraction stays exact; the per-moment
+        memory drops from dozens of small tensors (each with its own overhead) to a handful."""
+        if len(cur.ev) > 1:
+            groups: Dict[Tuple[int, int], List[Tuple[torch.Tensor, torch.Tensor]]] = {}
+            for table, slot, ids, amounts in cur.ev:
+                groups.setdefault((table, slot), []).append((ids, amounts))
+            cur.ev = [(table, slot, torch.cat([i for i, _ in parts]), torch.cat([a for _, a in parts]))
+                      for (table, slot), parts in groups.items()]
+        for name in ("tie_use", "unit_use"):
+            parts = getattr(cur, name)
+            if len(parts) > 1:
+                setattr(cur, name, [(torch.cat([i for i, _ in parts]), torch.cat([a for _, a in parts]))])
 
     def _subtract(self, entry: MomentLog) -> None:
         for table, slot, ids, amounts in entry.ev:
@@ -279,6 +404,8 @@ class Substance:
             raise RuntimeError("retract inside a moment")
         self._subtract(entry)
         entry.retracted = True
+        if isinstance(self.log, DiskLog):
+            self.log.mark_retracted(m)
         killed_ties = killed_units = 0
         t0, t1, u0, u1 = entry.ties0, entry.ties1, entry.units0, entry.units1
         if t1 > t0:
@@ -372,6 +499,9 @@ class Substance:
 
     def nbytes(self) -> Dict[str, int]:
         core = sum(t.numel() * t.element_size() for t in self.tensors().values())
+        if isinstance(self.log, DiskLog):
+            return {"core_tensors": core, "log": sum(e.nbytes() for e in self.log.ram.values()),
+                    "log_on_disk": self.log.disk_bytes()}
         return {"core_tensors": core, "log": sum(e.nbytes() for e in self.log.values())}
 
     def max_evidence(self) -> float:

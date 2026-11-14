@@ -88,6 +88,7 @@ class Config:
     knobs: bool = False             # section 8, simple first version
     babble_every: int = 0           # with knobs: emit one knob act every N idle moments (exploration)
     keep_log: bool = True
+    log_path: Optional[str] = None  # keep the experience log on disk at this path (memory stays small)
     undo_depth: int = 1             # how many of the latest moments keep their working state for undo
 
     @classmethod
@@ -127,6 +128,9 @@ class Mind:
         self.cfg = cfg if cfg is not None else Config()
         self.S = Substance(n_slots=N_PROV, keep_log=self.cfg.keep_log)
         self.S.bind_repeats = self.cfg.bind_repeats
+        if self.cfg.keep_log and self.cfg.log_path:
+            from .store import DiskLog
+            self.S.log = DiskLog(self.cfg.log_path, keep=max(4, self.cfg.undo_depth + 2))
         self.ch = Channels()
         self.t = 0
         self.knob = {"F": self.cfg.F, "theta": self.cfg.theta, "gain": self.cfg.gain}
@@ -345,6 +349,7 @@ class Mind:
         ranked = self._winners(grounded, {}, virtual, F, first, fresh, order)
         for _ in range(cfg.T if cfg.lag0 else 0):
             evoked: Dict[int, float] = {}
+            dsts, vals = [], []
             for key, a_u in ranked:
                 if isinstance(key, tuple) or not int(S.u_kind[key]) & ATOMIC:
                     continue
@@ -354,8 +359,15 @@ class Mind:
                 ids = torch.tensor(ties, dtype=I64)
                 e = expectation((S.t_w[W_POS, ids] * self.trust).sum(-1), (S.t_w[W_NEG, ids] * self.trust).sum(-1),
                                 cfg.k)
-                for v, x in zip(S.t_dst[ids].tolist(), (a_u * (2.0 * e - 1.0)).tolist()):
-                    evoked[v] = evoked.get(v, 0.0) + x
+                dsts.append(S.t_dst[ids])
+                vals.append(a_u * (2.0 * e - 1.0))
+            if dsts:                                   # summed per target in one pass (same sums as the loop)
+                dst_all, val_all = torch.cat(dsts), torch.cat(vals)
+                unique, inverse = torch.unique(dst_all, return_inverse=True)
+                summed = torch.zeros(unique.numel(), dtype=F64).index_add_(0, inverse, val_all)
+                for v, x in zip(unique.tolist(), summed.tolist()):
+                    if x > 0.0 or v in grounded:       # a negative sum matters only for a unit already in play
+                        evoked[v] = x
             again = self._winners(grounded, evoked, virtual, F, first, fresh, order)
             if [k for k, _ in again] == [k for k, _ in ranked]:
                 ranked = again
@@ -418,8 +430,10 @@ class Mind:
             unique, inverse = torch.unique(ids, return_inverse=True)
             gained = torch.zeros(unique.numel(), dtype=F64).index_add_(0, inverse, gain)
             touched = int(unique.numel())
-            kinds = [self.ch.kind(c) if c >= 0 else "" for c in S.u_channel[S.t_dst[unique]].tolist()]
-            expect = (S.t_form[unique] == EXPECT) & torch.tensor([k in ("sense", "act") for k in kinds])
+            world = torch.tensor([self.ch.kind(c) in ("sense", "act") for c in range(len(self.ch.names))] + [False],
+                                 dtype=torch.bool)                  # by channel id; index -1 (no channel) -> False
+            channels = S.u_channel[S.t_dst[unique]].long()
+            expect = (S.t_form[unique] == EXPECT) & world[channels]
             after = ((S.t_w[W_POS, unique] + S.t_w[W_NEG, unique]) * self.trust).sum(-1)
             before = torch.clamp(after - gained, min=0.0)
             relief = float((S.t_use[unique] * (conviction(after, k) - conviction(before, k)))[expect].sum())

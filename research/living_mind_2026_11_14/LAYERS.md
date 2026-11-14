@@ -163,6 +163,25 @@ optimisations in sleep." And: "The model will not just say 'I don't know'; the m
   conviction and low use. The result is fewer, more reliable generalisations ("golden knowledge"), learned from the
   same evidence without new input.
 
+## L8. Knowing itself: "others answer so" is not "this is true of me" (owner, 2026-11-14)
+
+Owner, about the first chat on real data ("Hangi saatte yatarsın?" -> "on iki, gece takılıyorum"): "If it could
+think, it would have to say: I cannot lie down." The answer copied what others answer, as if it were the mind's own.
+The distinction already exists for acts (vision 9b, T7: "others do X" and "I do X" are separate evidence); speech
+needs it too.
+
+- "You" and "I": a question addressed to the mind ("sen ...") is about the mind; the mapping from the addressed
+  "sen" to the answering "ben" is a relation learned from watched dialogues, like SELF/NEXT in F12.
+- Evidence about itself comes from its own life: its body channel (memory, speed, nights of consolidation), its own
+  acts (provenance acted) and what it senses of itself; not from what others say about themselves.
+- An answer about itself passes an evidence gate: "I do X" is said only with own evidence for it. With only imitated
+  evidence the mind either says what it knows of itself ("I do not lie down; I live on a computer") or reports
+  others ("people usually go to bed at twelve"). No line of the core names sleep, beds or any topic: the gate is
+  the provenance split applied to statements whose subject is the mind.
+
+Test T14 (knowing itself): questions about the mind's own habits, body and history are answered from own evidence
+(or with "others do ..."), never by passing off a copied answer as its own; the copied knowledge stays intact.
+
 ## What would make this testable (to be added to the benchmark)
 
 - T10 automation: after an act has been reliable in a situation for long enough, it is emitted while the focus is

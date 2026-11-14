@@ -8,7 +8,7 @@ Commands (Turkish, with English aliases):
     !gordum <metin>      / !saw     the same, as something the mind SENSES itself (provenance "sensed")
     !izle <soz> || <karsilik> / !watch  the mind WATCHES two others talk (provenance "imitated"): how one answers
     !ogret <dosya>       / !teach   watch every line of a file: "soz<TAB>karsilik" dialogues or plain sentences
-    !oku <dosya|klasor>  / !read    watch every text in a file or folder (.txt .md .tsv; .docx with python-docx,
+    !oku <dosya|klasor>  / !read    watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
                                     .pdf with pypdf): sentences of documents as speech of others (imitated)
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
 Turn taking (while you speak the mind listens, then it may speak until it falls silent) is set by the session, not
@@ -18,8 +18,10 @@ learned yet: during your words the act threshold is raised, afterwards it is the
     !gecmis              / !history what you have told, with numbers
     !unut <no>           / !forget  retract that utterance exactly (its evidence is removed from the core)
     !boyut               / !size    units, ties, bytes, moments
+    !yas                 / !age     developmental profile: moments and nights lived, words known, concepts, phrases
     !kaydet <yol>        / !save    save the mind (with integrity manifest)
     !yukle <yol>         / !load    load a saved mind
+    !tasinabilir <yol>   / !portable  save a copy for conversation without the experience ledger (small file)
     !cik                 / !quit
 The text adapter splits words and punctuation; the alphabet is open (a new word is a new symbol at any time). The
 mind never sees text, only symbols on the "text" channel; meaning is in the ties.
@@ -33,17 +35,48 @@ from typing import List
 
 from . import IMITATED, SENSED, TOLD, Config, Event, Mind, read
 from .events import PROVENANCE
-from .persist import load, save
+from .persist import export_portable, load, save
 from .store import W_NEG, W_POS
 
 CHANNEL = "text"
-VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True),
+def _log_path() -> str:
+    import os
+    import time
+    os.makedirs("zihin_logs", exist_ok=True)
+    return os.path.join("zihin_logs", "defter-%d.log" % int(time.time() * 1000))
+
+
+VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True,
+                                               log_path=_log_path()),
             "members": lambda: Config.changed(support="members"), "changed": Config.changed}
 
 
+def lower_tr(text: str) -> str:
+    """Turkish lower case (I -> ı, İ -> i) so that a word at the start of a sentence is the same symbol."""
+    return text.replace("I", "ı").replace("İ", "i").lower()
+
+
 def words(text: str) -> List[str]:
-    """Text channel adapter: words and punctuation as symbols."""
-    return re.findall(r"\w+|[^\w\s]", text, flags=re.UNICODE)
+    """Text channel adapter: words and punctuation as symbols, in Turkish lower case."""
+    return re.findall(r"\w+|[^\w\s]", lower_tr(text), flags=re.UNICODE)
+
+
+ASK_KEYS = ("soru", "question", "input", "prompt", "söz", "soz")
+ANSWER_KEYS = ("cevap", "answer", "output", "response", "karşılık", "karsilik")
+
+
+def dialogues_of(data) -> List[tuple]:
+    """(utterance, answer) pairs from JSON: a list of objects with a question-like and an answer-like field."""
+    pairs = []
+    for item in data if isinstance(data, list) else []:
+        if not isinstance(item, dict):
+            continue
+        keys = {k.lower(): v for k, v in item.items() if isinstance(v, str)}
+        ask = next((keys[k] for k in ASK_KEYS if k in keys), None)
+        answer = next((keys[k] for k in ANSWER_KEYS if k in keys), None)
+        if ask and answer:
+            pairs.append((ask, answer))
+    return pairs
 
 
 def sentences(text: str) -> List[str]:
@@ -65,6 +98,33 @@ def read_document(path: str) -> str:
         from pypdf import PdfReader
         return "\n".join(page.extract_text() or "" for page in PdfReader(path).pages)
     return ""
+
+
+def profile(mind: Mind) -> str:
+    """Developmental profile measured from the substance (nothing assigned)."""
+    from .evidence import conviction
+    from .store import ATOMIC, CATEGORY, COMPOSED, EXPECT, SLOTTED
+    S = mind.S
+    n = S.n_units
+    kinds = S.u_kind[:n]
+    cid = mind.ch.id(CHANNEL) if mind.ch.has(CHANNEL) else -1
+    words_seen = known = 0
+    for unit in range(n):
+        if not int(kinds[unit]) & ATOMIC or int(S.u_channel[unit]) != cid:
+            continue
+        words_seen += 1
+        ties = S.out.get((unit, EXPECT, 1), [])
+        if ties:
+            mass = float(max((S.t_w[0, t] * mind.trust).sum() + (S.t_w[1, t] * mind.trust).sum() for t in ties))
+            known += conviction(mass, mind.cfg.k) >= 0.5
+    phrases = int(((kinds & COMPOSED).bool() & ~(kinds & SLOTTED).bool()).sum())
+    lines = ["  yaşanmış an: %d   gece (uyku döngüsü): %d" % (mind.t, getattr(mind, "nights", 0)),
+             "  karşılaştığı kelime: %d   kanaat kazandığı kelime (c >= 0.5): %d" % (words_seen, known),
+             "  kurduğu kavram (kategori): %d   çerçeve: %d   birleşik birim (dizi): %d" % (
+                 int((kinds & CATEGORY).bool().sum()), int((kinds & SLOTTED).bool().sum()), phrases),
+             "  bağ: %d   öz: %.1f MB" % (S.n_ties, mind.size()["core_tensors"] / 1e6),
+             "  (insan yaşı karşılığı verilmez: kaynaklı bir gelişim normu olmadan sayı uydurulmaz)"]
+    return "\n".join(lines)
 
 
 class Session:
@@ -126,6 +186,16 @@ class Session:
         start, lived, skipped = time.time(), 0, []
         for name in files:
             try:
+                if name.lower().endswith(".json"):
+                    import json
+                    with open(name, encoding="utf-8") as f:
+                        pairs = dialogues_of(json.load(f))
+                    for first, answer in pairs:
+                        self.watch(first, answer)
+                        lived += 1
+                    if not pairs:
+                        skipped.append(os.path.basename(name))
+                    continue
                 if name.lower().endswith(".tsv"):
                     with open(name, encoding="utf-8", errors="replace") as f:
                         for raw in f:
@@ -218,7 +288,7 @@ def main(argv=None) -> None:
         if not line:
             continue
         try:
-            if line.startswith("?"):
+            if line.startswith("?") and not chat:
                 print(session.ask(line[1:].strip()))
             elif line.startswith("!"):
                 cmd, _, rest = line[1:].partition(" ")
@@ -256,10 +326,14 @@ def main(argv=None) -> None:
                         print("  %3d  %s" % (number, text))
                 elif cmd in ("unut", "forget"):
                     print(session.forget(int(rest)))
+                elif cmd in ("yas", "yaş", "age"):
+                    print(profile(session.mind))
                 elif cmd in ("boyut", "size"):
                     print("  %d an, %s" % (session.mind.t, session.mind.size()))
                 elif cmd in ("kaydet", "save"):
                     print("  kaydedildi: %s" % save(session.mind, rest.strip()))
+                elif cmd in ("tasinabilir", "portable"):
+                    print("  taşınabilir kopya: %s" % export_portable(session.mind, rest.strip()))
                 elif cmd in ("yukle", "load"):
                     session = Session(load(rest.strip()))
                     print("  yüklendi: %d an" % session.mind.t)
