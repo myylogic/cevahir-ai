@@ -53,6 +53,9 @@ class Config:
     induct_cap: float = 1.0         # each instance counts at most one experience in induction
     general_miss: bool = False      # changed: a generalisation in the focus gets negative evidence for what
                                     # it expected and did not occur (the ordinary rule of step 5)
+    miss_scope: str = "focus"       # which generalisations get that negative evidence: those in the focus
+                                    # ("focus", changed) or every generalisation that received positive
+                                    # evidence from the episode ("gens", symmetric; see NOTES.md F7)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
     evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
     feel_focus: bool = True         # feelings compete for the focus like any event (as written)
@@ -85,6 +88,13 @@ class Config:
                     clear_on_pause=True, general_miss=True, select="specific")
         base.update(over)
         return cls(**base)
+
+    @classmethod
+    def symmetric(cls, **over) -> "Config":
+        """changed + F7: a generalisation is judged by every episode it learns from (NOTES.md)."""
+        base = dict(miss_scope="gens")
+        base.update(over)
+        return cls.changed(**base)
 
 
 class Mind:

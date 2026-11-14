@@ -115,6 +115,19 @@ F6. A copied act that never brings relief can never be given up as written: nega
 existing expectation, and the tie (S, X) -> relief does not exist before relief has occurred once. Change:
 `act_expect_relief=True`: acting is itself an expectation of relief, with the expectation the mind acted on.
 
+F7. (found after the first lives, 2026-11-14) Learning and reading disagree about which generalisations count.
+   A generalisation (frame or category) learns only while it holds a place in the focus (F = 7), but an instance
+   is READ with all of its generalisations (read.generalisations). A frame that won a place once collects positive
+   evidence and is never judged again, so it reports f = 1.00 for whatever it saw that once (white box, nitelik
+   seed 0: frames (C71, dim) -> yafi f 1.00 c 0.33, (ent, C266) -> labomac f 1.00). Read together, these spurious
+   frames push wrong values above 1/2 and an instance never told the dimension is answered at chance (T3 held-out
+   0.47-0.67). Change (miss_scope = "gens", variant "symmetric"): every generalisation an instance is read from
+   is judged by the same episode (positive for what occurred, negative for what it expected and did not occur).
+   After it the same frames are honest (class frame -> rule value f 0.83 c 0.75; spurious frames f 0.28-0.38 for
+   values). Second finding in the same probe: the "nested" combination (general -> specific by extension) lets a
+   weaker but smaller-extension generalisation pull the right value back below 1/2; pooling capped evidence
+   (support = "capped", variant "symmetric_pooled") is the alternative measured side by side.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit

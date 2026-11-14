@@ -143,7 +143,16 @@ def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel)
     S, cfg, cap = mind.S, mind.cfg, mind.cfg.induct_cap
     activation = {unit: a for unit, a, _ in mind.last_focus}
     missed = set()
-    for general, instance, e_abs in mind.last_gens:
+    gens = list(mind.last_gens)
+    if cfg.miss_scope == "gens":         # F7: every generalisation the instance is read from is judged by it
+        from .read import generalisations
+        listed = {(g, i) for g, i, _ in gens}
+        for instance in changes:
+            for general, e_abs in generalisations(mind, instance):
+                if (general, instance) not in listed:
+                    listed.add((general, instance))
+                    gens.append((general, instance, e_abs))
+    for general, instance, e_abs in gens:
         record = changes.get(instance)
         if record is None or e_abs <= 0.5:
             continue
@@ -156,8 +165,9 @@ def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel)
                 tie = S.find_tie(general, v, EXPECT, 1)
                 if tie >= 0:
                     add_evidence1(mind, W_NEG, slot_neg, tie, down)
-        if cfg.general_miss and general not in missed and general in activation:
+        if cfg.general_miss and general not in missed and (general in activation or cfg.miss_scope == "gens"):
             missed.add(general)
+            strength = activation[general] if general in activation else e_abs
             ties = S.out.get((general, EXPECT, 1), [])
             if not ties:
                 continue
@@ -167,7 +177,7 @@ def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel)
             e = expectation(w_pos, w_neg, cfg.k)
             channel = S.u_channel[dst]
             present = torch.tensor([occurred[d][0] if d in occurred else 0.0 for d in dst.tolist()], dtype=F64)
-            miss = mind.knob["gain"] * activation[general] * e * (1.0 - present)
+            miss = mind.knob["gain"] * strength * e * (1.0 - present)
             for ch, slot in slot_of_channel.items():
                 on = channel == ch
                 if bool(on.any()):
