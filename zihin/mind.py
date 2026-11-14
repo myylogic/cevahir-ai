@@ -47,7 +47,7 @@ class Config:
     theta: float = 1.0              # act threshold: one unit of accumulated net expectation
     decay: Optional[float] = None   # context decay per moment; None = 1 - 1/F (time constant = focus span)
     lam: float = 0.5                # support factor of section 4 (design: 0.5)
-    support: str = "raw"            # "raw" = as written, "capped" = changed, "none" = ablation
+    support: str = "raw"            # "raw" = as written; "capped", "nested" = changed; "none" = ablation
     predict: str = "votes"          # "votes" = as written, "specific" = changed
     neg_weight: str = "e"           # failed expectation weighted by e (as written) or by 1 ("one")
     induct_cap: float = 1.0         # each instance counts at most one experience in induction
@@ -81,7 +81,7 @@ class Config:
     @classmethod
     def changed(cls, **over) -> "Config":
         """The design with the smallest principled changes the prototype found necessary (NOTES.md)."""
-        base = dict(support="capped", predict="specific", evoke="grounded_first", feel_focus=False,
+        base = dict(support="nested", predict="specific", evoke="grounded_first", feel_focus=False,
                     clear_on_pause=True, general_miss=True, select="specific")
         base.update(over)
         return cls(**base)
@@ -375,7 +375,8 @@ class Mind:
             unique, inverse = torch.unique(ids, return_inverse=True)
             gained = torch.zeros(unique.numel(), dtype=F64).index_add_(0, inverse, gain)
             touched = int(unique.numel())
-            expect = S.t_form[unique] == EXPECT
+            kinds = [self.ch.kind(c) if c >= 0 else "" for c in S.u_channel[S.t_dst[unique]].tolist()]
+            expect = (S.t_form[unique] == EXPECT) & torch.tensor([k in ("sense", "act") for k in kinds])
             after = ((S.t_w[W_POS, unique] + S.t_w[W_NEG, unique]) * self.trust).sum(-1)
             before = torch.clamp(after - gained, min=0.0)
             relief = float((S.t_use[unique] * (conviction(after, k) - conviction(before, k)))[expect].sum())

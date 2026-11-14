@@ -23,7 +23,7 @@ import torch
 
 from .evidence import conviction, expectation, frequency
 from .form import categories_of
-from .store import CATEGORY, COMPOSED, EXPECT, I64, SLOTTED, W_NEG, W_POS
+from .store import ABSTRACT, CATEGORY, COMPOSED, EXPECT, I64, SLOTTED, W_NEG, W_POS
 
 
 def generalisations(mind, unit: int) -> List[Tuple[int, float]]:
@@ -62,6 +62,8 @@ def effective(mind, unit: int, trust: Optional[torch.Tensor] = None, support: Op
     """
     cfg = mind.cfg
     support = cfg.support if support is None else support
+    if support == "nested":                                # masses are only defined for the additive forms
+        support = "capped"
     mass = own_mass(mind, unit, 1, trust)
     kind = int(mind.S.u_kind[unit])
     if support == "none" or kind & (CATEGORY | SLOTTED):
@@ -78,6 +80,47 @@ def effective(mind, unit: int, trust: Optional[torch.Tensor] = None, support: Op
     return mass
 
 
+def extension(mind, general: int) -> int:
+    """How many instances a generalisation covers: the fillers of its category (of the category that stands
+    in, for a frame). Smaller = more specific."""
+    S = mind.S
+    if int(S.u_kind[general]) & CATEGORY:
+        return len(S.inc.get((general, ABSTRACT), ()))
+    sizes = [len(S.inc.get((p, ABSTRACT), ())) for p in S.parts(general) if int(S.u_kind[p]) & CATEGORY]
+    return min(sizes) if sizes else 0
+
+
+def expect_map(mind, unit: int) -> Dict[int, float]:
+    """Effective expectation of every lag-1 tie of ``unit``, by target.
+
+    With support "raw" / "capped" / "none" this is the expectation of the effective masses (section 4 as
+    written, or capped). With support "nested" (changed, see NOTES.md) the generalisations are read from the
+    most general to the most specific, each one moving the estimate towards its own frequency in proportion
+    to how much it has lived, and the instance's own evidence comes last:
+
+        e <- 1/2;   for g general -> specific:  e <- c_g f_g + (1 - c_g) e,   c_g = lam e(i -> g) conviction_g
+                    own evidence:               e <- c_own f_own + (1 - c_own) e
+
+    Without any generalisation this is exactly e = c (f - 1/2) + 1/2. The form is idempotent for copies of
+    the same category, lets the specific override the general, and lets own evidence override both.
+    """
+    cfg = mind.cfg
+    if cfg.support != "nested" or int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
+        return {v: expectation(p, n, cfg.k) for v, (p, n) in effective(mind, unit).items()}
+    own = own_mass(mind, unit)
+    gens = sorted(((extension(mind, g), g, e_abs) for g, e_abs in generalisations(mind, unit)),
+                  key=lambda x: (-x[0], x[1]))
+    out: Dict[int, float] = {}
+    for _, general, e_abs in gens:
+        for target, (w_pos, w_neg) in own_mass(mind, general).items():
+            c = cfg.lam * e_abs * conviction(w_pos + w_neg, cfg.k)
+            out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
+    for target, (w_pos, w_neg) in own.items():
+        c = conviction(w_pos + w_neg, cfg.k)
+        out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
+    return out
+
+
 def predictions(mind, mode: Optional[str] = None) -> Dict[int, float]:
     """Expectations for the next moment (section 2.3).
 
@@ -90,7 +133,7 @@ def predictions(mind, mode: Optional[str] = None) -> Dict[int, float]:
     if mode == "specific":
         if mind.context is None:
             return {}
-        return {v: expectation(p, n, cfg.k) for v, (p, n) in effective(mind, mind.context).items()}
+        return expect_map(mind, mind.context)
     votes: Dict[int, float] = {}
     for unit, a_u, grounded in mind.focus:
         if a_u <= 0.0:
@@ -111,18 +154,25 @@ def belief(mind, unit: int, target: int) -> Dict[str, float]:
         out[name + "_f"] = frequency(p, n)
         out[name + "_c"] = conviction(p + n, cfg.k)
         out[name + "_e"] = expectation(p, n, cfg.k)
+    out["eff_e"] = expect_map(mind, unit).get(target, 0.5)
     return out
 
 
 def drive_of(mind, unit: int) -> float:
-    """D(u) = sum over the lag-1 ties of u of use * (1 - conviction) (section 5)."""
+    """D(u) = sum over the lag-1 ties of u of use * (1 - conviction) (section 5).
+
+    Only ties to units of sense and act channels count: the drive is uncertainty about the world, not about
+    the mind's own feelings (otherwise feeling something would itself be a relief; see NOTES.md).
+    """
     S = mind.S
     ties = S.out.get((unit, EXPECT, 1), [])
     if not ties:
         return 0.0
     ids = torch.tensor(ties, dtype=I64)
+    world = torch.tensor([c >= 0 and mind.ch.kind(c) in ("sense", "act")
+                          for c in S.u_channel[S.t_dst[ids]].tolist()])
     total = ((S.t_w[W_POS, ids] + S.t_w[W_NEG, ids]) * mind.trust).sum(-1)
-    return float((S.t_use[ids] * (1.0 - conviction(total, mind.cfg.k))).sum())
+    return float((S.t_use[ids] * (1.0 - conviction(total, mind.cfg.k)))[world].sum())
 
 
 def total_drive(mind) -> float:

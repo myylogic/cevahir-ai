@@ -21,21 +21,28 @@ from typing import Dict, List, Tuple
 
 import torch
 
-from .events import INFERRED, REFERENCE, SENSED
+from .events import ACTED, REFERENCE, SENSED
 from .evidence import conviction, expectation
 from .store import ABSTRACT, C_NEG, C_POS, CATEGORY, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS
 
 
-def add_evidence(mind, table: int, slot: int, ids: torch.Tensor, amounts: torch.Tensor) -> torch.Tensor:
-    """Add evidence through the store; keep the relief bookkeeping; let direct experience judge the rest."""
+def add_evidence(mind, table: int, slot: int, ids: torch.Tensor, amounts: torch.Tensor,
+                 relief: bool = True) -> torch.Tensor:
+    """Add evidence through the store; keep the relief bookkeeping; let direct experience judge the rest.
+
+    ``relief`` False: the evidence is the echo of the mind's own act and says nothing about the world, so it
+    does not count as a decrease of the drive (see NOTES.md, finding on self-made relief).
+    """
     S = mind.S
     if ids.numel() == 0:
         return amounts
     amounts = S.add(table, slot, ids, amounts)  # snapped to the grid, aligned with ids
     if table in (W_POS, W_NEG):
-        mind._gained.append((ids, amounts * float(mind.trust[slot])))  # for relief (section 5)
-        if slot in REFERENCE and mind.cfg.learn_trust:
-            judge(mind, table, ids, amounts)
+        expect = S.t_form[ids] == EXPECT
+        if relief and bool(expect.any()):
+            mind._gained.append((ids[expect], amounts[expect] * float(mind.trust[slot])))  # for relief (section 5)
+        if slot in REFERENCE and mind.cfg.learn_trust and bool(expect.any()):
+            judge(mind, table, ids[expect], amounts[expect])  # only expectations are claims about the world
     return amounts
 
 
@@ -80,6 +87,8 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
         slot_of_channel.setdefault(channel, slot)
     if not mind.last_focus or not occurred:
         return
+    # channels on which the mind hears only itself in this moment (the echo of its own act)
+    echo = {ch for ch, slot in slot_of_channel.items() if slot == ACTED and mind.ch.kind(ch) in ("act", "knob")}
     changes: Dict[int, Dict[int, list]] = {}  # instance -> target -> raw masses before/after and slots
     for unit, a_u, grounded in mind.last_focus:
         if not grounded or a_u <= 0.0 or int(S.u_kind[unit]) & (CATEGORY | SLOTTED):
@@ -104,7 +113,7 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
                 on = channel == ch
                 if bool(on.any()):
                     reporting |= on
-                    got = add_evidence(mind, W_NEG, slot, ids[on], miss[on])
+                    got = add_evidence(mind, W_NEG, slot, ids[on], miss[on], relief=ch not in echo)
                     for d, rp, rn, m in zip(dst[on].tolist(), raw_pos[on].tolist(), raw_neg[on].tolist(),
                                             got.tolist()):
                         record[d] = [rp, rp, rn, rn + m, slot, slot]
@@ -117,7 +126,8 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
                 rp, rn = float(S.t_w[W_POS, tie].sum()), float(S.t_w[W_NEG, tie].sum())
                 record[v] = [rp, rp, rn, rn, slot, slot]
             got = add_evidence(mind, W_POS, slot, torch.tensor([tie], dtype=I64),
-                               torch.tensor([g * a_u * intensity], dtype=F64))
+                               torch.tensor([g * a_u * intensity], dtype=F64),
+                               relief=int(S.u_channel[v]) not in echo)
             record[v][1] += float(got[0])
             record[v][4] = slot
         changes[unit] = record
