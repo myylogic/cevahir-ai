@@ -20,3 +20,7 @@ imports changed, so re-run `tests/evolution/test_cev11_*.py` and the study's `ve
 then re-pin with the reason.
 
 Files here are LF on every platform (`.gitattributes`), so the digests in them are stable.
+
+What is **not** here: the registry (manifests, locations) and the audit log. They are machine
+state and live under `CEVAHIR_HOME`, outside the repository
+(`docs/architecture/KONSOL_VE_KAYIT.md`). The console reads them: `python -m cevahir_ai`.

@@ -17,9 +17,10 @@
 > declares no architecture, a target model whose architecture cannot be read is refused, a
 > tokenizer identity that nothing verified is refused, fp16 is never cast silently, and a load is
 > all or nothing (a failure after the gate puts the target model back as it was). The legacy
-> loaders are unchanged and are not governed. The registry, audit log, policy layer and the
-> PowerShell-like console are later phases and do not exist yet. Limits are listed in the last
-> section.
+> loaders are unchanged and are not governed. The registry, the audit log, lineage and the
+> PowerShell-like console came in the next two phases and are described in
+> `KONSOL_VE_KAYIT.md`; the policy layer (policies as data, approvals, signatures) does not exist
+> yet. Limits are listed in the last section.
 
 Bu sayfa, çatı paketinin ilk iki aşamasında (P1: güvenlik ağı ve paket iskeleti, P2: anahtar
 sistemi ve uyumluluk kapısı) depoya girenleri anlatır. Yapılmayanlar son bölümdedir.
@@ -362,17 +363,18 @@ verdict     compatible-with-warnings  (purpose: evaluate, level: compat)
 - **Eski yükleyiciler yönetilmiyor.** `ModelManager.load`, `ModelLoader`, eğitim sürdürme yolu ve
   `train.py` değişmedi; kapıdan yalnız `open_checkpoint` ve `inspect` geçer. Çıplak
   `state_dict` hâlâ `ModelManager.load` ile yanlış başlı modele yüklenebilir (testte gösterilir).
-- **Kayıt, denetim kaydı, soy ağacı, politika, onay, konsol yok.** `CEVAHIR_HOME` çözücüsü var
-  ama oraya hiçbir şey yazılmıyor. Anahtarlar hesaplanır, hiçbir yere kaydedilmez; eğitim
-  koşuları henüz `run`/`runspec` anahtarı üretmez, `prepare_cache` `cache:recipe-v1` yazmaz.
+- **Politika ve onay yok.** Kayıt, denetim kaydı, soy ağacı ve konsol sonraki iki aşamada geldi
+  ([KONSOL_VE_KAYIT.md](KONSOL_VE_KAYIT.md)); anahtarlar artık `Register-Artifact` ile
+  `CEVAHIR_HOME` altına kaydedilir. Eğitim koşuları henüz `run`/`runspec` anahtarı üretmez,
+  `prepare_cache` `cache:recipe-v1` yazmaz: bunlar yönetilen işlemlerle (P5) gelir.
 - **C2, C6, C8, C13, C14, C15 uygulanmadı** (imza, canlı mimari okuması, tokenizer davranış
   parmak izi, köken, değerlendirme eşiği, korunan yollar). `arch:live-v1` ve `tok:probe-v1`
   şemaları yok. C6 olmadığı için kurucu kaydı (`_ctor_cfg`) elle değiştirilmiş bir hedef model
   C5'i yanıltabilir; C4 yalnız şekli değişen farkları yakalar.
 - **Tasarımda adı geçip yapılmayan çatı adları:** `cevahir_ai.tokenizer.Tokenizer` (Protocol) ve
   `open_tokenizer`, `cevahir_ai.cognition.ModelAPI` (tek yapısal Protocol; beş ayrı tanım
-  duruyor), `cevahir_ai._deprecations`, `adapters/research.py`, `_compat/{locks, ids, clock,
-  console_io}.py`, `workers/`. Bunlar kayıt ve konsol aşamalarının parçalarıdır.
+  duruyor), `cevahir_ai._deprecations`, `adapters/research.py`, `_compat/{ids, console_io}.py`,
+  `workers/`.
 - **İzlenen tokenizer ve yan dosya, tokenizer argümanının yerini tutar ama aynı şey değildir.**
   Kapı checkpoint'in hangi tokenizer'a bağlı olduğunu ve o dosyaların yerinde durduğunu
   doğrular; çağıranın modeli sonradan o tokenizer'la kullanıp kullanmadığını göremez. Kesinlik
