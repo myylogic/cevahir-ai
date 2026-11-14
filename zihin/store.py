@@ -25,6 +25,7 @@ import torch
 from .evidence import EXACT_LIMIT, quantize, q
 
 EXPECT, PART, ABSTRACT = 0, 1, 2
+RELY = 3  # self-tie g -> g: how well generalisation g has predicted what its instances lived (F9)
 FORMS = ("EXPECT", "PART", "ABSTRACT")
 # Kind flags are consequences of how a unit came to be, not types chosen by hand.
 ATOMIC, COMPOSED, SLOTTED, CATEGORY, INDUCED = 1, 2, 4, 8, 16

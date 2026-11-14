@@ -140,6 +140,17 @@ F7 outcome (2026-11-14, seeds 0-1, exploratory). Negative. Judging every general
    (probe_reading.py): the generalisation that pins down a value most decisively (max lam e c f over sense/act
    targets) speaks. Symmetric runs were stopped after seeds 0-1; their records are kept as measured.
 
+F9. (2026-11-14) Which classification predicts which dimension is learned, by the same rule. The mind holds
+   many overlapping classes for one instance (F7 outcome); neither size (nested), amount lived (choice) nor
+   decisiveness (sharpest, F8) is a principled way to choose. F9 applies C3 to the mind's own generalisations:
+   when a composed instance lives a value v on a sense/act channel, each generalisation g it is read from is
+   judged by the expectation it held for v before that moment (w+ += e(i->g) e(g->v), w- += e(i->g)(1-e(g->v))
+   on a self-tie of a new form RELY, provenance "inferred", logged like all evidence). Reading ("reliable"): the
+   generalisation with the highest e(i->g) x reliability speaks for an instance; own evidence comes last. Nothing
+   in the core names a dimension or a class; reliability is a property each generalisation earns in the life.
+   Measured on 600-experience lives (5 seeds, 2 domains) and, following the owner's criterion (the outcome at the
+   end of a life matters, not the speed of learning), on 1500-experience lives against changed (results_long/).
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit

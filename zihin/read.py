@@ -23,7 +23,7 @@ import torch
 
 from .evidence import conviction, expectation, frequency
 from .form import categories_of
-from .store import ABSTRACT, CATEGORY, COMPOSED, EXPECT, I64, SLOTTED, W_NEG, W_POS
+from .store import ABSTRACT, CATEGORY, COMPOSED, EXPECT, I64, RELY, SLOTTED, W_NEG, W_POS
 
 
 def generalisations(mind, unit: int) -> List[Tuple[int, float]]:
@@ -62,7 +62,7 @@ def effective(mind, unit: int, trust: Optional[torch.Tensor] = None, support: Op
     """
     cfg = mind.cfg
     support = cfg.support if support is None else support
-    if support in ("nested", "choice"):                    # masses are only defined for the additive forms
+    if support in ("nested", "choice", "reliable"):                    # masses are only defined for the additive forms
         support = "capped"
     mass = own_mass(mind, unit, 1, trust)
     kind = int(mind.S.u_kind[unit])
@@ -105,6 +105,8 @@ def expect_map(mind, unit: int) -> Dict[int, float]:
     the same category, lets the specific override the general, and lets own evidence override both.
     """
     cfg = mind.cfg
+    if cfg.support == "reliable" and not int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
+        return reliable_map(mind, unit)
     if cfg.support == "choice" and not int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
         return choice_map(mind, unit)
     if cfg.support != "nested" or int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
@@ -118,6 +120,47 @@ def expect_map(mind, unit: int) -> Dict[int, float]:
             c = cfg.lam * e_abs * conviction(w_pos + w_neg, cfg.k)
             out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
     for target, (w_pos, w_neg) in own.items():
+        c = conviction(w_pos + w_neg, cfg.k)
+        out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
+    return out
+
+
+def reliability(mind, general: int) -> float:
+    """Expectation of the RELY self-tie of a generalisation (F9); 1/2 when it has never been judged."""
+    S = mind.S
+    ties = S.out.get((general, RELY, 0), [])
+    if not ties:
+        return 0.5
+    ids = torch.tensor(ties, dtype=I64)
+    w_pos = float((S.t_w[W_POS, ids] * mind.trust).sum())
+    w_neg = float((S.t_w[W_NEG, ids] * mind.trust).sum())
+    return expectation(w_pos, w_neg, mind.cfg.k)
+
+
+def reliable_map(mind, unit: int) -> Dict[int, float]:
+    """support = "reliable" (F9): the generalisation that has best predicted what its instances lived speaks.
+
+        g* = argmax over generalisations with sense/act targets of  e(i -> g) reliability(g)
+        e <- c f + (1 - c) 1/2 for every target of g*,  c = lam e(i -> g*) conviction(g* -> v)
+        own evidence of the instance last:  e <- c_own f_own + (1 - c_own) e
+    """
+    cfg, S = mind.cfg, mind.S
+    best = None
+    for general, e_abs in generalisations(mind, unit):
+        mass = {t: pn for t, pn in own_mass(mind, general).items()
+                if int(S.u_channel[t]) >= 0 and mind.ch.kind(int(S.u_channel[t])) in ("sense", "act")}
+        if not mass:
+            continue
+        score = e_abs * reliability(mind, general)
+        if best is None or score > best[0]:
+            best = (score, e_abs, general)
+    out: Dict[int, float] = {}
+    if best is not None:
+        _, e_abs, general = best
+        for target, (w_pos, w_neg) in own_mass(mind, general).items():
+            c = cfg.lam * e_abs * conviction(w_pos + w_neg, cfg.k)
+            out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
+    for target, (w_pos, w_neg) in own_mass(mind, unit).items():
         c = conviction(w_pos + w_neg, cfg.k)
         out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
     return out

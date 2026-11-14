@@ -21,9 +21,9 @@ from typing import Dict, List, Tuple
 
 import torch
 
-from .events import ACTED, REFERENCE, SENSED
+from .events import ACTED, INFERRED, REFERENCE, SENSED
 from .evidence import conviction, expectation
-from .store import ABSTRACT, C_NEG, C_POS, CATEGORY, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS
+from .store import ABSTRACT, C_NEG, C_POS, CATEGORY, COMPOSED, EXPECT, F64, I64, RELY, SLOTTED, W_NEG, W_POS
 
 
 def add_evidence(mind, table: int, slot: int, ids: torch.Tensor, amounts: torch.Tensor,
@@ -141,6 +141,8 @@ def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel)
     ABSTRACT relation. The evidence keeps the provenance class of the event that gave it to the instance.
     """
     S, cfg, cap = mind.S, mind.cfg, mind.cfg.induct_cap
+    if cfg.reliability:
+        judge_generalisations(mind, changes)
     activation = {unit: a for unit, a, _ in mind.last_focus}
     missed = set()
     gens = list(mind.last_gens)
@@ -183,6 +185,35 @@ def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel)
                 if bool(on.any()):
                     add_evidence(mind, W_NEG, slot, ids[on], miss[on])
                     S.use_ties(ids[on])
+
+
+def judge_generalisations(mind, changes: Dict[int, Dict[int, list]]) -> None:
+    """F9: the same rule applied to the mind's own generalisations.
+
+    For a composed instance that has just lived a value v on a sense/act channel, every generalisation g it is
+    read from is judged by the expectation it held for v before this moment: w+ += e(i->g) e(g->v),
+    w- += e(i->g) (1 - e(g->v)) on the self-tie g -> g of form RELY (provenance "inferred"). Its expectation is
+    how reliably g has predicted what its instances lived. Nothing says which classification fits which
+    dimension; that is learned here, per generalisation, from the mind's own life.
+    """
+    from .read import generalisations, own_mass
+    S, k = mind.S, mind.cfg.k
+    for instance, record in changes.items():
+        kind = int(S.u_kind[instance])
+        if not kind & COMPOSED or kind & SLOTTED:
+            continue
+        lived = [v for v, r in record.items() if r[1] > r[0] and int(S.u_channel[v]) >= 0
+                 and mind.ch.kind(int(S.u_channel[v])) in ("sense", "act")]
+        if not lived:
+            continue
+        for general, e_abs in generalisations(mind, instance):
+            mass = own_mass(mind, general)
+            tie = S.tie(general, general, RELY, 0)
+            for v in lived:
+                w_pos, w_neg = mass.get(v, (0.0, 0.0))
+                e = float(expectation(torch.tensor(w_pos, dtype=F64), torch.tensor(w_neg, dtype=F64), k))
+                add_evidence1(mind, W_POS, INFERRED, tie, e_abs * e)
+                add_evidence1(mind, W_NEG, INFERRED, tie, e_abs * (1.0 - e))
 
 
 def learn_together(mind, focus: List[Tuple[int, float, bool]], slot: int) -> None:

@@ -34,6 +34,7 @@ PROV = {"told": TOLD, "sensed": SENSED, "imitated": IMITATED}
 VARIANTS = {"as_written": lambda **kw: Config(**kw), "changed": lambda **kw: Config.changed(**kw),
             "symmetric": lambda **kw: Config.symmetric(**kw),
             "symmetric_pooled": lambda **kw: Config.symmetric(**dict(dict(support="capped"), **kw)),
+            "reliable": lambda **kw: Config.reliable(**kw),
             "symmetric_choice": lambda **kw: Config.symmetric(**dict(dict(support="choice"), **kw))}
 CHANNEL = "text"
 
