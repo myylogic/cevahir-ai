@@ -162,6 +162,13 @@ F10. (2026-11-14) Acquisition versus meaning (owner: "the deciding consciousness
    Remaining suspect: frames outside the focus never get negative evidence (F7), so their f is not meaningful;
    honest_reflective / honest_trusted (F7 + F10) under test.
 
+F10b. (2026-11-14) Relative verdicts (share of g's evidence that went to the lived value) and "only generalisations
+   with reliability > 1/2 speak": measured WORSE on 600-experience lives (reflective iliski 46/80 -> 26/80, nitelik
+   41/60 -> 30/60; honest_reflective iliski 42 -> 20, nitelik 29 -> 25). Silencing unproven generalisations leaves
+   most held-out answers at 1/2. Kept behind flags (verdict = "share", proven_only = True), default back to F10.
+   Honest frames (F7) raise the right-on-top share of the class frame to 90-93% (oracle), but selection stays at
+   35-43% in every reading tried. Records: results/oracle_t3.jsonl.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit

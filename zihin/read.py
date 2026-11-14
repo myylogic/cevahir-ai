@@ -155,7 +155,7 @@ def reliable_map(mind, unit: int) -> Dict[int, float]:
         if not mass:
             continue
         r = reliability(mind, general)
-        if r <= 0.5:                                       # not shown better than its alternatives: no voice
+        if mind.cfg.proven_only and r <= 0.5:              # F10b (measured worse): unproven ones have no voice
             continue
         score = e_abs * r
         if best is None or score > best[0]:

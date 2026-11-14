@@ -60,6 +60,8 @@ class Config:
                                     # instance then lived (evidence on its RELY self-tie); read with "reliable"
     reflect: int = 0                # F10: in each idle moment re-read this many lived instances with the
                                     # generalisations the mind has NOW (needs reliability)
+    verdict: str = "opinion"        # F10 "opinion" (default) or F10b "share"; see learn._verdict
+    proven_only: bool = False       # F10b: only generalisations with reliability > 1/2 speak (measured worse)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
     evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
     feel_focus: bool = True         # feelings compete for the focus like any event (as written)
