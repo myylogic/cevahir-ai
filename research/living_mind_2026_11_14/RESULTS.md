@@ -153,3 +153,30 @@ operating self with control knobs) remains to be built.
 
 No interference: after living B, A's facts told once early are bit-identical (10/10 lives), A's held-out answers are
 unchanged (10/10), members and exceptions 1.00. A second domain does not overwrite the first.
+
+## Against Transformer baselines on the identical stream (`baseline_transformer.py`, `results/baseline_*.jsonl`)
+
+Same worlds and schedules (600 experiences, 5 seeds per domain), same probes, same criterion for every system: the
+right value must be the top one among the values of the asked dimension. Zihin = variant "members" (F11). Online =
+a small causal Transformer (2 layers, width 64, 4 heads) trained one step per utterance as it arrives. Offline = the
+same architecture trained from scratch on the whole stream until the loss stopped falling (55-59 epochs).
+
+| | held-out, told rule | held-out, induced rule | members | exceptions | facts told once early |
+|---|---|---|---|---|---|
+| nitelik Zihin | **0.90** | **0.97** | 1.00 | 1.00 | 1.00 |
+| nitelik online Transformer | 0.67 | 0.57 | 0.82 | 0.66 | 0.44 |
+| nitelik offline Transformer | 0.77 | 0.67 | 1.00 | 1.00 | 1.00 |
+| iliski Zihin | **0.75** | **0.95** | 1.00 | 1.00 | 1.00 |
+| iliski online Transformer | 0.60 | 0.50 | 0.78 | 0.80 | 0.46 |
+| iliski offline Transformer | 0.53 | 0.53 | 1.00 | 1.00 | 1.00 |
+
+Interference (T6, nitelik then iliski, 5 seeds): A's members after living B: Zihin 1.00 -> 1.00, online Transformer
+0.85 -> 0.74. Retraction of one experience (T9): Zihin 20-77 ms, exact; the Transformer's exact counterpart is
+retraining from scratch without it, 4.4-4.7 s (55-59 epochs) at this size, growing with the data.
+
+Reading: in this regime (little data, learning while living, generated worlds) the mind generalises better to
+instances it never saw than both baselines, matches the converged snapshot on what was told, keeps a first domain
+intact where the online Transformer forgets, and retracts exactly at a small fixed cost. Limits, stated: the
+Transformers are small and not tuned to the probes (standard choices), they are given the whole vocabulary in
+advance; with far more data a Transformer may close the held-out gap; 6-8 held-out probes per life. This is a
+comparison in the small-data living regime, not a claim that the mind is better than Transformers in general.
