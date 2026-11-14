@@ -1,6 +1,6 @@
 # Roof package metadata and tool configuration. Runtime dependencies of the model, tokenizer,
 # training and API code live in requirements*.txt (see README "Getting started"); the roof core
-# (cevahir_ai: keys, gate, evidence) needs only the standard library.
+# (cevahir_ai: keys, gate, evidence, registry, console) needs only the standard library.
 
 [build-system]
 requires = ["setuptools>=69"]
@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cevahir-ai"
 dynamic = ["version"]
-description = "Cevahir AI roof package: unversioned facades, the central key system and the compatibility gate"
+description = "Cevahir AI roof package: unversioned facades, the central key system, the compatibility gate, the registry and the console"
 requires-python = ">=3.11"
 dependencies = []
 
@@ -22,7 +22,7 @@ cevahir = "cevahir_ai.__main__:main"
 include = ["cevahir_ai*"]
 
 [tool.setuptools.package-data]
-cevahir_ai = ["keys/schemas/**/*.json"]
+cevahir_ai = ["keys/schemas/**/*.json", "console/help/**/*.md"]
 
 [tool.setuptools.dynamic]
 version = {attr = "cevahir_ai.__version__"}

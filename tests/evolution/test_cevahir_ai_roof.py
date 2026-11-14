@@ -53,7 +53,7 @@ print(json.dumps({"elapsed": elapsed, "modules": sorted(sys.modules), "handlers"
     assert not loaded & set(LEGACY), f"the roof imported a legacy package: {sorted(loaded & set(LEGACY))}"
     assert report["handlers"] == 0 and report["level"] == 30, "importing the roof configured logging"
     assert report["elapsed"] < 1.0, f"roof import took {report['elapsed']:.2f}s"
-    assert report["version"] == "0.3.0"
+    assert report["version"] == "0.4.0"
 
 
 def test_architecture_key_is_computed_without_torch():
@@ -71,7 +71,7 @@ print(key, len(normalized), fields["num_heads"])
 
 def test_version_entry_point():
     result = subprocess.run([sys.executable, "-m", "cevahir_ai", "--version"], cwd=ROOT, env=ENV, capture_output=True, text=True)
-    assert result.returncode == 0 and result.stdout.strip() == "0.3.0"
+    assert result.returncode == 0 and result.stdout.strip() == "0.4.0"
     usage = subprocess.run([sys.executable, "-m", "cevahir_ai", "nonsense"], cwd=ROOT, env=ENV, capture_output=True, text=True)
     assert usage.returncode == 2
     schemes = subprocess.run([sys.executable, "-m", "cevahir_ai", "keys", "schemes"], cwd=ROOT, env=ENV, capture_output=True, text=True)

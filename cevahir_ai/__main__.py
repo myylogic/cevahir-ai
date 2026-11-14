@@ -1,4 +1,11 @@
-"""``python -m cevahir_ai``: version and a passthrough to the key CLI (the console arrives later)."""
+"""``python -m cevahir_ai`` and the ``cevahir`` command: the console, and a passthrough to the key CLI.
+
+    cevahir                         the interactive console (see ``cevahir -Help``)
+    cevahir -Command "..."          one line of the console language
+    cevahir -File script.ps1        a script
+    cevahir keys <inspect|...>      the key CLI of ``python -m cevahir_ai.keys``
+    cevahir --version
+"""
 import sys
 
 
@@ -7,12 +14,8 @@ def main(argv=None):
     if argv[:1] == ["keys"]:
         from cevahir_ai.keys.cli import main as keys_main
         return keys_main(argv[1:])
-    if argv in (["--version"], ["-V"]):
-        from cevahir_ai import __version__
-        print(__version__)
-        return 0
-    print("usage: python -m cevahir_ai --version | keys <inspect|verify|explain|diff|schemes> ...", file=sys.stderr)
-    return 0 if argv in (["-h"], ["--help"]) else 2
+    from cevahir_ai.console.main import main as console_main
+    return console_main(argv)
 
 
 if __name__ == "__main__":

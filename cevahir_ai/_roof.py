@@ -135,5 +135,5 @@ RESPONSIBILITIES = (
                    ("model.cevahir", "api.app_factory", "chatting_management.chatting_manager"), "facade"),
     Responsibility("R-AUDIT", "Registry, audit log and lineage", "cevahir_ai.store", (), "owned"),
     Responsibility("R-POLICY", "Policy and approvals", "cevahir_ai.gov", ("training_management.contracts",), "planned"),
-    Responsibility("R-OPERATOR", "Operator console", "cevahir_ai.console", (), "planned"),
+    Responsibility("R-OPERATOR", "Operator console", "cevahir_ai.console", (), "owned"),
 )
