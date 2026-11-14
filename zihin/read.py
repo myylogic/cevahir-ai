@@ -62,7 +62,7 @@ def effective(mind, unit: int, trust: Optional[torch.Tensor] = None, support: Op
     """
     cfg = mind.cfg
     support = cfg.support if support is None else support
-    if support == "nested":                                # masses are only defined for the additive forms
+    if support in ("nested", "choice"):                    # masses are only defined for the additive forms
         support = "capped"
     mass = own_mass(mind, unit, 1, trust)
     kind = int(mind.S.u_kind[unit])
@@ -105,6 +105,8 @@ def expect_map(mind, unit: int) -> Dict[int, float]:
     the same category, lets the specific override the general, and lets own evidence override both.
     """
     cfg = mind.cfg
+    if cfg.support == "choice" and not int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
+        return choice_map(mind, unit)
     if cfg.support != "nested" or int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
         return {v: expectation(p, n, cfg.k) for v, (p, n) in effective(mind, unit).items()}
     own = own_mass(mind, unit)
@@ -116,6 +118,29 @@ def expect_map(mind, unit: int) -> Dict[int, float]:
             c = cfg.lam * e_abs * conviction(w_pos + w_neg, cfg.k)
             out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
     for target, (w_pos, w_neg) in own.items():
+        c = conviction(w_pos + w_neg, cfg.k)
+        out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
+    return out
+
+
+def choice_map(mind, unit: int) -> Dict[int, float]:
+    """support = "choice" (F7): for each target, the generalisation that has lived most about it speaks.
+
+        best g = argmax over generalisations of  lam e(i -> g) conviction(g -> v)
+        e <- c_g f_g + (1 - c_g) 1/2;   own evidence:  e <- c_own f_own + (1 - c_own) e
+
+    Competing generalisations are not summed and not ordered by size: the most experienced one is chosen (the
+    choice rule of NARS between competing beliefs). Own evidence of the instance always comes last.
+    """
+    cfg = mind.cfg
+    best: Dict[int, Tuple[float, float]] = {}
+    for general, e_abs in generalisations(mind, unit):
+        for target, (w_pos, w_neg) in own_mass(mind, general).items():
+            c = cfg.lam * e_abs * conviction(w_pos + w_neg, cfg.k)
+            if c > best.get(target, (-1.0, 0.0))[0]:
+                best[target] = (c, frequency(w_pos, w_neg))
+    out = {t: c * f + (1.0 - c) * 0.5 for t, (c, f) in best.items()}
+    for target, (w_pos, w_neg) in own_mass(mind, unit).items():
         c = conviction(w_pos + w_neg, cfg.k)
         out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
     return out
