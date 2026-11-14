@@ -201,6 +201,22 @@ F13. (2026-11-14) "Comes next" is learned only by what was the present a moment 
    text). Found while building the chat; on in the "speaking" variant only so far; the T1-T9 lives have not yet been
    rerun with it.
 
+F14. (2026-11-14) A failed prediction is recorded only where something was expected (neg_floor, speaking variant
+   1/14 = 1/(2F), a default, not tuned). Found while reading real documents: a frequent word ("ve", "bir") has
+   thousands of followers, and as written every moment wrote a small negative increment to all of them (and logged
+   it), so time and the ledger grew with the mind (about 180 KB of ledger per moment at 1.3 million ties, 11 GB on
+   disk before the disk filled). With the floor the structure is the same (identical number of ties after 500
+   report sentences: 140 213), 100 sentences take 11.5 s instead of 40.2 s, and the ledger is about 13 KB per moment.
+   Cost, stated: rare followers no longer collect negatives once their expectation is below the floor, so their
+   expectation settles near the floor instead of near their true small frequency; predictions above 1/2, the F11
+   member reading (positive shares) and acts are unaffected. The T1-T9 worlds have not been rerun with it.
+Incident (2026-11-14, recorded as it happened): two loads of the same saved mind wrote into the same live ledger
+   file (a fixed name); exporting a conversation copy overwrote and then deleted the live ledger of the running
+   curriculum. The substance of that mind was intact (digest verified), its ledger was not; it was discarded and
+   the curriculum is lived again. Fixed: every load gets its own live ledger file; minds can be loaded without a
+   ledger for conversation; a mind saved without a ledger starts a fresh one when loaded (new experiences remain
+   exactly retractable, the documents of its childhood are not).
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit
