@@ -140,6 +140,53 @@ F7 outcome (2026-11-14, seeds 0-1, exploratory). Negative. Judging every general
    (probe_reading.py): the generalisation that pins down a value most decisively (max lam e c f over sense/act
    targets) speaks. Symmetric runs were stopped after seeds 0-1; their records are kept as measured.
 
+F9. (2026-11-14) Which classification predicts which dimension is learned, by the same rule. The mind holds
+   many overlapping classes for one instance (F7 outcome); neither size (nested), amount lived (choice) nor
+   decisiveness (sharpest, F8) is a principled way to choose. F9 applies C3 to the mind's own generalisations:
+   when a composed instance lives a value v on a sense/act channel, each generalisation g it is read from is
+   judged by the expectation it held for v before that moment (w+ += e(i->g) e(g->v), w- += e(i->g)(1-e(g->v))
+   on a self-tie of a new form RELY, provenance "inferred", logged like all evidence). Reading ("reliable"): the
+   generalisation with the highest e(i->g) x reliability speaks for an instance; own evidence comes last. Nothing
+   in the core names a dimension or a class; reliability is a property each generalisation earns in the life.
+   Measured on 600-experience lives (5 seeds, 2 domains) and, following the owner's criterion (the outcome at the
+   end of a life matters, not the speed of learning), on 1500-experience lives against changed (results_long/).
+
+F10. (2026-11-14) Acquisition versus meaning (owner: "the deciding consciousness making sense of what it has
+   acquired is an art of its own"). oracle_t3.py shows the right knowledge for a held-out instance is in the core
+   (class frame exists 100%, right on top 80%) but is selected in 30-53%. Four steps tried, all logged:
+   (a) F9 judged with e(g -> v): reliabilities stay at 1/2 because most generalisations have no opinion on v when
+   judged (raw w+ = w- = 1.45 on average); (b) reflection: idle moments re-read lived instances with the present
+   generalisations, leaving out the instance's own contribution (reflective); (c) trusted pooling: generalisations
+   pooled like provenance classes with tau_g = max(0, 2 r_g - 1) (trusted); (d) verdicts only where g has an
+   opinion on the channel, w+ = c f(g -> v), w- = c (1 - f). Right answers 58-73%, no reading uniformly better.
+   Remaining suspect: frames outside the focus never get negative evidence (F7), so their f is not meaningful;
+   honest_reflective / honest_trusted (F7 + F10) under test.
+
+F10b. (2026-11-14) Relative verdicts (share of g's evidence that went to the lived value) and "only generalisations
+   with reliability > 1/2 speak": measured WORSE on 600-experience lives (reflective iliski 46/80 -> 26/80, nitelik
+   41/60 -> 30/60; honest_reflective iliski 42 -> 20, nitelik 29 -> 25). Silencing unproven generalisations leaves
+   most held-out answers at 1/2. Kept behind flags (verdict = "share", proven_only = True), default back to F10.
+   Honest frames (F7) raise the right-on-top share of the class frame to 90-93% (oracle), but selection stays at
+   35-43% in every reading tried. Records: results/oracle_t3.jsonl.
+
+F10c. (2026-11-14) Sleep as re-reading (variant "sleeping": reflect 8 instances per idle moment, a night of 50 silent
+   moments every 100 experiences): iliski 43/80, nitelik 40/60 right, no better than daytime reflection (46/80,
+   41/60). Five readings and two judging rules have now left selection of the right generalisation at 35-45%.
+   Conclusion: the reading is not the bottleneck; the STRUCTURE being read is. One category per slot position gives
+   about a thousand frames in 600 experiences, many with identical members or resting on a few observations, all
+   competing with the class frame. Next: consolidation of categories (sleep merges categories with the same members).
+
+F11. (2026-11-14) A category speaks with what its members have lived, read at read time. Found from the honest
+   frames (F7): reliability ranked the class frame first, but its absolute frequency for the right value had eroded
+   to 0.30-0.36, because induction caps positive evidence at one experience per instance while negative evidence
+   from failed predictions is not capped and grows with every repetition. Change (support = "members"): a frame
+   with one category position does not use its own accumulated counts; its expectation is computed when read from
+   its members' own beliefs: W+(v) = sum_x e(x -> C) s_x(v), W-(v) = sum_x e(x -> C)(1 - s_x(v)), s_x the share of
+   member x's own positive evidence that went to v; every member counts once with both signs; the instance being
+   read is left out. The frame whose members agree most speaks (e(i->g) x conviction(members) x max f); own evidence
+   comes last. No storage, nothing to retract. Held-out T3 on 600-experience lives (5 seeds, oracle_t3.py):
+   nitelik 56/60 (93%), iliski 65/80 (81%), against the best earlier reading 44/60 and 46/80.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit

@@ -34,6 +34,13 @@ PROV = {"told": TOLD, "sensed": SENSED, "imitated": IMITATED}
 VARIANTS = {"as_written": lambda **kw: Config(**kw), "changed": lambda **kw: Config.changed(**kw),
             "symmetric": lambda **kw: Config.symmetric(**kw),
             "symmetric_pooled": lambda **kw: Config.symmetric(**dict(dict(support="capped"), **kw)),
+            "reliable": lambda **kw: Config.reliable(**kw),
+            "reflective": lambda **kw: Config.reflective(**kw),
+            "honest_reflective": lambda **kw: Config.reflective(**dict(dict(miss_scope="gens"), **kw)),
+            "honest_trusted": lambda **kw: Config.reflective(**dict(dict(miss_scope="gens", support="trusted"), **kw)),
+            "members": lambda **kw: Config.changed(**dict(dict(support="members"), **kw)),
+            "sleeping": lambda **kw: Config.reflective(**dict(dict(reflect=8), **kw)),
+            "trusted": lambda **kw: Config.reflective(**dict(dict(support="trusted"), **kw)),
             "symmetric_choice": lambda **kw: Config.symmetric(**dict(dict(support="choice"), **kw))}
 CHANNEL = "text"
 
@@ -206,8 +213,12 @@ def checkpoint(world: World, mind: Mind, state: dict, at: int) -> List[dict]:
 
 
 def live(world: World, variant: str, n: int, checkpoints: int = 10, skip: Optional[int] = None,
-         record: bool = True, **over) -> Tuple[Mind, List[dict], dict]:
-    """Live the schedule. ``skip`` leaves one experience out (the counterfactual life of T9)."""
+         record: bool = True, night_every: int = 0, night_length: int = 0, **over) -> Tuple[Mind, List[dict], dict]:
+    """Live the schedule. ``skip`` leaves one experience out (the counterfactual life of T9).
+
+    Sleep (LAYERS.md L7): after every ``night_every`` experiences the world is silent for ``night_length``
+    moments; the mind's idle processes (reflection, F10) run on what it has lived. Nothing is presented at night.
+    """
     mind = Mind(VARIANTS[variant](**over))
     mind.add_channel(CHANNEL, "act")
     schedule = world.schedule(n)
@@ -215,6 +226,9 @@ def live(world: World, variant: str, n: int, checkpoints: int = 10, skip: Option
     rows: List[dict] = []
     every = max(1, len(schedule) // checkpoints)
     for index, x in enumerate(schedule):
+        if night_every and index and index % night_every == 0:
+            for _ in range(night_length):
+                mind.step([])
         if index == skip:
             continue
         before = None
