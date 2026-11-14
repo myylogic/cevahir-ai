@@ -213,14 +213,16 @@ def checkpoint(world: World, mind: Mind, state: dict, at: int) -> List[dict]:
 
 
 def live(world: World, variant: str, n: int, checkpoints: int = 10, skip: Optional[int] = None,
-         record: bool = True, night_every: int = 0, night_length: int = 0, **over) -> Tuple[Mind, List[dict], dict]:
+         record: bool = True, night_every: int = 0, night_length: int = 0, mind: Optional[Mind] = None,
+         **over) -> Tuple[Mind, List[dict], dict]:
     """Live the schedule. ``skip`` leaves one experience out (the counterfactual life of T9).
 
     Sleep (LAYERS.md L7): after every ``night_every`` experiences the world is silent for ``night_length``
     moments; the mind's idle processes (reflection, F10) run on what it has lived. Nothing is presented at night.
     """
-    mind = Mind(VARIANTS[variant](**over))
-    mind.add_channel(CHANNEL, "act")
+    if mind is None:                                   # a new mind; otherwise the same mind lives on (T6)
+        mind = Mind(VARIANTS[variant](**over))
+        mind.add_channel(CHANNEL, "act")
     schedule = world.schedule(n)
     state = {"heard": {}, "isa": {}, "early": {}, "times": [], "time_mark": 0, "moments": {}, "lie_value": {}}
     rows: List[dict] = []

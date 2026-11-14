@@ -62,6 +62,9 @@ class Config:
                                     # generalisations the mind has NOW (needs reliability)
     verdict: str = "opinion"        # F10 "opinion" (default) or F10b "share"; see learn._verdict
     proven_only: bool = False       # F10b: only generalisations with reliability > 1/2 speak (measured worse)
+    next_only_present: bool = False # F13: EXPECT lag 1 is learned only by the previous context and the previous
+                                    # item, not by older units still carried in the focus (no skip-gram smear)
+    bind_repeats: bool = False      # F12: a unit occurring at several positions of a tuple is one slot (variable)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
     evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
     feel_focus: bool = True         # feelings compete for the focus like any event (as written)
@@ -123,6 +126,7 @@ class Mind:
     def __init__(self, cfg: Optional[Config] = None) -> None:
         self.cfg = cfg if cfg is not None else Config()
         self.S = Substance(n_slots=N_PROV, keep_log=self.cfg.keep_log)
+        self.S.bind_repeats = self.cfg.bind_repeats
         self.ch = Channels()
         self.t = 0
         self.knob = {"F": self.cfg.F, "theta": self.cfg.theta, "gain": self.cfg.gain}
@@ -308,7 +312,12 @@ class Mind:
                 for category, e in cats.get(part, []):
                     a_frame = (sum(base.get(p, 0.0) for j, p in enumerate(parts) if j != pos)
                                + base.get(part, 0.0) * (2.0 * e - 1.0)) / len(parts)
-                    frame_parts = parts[:pos] + (category,) + parts[pos + 1:]
+                    if cfg.bind_repeats:
+                        if part in parts[:pos]:
+                            continue                       # the slot of this unit was built at its first position
+                        frame_parts = tuple(category if q == part else q for q in parts)
+                    else:
+                        frame_parts = parts[:pos] + (category,) + parts[pos + 1:]
                     frame = S.tuple_index.get(frame_parts)
                     if frame is None:
                         if not cfg.typed_frames:

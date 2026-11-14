@@ -51,7 +51,13 @@ def decide(mind) -> List[Event]:
     S, cfg = mind.S, mind.cfg
     theta, T = mind.knob["theta"], cfg.T
     candidates = {}
-    if mind.context is not None:
+    if mind.context is not None and cfg.support == "members" and cfg.bind_repeats:
+        from .read import members_map                      # F12: speak with what the frame's members lived
+        for unit, e in members_map(mind, mind.context).items():
+            channel = int(S.u_channel[unit])
+            if channel >= 0 and mind.ch.kind(channel) == "act" and e > 0.5:
+                candidates[unit] = e
+    elif mind.context is not None:
         only_imitated = torch.zeros(N_PROV, dtype=F64)
         only_imitated[IMITATED] = mind.trust[IMITATED]
         for unit, (w_pos, w_neg) in effective(mind, mind.context, trust=only_imitated).items():

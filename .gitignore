@@ -47,3 +47,9 @@ runs/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Zihin: private training data and saved minds (a saved mind contains what it learned) are never committed
+private_data/
+*.zihin
+*.zihin.json
+*.zihin.tmp

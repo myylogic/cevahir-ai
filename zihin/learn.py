@@ -90,8 +90,13 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
     # channels on which the mind hears only itself in this moment (the echo of its own act)
     echo = {ch for ch, slot in slot_of_channel.items() if slot == ACTED and mind.ch.kind(ch) in ("act", "knob")}
     changes: Dict[int, Dict[int, list]] = {}  # instance -> target -> raw masses before/after and slots
+    was_present = None
+    if cfg.next_only_present:               # F13: "comes next" is learned by what WAS the present a moment ago
+        was_present = {u for u in (mind.context, mind.episode[-1] if mind.episode else None) if u is not None}
     for unit, a_u, grounded in mind.last_focus:
         if not grounded or a_u <= 0.0 or int(S.u_kind[unit]) & (CATEGORY | SLOTTED):
+            continue
+        if was_present is not None and unit not in was_present:
             continue
         record: Dict[int, list] = {}
         ties = S.out.get((unit, EXPECT, 1), [])

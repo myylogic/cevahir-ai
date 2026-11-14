@@ -187,6 +187,20 @@ F11. (2026-11-14) A category speaks with what its members have lived, read at re
    comes last. No storage, nothing to retract. Held-out T3 on 600-experience lives (5 seeds, oracle_t3.py):
    nitelik 56/60 (93%), iliski 65/80 (81%), against the best earlier reading 44/60 and 46/80.
 
+F12. (2026-11-14) Relations, not words, can be what members share (bind_repeats, terminal variant "speaking").
+   A unit occurring at several positions of a tuple is one slot (a variable), so (kedi ne yapar kedi) and
+   (kopek ne yapar kopek) give the frame (C ne yapar C). In the F11 member reading a member's value that IS the member
+   counts as SELF and a value that is one of the member's own continuations (not a fixed word of the frame) counts as
+   NEXT; reading an instance resolves SELF to the word in its slot and NEXT to that word's strongest continuation.
+   Speaking uses the same reading. Nothing names a word or a language. First chat (results/second_chat.txt): after
+   watching 5 dialogues three times and being told "kus oter", "at kisner", it answers "kus ne yapar" with "kus oter"
+   and "at ne yapar" with "at kisner" (never watched), and "inek ne yapar" with "inek" and silence (nothing known).
+F13. (2026-11-14) "Comes next" is learned only by what was the present a moment ago (next_only_present): the previous
+   context and the previous item. As written every unit still carried in the focus learned lag-1 ties, so a context
+   also expected the word two steps ahead (the question expected the answer's second word; "kedi" -> "icer" in free
+   text). Found while building the chat; on in the "speaking" variant only so far; the T1-T9 lives have not yet been
+   rerun with it.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit
