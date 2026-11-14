@@ -33,6 +33,9 @@ FAMILIES = ("WF", "PF6", "PF5", "IF5", "RN", "RD", "RB", "RC")
 STREAM_ARMS = ("FEC-TOP+RLS", "FEC-A+RLS", "FEC-TOP", "FEC-TOP+RLS+G", "HEBB-TOP+RLS", "HEBB-0+RLS", "BP-1+RLS",
                "FT-L-seq", "RLSEdit")
 FEC_STREAM = ("FEC-TOP+RLS", "FEC-A+RLS")
+# stream arms whose step is the Frobenius norm of a unit-normalised write (they share one step cap)
+NORMALISED_STREAM_ARMS = ("FEC-TOP+RLS", "FEC-A+RLS", "FEC-TOP", "FEC-TOP+RLS+G", "HEBB-TOP+RLS", "HEBB-0+RLS",
+                          "BP-1+RLS")
 COMPARATORS = ("FT-L-seq", "BP-1+RLS", "RLSEdit", "HEBB-TOP+RLS", "HEBB-0+RLS")
 GATE_ARMS = ("FEC-TOP+RLS", "FEC-A+RLS")
 THETAS = (0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95)
@@ -144,6 +147,7 @@ def load_base(world: int, base_dir: Optional[pathlib.Path] = None):
         raise FileNotFoundError(f"{path / 'model.pt'} not found: set CEV_BASES to the folder that holds the "
                                 f"CEV-11 bases (the weights are not in the repository)")
     base = E.load_base(path, REPO)
+    check_base_world(base, world, path)
     gates = json.loads((path / "gates.json").read_text(encoding="utf-8"))
     if not gates.get("all_pass", False):
         raise RuntimeError(f"{path.name}: the CEV-11 base gates did not pass")
@@ -151,6 +155,15 @@ def load_base(world: int, base_dir: Optional[pathlib.Path] = None):
     if not editable:
         raise RuntimeError(f"{path.name}: no editable entity list in gates.json")
     return base, sorted(editable)
+
+
+def check_base_world(base, world: int, where="base") -> None:
+    """A base belongs to exactly one world (the seed of its world file). Without this check ``--base`` could put
+    a confirmatory base under a discovery or smoke run, which would break the blinding."""
+    seed = getattr(base.world, "seed", None)
+    if seed != world:
+        raise RuntimeError(f"{where}: this base was pre-trained for world {seed!r}, not for world {world}; "
+                           f"a run may only use the base of its own world")
 
 
 # -------------------------------------------------------------------------------------------------------- records
@@ -242,12 +255,37 @@ def read_records(path: pathlib.Path) -> List[dict]:
     return out
 
 
+def repair_tail(path: pathlib.Path) -> Optional[str]:
+    """A process killed in the middle of a write leaves a last line without its newline. If that line is a
+    complete record the newline is added; otherwise the fragment is cut off (its record will be made again).
+    Returns what was done ("completed" / "dropped") or None when the file ends cleanly. Lines that end with a
+    newline are never touched: a damaged line in the middle of a file stays an error."""
+    path = pathlib.Path(path)
+    if not path.exists():
+        return None
+    data = path.read_bytes()
+    if not data or data.endswith(b"\n"):
+        return None
+    cut = data.rfind(b"\n") + 1
+    try:
+        validate_record(json.loads(data[cut:].decode("utf-8")))
+    except (ValueError, UnicodeDecodeError):
+        with path.open("r+b") as f:
+            f.truncate(cut)
+        return "dropped"
+    with path.open("ab") as f:
+        f.write(b"\n")
+    return "completed"
+
+
 class RecordWriter:
-    """Append-only JSONL with resume: a key that is already in the file is not written again."""
+    """Append-only JSONL with resume: a key that is already in the file is not written again. A last line that
+    a killed process left unfinished is repaired first (``repair_tail``)."""
 
     def __init__(self, path: pathlib.Path):
         self.path = pathlib.Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.repaired = repair_tail(self.path)
         self.done = {r["key"] for r in read_records(self.path)}
 
     def has(self, key: str) -> bool:
@@ -260,6 +298,7 @@ class RecordWriter:
         with self.path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             f.flush()
+            os.fsync(f.fileno())
         self.done.add(rec["key"])
 
 

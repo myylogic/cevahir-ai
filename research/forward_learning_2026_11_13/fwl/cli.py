@@ -34,9 +34,11 @@ SELECT_DOC = """Forward-learning study: operating points from the discovery worl
     python research/forward_learning_2026_11_13/run_select.py [--results DIR] [--out FILE]
 
 Reads results/discovery/w0.jsonl and w1.jsonl (both must be complete) and writes results/selection.json: step
-caps (4 x the discovery median per arm), the best exact one-step variant BP*, the stream learner FEC* and the
-best sequential comparator CMP*, and the gate operating points (theta*, gain*) at hard-negative leak <= 2% and
-prose bpb change <= 0.01. The file carries its own sha256 and is part of the freeze manifest.
+caps (4 x the discovery median per arm; for stream arms the median over the first checkpoint), the best exact
+one-step variant BP*, the stream learner FEC* (by net facts per write; CMP* is descriptive, H3 is tested against
+every comparator), and the gate operating points (theta*, gain*) at hard-negative leak <= 2% and prose bpb
+change <= 0.01. The file carries its own sha256, the engine and configuration hashes of the discovery records,
+and is part of the freeze manifest.
 """
 
 ANALYZE_DOC = """Forward-learning study: confirmatory analysis (PROTOCOL §4, §7). Unit = world, exact sign-flip test, Holm.
@@ -163,12 +165,19 @@ def analyze_main(argv=None) -> int:
     if any(r["run"] != "confirm" for recs in per_world.values() for r in recs):
         print(json.dumps({"analysis": "refused", "problems": ["records are not confirmatory records"]}, indent=1))
         return 1
+    header_problems = V.run_header_problems(per_world, selection)
+    if header_problems:
+        print(json.dumps({"analysis": "refused", "problems": header_problems}, indent=1))
+        return 1
     decisions = json.loads(json.dumps(A.compute_decisions(per_world, selection)))
     decisions["records_sha256"] = {w: v["sha256"] for w, v in report["worlds"].items()}
+    # whether protocol, selection, study code and engine still are what was frozen (reported, not hidden)
+    freeze_problems = V.check_preconditions(pathlib.Path(args.selection))
+    decisions["freeze"] = {"ok": not freeze_problems, "problems": freeze_problems}
     out = pathlib.Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(decisions, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    print(json.dumps({"decisions": str(out), "worlds": decisions["worlds"],
+    print(json.dumps({"decisions": str(out), "worlds": decisions["worlds"], "freeze": decisions["freeze"],
                       "labels": {h: d["label"] for h, d in decisions["decisions"].items()},
                       "secondary": {h: d["label"] for h, d in decisions["secondary"].items()}}, indent=1))
     return 0

@@ -14,7 +14,7 @@ from . import common as C
 SUPPORTED, REFUTED, INCONCLUSIVE = "supported", "refuted", "inconclusive"
 GUARD_FAILED, NOT_TESTABLE, CONTROL_FAILED = "guard failed", "not testable", "control failed"
 PRIMARY = ("H1", "H2a", "H2b", "H3", "H4a")
-MARGINS = {"H1": 0.05, "H1_FT_ALL": 0.04, "H2a": 0.05, "H2b": 0.05, "H3": 0.05, "H4a": 0.10,
+MARGINS = {"H1": 0.04, "H1_FT_L": 0.05, "H2a": 0.05, "H2b": 0.05, "H3": 0.05, "H3_composite": 0.05, "H4a": 0.10,
            "leak_guard": 0.02, "bpb_guard": 0.01, "gate_leak_point": 0.02, "gate_leak_bound": 0.05,
            "rand_installs": 0.10, "knee_inner": 0.25, "knee_outer": 0.50, "kl": 0.05, "others": 0.02,
            "recalled": 0.5}
@@ -167,8 +167,21 @@ def select(discovery: Dict[int, List[dict]]) -> dict:
     for install in C.INSTALLS:                       # the control has no installing steps of its own
         if f"FEC-0|{install}" in caps_single:
             caps_single[f"RAND-0|{install}"] = caps_single[f"FEC-0|{install}"]
+    # Stream caps. Every arm whose step is the Frobenius norm of its write (all learner arms) gets ONE common
+    # cap: 4 x the median installing step of the two FEC stream arms over the discovery streams. A cap from an
+    # arm's own uncapped run is useless for an arm that collapses without a cap (its steps grow with the damage:
+    # on discovery world 0 the first exact-gradient step was 22.6 against 2.0 for FEC-TOP), and the source
+    # proposal asks for "the same step cap for all". RLSEdit's step is a multiple of its own value search and
+    # keeps its own cap; sequential FT-L has no step search.
     caps_stream: Dict[str, float] = {}
+    fec_meds = [s["stream"][arm]["mu_median"] for s in stats.values() for arm in C.FEC_STREAM
+                if arm in s["stream"] and s["stream"][arm].get("mu_median")]
+    if fec_meds:
+        for arm in C.NORMALISED_STREAM_ARMS:
+            caps_stream[arm] = 4.0 * C.median(fec_meds)
     for arm in C.STREAM_ARMS:
+        if arm in C.NORMALISED_STREAM_ARMS:
+            continue
         meds = [s["stream"][arm]["mu_median"] for s in stats.values()
                 if arm in s["stream"] and s["stream"][arm].get("mu_median")]
         if meds:
@@ -181,16 +194,25 @@ def select(discovery: Dict[int, List[dict]]) -> dict:
 
     bp_star, bp_scores = best(("BP-1", "BP-1b", "BP-pred"),
                               lambda s, c: (s["single"].get(f"{c}|greedy") or {}).get("G"))
-    fec_star, fec_scores = best(C.FEC_STREAM, lambda s, c: (s["stream"].get(c) or {}).get("composite"))
-    cmp_star, cmp_scores = best(C.COMPARATORS, lambda s, c: (s["stream"].get(c) or {}).get("composite"))
+    # FEC* by net facts per write (the primary quantity of H3). CMP* is descriptive only: H3 is tested against
+    # every comparator, because the discovery streams run without caps and cannot rank the comparators fairly.
+    fec_star, fec_scores = best(C.FEC_STREAM, lambda s, c: (s["stream"].get(c) or {}).get("net_per_write"))
+    cmp_star, cmp_scores = best(C.COMPARATORS, lambda s, c: (s["stream"].get(c) or {}).get("net_per_write"))
     gate = {}
     for arm in C.GATE_ARMS:
         tables = [s["gate"][arm] for s in stats.values() if arm in s["gate"]]
         if tables:
             gate[arm] = {"theta": choose_operating_point(tables, "theta"),
                          "gain": choose_operating_point(tables, "gain")}
-    sel = {"schema": "fwl.selection.v1", "worlds": sorted(discovery), "final_n": {str(w): s["final_n"]
+    heads = [r for recs in discovery.values() for r in recs if r["kind"] == "meta"]
+    engines = sorted({h["engine_sha256"] for h in heads})
+    configs = sorted({h["config_sha256"] for h in heads})
+    complete = len(heads) == len(discovery)
+    sel = {"schema": "fwl.selection.v2", "worlds": sorted(discovery), "final_n": {str(w): s["final_n"]
                                                                                   for w, s in stats.items()},
+           # the engine and the run configuration the discovery records were made with (one value each, or None)
+           "engine_sha256": engines[0] if (complete and len(engines) == 1) else None,
+           "discovery_config_sha256": configs[0] if (complete and len(configs) == 1) else None,
            "caps": {"single": caps_single, "stream": caps_stream}, "bp_star": bp_star, "bp_scores": bp_scores,
            "fec_star": fec_star, "fec_scores": fec_scores, "cmp_star": cmp_star, "cmp_scores": cmp_scores,
            "gate_arm": fec_star if fec_star in gate else (sorted(gate)[0] if gate else None), "gate": gate,
@@ -234,7 +256,7 @@ def test_superiority(d: Sequence[float], sesoi: float) -> dict:
 
 
 def label(test: dict, p_adjusted: float, alpha: float = 0.05) -> str:
-    hi = test["ci95"][1]
+    hi = test.get("refute_upper", test["ci95"][1])      # intersection-union tests: the lowest upper bound
     if test["kind"] == "non-inferiority":
         if p_adjusted <= alpha:
             return SUPPORTED
@@ -250,6 +272,29 @@ def guard(d: Sequence[float], limit: float) -> dict:
     hi = out["ci95"][1]
     out.update({"limit": limit, "ok": bool(hi is not None and hi <= limit)})
     return out
+
+
+def test_against_every(stats: Dict[int, dict], a, comparators: Sequence[Tuple[str, object]], margin: float,
+                       min_worlds: int) -> Tuple[Optional[dict], Optional[str]]:
+    """Intersection-union non-inferiority test: ``a`` must be non-inferior to every comparator. The p-value is
+    the largest of the single p-values (valid without a correction inside the union); the test is refuted when
+    the 95% upper bound against any one comparator lies below the margin. Returns (test, None), or (None, name)
+    when a comparator has fewer than ``min_worlds`` paired worlds."""
+    per: Dict[str, dict] = {}
+    for name, getter in comparators:
+        d, worlds = _paired(stats, a, getter)
+        if len(d) < min_worlds:
+            return None, name
+        per[name] = dict(test_noninferiority(d, margin), world_ids=worlds)
+    if not per:
+        return None, "no comparator"
+    binding = max(per, key=lambda c: (per[c]["p"], -per[c]["mean"], c))
+    uppers = [t["ci95"][1] for t in per.values() if t["ci95"][1] is not None]
+    out = dict(per[binding])
+    out.update({"kind": "non-inferiority", "against": binding, "union": "every comparator",
+                "refute_upper": min(uppers) if uppers else None,
+                "comparators": {c: {k: t[k] for k in ("n", "mean", "ci95", "p", "worlds")} for c, t in per.items()}})
+    return out, None
 
 
 def _paired(stats: Dict[int, dict], a, b) -> Tuple[List[float], List[int]]:
@@ -296,10 +341,19 @@ def compute_decisions(per_world: Dict[int, List[dict]], selection: dict, *, min_
     garm = selection.get("gate_arm")
     gsel = (selection.get("gate") or {}).get(garm) or {}
     theta_s, gain_s = (gsel.get("theta") or {}).get("setting"), (gsel.get("gain") or {}).get("setting")
-    add("H1", _paired(stats, _single("FEC-A|nll"), _single("FT-L|ft")), "ni", MARGINS["H1"])
-    add("H2a", _paired(stats, _single("FEC-A|greedy"), _single("FEC-0|greedy")), "sup", MARGINS["H2a"])
+    add("H1", _paired(stats, _single("FEC-A|nll"), _single("FT-ALL|ft")), "ni", MARGINS["H1"])
+    add("H2a", _paired(stats, _single("FEC-A|greedy"), _single("FEC-TOP|greedy")), "sup", MARGINS["H2a"])
     add("H2b", _paired(stats, _single("FEC-A|greedy"), _single(f"{bp}|greedy")), "ni", MARGINS["H2b"], bp or "")
-    add("H3", _paired(stats, _stream(fec or ""), _stream(cmp_ or "")), "ni", MARGINS["H3"], (fec and cmp_) or "")
+    if not fec:
+        notes["H3"] = NOT_TESTABLE
+    else:
+        h3, lacking = test_against_every(stats, _stream(fec, "net_per_write"),
+                                         [(c, _stream(c, "net_per_write")) for c in C.COMPARATORS],
+                                         MARGINS["H3"], min_worlds)
+        if h3 is None:
+            notes["H3"] = f"{NOT_TESTABLE} (comparator {lacking}: too few worlds)"
+        else:
+            tests["H3"] = dict(h3, arm=fec, metric="net_per_write")
     add("H4a", _paired(stats, _gate(garm or "", theta_s or "", "recall_other"),
                        _gate(garm or "", gain_s or "", "recall_other")), "sup", MARGINS["H4a"],
         (garm and theta_s and gain_s) or "")
@@ -316,7 +370,7 @@ def compute_decisions(per_world: Dict[int, List[dict]], selection: dict, *, min_
 
     # guards and controls
     if "H1" in tests:
-        guards = {name: guard(_paired(stats, _single("FEC-A|nll", name), _single("FT-L|ft", name))[0],
+        guards = {name: guard(_paired(stats, _single("FEC-A|nll", name), _single("FT-ALL|ft", name))[0],
                               MARGINS["leak_guard"]) for name in ("Leak_RD", "Leak_C", "Leak_RN")}
         bpb = [v for v in (_single("FEC-A|nll", "dbpb")(s) for s in stats.values()) if v is not None]
         guards["dbpb"] = guard(bpb, MARGINS["bpb_guard"]) if len(bpb) >= 2 else {"ok": False, "n": len(bpb)}
@@ -369,7 +423,16 @@ def compute_decisions(per_world: Dict[int, List[dict]], selection: dict, *, min_
         h4b = REFUTED
     else:
         h4b = INCONCLUSIVE
-    decisions["H4b"] = {"label": h4b, "ratios": used, "inside_25": inner, "outside_50": outer, "n": n_r}
+    # descriptive: the same ratio with the crossing of the measured MEAN (what the law predicts)
+    mean_ratios = []
+    for w, s in sorted(stats.items()):
+        cap = s["capacity"]
+        km = {k["theta"]: k for k in (cap or {}).get("knees_mean", [])}
+        k = km.get(theta_star) or km.get(0.5)
+        if k and k["ratio"] is not None:
+            mean_ratios.append({"world": w, "theta": k["theta"], "ratio": k["ratio"]})
+    decisions["H4b"] = {"label": h4b, "ratios": used, "inside_25": inner, "outside_50": outer, "n": n_r,
+                        "ratios_mean_crossing": mean_ratios}
 
     # H5: retraction against a replay without the fact
     kl = [s["retract"]["kl"] for s in stats.values() if s["retract"]["kl"] is not None]
@@ -389,14 +452,14 @@ def compute_decisions(per_world: Dict[int, List[dict]], selection: dict, *, min_
     # secondary, unadjusted
     secondary = {}
     for name, a, b, kind, size in (
-            ("routing_vs_TOP_greedy", _single("FEC-A|greedy"), _single("FEC-TOP|greedy"), "sup", 0.05),
-            ("routing_vs_TOP_nll", _single("FEC-A|nll"), _single("FEC-TOP|nll"), "sup", 0.05),
-            ("H1_vs_FT-ALL", _single("FEC-A|nll"), _single("FT-ALL|ft"), "ni", MARGINS["H1_FT_ALL"]),
-            ("H1_greedy_rule", _single("FEC-A|greedy"), _single("FT-L|ft"), "ni", MARGINS["H1"]),
-            ("H2a_nll_rule", _single("FEC-A|nll"), _single("FEC-0|nll"), "sup", MARGINS["H2a"]),
-            ("H3_net_per_write", _stream(fec or "", "net_per_write"), _stream(cmp_ or "", "net_per_write"),
-             "ni", 0.05),
-            ("H3_superiority", _stream(fec or ""), _stream(cmp_ or ""), "sup", 0.05),
+            ("routing_vs_FEC-0_greedy", _single("FEC-A|greedy"), _single("FEC-0|greedy"), "sup", MARGINS["H2a"]),
+            ("routing_vs_FEC-0_nll", _single("FEC-A|nll"), _single("FEC-0|nll"), "sup", MARGINS["H2a"]),
+            ("H2a_nll_rule", _single("FEC-A|nll"), _single("FEC-TOP|nll"), "sup", MARGINS["H2a"]),
+            ("H1_vs_FT-L", _single("FEC-A|nll"), _single("FT-L|ft"), "ni", MARGINS["H1_FT_L"]),
+            ("H1_greedy_rule", _single("FEC-A|greedy"), _single("FT-ALL|ft"), "ni", MARGINS["H1"]),
+            ("H3_composite_vs_CMP", _stream(fec or ""), _stream(cmp_ or ""), "ni", MARGINS["H3_composite"]),
+            ("H3_superiority_vs_CMP", _stream(fec or "", "net_per_write"), _stream(cmp_ or "", "net_per_write"),
+             "sup", 0.05),
             ("selectivity_SO_FEC-A_vs_BP", _single("FEC-A|nll", "Leak_SO"), _single(f"{bp}|nll", "Leak_SO"),
              "sup", 0.02)):
         d, worlds = _paired(stats, a, b)
@@ -406,6 +469,6 @@ def compute_decisions(per_world: Dict[int, List[dict]], selection: dict, *, min_
             secondary[name] = t
         else:
             secondary[name] = {"label": NOT_TESTABLE, "n": len(d)}
-    return {"schema": "fwl.decisions.v1", "worlds": sorted(per_world), "selection_sha256": selection.get("sha256"),
+    return {"schema": "fwl.decisions.v2", "worlds": sorted(per_world), "selection_sha256": selection.get("sha256"),
             "margins": MARGINS, "decisions": decisions, "secondary": secondary,
             "tables": {str(w): {"single": s["single"], "stream": s["stream"]} for w, s in stats.items()}}

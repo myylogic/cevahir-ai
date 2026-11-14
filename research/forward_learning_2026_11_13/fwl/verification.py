@@ -8,9 +8,10 @@
     python research/forward_learning_2026_11_13/verify.py --crosscheck                FT-L / FT-ALL vs CEV-11 records
 
 The freeze is refused unless PROTOCOL.md carries a line "Status: FROZEN <YYYY-MM-DD>" and the discovery selection
-(results/selection.json) exists with a valid hash. The manifest covers the protocol, the selection, the study
-code and the engine module; any later change makes --preconditions fail, and run_world.py then refuses
-confirmatory worlds.
+(results/selection.json) exists with a valid hash and was built from records of the current engine module and the
+registered configuration. The manifest covers the protocol, the selection, the study code and the engine module;
+any later change makes --preconditions fail, and run_world.py then refuses confirmatory worlds. An existing
+manifest is never overwritten by a different one.
 """
 from __future__ import annotations
 
@@ -65,10 +66,20 @@ def selection_problems(selection: pathlib.Path = SELECTION) -> List[str]:
         return [f"{selection} is missing (run the discovery jobs and run_select.py)"]
     sel = json.loads(pathlib.Path(selection).read_text(encoding="utf-8"))
     problems = []
-    if sel.get("schema") != "fwl.selection.v1" or not A.selection_hash_ok(sel):
+    if sel.get("schema") != "fwl.selection.v2" or not A.selection_hash_ok(sel):
         problems.append("selection.json: wrong schema or hash")
     if tuple(sel.get("worlds", ())) != C.DISCOVERY_WORLDS:
         problems.append(f"selection.json: must be built from the discovery worlds {C.DISCOVERY_WORLDS}")
+    # the discovery records must come from the engine and the registered configuration that are frozen with them
+    if not sel.get("engine_sha256") or not sel.get("discovery_config_sha256"):
+        problems.append("selection.json: the discovery records do not share one engine and one configuration "
+                        "(or have no header)")
+    else:
+        if sel["engine_sha256"] != C.sha256_file(C.ENGINE_FILE):
+            problems.append("selection.json: the engine module changed after the discovery runs "
+                            "(run the discovery jobs and run_select.py again)")
+        if sel["discovery_config_sha256"] != C.sha256_json(C.protocol_config().to_json()):
+            problems.append("selection.json: the discovery records were not made with the registered configuration")
     for k in ("bp_star", "fec_star", "cmp_star", "gate_arm"):
         if not sel.get(k):
             problems.append(f"selection.json: {k} is not set")
@@ -99,8 +110,30 @@ def freeze(selection: pathlib.Path = SELECTION, manifest: pathlib.Path = MANIFES
     if problems:
         return problems
     lines = [f"{digest}  {name}" for name, digest in sorted(current_hashes(selection).items())]
-    manifest.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    text = "\n".join(lines) + "\n"
+    if manifest.exists() and manifest.read_text(encoding="utf-8") != text:
+        # a second freeze after a change would silently move the goalposts; an amendment has to be explicit
+        return [f"{manifest.name} exists and differs from the current files: the study is already frozen. "
+                f"An amendment must be written into PROTOCOL.md and the old manifest removed by hand"]
+    manifest.write_text(text, encoding="utf-8")
     return []
+
+
+def run_header_problems(per_world: Dict[int, List[dict]], selection: dict) -> List[str]:
+    """Confirmatory records must carry the configuration the frozen selection implies (its caps) and the engine
+    the discovery records were made with."""
+    want_config = C.sha256_json(C.protocol_config(selection).to_json())
+    problems = []
+    for w, records in sorted(per_world.items()):
+        head = next((r for r in records if r["key"] == "meta|run"), None)
+        if head is None:
+            problems.append(f"w{w}: no header record")
+            continue
+        if head["config_sha256"] != want_config:
+            problems.append(f"w{w}: records were not made with the configuration of the frozen selection")
+        if head["engine_sha256"] != selection.get("engine_sha256"):
+            problems.append(f"w{w}: records were made with another engine module than the discovery records")
+    return problems
 
 
 # -------------------------------------------------------------------------------------------------------- records
@@ -180,11 +213,14 @@ def rerun(results_dir: pathlib.Path, selection: pathlib.Path = SELECTION, decisi
         return [f"{decisions} is missing (analyze.py)"]
     sel = json.loads(pathlib.Path(selection).read_text(encoding="utf-8"))
     stored = json.loads(decisions.read_text(encoding="utf-8"))
+    stored.pop("freeze", None)
     for w, digest in sorted(stored.pop("records_sha256", {}).items()):
         path = C.results_path(results_dir, int(w))
         if not path.exists() or C.sha256_file(path) != digest:
             problems.append(f"records of world {w} changed since the analysis")
-    now = json.loads(json.dumps(A.compute_decisions(load_run(results_dir, C.CONFIRMATORY_WORLDS), sel)))
+    per_world = load_run(results_dir, C.CONFIRMATORY_WORLDS)
+    problems += run_header_problems(per_world, sel)
+    now = json.loads(json.dumps(A.compute_decisions(per_world, sel)))
     if C.canonical_json(now) != C.canonical_json(stored):
         problems.append("recomputed decisions differ from the stored decisions")
     return problems

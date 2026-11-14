@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 """Forward-learning study (research/forward_learning_2026_11_13): pipeline, records, selection, decisions.
 
-* The per-world runner on a tiny random base (no trained weights): every arm of Part A and Part B runs, records
-  are schema-valid and complete, the base model stays bit-identical, a resumed run adds nothing, and two runs give
-  the same records.
+* The per-world runner on a tiny random base (no trained weights): a first test runs most arms with the gate,
+  capacity and retraction parts, a second one the remaining arms, so that every arm of the protocol's Part A and
+  Part B runs at least once; records are schema-valid and complete, the base model stays bit-identical, a resumed
+  run adds nothing (also after a kill in the middle of a record), and two runs give the same records.
+* A base may only be used for its own world.
 * Selection and decisions on synthetic records with known effects: labels, guards, the random-feedback control,
-  Holm over the primary family, the capacity count rule, the retraction bound.
-* The freeze gate: confirmatory worlds are refused while the protocol is not frozen; job lists are well formed.
+  Holm over the primary family, the intersection-union stream test, the capacity count rule, the retraction bound.
+* The freeze gate: confirmatory worlds are refused while the protocol is not frozen; the selection is tied to the
+  engine and configuration of the discovery records, confirmatory records to the selection; job lists are well formed.
 
 No learning claim is made here: the tiny model is random and untrained.
 """
@@ -41,6 +44,7 @@ from fwl import verification as V  # noqa: E402
 sys.path.remove(str(STUDY))
 
 WIDE_GRID = (0.0,) + tuple(0.25 * 2.0 ** (i / 2.0) for i in range(44))
+TINY_WORLD = 11                                # the world seed of the tiny base
 
 
 @pytest.fixture(autouse=True)
@@ -59,7 +63,7 @@ def make_tiny_base():
     from cev11.model import build_model, model_sha256
     from cev11.tokenizers import train_tokenizer
     from cev11.world import make_world, sentence
-    world = make_world(11, n_names=120)
+    world = make_world(TINY_WORLD, n_names=120)
     rnd = random.Random(0)
     texts = [sentence(n, r, c, world.facts[(n, r)], o, x)
              for n in world.names[:60] for r in ("A", "B", "C") for c in ("nom", "gen", "abl")
@@ -108,7 +112,7 @@ def _strip(records):
 
 
 # ---------------------------------------------------------------------------------------------- pipeline on a base
-def test_world_runner_runs_every_arm_validates_resumes_and_is_deterministic(tiny, tmp_path, monkeypatch):
+def test_world_runner_validates_resumes_and_is_deterministic(tiny, tmp_path, monkeypatch):
     from cev11.model import model_sha256
     base, editable = tiny
     cfg = tiny_config()
@@ -119,8 +123,8 @@ def test_world_runner_runs_every_arm_validates_resumes_and_is_deterministic(tiny
     x = torch.randint(5, base.tok.vocab_size, (2, 12), generator=torch.Generator().manual_seed(4))
     with torch.no_grad():
         before = base.model(x)[0].clone()
-    info = W.run_world(1000, "smoke", cfg, tmp_path / "a", base=base, editable=editable, log=lambda m: None)
-    path = C.results_path(tmp_path / "a", 1000)
+    info = W.run_world(TINY_WORLD, "smoke", cfg, tmp_path / "a", base=base, editable=editable, log=lambda m: None)
+    path = C.results_path(tmp_path / "a", TINY_WORLD)
     records = C.read_records(path)
     assert info["n_records"] == len(records) and records[0]["key"] == "meta|run"
     # nothing is left installed and no parameter changed
@@ -130,7 +134,7 @@ def test_world_runner_runs_every_arm_validates_resumes_and_is_deterministic(tiny
     assert all(len(layer.ffn.fc2._forward_hooks) == 0 for layer in base.model.layers)   # every hook is gone
 
     report = V.check_records(tmp_path / "a")
-    assert report["problems"] == [] and report["worlds"]["1000"]["complete"]
+    assert report["problems"] == [] and report["worlds"][str(TINY_WORLD)]["complete"]
     kinds = {k: sum(r["kind"] == k for r in records) for k in C.KINDS}
     assert kinds["single"] == 5 * 2 + 2 and kinds["stream"] == 5 * 2 + 1
     assert kinds["gate"] == 3 and kinds["capacity"] == 1 and kinds["side"] == 1
@@ -168,9 +172,16 @@ def test_world_runner_runs_every_arm_validates_resumes_and_is_deterministic(tiny
     assert cap["trace"][-1][0] == fec["n_keys"]["1"]              # stored keys of the top block
     assert all(0.0 <= m <= 1.0 and 0.0 <= p <= 1.0 for (_, m, _), p in zip(cap["trace"], cap["predicted"]))
     assert abs(sum(cap["shares"]) - 1.0) < 1e-12 and cap["knees"][0]["theta"] == 0.5
+    # the crossing of the measured mean is on file next to the registered (median) knee, against the same law
+    assert [k["theta"] for k in cap["knees_mean"]] == [0.5]
+    assert cap["knees_mean"][0]["predicted_keys"] == cap["knees"][0]["predicted_keys"]
+    assert cap["knees_mean"][0]["measured_keys"] == ST._crossing([t[0] for t in cap["trace"]],
+                                                                 [t[1] for t in cap["trace"]], 0.5)
     gates = {r["setting"]: r for r in records if r["kind"] == "gate"}
     assert set(gates) == {"theta=0", "theta=0.5", "gain=0.5"}
-    assert gates["theta=0.5"]["leak_hard"] <= gates["theta=0"]["leak_hard"] + 1e-12
+    # the ungated read moves hard negatives of this random model; the gated read cannot leak more than it
+    assert gates["theta=0"]["leak_hard"] > 0.0 and gates["theta=0"]["n_hard"] > 0
+    assert gates["theta=0.5"]["leak_hard"] <= gates["theta=0"]["leak_hard"]
     retr = [r for r in records if r["kind"] == "retract"]
     side = next(r for r in records if r["kind"] == "side")
     assert sorted(r["index"] for r in retr) == side["retracted"] and len(retr) >= 1
@@ -179,20 +190,36 @@ def test_world_runner_runs_every_arm_validates_resumes_and_is_deterministic(tiny
 
     # resume: nothing is added, the file is unchanged
     digest = C.sha256_file(path)
-    again = W.run_world(1000, "smoke", cfg, tmp_path / "a", base=base, editable=editable, log=lambda m: None)
+    again = W.run_world(TINY_WORLD, "smoke", cfg, tmp_path / "a", base=base, editable=editable,
+                        log=lambda m: None)
     assert again["n_records"] == len(records) and C.sha256_file(path) == digest
+    # a process killed in the middle of the last record: the fragment is cut off and the record is made again
+    lines = path.read_text(encoding="utf-8").split("\n")
+    assert lines[-1] == "" and json.loads(lines[-2])["key"] == "stream|0|RLSEdit|3"
+    path.write_text("\n".join(lines[:-2]) + "\n" + lines[-2][:len(lines[-2]) // 2], encoding="utf-8")
+    with pytest.raises(ValueError):
+        C.read_records(path)                                        # the strict reader does not hide the damage
+    logged = []
+    healed = W.run_world(TINY_WORLD, "smoke", cfg, tmp_path / "a", base=base, editable=editable, log=logged.append)
+    assert any("unfinished last line dropped" in m for m in logged)
+    assert healed["n_records"] == len(records)
+    assert _strip(C.read_records(path)) == _strip(records)
     # another configuration in the same folder is refused
     other = C.RunConfig(**{**cfg.__dict__, "stream_n": 5, "checkpoints": (5,)})
     with pytest.raises(RuntimeError, match="another config_sha256"):
-        W.run_world(1000, "smoke", other, tmp_path / "a", base=base, editable=editable, log=lambda m: None)
+        W.run_world(TINY_WORLD, "smoke", other, tmp_path / "a", base=base, editable=editable, log=lambda m: None)
+    # a base belongs to one world: the same base under another world number is refused before anything is written
+    with pytest.raises(RuntimeError, match="pre-trained for world 11"):
+        W.run_world(1000, "smoke", cfg, tmp_path / "c", base=base, editable=editable, log=lambda m: None)
+    assert not (tmp_path / "c").exists()
     # determinism: a second run of the stream part gives the same records (wall-clock fields aside)
-    W.run_world(1000, "smoke", cfg, tmp_path / "b", base=base, editable=editable, parts=("B",),
+    W.run_world(TINY_WORLD, "smoke", cfg, tmp_path / "b", base=base, editable=editable, parts=("B",),
                 log=lambda m: None)
-    second = C.read_records(C.results_path(tmp_path / "b", 1000))
+    second = C.read_records(C.results_path(tmp_path / "b", TINY_WORLD))
     assert _strip(second) == _strip([r for r in records if r["kind"] != "single"])
     # ... and so do two writes of a one-step arm, the seeded random-feedback control included
     FL = C.engine()
-    item = SG.protocol_items(base, editable, 1000, cfg)[0]
+    item = SG.protocol_items(base, editable, TINY_WORLD, cfg)[0]
     for arm in ("RAND-0", "FEC-A", "BP-pred"):
         prints = []
         for _ in range(2):
@@ -205,6 +232,50 @@ def test_world_runner_runs_every_arm_validates_resumes_and_is_deterministic(tiny
     summary = W.summarise(records)
     assert "FEC-TOP|greedy" in summary["single"] and "FEC-TOP+RLS|6" in summary["stream"]
     assert model_sha256(base.model) == base.base_sha
+
+
+def test_the_remaining_arms_run_so_that_every_protocol_arm_is_exercised(tiny, tmp_path):
+    base, editable = tiny
+    first = tiny_config()
+    cfg = C.RunConfig(
+        label="test-rest", per_case=1, edits_per_case=1, max_edits=1,
+        single_arms=("FEC-0", "FEC-1", "HEBB-TOP", "HEBB-0", "BP-1"), installs=("greedy",), single_grid=WIDE_GRID,
+        bpb_edits=0, bpb_texts=2, so_entities=2, streams=1, stream_n=3, checkpoints=(3,),
+        stream_arms=("FEC-TOP", "HEBB-TOP+RLS", "HEBB-0+RLS"), stream_install="greedy", stream_grid=WIDE_GRID,
+        untouched=10, c0_tokens=600, gate_arms=(), retract_indices=(), capacity_thetas=(0.5,), guard_rms_cap=1e9)
+    # the two test configurations together are the protocol's arm lists
+    assert set(first.single_arms) | set(cfg.single_arms) == set(C.SINGLE_ONE_STEP + C.SINGLE_FT)
+    assert set(first.stream_arms) | set(cfg.stream_arms) == set(C.STREAM_ARMS)
+    assert set(C.COMPARATORS) | set(C.FEC_STREAM) <= set(C.STREAM_ARMS)
+    assert set(C.NORMALISED_STREAM_ARMS) == set(ST.LEARNER_ARMS)
+    W.run_world(TINY_WORLD, "smoke", cfg, tmp_path, base=base, editable=editable, log=lambda m: None)
+    records = C.read_records(C.results_path(tmp_path, TINY_WORLD))
+    assert V.check_records(tmp_path)["problems"] == []
+    single = {r["arm"]: r for r in records if r["kind"] == "single"}
+    assert set(single) == set(cfg.single_arms)
+    top = str(len(base.model.layers) - 1)
+    for arm, r in single.items():
+        if r["write_installed"] and r["mu"]:
+            # the top-block rule writes one block, the others all of them
+            assert (set(r["block_share"]) == {top}) == (arm == "HEBB-TOP"), arm
+            assert abs(sum(r["block_share"].values()) - 1.0) < 1e-9
+    assert any(r["write_installed"] for r in single.values())
+    streams = {r["arm"]: r for r in records if r["kind"] == "stream"}
+    assert set(streams) == set(cfg.stream_arms)
+    assert all(r["n"] == 3 and 0 <= r["installed"] <= 3 for r in streams.values())
+    assert set(streams["HEBB-TOP+RLS"].get("n_keys", {top: 0})) <= {top}       # top-block arm: top-block keys only
+    assert not any(r["kind"] in ("gate", "capacity", "retract", "side") for r in records)
+    from cev11.model import model_sha256
+    assert model_sha256(base.model) == base.base_sha
+    assert all(len(layer.ffn.fc2._forward_hooks) == 0 for layer in base.model.layers)
+
+
+def test_a_base_is_bound_to_its_world(tiny):
+    base, _ = tiny
+    C.check_base_world(base, TINY_WORLD)
+    for other in (0, 1, 1000):
+        with pytest.raises(RuntimeError, match="may only use the base of its own world"):
+            C.check_base_world(base, other)
 
 
 def test_stream_probes_and_items_are_deterministic_and_disjoint(tiny):
@@ -284,11 +355,20 @@ def _single(world, arm, install, good, n=10, leak=0.0, bpb=None, mu=1.0, install
     return out
 
 
+def _meta(world, run, config: C.RunConfig, engine=None):
+    """A header record as run_world writes it (the real engine hash unless another one is given)."""
+    cfg = config.to_json()
+    return {"schema": C.RECORD_SCHEMA, "kind": "meta", "run": run, "world": world, "key": "meta|run", "config": cfg,
+            "config_sha256": C.sha256_json(cfg), "base_sha256": f"base-{world}",
+            "engine_sha256": engine or C.sha256_file(C.ENGINE_FILE), "items_sha256": f"items-{world}",
+            "n_items": 10}
+
+
 def _stream(world, arm, composite, n=100, run="confirm", mu=2.0):
     return {"schema": C.RECORD_SCHEMA, "kind": "stream", "run": run, "world": world, "key": f"stream|0|{arm}|{n}",
             "stream": 0, "arm": arm, "n": n, "written": n, "installed": n, "retention": 0.9, "PF6": 0.6, "IF": 0.5,
             "dmg_A": 0.1, "dmg_B": 0.0, "known_A": 100, "known_B": 100, "net_per_write": composite - 0.5,
-            "composite": composite, "mu_median": mu, "mu_max": 2 * mu, "seconds": 1.0}
+            "composite": composite, "mu_median": mu, "mu_max": None if mu is None else 2 * mu, "seconds": 1.0}
 
 
 def _gate(world, arm, setting, theta, gain, recall, leak, run="confirm", dbpb=0.0):
@@ -312,20 +392,22 @@ def _retract(world, i, kl, p_before=0.9, others=(0.9, 0.9)):
             "others_retract": others[0], "others_replay": others[1]}
 
 
-def synthetic_world(world, *, fec_a=9, ft_l=9, fec_0=7, bp=9, rand_ok=False, s_fec=0.6, s_cmp=0.6, gated=0.8,
-                    ungated=0.5, knee=1.0, kl=0.01, leak_fec=0.0, bpb=0.001, gate_leak=0.01):
+def synthetic_world(world, *, fec_a=9, ft_l=8, ft_all=9, fec_0=7, fec_top=8, bp=9, rand_ok=False, s_fec=0.6,
+                    s_cmp=0.6, s_hebb=0.2, gated=0.8, ungated=0.5, knee=1.0, kl=0.01, leak_fec=0.0, bpb=0.001,
+                    gate_leak=0.01):
     recs = []
     recs += _single(world, "FEC-A", "nll", fec_a, leak=leak_fec, bpb=bpb)
     recs += _single(world, "FEC-A", "greedy", fec_a)
     recs += _single(world, "FEC-0", "greedy", fec_0) + _single(world, "FEC-0", "nll", fec_0)
-    recs += _single(world, "FEC-TOP", "greedy", 8) + _single(world, "FEC-TOP", "nll", 8)
+    recs += _single(world, "FEC-TOP", "greedy", fec_top) + _single(world, "FEC-TOP", "nll", fec_top)
     recs += _single(world, "BP-pred", "greedy", bp) + _single(world, "BP-pred", "nll", bp, so=0.05)
     recs += _single(world, "BP-1", "greedy", bp - 2)
-    recs += _single(world, "FT-L", "ft", ft_l) + _single(world, "FT-ALL", "ft", 9)
+    recs += _single(world, "FT-L", "ft", ft_l) + _single(world, "FT-ALL", "ft", ft_all)
     recs += _single(world, "RAND-0", "greedy", 10, installed=rand_ok)
     recs += [_stream(world, "FEC-TOP+RLS", s_fec), _stream(world, "FEC-A+RLS", s_fec - 0.1),
-             _stream(world, "RLSEdit", s_cmp), _stream(world, "FT-L-seq", s_cmp - 0.3),
-             _stream(world, "BP-1+RLS", s_cmp - 0.5)]
+             _stream(world, "RLSEdit", s_cmp), _stream(world, "FT-L-seq", s_cmp - 0.3, mu=None),
+             _stream(world, "BP-1+RLS", s_cmp - 0.5), _stream(world, "HEBB-TOP+RLS", s_hebb),
+             _stream(world, "HEBB-0+RLS", s_hebb - 0.1)]
     recs += [_gate(world, "FEC-TOP+RLS", "theta=0", 0.0, 1.0, 0.85, 0.4),
              _gate(world, "FEC-TOP+RLS", "theta=0.6", 0.6, 1.0, gated, gate_leak),
              _gate(world, "FEC-TOP+RLS", "theta=0.9", 0.9, 1.0, 0.3, 0.0),
@@ -338,10 +420,11 @@ def synthetic_world(world, *, fec_a=9, ft_l=9, fec_0=7, bp=9, rand_ok=False, s_f
     return recs
 
 
-def discovery_records():
+def discovery_records(engine=None, config=None):
     out = {}
     for w in (0, 1):
-        recs = [dict(r, run="discovery") for r in synthetic_world(w)]
+        recs = [_meta(w, "discovery", config or C.protocol_config(), engine)]
+        recs += [dict(r, run="discovery") for r in synthetic_world(w)]
         out[w] = recs
     return out
 
@@ -356,6 +439,28 @@ def test_selection_fixes_operating_points_from_discovery_only():
     assert gain["value"] == 0.5 and gain["feasible"]
     assert sel["caps"]["single"]["FEC-A|nll"] == 4.0 and sel["caps"]["stream"]["FEC-TOP+RLS"] == 8.0
     assert sel["caps"]["single"]["RAND-0|greedy"] == sel["caps"]["single"]["FEC-0|greedy"]
+    # the selection carries the engine and the configuration of the discovery records
+    assert sel["engine_sha256"] == C.sha256_file(C.ENGINE_FILE)
+    assert sel["discovery_config_sha256"] == C.sha256_json(C.protocol_config().to_json())
+    # one common step cap for every unit-normalised stream arm, from the FEC arms: an arm that collapses without
+    # a cap (large steps of its own) does not get a looser cap for it
+    wild = discovery_records()
+    for recs in wild.values():
+        for r in recs:
+            if r["kind"] == "stream" and r["arm"] == "BP-1+RLS":
+                r["mu_median"], r["mu_max"] = 40.0, 128.0
+            if r["kind"] == "stream" and r["arm"] == "RLSEdit":
+                r["mu_median"] = 1.0
+    caps = A.select(wild)["caps"]["stream"]
+    assert {caps[a] for a in C.NORMALISED_STREAM_ARMS} == {8.0} and caps["BP-1+RLS"] == 8.0
+    assert caps["RLSEdit"] == 4.0 and "FT-L-seq" not in caps       # its own scale; no step search at all
+    # FEC* is chosen on net facts per write; the comparator ranking is descriptive (H3 tests every comparator)
+    flipped = discovery_records()
+    for recs in flipped.values():
+        for r in recs:
+            if r["kind"] == "stream" and r["arm"] == "FEC-A+RLS":
+                r["net_per_write"] = 5.0                              # better net, worse composite
+    assert A.select(flipped)["fec_star"] == "FEC-A+RLS"
     # deterministic, and any change of a discovery record changes the hash
     assert A.select(discovery_records())["sha256"] == sel["sha256"]
     changed = discovery_records()
@@ -371,25 +476,31 @@ def test_selection_fixes_operating_points_from_discovery_only():
     assert C.protocol_config(sel).caps["stream"]["FEC-TOP+RLS"] == 8.0
 
 
-def confirm(**overrides):
+def confirm(selection=None, **overrides):
+    """Synthetic confirmatory records; with ``selection`` every world also gets the header a real run writes."""
     per_world = {}
     for i, w in enumerate(C.CONFIRMATORY_WORLDS):
         kw = {k: (v[i] if isinstance(v, (list, tuple)) else v) for k, v in overrides.items()}
-        per_world[w] = synthetic_world(w, **kw)
+        head = [] if selection is None else [_meta(w, "confirm", C.protocol_config(selection))]
+        per_world[w] = head + synthetic_world(w, **kw)
     return per_world
 
 
 def test_decisions_labels_guards_and_controls():
     sel = A.select(discovery_records())
     jitter = [0, 1, 0, 1, 0, 0, 1, 0]
-    base = A.compute_decisions(confirm(ft_l=[9 - j for j in jitter]), sel)
+    base = A.compute_decisions(confirm(ft_all=[9 - j for j in jitter]), sel)
     d = base["decisions"]
     assert set(d) == {"H1", "H2a", "H2b", "H3", "H4a", "H4b", "H5"} and base["worlds"] == list(C.CONFIRMATORY_WORLDS)
     assert d["H1"]["label"] == A.SUPPORTED and d["H1"]["kind"] == "non-inferiority" and d["H1"]["n"] == 8
     assert all(g["ok"] for g in d["H1"]["guards"].values())
-    assert d["H2a"]["label"] == A.SUPPORTED and abs(d["H2a"]["mean"] - 0.2) < 1e-9       # 0.9 - 0.7
+    assert d["H1"]["margin"] == 0.04                      # against FT-ALL, the stronger comparator
+    assert d["H2a"]["label"] == A.SUPPORTED and abs(d["H2a"]["mean"] - 0.1) < 1e-9       # FEC-A 0.9 - FEC-TOP 0.8
     assert d["H2b"]["label"] == A.SUPPORTED and d["H2b"]["control_RAND-0"]["ok"]
     assert d["H3"]["label"] == A.SUPPORTED and d["H4a"]["label"] == A.SUPPORTED
+    # H3: net facts per write of FEC* against every comparator; the binding one is the closest
+    assert d["H3"]["metric"] == "net_per_write" and d["H3"]["arm"] == "FEC-TOP+RLS"
+    assert set(d["H3"]["comparators"]) == set(C.COMPARATORS) and d["H3"]["against"] == "RLSEdit"
     assert d["H4a"]["operating_point"] == {"arm": "FEC-TOP+RLS", "theta": "theta=0.6", "gain": "gain=0.5",
                                            "feasible_on_discovery": [True, True]}
     assert d["H4b"]["label"] == A.SUPPORTED and d["H4b"]["inside_25"] == 8
@@ -397,8 +508,11 @@ def test_decisions_labels_guards_and_controls():
     assert all(v == pytest.approx(0.01) for v in d["H5"]["kl"]["worlds"])
     for h in A.PRIMARY:                                   # smallest exact p with 8 worlds, Holm over five tests
         assert d[h]["p"] == pytest.approx(1 / 256) and d[h]["p_holm"] == pytest.approx(5 / 256)
-    assert base["secondary"]["H1_vs_FT-ALL"]["label"] == A.SUPPORTED
-    assert base["secondary"]["H3_superiority"]["label"] != A.SUPPORTED     # equal composites: no superiority
+    assert base["secondary"]["H1_vs_FT-L"]["label"] == A.SUPPORTED
+    assert base["secondary"]["routing_vs_FEC-0_greedy"]["label"] == A.SUPPORTED          # 0.9 - 0.7
+    assert base["secondary"]["H3_superiority_vs_CMP"]["label"] != A.SUPPORTED   # equal nets: no superiority
+    assert base["secondary"]["H3_composite_vs_CMP"]["label"] == A.SUPPORTED
+    assert base["decisions"]["H4b"]["ratios_mean_crossing"] == []          # synthetic records carry no mean knee
     assert base["tables"]["1000"]["single"]["FEC-A|nll"]["G"] == pytest.approx(0.9)
 
     # H1: far below the comparator -> refuted; a leak guard that fails turns "supported" into "guard failed"
@@ -409,8 +523,16 @@ def test_decisions_labels_guards_and_controls():
     d = A.compute_decisions(confirm(bpb=[0.02, 0.03, 0.02, 0.03, 0.02, 0.03, 0.02, 0.03]), sel)["decisions"]
     assert d["H1"]["label"] == A.GUARD_FAILED and not d["H1"]["guards"]["dbpb"]["ok"]
     # mixed signs -> inconclusive
-    d = A.compute_decisions(confirm(fec_a=[9, 7, 9, 8, 9, 7, 9, 8], ft_l=[8, 9, 8, 9, 8, 9, 8, 9]), sel)["decisions"]
+    d = A.compute_decisions(confirm(fec_a=[9, 7, 9, 8, 9, 7, 9, 8], ft_all=[8, 9, 8, 9, 8, 9, 8, 9]),
+                            sel)["decisions"]
     assert d["H1"]["label"] == A.INCONCLUSIVE
+    # H1 is decided against FT-ALL: beating the weaker FT-L does not help, and the FT-L test is only secondary
+    full = A.compute_decisions(confirm(fec_a=8, ft_l=6, ft_all=10), sel)
+    assert full["decisions"]["H1"]["label"] == A.REFUTED and full["secondary"]["H1_vs_FT-L"]["label"] == A.SUPPORTED
+    # H2a is decided against FEC-TOP: an advantage over FEC-0 alone does not support routing
+    full = A.compute_decisions(confirm(fec_a=9, fec_top=9, fec_0=6), sel)
+    assert full["decisions"]["H2a"]["label"] == A.REFUTED
+    assert full["secondary"]["routing_vs_FEC-0_greedy"]["label"] == A.SUPPORTED
     # the random-feedback control installs: a supported routing result is relabelled
     d = A.compute_decisions(confirm(rand_ok=True), sel)["decisions"]
     assert d["H2a"]["label"] == A.CONTROL_FAILED and d["H2b"]["label"] == A.CONTROL_FAILED
@@ -418,6 +540,20 @@ def test_decisions_labels_guards_and_controls():
     # stream: the comparator clearly better -> refuted
     d = A.compute_decisions(confirm(s_fec=[0.3, 0.32, 0.3, 0.31, 0.3, 0.32, 0.3, 0.31]), sel)["decisions"]
     assert d["H3"]["label"] == A.REFUTED
+    # intersection-union: level with the comparator the discovery worlds ranked first (RLSEdit) is not enough
+    # when another comparator is clearly better on the confirmatory worlds
+    d = A.compute_decisions(confirm(s_hebb=[0.9, 0.92, 0.9, 0.91, 0.9, 0.92, 0.9, 0.91]), sel)["decisions"]
+    assert d["H3"]["against"] == "HEBB-TOP+RLS" and d["H3"]["label"] == A.REFUTED
+    assert d["H3"]["comparators"]["RLSEdit"]["p"] == pytest.approx(1 / 256)
+    assert d["H3"]["p"] == max(c["p"] for c in d["H3"]["comparators"].values()) == 1.0
+    # ... and one noisy comparator makes it inconclusive, not supported
+    d = A.compute_decisions(confirm(s_hebb=[0.7, 0.5, 0.7, 0.5, 0.7, 0.5, 0.7, 0.6]), sel)["decisions"]
+    assert d["H3"]["label"] == A.INCONCLUSIVE and d["H3"]["against"] == "HEBB-TOP+RLS"
+    # a comparator without records leaves H3 untested (it is never silently dropped from the union)
+    missing = {w: [r for r in recs if r.get("arm") != "BP-1+RLS"] for w, recs in confirm().items()}
+    d = A.compute_decisions(missing, sel)["decisions"]
+    assert d["H3"]["label"].startswith(A.NOT_TESTABLE) and "BP-1+RLS" in d["H3"]["label"]
+    assert d["H3"].get("p") is None and d["H1"]["p_holm"] == pytest.approx(5 / 256)   # still a family of five
     # gate: no gain over the ungated read -> refuted; leak above the bound -> guard failed
     d = A.compute_decisions(confirm(gated=[0.5, 0.52, 0.5, 0.51, 0.5, 0.52, 0.5, 0.51]), sel)["decisions"]
     assert d["H4a"]["label"] == A.REFUTED
@@ -463,6 +599,8 @@ def test_statistics_helpers_match_the_cev11_package():
 
 # -------------------------------------------------------------------------------------------- freeze gate and jobs
 def test_confirmatory_worlds_are_refused_while_the_protocol_is_not_frozen(tmp_path, capsys):
+    # This test describes the study BEFORE its freeze. On the day PROTOCOL.md gets "Status: FROZEN <date>" it
+    # fails on the next line by design: replace it then by a test of the frozen manifest.
     text = (STUDY / "PROTOCOL.md").read_text(encoding="utf-8")
     assert "NOT FROZEN" in text and V.protocol_frozen(text) is None
     assert V.protocol_frozen("# x\n\nStatus: FROZEN 2026-12-01\n") == "2026-12-01"
@@ -498,6 +636,60 @@ def test_confirmatory_worlds_are_refused_while_the_protocol_is_not_frozen(tmp_pa
     capsys.readouterr()
 
 
+def test_selection_is_tied_to_the_engine_and_configuration_of_the_discovery_records(tmp_path):
+    def problems(discovery):
+        path = tmp_path / "selection.json"
+        path.write_text(json.dumps(A.select(discovery)), encoding="utf-8")
+        return V.selection_problems(path)
+
+    assert problems(discovery_records()) == []
+    # discovery records made with another engine module than the one on disk: stale caps and stars
+    assert any("engine module changed" in p for p in problems(discovery_records(engine="0" * 64)))
+    # discovery records of a reduced (smoke-like) configuration cannot found a selection
+    assert any("registered configuration" in p for p in problems(discovery_records(config=C.smoke_config())))
+    # the two worlds disagree, or a world has no header
+    mixed = discovery_records()
+    mixed[1][0] = _meta(1, "discovery", C.protocol_config(), engine="1" * 64)
+    assert any("do not share one engine" in p for p in problems(mixed))
+    headless = discovery_records()
+    headless[0] = headless[0][1:]
+    assert any("do not share one engine" in p for p in problems(headless))
+    # an old-schema selection is refused
+    old = dict(A.select(discovery_records()), schema="fwl.selection.v1")
+    old["sha256"] = C.sha256_json({k: v for k, v in old.items() if k != "sha256"})
+    (tmp_path / "old.json").write_text(json.dumps(old), encoding="utf-8")
+    assert any("schema" in p for p in V.selection_problems(tmp_path / "old.json"))
+
+
+def test_freeze_writes_a_manifest_once_and_confirmatory_records_must_match_the_selection(tmp_path, monkeypatch):
+    sel = A.select(discovery_records())
+    sel_path, manifest = tmp_path / "selection.json", tmp_path / "freeze_manifest.sha256"
+    sel_path.write_text(json.dumps(sel), encoding="utf-8")
+    monkeypatch.setattr(V, "protocol_frozen", lambda text=None: "2026-12-01")       # as if the status line said so
+    assert V.freeze(sel_path, manifest) == [] and manifest.exists()
+    assert V.check_preconditions(sel_path, manifest) == []
+    first = manifest.read_text(encoding="utf-8")
+    assert V.freeze(sel_path, manifest) == [] and manifest.read_text(encoding="utf-8") == first   # same files: fine
+    # anything changes after the freeze: the preconditions fail and a second freeze does not move the manifest
+    changed = dict(sel, bp_star="BP-1")
+    changed["sha256"] = C.sha256_json({k: v for k, v in changed.items() if k != "sha256"})
+    sel_path.write_text(json.dumps(changed), encoding="utf-8")
+    assert any("changed since the freeze: results/selection.json" in p
+               for p in V.check_preconditions(sel_path, manifest))
+    again = V.freeze(sel_path, manifest)
+    assert again and "already frozen" in again[0] and manifest.read_text(encoding="utf-8") == first
+
+    # confirmatory headers: the configuration (caps) of the frozen selection and the engine of the discovery records
+    good = confirm(sel)
+    assert V.run_header_problems(good, sel) == []
+    uncapped = {w: [_meta(w, "confirm", C.protocol_config())] + recs[1:] for w, recs in good.items()}
+    assert len(V.run_header_problems(uncapped, sel)) == 8
+    assert all("configuration of the frozen selection" in p for p in V.run_header_problems(uncapped, sel))
+    other = {w: [_meta(w, "confirm", C.protocol_config(sel), engine="2" * 64)] + recs[1:] for w, recs in good.items()}
+    assert all("another engine" in p for p in V.run_header_problems(other, sel))
+    assert all("no header" in p for p in V.run_header_problems(confirm(), sel))
+
+
 def test_incomplete_or_foreign_records_are_reported(tmp_path):
     recs = synthetic_world(1000)
     path = C.results_path(tmp_path, 1000)
@@ -514,13 +706,14 @@ def test_rerun_detects_changed_records_and_crosscheck_compares_with_cev11_record
     sel_path, dec_path, results = tmp_path / "selection.json", tmp_path / "decisions.json", tmp_path / "confirm"
     sel_path.write_text(json.dumps(sel), encoding="utf-8")
     results.mkdir()
-    per_world = confirm()
+    per_world = confirm(sel)
     for w, recs in per_world.items():
         C.results_path(results, w).write_text("\n".join(json.dumps(r) for r in recs) + "\n", encoding="utf-8")
     assert V.rerun(results, sel_path, dec_path) and not dec_path.exists()         # no decisions file yet
     decisions = json.loads(json.dumps(A.compute_decisions(per_world, sel)))
     decisions["records_sha256"] = {str(w): C.sha256_file(C.results_path(results, w)) for w in per_world}
-    dec_path.write_text(json.dumps(decisions), encoding="utf-8")                  # what analyze.py writes
+    decisions["freeze"] = {"ok": False, "problems": ["not frozen"]}                # written by analyze.py, not compared
+    dec_path.write_text(json.dumps(decisions), encoding="utf-8")
     assert V.rerun(results, sel_path, dec_path) == []
     # a record that changed after the analysis is found twice: by its file hash and by the recomputation
     recs = per_world[1003]

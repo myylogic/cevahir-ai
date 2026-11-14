@@ -40,8 +40,12 @@ def run_world(world: int, run: str, cfg: C.RunConfig, out_dir, *, base_dir=None,
     torch.set_num_threads(1)
     if base is None:
         base, editable = C.load_base(world, base_dir)
+    else:
+        C.check_base_world(base, world)
     load_s = time.time() - t0
     writer = C.RecordWriter(C.results_path(out_dir, world))
+    if writer.repaired:
+        log(f"[{run} w{world}] {writer.path.name}: unfinished last line {writer.repaired}")
     items = protocol_items(base, editable, world, cfg)
     head = header(base, world, run, cfg, items)
     if writer.has("meta|run"):

@@ -539,18 +539,22 @@ def capacity_record(setup: dict, trace: List[List[float]], cfg: C.RunConfig, run
     xs = [t[0] for t in trace]
     predicted = [_interp(grid, curve, x) for x in xs]
     predicted_v2 = [_interp(grid, curve_v2, x) for x in xs]
-    knees, knees_v2 = [], []
+    # The registered knee (H4b) is where the MEDIAN familiarity of the probes crosses theta, as the source
+    # proposal words it; the law predicts the MEAN. The crossing of the measured mean is recorded next to it
+    # (knees_mean) so that the like-for-like comparison is on file.
+    knees, knees_v2, knees_mean = [], [], []
     for theta in cfg.capacity_thetas:
         meas = _crossing(xs, [t[2] for t in trace], theta)
-        for out, cv in ((knees, curve), (knees_v2, curve_v2)):
+        meas_mean = _crossing(xs, [t[1] for t in trace], theta)
+        for out, cv, m in ((knees, curve, meas), (knees_v2, curve_v2, meas), (knees_mean, curve, meas_mean)):
             pred = _crossing(grid, cv, theta)
-            out.append({"theta": theta, "predicted_keys": pred, "measured_keys": meas,
-                        "ratio": (meas / pred) if (meas and pred) else None})
+            out.append({"theta": theta, "predicted_keys": pred, "measured_keys": m,
+                        "ratio": (m / pred) if (m and pred) else None})
     end = trace[-1] if trace else [0.0, 0.0, 0.0]
     return C.make_record(
         "capacity", run, world, f"capacity|{stream.index}|{arm}", stream=stream.index, arm=arm,
         block=setup["block"], trace=trace, predicted=predicted, predicted_v2=predicted_v2, knees=knees,
-        knees_v2=knees_v2, law={"grid": grid, "mixture": curve, "v2": curve_v2}, shares=setup["shares"], xi=xi,
+        knees_v2=knees_v2, knees_mean=knees_mean, law={"grid": grid, "mixture": curve, "v2": curve_v2}, shares=setup["shares"], xi=xi,
         n0=cfg.n0, keys_end=end[0], nu_mean_end=end[1], nu_median_end=end[2],
         predicted_end=predicted[-1] if predicted else 0.0,
         predicted_v2_end=predicted_v2[-1] if predicted_v2 else 0.0, d_ww=setup["d_ww"], p_w=setup["p_w"],
