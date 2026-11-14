@@ -1,0 +1,16 @@
+{
+ "N": 100,
+ "addresses": {
+  "PRED-RES@5": {
+   "bpb": 2.1955778715689283,
+   "bpb_base": 2.19557548088477,
+   "cached_vs_hooked_disagree": 0,
+   "dbpb": 2.3906841581933236e-06,
+   "hooked_vs_greedy_disagree": 0,
+   "ledger_sha256": "29b46724618228465e3b54017238befe627b4ae5aa83522ec23e29d01c669fe3",
+   "n_sample": 55
+  }
+ },
+ "model_unchanged": true,
+ "world": 1005
+}

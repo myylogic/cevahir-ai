@@ -1,0 +1,30 @@
+{
+ "files": {
+  "checks.json": "3130874c6ba70f6fde50eed4b514cf220e2d05dde857b316f829c3031afe20e6",
+  "episodic.jsonl": "ca32e11c2efc3dbb896a5c128a4c821b985568c36ee911b3a56dc51968577b34",
+  "ft_stream.jsonl": "479142f2f1bea40bc02b24f46f62bf2ffc94f72f678bf289066b37a4a199a729",
+  "setup.json": "b67fe5a575bf9fa7c6e798ce526826876841a173a095dc8106f7a021a0320045"
+ },
+ "ka_version": "ka/2",
+ "phases": [
+  "episodic",
+  "ft",
+  "checks"
+ ],
+ "protocol_config": true,
+ "required_phases": [
+  "episodic",
+  "ft",
+  "checks"
+ ],
+ "run": "confirm",
+ "seconds": {
+  "checks": 11.9,
+  "episodic": 47.6,
+  "ft": 75.8,
+  "ft_FT-ALL": 35.8,
+  "ft_FT-L": 34.5,
+  "setup": 40.3
+ },
+ "world": 1005
+}
