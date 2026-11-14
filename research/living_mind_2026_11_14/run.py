@@ -38,6 +38,7 @@ VARIANTS = {"as_written": lambda **kw: Config(**kw), "changed": lambda **kw: Con
             "reflective": lambda **kw: Config.reflective(**kw),
             "honest_reflective": lambda **kw: Config.reflective(**dict(dict(miss_scope="gens"), **kw)),
             "honest_trusted": lambda **kw: Config.reflective(**dict(dict(miss_scope="gens", support="trusted"), **kw)),
+            "members": lambda **kw: Config.changed(**dict(dict(support="members"), **kw)),
             "sleeping": lambda **kw: Config.reflective(**dict(dict(reflect=8), **kw)),
             "trusted": lambda **kw: Config.reflective(**dict(dict(support="trusted"), **kw)),
             "symmetric_choice": lambda **kw: Config.symmetric(**dict(dict(support="choice"), **kw))}
