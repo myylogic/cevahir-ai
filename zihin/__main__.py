@@ -35,7 +35,8 @@ from .persist import load, save
 from .store import W_NEG, W_POS
 
 CHANNEL = "text"
-VARIANTS = {"members": lambda: Config.changed(support="members"), "changed": Config.changed}
+VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True),
+            "members": lambda: Config.changed(support="members"), "changed": Config.changed}
 
 
 def words(text: str) -> List[str]:
@@ -143,7 +144,7 @@ class Session:
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(prog="python -m zihin")
     ap.add_argument("--load")
-    ap.add_argument("--variant", default="members", choices=sorted(VARIANTS))
+    ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
     args = ap.parse_args(argv)
     if args.load:
         mind = load(args.load)

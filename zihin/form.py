@@ -60,8 +60,8 @@ def recognise(mind, slot: int) -> Optional[int]:
 def induce_slots(mind, unit: int, parts: Tuple[int, ...], slot: int) -> None:
     """Frames and categories from composed units that differ in exactly one position."""
     S, g = mind.S, mind.knob["gain"]
-    for pos in range(len(parts)):
-        key = (pos, parts[:pos] + (-1,) + parts[pos + 1:])
+    for key, where in S.slot_keys(parts):
+        pos = where[0]
         frame = S.frame_of.get(key)
         if frame is None:
             first = S.frame_first.get(key)
@@ -71,7 +71,7 @@ def induce_slots(mind, unit: int, parts: Tuple[int, ...], slot: int) -> None:
             if first == unit:
                 continue
             category = S.new_unit(CATEGORY)
-            frame_parts = parts[:pos] + (category,) + parts[pos + 1:]
+            frame_parts = tuple(category if j in where else q for j, q in enumerate(parts))
             frame = S.new_unit(COMPOSED | SLOTTED | INDUCED, arity=len(parts))  # always category + 1
             S.tuple_index[frame_parts] = frame
             for position, part in enumerate(frame_parts):

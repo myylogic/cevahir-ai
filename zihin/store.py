@@ -107,6 +107,22 @@ class Substance:
         self.out.setdefault((src, form, -1 if form == PART else lag), []).append(tie)
         self.inc.setdefault((dst, form), []).append(tie)
 
+    def slot_keys(self, parts: Tuple[int, ...]):
+        """Slot keys of a tuple: (key, positions). Without ``bind_repeats`` one key per position (as written);
+        with it, all positions holding the same unit form one slot (a variable that occurs more than once)."""
+        out, seen = [], set()
+        for pos, part in enumerate(parts):
+            if getattr(self, "bind_repeats", False):
+                where = tuple(j for j, q in enumerate(parts) if q == part)
+                if where in seen:
+                    continue
+                seen.add(where)
+            else:
+                where = (pos,)
+            masked = tuple(-1 if j in where else q for j, q in enumerate(parts))
+            out.append(((where[0] if len(where) == 1 else where, masked), where))
+        return out
+
     def parts(self, unit: int) -> Tuple[int, ...]:
         """Parts of a composed unit in position order, read from its PART ties."""
         ties = self.out.get((unit, PART, -1), [])
@@ -131,8 +147,8 @@ class Substance:
             if not self.u_alive[unit] or not int(self.u_kind[unit]) & COMPOSED:
                 continue
             parts, kind = self.parts(unit), int(self.u_kind[unit])
-            for pos in range(len(parts)):
-                key = (pos, parts[:pos] + (-1,) + parts[pos + 1:])
+            for key, where in self.slot_keys(parts):
+                pos = where[0]
                 if kind & INDUCED and int(self.u_kind[parts[pos]]) & CATEGORY and \
                         int(self.u_birth[parts[pos]]) == int(self.u_birth[unit]) and parts[pos] == unit - 1:
                     self.frame_of[key] = unit
@@ -318,8 +334,8 @@ class Substance:
                 parts = self.parts(unit)
                 if self.tuple_index.get(parts) == unit:
                     del self.tuple_index[parts]
-                for pos in range(len(parts)):
-                    key = (pos, parts[:pos] + (-1,) + parts[pos + 1:])
+                for key, where in self.slot_keys(parts):
+                    pos = where[0]
                     if self.frame_first.get(key) == unit:
                         del self.frame_first[key]
                     if kind & INDUCED and parts[pos] == unit - 1 and self.frame_of.get(key) == unit:

@@ -35,7 +35,10 @@ def generalisations(mind, unit: int) -> List[Tuple[int, float]]:
         parts = S.parts(unit)
         for pos, part in enumerate(parts):
             for category, e in categories_of(mind, part):
-                frame = S.tuple_index.get(parts[:pos] + (category,) + parts[pos + 1:])
+                if getattr(S, "bind_repeats", False):
+                    frame = S.tuple_index.get(tuple(category if q == part else q for q in parts))
+                else:
+                    frame = S.tuple_index.get(parts[:pos] + (category,) + parts[pos + 1:])
                 if frame is not None:
                     found.append((frame, e))
     return [(general, e) for general, e in found if e > 0.5]
@@ -179,28 +182,42 @@ def _world(mind, unit: int) -> bool:
     return channel >= 0 and mind.ch.kind(channel) in ("sense", "act")
 
 
-def member_mass(mind, frame: int, exclude: int) -> Tuple[Dict[int, Tuple[float, float]], float]:
+SELF, NEXT = -1, -2   # F12 relational targets of a frame: "the filler of my slot", "what the filler goes on with"
+
+
+def continuations(mind, unit: int, exclude=()) -> Dict[int, float]:
+    """Own lag-1 expectations of a unit on sense/act targets, without ``exclude`` (the fixed words of a frame)."""
+    return {v: expectation(p, n, mind.cfg.k) for v, (p, n) in own_mass(mind, unit).items()
+            if _world(mind, v) and v not in exclude and v != unit and p > 0.0}
+
+
+def member_mass(mind, frame: int, exclude: int):
     """F11: what the members of a frame's category have lived in its slot, read now from their own evidence.
 
-    For a frame with one category position (C, rest), each member x of C (ABSTRACT x -> C with expectation
-    e_x) whose instance (x, rest) exists contributes its own belief: the share of its own positive evidence on
-    sense/act targets that each value v received, s_x(v). Then
-        W+(v) = sum_x e_x s_x(v),   W-(v) = sum_x e_x (1 - s_x(v)),
-    i.e. every member counts once, with both signs, however often it was told (no growth of evidence by
-    repetition, no asymmetry between confirming and failing). The instance being read is left out. Returns the
-    masses and the number of members that contributed (weighted).
+    For a frame whose category C fills one slot (one or, with bind_repeats, several positions), each member x of
+    C (ABSTRACT x -> C with expectation e_x) whose instance (the frame with x in the slot) exists contributes its
+    own belief: the share of its own positive evidence on sense/act targets that each value v received, s_x(v).
+        W+(v) = sum_x e_x s_x(v),   W-(v) = sum_x e_x (1 - s_x(v))
+    Every member counts once, with both signs; the instance being read is left out.
+    F12 (bind_repeats): a value that IS the member itself counts under SELF, a value that is one of the member's
+    own continuations (not a fixed word of the frame) counts under NEXT, so members that agree on a relation
+    ("the answer repeats the asked word", "then comes what that word goes on with") agree although their words
+    differ. Returns (masses by target or SELF/NEXT, members, slot positions, fixed words).
     """
     S, k = mind.S, mind.cfg.k
     parts = S.parts(frame)
-    pos = [i for i, p in enumerate(parts) if int(S.u_kind[p]) & CATEGORY]
-    if len(pos) != 1:
-        return {}, 0.0
-    i0, category = pos[0], parts[pos[0]]
+    cats = {p for p in parts if int(S.u_kind[p]) & CATEGORY}
+    if len(cats) != 1:
+        return {}, 0.0, (), ()
+    category = cats.pop()
+    where = tuple(j for j, p in enumerate(parts) if p == category)
+    fixed = tuple(p for p in parts if p != category)
+    relational = getattr(S, "bind_repeats", False)
     shares: Dict[int, float] = {}
     members = 0.0
     for tie in S.inc.get((category, ABSTRACT), ()):
         x = int(S.t_src[tie])
-        instance = S.tuple_index.get(parts[:i0] + (x,) + parts[i0 + 1:])
+        instance = S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts)))
         if instance is None or instance == exclude:
             continue
         own = {v: p for v, (p, n) in own_mass(mind, instance).items() if _world(mind, v) and p > 0.0}
@@ -209,9 +226,11 @@ def member_mass(mind, frame: int, exclude: int) -> Tuple[Dict[int, Tuple[float, 
             continue
         e_x = expectation(float((S.t_w[W_POS, tie] * mind.trust).sum()), float((S.t_w[W_NEG, tie] * mind.trust).sum()), k)
         members += e_x
+        goes_on = continuations(mind, x, fixed) if relational else {}
         for v, p in own.items():
-            shares[v] = shares.get(v, 0.0) + e_x * p / total
-    return {v: (w, members - w) for v, w in shares.items()}, members
+            key = SELF if relational and v == x else NEXT if v in goes_on else v
+            shares[key] = shares.get(key, 0.0) + e_x * p / total
+    return {v: (w, members - w) for v, w in shares.items()}, members, where, fixed
 
 
 def members_map(mind, unit: int) -> Dict[int, float]:
@@ -219,25 +238,35 @@ def members_map(mind, unit: int) -> Dict[int, float]:
 
     Among the frames of the instance, the one whose members agree most on a value speaks
     (score = e(i -> g) conviction(members) max_v f(v)); its expectations are e <- c f + (1 - c) 1/2 with
-    c = lam e(i -> g) conviction(members); the instance's own evidence comes last, as everywhere.
+    c = lam e(i -> g) conviction(members); SELF resolves to the word in the instance's slot and NEXT to that word's
+    own strongest continuation (F12); the instance's own evidence comes last, as everywhere.
     """
-    cfg = mind.cfg
+    cfg, S = mind.cfg, mind.S
     best = None
     for general, e_abs in generalisations(mind, unit):
-        mass, members = member_mass(mind, general, unit)
+        mass, members, where, fixed = member_mass(mind, general, unit)
         if not mass:
             continue
         c_members = conviction(members, cfg.k)
         top = max(frequency(p, n) for p, n in mass.values())
         score = e_abs * c_members * top
         if best is None or score > best[0]:
-            best = (score, e_abs, c_members, mass)
+            best = (score, e_abs, c_members, mass, where, fixed)
     out: Dict[int, float] = {}
     if best is not None:
-        _, e_abs, c_members, mass = best
+        _, e_abs, c_members, mass, where, fixed = best
         c = cfg.lam * e_abs * c_members
+        filler = S.parts(unit)[where[0]] if where and int(S.u_kind[unit]) & COMPOSED else None
         for target, (w_pos, w_neg) in mass.items():
-            out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
+            if target == SELF:
+                target = filler
+            elif target == NEXT:
+                goes_on = continuations(mind, filler, fixed) if filler is not None else {}
+                target = max(goes_on, key=goes_on.get) if goes_on else None
+            if target is None:
+                continue
+            e = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
+            out[target] = max(out.get(target, 0.0), e)
     for target, (w_pos, w_neg) in own_mass(mind, unit).items():
         c = conviction(w_pos + w_neg, cfg.k)
         out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
