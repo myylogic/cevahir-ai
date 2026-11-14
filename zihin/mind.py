@@ -29,7 +29,7 @@ from . import act as act_mod
 from .events import ACTED, IMAGINED, IMITATED, N_PROV, PROVENANCE, REFERENCE, SENSED, Channels, Event
 from .evidence import conviction, expectation
 from .form import categories_of, compose, confirm_parts, maybe_chunk, recognise
-from .learn import learn_follow, learn_together
+from .learn import learn_follow, learn_together, reflect
 from .read import conflict_of, predictions, total_drive
 from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS, Substance
 
@@ -58,6 +58,8 @@ class Config:
                                     # evidence from the episode ("gens", symmetric; see NOTES.md F7)
     reliability: bool = False       # F9: every generalisation an instance is read from is judged by what the
                                     # instance then lived (evidence on its RELY self-tie); read with "reliable"
+    reflect: int = 0                # F10: in each idle moment re-read this many lived instances with the
+                                    # generalisations the mind has NOW (needs reliability)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
     evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
     feel_focus: bool = True         # feelings compete for the focus like any event (as written)
@@ -97,6 +99,13 @@ class Config:
         base = dict(reliability=True, support="reliable")
         base.update(over)
         return cls.changed(**base)
+
+    @classmethod
+    def reflective(cls, **over) -> "Config":
+        """reliable + F10: idle moments re-read lived instances with the present generalisations."""
+        base = dict(reflect=1)
+        base.update(over)
+        return cls.reliable(**base)
 
     @classmethod
     def symmetric(cls, **over) -> "Config":
@@ -229,6 +238,8 @@ class Mind:
         acts = act_mod.decide(self)                        # step 4
         if cfg.imagine and not items:
             act_mod.imagine(self)
+        if cfg.reflect and cfg.reliability and not items:
+            reflect(self, cfg.reflect)
         if cfg.knobs and not items and not acts:
             acts = act_mod.babble(self)
         for event in acts:

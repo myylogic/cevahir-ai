@@ -35,6 +35,10 @@ VARIANTS = {"as_written": lambda **kw: Config(**kw), "changed": lambda **kw: Con
             "symmetric": lambda **kw: Config.symmetric(**kw),
             "symmetric_pooled": lambda **kw: Config.symmetric(**dict(dict(support="capped"), **kw)),
             "reliable": lambda **kw: Config.reliable(**kw),
+            "reflective": lambda **kw: Config.reflective(**kw),
+            "honest_reflective": lambda **kw: Config.reflective(**dict(dict(miss_scope="gens"), **kw)),
+            "honest_trusted": lambda **kw: Config.reflective(**dict(dict(miss_scope="gens", support="trusted"), **kw)),
+            "trusted": lambda **kw: Config.reflective(**dict(dict(support="trusted"), **kw)),
             "symmetric_choice": lambda **kw: Config.symmetric(**dict(dict(support="choice"), **kw))}
 CHANNEL = "text"
 

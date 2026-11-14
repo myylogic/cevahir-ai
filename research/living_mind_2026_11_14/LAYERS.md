@@ -131,6 +131,15 @@ second model. What changed in between is only what was added: more composed situ
 learned values and knobs. T13 therefore runs in ONE life (the avoidance phase and the later choice are moments of
 the same mind), and the continuity checks of T5/T9 (early evidence bit-identical, exact ledger) apply across it.
 
+The central sentence (owner): "the deciding consciousness making sense of what it has acquired is an art of its
+own". In Zihin: ACQUISITION and MEANING are two different things. Acquisition is evidence, lived once and kept as
+lived (additive, exact, retractable). Meaning is constructed by the decider each time it reads that evidence:
+which generalisation speaks (F9 reliability), what the consequences are worth (values), how far ahead it looks
+(knobs), in which context. Meaning-making is itself learned and grows (reliabilities, values and knobs are evidence
+too), so the same acquisition means more to an older mind. Measured gap (oracle_t3.py, 600-experience lives, 5 seeds):
+the right knowledge for a held-out instance exists in the core in 100% of probes and is correct in 80%, but the
+reading selects it in only 30-53%; the answers are right in 51-63%. The missing part is meaning, not acquisition.
+
 Test T13 (consequence meaning): after one own harmful outcome the act is avoided in new instances of the same kind
 (generalised avoidance); in a context whose stake has a higher learned value the act is taken although the harm
 expectation is unchanged; the harm evidence is bit-identical before and after that choice.

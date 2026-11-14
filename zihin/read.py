@@ -62,7 +62,7 @@ def effective(mind, unit: int, trust: Optional[torch.Tensor] = None, support: Op
     """
     cfg = mind.cfg
     support = cfg.support if support is None else support
-    if support in ("nested", "choice", "reliable"):                    # masses are only defined for the additive forms
+    if support in ("nested", "choice", "reliable", "trusted"):                    # masses are only defined for the additive forms
         support = "capped"
     mass = own_mass(mind, unit, 1, trust)
     kind = int(mind.S.u_kind[unit])
@@ -105,6 +105,8 @@ def expect_map(mind, unit: int) -> Dict[int, float]:
     the same category, lets the specific override the general, and lets own evidence override both.
     """
     cfg = mind.cfg
+    if cfg.support == "trusted" and not int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
+        return trusted_map(mind, unit)
     if cfg.support == "reliable" and not int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
         return reliable_map(mind, unit)
     if cfg.support == "choice" and not int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
@@ -160,6 +162,33 @@ def reliable_map(mind, unit: int) -> Dict[int, float]:
         for target, (w_pos, w_neg) in own_mass(mind, general).items():
             c = cfg.lam * e_abs * conviction(w_pos + w_neg, cfg.k)
             out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
+    for target, (w_pos, w_neg) in own_mass(mind, unit).items():
+        c = conviction(w_pos + w_neg, cfg.k)
+        out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
+    return out
+
+
+def trusted_map(mind, unit: int) -> Dict[int, float]:
+    """support = "trusted" (F10): generalisations are sources, pooled by the trust they have earned.
+
+    The same pooling as for provenance classes (W = sum_pi tau_pi w), with the trust of a generalisation
+    tau_g = max(0, 2 reliability(g) - 1): one that has predicted no better than chance has no voice. Each speaks
+    with at most lam e(i -> g) lived experiences (capped, as in section 4 changed):
+        W+_gen(v) = sum_g tau_g lam e(i -> g) W+(g -> v) / max(1, W(g -> v) / k),   W-_gen likewise
+        e <- c_gen f_gen + (1 - c_gen) 1/2;   own evidence last: e <- c_own f_own + (1 - c_own) e
+    """
+    cfg = mind.cfg
+    pooled: Dict[int, List[float]] = {}
+    for general, e_abs in generalisations(mind, unit):
+        tau = max(0.0, 2.0 * reliability(mind, general) - 1.0)
+        if tau <= 0.0:
+            continue
+        for target, (w_pos, w_neg) in own_mass(mind, general).items():
+            factor = tau * cfg.lam * e_abs / max(1.0, (w_pos + w_neg) / cfg.k)
+            acc = pooled.setdefault(target, [0.0, 0.0])
+            acc[0] += factor * w_pos
+            acc[1] += factor * w_neg
+    out = {t: expectation(p, n, cfg.k) for t, (p, n) in pooled.items()}
     for target, (w_pos, w_neg) in own_mass(mind, unit).items():
         c = conviction(w_pos + w_neg, cfg.k)
         out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
