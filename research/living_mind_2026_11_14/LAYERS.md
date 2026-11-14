@@ -65,10 +65,16 @@ Owner: "By nature a human tends to mate and to chase pleasures; strong reinforce
 wrap the mind. Why does not every mind act with the same strength or direction? These directors are models too.
 But the upper consciousness can, when needed, show the will to take the more likely and the right decision."
 
+The owner's example is an illustration and nothing in the core is about it (vision point 15, as with "red").
+What is modelled is the STRUCTURE of a human mind: directors (innate value signals, each with its own gain), the
+lived evidence that shapes how each director acts in this mind, and an upper layer that weighs consequences and can
+outweigh a director. Any director, any value, any body.
+
 In the substance:
 
-- Value signals are interoceptive channels like the feelings: pleasure, pain (later: any body-specific value).
-  A body adapter may give a few innate ties with innate evidence (trust_prior), e.g. (sensed X -> pleasure).
+- Value signals are interoceptive channels like the feelings: v_1 ... v_m, positive or negative, defined by the
+  body adapter, never by the core. A body adapter may give a few innate ties with innate evidence (trust_prior),
+  e.g. (sensed X -> v_j). Below, "pleasure" stands for any positive value signal and "harm" for any negative one.
   The innate GAIN of each value channel (how much one pleasure event counts) is a body constant that differs
   between minds: temperament. Same rule, different gains, different lives -> different strength and direction.
 - A drive toward an act is the pooled expectation (S, X) -> pleasure at lag 1 (immediate). Consequences are ties
