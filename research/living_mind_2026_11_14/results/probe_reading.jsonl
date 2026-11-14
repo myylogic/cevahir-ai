@@ -1,0 +1,12 @@
+{"domain": "iliski", "seed": 0, "variant": "changed", "default_told": 0.25, "default_induced": 0.75, "default_member": 1.0, "sharpest_told": 0.5, "sharpest_induced": 0.75, "sharpest_member": 1.0}
+{"domain": "nitelik", "seed": 1, "variant": "changed", "default_told": 1.0, "default_induced": 0.16666666666666666, "default_member": 1.0, "sharpest_told": 1.0, "sharpest_induced": 0.3333333333333333, "sharpest_member": 1.0}
+{"domain": "nitelik", "seed": 2, "variant": "changed", "default_told": 0.5, "default_induced": 0.16666666666666666, "default_member": 1.0, "sharpest_told": 1.0, "sharpest_induced": 0.16666666666666666, "sharpest_member": 1.0}
+{"domain": "nitelik", "seed": 0, "variant": "changed", "default_told": 0.8333333333333334, "default_induced": 0.6666666666666666, "default_member": 1.0, "sharpest_told": 0.5, "sharpest_induced": 1.0, "sharpest_member": 1.0}
+{"domain": "iliski", "seed": 1, "variant": "changed", "default_told": 0.5, "default_induced": 0.75, "default_member": 1.0, "sharpest_told": 0.5, "sharpest_induced": 0.625, "sharpest_member": 1.0}
+{"domain": "iliski", "seed": 2, "variant": "changed", "default_told": 0.75, "default_induced": 0.5, "default_member": 1.0, "sharpest_told": 0.625, "sharpest_induced": 0.5, "sharpest_member": 1.0}
+{"domain": "nitelik", "seed": 0, "variant": "symmetric", "default_told": 0.3333333333333333, "default_induced": 0.0, "default_member": 1.0, "sharpest_told": 1.0, "sharpest_induced": 0.5, "sharpest_member": 1.0}
+{"domain": "nitelik", "seed": 1, "variant": "symmetric", "default_told": 0.3333333333333333, "default_induced": 0.0, "default_member": 1.0, "sharpest_told": 0.8333333333333334, "sharpest_induced": 0.0, "sharpest_member": 1.0}
+{"domain": "nitelik", "seed": 2, "variant": "symmetric", "default_told": 0.0, "default_induced": 0.0, "default_member": 1.0, "sharpest_told": 0.6666666666666666, "sharpest_induced": 0.6666666666666666, "sharpest_member": 1.0}
+{"domain": "iliski", "seed": 0, "variant": "symmetric", "default_told": 0.125, "default_induced": 0.0, "default_member": 1.0, "sharpest_told": 0.625, "sharpest_induced": 0.25, "sharpest_member": 1.0}
+{"domain": "iliski", "seed": 2, "variant": "symmetric", "default_told": 0.125, "default_induced": 0.5, "default_member": 1.0, "sharpest_told": 0.875, "sharpest_induced": 0.5, "sharpest_member": 1.0}
+{"domain": "iliski", "seed": 1, "variant": "symmetric", "default_told": 0.0, "default_induced": 0.0, "default_member": 1.0, "sharpest_told": 0.5, "sharpest_induced": 0.75, "sharpest_member": 1.0}
