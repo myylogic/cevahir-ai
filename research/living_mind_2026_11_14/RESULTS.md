@@ -67,3 +67,20 @@ removed). Retraction is exact for evidence, not for structure (same law as "same
 
 T4 (questions), T6 (transfer to an unseen domain), T7 (imitation and detaching), T8 (imagination with reality
 score), and the Transformer baselines on the identical stream. These remain the decisive tests of the design.
+
+## Follow-up on T3 held-out (exploratory, seeds 0-2, `probe_reading.py`, `results/probe_reading.jsonl`)
+
+Share of held-out probes answered right (right value top and > ½; chance of being top: 1/4 nitelik, 1/5 iliski),
+three seeds each, 6-8 held-out probes per life — small samples:
+
+| learning / reading | nitelik told rule | nitelik induced | iliski told rule | iliski induced | members |
+|---|---|---|---|---|---|
+| changed / nested (as in T3 above) | 0.78 | 0.33 | 0.50 | 0.67 | 1.00 |
+| changed / sharpest (F8) | 0.83 | 0.50 | 0.54 | 0.62 | 1.00 |
+| symmetric (F7) / nested | 0.22 | 0.00 | 0.08 | 0.17 | 1.00 |
+| symmetric (F7) / sharpest (F8) | 0.83 | 0.39 | 0.67 | 0.50 | 1.00 |
+
+Reading: F7 alone is harmful (and 3-4× slower); F8 repairs it, and on the changed learning F8 gives a small,
+not significant gain. Generalisation to an instance never told the dimension is still only partly solved
+(0.4-0.8, far from the members' 1.00). The root cause recorded in NOTES.md (many overlapping classes; the mind
+does not yet learn WHICH classification predicts WHICH dimension) is the open problem, not a reading detail.
