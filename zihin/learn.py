@@ -319,6 +319,22 @@ def reflect(mind, budget: int = 1) -> None:
     mind.reflect_cursor = cursor
 
 
+def learn_value(mind, percepts) -> None:
+    """L5, consequences: a signal on a channel of kind "value" (good or bad for this mind, as its body adapter
+    defines) is evidence for every step of the episode that led to it: each composed context in the episode's
+    trace gets EXPECT lag 2 ("later in the same episode") to the value unit. The trace is the only memory a
+    consequence needs; nothing names what is good or bad here."""
+    S, g = mind.S, mind.knob["gain"]
+    trace = getattr(mind, "trace", [])
+    if not trace:
+        return
+    for unit, intensity, slot, channel in percepts:
+        if intensity <= 0.0 or mind.ch.kind(channel) != "value":
+            continue
+        for step_unit in dict.fromkeys(trace):
+            add_evidence1(mind, W_POS, slot, S.tie(step_unit, unit, EXPECT, 2), g * intensity)
+
+
 def learn_facets(mind, items: List[int], facets: List[Tuple[int, float, int]], slot: int) -> None:
     """Facets (parts or features of an item on a channel of kind "facet", e.g. subword pieces of a word, later
     features of a seen object) hold together with the items of the same moment: EXPECT lag 0 in both directions,

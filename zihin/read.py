@@ -191,7 +191,7 @@ def continuations(mind, unit: int, exclude=()) -> Dict[int, float]:
             if _world(mind, v) and v not in exclude and v != unit and p > 0.0}
 
 
-def member_mass(mind, frame: int, exclude: int):
+def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None):
     """F11: what the members of a frame's category have lived in its slot, read now from their own evidence.
 
     For a frame whose category C fills one slot (one or, with bind_repeats, several positions), each member x of
@@ -220,7 +220,7 @@ def member_mass(mind, frame: int, exclude: int):
         instance = S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts)))
         if instance is None or instance == exclude:
             continue
-        own = {v: p for v, (p, n) in own_mass(mind, instance).items() if _world(mind, v) and p > 0.0}
+        own = {v: p for v, (p, n) in own_mass(mind, instance, 1, trust).items() if _world(mind, v) and p > 0.0}
         total = sum(own.values())
         if total <= 0.0:
             continue
@@ -233,7 +233,7 @@ def member_mass(mind, frame: int, exclude: int):
     return {v: (w, members - w) for v, w in shares.items()}, members, where, fixed
 
 
-def members_map(mind, unit: int) -> Dict[int, float]:
+def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
     """support = "members" (F11): a category speaks for an instance with what its members have lived.
 
     Among the frames of the instance, the one whose members agree most on a value speaks
@@ -244,7 +244,7 @@ def members_map(mind, unit: int) -> Dict[int, float]:
     cfg, S = mind.cfg, mind.S
     best = None
     for general, e_abs in generalisations(mind, unit):
-        mass, members, where, fixed = member_mass(mind, general, unit)
+        mass, members, where, fixed = member_mass(mind, general, unit, trust)
         if not mass:
             continue
         c_members = conviction(members, cfg.k)
@@ -267,7 +267,7 @@ def members_map(mind, unit: int) -> Dict[int, float]:
                 continue
             e = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
             out[target] = max(out.get(target, 0.0), e)
-    for target, (w_pos, w_neg) in own_mass(mind, unit).items():
+    for target, (w_pos, w_neg) in own_mass(mind, unit, 1, trust).items():
         c = conviction(w_pos + w_neg, cfg.k)
         out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
     return out

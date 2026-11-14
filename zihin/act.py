@@ -46,6 +46,34 @@ def act_expectation(mind, act_unit: int, imitated_pos: float, imitated_neg: floa
     return expectation(imitated_pos, imitated_neg, mind.cfg.k)
 
 
+def consequence(mind, act_unit: int) -> float:
+    """L5: sum over value signals of sign x (2 e - 1) for the path "this episode, then this act", read from the
+    EXPECT lag-2 ties that the episode trace collected when such a path was taken before (0 when never taken
+    or no value signal is defined). Signs come from the adapter (mind.value_sign)."""
+    signs = getattr(mind, "value_sign", None)
+    if not signs or not mind.episode:
+        return 0.0
+    S = mind.S
+    path = S.tuple_index.get(tuple(mind.episode) + (act_unit,))
+    if path is None:
+        return 0.0
+    total = 0.0
+    for (channel, symbol), sign in signs.items():
+        if not mind.ch.has(channel):
+            continue
+        cid = mind.ch.id(channel)
+        index = mind.ch.symbol_index(cid, symbol, create=False)
+        value_unit = S.atom_index.get((cid, index), -1) if index >= 0 else -1
+        if value_unit < 0:
+            continue
+        tie = S.find_tie(path, value_unit, EXPECT, 2)
+        if tie >= 0:
+            w_pos = float((S.t_w[W_POS, tie] * mind.trust).sum())
+            w_neg = float((S.t_w[W_NEG, tie] * mind.trust).sum())
+            total += sign * (2.0 * expectation(w_pos, w_neg, mind.cfg.k) - 1.0)
+    return total
+
+
 def decide(mind) -> List[Event]:
     """Step 4: accumulate to threshold; at most one act per act channel; silence is legal."""
     S, cfg = mind.S, mind.cfg
@@ -53,7 +81,9 @@ def decide(mind) -> List[Event]:
     candidates = {}
     if mind.context is not None and cfg.support == "members" and cfg.bind_repeats:
         from .read import members_map                      # F12: speak with what the frame's members lived
-        for unit, e in members_map(mind, mind.context).items():
+        not_self = mind.trust.clone()
+        not_self[ACTED] = 0.0                              # own repetitions are a record, not a reason (section 7)
+        for unit, e in members_map(mind, mind.context, not_self).items():
             channel = int(S.u_channel[unit])
             if channel >= 0 and mind.ch.kind(channel) == "act" and e > 0.5:
                 candidates[unit] = e
@@ -72,7 +102,7 @@ def decide(mind) -> List[Event]:
                 candidates[unit] = act_expectation(mind, unit, 0.0, 0.0)
     best = {}
     for unit, e in candidates.items():
-        rate = 2.0 * e - 1.0
+        rate = 2.0 * e - 1.0 + consequence(mind, unit)  # L5 will: the drive plus what this path led to
         if rate <= 0.0:
             continue
         latency = math.ceil(theta / rate - 1e-12)

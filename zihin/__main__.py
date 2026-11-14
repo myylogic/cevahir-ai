@@ -11,6 +11,8 @@ Commands (Turkish, with English aliases):
     !oku <dosya|klasor>  / !read    watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
                                     .pdf with pypdf): sentences of documents as speech of others (imitated)
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
+    !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
+                                    the path that led to it is remembered and weighed next time, L5)
 Turn taking (while you speak the mind listens, then it may speak until it falls silent) is set by the session, not
 learned yet: during your words the act threshold is raised, afterwards it is the mind's own.
     ?<metin>             / ?        what does the mind expect after this beginning (nothing is lived; a clone is asked)
@@ -128,6 +130,8 @@ def profile(mind: Mind) -> str:
 
 
 FACETS = "parca"
+VALUE = "deger"
+VALUE_SIGN = {(VALUE, "iyi"): 1.0, (VALUE, "kötü"): -1.0}     # the adapter defines what is good and bad
 
 
 class Session:
@@ -137,6 +141,9 @@ class Session:
         self.pieces = pieces                  # optional subword tokenizer: pieces of each word as facets
         if pieces is not None:
             mind.add_channel(FACETS, "facet")
+        mind.add_channel(VALUE, "value")
+        mind.value_sign = dict(VALUE_SIGN)
+        self.open_turn = False                # the mind has just answered; feedback may still come
 
     def events(self, symbol: str, prov: int) -> List[Event]:
         """One word as an event on the text channel, with its subword pieces as facets of the same moment."""
@@ -148,12 +155,11 @@ class Session:
         return out
 
     def live(self, text: str, prov: int) -> None:
-        moments = []
-        for symbol in words(text):
-            self.mind.step(self.events(symbol, prov))
-            moments.append(self.mind.t)
+        """Hear (told) or sense an utterance while listening: the mind does not speak into it."""
+        start = self.mind.t + 1
+        self.listen(text, prov)
         self.mind.step([])
-        self.history.append((len(self.history) + 1, text, moments))
+        self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
 
     def listen(self, text: str, prov: int) -> None:
         """Hear an utterance while not speaking (turn taking set by the session)."""
@@ -178,6 +184,7 @@ class Session:
         The turn passes to the mind with your last word: it decides in that very moment (the context of your
         whole utterance is present), and each symbol it says comes back as its own echo in the next moment.
         """
+        self.close_turn()
         start = self.mind.t + 1
         symbols = words(text)
         if not symbols:
@@ -188,9 +195,23 @@ class Session:
         while acts and len(said) < limit:
             said += [str(e.symbol) for e in acts if e.channel == CHANNEL]
             acts = self.mind.step([])                    # the echo of its own act arrives here
-        self.mind.step([])
         self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
+        self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
         return " ".join(said) if said else "(sessiz)"
+
+    def close_turn(self) -> None:
+        if self.open_turn:
+            self.mind.step([])
+            self.open_turn = False
+
+    def feedback(self, good: bool) -> str:
+        """How the mind's last answer was received: a value event at the end of the same episode."""
+        if not self.open_turn:
+            return "  geri bildirim, zihnin cevabından hemen sonra verilmeli"
+        self.mind.step([Event(VALUE, "iyi" if good else "kötü", SENSED)])
+        self.mind.step([])
+        self.open_turn = False
+        return "  not edildi (%s)" % ("iyi" if good else "kötü")
 
     def read_path(self, path: str) -> str:
         """Watch the texts of a file or of every supported file under a folder; report what was lived."""
@@ -240,8 +261,9 @@ class Session:
 
     def ask(self, text: str, top: int = 5) -> str:
         twin = self.mind.clone()
+        twin.knob["theta"] = 1e9                         # listening: the clone does not speak into the question
         for symbol in words(text):
-            twin.step([Event(CHANNEL, symbol, TOLD)])
+            twin.step(self.events(symbol, TOLD))
         expected = sorted(twin.expected(CHANNEL, "specific").items(), key=lambda kv: -kv[1])[:top]
         drive = read.total_drive(twin)
         if not expected or expected[0][1] <= 0.5:
@@ -258,8 +280,9 @@ class Session:
 
     def why(self, text: str, value: str) -> str:
         twin = self.mind.clone()
+        twin.knob["theta"] = 1e9                         # listening: the clone does not speak into the question
         for symbol in words(text):
-            twin.step([Event(CHANNEL, symbol, TOLD)])
+            twin.step(self.events(symbol, TOLD))
         if twin.context is None or not twin.ch.has(CHANNEL):
             return "  bağlam yok"
         cid = twin.ch.id(CHANNEL)
@@ -323,6 +346,9 @@ def main(argv=None) -> None:
         if not line:
             continue
         try:
+            if not line.lstrip("!").split(" ")[0] in ("dogru", "doğru", "good", "iyi", "yanlis", "yanlış", "bad", "kotu",
+                                                       "kötü") or not line.startswith("!"):
+                session.close_turn()                     # any other input ends the answered turn first
             if line.startswith("?") and not chat:
                 print(session.ask(line[1:].strip()))
             elif line.startswith("!"):
@@ -350,6 +376,10 @@ def main(argv=None) -> None:
                     print("  %d satır izlendi, %d an" % (n, session.mind.t))
                 elif cmd in ("oku", "read"):
                     print(session.read_path(rest.strip()))
+                elif cmd in ("dogru", "doğru", "good", "iyi"):
+                    print(session.feedback(True))
+                elif cmd in ("yanlis", "yanlış", "bad", "kotu", "kötü"):
+                    print(session.feedback(False))
                 elif cmd in ("konus", "chat"):
                     chat = not chat
                     print("  sohbet modu %s" % ("açık" if chat else "kapalı"))

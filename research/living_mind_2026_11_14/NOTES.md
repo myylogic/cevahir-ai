@@ -217,6 +217,18 @@ Incident (2026-11-14, recorded as it happened): two loads of the same saved mind
    ledger for conversation; a mind saved without a ledger starts a fresh one when loaded (new experiences remain
    exactly retractable, the documents of its childhood are not).
 
+F15. (2026-11-14) Speech judged by its consequences (L5 will, T7 applied to speech; owner: "if it could think it
+   would say: I cannot lie down"; "I do not want a parrot"). A channel of kind "value" carries signals the adapter
+   calls good or bad (the core never names them). Every composed context of the current episode is kept in a trace;
+   a value signal adds EXPECT lag 2 ("later in this episode") evidence from each step of the trace to the value unit.
+   Before saying a word the act's rate is the drive plus the consequences of the path "this episode, then this
+   word": rate = (2e - 1) + sum_j sign_j (2 e(path -> v_j) - 1). Own repetitions are no longer a reason to speak
+   (ACTED excluded from the act's drive, design section 7). Two session fixes found with it: the mind listens while
+   spoken to (it no longer completes the partner's sentence into its own context), and an answered turn stays open
+   for feedback and is closed by any other input. Result (results/third_chat_feedback.txt): after one "wrong" the
+   copied answer is not said again; another answer that was approved is kept; the copied knowledge is still
+   expected ("on" 0.79 before, 0.87 after). Records of the chat only; not yet a multi-seed test.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit
