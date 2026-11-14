@@ -144,6 +144,25 @@ Test T13 (consequence meaning): after one own harmful outcome the act is avoided
 (generalised avoidance); in a context whose stake has a higher learned value the act is taken although the harm
 expectation is unchanged; the harm evidence is bit-identical before and after that choice.
 
+## L7. Not knowing is a state the mind knows, not an output (owner, 2026-11-14)
+
+Owner: "I ask myself what cancer cells are; what I know comes to mind; I go deeper and ask how they form. If I know
+nothing I can say I do not know, but I do not stop there: I try to learn, if it is really needed. Humans make these
+optimisations in sleep." And: "The model will not just say 'I don't know'; the mind has to know what not knowing means."
+
+- Asking oneself is an act on the inner voice channel (L3); what is tied to the asked unit comes to mind by
+  settling; going deeper is asking again with what came.
+- Not knowing is measured inside, never written as an answer: the conviction of what the asked context leads to
+  is low (no generalisation with proven reliability, own evidence near zero). This is felt: the drive
+  D = use x (1 - c) of the asked unit is high, and that is an interoceptive event like surprise or conflict.
+- Its meaning is learned like any other: what followed when the mind, in that felt state, guessed, stayed silent,
+  asked, searched, or said "I do not know" (an act copied from others and then judged by its outcomes, T7). "If it
+  is really needed" is the use factor of the drive. No line of the core says "if c is low, say I do not know".
+- Sleep is offline consolidation: long idle phases in which the mind re-reads lived instances with its present
+  generalisations (F10 reflection), merges categories that have the same members, and prunes ties with low
+  conviction and low use. The result is fewer, more reliable generalisations ("golden knowledge"), learned from the
+  same evidence without new input.
+
 ## What would make this testable (to be added to the benchmark)
 
 - T10 automation: after an act has been reliable in a situation for long enough, it is emitted while the focus is

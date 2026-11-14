@@ -142,7 +142,8 @@ def reliability(mind, general: int) -> float:
 def reliable_map(mind, unit: int) -> Dict[int, float]:
     """support = "reliable" (F9): the generalisation that has best predicted what its instances lived speaks.
 
-        g* = argmax over generalisations with sense/act targets of  e(i -> g) reliability(g)
+        g* = argmax over generalisations with sense/act targets and reliability(g) > 1/2 of  e(i -> g) reliability(g)
+        (none such: no generalisation speaks; what is not known stays at 1/2, "I do not know")
         e <- c f + (1 - c) 1/2 for every target of g*,  c = lam e(i -> g*) conviction(g* -> v)
         own evidence of the instance last:  e <- c_own f_own + (1 - c_own) e
     """
@@ -153,7 +154,10 @@ def reliable_map(mind, unit: int) -> Dict[int, float]:
                 if int(S.u_channel[t]) >= 0 and mind.ch.kind(int(S.u_channel[t])) in ("sense", "act")}
         if not mass:
             continue
-        score = e_abs * reliability(mind, general)
+        r = reliability(mind, general)
+        if r <= 0.5:                                       # not shown better than its alternatives: no voice
+            continue
+        score = e_abs * r
         if best is None or score > best[0]:
             best = (score, e_abs, general)
     out: Dict[int, float] = {}

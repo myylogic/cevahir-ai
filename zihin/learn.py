@@ -222,26 +222,27 @@ def judge_generalisations(mind, changes: Dict[int, Dict[int, list]]) -> None:
 def _verdict(mind, general: int, v: int, leave_out: float = 0.0):
     """How generalisation g fared on a lived value v: (w+, w-) for its RELY tie, or None if g had no opinion.
 
-    g's opinion on the channel of v is its sense/act ties on that channel. With none, g is not tested (no
-    prediction, no evidence). Otherwise it is tested with the frequency it gave v, f(g -> v) (0 if v never
-    followed g), weighted by the conviction of its strongest tie on that channel:  w+ = c f,  w- = c (1 - f).
-    ``leave_out`` raw positive evidence on g -> v is removed first (what g received from this very instance).
+    g's opinion on the channel of v is the positive evidence of its sense/act ties on that channel. With none,
+    g is not tested. Otherwise it is tested with the SHARE of that evidence that went to v,
+    p = W+(g -> v) / sum_u W+(g -> u)  (relative: among the alternatives g has seen, how much was v), weighted
+    by the conviction of that opinion c = W/(W + k):  w+ = c p,  w- = c (1 - p). ``leave_out`` raw positive
+    evidence on g -> v is removed first (what g received from this very instance).
     """
     S, k = mind.S, mind.cfg.k
     channel = int(S.u_channel[v])
-    ties = [t for t in S.out.get((general, EXPECT, 1), []) if int(S.u_channel[int(S.t_dst[t])]) == channel]
-    if not ties:
-        return None
-    best, f = 0.0, 0.0
-    for t in ties:
-        w_pos, w_neg = float(S.t_w[W_POS, t].sum()), float(S.t_w[W_NEG, t].sum())
+    total = mine = 0.0
+    for t in S.out.get((general, EXPECT, 1), []):
+        if int(S.u_channel[int(S.t_dst[t])]) != channel:
+            continue
+        w_pos = float(S.t_w[W_POS, t].sum())
         if int(S.t_dst[t]) == v:
             w_pos = max(0.0, w_pos - leave_out)
-            f = w_pos / (w_pos + w_neg) if w_pos + w_neg > 0.0 else 0.0
-        best = max(best, (w_pos + w_neg) / (w_pos + w_neg + k))
-    if best <= 0.0:
+            mine = w_pos
+        total += w_pos
+    if total <= 0.0:
         return None
-    return best * f, best * (1.0 - f)
+    p, c = mine / total, total / (total + k)
+    return c * p, c * (1.0 - p)
 
 
 def _judged(mind) -> set:
