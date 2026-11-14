@@ -111,14 +111,15 @@ def babble(mind) -> List[Event]:
 def imagine(mind) -> int:
     """Idle moment: construct conclusions from support alone and record them as imagined.
 
-    Start from the carried units with the highest drive (at most H). A conclusion is a tie i -> v that the
+    Start from the units of the last focus with the highest drive (at most H). A conclusion is a tie i -> v that the
     instance does not hold itself but one generalisation g expects (chain i -> g -> v). Its reality score R
     is the expectation of i -> v from all evidence that is NOT on that chain (other generalisations; 1/2 when
     there is none). It is written with provenance ``imagined`` and weight iota * R. Later direct experience on
     the same tie judges it and so moves the trust in the mind's own constructions (``learn.judge``).
     """
     S, cfg = mind.S, mind.cfg
-    starts = sorted((-drive_of(mind, u), u) for u in mind.carry if not int(S.u_kind[u]) & (CATEGORY | SLOTTED))
+    starts = sorted((-drive_of(mind, u), u) for u, _, grounded in mind.last_focus
+                    if grounded and not int(S.u_kind[u]) & (CATEGORY | SLOTTED))
     made = 0
     for _, instance in starts[:cfg.H]:
         own = own_mass(mind, instance)
