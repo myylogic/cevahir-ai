@@ -1,6 +1,6 @@
 # Kavram Adresi (KA) — PROTOCOL
 
-Status: NOT FROZEN
+Status: FROZEN 2026-11-14
 
 This is a draft protocol. Nothing here has been run on a confirmatory world. The code refuses a confirmatory run
 until this status line reads `Status: FROZEN <date>`, the discovery selection exists and reports no failed
@@ -501,3 +501,20 @@ core (the programme's estimate was ≈ 33 min, hard cap 7.0 core-h for the study
   N = 100 without drift, and this project needs no separate memory at this scale.
 - KA-H3(a) refuted: calibration on c0 does not transfer; "tuning-free" is withdrawn. KA-H3(b) refuted: false
   firings grow with N despite the Bayes prior.
+
+## 12. Freeze record (2026-11-14)
+
+Frozen by the study lead after the discovery jobs (worlds 0 and 1) and before any confirmatory run.
+
+- Open points of §10: every choice described there as "here" is accepted as implemented. No mechanism, margin,
+  grid or SESOI was changed after the discovery records were seen. In particular items 2 (absolute locality guard,
+  low power acknowledged), 9 (the radius gate is not restricted to the first match) and 10 (S2 reads the
+  scored-sequence flag; the prefix-flag statistics are reported beside it) stay as written.
+- Discovery outcome that shapes the confirmatory families (results/selection.json, hash in
+  results/selection.sha256): the screens G-KA1a and G-KA1b failed. On both discovery worlds every gated address
+  (A-CTX, A-TOKG, A-RES, A-SUP) and A-TOK was infeasible under the leak constraints at the frozen mixtures
+  (F* = 0), while the fine-tuning references reached F* 0.39-0.64. KA-H1 (the attention-written stream is a
+  better write address) is therefore NOT confirmatory: it is reported as a discovery-stage negative result and
+  its confirmatory records are descriptive. The primary family is {KA-H2, KA-H3} (m = 2), the secondary family
+  is {S2}; PRED-ATT failed its screen, the read layer is 5.
+- G-KA1c and the consistency rule passed; no blocking gate failed.

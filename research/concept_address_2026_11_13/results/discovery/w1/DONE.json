@@ -1,0 +1,34 @@
+{
+ "files": {
+  "checks.json": "904a7dd99770968114057635ea9662521e0b29394b8d9254acdb506345523084",
+  "episodic.jsonl": "810ccf990bb5735cf3f59747746cd25bc4b7b7febd5fecb5288a9468faddbb5a",
+  "ft_stream.jsonl": "5aaa61d97228191463f1e0f2787130a2f5940a76e5dc9bd977df02452b431ab8",
+  "part_a.jsonl": "69476fd5d94cdea0ea83e6e1be1ee8839aba22f693347882fa1c2fd50ebce8c3",
+  "setup.json": "445167fc2c2da6f412b4bc6874ae440b4e4acaabc69175154ca01227d9830d40"
+ },
+ "ka_version": "ka/2",
+ "phases": [
+  "parta",
+  "episodic",
+  "ft",
+  "checks"
+ ],
+ "protocol_config": true,
+ "required_phases": [
+  "parta",
+  "episodic",
+  "ft",
+  "checks"
+ ],
+ "run": "discovery",
+ "seconds": {
+  "checks": 47.8,
+  "episodic": 208.7,
+  "ft": 60.1,
+  "ft_FT-ALL": 33.1,
+  "ft_FT-L": 23.7,
+  "parta": 362.9,
+  "setup": 77.3
+ },
+ "world": 1
+}
