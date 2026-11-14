@@ -49,6 +49,8 @@ class Config:
     lam: float = 0.5                # support factor of section 4 (design: 0.5)
     support: str = "raw"            # "raw" = as written; "capped", "nested" = changed; "none" = ablation
     predict: str = "votes"          # "votes" = as written, "specific" = changed
+    neg_floor: float = 0.0          # F14: a failed prediction is recorded only if it was expected (e >= floor);
+                                    # 0 = every tie of a present unit, as written
     neg_weight: str = "e"           # failed expectation weighted by e (as written) or by 1 ("one")
     induct_cap: float = 1.0         # each instance counts at most one experience in induction
     general_miss: bool = False      # changed: a generalisation in the focus gets negative evidence for what

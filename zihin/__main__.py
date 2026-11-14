@@ -47,7 +47,7 @@ def _log_path() -> str:
 
 
 VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True,
-                                               log_path=_log_path()),
+                                               neg_floor=1.0 / 14, log_path=_log_path()),
             "members": lambda: Config.changed(support="members"), "changed": Config.changed}
 
 
@@ -273,12 +273,21 @@ class Session:
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(prog="python -m zihin")
     ap.add_argument("--load")
+    ap.add_argument("--defter-yok", dest="no_ledger", action="store_true",
+                    help="no experience ledger: smaller and faster, but !unut cannot retract")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
     args = ap.parse_args(argv)
     if args.load:
-        mind = load(args.load)
+        mind = load(args.load, ledger=not args.no_ledger)
+        if not args.no_ledger and not mind.S.keep_log:      # a mind saved without a ledger: keep one from now on
+            from .store import DiskLog
+            mind.cfg.keep_log, mind.cfg.log_path = True, _log_path()
+            mind.S.keep_log = True
+            mind.S.log = DiskLog(mind.cfg.log_path, keep=max(4, mind.cfg.undo_depth + 2))
     else:
         mind = Mind(VARIANTS[args.variant]())
+        if args.no_ledger:
+            mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path = {}, False, False, None
         mind.add_channel(CHANNEL, "act")
     session = Session(mind)
     chat = False

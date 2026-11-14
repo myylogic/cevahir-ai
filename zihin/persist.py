@@ -13,6 +13,7 @@ import json
 import os
 import pickle
 import shutil
+import time
 from typing import Dict
 
 from .mind import Mind
@@ -69,8 +70,12 @@ def export_portable(mind: Mind, path: str) -> Dict[str, object]:
     return save(twin, path)
 
 
-def load(path: str, live_log: str = None) -> Mind:
-    """Read a mind saved by ``save``; verifies the file hash and the substance digest."""
+def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
+    """Read a mind saved by ``save``; verifies the file hash and the substance digest.
+
+    ``ledger`` False: the mind is loaded for conversation without its experience ledger (nothing is copied;
+    single experiences cannot be retracted in this session). Otherwise the saved ledger is copied to a live file
+    that is unique to this load, so two loads of the same saved mind never write into the same file."""
     if not path.endswith(".zihin"):
         path += ".zihin"
     with open(path + ".json", encoding="utf-8") as f:
@@ -83,11 +88,15 @@ def load(path: str, live_log: str = None) -> Mind:
         mind = pickle.load(f)
     if mind.S.digest() != manifest["substance_digest"]:
         raise ValueError("substance digest does not match the manifest")
+    if not ledger:
+        mind.S.log, mind.S.keep_log = {}, False
+        mind.cfg.keep_log, mind.cfg.log_path = False, None
+        return mind
     if isinstance(mind.S.log, DiskLog):
         saved_log = os.path.join(os.path.dirname(os.path.abspath(path)), mind.S.log.path)
         if manifest.get("log_sha256") and _sha256(saved_log) != manifest["log_sha256"]:
             raise ValueError("experience log does not match the manifest")
-        live = live_log or saved_log + ".live"
+        live = live_log or "%s.live-%d-%d" % (saved_log, os.getpid(), time.time_ns())
         shutil.copyfile(saved_log, live)                    # the saved ledger is never written to
         mind.S.log.path = live
     return mind

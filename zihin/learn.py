@@ -113,9 +113,10 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
             present = torch.tensor([occurred[d][0] if d in occurred else 0.0 for d in dst.tolist()], dtype=F64)
             weight = e if cfg.neg_weight == "e" else torch.ones_like(e)
             miss = g * a_u * weight * (1.0 - present)
+            expected = (e >= cfg.neg_floor) if cfg.neg_floor > 0.0 else torch.ones_like(present, dtype=torch.bool)
             reporting = torch.zeros(ids.numel(), dtype=torch.bool)
             for ch, slot in slot_of_channel.items():
-                on = channel == ch
+                on = (channel == ch) & expected
                 if bool(on.any()):
                     reporting |= on
                     got = add_evidence(mind, W_NEG, slot, ids[on], miss[on], relief=ch not in echo)
@@ -185,8 +186,9 @@ def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel)
             channel = S.u_channel[dst]
             present = torch.tensor([occurred[d][0] if d in occurred else 0.0 for d in dst.tolist()], dtype=F64)
             miss = mind.knob["gain"] * strength * e * (1.0 - present)
+            expected = (e >= cfg.neg_floor) if cfg.neg_floor > 0.0 else torch.ones_like(present, dtype=torch.bool)
             for ch, slot in slot_of_channel.items():
-                on = channel == ch
+                on = (channel == ch) & expected
                 if bool(on.any()):
                     add_evidence(mind, W_NEG, slot, ids[on], miss[on])
                     S.use_ties(ids[on])
@@ -331,8 +333,9 @@ def learn_together(mind, focus: List[Tuple[int, float, bool]], slot: int) -> Non
             w_pos, w_neg = tie_mass(mind, ids)
             e = expectation(w_pos, w_neg, cfg.k)
             weight = e if cfg.neg_weight == "e" else torch.ones_like(e)
-            add_evidence(mind, W_NEG, slot, ids, g * a_u * weight * (1.0 - here))
-            S.use_ties(ids)
+            keep = ((e >= cfg.neg_floor) | (here > 0.0)) if cfg.neg_floor > 0.0 else torch.ones_like(here, dtype=torch.bool)
+            add_evidence(mind, W_NEG, slot, ids[keep], (g * a_u * weight * (1.0 - here))[keep])
+            S.use_ties(ids[keep])
         for other, a_v in present.items():
             if other != unit:
                 add_evidence1(mind, W_POS, mind.prov_of.get(other, SENSED), S.tie(unit, other, EXPECT, 0),
