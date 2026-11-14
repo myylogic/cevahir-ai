@@ -56,7 +56,7 @@ class DiskLog:
             old = min(self.ram)
             e = self.ram.pop(old)
             e.undo = None
-            data = pickle.dumps(e, protocol=pickle.HIGHEST_PROTOCOL)
+            data = pickle.dumps(self._pack(e), protocol=pickle.HIGHEST_PROTOCOL)
             with open(self.path, "ab") as f:
                 offset = f.tell()
                 f.write(data)
@@ -69,7 +69,7 @@ class DiskLog:
             offset, length = self.index[m]
             with open(self.path, "rb") as f:
                 f.seek(offset)
-                e = pickle.loads(f.read(length))
+                e = self._unpack(pickle.loads(f.read(length)))
             e.retracted = m in self.retracted
             return e
         return default
@@ -78,6 +78,35 @@ class DiskLog:
         e = self.get(m)
         if e is None:
             raise KeyError(m)
+        return e
+
+    @staticmethod
+    def _pack(e: "MomentLog") -> tuple:
+        """Plain numbers and raw array bytes (no per-tensor pickling overhead)."""
+        arr = lambda t: (t.numpy().tobytes(), str(t.dtype), tuple(t.shape))
+        return (e.m, e.units0, e.ties0, e.units1, e.ties1, e.alpha0,
+                [(table, slot, arr(i), arr(a)) for table, slot, i, a in e.ev],
+                [(arr(i), arr(a)) for i, a in e.tie_use], [(arr(i), arr(a)) for i, a in e.unit_use],
+                None if e.last is None else (arr(e.last[0]), arr(e.last[1])))
+
+    @staticmethod
+    def _unpack(p) -> "MomentLog":
+        if isinstance(p, MomentLog):                        # entries written before the raw-array format
+            return p
+        import numpy as np
+        types = {"torch.int64": (np.int64, torch.int64), "torch.float64": (np.float64, torch.float64),
+                 "torch.int32": (np.int32, torch.int32)}
+        def ten(x):
+            raw, dtype, shape = x
+            npt, _ = types[dtype]
+            return torch.from_numpy(np.frombuffer(raw, dtype=npt).copy().reshape(shape))
+        m, u0, t0, u1, t1, alpha, ev, tu, uu, last = p
+        e = MomentLog(m, u0, t0, alpha)
+        e.units1, e.ties1 = u1, t1
+        e.ev = [(table, slot, ten(i), ten(a)) for table, slot, i, a in ev]
+        e.tie_use = [(ten(i), ten(a)) for i, a in tu]
+        e.unit_use = [(ten(i), ten(a)) for i, a in uu]
+        e.last = None if last is None else (ten(last[0]), ten(last[1]))
         return e
 
     def mark_retracted(self, m: int) -> None:
