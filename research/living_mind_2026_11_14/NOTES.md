@@ -128,6 +128,18 @@ F7. (found after the first lives, 2026-11-14) Learning and reading disagree abou
    weaker but smaller-extension generalisation pull the right value back below 1/2; pooling capped evidence
    (support = "capped", variant "symmetric_pooled") is the alternative measured side by side.
 
+F7 outcome (2026-11-14, seeds 0-1, exploratory). Negative. Judging every generalisation (symmetric) makes the
+   frames honest but held-out T3 gets WORSE than changed (nitelik seed 0: told rule 0.83 -> 0.33, induced 0.67 ->
+   0.00; iliski similar) and a moment costs 21-34 ms instead of 8. Readings tried on top: nested (default),
+   pooled capped evidence (rejected: early recall 1.00 -> 0.10, members 0.77-0.88) and "choice" (the most lived
+   generalisation speaks; rejected: it picks the frame over ALL entities, which correctly reports the base rate,
+   e.g. rule value f 0.23, and every value ends below 1/2). Diagnosis: this is the reference-class problem. The
+   mind holds many overlapping classes that contain the instance (8 categories for one entity, 25 for one
+   dimension word, because every frame position makes its own category); which class predicts the asked
+   dimension is not chosen by size (nested) nor by amount lived (choice). Candidate F8 under test
+   (probe_reading.py): the generalisation that pins down a value most decisively (max lam e c f over sense/act
+   targets) speaks. Symmetric runs were stopped after seeds 0-1; their records are kept as measured.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit
