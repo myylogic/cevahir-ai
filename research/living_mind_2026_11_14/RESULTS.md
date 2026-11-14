@@ -132,3 +132,24 @@ age. T9 exact retraction holds in 10/10 lives; T1 conviction by hearings unchang
 four or more); categories recovered 1.00. Limits: two small generated domains, 6-8 held-out probes per life; the
 mechanism is close to exemplar models of categories in cognitive science; what is new here is that it runs inside
 a core that learns while living under one evidence rule and stays exactly retractable.
+
+## T6 — a second, unseen domain; and is the first kept? (`t6_transfer.py`, `results/t6_transfer.jsonl`, F11, 5 seeds × 2 orders)
+
+Held-out generalisation in domain B (mean of told-rule and induced-rule probes) by experiences lived in B, for a fresh
+mind and for the mind that first lived A (600 experiences, independent vocabulary):
+
+| order | condition | 60 | 120 | 180 | 300 | 600 |
+|---|---|---|---|---|---|---|
+| nitelik -> iliski | fresh | 0.41 | 0.68 | 0.68 | 0.68 | 0.81 |
+| nitelik -> iliski | experienced | 0.36 | 0.68 | 0.68 | 0.68 | 0.81 |
+| iliski -> nitelik | fresh | 0.53 | 0.65 | 0.78 | 0.87 | 0.93 |
+| iliski -> nitelik | experienced | 0.53 | 0.65 | 0.80 | 0.87 | 0.93 |
+
+Transfer of the way of learning: essentially NONE (negative result for T6). The only thing that carries over is the
+learned trust in the teller (0.66 instead of 0.57 at the start), which raises the conviction of first hearings early in
+B (c 0.40-0.41 against 0.35-0.36 at 60) and nothing else. The way concepts are built (slots, categories, F11 reading) is
+innate in this prototype and is not changed by living; learning to learn (vision point 7, design section 8, the
+operating self with control knobs) remains to be built.
+
+No interference: after living B, A's facts told once early are bit-identical (10/10 lives), A's held-out answers are
+unchanged (10/10), members and exceptions 1.00. A second domain does not overwrite the first.
