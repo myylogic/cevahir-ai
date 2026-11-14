@@ -5,9 +5,9 @@ title: "Cevahir AI: Living-Learning Research Reports and Technical Book"
 authors:
   - family-names: "Yılmaz"
     given-names: "Muhammed Yasin"
-version: "2026.10.13"
-doi: 10.5281/zenodo.23342649
-date-released: 2026-10-13
+version: "2026.11.14"
+doi: 10.5281/zenodo.22864660
+date-released: 2026-11-14
 repository-code: "https://github.com/myylogic/cevahir-ai"
 url: "https://github.com/myylogic/cevahir-ai/tree/main/docs/publications"
 license: Apache-2.0
