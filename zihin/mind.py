@@ -74,6 +74,7 @@ class Config:
     knobs: bool = False             # section 8, simple first version
     babble_every: int = 0           # with knobs: emit one knob act every N idle moments (exploration)
     keep_log: bool = True
+    undo_depth: int = 1             # how many of the latest moments keep their working state for undo
 
     @classmethod
     def changed(cls, **over) -> "Config":
@@ -214,7 +215,7 @@ class Mind:
         self._feel(surprise)                               # step 6
         entry = S.end()
         entry.undo = undo
-        previous = S.log.get(self.t - 1)
+        previous = S.log.get(self.t - cfg.undo_depth)
         if previous is not None:
             previous.undo = None
         self.last_focus, self.last_gens = self.focus, self.gens

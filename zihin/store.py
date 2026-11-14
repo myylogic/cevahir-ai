@@ -292,6 +292,7 @@ class Substance:
         if entry.retracted:
             raise KeyError("the last moment was already retracted")
         self._subtract(entry)
+        self._forget_rows(entry.units0, entry.ties0)
         for name in ("u_kind", "u_arity", "u_birth", "u_use", "u_alive"):
             getattr(self, name)[entry.units0:self.n_units] = 0
         self.u_channel[entry.units0:self.n_units] = -1
@@ -302,8 +303,37 @@ class Substance:
         self.n_units, self.n_ties = entry.units0, entry.ties0
         del self.log[m]
         self.now = m - 1
-        self.rebuild_indices()
         return entry
+
+    def _forget_rows(self, units0: int, ties0: int) -> None:
+        """Take the units >= units0 and the ties >= ties0 (the newest rows) out of every cache."""
+        for unit in range(units0, self.n_units):
+            if not self.u_alive[unit]:
+                continue
+            kind = int(self.u_kind[unit])
+            if kind & ATOMIC:
+                self.atom_index.pop((int(self.u_channel[unit]), int(self.u_symbol[unit])), None)
+            if kind & COMPOSED:
+                parts = self.parts(unit)
+                if self.tuple_index.get(parts) == unit:
+                    del self.tuple_index[parts]
+                for pos in range(len(parts)):
+                    key = (pos, parts[:pos] + (-1,) + parts[pos + 1:])
+                    if self.frame_first.get(key) == unit:
+                        del self.frame_first[key]
+                    if kind & INDUCED and parts[pos] == unit - 1 and self.frame_of.get(key) == unit:
+                        del self.frame_of[key]
+        for tie in range(self.n_ties - 1, ties0 - 1, -1):
+            if not self.t_alive[tie]:
+                continue
+            src, dst = int(self.t_src[tie]), int(self.t_dst[tie])
+            form, lag = int(self.t_form[tie]), int(self.t_lag[tie])
+            self.tie_index.pop((src, dst, form, lag), None)
+            for table, key in ((self.out, (src, form, -1 if form == PART else lag)), (self.inc, (dst, form))):
+                ties = table[key]
+                ties.remove(tie)
+                if not ties:
+                    del table[key]
 
     # ------------------------------------------------------------------ inspection
     def tensors(self) -> Dict[str, torch.Tensor]:
