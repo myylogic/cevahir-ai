@@ -13,13 +13,13 @@ from zihin.evidence import frequency
 from zihin.store import ABSTRACT, CATEGORY
 
 
-def main(domain, seed, variant, n):
+def main(domain, seed, variant, n, night_every=0, night_length=0):
     w = World.make(seed, domain)
-    mind, _, state = live(w, variant, n, record=False)
+    mind, _, state = live(w, variant, n, record=False, night_every=night_every, night_length=night_length)
     S = mind.S
     sym = {u: mind.ch.symbol(c, si) for (c, si), u in S.atom_index.items()}
     classes = {c: {e for e in w.entities if w.cat_of[e] == c} for c in w.categories}
-    out = {"domain": domain, "seed": seed, "variant": variant, "n": n, "items": 0, "class_frame_exists": 0,
+    out = {"domain": domain, "seed": seed, "variant": variant, "n": n, "nights": [night_every, night_length], "items": 0, "class_frame_exists": 0,
            "class_frame_right_top": 0, "class_frame_chosen": 0, "answered_right": 0}
     for ent in w.held_out:
         if not state["isa"].get(ent):
@@ -52,4 +52,4 @@ def main(domain, seed, variant, n):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]), sys.argv[3], int(sys.argv[4]))
+    main(sys.argv[1], int(sys.argv[2]), sys.argv[3], int(sys.argv[4]), *[int(a) for a in sys.argv[5:7]])
