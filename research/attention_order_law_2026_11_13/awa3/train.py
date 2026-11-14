@@ -3,7 +3,14 @@
 
 Recipe: batch 64; AdamW betas (0.9, 0.98), eps 1e-8, weight decay 0.01 on matrices only (none on norms, biases,
 rho, tau, gate biases); 100 warm-up steps, cosine decay to 0.1x at step S, then constant 0.1x (extension steps);
-gradient clipping at 1.0; single-token cross-entropy at the answer position with a rows-only final layer.
+gradient clipping at 1.0; rows-only final layer.
+
+Training signal (PROTOCOL section 5.1, ``task.make_batch``): every training program carries several independent
+query rows (its own test-format query, further forward queries, inverse queries, key-value rows that see a
+prefix of the facts; chain rows exist and are off). The loss is the mean over the rows of the cross-entropy over
+each row's answer alphabet. Validation and evaluation use the frozen single-query sets and the same literal
+readout. A "train" record carries the loss over all rows, the loss and accuracy of row 0 (the program's own
+query) and the accuracy of every row group.
 
 Streams: data from ``random.Random(f"train|{seed}")`` (shared by every arm with that seed: common random
 numbers); budgets (K for walks, T for loops) from ``random.Random(f"budget|{seed}")``, drawn once per step in
@@ -29,7 +36,6 @@ import time
 from typing import Any, Dict, List, Optional, Sequence
 
 import torch
-import torch.nn.functional as F
 
 from . import arms, task
 
@@ -51,6 +57,7 @@ class Recipe:
     weight_decay: float = 0.01
     clip: float = 1.0
     depths: Sequence[int] = task.TRAIN_DEPTHS
+    signal: Sequence[int] = task.TRAIN_SIGNAL   # query rows per group (task.SIGNAL_GROUPS)
     budgets: Sequence[int] = arms.TRAIN_BUDGETS
     val_every: int = 200
     val_items: int = task.VAL_ID_ITEMS
@@ -160,7 +167,8 @@ def _val_tensors(k: int, stratum: str, n_items: int):
 @torch.no_grad()
 def validate(model, arm: str, n_items: int = task.VAL_ID_ITEMS, budget: int = arms.COMPETENCE_BUDGET,
              chunk: int = 300) -> dict:
-    """In-distribution validation (k = 1, 2, 3; shuffled and sorted strata) at the competence budget.
+    """In-distribution validation (k = 1, 2, 3; shuffled and sorted strata) at the competence budget, on the
+    frozen single-query validation sets; loss and accuracy over the literal classes (``task.answer_scores``).
 
     Returns {"cells": {k: {stratum: {"loss", "acc"}}}, "competence": mean accuracy over k of the arm's competence
     stratum, "competence_loss": the same for the loss, "k1_acc": accuracy at k = 1}.
@@ -179,8 +187,8 @@ def validate(model, arm: str, n_items: int = task.VAL_ID_ITEMS, budget: int = ar
             loss_sum, correct = 0.0, 0
             for i in range(0, X.shape[0], chunk):
                 logits = arms.answer_logits(model, arm, X[i:i + chunk], use_budget)
-                loss_sum += float(F.cross_entropy(logits, Y[i:i + chunk], reduction="sum"))
-                correct += int((logits.argmax(-1) == Y[i:i + chunk]).sum())
+                loss_sum += float(task.answer_loss(logits, Y[i:i + chunk], reduction="sum"))
+                correct += int((task.predict(logits) == Y[i:i + chunk]).sum())
             cells[str(k)][stratum] = {"loss": loss_sum / X.shape[0], "acc": correct / X.shape[0]}
     stratum = arms.competence_stratum(arm)
     model.train(was_training)
@@ -278,11 +286,11 @@ def train(run_dir, arm: str, seed: int, recipe: Recipe, *, total_steps: Optional
     while step < total and (stop_after is None or step < stop_after):
         t0 = time.process_time()
         step += 1
-        x, y = task.make_batch(data_rng, recipe.batch, recipe.depths)
+        batch = task.make_batch(data_rng, recipe.batch, recipe.depths, recipe.signal)
         budget = budget_rng.choice(tuple(recipe.budgets))         # drawn in every arm (stream alignment)
         use_budget = budget if forward in ("walk", "looped", "arloop") else None
-        logits = arms.answer_logits(model, arm, x, use_budget)
-        loss = F.cross_entropy(logits, y)
+        logits = arms.row_logits(model, arm, batch.x, batch.rows, use_budget, batch.mask)
+        loss = task.signal_loss(logits, batch.y, batch.kinds)
         loss_value = float(loss.detach())
         if not math.isfinite(loss_value):
             raise FloatingPointError(f"{arm} seed {seed}: non-finite loss at step {step}")
@@ -297,7 +305,13 @@ def train(run_dir, arm: str, seed: int, recipe: Recipe, *, total_steps: Optional
         # the last planned step is always recorded (like validation and the checkpoint below): an extended run
         # then has the same curve as one that ran straight through, and its "cpu_s" there prices the extension
         if step % recipe.log_every == 0 or step == total or step == recipe.steps:
-            _append_jsonl(curve_path, {"type": "train", "step": step, "loss": loss_value, "lr": lr,
+            with torch.no_grad():                                 # row 0: the program's own (test-format) query
+                own = float(task.answer_loss(logits[:, 0], batch.y[:, 0]))
+                hits = (torch.stack([task.predict(logits[:, r], int(kind)) for r, kind in enumerate(batch.kinds)], 1)
+                        == batch.y).float().mean(0)
+                rows_acc = {name: float(hits[rows].mean()) for name, rows in task.signal_groups(recipe.signal).items()}
+            _append_jsonl(curve_path, {"type": "train", "step": step, "loss": loss_value, "loss_own_query": own,
+                                       "acc_own_query": float(hits[0]), "acc_rows": rows_acc, "lr": lr,
                                        "budget": use_budget, "grad_norm": grad_norm, "cpu_s": cpu_train})
             curve_len += 1
         if step % recipe.val_every == 0 or step == total or step == recipe.steps:

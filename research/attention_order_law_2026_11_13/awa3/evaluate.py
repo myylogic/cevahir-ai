@@ -2,7 +2,8 @@
 """Evaluation of one trained run (PROTOCOL section 8): everything the analysis needs, as exact counts.
 
 One pass per (depth, stratum) gives the whole budget axis: K = 0..24 for the walks, T = 1..16 for LOOPED,
-T = 1..24 for ARLOOP; ChaCAL-style and STD have a single (exact) evaluation, stored as budget 0.
+T = 1..24 for ARLOOP; ChaCAL-style and STD have a single (exact) evaluation, stored as budget 0. A prediction
+is the arg-max over the 16 literal classes (``task.predict``), the readout the models are trained with.
 
 Recorded:
 * ``test``   depth x stratum x budget: number of correct answers on the frozen test sets;
@@ -53,7 +54,7 @@ def _correct_per_budget(model, arm: str, X: torch.Tensor, Y: torch.Tensor, chunk
         if len(outs) != len(axis):
             raise RuntimeError(f"{arm}: {len(outs)} outputs for a budget axis of {len(axis)}")
         for b, logits in enumerate(outs):
-            counts[b] += int((logits.argmax(-1) == y).sum())
+            counts[b] += int((task.predict(logits) == y).sum())
     return counts
 
 
@@ -91,7 +92,7 @@ def _zero_operator(model, arm: str, sets: Dict[int, Sequence[dict]], chunk: int)
                         logits = model.forward_rows(X[i:i + chunk], torch.tensor([X.shape[1] - 1]))[:, 0]
                     finally:
                         attn.attention_operator = "chacal"
-                correct += int((logits.argmax(-1) == Y[i:i + chunk]).sum())
+                correct += int((task.predict(logits) == Y[i:i + chunk]).sum())
             cell[stratum] = {"n": len(progs), "correct": correct}
         for stratum in task.STRATA:
             cell.setdefault(stratum, dict(cell["shuffled"]))
@@ -108,7 +109,7 @@ def _by_disorder(model, arm: str, sets: Dict[int, Sequence[dict]], chunk: int) -
             continue
         progs = sets[k]
         X, Y = task.tensors(progs, "shuffled")
-        hits = torch.cat([arms.answer_logits(model, arm, X[i:i + chunk], budget).argmax(-1) == Y[i:i + chunk]
+        hits = torch.cat([task.predict(arms.answer_logits(model, arm, X[i:i + chunk], budget)) == Y[i:i + chunk]
                           for i in range(0, X.shape[0], chunk)])
         groups: Dict[str, List[int]] = {}
         for p, hit in zip(progs, hits.tolist()):

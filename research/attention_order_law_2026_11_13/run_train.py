@@ -47,6 +47,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--val-every", type=int, default=None, help="smoke runs only")
     ap.add_argument("--ckpt-every", type=int, default=None, help="smoke runs only")
     ap.add_argument("--val-items", type=int, default=None, help="smoke runs only")
+    ap.add_argument("--signal", default=None, help="smoke runs only: query rows 'forward,inverse,prefix_forward,"
+                                                   "prefix_inverse,chain' (default: the protocol's training signal)")
     ap.add_argument("--results", default=str(layout.DEFAULT_RESULTS))
     args = ap.parse_args(argv)
     results = pathlib.Path(args.results)
@@ -74,8 +76,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.lr is None:
             ap.error("smoke runs need --lr")
         lr, seed = args.lr, 900 if args.seed is None else args.seed
+    signal = None if args.signal is None else tuple(int(v) for v in args.signal.split(","))
     recipe = phases.recipe_for(args.phase, lr, args.steps, val_every=args.val_every, ckpt_every=args.ckpt_every,
-                               val_items=args.val_items)
+                               val_items=args.val_items, signal=signal)
     run_dir = layout.run_dir(results, args.phase, args.arm, seed, lr)
     meta = train.train(run_dir, args.arm, seed, recipe, progress=lambda msg: print(msg, flush=True))
     print(json.dumps({"run_dir": str(run_dir), "steps": meta["steps"], "competence": meta["competence"],

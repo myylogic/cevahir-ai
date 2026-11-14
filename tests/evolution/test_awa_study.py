@@ -2,6 +2,9 @@
 """AWA-3 study pipeline (research/attention_order_law_2026_11_13): generator, arms, order law, drivers, statistics.
 
 * VarDeref v2: paired strata, equal chance floors, frozen streams.
+* Training signal (PROTOCOL 5.1): row layout, labels, attention mask, readout over the answer alphabet; every
+  label of a training batch reproduced from its tokens by the hand-set operators; in every arm row 0 equals the
+  single-query forward and no row depends on another query pair.
 * Arms: asserted parameter counts, answer-row forwards against the full forward, analytic cost model.
 * The order law with hand-set weights: lower-triangular operators resolve a chain iff it is dependency-sorted
   (exactly one of the (k - 1)! alias orders); the query-window walk resolves every order.
@@ -155,10 +158,145 @@ def test_frozen_streams_floors_and_no_overlap_with_training():
     hashes = task.frozen_set_hashes()
     assert len(hashes) == 18 and "test|k=6|n=1000" in hashes and "val|k=3|n=600" in hashes
     assert task.train_overlap(0, 3000) == 0
-    x1, y1 = task.make_batch(random.Random("train|7"), 5)
-    x2, y2 = task.make_batch(random.Random("train|7"), 5)
-    assert torch.equal(x1, x2) and torch.equal(y1, y2) and x1.shape == (5, 67)
-    assert ((y1 >= task.N_VAR) & (y1 < task.N_VAR + task.N_LIT)).all()
+
+
+# ===================================================================== training signal (section 5.1)
+def test_training_signal_layout_rows_and_mask():
+    assert task.TRAIN_SIGNAL == (8, 4, 4, 4, 0) and task.signal_rows() == 20 and task.train_length() == 105
+    assert task.SIGNAL_GROUPS == ("forward", "inverse", "prefix_forward", "prefix_inverse", "chain")
+    assert task.FACT_TOKENS == 65 and task.signal_kinds() == [0] * 8 + [1] * 4 + [0] * 4 + [1] * 4
+    groups = task.signal_groups()
+    assert groups == {"forward": slice(0, 8), "inverse": slice(8, 12), "prefix_forward": slice(12, 16),
+                      "prefix_inverse": slice(16, 20)}, "chain rows are off in the protocol's signal"
+    assert task.signal_groups((3, 0, 2, 0, 1)) == {"forward": slice(0, 3), "prefix_forward": slice(3, 5),
+                                                   "chain": slice(5, 6)}
+    assert task.signal_kinds((1, 1, 1, 1, 2)) == [0, 1, 0, 1, 0, 0]
+    full, prefix = slice(0, 12), slice(12, 20)
+    batch = task.make_batch(random.Random("train|7"), 40)
+    again = task.make_batch(random.Random("train|7"), 40)
+    assert all(torch.equal(a, b) for a, b in zip(batch, again)), "a batch is a function of the stream alone"
+    B, R = 40, 20
+    assert batch.x.shape == (B, 105) and batch.y.shape == batch.depth.shape == (B, R)
+    assert batch.visible.shape == (B, R, task.M_FACTS) and batch.visible.dtype == torch.bool
+    assert batch.rows.tolist() == [66 + 2 * r for r in range(R)] and batch.kinds.tolist() == task.signal_kinds()
+    assert batch.mask.shape == (B, 1, 105, 105) and batch.mask.dtype == torch.bool
+    forward, inverse = batch.kinds == task.FORWARD, batch.kinds == task.INVERSE
+    assert ((batch.y[:, forward] >= task.N_VAR) & (batch.y[:, forward] < task.N_VAR + task.N_LIT)).all()
+    assert (batch.y[:, inverse] < task.N_VAR).all()
+    assert (batch.x[:, batch.rows - 1] == task.QM).all(), "every supervised position follows '?'"
+    assert (batch.x[:, batch.rows][:, forward] < task.N_VAR).all(), "forward queries are variables"
+    assert (batch.x[:, batch.rows][:, inverse] >= task.N_VAR).all(), "inverse queries are literals"
+    # training depths stay <= 3 in every row; the program's own query (row 0) is uniform over them
+    assert set(batch.depth[:, forward].flatten().tolist()) == {1, 2, 3} and (batch.depth[:, inverse] == 0).all()
+    assert set(batch.depth[:, 0].tolist()) == {1, 2, 3}
+    assert batch.visible[:, full].all(), "full rows see the whole program"
+    n_visible = batch.visible.sum(-1)
+    assert (n_visible[:, prefix] >= 2).all() and (batch.depth[:, groups["prefix_forward"]] == 1).all()
+    first = batch.visible[:, prefix].long().argmin(-1)                # first invisible fact = number of visible ones
+    assert torch.equal(first, n_visible[:, prefix]), "a key-value row sees a prefix of the program"
+    # the same stream, replayed program by program: row 0 is the test format, the labels follow the interpreter
+    rng = random.Random("train|7")
+    for b in range(B):
+        item = task.train_program(rng)
+        prog = item["prog"]
+        assert item["tokens"] == batch.x[b].tolist() and item["targets"] == batch.y[b].tolist()
+        assert item["visible"] == batch.visible[b].tolist() and item["depth"] == batch.depth[b].tolist()
+        assert item["tokens"][:task.SEQ_LEN] == task.tokens(prog, prog["order"]) and item["targets"][0] == prog["answer"]
+        assert task.interpret(prog) == (prog["answer"], int(batch.depth[b, 0])) and prog["k"] <= 3
+        queried = [item["tokens"][row] for row in batch.rows.tolist()]
+        assert len(set(queried[:8])) == 8 and len(set(queried[8:12])) == 4, "full rows: without replacement"
+        assert (n_visible[b, prefix] <= prog["n_lit"]).all(), "a key-value row stays inside the literal block"
+        for r in range(R):
+            seen = [prog["facts"][fi] for p, fi in enumerate(prog["order"]) if item["visible"][r][p]]
+            lhs2rhs = {f[2]: f[3] for f in seen}                  # the program the row can see
+            if batch.kinds[r] == task.FORWARD:
+                assert task.resolve_variable(prog, queried[r]) == (item["targets"][r], item["depth"][r])
+                assert task.resolve_variable({"facts": seen}, queried[r])[0] == item["targets"][r], "path visible"
+                assert sum(f[3] >= task.N_VAR for f in seen) >= 2, "there is always a wrong literal in sight"
+            else:
+                assert lhs2rhs[item["targets"][r]] == queried[r]
+    # the mask: a pair sees <bos>, its visible facts and itself; facts are not restricted
+    assert not batch.mask[:, 0, :task.FACT_TOKENS].any()
+    for b in (0, 17):
+        for r in (0, 9, 13, 19):
+            facts = [t for p in range(task.M_FACTS) if batch.visible[b, r, p] for t in task.fact_span(p)]
+            for position in (65 + 2 * r, 66 + 2 * r):
+                allowed = (~batch.mask[b, 0, position]).nonzero().flatten().tolist()
+                assert allowed == [0] + facts + [65 + 2 * r, 66 + 2 * r]
+    assert torch.equal(task.query_mask(batch.visible), batch.mask)
+    # chain rows (available, off by default): the variable of an alias fact, seen with its path to the literal
+    # and 1..4 other literal facts
+    chained = task.make_batch(random.Random("train|7"), 40, signal=(2, 0, 0, 0, 6))
+    assert chained.x.shape == (40, 81) and set(chained.depth[:, 2:].flatten().tolist()) == {2, 3}
+    assert set((chained.visible[:, 2:].sum(-1) - chained.depth[:, 2:]).flatten().tolist()) == {1, 2, 3, 4}
+    rng = random.Random("train|7")
+    for b in range(40):
+        item = task.train_program(rng, signal=(2, 0, 0, 0, 6))
+        prog = item["prog"]
+        assert item["tokens"] == chained.x[b].tolist() and item["visible"] == chained.visible[b].tolist()
+        for r in range(2, 8):
+            seen = [prog["facts"][fi] for p, fi in enumerate(prog["order"]) if item["visible"][r][p]]
+            query = item["tokens"][66 + 2 * r]
+            assert task.resolve_variable({"facts": seen}, query) == (item["targets"][r], item["depth"][r])
+            assert sum(f[3] < task.N_VAR for f in seen) == item["depth"][r] - 1, "its path and literal facts only"
+            assert sum(f[3] >= task.N_VAR for f in seen) >= 2, "a wrong literal in sight"
+    # the length depends on the signal only (never on a depth); other signals
+    for signal, length in (((1, 0, 0, 0, 0), 67), ((3, 2, 0, 1, 0), 77), ((16, 6, 0, 0, 0), 109), ((2, 0, 0, 0, 3), 75)):
+        for depths in ((1,), (3,), (1, 2, 3)):
+            other = task.make_batch(random.Random("unit|signal"), 3, depths, signal)
+            assert other.x.shape == (3, length) == (3, task.train_length(signal))
+    single = task.make_batch(random.Random("unit|signal"), 3, (2,), (1, 0, 0, 0, 0))
+    assert single.rows.tolist() == [task.ANSWER_POS] and not single.mask.any()
+    for bad in ((0, 0, 0, 0, 0), (17, 0, 0, 0, 0), (4, 7, 0, 0, 0), (4, -1, 0, 0, 0), (4, 2, 1, 1)):
+        with pytest.raises(ValueError):
+            task.make_batch(random.Random("unit|signal"), 1, signal=bad)
+    with pytest.raises(ValueError, match="chains"):
+        task.train_program(random.Random("unit|signal"), depths=(14,))
+
+
+def test_readout_over_the_answer_alphabet():
+    logits = torch.zeros(3, task.VOCAB)
+    logits[:, task.EQ] = 9.0                                        # a non-answer token never wins
+    logits[0, task.N_VAR + 5], logits[1, 7], logits[2, task.N_VAR + 15] = 2.0, 3.0, 1.0
+    assert task.predict(logits).tolist() == [task.N_VAR + 5, task.N_VAR, task.N_VAR + 15]
+    assert task.predict(logits, task.INVERSE).tolist() == [0, 7, 0]
+    assert task.answer_scores(logits).shape == (3, 16) and task.answer_scores(logits, task.INVERSE).shape == (3, 48)
+    y = torch.tensor([task.N_VAR + 5, task.N_VAR + 1, task.N_VAR + 15])
+    expected = torch.nn.functional.cross_entropy(logits[:, 48:64], y - 48)
+    assert float(task.answer_loss(logits, y)) == pytest.approx(float(expected))
+    assert float(task.answer_loss(torch.zeros(4, task.VOCAB), y[:1].repeat(4))) == pytest.approx(math.log(16))
+    # the training loss: mean over rows, each over its own alphabet
+    rows = torch.zeros(2, 3, task.VOCAB)
+    targets, kinds = torch.tensor([[50, 3, 60], [49, 0, 63]]), torch.tensor([0, 1, 0])
+    assert float(task.signal_loss(rows, targets, kinds)) == pytest.approx((4 * math.log(16) + 2 * math.log(48)) / 6)
+    rows[0, 0, 50] = 50.0
+    assert float(task.signal_loss(rows, targets, kinds)) == pytest.approx((3 * math.log(16) + 2 * math.log(48)) / 6)
+
+
+def test_training_batch_is_resolved_from_its_tokens_by_hand_set_weights():
+    """End to end through the trainer's batch and label path, without training: the hand-set operators read the
+    token tensor of a training batch and must reproduce its labels at every supervised row."""
+    batch = task.make_batch(random.Random("train|0"), 24)
+    counts = handset.check_training_batch(batch)
+    n_forward, n_inverse = 24 * 12, 24 * 8
+    assert counts["forward_rows"] == n_forward and counts["inverse_rows"] == n_inverse
+    assert counts["AWA"] == n_forward and counts["inverse"] == n_inverse
+    assert counts["AWA-own"] == counts["ChaCAL"] == counts["followable"] < n_forward
+    assert counts["lower_triangular_law"] == n_forward, "lower-triangular operators: exactly the sorted chains"
+    chained = handset.check_training_batch(task.make_batch(random.Random("train|1"), 12, signal=(4, 2, 2, 2, 4)))
+    assert chained["AWA"] == chained["forward_rows"] == 12 * 10 and chained["inverse"] == chained["inverse_rows"] == 12 * 4
+    assert chained["AWA-own"] == chained["ChaCAL"] == chained["followable"] < 12 * 10, "chain rows included"
+    assert chained["lower_triangular_law"] == 12 * 10
+    # a batch whose labels are misaligned by one row is caught
+    shifted = batch._replace(y=batch.y.roll(1, 1))
+    wrong = handset.check_training_batch(shifted)
+    assert wrong["AWA"] < 0.3 * n_forward and wrong["inverse"] < 0.3 * n_inverse
+    with pytest.raises(ValueError, match="follow"):
+        handset.check_training_batch(batch._replace(rows=batch.rows - 1))
+    with pytest.raises(ValueError, match="v = x ;"):
+        handset.facts_from_tokens(batch.x[0].tolist()[:1] + batch.x[0].tolist()[2:], range(16))
+    assert handset.facts_from_tokens(batch.x[0].tolist(), [3, 0]) == [
+        tuple(batch.x[0, [13, 15]].tolist()), tuple(batch.x[0, [1, 3]].tolist())]
 
 
 # ===================================================================================== the order law
@@ -268,8 +406,55 @@ def test_arms_share_initial_weights_for_a_seed_and_differ_across_seeds(built):
     assert torch.equal(torch.rand(1), before), "building does not consume the caller's random stream"
 
 
+def test_training_rows_are_the_test_format_forward_and_independent_of_each_other(built):
+    """Every arm: row 0 of the training forward is the single-query forward of the program; no row depends on
+    another query pair (nothing can leak between rows); a full or key-value row does not depend on a fact it
+    cannot see. (A chain row sees a scattered subset: the facts it cannot see still shape the binding-layer
+    states of the later facts it does see, so only the facts after its last visible fact are irrelevant.)"""
+    signal = (3, 2, 2, 1, 2)
+    batch = task.make_batch(random.Random("unit|rows"), 4, signal=signal)
+    R = task.signal_rows(signal)
+    generator = torch.Generator().manual_seed(0)
+    with torch.no_grad():
+        for arm, (model, _) in built.items():
+            model.eval()
+            budget = 3 if arms.ARMS[arm]["forward"] in ("walk", "looped", "arloop") else None
+            out = arms.row_logits(model, arm, batch.x, batch.rows, budget, batch.mask)
+            assert out.shape == (4, R, task.VOCAB)
+            single = arms.answer_logits(model, arm, batch.x[:, :task.SEQ_LEN], budget)
+            assert float((out[:, 0] - single).abs().max()) < 2e-6, arm
+            for r in range(R):
+                x = batch.x.clone()
+                for b in range(4):                                   # scramble what row r must not see
+                    last = int(batch.visible[b, r].nonzero().max())  # facts after the last visible one
+                    hidden = [t for p in range(last + 1, task.M_FACTS) for t in task.fact_span(p)]
+                    x[b, hidden] = torch.randint(0, 64, (len(hidden),), generator=generator)
+                    others = [task.FACT_TOKENS + 2 * q + 1 for q in range(R) if q != r]
+                    x[b, others] = torch.randint(0, 64, (R - 1,), generator=generator)
+                changed = arms.row_logits(model, arm, x, batch.rows, budget, batch.mask)
+                assert float((changed[:, r] - out[:, r]).abs().max()) < 1e-6, (arm, r)
+            assert all(int(batch.visible[b, r].sum()) == int(batch.visible[b, r].nonzero().max()) + 1
+                       for b in range(4) for r in range(R - 2)), "full and key-value rows see a prefix"
+            x = batch.x.clone()
+            x[:, 1:9] = torch.randint(0, 64, (4, 8), generator=generator)       # ... and what it does see matters
+            assert float((arms.row_logits(model, arm, x, batch.rows, budget, batch.mask) - out).abs().max()) > 1e-4
+        # one row, no mask: the answer-row forward
+        awa, arloop = built["AWA-2L"][0], built["ARLOOP-2L"][0]
+        x = batch.x[:, :task.SEQ_LEN]
+        last = torch.tensor([task.ANSWER_POS])
+        for arm, model, budget in (("AWA-2L", awa, 4), ("ARLOOP-2L", arloop, 3), ("STD-2L-pm", built["STD-2L-pm"][0], None)):
+            one = arms.row_logits(model, arm, x, last, budget)[:, 0]
+            assert float((one - arms.answer_logits(model, arm, x, budget)).abs().max()) < 1e-6
+    with pytest.raises(ValueError, match="needs the query mask"):
+        arms.row_logits(arloop, "ARLOOP-2L", batch.x, batch.rows, 2)
+    with pytest.raises(ValueError, match="needs a budget"):
+        arms.row_logits(awa, "AWA-2L", batch.x, batch.rows, None, batch.mask)
+    with pytest.raises(ValueError, match="T >= 1"):
+        arms.row_logits(arloop, "ARLOOP-2L", batch.x, batch.rows, 0, batch.mask)
+
+
 def test_answer_logits_equal_the_full_forward_and_the_loop_reductions(built):
-    x, _ = task.make_batch(random.Random("unit|forward"), 4)
+    x = task.make_batch(random.Random("unit|forward"), 4, signal=(1, 0, 0, 0, 0)).x
     rows = torch.tensor([task.ANSWER_POS])
     with torch.no_grad():
         std_model = built["STD-2L-pm"][0].eval()
@@ -337,6 +522,7 @@ def test_learning_rate_schedule_and_parameter_groups(built):
     assert recipe.steps == recipe.schedule_steps == 3000 and recipe.batch == 64 and recipe.warmup == 100
     assert tuple(recipe.betas) == (0.9, 0.98) and recipe.eps == 1e-8 and recipe.weight_decay == 0.01
     assert recipe.clip == 1.0 and tuple(recipe.depths) == (1, 2, 3) and tuple(recipe.budgets) == (3, 4, 5)
+    assert tuple(recipe.signal) == task.TRAIN_SIGNAL == (8, 4, 4, 4, 0)
     assert train.lr_at(1, recipe) == pytest.approx(1e-5) and train.lr_at(100, recipe) == pytest.approx(1e-3)
     assert train.lr_at(1550, recipe) == pytest.approx(1e-3 * (0.1 + 0.9 * 0.5))
     assert train.lr_at(3000, recipe) == pytest.approx(1e-4)
@@ -348,6 +534,10 @@ def test_learning_rate_schedule_and_parameter_groups(built):
     for phase in ("0", "1"):
         with pytest.raises(ValueError, match="no overrides"):
             phases.recipe_for(phase, 1e-3, steps=10)
+        with pytest.raises(ValueError, match="no overrides"):
+            phases.recipe_for(phase, 1e-3, signal=(1, 0, 0, 0, 0))
+    smoke = phases.recipe_for("smoke", 1e-3, 7, signal=[2, 1, 0, 0, 1])
+    assert smoke.steps == 7 and smoke.signal == (2, 1, 0, 0, 1) and smoke.to_json()["signal"] == [2, 1, 0, 0, 1]
     model = built["AWA-2L"][0]
     decay, no_decay = train.param_groups(model, 0.01)
     assert decay["weight_decay"] == 0.01 and no_decay["weight_decay"] == 0.0
@@ -376,9 +566,15 @@ def reference_training(arm, seed, steps, *, lr, batch, warmup, horizon, floor, b
     has_budget = arms.ARMS[arm]["forward"] in ("walk", "looped", "arloop")
     norms, rates = [], []
     for step in range(1, steps + 1):
-        x, y = task.make_batch(data, batch, (1, 2, 3))
+        rows = task.make_batch(data, batch, (1, 2, 3))              # the training signal of section 5.1
         budget = budgets.choice((3, 4, 5))
-        loss = torch.nn.functional.cross_entropy(arms.answer_logits(model, arm, x, budget if has_budget else None), y)
+        scores = arms.row_logits(model, arm, rows.x, rows.rows, budget if has_budget else None, rows.mask)
+        loss = scores.new_zeros(())                                 # mean over rows, each over its answer alphabet
+        for kind, classes, offset in ((0, slice(48, 64), 48), (1, slice(0, 48), 0)):
+            picked = scores[:, rows.kinds == kind][..., classes]
+            loss = loss + torch.nn.functional.cross_entropy(
+                picked.reshape(-1, picked.shape[-1]), (rows.y[:, rows.kinds == kind] - offset).reshape(-1), reduction="sum")
+        loss = loss / rows.y.numel()
         optim.zero_grad(set_to_none=True)
         loss.backward()
         norms.append(float(torch.nn.utils.clip_grad_norm_(model.parameters(), clip)))
@@ -438,6 +634,13 @@ def test_training_is_bitwise_deterministic_and_resumable(tmp_path):
     assert [r["step"] for r in curve if r["type"] == "val"] == [0, 3, 6]
     assert all(r["budget"] in (3, 4, 5) for r in curve if r["type"] == "train")
     assert curve[1]["lr"] == pytest.approx(1e-5) and len(curve[0]["lambda"]) == 4
+    # the loss is the mean over the 20 query rows; the program's own (test-format) query is logged next to it
+    assert set(curve[1]["acc_rows"]) == set(task.signal_groups()) == set(task.SIGNAL_GROUPS[:4])
+    assert 2.5 < curve[1]["loss_own_query"] < 6.0 and 0.0 <= curve[1]["acc_own_query"] <= 1.0
+    assert full["recipe"]["signal"] == [8, 4, 4, 4, 0]
+    assert train.train(tmp_path / "one_row", "AWA-2L", 3, tiny_recipe(steps=2, signal=(1, 0, 0, 0, 0)))["finished"]
+    with pytest.raises(ValueError, match="belongs to another run"):
+        train.train(tmp_path / "full", "AWA-2L", 3, tiny_recipe(steps=6, signal=(4, 2, 2, 2, 0)))
     # killed after 4 steps (last checkpoint at step 3, one more record already written), then resumed
     part = train.train(tmp_path / "resumed", "AWA-2L", 3, recipe, stop_after=3)
     assert part == {"finished": False, "step": 3}
@@ -1267,10 +1470,12 @@ def test_command_line_drivers_end_to_end(tmp_path, capsys):
     results = tmp_path / "results"
     run_train, run_eval = _load_script("run_train"), _load_script("run_eval")
     common = ["--phase", "smoke", "--arm", "ChaCAL-2L", "--lr", "1e-3", "--results", str(results)]
-    assert run_train.main(common + ["--steps", "2", "--val-every", "2", "--ckpt-every", "2", "--val-items", "8"]) == 0
+    assert run_train.main(common + ["--steps", "2", "--val-every", "2", "--ckpt-every", "2", "--val-items", "8",
+                                    "--signal", "2,1,1,1,1"]) == 0
     out = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
     run_dir = pathlib.Path(out["run_dir"])
     assert run_dir == results / "phasesmoke" / "runs" / "ChaCAL-2L_lr0.001_s900" and out["steps"] == 2
+    assert json.loads((run_dir / "meta.json").read_text(encoding="utf-8"))["recipe"]["signal"] == [2, 1, 1, 1, 1]
     assert {p.name for p in run_dir.iterdir()} == {"curve.jsonl", "ckpt.pt", "meta.json"}
     assert run_eval.main(common + ["--limit", "4"]) == 0
     record = json.loads((run_dir / "eval.json").read_text(encoding="utf-8"))

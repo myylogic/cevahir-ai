@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import pathlib
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Sequence
 
 from . import arms, layout, train
 
@@ -19,11 +19,13 @@ GO_LOSS_RATIO = 0.80                 # or: k = 2 validation loss <= 0.8 x its st
 
 
 def recipe_for(phase: str, lr: float, steps: Optional[int] = None, *, val_every: Optional[int] = None,
-               ckpt_every: Optional[int] = None, val_items: Optional[int] = None) -> train.Recipe:
+               ckpt_every: Optional[int] = None, val_items: Optional[int] = None,
+               signal: Optional[Sequence[int]] = None) -> train.Recipe:
     """The recipe of a phase. Phase 0 runs the first 800 steps of the main schedule; phase 1 runs S = 3,000 steps;
-    only smoke runs may change the step count or the validation / checkpoint cadence."""
+    only smoke runs may change the step count, the validation / checkpoint cadence or the training signal."""
     phase = str(phase)
-    overrides = {k: v for k, v in dict(val_every=val_every, ckpt_every=ckpt_every, val_items=val_items).items()
+    overrides = {k: v for k, v in dict(val_every=val_every, ckpt_every=ckpt_every, val_items=val_items,
+                                       signal=None if signal is None else tuple(int(v) for v in signal)).items()
                  if v is not None}
     if phase == "1":
         if steps is not None or overrides:

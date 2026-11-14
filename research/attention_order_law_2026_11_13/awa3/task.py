@@ -14,6 +14,12 @@ Target  = the literal that q resolves to, predicted at the last position.
   every guess that ignores the chain (uniform over literals, first literal, last literal) scores the same in
   all four strata: the chance floor h_k is identical across strata.
 
+Test and validation items are single-query programs in exactly this format. A TRAINING sequence is such a
+program followed by more query pairs "? x" (PROTOCOL section 5.1, ``make_batch``): its own query, further
+forward queries, inverse queries ("? n" -> the variable assigned n) and key-value rows that see only the first
+m facts; an attention mask keeps every query pair from seeing any other pair. Loss and accuracy are computed
+over the answer alphabet (the 16 literals for "? v").
+
 All streams are string-keyed ``random.Random`` instances (``train|<seed>``, ``budget|<seed>``, ``test|k=<k>``,
 ``val|k=<k>``); nothing here uses torch's or the global random state.
 """
@@ -21,9 +27,10 @@ from __future__ import annotations
 
 import hashlib
 import random
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, NamedTuple, Sequence, Tuple
 
 import torch
+import torch.nn.functional as F
 
 N_VAR, N_LIT = 48, 16
 EQ, SEMI, QM, BOS, EOS, PAD = 64, 65, 66, 67, 68, 69
@@ -31,6 +38,17 @@ VOCAB = 72
 M_FACTS = 16
 SEQ_LEN = 1 + 4 * M_FACTS + 2                 # 67, identical at every depth
 ANSWER_POS = SEQ_LEN - 1
+FACT_TOKENS = 1 + 4 * M_FACTS                 # 65: <bos> and the 16 facts; query pairs "? x" follow
+LITERALS = slice(N_VAR, N_VAR + N_LIT)        # answer alphabet of a forward query "? v"
+VARIABLES = slice(0, N_VAR)                   # answer alphabet of an inverse query "? n"
+FORWARD, INVERSE = 0, 1                       # kinds of query rows
+MIN_CHAINS = 6                                # every training program has at least ceil(16 / 3) chains (literals)
+SIGNAL_GROUPS: Tuple[str, ...] = ("forward", "inverse", "prefix_forward", "prefix_inverse", "chain")
+# Query rows per training program, in SIGNAL_GROUPS order. Chain rows exist and are tested but are off: they did
+# not make any arm learn a second hop in 3,000 steps (PROTOCOL section 15), and the measured learning curves of
+# the protocol belong to this signal.
+TRAIN_SIGNAL: Tuple[int, ...] = (8, 4, 4, 4, 0)
+CHAIN_EXTRA: Tuple[int, int] = (1, 4)         # a chain row sees its own path plus U{1..4} other literal facts
 STRATA: Tuple[str, ...] = ("sorted", "oneswap", "anti", "shuffled")
 TRAIN_DEPTHS: Tuple[int, ...] = (1, 2, 3)
 TEST_DEPTHS: Tuple[int, ...] = (1, 2, 3, 4, 5, 6, 8, 10, 12)
@@ -165,16 +183,182 @@ def interpret(prog: dict) -> Tuple[int, int]:
     return v, depth
 
 
-# ----------------------------------------------------------------------------------- batches, sets
+# ------------------------------------------------------------------------ readout over the answer alphabet
+def answer_scores(logits: torch.Tensor, kind: int = FORWARD) -> torch.Tensor:
+    """The scores of the answer alphabet: the 16 literals (forward query) or the 48 variables (inverse query).
+
+    The answer of "? v" is always a literal, so loss and accuracy are computed over the literal classes only, in
+    training, validation and evaluation alike (PROTOCOL section 5.1). A loss over all 72 classes makes "is a
+    literal" the first thing a tied-embedding model learns and collapses the token embeddings onto that one
+    direction (measured: section 15).
+    """
+    return logits[..., LITERALS if kind == FORWARD else VARIABLES]
+
+
+def predict(logits: torch.Tensor, kind: int = FORWARD) -> torch.Tensor:
+    """Predicted token: the arg-max over the answer alphabet."""
+    return answer_scores(logits, kind).argmax(-1) + (N_VAR if kind == FORWARD else 0)
+
+
+def answer_loss(logits: torch.Tensor, y: torch.Tensor, kind: int = FORWARD, reduction: str = "mean") -> torch.Tensor:
+    """Cross-entropy over the answer alphabet; ``y`` holds token ids."""
+    scores = answer_scores(logits, kind)
+    return F.cross_entropy(scores.reshape(-1, scores.shape[-1]), (y - (N_VAR if kind == FORWARD else 0)).reshape(-1),
+                           reduction=reduction)
+
+
+def signal_loss(logits: torch.Tensor, y: torch.Tensor, kinds: torch.Tensor) -> torch.Tensor:
+    """Training loss: mean over all query rows (B, R) of the cross-entropy over each row's answer alphabet."""
+    total = logits.new_zeros(())
+    for kind in (FORWARD, INVERSE):
+        sel = kinds == kind
+        if bool(sel.any()):
+            total = total + answer_loss(logits[:, sel], y[:, sel], kind, reduction="sum")
+    return total / y.numel()
+
+
+# --------------------------------------------------------------------------- training signal (section 5.1)
+class TrainBatch(NamedTuple):
+    """One training batch. Every program is a test-format program followed by more query pairs "? x".
+
+    x        (B, n) tokens, n = 65 + 2 R: <bos>, the 16 facts, then R query pairs.
+    rows     (R,)   supervised positions: the query token of every pair.
+    y        (B, R) target token of every row.
+    kinds    (R,)   FORWARD ("? v" -> the literal v resolves to) or INVERSE ("? n" -> the variable assigned n).
+    visible  (B, R, 16) bool: the facts (by program position) the pair can see; all 16 for a full row.
+    depth    (B, R) dereferencing depth of a forward row (0 for inverse rows).
+    mask     (B, 1, n, n) bool, True = blocked: a pair sees <bos>, its visible facts and itself, nothing else.
+    """
+    x: torch.Tensor
+    rows: torch.Tensor
+    y: torch.Tensor
+    kinds: torch.Tensor
+    visible: torch.Tensor
+    depth: torch.Tensor
+    mask: torch.Tensor
+
+
+def signal_rows(signal: Sequence[int] = TRAIN_SIGNAL) -> int:
+    """Number of query rows of a training program; ``signal`` gives the rows per group, in SIGNAL_GROUPS order."""
+    signal = tuple(int(v) for v in signal)
+    if len(signal) != len(SIGNAL_GROUPS) or signal[0] < 1 or min(signal) < 0:
+        raise ValueError(f"signal = rows of {SIGNAL_GROUPS}: forward >= 1, the others >= 0")
+    if signal[0] > M_FACTS or signal[1] > MIN_CHAINS:
+        raise ValueError(f"at most {M_FACTS} forward and {MIN_CHAINS} inverse queries per program")
+    return sum(signal)
+
+
+def signal_kinds(signal: Sequence[int] = TRAIN_SIGNAL) -> List[int]:
+    forward, inverse, prefix_forward, prefix_inverse, chain = (int(v) for v in signal)
+    return ([FORWARD] * forward + [INVERSE] * inverse + [FORWARD] * prefix_forward + [INVERSE] * prefix_inverse
+            + [FORWARD] * chain)
+
+
+def signal_groups(signal: Sequence[int] = TRAIN_SIGNAL) -> Dict[str, slice]:
+    """Row ranges of the non-empty groups, in row order (SIGNAL_GROUPS)."""
+    groups, start = {}, 0
+    for name, count in zip(SIGNAL_GROUPS, signal):
+        if count:
+            groups[name] = slice(start, start + int(count))
+        start += int(count)
+    return groups
+
+
+def train_length(signal: Sequence[int] = TRAIN_SIGNAL) -> int:
+    """Length of a training sequence: it depends on the signal only, never on a depth."""
+    return FACT_TOKENS + 2 * signal_rows(signal)
+
+
+def resolve_variable(prog: dict, v: int) -> Tuple[int, int]:
+    """(literal token, depth) of any variable of the program (``interpret`` for an arbitrary start)."""
+    lhs2rhs = {f[2]: f[3] for f in prog["facts"]}
+    depth = 0
+    while v < N_VAR:
+        v, depth = lhs2rhs[v], depth + 1
+    return v, depth
+
+
+def train_program(rng: random.Random, depths: Sequence[int] = TRAIN_DEPTHS,
+                  signal: Sequence[int] = TRAIN_SIGNAL) -> dict:
+    """One training program: a base program of the training distribution and its query rows.
+
+    Rows, in this order (``signal`` = rows per group, SIGNAL_GROUPS):
+    * forward: row 0 is the program's own query, i.e. exactly the test format (head of the queried chain, depth
+      k); then forward - 1 further variables, drawn without replacement from the other 15 variables;
+    * inverse: literals of the program, drawn without replacement ("? n" -> the variable assigned n);
+    * prefix_forward / prefix_inverse: key-value rows. The row sees only the first m facts of the program,
+      m ~ U{2..number of literal facts} (the literal block comes first, so these are m key-value pairs), and
+      asks for the literal (forward) or the variable (inverse) of a fact drawn uniformly among those m;
+    * chain: a small multi-hop program. The variable of a uniformly drawn alias fact (depth 2 or 3; any variable
+      if the program has no alias fact), seen with the facts on its path to its literal plus e ~ U{1..4} other
+      literal facts (so there is always a wrong literal in sight).
+    The first two groups see all 16 facts. The draws come from ``rng`` only, after the base program's own.
+    """
+    forward, inverse, prefix_forward, prefix_inverse, chain = (int(v) for v in signal)
+    signal_rows(signal)
+    prog = base_program(rng, rng.choice(tuple(depths)))
+    facts, order = prog["facts"], prog["order"]
+    literal_ids = order[:prog["n_lit"]]                             # the literal block, in program order
+    alias_ids = sorted(order[prog["n_lit"]:])
+    if len(literal_ids) < max(inverse, 2):
+        raise ValueError("the training signal needs programs with at least max(inverse, 2) chains")
+    everything = set(range(len(facts)))
+    queries = [(prog["qvar"], prog["answer"], everything, prog["k"])]
+    others = [f[2] for f in facts if f[2] != prog["qvar"]]
+    for v in rng.sample(others, forward - 1):
+        literal, depth = resolve_variable(prog, v)
+        queries.append((v, literal, everything, depth))
+    for i in rng.sample(sorted(literal_ids), inverse):
+        queries.append((facts[i][3], facts[i][2], everything, 0))
+    for index in range(prefix_forward + prefix_inverse):
+        m = rng.randint(2, len(literal_ids))
+        fact = facts[literal_ids[rng.randrange(m)]]
+        seen = set(literal_ids[:m])
+        queries.append((fact[2], fact[3], seen, 1) if index < prefix_forward else (fact[3], fact[2], seen, 0))
+    for _ in range(chain):
+        start = rng.choice(alias_ids) if alias_ids else rng.randrange(len(facts))
+        path = [i for i, f in enumerate(facts) if f[0] == facts[start][0] and f[1] >= facts[start][1]]
+        pool = [i for i in sorted(literal_ids) if i not in path]    # at least 5 literal facts at depths <= 3
+        extras = rng.sample(pool, rng.randint(CHAIN_EXTRA[0], min(CHAIN_EXTRA[1], len(pool))))
+        literal, depth = resolve_variable(prog, facts[start][2])
+        queries.append((facts[start][2], literal, set(path) | set(extras), depth))
+    toks = tokens(prog, order)[:FACT_TOKENS]
+    for query, _, _, _ in queries:
+        toks += [QM, query]
+    return dict(prog=prog, tokens=toks, targets=[q[1] for q in queries],
+                visible=[[fi in q[2] for fi in order] for q in queries], depth=[q[3] for q in queries])
+
+
+def query_mask(visible: torch.Tensor) -> torch.Tensor:
+    """Attention mask of a training batch, (B, 1, n, n) bool with True = blocked (on top of the causal mask).
+
+    The pair of row r sees <bos>, the facts with ``visible[b, r, p]`` and itself; it sees no other pair and no
+    other fact. Fact positions are not restricted. Hence, in every arm, nothing a row computes can reach another
+    row, and a row whose facts are a prefix of the program (full and key-value rows) is computed from that
+    prefix alone. A chain row sees a scattered subset: the facts it does see were encoded by the binding layer
+    in the presence of the earlier facts it does not see.
+    """
+    B, R, _ = visible.shape
+    n = FACT_TOKENS + 2 * R
+    pair = torch.arange(2 * R) // 2                                                  # pair of every tail position
+    fact = (torch.arange(1, FACT_TOKENS) - 1) // 4                                   # fact of every fact token
+    blocked = torch.zeros(B, n, n, dtype=torch.bool)
+    blocked[:, FACT_TOKENS:, 1:FACT_TOKENS] = ~visible[:, pair][:, :, fact]
+    blocked[:, FACT_TOKENS:, FACT_TOKENS:] = (pair.view(-1, 1) != pair.view(1, -1)).unsqueeze(0)
+    return blocked.unsqueeze(1)
+
+
 def make_batch(rng: random.Random, batch: int, depths: Sequence[int] = TRAIN_DEPTHS,
-               stratum: str = "shuffled") -> Tuple[torch.Tensor, torch.Tensor]:
-    """Training batch: depth uniform over ``depths`` per item, the given stratum (training = shuffled)."""
-    X, Y = [], []
-    for _ in range(batch):
-        prog = base_program(rng, rng.choice(tuple(depths)))
-        X.append(tokens(prog, stratum_order(prog, stratum)))
-        Y.append(prog["answer"])
-    return torch.tensor(X), torch.tensor(Y)
+               signal: Sequence[int] = TRAIN_SIGNAL) -> TrainBatch:
+    """Training batch (shuffled stratum): depth of the program's own query uniform over ``depths`` per item."""
+    items = [train_program(rng, depths, signal) for _ in range(batch)]
+    R = signal_rows(signal)
+    visible = torch.tensor([it["visible"] for it in items])
+    return TrainBatch(x=torch.tensor([it["tokens"] for it in items]),
+                      rows=FACT_TOKENS + 1 + 2 * torch.arange(R),
+                      y=torch.tensor([it["targets"] for it in items]),
+                      kinds=torch.tensor(signal_kinds(signal)), visible=visible,
+                      depth=torch.tensor([it["depth"] for it in items]), mask=query_mask(visible))
 
 
 def item_set(split: str, k: int, n_items: int) -> List[dict]:
@@ -249,8 +433,10 @@ def followable_fraction(k: int) -> float:
     return heuristic_floors(eval_set(k), "shuffled")["lowertri_followable"]
 
 
-def train_overlap(seed: int, n_programs: int, depths: Sequence[int] = TRAIN_DEPTHS) -> int:
-    """How many of the first ``n_programs`` training programs of ``train|seed`` equal a frozen test item."""
+def train_overlap(seed: int, n_programs: int, depths: Sequence[int] = TRAIN_DEPTHS,
+                  signal: Sequence[int] = TRAIN_SIGNAL) -> int:
+    """How many of the first ``n_programs`` training programs of ``train|seed`` equal a frozen test item
+    (the program with its own query, i.e. the first 67 tokens of the training sequence)."""
     keys = set()
     for k in depths:
         for p in eval_set(k):
@@ -259,6 +445,5 @@ def train_overlap(seed: int, n_programs: int, depths: Sequence[int] = TRAIN_DEPT
     rng = random.Random(f"train|{seed}")
     hits = 0
     for _ in range(n_programs):
-        p = base_program(rng, rng.choice(tuple(depths)))
-        hits += tuple(tokens(p, p["order"])) in keys
+        hits += tuple(train_program(rng, depths, signal)["tokens"][:SEQ_LEN]) in keys
     return hits

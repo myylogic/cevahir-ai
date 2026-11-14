@@ -8,7 +8,9 @@ Every arm is a tiny Cevahir model built with ``tiny_model_config`` + ``ModelMana
 the last layer through the model configuration; this file adds no parameters of its own.
 
 Every arm computes its final layer only at the answer position (``CevahirNeuralNetwork.forward_rows`` /
-``layer_forward_rows``), which equals the full forward at that position.
+``layer_forward_rows``), which equals the full forward at that position. In training the answer positions are
+the query rows of the batch (``row_logits``, PROTOCOL section 5.1): the same computation at every row, under
+the batch's attention mask, which keeps the rows from reading each other.
 """
 from __future__ import annotations
 
@@ -197,6 +199,48 @@ def answer_logits(model, arm: str, x: torch.Tensor, budget: Optional[int] = None
             if t < int(budget) - 1:
                 h = h.scatter(1, index, y)
         return outs if return_all else model._output_head(y)[:, 0]
+    raise ValueError(f"unknown forward {forward!r}")
+
+
+def row_logits(model, arm: str, x: torch.Tensor, rows: torch.Tensor, budget: Optional[int] = None,
+               mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+    """Logits at several query rows of every item: (B, R, V). The training forward (PROTOCOL section 5.1).
+
+    ``rows`` [R] are the supervised positions; ``mask`` is the attention mask of the training batch
+    (``task.query_mask``: a query pair sees its visible facts and itself). Each arm computes at every row what
+    ``answer_logits`` computes at the answer row; with the mask no row can read another row, so
+
+    * walk / exact / std: one rows-only final layer for all rows;
+    * looped: T - 1 full applications of the block, the last one at the rows only;
+    * arloop: the block is re-applied T times at all rows at once; a row's state is only ever read by that row.
+
+    With R = 1, the last row and no mask this is ``answer_logits``.
+    """
+    forward = ARMS[arm]["forward"]
+    if forward in ("std", "exact"):
+        return model.forward_rows(x, rows, mask=mask)
+    if budget is None:
+        raise ValueError(f"{arm} needs a budget")
+    if forward == "walk":
+        return model.forward_rows(x, rows, mask=mask, num_hops=int(budget))
+    if budget < 1:
+        raise ValueError("loop arms need T >= 1")
+    binding, block = model.layers
+    h = binding(_embed(model, x), mask=mask, causal_mask=True)[0]
+    if forward == "looped":
+        for _ in range(int(budget) - 1):
+            h = block(h, mask=mask, causal_mask=True)[0]
+        return model._output_head(layer_forward_rows(block, h, rows, mask=mask))
+    if forward == "arloop":
+        if rows.numel() > 1 and mask is None:
+            raise ValueError("ARLOOP with several rows needs the query mask (a row must not read another row)")
+        B, _, D = h.shape
+        index = rows.view(1, -1, 1).expand(B, rows.numel(), D)
+        for t in range(int(budget)):
+            y = layer_forward_rows(block, h, rows, mask=mask)
+            if t < int(budget) - 1:
+                h = h.scatter(1, index, y)
+        return model._output_head(y)
     raise ValueError(f"unknown forward {forward!r}")
 
 
