@@ -15,13 +15,16 @@ This edition adds, since v4:
   (single lookup learned, multi-hop not learned; paused).
 - `cevahir_ai` roof package: content keys, compatibility gate, registry with hash-chained audit log and
   lineage, and a PowerShell-like console.
-- Zihin (`zihin/`, `research/living_mind_2026_11_14/`): first prototype of a core that learns while it runs
-  (events on channels, one growing structure of units and ties, provenance-resolved evidence with learned
-  trust, categories from instances, exact retraction). First life measurements (`RESULTS.md`): graded
-  conviction, refinement without deletion, hidden classes recovered, no forgetting of facts told once, exact
-  evidence retraction. Generalisation to an instance never told the dimension is only partly solved; two
-  repair attempts (F7, F8) are recorded, F7 as negative. T4, T6, T7, T8 and Transformer baselines are not yet
-  measured.
+- Cevahir Zihin (`zihin/`, `research/living_mind_2026_11_14/`): a new core that is not a Transformer. It learns while it
+  runs (no fixed dimension, vocabulary or training phase); knowledge is a growing structure of units and ties with
+  source-resolved evidence and learned trust; any single experience can be retracted exactly. Results (`RESULTS.md`,
+  `NOTES.md` F1-F15): graded conviction, refinement without deletion, hidden classes recovered, no forgetting (a second
+  domain leaves the first bit-identical), exact retraction, generalisation to never-seen instances improving with age
+  (93% / 81% at 600 experiences, 100% / 90% at 1500) once a category is read from what its members lived (F11),
+  imitation then detachment by outcomes (T7). A terminal chat (`python -m zihin`) answers watched dialogues, answers
+  some unwatched questions by relations (F12), stays silent when it knows nothing and stops a copied answer after
+  negative feedback (F15). Not yet: learning to learn (T6 negative), its own questions (T4), imagination with a reality
+  score (T8), a Transformer baseline on the same stream; small worlds. Design layers for what comes next: `LAYERS.md`.
 
 No claim of consciousness or novelty is made. Reports are research preprints and are not peer reviewed. The
 DOI will identify this exact archive; it is not scientific or identity certification.
