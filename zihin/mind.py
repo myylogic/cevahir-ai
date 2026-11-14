@@ -31,7 +31,7 @@ from .evidence import conviction, expectation
 from .form import categories_of, compose, confirm_parts, maybe_chunk, recognise
 from .learn import learn_follow, learn_together
 from .read import conflict_of, predictions, total_drive
-from .store import ATOMIC, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS, Substance
+from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS, Substance
 
 FEELINGS = ("surprise", "relief", "load", "conflict")
 
@@ -56,6 +56,8 @@ class Config:
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
     evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
     feel_focus: bool = True         # feelings compete for the focus like any event (as written)
+    select: str = "activation"      # which generalisations win a place: by "activation" (as written) or
+                                    # "specific": what is present first, then the most specific ones
     body_ties: int = 1_000_000      # tie budget of the body; load = ties / budget
     slots: bool = True              # slot / frame induction
     typed_frames: bool = True       # existing categories stand in for their instances
@@ -80,7 +82,7 @@ class Config:
     def changed(cls, **over) -> "Config":
         """The design with the smallest principled changes the prototype found necessary (NOTES.md)."""
         base = dict(support="capped", predict="specific", evoke="grounded_first", feel_focus=False,
-                    clear_on_pause=True, general_miss=True)
+                    clear_on_pause=True, general_miss=True, select="specific")
         base.update(over)
         return cls(**base)
 
@@ -260,11 +262,15 @@ class Mind:
         gens: Dict[int, Tuple[int, float]] = {}
         virtual: Dict[Tuple[int, ...], Tuple[float, int, float]] = {}
         cats = {u: [(c, e) for c, e in categories_of(self, u) if e > 0.5] for u in base}
+        bare: List[tuple] = []                             # (instance, extension size, -activation, key)
+        framed: List[tuple] = []                           # (position, extension size, -activation, key)
         for unit, a_u in base.items():
             for category, e in cats[unit]:
                 derived[category] = min(1.0, derived.get(category, 0.0) + a_u * (2.0 * e - 1.0))
                 if category not in gens or e > gens[category][1]:
                     gens[category] = (unit, e)
+                bare.append((unit, len(S.inc.get((category, ABSTRACT), ())), -derived[category], (0, category),
+                             category))
         if context is not None and cfg.typed_frames:
             for pos, part in enumerate(parts):
                 for category, e in cats.get(part, []):
@@ -277,13 +283,23 @@ class Mind:
                     else:
                         derived[frame] = max(derived.get(frame, 0.0), a_frame)
                         gens[frame] = (context, e)
+                    framed.append((pos, len(S.inc.get((category, ABSTRACT), ())), -a_frame,
+                                   (1, frame_parts) if frame is None else (0, frame),
+                                   frame_parts if frame is None else frame))
+        order: Dict[object, tuple] = {}
+        if cfg.select == "specific":                       # the most specific generalisation of each place first
+            for tier, candidates in ((0, framed), (1, bare)):
+                seen: Dict[int, int] = {}
+                for group, size, neg_a, tie_break, key in sorted(candidates, key=lambda c: c[:4]):
+                    seen[group] = seen.get(group, 0) + 1
+                    order.setdefault(key, (tier, seen[group], group))
         grounded = dict(base)
         grounded.update(derived)
         first = cfg.evoke == "grounded_first"
         fresh = {u for u, a, _, _ in percepts if a > 0}
         if context is not None:
             fresh.add(context)
-        ranked = self._winners(grounded, {}, virtual, F, first, fresh)
+        ranked = self._winners(grounded, {}, virtual, F, first, fresh, order)
         for _ in range(cfg.T if cfg.lag0 else 0):
             evoked: Dict[int, float] = {}
             for key, a_u in ranked:
@@ -297,7 +313,7 @@ class Mind:
                                 cfg.k)
                 for v, x in zip(S.t_dst[ids].tolist(), (a_u * (2.0 * e - 1.0)).tolist()):
                     evoked[v] = evoked.get(v, 0.0) + x
-            again = self._winners(grounded, evoked, virtual, F, first, fresh)
+            again = self._winners(grounded, evoked, virtual, F, first, fresh, order)
             if [k for k, _ in again] == [k for k, _ in ranked]:
                 ranked = again
                 break
@@ -322,27 +338,30 @@ class Mind:
         S.use_units(torch.tensor([u for u, _, _ in focus], dtype=I64))
 
     @staticmethod
-    def _winners(grounded, evoked, virtual, F, grounded_first=False, fresh=()):
-        """k-winners: the F most active candidates.
+    def _winners(grounded, evoked, virtual, F, grounded_first=False, fresh=(), order=None):
+        """k-winners: the F candidates that win a place in the focus.
 
-        Equal activations are ordered: perceived or recognised in this very moment, then older units by id,
-        then frames still to be recruited. As written (``grounded_first`` False) activation through
-        EXPECT(lag 0) adds to every unit. With ``grounded_first`` what is present (perceived, recognised, or
-        active through an instance) keeps the activation of its presence and is ranked before what is only
-        called to mind.
+        As written: by activation alone, EXPECT(lag 0) activation added to every unit; equal activations are
+        ordered: perceived or recognised in this very moment, then older units by id, then frames still to be
+        recruited. Changed (see NOTES.md): with ``grounded_first`` what is present keeps the activation of its
+        presence and is ranked before what is only called to mind; with ``order`` (select = "specific") what is
+        present comes first and generalisations follow in rounds, the most specific one of each place first.
         """
+        order = order or {}
         scored = []
         for unit, a in grounded.items():
             if not grounded_first:
                 a = min(1.0, a + evoked.get(unit, 0.0))
             if a > 0.0:
-                scored.append((0, -a, 0 if unit in fresh else 1, 0, (unit,), unit))
+                rank = (1,) + order[unit] if unit in order else (0, 0, 0, 0)
+                scored.append((rank, -a, 0 if unit in fresh else 1, 0, (unit,), unit))
         for unit, a in evoked.items():
             if unit not in grounded and a > 0.0:
-                scored.append((1 if grounded_first else 0, -min(1.0, a), 1, 0, (unit,), unit))
+                scored.append(((2, 0, 0, 0) if grounded_first else (0, 0, 0, 0), -min(1.0, a), 1, 0, (unit,), unit))
         for parts, (a, _, _) in virtual.items():
             if a > 0.0:
-                scored.append((0, -a, 1, 1, parts, parts))
+                rank = (1,) + order[parts] if parts in order else (0, 0, 0, 0)
+                scored.append((rank, -a, 1, 1, parts, parts))
         scored.sort(key=lambda s: s[:5])
         return [(key, -neg) for _, neg, _, _, _, key in scored[:F]]
 
