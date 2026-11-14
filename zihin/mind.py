@@ -29,7 +29,7 @@ from . import act as act_mod
 from .events import ACTED, IMAGINED, IMITATED, N_PROV, PROVENANCE, REFERENCE, SENSED, Channels, Event
 from .evidence import conviction, expectation
 from .form import categories_of, compose, confirm_parts, maybe_chunk, recognise
-from .learn import learn_follow, learn_together, reflect
+from .learn import learn_facets, learn_follow, learn_together, reflect
 from .read import conflict_of, predictions, total_drive
 from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS, Substance
 
@@ -246,6 +246,9 @@ class Mind:
         self._settle(percepts, slot, bool(items))          # steps 1 and 2
         if cfg.lag0:
             learn_together(self, [f for f in self.focus if int(S.u_kind[f[0]]) & ATOMIC], slot)
+        facets = [(u, i, c) for u, i, p, c in percepts if i > 0 and self.ch.kind(c) == "facet"]
+        if facets and items:                               # facets of this moment go with its items (lag 0)
+            learn_facets(self, [u for u, _ in items], facets, slot)
         self.predicted = predictions(self)                 # step 3
         acts = act_mod.decide(self)                        # step 4
         if cfg.imagine and not items:
@@ -283,7 +286,10 @@ class Mind:
         decay = cfg.decay if cfg.decay is not None else 1.0 - 1.0 / F
         base: Dict[int, float] = {u: decay * a for u, a in self.carry.items()}
         for unit, intensity, prov, channel in percepts:
-            if intensity > 0 and (cfg.feel_focus or self.ch.kind(channel) != "feel"):
+            kind = self.ch.kind(channel)
+            if kind == "facet":                            # facets accompany items; they do not compete for focus
+                continue
+            if intensity > 0 and (cfg.feel_focus or kind != "feel"):
                 base[unit] = max(base.get(unit, 0.0), min(1.0, intensity))
                 self.prov_of[unit] = prov
         context = recognise(self, slot) if has_items else None

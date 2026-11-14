@@ -319,6 +319,18 @@ def reflect(mind, budget: int = 1) -> None:
     mind.reflect_cursor = cursor
 
 
+def learn_facets(mind, items: List[int], facets: List[Tuple[int, float, int]], slot: int) -> None:
+    """Facets (parts or features of an item on a channel of kind "facet", e.g. subword pieces of a word, later
+    features of a seen object) hold together with the items of the same moment: EXPECT lag 0 in both directions,
+    positive evidence g x intensity. They never enter the episode or the focus; the context learns to expect them
+    in the next moment like any percept (learn_follow), so a context can expect a suffix of a word it never met."""
+    g = mind.knob["gain"]
+    for item in items:
+        for facet, intensity, _ in facets:
+            add_evidence1(mind, W_POS, slot, mind.S.tie(item, facet, EXPECT, 0), g * intensity)
+            add_evidence1(mind, W_POS, slot, mind.S.tie(facet, item, EXPECT, 0), g * intensity)
+
+
 def learn_together(mind, focus: List[Tuple[int, float, bool]], slot: int) -> None:
     """EXPECT lag 0 among the grounded units of the focus; expected but absent partners get negative evidence."""
     S, cfg = mind.S, mind.cfg

@@ -127,15 +127,30 @@ def profile(mind: Mind) -> str:
     return "\n".join(lines)
 
 
+FACETS = "parca"
+
+
 class Session:
-    def __init__(self, mind: Mind) -> None:
+    def __init__(self, mind: Mind, pieces=None) -> None:
         self.mind = mind
         self.history: List[tuple] = []        # (number, text, moments)
+        self.pieces = pieces                  # optional subword tokenizer: pieces of each word as facets
+        if pieces is not None:
+            mind.add_channel(FACETS, "facet")
+
+    def events(self, symbol: str, prov: int) -> List[Event]:
+        """One word as an event on the text channel, with its subword pieces as facets of the same moment."""
+        out = [Event(CHANNEL, symbol, prov)]
+        if self.pieces is not None and symbol.isalpha():
+            parts = [p for p in self.pieces.tokenize(symbol) if p.strip()]
+            if len(parts) > 1:
+                out += [Event(FACETS, p.strip(), prov) for p in parts]
+        return out
 
     def live(self, text: str, prov: int) -> None:
         moments = []
         for symbol in words(text):
-            self.mind.step([Event(CHANNEL, symbol, prov)])
+            self.mind.step(self.events(symbol, prov))
             moments.append(self.mind.t)
         self.mind.step([])
         self.history.append((len(self.history) + 1, text, moments))
@@ -146,7 +161,7 @@ class Session:
         self.mind.knob["theta"] = 1e9
         try:
             for symbol in words(text):
-                self.mind.step([Event(CHANNEL, symbol, prov)])
+                self.mind.step(self.events(symbol, prov))
         finally:
             self.mind.knob["theta"] = theta
 
@@ -168,7 +183,7 @@ class Session:
         if not symbols:
             return "(sessiz)"
         self.listen(" ".join(symbols[:-1]), TOLD)
-        acts = self.mind.step([Event(CHANNEL, symbols[-1], TOLD)])
+        acts = self.mind.step(self.events(symbols[-1], TOLD))
         said: List[str] = []
         while acts and len(said) < limit:
             said += [str(e.symbol) for e in acts if e.channel == CHANNEL]
@@ -234,6 +249,11 @@ class Session:
         else:
             head = "  beklentiler (e = eyleme esas beklenti):"
         lines = [head] + ["    %-20s e %.3f" % (s, e) for s, e in expected]
+        if self.pieces is not None:
+            facets = sorted(twin.expected(FACETS, "specific").items(), key=lambda kv: -kv[1])[:top]
+            if facets:
+                lines.append("  beklenen parçalar (bir sonraki kelimenin kök/ekleri):")
+                lines += ["    %-20s e %.3f" % (s, e) for s, e in facets]
         return "\n".join(lines)
 
     def why(self, text: str, value: str) -> str:
@@ -273,6 +293,7 @@ class Session:
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(prog="python -m zihin")
     ap.add_argument("--load")
+    ap.add_argument("--parca", help="subword tokenizer (ByteLevelBPE json): word pieces enter as facets")
     ap.add_argument("--defter-yok", dest="no_ledger", action="store_true",
                     help="no experience ledger: smaller and faster, but !unut cannot retract")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
@@ -289,7 +310,12 @@ def main(argv=None) -> None:
         if args.no_ledger:
             mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path = {}, False, False, None
         mind.add_channel(CHANNEL, "act")
-    session = Session(mind)
+    pieces = None
+    if args.parca:
+        sys.path.insert(0, ".")
+        from tokenizer_management.byte_bpe import ByteLevelBPE
+        pieces = ByteLevelBPE.load(args.parca)
+    session = Session(mind, pieces)
     chat = False
     print("Zihin — anlat, sor (?...), !neden, !unut, !kaydet, !cik. %d an yaşanmış." % mind.t)
     for line in sys.stdin if not sys.stdin.isatty() else iter(lambda: input("> "), None):
@@ -344,7 +370,7 @@ def main(argv=None) -> None:
                 elif cmd in ("tasinabilir", "portable"):
                     print("  taşınabilir kopya: %s" % export_portable(session.mind, rest.strip()))
                 elif cmd in ("yukle", "load"):
-                    session = Session(load(rest.strip()))
+                    session = Session(load(rest.strip()), session.pieces)
                     print("  yüklendi: %d an" % session.mind.t)
                 else:
                     print("  bilinmeyen komut")
