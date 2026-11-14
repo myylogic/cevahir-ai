@@ -463,6 +463,11 @@ would have run the confirmatory streams with a cap of 4 × 8.0 = 32. H3 is expec
    are selected under the conditions of the confirmatory streams (about one more core-hour).
 9. The margin of H3 (0.05 net facts per write, from FEC v2) was set before any capped stream was seen; the
    spread of net facts per write across worlds is unknown.
+10. H4a's comparator. In the smoke a global gain of 0.5 already removed every installed fact, so "the ungated
+    read at γ★" is likely to sit at recall 0 and the superiority test of H4a can hardly fail once any θ is
+    feasible; the test then rests on its leak guard alone. The like-for-like comparator the DEFTER reviews asked
+    for is the episodic store over the same keys (point 7). Until that is settled, a supported H4a must be worded
+    as "the gate reaches the leak budget with recall left", not as "the gate beats the alternatives".
 
 ## 12. Commands
 

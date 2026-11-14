@@ -323,6 +323,21 @@ def test_record_validation_and_writer_resume(tmp_path):
     with pytest.raises(ValueError, match="duplicate"):
         w.write(rec)
     assert C.RecordWriter(tmp_path / "w3.jsonl").has("stream|0|X|5")
+    # an unfinished last line (a kill during a write): a complete record only lacks its newline and is kept,
+    # a fragment is cut off; lines that end with a newline are never touched
+    path = tmp_path / "w3.jsonl"
+    clean = path.read_bytes()
+    assert C.repair_tail(path) is None and C.repair_tail(tmp_path / "absent.jsonl") is None
+    second = json.dumps(dict(rec, key="stream|0|X|6", n=6))
+    path.write_bytes(clean + second.encode("utf-8"))
+    assert C.repair_tail(path) == "completed" and path.read_bytes() == clean + second.encode("utf-8") + b"\n"
+    assert [r["key"] for r in C.read_records(path)] == ["stream|0|X|5", "stream|0|X|6"]
+    path.write_bytes(clean + second.encode("utf-8")[:40])
+    resumed = C.RecordWriter(path)
+    assert resumed.repaired == "dropped" and path.read_bytes() == clean and not resumed.has("stream|0|X|6")
+    path.write_bytes(clean[:30] + b"\n" + clean)                  # damage in the middle is not repaired away
+    with pytest.raises(ValueError):
+        C.RecordWriter(path)
     for bad in ({**rec, "retention": 1.5}, {**rec, "kind": "nope"}, {**rec, "run": "x"}, {**rec, "world": "3"},
                 {**rec, "dmg_A": float("nan")}, {k: v for k, v in rec.items() if k != "composite"},
                 {**rec, "schema": "other"}):
