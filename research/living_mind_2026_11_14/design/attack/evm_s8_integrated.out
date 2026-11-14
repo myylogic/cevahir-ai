@@ -1,0 +1,38 @@
+The DESIGN arithmetic (LEAD_DESIGN §1, §2.5, §4, §6 read literally) and the CORRECTED arithmetic
+(attack/evidence-math.md) live the identical stream.  Developmental curve: how good are the mind's expectations
+about (object, property) pairs it was never allowed to look at, after N experiences?
+
+World (random, no domain): 120 objects in 12 categories of 10; 12 properties.  A category has a rule for each
+property (holds / does not hold); an object follows the rule with probability 0.9.  Two tellers: H is right 95% of the
+time and makes 60% of the statements, N is right 60% of the time.  Every statement names ONE property of one object.
+A quarter of the experiences are closed looks (present / absent) at pairs from a fixed lookable 20%; the other 80% of
+pairs can only be known by being told or by generalising.  After every experience the mind idles r = 3 steps.
+
+   pairs the mind may never look at; mean of 5 lives.  Brier: lower is better; 'always 1/2' = 0.250;
+   'always the base rate' = 0.217
+   experiences |  DESIGN: Brier  right side  mean c  tau_told  tau_imagined |  CORRECTED: Brier  right side  mean c (lived)
+        250    |          0.246    67.6%    0.282    0.265      0.315     |             0.178    72.5%     0.201
+        500    |          0.246    64.5%    0.423    0.209      0.295     |             0.158    76.5%     0.335
+       1000    |          0.246    62.8%    0.588    0.219      0.280     |             0.126    81.8%     0.478
+       2000    |          0.244    65.7%    0.725    0.218      0.284     |             0.089    88.3%     0.606
+       4000    |          0.240    68.2%    0.828    0.198      0.279     |             0.058    93.4%     0.706
+       6000    |          0.238    68.6%    0.873    0.189      0.281     |             0.048    94.6%     0.755
+   corrected, learned by the end of the last life:
+     base rate b = 0.320;  teller H: precision A = 0.911, reliability rho = 0.870, completeness chi = 0.250
+     teller N: precision A = 0.577, rho = 0.378, chi = 0.177;  category conformity A = 0.811, rho = 0.565, rule horizon k_g = 0.77
+
+   which fix buys what (after 6000 experiences, mean of 5 lives):
+   variant                                                      Brier   right side   mean c   tau_told  tau_imagined
+   design, literal                                              0.238    68.6%      0.873    0.189     0.281
+   design without imagination (r = 0)                           0.222    64.5%      0.841    0.189     0.500
+   design + fix F1 (open world, unweighted closed negatives)    0.354    38.7%      0.818    0.545     0.654
+   design + fix F1, without imagination                         0.346    39.1%      0.809    0.545     0.500
+   design + fix F1 + fix S1 (base-rate support), r = 3          0.410    38.2%      0.455    0.545     0.679
+   design + fix F1 + fix S1, without imagination                0.402    38.4%      0.435    0.545     0.500
+   CORRECTED (all of evidence-math.md)                          0.048    94.6%      0.755       -          -  
+   corrected, silence not counted (chi = 0)                     0.271    51.6%      0.324       -          -  
+   corrected, chi from the teller's own repetition rate         0.038    97.1%      0.707       -          -  
+   corrected, base rate fixed at 1/2                            0.047    94.7%      0.708       -          -  
+   corrected, one slot for both tellers                         0.064    94.9%      0.560       -          -  
+   corrected, reliability = hit rate (no chance correction)     0.050    94.8%      0.802       -          -  
+   corrected, no category base rate (own evidence only)         0.064    93.0%      0.755       -          -  

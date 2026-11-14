@@ -3,11 +3,25 @@
 A growing graph of concept units whose links carry evidence, operated by one loop in which perceiving,
 learning, constructing and asking are the same process.
 
-⟦TR_SUMMARY⟧
+**Türkçe özet (12 satır)**
+
+1. Öneri: çekirdek sabit bir ağ değil, büyüyen bir kavram çizgesi ve onu işleten tek döngüdür: duy → tahmin et → kanıtı yaz → yeniden çöz → kavram kur → hayal et → sor.
+2. Ağırlık = dereceli inanç: her bağ (olumlu kanıt, olumsuz kanıt) taşır; sıklık f = w⁺/w, güven c = w/(w+2). Hiçbir şey silinmez; kanıt eklenir ve her yazı tam olarak geri alınabilir.
+3. Öğrenme ile çalışma tek süreçtir: geri yayılım, optimizer, eğit/dondur yoktur; tek birincil durum kanıt defteridir, gerisi ondan kapalı biçimli tensör işlemleriyle türetilir.
+4. Kavram gerektiğinde kurulur: aynı öznede birbirini dışlayan iki özellik (koyu/açık) yeni bir birim açar ("bazen koyu, bazen açık"); deneyimli zihin bu birimi söylenmeden, öngörerek açar.
+5. Kategori kuralı örneklerden yukarı toplanır ve örneğe destek olarak geri verilir; örneğin kendi kanıtı kendine dönmez (biri-dışarıda), böylece inanç kendini şişirmez.
+6. Hayal: doğrudan kanıtı olmayan inanç "kurgu"dur; deftere yazılmaz, günlüğe yazılır, dünya konuşunca puanlanır; ölçülen gerçeklik oranı bir sonraki kurgunun ön güvenidir.
+7. İşleten süreç de öğrenir: kategori içinde ne kadar genelleyeceği (k), bir konudan ötekine ne kadar taşıyacağı (K_S), kendi kurgularına ve kaynaklarına ne kadar güveneceği deneyimle güncellenen inançlardır.
+8. Kırmızı örneği (sayılar betikten): ilk söz c = 0,20 → incelmiş inanç 0,33 → kategori kuralı: hiç yaşamamış zihinde 0,03, üç alan yaşamışta 0,37, altı alan yaşamışta 0,51 → kırmızıya geri besleme: 0,33 / 0,47 / 0,56.
+9. "Başka hangi renkler var?" sorusu yeni doğmuş zihinde doğmaz (kazanç 0,002 < 0,03); üç alan yaşamışta doğar ama ikinci sıradadır (0,033); altı alan yaşamışta birinci sorudur (0,049 > 0,033).
+10. Olumsuz bulgular: örnekte örneklerden yeni kategori doğmadı (ölçüt ya yanlış bölüyor ya hiç bölmüyor); aktarım pilotunda kazanç küçük (saf dünyada ideal gözlemciye olan açığın %17'si, karışık dünyada ölçülemez); ilk formül terk edildi.
+11. Önceki sanat: parçaların hepsi var (NARS, hiyerarşik Bayes/üst-hipotezler, ART, PLN, öznel mantık, LNN, NELL). Hiçbir şeye "yeni" demiyorum; tek aday, NARS'ın sabit k'sinin bağlam başına öğrenilen inanç olmasıdır ve tam metin denetimi ister.
+12. Karar deneyi (yaklaşık 3,5 çekirdek-saat): eşit parametreli Transformer (standart eğitim), aynısı + test-zamanı ince ayar, 10 kat büyüğü ve ideal gözlemci; H1–H3 tutmazsa bu çekirdek kurulmamalı. En büyük risk dildir.
 
 **Status.** A design proposal with executable reference equations. `bg_core.py` (numpy, about 600 lines) runs every
-equation of section 2; the numbers of section 3 are printed by `trace_red.py`, not typed by hand. Three small checks
-were run (comparison with exact hierarchical Bayes, a dose-response of the red episode, an internal transfer pilot).
+equation of section 2; the numbers of section 3 are printed by `trace_red.py`, not typed by hand. Four small checks
+were run (comparison with exact hierarchical Bayes, a dose-response of the red episode, an internal transfer pilot,
+a continuation of the episode to see whether a category would form).
 **No experiment against a Transformer has been run.** Nothing below is a result about being better than anything.
 Two hosts needed for full-text literature checks (arxiv.org, cis.temple.edu) were not reachable from this session;
 the prior-art section therefore rests on search-result summaries and is weaker than it should be (section 6).
@@ -16,18 +30,26 @@ the prior-art section therefore rests on search-result summaries and is weaker t
 
 ## 0. Verdict first
 
-Substrate A satisfies P1 (one process), P2 (graded, revisable beliefs) and P3 (units formed when needed) natively and
-exactly, P4 (constructions that are measured) in a narrow but real sense, and P5 (the operating process improves)
-only parametrically: the mind learns *how strongly* to generalise, carry over, trust and split, and it applies an
-acquired lens to new subjects, but it does not invent new kinds of inference. P6 is the weak point: this family of
-systems has a long record of not scaling to open language.
+Substrate A satisfies P1 (one process) and P2 (graded, revisable beliefs) natively and exactly. P3 it satisfies in
+part: symbols and refined concepts are formed when needed, but in the final equations no category emerged from
+instances. P4 (constructions that are measured) holds in a narrow but real sense. P5 (the operating process improves)
+holds only parametrically: the mind learns *how strongly* to generalise, to carry over and to trust, and it applies
+an acquired lens to new subjects, but it does not invent new kinds of inference. P6 is the weak point: this family
+of systems has a long record of not scaling to open language.
 
 Every mechanism has prior art (NARS, hierarchical Bayes with overhypotheses, ART, PLN, subjective logic). I claim
 nothing as new. What the substrate offers is a specific, testable combination, and three properties a trained
 Transformer does not have by construction: every experience changes the state at once and can be taken back exactly;
 every belief carries how much evidence stands behind it; and the state says what it does not know.
 
-The worked example gives a mixed picture, reported as it came out (section 3): ⟦VERDICT_NUMBERS⟧
+The worked example gives a mixed picture, reported as it came out (section 3): a mind that has lived nothing
+stores the first statement weakly (c = 0.20) and refines it without deleting anything (0.33), but its rule about
+the category is negligible (0.03), nothing is fed back to the instance, and the question about the other colours
+does not arise. After three lived subjects the rule is 0.37, red is lifted to 0.47, and the question arises as the
+second candidate; after six, 0.51 and 0.56, and it is the first question. The closed forms agree with exact
+hierarchical Bayes to 0.016 on average. Against that: in the final version **no category emerged from instances**,
+the internal transfer pilot showed a **small** effect (17% of the gap to an ideal observer closed in one world,
+nothing measurable in the other), and the first formulation, which gave the nicest numbers, had to be abandoned.
 
 My recommendation as an architect: build it only as the belief-and-memory core of the new engine, behind the decisive
 experiment of section 5, and with the language risk stated to the owner in plain words.
@@ -49,16 +71,16 @@ experiment of section 5, and with the language risk stated to the owner in plain
    predicted value and predicted realism, and scored when the world speaks; the measured share of constructions that
    came true becomes the prior confidence of the next construction.
 5. The quantities that govern the loop itself — how strongly to generalise inside a category, how strongly to carry a
-   regularity from one subject to another, how much to trust each source and the mind's own projections, when to
-   split — are themselves **beliefs updated by the same evidence**, so the way of constructing improves with
-   experience and transfers to new subjects.
+   regularity from one subject to another, how much to trust each source and the mind's own projections — are
+   themselves **beliefs updated by the same evidence**, so the way of constructing improves with experience and
+   transfers to new subjects.
 
 | Part | Serves | How |
 |---|---|---|
 | Ledger; beliefs are functions of it | P1, P6 | one write per experience is the whole learning step; exact retraction |
 | Evidence pair, frequency, confidence | P2 | weak first storage, revision by addition, "sometimes" = stable middle frequency |
 | Trust-weighted evidence, per source | P2, P5 | a statement is worth what its source has proved to be worth |
-| Refined lens (MIX unit), sub-category | P3 | allocated on unexplained evidence; a category is formed from its instances |
+| Refined lens (MIX unit), sub-category | P3 | allocated on unexplained evidence; a sub-category is meant to form from its instances (it did not, 3.4) |
 | Votes upward, hand-down, leave-one-out | P2 | the category rule, and the support it feeds back without self-support |
 | Imagination journal, realism `v` | P4 | constructions are measured against later experience; realism gates later constructions |
 | Question gains | P2 | questions arise from an explicit objective, not from a template |
@@ -257,9 +279,10 @@ is a construction. On creation the journal records its expectation `e`, its conf
 realism** `R = inl_s` (the prior that the construction will prove real, i.e. `v_σ` adjusted by membership).
 It is never written to the ledger and never counted as evidence for anything.
 
-**Observing one's own output from outside.** The constructed statement is passed through the same `answer` path as
-a statement heard from a stranger; what the mind would say about it is exactly what it constructed, with the
-confidence it deserves, and the source "my own projection of kind σ" carries the trust `v_σ` it has earned.
+**Observing one's own output from outside.** In this substrate the phrase has a modest, concrete meaning and no
+more. What the mind has constructed is available to it only through the same `answer` path by which it would judge
+a stranger's statement, with the confidence that the evidence behind it deserves; and the channel that produced it
+("my own projection of kind σ") is treated like an informant with a record, `v_σ`. There is no second observer.
 
 **Scoring.** When direct evidence under the lens reaches `θ_res`, the construction is resolved: the journal gets the
 world's frequency `f_world`, the squared error `(e − f_world)²`, and the **realism after the fact** `r_post = inl_s`
@@ -315,7 +338,8 @@ Let `N` units, `L` non-zero links, `Q` sources, `C` contexts, `M_g` members of c
   amortised (recompute when a context mean moved by more than a tolerance). Nothing depends on `N`.
 - **Answer:** `O(J)` per context holding the subject, from cached `S0, S1, π`.
 - **Reference script:** recomputes everything from the ledger at every statement (`O(state)`), six sweeps. That is
-  what makes it a specification rather than an engine. ⟦TIMING⟧
+  what makes it a specification rather than an engine. On the trace it costs about 0.3 s per statement (numpy, one
+  core, a state of 150 ledger lines).
 - **Memory:** `2L` floats of evidence (`× Q̄` if per-source slices are kept), `2 C J` cached sums, `C J` coupling
   weights, the ledger. The ledger compacts to per-`(source, link)` counts; the order of lines is needed only for
   replay.
@@ -339,16 +363,22 @@ They are an online, closed-form approximation of a hierarchical Beta-binomial mo
 
 **Measured gap to exact hierarchical Bayes** (`check_exact_hbm.py`; reference by numerical integration over the mean
 on 4,001 points and the same grid; 144 random scenarios, 816 queries, 2 to 8 members with 1 to 6 observations each,
-four regimes): ⟦HBM_CHECK⟧
+four regimes): the mean absolute error of the expectation is **0.016** (maximum 0.153). For comparison, each member's
+own counts with Laplace's rule: 0.099; pooled counts: 0.143. By regime, for members with data and for a new member:
+mixed 0.018 and 0.012, skewed 0.015 and 0.021, pure 0.010 and 0.018, heterogeneous 0.020 and 0.022. The reference
+has certain memberships and no outlier component; the model was run with both set to match. With sub-categories
+allowed (final threshold) the numbers are identical, because no split occurred in any scenario.
 
 **Relation to the named systems** (details and sources in section 6):
 
 - *NARS.* The evidence pair, `f`, `c = w/(w+k)`, revision by adding evidence, and the expectation are NARS's. NARS
-  induction lets each instance contribute at most one unit, `w = n/(n+k)`: that is `vote(n, k)` at `k = 1` up to the
-  factor `(k+1)/k`. The difference is that NARS's `k` is one global constant of the system ("evidential horizon",
-  usually 1), while here the coupling is a belief per context, learned, and pooled across subjects; and that
-  overlapping evidence is excluded by leave-one-out algebra instead of evidential-base stamps. NARS has far more than
-  this substrate: compound terms, temporal and procedural inference, self-monitoring, budgeted attention.
+  induction lets one instance contribute at most one unit of evidence to a general statement (a product of
+  confidences of the form `n/(n+k)`): that is the shape of `vote(n, k)` at `k = 1`, up to the factor `(k+1)/k`.
+  (Stated from the NARS literature as I know it; the formulas could not be re-read in this session.) The difference
+  is that NARS's `k` is one global constant of the system ("evidential horizon", usually 1), while here the coupling
+  is a belief per context, learned, and pooled across subjects; and that overlapping evidence is excluded by
+  leave-one-out algebra instead of evidential-base stamps. NARS has far more than this substrate: compound terms,
+  temporal and procedural inference, self-monitoring, budgeted attention.
 - *Hierarchical Bayes, overhypotheses.* The coupling `k` is exactly the `α` of Kemp, Perfors and Tenenbaum (2007),
   the pooled mean their `β`, and the owner's example is their bags of marbles ("all bags are mixed" against "each bag
   is one colour"). What is added is only that the inference is online, closed-form and retractable.
@@ -400,7 +430,7 @@ The owner's illustrative figures are in the last column; they are weights, so th
 
 | Stage | NEWBORN | EXPERIENCED (three lived subjects) | Owner |
 |---|---|---|---|
-| **1. "red is a dark colour"** — first hearing | "red is dark": f = 1.00, **c = 0.200**, e = 0.613. Says: *"I have only heard that red is always dark."* By exclusion: red is light f = 0.00, c = 0.165 (*"never light"*). | Own evidence the same (**c = 0.200**). The lens `MIX(dark\|light)` is allocated **by anticipation**; the mind constructs *"red is sometimes dark, sometimes light"* (e = 0.659, c = 0.226, predicted realism 0.902) before being told. With that support: red is dark f = 0.696, c = 0.425 (*"usually dark"*); red is light f = 0.379 (*"sometimes"*, not "never"). | 0.23 |
+| **1. "red is a dark colour"** — first hearing | "red is dark": f = 1.00, **c = 0.200**, e = 0.613. Says: *"I have only heard that red is always dark."* By exclusion: red is light f = 0.00, c = 0.165 (*"never light"*). | Own evidence the same (**c = 0.200**). The lens `MIX(dark\|light)` is allocated **by anticipation**; the mind constructs *"red is sometimes dark, sometimes light"* (e = 0.659, c = 0.226, predicted realism 0.902) before being told. With the support of what it lived in other subjects: red is dark f = 0.696, c = 0.425 (*"usually dark"*); red is light f = 0.379 (*"sometimes"*, not "never"). | 0.23 |
 | **2. "red also has light shades"** — refine, do not delete | Surprise 0.874 nats. Conflict mass 0.40 ≥ 0.25: the lens **`MIX(dark\|light)` is allocated**. "red is dark" moves to f = 0.558, c = 0.309 (*"I think red is sometimes dark"*). Under the lens: f = 1.00, **c = 0.333**, e = 0.686. All three ledger lines about red are still there. | Surprise 0.789 nats. The construction of stage 1 is **resolved**: imagined e = 0.659, world f = 1.00, squared error 0.117, realism after the fact 0.939. Own evidence under the lens: **c = 0.333**. | 0.57 |
 | **3. the rule about the category** `colour → MIX(dark\|light)` | mean a = 0.565, **c_rule = 0.027** (one instance, nothing lived). | mean a = 0.823, **c_rule = 0.372**; of its 5.08 pseudo-votes, 4.42 come from the three lived subjects (prior mean 0.94). | 0.77 |
 | **4. support fed back to red** | K = 0: one instance cannot confirm itself. **c stays 0.333.** | K = 0.773 pseudo-counts fed back: **c = 0.470**, e = 0.800. | 0.88 |
@@ -483,7 +513,24 @@ Loss in nats on observations 2–4 of every member, mean over 5 seeds. In the mi
 pole with probability ½ (ideal loss 0.693 throughout); in the pure world each member shows one pole only (ideal
 loss about 0 once the first observation is in).
 
-⟦PILOT⟧
+| Arm | Mixed world, subjects 1 → 5 | Pure world, subjects 1 → 5 | Pure world, first member of subjects 2–5 |
+|---|---|---|---|
+| FULL (everything of 2.6 learned) | 0.784 0.762 0.725 0.734 0.751 | 0.318 0.294 0.292 0.277 **0.270** | 0.299 |
+| FROZEN (operating process frozen) | 0.783 0.770 0.734 0.746 0.772 | 0.321 0.327 0.323 0.320 0.327 | 0.332 |
+| FIXED-K1 (one coupling `k = 1`, frozen) | 0.799 0.781 0.743 0.758 0.786 | 0.307 0.316 0.312 0.312 0.319 | 0.327 |
+| FLAT (counts and exclusion, no categories) | 0.778 0.765 0.729 0.745 0.766 | 0.340 0.340 0.340 0.340 0.340 | 0.340 |
+| FULL+M (FULL, stated memberships taken as certain) | 0.778 0.749 0.715 0.716 0.729 | 0.304 0.237 0.220 0.197 **0.192** | 0.247 |
+| FROZEN+M | 0.776 0.767 0.733 0.740 0.769 | 0.308 0.319 0.312 0.306 0.320 | 0.325 |
+| ideal observer | 0.693 | about 0 | about 0 |
+
+In the pure world the learned process gets better from subject to subject (0.318 → 0.270) while the frozen and the
+fixed-coupling arms do not move and the count-only arm stays at 0.340; with memberships taken as certain the gain is
+larger (0.304 → 0.192). That is learning to learn, in sign. In size it is small: by the fifth subject FULL has closed
+17% of the gap between FROZEN and the ideal observer (40% with certain memberships). In the mixed world all arms lie
+between 0.72 and 0.80 with standard errors of 0.02–0.03 per cell; FULL is 0.015 below FLAT at the fifth subject and
+FULL+M 0.04 below FROZEN+M. I do not count that as an effect. Reasons I can see: a membership stated once is believed
+at 0.6, the realism prior starts at 0.5, and four observations per member leave the coupling beliefs broad. The
+earlier design, in which the lens handed evidence down to its poles, did no better (`pilot_transfer_v0c.out`).
 
 ### 3.6 What the example does and does not reproduce
 
@@ -520,7 +567,8 @@ Output is produced from `(f, c)`, never from a stored sentence: a frequency word
 < 0.35 ≤ sometimes < 0.65 ≤ usually < 0.85 ≤ always; *hiç, nadiren, bazen, çoğunlukla, hep*) and a hedge from `c`
 (*duyduğuma göre* < 0.25 ≤ *sanırım* < 0.5 ≤ *oldukça eminim* < 0.75 ≤ *biliyorum*); below `c = 0.02` the answer is
 *bilmiyorum*. Constructions are spoken with a marker (*kurduğuma göre …*), questions from the agenda of 2.9
-(*başka hangi renkler var?*). The examples of section 3 are produced this way.
+(*başka hangi renkler var?*). The English sentences quoted in section 3 are produced this way by `say()` in the
+reference script; the Turkish words are the same table and are not implemented there.
 
 **L2 — words and constructions as units (research stage, outside the 2,000 lines).** A word is a unit; "this word
 denotes this concept" is a link with evidence gathered across situations in which the word and the concept occur
@@ -545,3 +593,232 @@ re-verify it) is what a front-end would need in order to decide whether a piece 
 or opens a new one; inside the graph that role is played by `c`.
 
 ---
+
+## 5. Falsifiable hypotheses and the decisive experiment
+
+### 5.1 World
+
+A tokenised stream ("shade world"), about 400 tokens: nonce names for categories, members, property poles and
+informants, and a dozen function tokens (`is`, `a`, `not`, `excludes`, `says`, `?`, `.`, `yes`, `no`). Every life
+draws fresh names, so nothing lexical can be carried from one life to the next.
+
+A **life** is about 3,000 statements (about 18,000 tokens) over 40 subjects that arrive in sequence, 30% of the
+statements returning to earlier subjects. A subject has one category, 6–10 members, two contrast pairs and two plain
+properties. Each (subject, pair) has a regime — mixed (θ = 0.5), skewed (θ = 0.8) or pure — drawn with probabilities
+that are fixed within a life and differ between lives, so that there is something to learn across subjects. A
+quarter of the categories contain two or three exceptional members. Statements come from the mind's own observation
+and from four informants of reliability 0.95, 0.9, 0.7 and 0.3. For a fifth of the members the first statement is a
+generic one that later observations contradict (the "red" pattern).
+
+**Probes** are questions `is X A ?` answered with a probability, never followed by feedback, scored by expected
+log-loss under the generating parameters. Classes: R1 retention (the fact is at least 1,000 statements old), R2
+refinement (frequency after a contradiction), G1 a new member of a known category, G2 the first member of a new
+subject after one observation, X1 exceptions, S1 what the unreliable informant said. An **ideal observer** (exact
+Bayes for the generating family, by enumeration and quadrature) gives the floor; results are reported as **regret**,
+loss minus ideal loss, in nats per probe, with calibration error alongside.
+
+### 5.2 Arms
+
+| Arm | What it is |
+|---|---|
+| A-full | the 2,000-line prototype |
+| A-frozen | the same with the operating process frozen (no pooling across subjects, realism and trust fixed) |
+| A-fixed-k | one global coupling `k = 1`, frozen: an evidence logic with NARS's constant. It is not NARS and will not be called NARS |
+| A-flat | counts and exclusions only, no categories |
+| T-eq | a Transformer decoder whose parameter count equals the number of floats in A-full's state at the end of a life (evidence, cached sums, coupling weights; I expect 30–60 thousand), **trained the standard way**: next-token prediction on 30 million tokens of lives from the same generator, context 512 tokens, then frozen. At test it learns only in context |
+| T-10x | the same with ten times the parameters |
+| T-eq + TTT, T-10x + TTT | the same weights with **test-time fine-tuning**: one to three SGD steps on each incoming statement, learning rate in {1e-4, 3e-4, 1e-3, 3e-3}, with and without replay from a buffer whose size in floats equals A-full's state. The configuration is chosen on three validation lives and frozen before the ten test lives |
+| Ideal | exact Bayes for the generator (floor) |
+
+Reported for every arm: floats and bytes of state, wall time, statements per second. "Equal parameter count" is a
+generous reading for A (its state is memory of this life; the Transformer's parameters are general), which is why
+T-10x is included: if A only beats a Transformer of its own size, that is weak.
+
+**Budget.** The project measured 2,729 training tokens per second on one thread for a 3.45-million-parameter model.
+At about 0.4 million parameters (T-10x) I estimate 15,000 tokens per second: 30 million tokens in about 35 minutes
+per core; T-eq a few minutes; test-time fine-tuning over validation and test lives about 1.5 core-hours; the A arms
+and the ideal observer minutes. Total about 3.5 core-hours. If throughput is lower, lives are cut to 1,500
+statements and pre-training to 15 million tokens; this fallback is fixed now.
+
+### 5.3 Hypotheses and what refutes them
+
+| | Claim | Refuted if |
+|---|---|---|
+| **H1** persistence and revision in one process (P1, P2) | On R1 and R2, A-full's regret is at most 0.03 nats, and every TTT arm is worse than A-full by at least 0.03 nats on at least one of R1, R2 (paired over ten lives, 95% interval excluding 0). | A-full's own regret exceeds 0.03 nats on R1 or R2; or any TTT arm, of either size, is within 0.03 nats of A-full on **both**. In the second case writing evidence into a ledger buys nothing measurable over fine-tuning a network at test time in this world. |
+| **H2** the closed forms are good enough (P2, P3) | A-full's regret on G1 is at most 0.05 nats in each regime. | Regret above 0.10 in any regime; or A-flat within 0.02 nats of A-full on G1 (then categories do nothing). |
+| **H3** the operating process improves and transfers (P5) | On G2, in subjects 21–40, A-full closes at least half of the gap between A-frozen and the ideal observer. | It closes less than a quarter. Between a quarter and a half: inconclusive, reported as such. The pilot of 3.5 is a warning: after five subjects A-full had closed 17% of that gap in the pure world (40% with certain memberships) and nothing measurable in the mixed one. |
+| **H4** constructions are measured and become more real (P4) | Predicted realism is calibrated against realism after the fact (calibration error at most 0.10 over at least 300 resolved constructions per life); the squared-error skill of constructions against the uniform guess is positive and larger in the last third of a life than in the first. | Calibration error above 0.20, or no increase in skill (interval including 0). |
+| **H5** questions matter (P2) | In an interactive condition (every fifth statement answers one of the mind's questions), A-full with its own questions reaches regret 0.05 on G1 with at least 15% fewer statements than with random questions from the same candidates, and no more than with lowest-confidence-first questions. | No better than random; or worse than the lowest-confidence heuristic (then 2.9 adds nothing to a textbook rule). |
+| **H6** no self-support | Exact invariants: constructions never appear in the ledger; a rule never raises the confidence of the only instance it was built from; an informant that repeats one statement any number of times adds at most 2 units. | Any violation. |
+
+Reported but not counted for A: (i) inside its 512-token window I expect the Transformer arms to match A-full and
+the ideal observer on G1, because a Transformer meta-trained on such a family approximates Bayesian prediction in
+context (prior-data fitted networks; meta-learned models of cognition). That outcome refutes nothing; H1 is about
+what lies beyond the window and about revision. (ii) A **structure-shift** test: one subject whose regularity is a
+transitive order and one whose rule is a conjunction of two properties. A has no unit that can express either and
+should fail; if a Transformer arm learns them in context, that is a point for the baseline and will be said so.
+(iii) A known hole: several informants that copy each other are counted as independent.
+
+**Decision rule.** Substrate A is worth building beyond the prototype only if H1, H2 and H3 all hold. If H1 fails,
+the argument for leaving the fixed network has to come from elsewhere. If H3 fails, P5 is not delivered and what
+remains is a fixed evidence logic, which is prior art. H4–H6 qualify the result; they do not decide it. The
+protocol (generator configuration, arms, grids, thresholds, analysis script) is frozen before the first test life,
+as in the project's earlier studies.
+
+---
+
+## 6. Prior art
+
+Searched on 2026-11-14 with 36 web-search queries; none contained the name of the project or its owner. Only
+search-result summaries were available: arxiv.org and cis.temple.edu could not be fetched from this session, so no
+full text was read. The eight closest works, then what remains.
+
+| # | Work | What overlaps | What differs |
+|---|---|---|---|
+| 1 | **NARS / Non-Axiomatic Logic** (Wang; OpenNARS; "OpenNARS for Applications", Hammer & Lofthouse 2020) [1][2][3] | Almost everything in 2.2 and 2.5: truth value as (frequency, confidence) from positive and total evidence, `c = w/(w+k)`, revision by pooling evidence, induction and abduction as weak single-unit evidence, deduction, expectation, questions derived by backward inference, no separate training phase, evidence never counted twice, failed anticipations as negative evidence. | `k` is one user-set constant of the system ("evidential horizon", usually 1); the inference rules and control are fixed at the meta-level by design; overlap is prevented by evidential bases, not by leave-one-out; NARS is much richer (compound terms, time, procedures, attention under bounded resources). |
+| 2 | **Hierarchical Bayes, overhypotheses** (Kemp, Perfors & Tenenbaum 2007, after Goodman) [4] | The model of 2.12 is theirs: `α` (how uniform each bag is) is the coupling `k`, `β` the category mean; the owner's example is their bags of marbles; learning the higher level speeds learning in a new category. | Batch inference by integration or sampling; no growing graph, no revision ledger, no questions, no language. |
+| 3 | **Probabilistic Logic Networks** (Goertzel et al. 2008) and **Differentiable PLN** (Potapov et al. 2019) [5][6][7] | Strength and confidence on a hypergraph; in the differentiable version truth values are tensors and both premise truth values and rule formulas are learned by backpropagation; inference control learning is an acknowledged open problem. Goertzel (2024) shows PLN and NARS give similar strength × confidence when term probabilities are uncertain. | Term probabilities and a large rule set; learning there is gradient-based and offline. |
+| 4 | **Adaptive Resonance Theory**, fuzzy ARTMAP, fusion ART (Carpenter, Grossberg; Tan) [8][9][10] | A new category node is recruited when no existing one matches (vigilance, match tracking) instead of overwriting: the classical answer to stability versus plasticity; incremental, one pass; rules can be read off. | Feature vectors and fuzzy AND; no evidence counts, no hierarchy of couplings; the mismatch test here is an evidence ratio. |
+| 5 | **Subjective logic** (Jøsang) [11][12] | An opinion is belief, disbelief, uncertainty and base rate, equivalent to evidence counts; cumulative fusion is revision; trust discounting of sources; deduction and abduction operators. | No concept formation, no learned operating parameters. (The prior weight W = 2 of that literature is from my memory; the search did not confirm it.) |
+| 6 | **Incremental concept formation**: COBWEB (Fisher 1987; revisited 2024), rational models of categorisation, structure learning in active inference (Smith, Schwartenbeck, Parr & Friston 2020; Friston et al. 2023) [13][14][15][16] | A new concept or latent slot is added when the evidence warrants, and removed by model reduction; incremental; category utility or model evidence as the criterion. | No graded links with revision; in active inference the slots are pre-allocated. |
+| 7 | **Weighted logics trained by gradient**: Logical Neural Networks (Riegel et al. 2020), ∂ILP (Evans & Grefenstette 2018), Logic Tensor Networks, Neural Theorem Provers [17][18] | Truth values in tensors; in LNN truth *bounds*, an upward and a downward pass (the downward pass is the analogue of feeding support back), and the open-world distinction between unknown and contradictory. | Trained offline by backpropagation over a fixed set of formulas or templates. |
+| 8 | **NELL, never-ending learning** (Carlson et al. 2010; Mitchell et al. 2018) [19] | Beliefs with confidence accumulated without end, learned rules as coupling constraints, promotion when independent sources agree. Its documented failure is **semantic drift**: errors that reinforce themselves. | Web-scale extraction with periodic retraining; not a single revision algebra. |
+
+Also relevant, more briefly: **ACT-R and Soar** (utility learning, chunking: an operating process that improves with
+use; both suffer a "utility problem" under continuous learning) [20]; **AM and EURISKO** (an agenda of
+self-generated tasks, heuristics that modify heuristics; Lenat later analysed why learning new heuristics was much
+harder than expected) [21]; **AERA / Replicode** (self-programming, models kept or dropped by their record) [22];
+**Sigma** (a cognitive architecture as a factor graph with message passing) [23]; **a NAL-based sequence learner**
+(Xu 2023/2025: hypothesise, revise, recycle; claims freedom from catastrophic forgetting) — the closest cousin on the
+language path [24]; **NARS-GPT** and a 2026 Narsese benchmark (a language model as the language channel of NARS) [25];
+**BeliefBank** (a belief graph added to a frozen language model) [26]; the **Thousand Brains Project** (evidence-based
+learning modules without backpropagation, for sensorimotor objects) [27]; **prior-data fitted networks** and
+**meta-learned models of cognition** (why the Transformer baseline may be Bayes-like inside its window) [28][29];
+**dynamic evaluation** (the test-time fine-tuning baseline) [30]; **question asking by expected information gain**
+(Rothe, Lake & Gureckis 2017) [31]; **reality monitoring** as the discrimination of imagined from perceived [32].
+Truth discovery among unreliable sources (Dawid & Skene 1979) is cited from memory and was not searched.
+
+**What remains new — if anything.** Stated as candidates with their status, not as claims:
+
+- (a) *The coupling as a learned belief per context, pooled across subjects, inside an evidence logic of the NARS
+  kind* — i.e. NARS's constant `k` read as the overhypothesis `α` and learned. Two queries aimed at exactly this
+  (a learned or adaptive evidential horizon; NAL induction read as hierarchical-Bayes shrinkage) returned nothing,
+  and the NARS sources describe `k` as a system constant and the meta-level as fixed. This is the one candidate worth
+  a full-text check of the NAL book and of ONA before anyone says "new".
+- (b) *One number in three roles*: the measured realism of past constructions is the mixing weight of a robust
+  mixture and the prior confidence of the next construction. No source found; it is a small design idea next to
+  NARS's anticipation and to textbook robust mixtures.
+- (c) *The question gain of 2.9*: unseen-member mass times what the rule would lend a new member. Question asking
+  by expected information gain is prior art; this particular objective was not found. Small.
+- (d) *The two message formulas of 2.2.* A derivation from textbook moments; the statistics literature on shrinkage
+  was not searched; not claimed.
+- (e) *The combination*: one ledger, every belief a closed-form function of it, all couplings learned from it,
+  exact retraction. Combination only, and unproven.
+
+So nothing here is called new. If the experiment supports H3, candidate (a) is the thing to check properly.
+
+Sources:
+[1] https://cis.temple.edu/~pwang/GTI-book/GTI-CH3/GTI-3-4.html ·
+[2] https://cis.temple.edu/~pwang/AGI-NARS/2015-KFU/02-Evidence.html ·
+[3] https://cis.temple.edu/tagit/publications/ONA.pdf ·
+[4] https://sites.socsci.uci.edu/~lpearl/courses/readings/KempPerforsTenenbaum2007_LearningOverhypotheses.pdf ·
+[5] https://people.csail.mit.edu/zucker/PLN_BOOK_6_27_08.pdf ·
+[6] https://arxiv.org/abs/1907.04592 ·
+[7] https://arxiv.org/abs/2412.19524 ·
+[8] https://en.wikipedia.org/wiki/Adaptive_resonance_theory ·
+[9] https://open.bu.edu/items/f04eeac2-577c-4309-bf3d-720170e856eb ·
+[10] https://ink.library.smu.edu.sg/sol_research/3587 ·
+[11] https://www.openphilanthropy.org/wp-content/uploads/Josang2013.pdf ·
+[12] https://mn.uio.no/ifi/english/people/aca/josang/publications/jos2016-fusion.pdf ·
+[13] https://cdn.aaai.org/AAAI/1987/AAAI87-082.pdf ·
+[14] https://arxiv.org/abs/2403.03835 ·
+[15] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7250191/ ·
+[16] https://arxiv.org/abs/2311.10300 ·
+[17] https://arxiv.org/abs/2006.13155 ·
+[18] https://arxiv.org/abs/1711.04574 ·
+[19] https://papers.baulab.info/papers/knowledge/Mitchell-2015.pdf ·
+[20] https://arxiv.org/abs/2201.09305 ·
+[21] https://aaai.org/papers/00236-aaai83-059-why-am-and-eurisko-appear-to-work/ ·
+[22] https://openaera.org/ ·
+[23] https://arxiv.org/abs/2101.02231 ·
+[24] https://arxiv.org/abs/2308.12486 ·
+[25] https://github.com/opennars/NARS-GPT and https://arxiv.org/abs/2604.18873 ·
+[26] https://aclanthology.org/2021.emnlp-main.697/ ·
+[27] https://arxiv.org/abs/2412.18354 ·
+[28] https://arxiv.org/abs/2112.10510 ·
+[29] https://arxiv.org/abs/2304.06729 ·
+[30] https://proceedings.mlr.press/v80/krause18a.html ·
+[31] https://arxiv.org/abs/1711.06351 ·
+[32] https://www.nature.com/articles/s41467-023-37322-1
+
+---
+
+## 7. Failure modes and the mechanism against each
+
+"Status" says whether the mechanism exists in the reference code, and whether anything was observed.
+
+| Failure | Mechanism | Status |
+|---|---|---|
+| **Runaway growth** of units, links, contexts | Allocation only on unexplained evidence (conflict mass; strong-evidence split); one lens per exclusive pair; a controller that raises `θ_alloc` when allocations per thousand statements exceed a budget; a merge test (the split test read backwards); hard caps with ghost-vote eviction (2.11). | Thresholds implemented. Controller, merge and eviction are **specified only**. In the trace: 34 units for 152 ledger lines, no runaway — on a tiny example. |
+| **Self-reinforcing false beliefs** | Constructions never enter the ledger. Leave-one-out inside a category and leave-one-category-out across subjects, so a rule cannot support the instance it came from. Repetition discount: one source repeating one statement adds at most 2 units. Trust is earned only against evidence that did not come from the source. | Implemented; in the trace the newborn's fed-back support is exactly 0, and the liar falls to 0.168. **Not covered:** informants that copy each other count as independent; evidence that reaches a member along two category paths would be counted twice (needs provenance sets, NARS-style, on fed-back evidence); a biased parser is a biased source. NELL's semantic drift is the cautionary tale. |
+| **Instability** | The solver is a fixed-point iteration (six sweeps) among responsibilities, couplings, realism and carry-over; damping and a per-sweep change monitor in the build; hysteresis between split and merge. | No convergence proof. Stable in every run here (trace, 144 comparison scenarios, pilot). Two weaknesses seen: hard assignments (split, join) depend on order and cannot be undone; and two lenses on the same evidence can disagree — at stage 10 the mind says of an undescribed colour "sometimes dark" with c = 0.44 through the pole lens while holding c = 0.037 through the refined lens. Consistency between lenses is not enforced. |
+| **Forgetting** | None by construction for what is in the ledger: evidence is additive and local, so learning one thing cannot erase another. Under a cap, eviction loses the detail of typical members and keeps category statistics. | Additivity is exact. The opposite failure is open: when the world changes, old evidence outweighs new. Planned: a volatility belief per context on a grid of discount factors, scored like the couplings. **Not implemented.** |
+| **Category formation that is over-eager or powerless** (found here) | A proper two-cluster evidence (each cluster with its own coupling), the merge test, and acceptance tests before the module ships (section 8). | With `ln 3`: false splits in 3 of 12 homogeneous and 6 of 12 heterogeneous eight-member categories. With `ln 10 + ln(n−1)`: none, and no split at all up to eleven colours. **Unsolved in this proposal.** |
+| **Weak transfer from little data** (found here) | Longer lives; memberships confirmed more than once; learned unseen-member and repetition constants. | Pilot: the learned process closes 17% of the gap to the ideal observer after five subjects in the pure world (40% with certain memberships), nothing measurable in the mixed world. H3 exists to decide whether this is a matter of data or of design. |
+| **Parser errors become evidence** | The parser is a source with learned trust; its lines can be retracted exactly. | Design only. |
+| **Cost** | Incremental solver; test that it equals the from-scratch solver to 1e-9. | Reference script: about 0.3 s per statement on the trace (full recomputation, numpy). |
+| **Over-reading** | — | Nothing here is consciousness. It is a bookkeeping loop whose parameters are beliefs. The owner should not be told otherwise. |
+
+---
+
+## 8. Build plan: 2,000 lines, with tests
+
+`bg_core.py` is the oracle: the prototype must print the numbers of section 3 to six decimals before anything is
+optimised.
+
+| Module | Lines | Content | Tests that gate it |
+|---|---|---|---|
+| `ledger.py` | 160 | append-only lines, per-source sparse counts, compaction, retraction, replay from checkpoints | retraction equals "never heard" on evidence (exact); replay equals the state (exact) at random positions |
+| `store.py` | 200 | units, sparse `W±` (index maps + `index_add_`), growth without re-indexing, caps | growth keeps indices; caps respected |
+| `truth.py` | 120 | `f, c, e`, `vote`, `handdown`, batched `lbeta` on `torch.lgamma`, grids | the limits of 2.2; agreement with `math.lgamma` |
+| `context.py` | 320 | contexts, incremental `S0, S1`, leave-one-out tensors, coupling posteriors, responsibilities | incremental equals from-scratch (1e-9) on random lives; mean gap to exact hierarchical Bayes at most 0.02 (the check of 2.12 as a regression test) |
+| `schema.py` | 180 | kinds, pooling of couplings, carry-over grid, leave-one-category-out | property test: no context ever receives evidence that originated in its own category |
+| `allocate.py` | 220 | lens allocation (conflict, anticipation), split and join with a two-cluster evidence, merge, rate controller | at most 5% false splits on 200 single-population categories; at least 80% detection on two groups of 8; a forced wrong split is merged back |
+| `operate.py` | 140 | trust by leave-one-source-out, realism, journal | friend and liar; repetition and echo invariants (H6) |
+| `imagine.py` | 110 | constructions, predicted realism, resolution, calibration report | constructions never in the ledger; calibration on synthetic lives |
+| `question.py` | 110 | candidates, gains, agenda | gain increases with unseen mass and with rule strength; no question when nothing can be gained |
+| `language.py` | 200 | Turkish and English templates to and from ledger lines; hedged output; question wording | round trip of every template; the red trace as a golden test |
+| `mind.py` | 140 | the loop of 2.5, budgets, statistics | end to end: the trace of 3.2; the dose-response is monotone in lived subjects |
+| **core** | **1,900** | | |
+| tests | about 600 | the gates above | |
+| harness (separate) | about 700 | world generator, ideal observer, Transformer arms, test-time fine-tuning, analysis | generator determinism; ideal observer against quadrature |
+
+Order: (1) ledger, store, truth; (2) context, against the oracle; (3) schema, operate; (4) allocate — the module
+most likely to need a redesign; (5) imagine, question, language, mind; (6) harness; protocol frozen before the first
+test life. Stop rules: if the acceptance tests of `allocate.py` cannot be met in two iterations, ship without
+sub-categories and say so in the report; if the incremental solver cannot be made equal to the from-scratch one, run
+the experiment on the from-scratch solver, ported to batched tensors (the numpy reference needs about 0.3 s per
+statement at 150 ledger lines and grows with the state, so it would not fit a 3,000-statement life as it stands).
+
+---
+
+## 9. What is not claimed, and how to reproduce
+
+Not claimed: novelty of any mechanism; superiority over a Transformer of any size; that categories emerge from
+instances in the present equations (they did not); that questions arise by themselves in a mind that has lived
+nothing (they do not); that language is solved; that this is consciousness.
+
+Files, all in
+`/tmp/claude-0/-workspace-cevahir-ai/79909244-c51d-5307-ad00-1a1e5ef77203/scratchpad/newcore/belief-graph/`:
+
+| File | What it is | Run time |
+|---|---|---|
+| `bg_core.py` | the reference equations (section 2) | — |
+| `trace_red.py` → `trace_red.out`, `trace_red.json` | the worked trace (3.2) | 95 s |
+| `dose_response.py` → `dose_response.out`, `.json` | lived subjects against readouts (3.3) | about 6 min |
+| `check_exact_hbm.py [--split]` → `check_exact_hbm.out`, `.json` | gap to exact hierarchical Bayes (2.12) | about 1 min |
+| `pilot_transfer.py` → `pilot_transfer.out`, `.json` | internal transfer pilot (3.5) | about 8 min on 3 cores |
+| `split_continuation.py` → `split_continuation.json` | how much more must be lived before a sub-category forms (3.4) | about 3 min |
+| `*_v0c.*`, `bg_core_v0a.py.bak`, `bg_core_v0c.py.bak` | earlier formulations of the design log (3.4), kept for audit | — |
+
+All runs: `OMP_NUM_THREADS=1 python3 <file>` from this folder; numpy only; seeds fixed in the files.

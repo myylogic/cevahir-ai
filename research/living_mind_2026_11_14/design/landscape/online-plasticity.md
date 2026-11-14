@@ -569,7 +569,7 @@ quantities that can both be read out, is updated by every experience with no pha
 a contradicted belief instead of replacing it (rows 23–25). Importance-based methods (row 18,
 EWC, metaplastic binary weights) keep a resistance to change, which cannot be read as "how well
 is this known". MESU is the strongest published form (200 tasks, no boundaries,
-out-of-distribution detection); the exact computation it approximates is a Kalman filter. [I]
+out-of-distribution detection [V]); the exact computation it approximates is a Kalman filter. [I]
 
 "Conviction" below = 1 − posterior predictive variance / prior predictive variance. One number
 was fitted: the observation noise, so that conviction is 0.230 after E1. [C]
@@ -788,6 +788,7 @@ All [I].
 ## Files
 
 - `/tmp/claude-0/-workspace-cevahir-ai/79909244-c51d-5307-ad00-1a1e5ef77203/scratchpad/newcore/landscape/online-plasticity.md` (this note)
-- `/tmp/claude-0/-workspace-cevahir-ai/79909244-c51d-5307-ad00-1a1e5ef77203/scratchpad/newcore/landscape/tools-online-plasticity/red_example_online_plasticity.py` and `red_example_output.txt`
+- `/tmp/claude-0/-workspace-cevahir-ai/79909244-c51d-5307-ad00-1a1e5ef77203/scratchpad/newcore/landscape/tools-online-plasticity/red_example_online_plasticity.py` (the traces of §5)
+- `/tmp/claude-0/-workspace-cevahir-ai/79909244-c51d-5307-ad00-1a1e5ef77203/scratchpad/newcore/landscape/tools-online-plasticity/red_example_output.txt` (its output)
 - `/tmp/claude-0/-workspace-cevahir-ai/79909244-c51d-5307-ad00-1a1e5ef77203/scratchpad/newcore/landscape/tools-online-plasticity/source_index.txt` (118 downloaded papers)
 - `/tmp/claude-0/-workspace-cevahir-ai/79909244-c51d-5307-ad00-1a1e5ef77203/scratchpad/newcore/landscape/sources-online-plasticity/` (one directory per arXiv id)

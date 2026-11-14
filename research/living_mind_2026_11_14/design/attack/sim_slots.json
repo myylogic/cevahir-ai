@@ -1,0 +1,152 @@
+{
+ "m3_n300": {
+  "composed": 253,
+  "frames": {
+   "1": 175,
+   "2": 80
+  },
+  "categories": 175,
+  "abstract_ties": 519,
+  "max_cat_per_word": 31,
+  "pairs": 31878,
+  "fix_categories": 5,
+  "fix_purity": 1.0,
+  "total_frames": 255
+ },
+ "m3_n1000": {
+  "composed": 653,
+  "frames": {
+   "1": 413,
+   "2": 92
+  },
+  "categories": 413,
+  "abstract_ties": 1636,
+  "max_cat_per_word": 98,
+  "pairs": 212878,
+  "fix_categories": 5,
+  "fix_purity": 1.0,
+  "total_frames": 505
+ },
+ "m3_n3000": {
+  "composed": 1369,
+  "frames": {
+   "1": 764,
+   "2": 92
+  },
+  "categories": 764,
+  "abstract_ties": 3829,
+  "max_cat_per_word": 164,
+  "pairs": 936396,
+  "fix_categories": 5,
+  "fix_purity": 1.0,
+  "total_frames": 856
+ },
+ "m3_n10000": {
+  "composed": 2555,
+  "frames": {
+   "1": 1103,
+   "2": 92
+  },
+  "categories": 1103,
+  "abstract_ties": 7545,
+  "max_cat_per_word": 290,
+  "pairs": 3262735,
+  "fix_categories": 5,
+  "fix_purity": 1.0,
+  "total_frames": 1195
+ },
+ "m3_n30000": {
+  "composed": 3684,
+  "frames": {
+   "1": 1261,
+   "2": 92
+  },
+  "categories": 1261,
+  "abstract_ties": 11036,
+  "max_cat_per_word": 384,
+  "pairs": 6784086,
+  "fix_categories": 5,
+  "fix_purity": 1.0,
+  "total_frames": 1353
+ },
+ "m5_n300": {
+  "composed": 297,
+  "frames": {
+   "1": 46,
+   "2": 381,
+   "3": 576,
+   "4": 124
+  },
+  "categories": 46,
+  "abstract_ties": 95,
+  "max_cat_per_word": 7,
+  "pairs": 43956,
+  "fix_categories": 7,
+  "fix_purity": 1.0,
+  "total_frames": 1127
+ },
+ "m5_n1000": {
+  "composed": 975,
+  "frames": {
+   "1": 398,
+   "2": 1736,
+   "3": 1413,
+   "4": 137
+  },
+  "categories": 398,
+  "abstract_ties": 906,
+  "max_cat_per_word": 48,
+  "pairs": 474825,
+  "fix_categories": 6,
+  "fix_purity": 1.0,
+  "total_frames": 3684
+ },
+ "m5_n3000": {
+  "composed": 2800,
+  "frames": {
+   "1": 1729,
+   "2": 5122,
+   "3": 2410,
+   "4": 137
+  },
+  "categories": 1729,
+  "abstract_ties": 4411,
+  "max_cat_per_word": 234,
+  "pairs": 3918600,
+  "fix_categories": 6,
+  "fix_purity": 1.0,
+  "total_frames": 9398
+ },
+ "m5_n10000": {
+  "composed": 8451,
+  "frames": {
+   "1": 7403,
+   "2": 12703,
+   "3": 3389,
+   "4": 137
+  },
+  "categories": 7403,
+  "abstract_ties": 21415,
+  "max_cat_per_word": 1034,
+  "pairs": 35705475,
+  "fix_categories": 6,
+  "fix_purity": 1.0,
+  "total_frames": 23632
+ },
+ "m5_n30000": {
+  "composed": 21352,
+  "frames": {
+   "1": 21526,
+   "2": 22937,
+   "3": 3752,
+   "4": 137
+  },
+  "categories": 21526,
+  "abstract_ties": 71454,
+  "max_cat_per_word": 3340,
+  "pairs": 227943276,
+  "fix_categories": 6,
+  "fix_purity": 1.0,
+  "total_frames": 48352
+ }
+}

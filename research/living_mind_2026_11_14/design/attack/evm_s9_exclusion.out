@@ -1,0 +1,17 @@
+== phase 1: exclusion learned from 2000 looks through two state channels (no rule about them in the core) ==
+   x(a3, a0) = 0.972   (two symbols of the same channel: never together)
+   x(b1, a0) = 0.000   (symbols of different channels: together about as often as chance)
+   mean exclusion within channel A = 0.972;  across channels = 0.023
+   (with plain f instead of f_up: within 0.997, across 0.079: sampling noise reads as weak exclusion)
+
+== phase 2: 'X a0' told once by a teller of reliability 0.3; then one more experience ==
+   experience                                   | DESIGN (§2.5): f, c, e of X -> a0 | CORRECTED: f, c, e of X -> a0
+   (start) told once                            |   1.00  0.231  0.615             |   1.00  0.231  0.615
+   (i)   same teller: 'X b1'   (compatible)     |   0.62  0.326  0.539             |   1.00  0.231  0.615
+   (ii)  second teller: 'X a3' (incompatible)   |   0.62  0.326  0.539             |   0.50  0.374  0.501
+   (iii) same teller: 'X a3'                    |   0.62  0.326  0.539             |   0.51  0.260  0.502
+   (iv)  own look: channel A shows a3           |   0.33  0.478  0.418             |   0.23  0.565  0.348
+   -> the design moves the belief by the same amount for a compatible and for an incompatible statement
+      (rows i-iii are identical): it reacts to the absence of the word, not to the contradiction.
+      The corrected arithmetic leaves the belief alone in (i) and refines it in (ii)-(iv): f moves, c rises,
+      nothing is deleted, and the own look weighs more than the second teller.

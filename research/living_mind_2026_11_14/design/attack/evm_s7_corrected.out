@@ -1,0 +1,36 @@
+== A. worked numbers.  Every row starts again from 'X -> v told once by a teller of reliability 0.3'. ==
+   scenario                                                       | DESIGN (§1, §2.5, §4)      | CORRECTED
+   a  first hearing                                               | f=1.00 c=0.231 e=0.615 | f=1.00 c=0.231 e=0.615
+   b  + 3 other true statements about X by the same teller        | f=0.38 c=0.442 e=0.446 | f=1.00 c=0.231 e=0.615
+   c  + the same teller repeats it 9 more times                   | f=1.00 c=0.750 e=0.875 | f=1.00 c=0.291 e=0.646
+   d  + a second, independent teller says it once                 | f=1.00 c=0.375 e=0.688 | f=1.00 c=0.375 e=0.688
+   e  + one own sighting that confirms                            | f=1.00 c=0.565 e=0.783 | f=1.00 c=0.565 e=0.783
+   f  + one own sighting that contradicts (refinement, no deletion) | f=0.23 c=0.565 e=0.348 | f=0.23 c=0.565 e=0.348
+   g  + the same teller DENIES it once ('X not v')                | f=1.00 c=0.375 e=0.688 | f=0.50 c=0.261 e=0.500
+      (design: the denial contains v, so it is booked as a second assertion; corrected: n- += 1 on the
+       teller's own slot, by an absence event or a learned exclusion)
+   h  + rule from 6 OTHER members seen with v (X itself not seen) | f=1.00 c=0.767 e=0.884 | f=1.00 c=0.231 e=0.945
+   i    ... then X is SEEN once not to be v (exception), m = 6    | f=0.69 c=0.828 e=0.655 | f=0.23 c=0.565 e=0.534
+   j    ... seen twice not to be v, m = 6                         | f=0.57 c=0.853 e=0.559 | f=0.13 c=0.697 e=0.372
+   h  + rule from 600 OTHER members seen with v (X itself not seen) | f=1.00 c=0.997 e=0.998 | f=1.00 c=0.231 e=0.999
+   i    ... then X is SEEN once not to be v (exception), m = 600  | f=1.00 c=0.997 e=0.993 | f=0.23 c=0.565 e=0.565
+   j    ... seen twice not to be v, m = 600                       | f=0.99 c=0.997 e=0.990 | f=0.13 c=0.697 e=0.394
+   in rows h-j the corrected c is the conviction LIVED about X itself; what the category adds is the base rate
+   b of the expectation (0.929 for m = 6, 0.999 for m = 600) and its own conviction S/(S+k_g) = 0.857 / 0.998.
+
+== B. invariants ==
+   1. order independence.  One tie, the same ten moments (5 with v, 5 without) in three orders:
+      +++++-----   design f = 0.576  e = 0.568   |   corrected f = 0.500  e = 0.500
+      +-----++++   design f = 0.666  e = 0.646   |   corrected f = 0.500  e = 0.500
+      +-+-+-+-+-   design f = 0.600  e = 0.589   |   corrected f = 0.500  e = 0.500
+   2. a world of 4875 experiences (evm_s1 D): the same experiences in a random order give beliefs that
+      differ by at most 0.0e+00.
+      retracting one told experience = decrementing its raw counters = the life without it (exact by
+      construction: integer counts; the retraction moved the largest belief by 0.025 and trust,
+      completeness and base rate were recomputed from the counts, not patched).
+   3. conviction from one source is bounded by its reliability:  n assertions by a teller of reliability rho
+      rho = 0.3:  c = 0.2308, 0.2913, 0.2999, 0.3000   (n = 1, 10, 1e3, 1e6;  bound 0.3)
+      rho = 0.6:  c = 0.3750, 0.5660, 0.5996, 0.6000   (n = 1, 10, 1e3, 1e6;  bound 0.6)
+      rho = 0.9:  c = 0.4737, 0.8257, 0.8992, 0.9000   (n = 1, 10, 1e3, 1e6;  bound 0.9)
+   4. no return path: a category whose only member is X gives X nothing (rule without X is empty):
+      corrected: c = 0.500, e = 0.750 (own evidence only)   |   design: W_eff = 1 + lambda*min(1,cap) = 1.5, c = 0.600, e = 0.800

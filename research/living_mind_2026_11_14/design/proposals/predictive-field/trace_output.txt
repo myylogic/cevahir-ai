@@ -1,0 +1,208 @@
+calibrated: lam = 1.4902 nats/statement (LR 4.44), eta0 = -2.6985 (p0 = 0.0631)
+====================================================================================================
+PART A -- the red example, novice mind (operator prior Beta(1,1): p_H = 0.5)
+====================================================================================================
+
+[1] "red is a dark colour"
+    frame (red, isa, colour)
+      recruit concept [red] (no attractor explains the token)
+      recruit concept [isa] (no attractor explains the token)
+      recruit concept [colour] (no attractor explains the token)
+      settle: best cue energy - > c_unit 5.0 -> recruit unit (red,isa,.)
+    frame (red, is, dark)
+      recruit concept [is] (no attractor explains the token)
+      recruit concept [dark] (no attractor explains the token)
+      settle: best cue energy 7.19 > c_unit 5.0 -> recruit unit (red,is,.)
+    belief ('x', 'red', 'is')                 = 0.230   [told +1.49 nats, constructed +0.00 nats, grounded share 1.00]
+    belief ('M', 'red', 'colour')             = 0.230   [own evidence alone 0.230]
+    content of (red, is, .): {'dark': 1.0}
+
+[2] "red also has light shades"
+    frame (red, is, light)
+      recruit concept [light] (no attractor explains the token)
+      settle: cue energy 0.00 -> unit (red,is,.) owns the frame
+      value energy 8.53 > c_mode 3.0 -> the old value is NOT overwritten: new mode [light] in the same unit (REFINE)
+      recruit variation concept V{dark|light}: centre = mean code, slack along (difference) axis
+        coverage energy of [dark] under V: 0.41 nats
+        coverage energy of [light] under V: 0.41 nats
+        mean coverage energy of the 4 other concepts: 5.71 nats (> c_mode: not in V)
+      GENERALISE: subject slot relaxed from [red] to its category [colour] -> rule (colour*, is, V{dark|light}); prior from the operator level p_H = 0.500 (Beta 1.00,1.00)
+    content of (red, is, .): {'dark': 0.5, 'light': 0.5}
+    refined belief before any rule (own evidence alone)  = 0.570
+    belief ('rule', 'colour', 'is')           = 0.740   [prior 0.500; upward nats red +1.05]
+    belief ('x', 'red', 'is')                 = 0.802   [told +2.98 nats, constructed +1.12 nats, grounded share 0.73]
+    belief ('M', 'red', 'colour')             = 0.600   [own evidence alone 0.230]
+
+    exact enumeration of the same model: rule 0.740183, red 0.802253, membership 0.599881  (max |message - exact| = 1.1e-16)
+
+    QUESTIONS (epistemic value in nats, best first):
+      0.251  enumerate: which other [colour] are there?  (P_unknown 0.63, E[new] 1.67, 0.147 nats each, follow-up 0.009)
+      0.208  confirm: is [red] a [colour]?
+      0.169  confirm rule: are all [colour] V?
+      0.141  confirm: is [red] really V?
+
+====================================================================================================
+PART B -- the question is answered; imagination, reality score, verification
+====================================================================================================
+
+[3] "blue is a colour"
+    frame (blue, isa, colour)
+      recruit concept [blue] (no attractor explains the token)
+      settle: best cue energy 8.50 > c_unit 5.0 -> recruit unit (blue,isa,.)
+
+[4] "green is a colour"
+    frame (green, isa, colour)
+      recruit concept [green] (no attractor explains the token)
+      settle: best cue energy 6.06 > c_unit 5.0 -> recruit unit (green,isa,.)
+    IMAGINE (blue, is, V{dark|light}): reality score = 0.223  [told 0.00 nats, constructed +1.45 nats, grounded share 0.00]
+    IMAGINE (green, is, V{dark|light}): reality score = 0.223  [told 0.00 nats, constructed +1.45 nats, grounded share 0.00]
+    belief ('rule', 'colour', 'is')           = 0.740   [prior 0.500; upward nats red +1.05, blue +0.00, green +0.00]
+    belief ('x', 'red', 'is')                 = 0.802   [told +2.98 nats, constructed +1.12 nats, grounded share 0.73]
+    belief ('M', 'red', 'colour')             = 0.600   [own evidence alone 0.230]
+
+[5] "blue is a dark colour"
+    frame (blue, isa, colour)
+      settle: cue energy 0.00 -> unit (blue,isa,.) owns the frame
+      value energy 0.00 < c_mode -> same mode, +1.49 nats
+    frame (blue, is, dark)
+      settle: best cue energy 7.19 > c_unit 5.0 -> recruit unit (blue,is,.)
+    belief ('rule', 'colour', 'is')           = 0.877   [prior 0.500; upward nats red +1.05, blue +0.92, green +0.00]
+    belief ('x', 'red', 'is')                 = 0.845   [told +2.98 nats, constructed +1.42 nats, grounded share 0.68]
+    belief ('M', 'red', 'colour')             = 0.668   [own evidence alone 0.230]
+    belief ('x', 'blue', 'is')                = 0.790   [told +1.49 nats, constructed +2.53 nats, grounded share 0.37]
+
+[6] "blue also has light shades"
+    frame (blue, is, light)
+      settle: cue energy 0.00 -> unit (blue,is,.) owns the frame
+      value energy 8.53 > c_mode 3.0 -> the old value is NOT overwritten: new mode [light] in the same unit (REFINE)
+    belief ('rule', 'colour', 'is')           = 0.941   [prior 0.500; upward nats red +1.05, blue +1.72, green +0.00]
+    belief ('x', 'red', 'is')                 = 0.865   [told +2.98 nats, constructed +1.58 nats, grounded share 0.65]
+    belief ('M', 'red', 'colour')             = 0.700   [own evidence alone 0.230]
+    belief ('x', 'blue', 'is')                = 0.943   [told +2.98 nats, constructed +2.53 nats, grounded share 0.54]
+
+[7] "green is a dark colour"
+    frame (green, isa, colour)
+      settle: cue energy 0.00 -> unit (green,isa,.) owns the frame
+      value energy 0.00 < c_mode -> same mode, +1.49 nats
+    frame (green, is, dark)
+      settle: best cue energy 6.06 > c_unit 5.0 -> recruit unit (green,is,.)
+    belief ('rule', 'colour', 'is')           = 0.976   [prior 0.500; upward nats red +1.05, blue +1.72, green +0.92]
+    belief ('x', 'red', 'is')                 = 0.876   [told +2.98 nats, constructed +1.67 nats, grounded share 0.64]
+    belief ('M', 'red', 'colour')             = 0.717   [own evidence alone 0.230]
+    belief ('x', 'green', 'is')               = 0.852   [told +1.49 nats, constructed +2.96 nats, grounded share 0.33]
+
+[8] "green also has light shades"
+    frame (green, is, light)
+      settle: cue energy 0.00 -> unit (green,is,.) owns the frame
+      value energy 8.53 > c_mode 3.0 -> the old value is NOT overwritten: new mode [light] in the same unit (REFINE)
+    belief ('rule', 'colour', 'is')           = 0.989   [prior 0.500; upward nats red +1.05, blue +1.72, green +1.72]
+    belief ('x', 'red', 'is')                 = 0.880   [told +2.98 nats, constructed +1.71 nats, grounded share 0.63]
+    belief ('M', 'red', 'colour')             = 0.724   [own evidence alone 0.230]
+    belief ('x', 'green', 'is')               = 0.962   [told +2.98 nats, constructed +2.96 nats, grounded share 0.50]
+
+    exact enumeration with three members (128 states): rule 0.988860 (|diff| 2.2e-16)
+    ceiling of the red belief if the rule were certain (membership rests on one statement): 0.884
+
+    -- a counter-example --
+
+[9] "black is a colour"
+    frame (black, isa, colour)
+      recruit concept [black] (no attractor explains the token)
+      settle: best cue energy 7.35 > c_unit 5.0 -> recruit unit (black,isa,.)
+
+[10] "black is a dark colour"
+    frame (black, isa, colour)
+      settle: cue energy 0.00 -> unit (black,isa,.) owns the frame
+      value energy 0.00 < c_mode -> same mode, +1.49 nats
+    frame (black, is, dark)
+      settle: best cue energy 7.19 > c_unit 5.0 -> recruit unit (black,is,.)
+
+[.] "black is not light" (three times)
+    belief ('rule', 'colour', 'is')           = 0.976   [prior 0.500; upward nats red +1.05, blue +1.72, green +1.72, black -0.77]
+    belief ('x', 'red', 'is')                 = 0.876   [told +2.98 nats, constructed +1.68 nats, grounded share 0.64]
+    belief ('M', 'red', 'colour')             = 0.718   [own evidence alone 0.230]
+    belief ('x', 'black', 'is')               = 0.068   [told -2.98 nats, constructed +3.07 nats, told evidence is AGAINST]
+    memory: 9 concepts, 8 units, 1 rule, 1 variation concept, 13 statements heard
+
+====================================================================================================
+PART C -- the same two statements, three operating histories (operator-level learning, P5)
+====================================================================================================
+  novice (no history)
+      operator belief: p_H = 0.500  (Beta 1.00, 1.00)
+      red example -> first 0.23 | refined 0.57 | rule 0.740 | red after feedback 0.802
+  seasoned (3 of 4 earlier generalisations held)
+      earlier construction ('animal', 'size'): test LR on new members = 31.158
+      earlier construction ('tool', 'weight'): test LR on new members = 31.158
+      earlier construction ('food', 'taste'): test LR on new members = 31.158
+      earlier construction ('stone', 'surface'): test LR on new members = 0.212
+      operator belief: p_H = 0.733  (Beta 3.36, 1.22)
+      red example -> first 0.23 | refined 0.57 | rule 0.887 | red after feedback 0.848
+  burnt (1 of 4 earlier generalisations held)
+      earlier construction ('animal', 'size'): test LR on new members = 31.158
+      earlier construction ('tool', 'weight'): test LR on new members = 0.212
+      earlier construction ('food', 'taste'): test LR on new members = 0.212
+      earlier construction ('stone', 'surface'): test LR on new members = 0.212
+      operator belief: p_H = 0.399  (Beta 1.45, 2.18)
+      red example -> first 0.23 | refined 0.57 | rule 0.654 | red after feedback 0.775
+
+====================================================================================================
+PART D -- the same loop without the cavity correction (what section 7 guards against)
+====================================================================================================
+  sweep  1: rule 0.740   red 0.849
+  sweep  2: rule 0.795   red 0.858
+  sweep  3: rule 0.796   red 0.858
+  sweep  5: rule 0.796   red 0.858
+  sweep 10: rule 0.796   red 0.858
+  sweep 30: rule 0.796   red 0.858
+  with the cavity (Part A) the fixed point is reached in one sweep: rule 0.740, red 0.802
+
+  D2 -- imagined instances written back as if they were evidence (no grounded/constructed separation):
+     0 imagined members -> rule 0.740
+     1 imagined members -> rule 0.824
+     3 imagined members -> rule 0.937
+    10 imagined members -> rule 0.999
+    30 imagined members -> rule 1.000
+    with the separation the rule stays at 0.740 for any number of imagined members (they carry 0 nats)
+
+====================================================================================================
+PART E -- exact retraction of one experience
+====================================================================================================
+  after [1]: {('M', 'red', 'colour'): 0.23, ('x', 'red', 'is'): 0.23}
+  after [2]: {('rule', 'colour', 'is'): 0.74, ('x', 'red', 'is'): 0.802, ('M', 'red', 'colour'): 0.6}
+  retract [2]: {('M', 'red', 'colour'): 0.23, ('x', 'red', 'is'): 0.23}
+  max |belief after retraction - belief after [1]| = 0.0e+00; rule kept but dormant: True; the concept [light] stays in the bank (it was heard)
+
+====================================================================================================
+PART F -- lexical settle on character-trigram codes (d = 256, a = 8, c_mode = 3)
+====================================================================================================
+  kırmızı      vs [kırmızı]: cosine 1.000, energy -0.00 -> same concept attractor
+  kırmızının   vs [kırmızı]: cosine 0.695, energy 2.44 -> same concept attractor
+  kırmızıdır   vs [kırmızı]: cosine 0.710, energy 2.32 -> same concept attractor
+  kırmızıya    vs [kırmızı]: cosine 0.768, energy 1.86 -> same concept attractor
+  kırıcı       vs [kırmızı]: cosine 0.234, energy 6.13 -> new concept
+  mavi         vs [kırmızı]: cosine -0.046, energy 8.37 -> new concept
+  renk         vs [renk]: cosine 1.000, energy 0.00 -> same concept attractor
+  rengi        vs [renk]: cosine 0.422, energy 4.63 -> new concept
+
+====================================================================================================
+PART G -- sensitivities
+====================================================================================================
+  order [S1 then S2]: rule 0.740183, red 0.802253, membership 0.599881
+  order [S1 (frames swapped) then S2]: rule 0.740183, red 0.802253, membership 0.599881
+  order [S2 then S1]: rule 0.740183, red 0.802253, membership 0.599881
+  order [S2 then S1 (frames swapped)]: rule 0.740183, red 0.802253, membership 0.599881
+  category openness alpha = 0.5: top question = confirm: is [red] a [colour]? (0.208 nats); second = confirm rule: are all [colour] V? (0.169)
+  category openness alpha = 0.82: top question = confirm: is [red] a [colour]? (0.208 nats); second = enumerate: which other [colour] are there? (0.206)
+  category openness alpha = 1.0: top question = enumerate: which other [colour] are there? (0.251 nats); second = confirm: is [red] a [colour]? (0.208)
+  category openness alpha = 2.0: top question = enumerate: which other [colour] are there? (0.503 nats); second = confirm: is [red] a [colour]? (0.208)
+  membership given, p_H = 0.27 (fitted to 0.77): rule 0.770, red 0.901
+  membership given, p_H = 0.50: rule 0.900, red 0.957
+  membership graded 0.23, p_H = 0.50 (the trace): rule 0.740, red 0.802
+  d = 64: identical structure and beliefs in 200 of 200 random code seeds
+  d = 256: identical structure and beliefs in 200 of 200 random code seeds
+
+====================================================================================================
+PART H -- randomised exactness check
+====================================================================================================
+  300 random trees (theta in 1, 0.95, 0.8, 0.6; positive and negative evidence; up to five members): max |message - enumeration| = 3.4e-15
+  operator filter with LR = 1 returns the prior: max deviation 1.3e-15

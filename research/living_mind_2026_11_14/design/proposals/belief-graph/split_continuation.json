@@ -1,0 +1,111 @@
+{
+ "NEWBORN": {
+  "rows": [
+   {
+    "tag": "after stage 10",
+    "ratio": 2.5421932709152664,
+    "thr": 3.6888794541139367,
+    "subs": {}
+   },
+   {
+    "tag": "+ yellow (mixed)",
+    "ratio": 2.7096923693032746,
+    "thr": 3.9120230054281464,
+    "subs": {}
+   },
+   {
+    "tag": "+ grey (mixed)",
+    "ratio": 2.8383212318855957,
+    "thr": 4.094344562222101,
+    "subs": {}
+   },
+   {
+    "tag": "+ purple (mixed)",
+    "ratio": 2.9401113871758353,
+    "thr": 4.248495242049359,
+    "subs": {}
+   },
+   {
+    "tag": "+ ivory (pure-light)",
+    "ratio": 3.367200479179246,
+    "thr": 4.382026634673881,
+    "subs": {}
+   },
+   {
+    "tag": "+ orange (mixed)",
+    "ratio": 3.486897432454642,
+    "thr": 4.499809670330265,
+    "subs": {}
+   },
+   {
+    "tag": "+ jet (pure-dark)",
+    "ratio": 3.878289642486749,
+    "thr": 4.605170185988092,
+    "subs": {}
+   }
+  ],
+  "teal": {
+   "e": 0.5209535453737265,
+   "c": 0.023377597658663735
+  },
+  "allocations": [
+   "new concept MIX(dark|light)  (conflict mass 0.40 >= 0.25 on 'red')"
+  ]
+ },
+ "EXPERIENCED": {
+  "rows": [
+   {
+    "tag": "after stage 10",
+    "ratio": 2.5421932709152664,
+    "thr": 3.6888794541139367,
+    "subs": {}
+   },
+   {
+    "tag": "+ yellow (mixed)",
+    "ratio": 2.7096923693032746,
+    "thr": 3.9120230054281464,
+    "subs": {}
+   },
+   {
+    "tag": "+ grey (mixed)",
+    "ratio": 2.8383212318855957,
+    "thr": 4.094344562222101,
+    "subs": {}
+   },
+   {
+    "tag": "+ purple (mixed)",
+    "ratio": 2.9401113871758353,
+    "thr": 4.248495242049359,
+    "subs": {}
+   },
+   {
+    "tag": "+ ivory (pure-light)",
+    "ratio": 3.367200479179246,
+    "thr": 4.382026634673881,
+    "subs": {}
+   },
+   {
+    "tag": "+ orange (mixed)",
+    "ratio": 3.486897432454642,
+    "thr": 4.499809670330265,
+    "subs": {}
+   },
+   {
+    "tag": "+ jet (pure-dark)",
+    "ratio": 3.878289642486749,
+    "thr": 4.605170185988092,
+    "subs": {}
+   }
+  ],
+  "teal": {
+   "e": 0.5330013138977251,
+   "c": 0.02601137666827756
+  },
+  "allocations": [
+   "new concept MIX(high|low)  (conflict mass 0.75 >= 0.25 on 'flute')",
+   "new concept MIX(sweet|sour)  (anticipated: lived contrast pairs behaved as dimensions)",
+   "new concept MIX(big|small)  (anticipated: lived contrast pairs behaved as dimensions)",
+   "new concept MIX(dark|light)  (anticipated: lived contrast pairs behaved as dimensions)"
+  ]
+ }
+}

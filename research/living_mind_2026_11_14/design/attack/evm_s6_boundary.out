@@ -1,0 +1,51 @@
+== A. retraction.  Experience x = 'told once that u -> v'.  Then u occurs five times and v does not follow
+      (sensed).  Then x is retracted. ==
+   design, life with x, before retraction                     W+ = 0.300  W- = 1.944  f = 0.134  c = 0.692  e = 0.247
+   design, after subtracting the logged increments of x       W+ = 0.000  W- = 1.944  f = 0.000  c = 0.660  e = 0.170
+   design, the life in which x never happened                 W+ = 0.000  W- = 0.000  f =   nan  c = 0.000  e = 0.500
+      (in that life the tie u -> v does not even exist: exists = False)
+   -> what is left after 'exact' retraction is 1.94 units of sensed evidence AGAINST a relation the mind would
+      never have considered: c = 0.66 that u -> v is false (e = 0.17).  The five negative increments were
+      weighted by an expectation that x had created; they are logged under the five later moments, not under x.
+      The same holds for everything x changed downstream: trust-tie increments of the teller, chunk and
+      recruitment decisions (thresholds on e), caps, and every inferred/imagined deposit computed while x was in.
+   corrected (raw counts n+ per source on the tie; opportunities N on the unit u, per reporting channel):
+      with x:      told W+ = 0.300; closed sense: 0 of 5 -> W- = 5.0;  f = 0.057, c = 0.841, e = 0.127
+      x retracted: n+_told = 0;        closed sense: 0 of 5 -> W- = 5.0;  f = 0.000, c = 0.833, e = 0.083
+      never told:  identical numbers (the five opportunities are a property of u's own history, counted whether
+      or not a tie to v exists; a question 'u -> v?' reads n+ = 0 and N = 5 in both lives).
+
+== B. float64.  1000 increments g*a_u (random in (0,1]) are added to one slot in life order; then 999 of them are
+      retracted in a different order.  Residual error against the one increment that remains: ==
+   exact in 0.0% of 2000 trials; max |error| = 1.77e-12; after retracting everything the slot is
+   NEGATIVE in 50.7% of trials (violates w >= 0; f = W+/W then has the wrong sign or divides by ~0).
+   'Exact' needs integer (fixed-point) counts or recomputation from the log, not float subtraction.
+
+== C. W = 0.  A tie with no trust-weighted evidence (after retraction of its only experience; a PART or ABSTRACT
+      tie at creation; a candidate tie created while the plasticity knob g = 0). ==
+   literal §1:  f = 0/0 = nan,  c = 0,  e = c*(f - 1/2) + 1/2 = nan    (0 * nan = nan in IEEE 754)
+   same quantity written as (W+ + k/2)/(W + k):  e = 0.5
+   kWTA on activations [0.2, 0.9, nan, 0.4]: np.argmax -> index 2;  torch.topk(k=2) -> indices [2, 1], values [nan, 0.9]
+   -> one evidence-free tie puts a NaN into settling and the NaN unit takes the focus.
+
+== D. conflicting provenance.  While idle the mind IMAGINES u (u never occurred).  In the next moment the real
+      event v arrives (sensed).  §2.5: 'v occurred: w+[pi] += g*a_u (pi = provenance of the confirming event)'. ==
+   times this coincidence happened   w+[sensed](u -> v)   c       e(u -> v)
+              1                           1.0          0.500    0.750
+              3                           3.0          0.750    0.875
+              5                           5.0          0.833    0.917
+             20                          20.0          0.952    0.976
+   -> the tie is booked as SENSED evidence that u is followed by v, at full trust, though u was never sensed.
+      The same happens for a category unit (active only through ABSTRACT) and for an antecedent that settling
+      ignited.  A tie increment has two ends; it is as real as the less real of them.
+
+== E. lag-0 ties ('holds together'): the weight g*a_u is the SETTLED activation of u, and settling lets v raise u
+      (the reverse tie v -> u).  If a_u = a+ in moments where v is present and a- where it is absent, even with
+      unweighted negatives the frequency converges to  p a+ / (p a+ + (1-p) a-): ==
+   true p   a+    a-     f the mind reads
+    0.50    1.00  0.50      0.667
+    0.30    1.00  0.50      0.462
+    0.50    1.00  0.25      0.800
+    0.20    1.00  0.25      0.500
+   -> belief -> activation -> size of the evidence increment -> belief.  The evidence weight of an end must be
+      its event-driven presence, not its settled activation.

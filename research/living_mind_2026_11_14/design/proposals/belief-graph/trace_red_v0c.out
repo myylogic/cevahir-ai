@@ -1,0 +1,265 @@
+==============================================================================================================
+STAGE 0  before the episode
+  [NEWBORN] ledger lines=8 units=2 exclusion(dark,light)=0.792  realism v={'plain': 0.5, 'MIX': 0.5}  carry-over coupling K_S~2.8
+  [EXPERIENCED] ledger lines=92 units=26 exclusion(dark,light)=0.792  realism v={'plain': 0.5, 'MIX': 0.904}  carry-over coupling K_S~4.3
+  [EXPERIENCED] lived rule instrument -> MIX(high|low): a=0.889 c_rule=0.507 k~2.1 pi=[0.18 0.15 0.13 0.11 0.11 0.1  0.11 0.11]
+  [EXPERIENCED] lived rule fruit -> MIX(sweet|sour): a=0.889 c_rule=0.507 k~2.1 pi=[0.18 0.15 0.13 0.11 0.11 0.1  0.11 0.11]
+  [EXPERIENCED] lived rule animal -> MIX(big|small): a=0.889 c_rule=0.507 k~2.1 pi=[0.18 0.15 0.13 0.11 0.11 0.1  0.11 0.11]
+  [EXPERIENCED] imaginations resolved during the prior life: 11; mean squared error 0.1260
+==============================================================================================================
+STAGE 1  'red is a dark colour'  (first hearing, unknown source)
+  [NEWBORN] hears (ISA red colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [EXPERIENCED] hears (ISA red colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [NEWBORN] hears (HAS red dark y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [EXPERIENCED] hears (HAS red dark y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [EXPERIENCED]   ALLOCATED: new concept MIX(dark|light)  (anticipated: lived contrast pairs behaved as dimensions)
+  [EXPERIENCED]   IMAGINED (kept out of the ledger): red under MIX(dark|light): e=0.659 c=0.226 predicted realism R=0.902
+
+  [NEWBORN] stage1
+     red    is dark : f=1.00 e=0.613 c=0.200    says: I have only heard that red is always dark.  (f=1.00, e=0.61, c=0.20)
+     red    is light: f=0.00 e=0.417 c=0.165    says: I have only heard that red is never light.  (f=0.00, e=0.42, c=0.17)
+     RULE  colour -> dark: mean a=0.540  evidence E=0.176 (schema prior E0=0.000, A0=0.50)  coupling k~2.9  transfer confidence c_rule=0.015
+           members {'red': {'w': 0.5, 'conforms': 0.482, 'K': 0.0}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.5}   trust = sense:0.952, stranger:0.500
+     question candidate  gain=0.0889  ARISES (>= 0.03): tell me more about 'red' and dark
+     question candidate  gain=0.0015                     which other 'colour's are there?
+     estimated share of unseen members of 'colour': 0.333
+
+  [EXPERIENCED] stage1
+     red    is dark : f=0.82 e=0.610 c=0.341    says: I think red is usually dark.  (f=0.82, e=0.61, c=0.34)
+     red    is light: f=0.25 e=0.424 c=0.312    says: I think red is rarely light.  (f=0.25, e=0.42, c=0.31)
+     red    'sometimes dark, sometimes light': own evidence w=0.000 c_own=0.000 | fed back K=0.583 -> c=0.226 e=0.659
+     RULE  colour -> MIX(dark|light): mean a=0.792  evidence E=3.919 (schema prior E0=3.919, A0=0.94)  coupling k~2.5  transfer confidence c_rule=0.327
+           members {'red': {'w': 0.0, 'conforms': 0.902, 'K': 0.583}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.9034994666215639}   trust = sense:0.952, teacher:0.500, stranger:0.500
+     question candidate  gain=0.0837  ARISES (>= 0.03): tell me more about 'red' and MIX(dark|light)
+     question candidate  gain=0.0376  ARISES (>= 0.03): which other 'colour's are there?
+     estimated share of unseen members of 'colour': 0.333
+==============================================================================================================
+STAGE 2  'red also has light shades'  (refine, do not delete)
+  [NEWBORN] hears (HAS red light y=1) from stranger: predicted e=0.417 c=0.165 surprise=0.874 nats
+  [NEWBORN]   ALLOCATED: new concept MIX(dark|light)  (conflict mass 0.40 >= 0.25 on 'red')
+  [EXPERIENCED] hears (HAS red light y=1) from stranger: predicted e=0.424 c=0.312 surprise=0.859 nats
+  [EXPERIENCED]   RESOLVED imagination about red: imagined e=0.659, world f=1.00, squared error=0.117, realism after the fact r=0.939 (predicted R=0.902)
+
+  [NEWBORN] stage2-5
+     red    is dark : f=0.56 e=0.518 c=0.309    says: I think red is sometimes dark.  (f=0.56, e=0.52, c=0.31)
+     red    is light: f=0.56 e=0.518 c=0.309    says: I think red is sometimes light.  (f=0.56, e=0.52, c=0.31)
+     red    'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.000 -> c=0.333 e=0.686
+     RULE  colour -> MIX(dark|light): mean a=0.565  evidence E=0.300 (schema prior E0=0.000, A0=0.50)  coupling k~2.8  transfer confidence c_rule=0.027
+           members {'red': {'w': 1.0, 'conforms': 0.5, 'K': 0.0}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.5000000000004173}   trust = sense:0.952, stranger:0.500
+     question candidate  gain=0.0714  ARISES (>= 0.03): tell me more about 'red' and MIX(dark|light)
+     question candidate  gain=0.0021                     which other 'colour's are there?
+     estimated share of unseen members of 'colour': 0.250
+     ledger lines about red still present: [('ISA', 'colour', 1.0), ('HAS', 'dark', 1.0), ('HAS', 'light', 1.0)]
+
+  [EXPERIENCED] stage2-5
+     red    is dark : f=0.56 e=0.524 c=0.421    says: I think red is sometimes dark.  (f=0.56, e=0.52, c=0.42)
+     red    is light: f=0.56 e=0.524 c=0.421    says: I think red is sometimes light.  (f=0.56, e=0.52, c=0.42)
+     red    'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.773 -> c=0.470 e=0.800
+     RULE  colour -> MIX(dark|light): mean a=0.823  evidence E=5.078 (schema prior E0=4.425, A0=0.94)  coupling k~2.5  transfer confidence c_rule=0.372
+           members {'red': {'w': 1.0, 'conforms': 0.939, 'K': 0.773}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.9067815929302713}   trust = sense:0.952, teacher:0.500, stranger:0.500
+     question candidate  gain=0.0465  ARISES (>= 0.03): tell me more about 'red' and MIX(dark|light)
+     question candidate  gain=0.0328  ARISES (>= 0.03): which other 'colour's are there?
+     estimated share of unseen members of 'colour': 0.250
+     ledger lines about red still present: [('ISA', 'colour', 1.0), ('HAS', 'dark', 1.0), ('HAS', 'light', 1.0)]
+==============================================================================================================
+CHECK  retraction of the second statement (on copies)
+  [NEWBORN] O(1) evidence retraction : red is dark f=1.00 e=0.600 c=0.200; stage-1 value f=1.00 e=0.613 c=0.200; max |evidence difference| = 0.0e+00; |belief difference| = 1.3e-02 (the allocated lens stays: units 5 vs 4)
+  [NEWBORN] replay without the line  : red is dark f=1.00 e=0.613 c=0.200; max |evidence difference| = 0.0e+00; |belief difference| = 0.0e+00; units 4 vs 4
+  [EXPERIENCED] O(1) evidence retraction : red is dark f=0.82 e=0.610 c=0.341; stage-1 value f=0.82 e=0.610 c=0.341; max |evidence difference| = 0.0e+00; |belief difference| = 0.0e+00 (the allocated lens stays: units 29 vs 29)
+  [EXPERIENCED] replay without the line  : red is dark f=0.82 e=0.610 c=0.341; max |evidence difference| = 0.0e+00; |belief difference| = 0.0e+00; units 29 vs 29
+==============================================================================================================
+SENSITIVITY of the question ranking after stage 2 (gain of 'which other colours?' / gain of the best other question)
+  [NEWBORN] g=0.5,phi=0.25: 0.01  g=0.5,phi=0.5: 0.01  g=0.5,phi=1: 0.03  g=1,phi=0.25: 0.01  g=1,phi=0.5: 0.03  g=1,phi=1: 0.06  g=2,phi=0.25: 0.03  g=2,phi=0.5: 0.06  g=2,phi=1: 0.12
+  [EXPERIENCED] g=0.5,phi=0.25: 0.18  g=0.5,phi=0.5: 0.35  g=0.5,phi=1: 0.70  g=1,phi=0.25: 0.35  g=1,phi=0.5: 0.70  g=1,phi=1: 1.41  g=2,phi=0.25: 0.70  g=2,phi=0.5: 1.41  g=2,phi=1: 2.82
+==============================================================================================================
+STAGE 6  the question is answered: 'blue is a colour', 'green is a colour'  (the mind expands over the set)
+  [NEWBORN] hears (ISA blue colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [NEWBORN]   IMAGINED (kept out of the ledger): blue under MIX(dark|light): e=0.512 c=0.017 predicted realism R=0.500
+  [EXPERIENCED] hears (ISA blue colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [EXPERIENCED]   IMAGINED (kept out of the ledger): blue under MIX(dark|light): e=0.684 c=0.262 predicted realism R=0.905
+  [NEWBORN] hears (ISA green colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [NEWBORN]   IMAGINED (kept out of the ledger): green under MIX(dark|light): e=0.512 c=0.017 predicted realism R=0.500
+  [EXPERIENCED] hears (ISA green colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [EXPERIENCED]   IMAGINED (kept out of the ledger): green under MIX(dark|light): e=0.684 c=0.262 predicted realism R=0.905
+
+  [NEWBORN] stage6
+     red    is dark : f=0.56 e=0.518 c=0.309    says: I think red is sometimes dark.  (f=0.56, e=0.52, c=0.31)
+     red    is light: f=0.56 e=0.518 c=0.309    says: I think red is sometimes light.  (f=0.56, e=0.52, c=0.31)
+     red    'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.000 -> c=0.333 e=0.686
+     blue   is dark : f=0.56 e=0.500 c=0.008    says: I do not know whether blue is dark.  (c=0.01)
+     blue   is light: f=0.56 e=0.500 c=0.008    says: I do not know whether blue is light.  (c=0.01)
+     blue   'sometimes dark, sometimes light': own evidence w=0.000 c_own=0.000 | fed back K=0.034 -> c=0.017 e=0.512
+     RULE  colour -> MIX(dark|light): mean a=0.565  evidence E=0.300 (schema prior E0=0.000, A0=0.50)  coupling k~2.8  transfer confidence c_rule=0.027
+           members {'red': {'w': 1.0, 'conforms': 0.5, 'K': 0.0}, 'blue': {'w': 0.0, 'conforms': 0.5, 'K': 0.034}, 'green': {'w': 0.0, 'conforms': 0.5, 'K': 0.034}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.5000000000004173}   trust = sense:0.952, stranger:0.500
+     question candidate  gain=0.0476  ARISES (>= 0.03): tell me more about 'red' and MIX(dark|light)
+     question candidate  gain=0.0323  ARISES (>= 0.03): tell me more about 'green' and MIX(dark|light)
+     question candidate  gain=0.0323  ARISES (>= 0.03): tell me more about 'blue' and MIX(dark|light)
+     estimated share of unseen members of 'colour': 0.167
+
+  [EXPERIENCED] stage6
+     red    is dark : f=0.56 e=0.524 c=0.421    says: I think red is sometimes dark.  (f=0.56, e=0.52, c=0.42)
+     red    is light: f=0.56 e=0.524 c=0.421    says: I think red is sometimes light.  (f=0.56, e=0.52, c=0.42)
+     red    'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.773 -> c=0.470 e=0.800
+     blue   is dark : f=0.56 e=0.512 c=0.207    says: I have only heard that blue is sometimes dark.  (f=0.56, e=0.51, c=0.21)
+     blue   is light: f=0.56 e=0.512 c=0.207    says: I have only heard that blue is sometimes light.  (f=0.56, e=0.51, c=0.21)
+     blue   'sometimes dark, sometimes light': own evidence w=0.000 c_own=0.000 | fed back K=0.709 -> c=0.262 e=0.684
+     RULE  colour -> MIX(dark|light): mean a=0.823  evidence E=5.078 (schema prior E0=4.425, A0=0.94)  coupling k~2.5  transfer confidence c_rule=0.372
+           members {'red': {'w': 1.0, 'conforms': 0.939, 'K': 0.773}, 'blue': {'w': 0.0, 'conforms': 0.905, 'K': 0.709}, 'green': {'w': 0.0, 'conforms': 0.905, 'K': 0.709}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.9067815929302713}   trust = sense:0.952, teacher:0.500, stranger:0.500
+     question candidate  gain=0.0310  ARISES (>= 0.03): tell me more about 'red' and MIX(dark|light)
+     question candidate  gain=0.0218                     which other 'colour's are there?
+     question candidate  gain=0.0192                     tell me more about 'green' and MIX(dark|light)
+     estimated share of unseen members of 'colour': 0.167
+==============================================================================================================
+STAGE 7  the world speaks about blue and green (both shades each)
+  [NEWBORN] hears (HAS blue dark y=1) from stranger: predicted e=0.500 c=0.008 surprise=0.692 nats
+  [EXPERIENCED] hears (HAS blue dark y=1) from stranger: predicted e=0.512 c=0.207 surprise=0.669 nats
+  [NEWBORN] hears (HAS blue light y=1) from stranger: predicted e=0.416 c=0.175 surprise=0.876 nats
+  [NEWBORN]   RESOLVED imagination about blue: imagined e=0.512, world f=1.00, squared error=0.238, realism after the fact r=0.567 (predicted R=0.500)
+  [EXPERIENCED] hears (HAS blue light y=1) from stranger: predicted e=0.428 c=0.337 surprise=0.849 nats
+  [EXPERIENCED]   RESOLVED imagination about blue: imagined e=0.684, world f=1.00, squared error=0.100, realism after the fact r=0.942 (predicted R=0.905)
+  [NEWBORN] hears (HAS green light y=1) from stranger: predicted e=0.501 c=0.022 surprise=0.691 nats
+  [EXPERIENCED] hears (HAS green light y=1) from stranger: predicted e=0.513 c=0.231 surprise=0.667 nats
+  [NEWBORN] hears (HAS green dark y=1) from stranger: predicted e=0.416 c=0.189 surprise=0.877 nats
+  [NEWBORN]   RESOLVED imagination about green: imagined e=0.512, world f=1.00, squared error=0.238, realism after the fact r=0.641 (predicted R=0.500)
+  [EXPERIENCED] hears (HAS green dark y=1) from stranger: predicted e=0.431 c=0.354 surprise=0.841 nats
+  [EXPERIENCED]   RESOLVED imagination about green: imagined e=0.684, world f=1.00, squared error=0.100, realism after the fact r=0.945 (predicted R=0.905)
+
+  [NEWBORN] stage7
+     red    is dark : f=0.56 e=0.519 c=0.325    says: I think red is sometimes dark.  (f=0.56, e=0.52, c=0.33)
+     red    is light: f=0.56 e=0.519 c=0.325    says: I think red is sometimes light.  (f=0.56, e=0.52, c=0.33)
+     red    'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.118 -> c=0.359 e=0.713
+     blue   is dark : f=0.56 e=0.519 c=0.325    says: I think blue is sometimes dark.  (f=0.56, e=0.52, c=0.33)
+     blue   is light: f=0.56 e=0.519 c=0.325    says: I think blue is sometimes light.  (f=0.56, e=0.52, c=0.33)
+     blue   'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.118 -> c=0.359 e=0.713
+     RULE  colour -> MIX(dark|light): mean a=0.689  evidence E=1.211 (schema prior E0=0.000, A0=0.50)  coupling k~2.8  transfer confidence c_rule=0.110
+           members {'red': {'w': 1.0, 'conforms': 0.641, 'K': 0.118}, 'blue': {'w': 1.0, 'conforms': 0.641, 'K': 0.118}, 'green': {'w': 1.0, 'conforms': 0.641, 'K': 0.118}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.5845617788783988}   trust = sense:0.952, stranger:0.500
+     question candidate  gain=0.0266                     tell me more about 'red' and MIX(dark|light)
+     question candidate  gain=0.0266                     tell me more about 'green' and MIX(dark|light)
+     question candidate  gain=0.0266                     tell me more about 'blue' and MIX(dark|light)
+     estimated share of unseen members of 'colour': 0.100
+
+  [EXPERIENCED] stage7
+     red    is dark : f=0.56 e=0.526 c=0.452    says: I think red is sometimes dark.  (f=0.56, e=0.53, c=0.45)
+     red    is light: f=0.56 e=0.526 c=0.452    says: I think red is sometimes light.  (f=0.56, e=0.53, c=0.45)
+     red    'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.996 -> c=0.500 e=0.822
+     blue   is dark : f=0.56 e=0.526 c=0.452    says: I think blue is sometimes dark.  (f=0.56, e=0.53, c=0.45)
+     blue   is light: f=0.56 e=0.526 c=0.452    says: I think blue is sometimes light.  (f=0.56, e=0.53, c=0.45)
+     blue   'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.996 -> c=0.500 e=0.822
+     RULE  colour -> MIX(dark|light): mean a=0.855  evidence E=6.772 (schema prior E0=4.775, A0=0.94)  coupling k~2.5  transfer confidence c_rule=0.422
+           members {'red': {'w': 1.0, 'conforms': 0.945, 'K': 0.996}, 'blue': {'w': 1.0, 'conforms': 0.945, 'K': 0.996}, 'green': {'w': 1.0, 'conforms': 0.945, 'K': 0.996}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.9130047293027769}   trust = sense:0.952, teacher:0.500, stranger:0.500
+     question candidate  gain=0.0167                     tell me more about 'red' and MIX(dark|light)
+     question candidate  gain=0.0167                     tell me more about 'green' and MIX(dark|light)
+     question candidate  gain=0.0167                     tell me more about 'blue' and MIX(dark|light)
+     estimated share of unseen members of 'colour': 0.100
+==============================================================================================================
+STAGE 8  a wrong construction: 'black is a colour' -> imagined to have light shades -> the world refutes it
+  [NEWBORN] hears (ISA black colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [NEWBORN]   IMAGINED (kept out of the ledger): black under MIX(dark|light): e=0.551 c=0.068 predicted realism R=0.581
+  [EXPERIENCED] hears (ISA black colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [EXPERIENCED]   IMAGINED (kept out of the ledger): black under MIX(dark|light): e=0.714 c=0.304 predicted realism R=0.910
+  [NEWBORN] before any evidence about black: I have only heard that black is sometimes light.  (f=0.56, e=0.50, c=0.04)
+  [EXPERIENCED] before any evidence about black: I think black is sometimes light.  (f=0.56, e=0.51, c=0.25)
+  [NEWBORN] hears (HAS black light y=0) from sense: predicted e=0.226 c=0.557 surprise=0.256 nats
+  [EXPERIENCED] hears (HAS black light y=0) from sense: predicted e=0.235 c=0.570 surprise=0.268 nats
+  [NEWBORN] hears (HAS black light y=0) from sense: predicted e=0.090 c=0.822 surprise=0.094 nats
+  [EXPERIENCED] hears (HAS black light y=0) from sense: predicted e=0.091 c=0.823 surprise=0.095 nats
+
+  [NEWBORN] stage8
+     red    is dark : f=0.56 e=0.519 c=0.318    says: I think red is sometimes dark.  (f=0.56, e=0.52, c=0.32)
+     red    is light: f=0.56 e=0.519 c=0.318    says: I think red is sometimes light.  (f=0.56, e=0.52, c=0.32)
+     red    'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.120 -> c=0.359 e=0.668
+     black  is dark : f=1.00 e=0.869 c=0.741    says: I am fairly sure black is always dark.  (f=1.00, e=0.87, c=0.74)
+     black  is light: f=0.00 e=0.083 c=0.836    says: I know black is never light.  (f=0.00, e=0.08, c=0.84)
+     black  'sometimes dark, sometimes light': own evidence w=10.353 c_own=0.838 | fed back K=0.039 -> c=0.839 e=0.066
+     RULE  colour -> MIX(dark|light): mean a=0.484  evidence E=1.871 (schema prior E0=0.000, A0=0.50)  coupling k~1.5  transfer confidence c_rule=0.128
+           members {'red': {'w': 1.0, 'conforms': 0.461, 'K': 0.12}, 'blue': {'w': 1.0, 'conforms': 0.461, 'K': 0.12}, 'green': {'w': 1.0, 'conforms': 0.461, 'K': 0.12}, 'black': {'w': 10.353, 'conforms': 0.565, 'K': 0.039}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.4911724956122226}   trust = sense:0.946, stranger:0.500
+
+  [EXPERIENCED] stage8
+     red    is dark : f=0.56 e=0.522 c=0.381    says: I think red is sometimes dark.  (f=0.56, e=0.52, c=0.38)
+     red    is light: f=0.56 e=0.522 c=0.381    says: I think red is sometimes light.  (f=0.56, e=0.52, c=0.38)
+     red    'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.572 -> c=0.440 e=0.744
+     black  is dark : f=1.00 e=0.868 c=0.741    says: I am fairly sure black is always dark.  (f=1.00, e=0.87, c=0.74)
+     black  is light: f=0.00 e=0.084 c=0.836    says: I know black is never light.  (f=0.00, e=0.08, c=0.84)
+     black  'sometimes dark, sometimes light': own evidence w=10.353 c_own=0.838 | fed back K=0.055 -> c=0.839 e=0.068
+     RULE  colour -> MIX(dark|light): mean a=0.754  evidence E=6.265 (schema prior E0=3.562, A0=0.94)  coupling k~1.2  transfer confidence c_rule=0.313
+           members {'red': {'w': 1.0, 'conforms': 0.922, 'K': 0.572}, 'blue': {'w': 1.0, 'conforms': 0.922, 'K': 0.572}, 'green': {'w': 1.0, 'conforms': 0.922, 'K': 0.572}, 'black': {'w': 10.353, 'conforms': 0.77, 'K': 0.055}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.8955402274446054}   trust = sense:0.946, teacher:0.500, stranger:0.500
+==============================================================================================================
+STAGE 9  a second exception: white -> does a new category emerge from the instances?
+  [NEWBORN] hears (ISA white colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [NEWBORN]   IMAGINED (kept out of the ledger): white under MIX(dark|light): e=0.478 c=0.081 predicted realism R=0.492
+  [EXPERIENCED] hears (ISA white colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [EXPERIENCED]   IMAGINED (kept out of the ledger): white under MIX(dark|light): e=0.592 c=0.213 predicted realism R=0.889
+  [NEWBORN]   ALLOCATED: new category colour*1 under 'colour' = ['black', 'white']: two groups explain the evidence on MIX(dark|light) better than one (log evidence ratio 1.17 > log 3)
+  [EXPERIENCED]   ALLOCATED: new category colour*1 under 'colour' = ['black', 'white']: two groups explain the evidence on MIX(dark|light) better than one (log evidence ratio 1.17 > log 3)
+  [NEWBORN] hears (HAS white dark y=0) from sense: predicted e=0.215 c=0.586 surprise=0.243 nats
+  [EXPERIENCED] hears (HAS white dark y=0) from sense: predicted e=0.209 c=0.602 surprise=0.235 nats
+  [NEWBORN] hears (HAS white dark y=0) from sense: predicted e=0.090 c=0.831 surprise=0.094 nats
+  [EXPERIENCED] hears (HAS white dark y=0) from sense: predicted e=0.089 c=0.834 surprise=0.093 nats
+
+  [NEWBORN] stage9
+     red    is dark : f=0.56 e=0.519 c=0.324    says: I think red is sometimes dark.  (f=0.56, e=0.52, c=0.32)
+     red    is light: f=0.56 e=0.519 c=0.324    says: I think red is sometimes light.  (f=0.56, e=0.52, c=0.32)
+     red    'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.112 -> c=0.357 e=0.713
+     black  is dark : f=0.99 e=0.876 c=0.764    says: I know black is always dark.  (f=0.99, e=0.88, c=0.76)
+     black  is light: f=0.01 e=0.083 c=0.844    says: I know black is never light.  (f=0.01, e=0.08, c=0.84)
+     black  'sometimes dark, sometimes light': own evidence w=10.341 c_own=0.838 | fed back K=0.822 -> c=0.848 e=0.042
+     white  is dark : f=0.01 e=0.083 c=0.844    says: I know white is never dark.  (f=0.01, e=0.08, c=0.84)
+     white  is light: f=0.99 e=0.876 c=0.764    says: I know white is always light.  (f=0.99, e=0.88, c=0.76)
+     white  'sometimes dark, sometimes light': own evidence w=10.341 c_own=0.838 | fed back K=0.822 -> c=0.848 e=0.042
+     RULE  colour -> MIX(dark|light): mean a=0.689  evidence E=1.211 (schema prior E0=0.000, A0=0.50)  coupling k~2.5  transfer confidence c_rule=0.105
+           members {'red': {'w': 1.0, 'conforms': 0.641, 'K': 0.112}, 'blue': {'w': 1.0, 'conforms': 0.641, 'K': 0.112}, 'green': {'w': 1.0, 'conforms': 0.641, 'K': 0.112}}
+     RULE  colour*1 -> MIX(dark|light): mean a=0.173  evidence E=5.146 (schema prior E0=0.000, A0=0.50)  coupling k~2.2  transfer confidence c_rule=0.360
+           members {'black': {'w': 10.341, 'conforms': 0.877, 'K': 0.822}, 'white': {'w': 10.341, 'conforms': 0.877, 'K': 0.822}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.5845617788783957}   trust = sense:0.945, stranger:0.500
+
+  [EXPERIENCED] stage9
+     red    is dark : f=0.56 e=0.526 c=0.451    says: I think red is sometimes dark.  (f=0.56, e=0.53, c=0.45)
+     red    is light: f=0.56 e=0.526 c=0.451    says: I think red is sometimes light.  (f=0.56, e=0.53, c=0.45)
+     red    'sometimes dark, sometimes light': own evidence w=1.000 c_own=0.333 | fed back K=0.988 -> c=0.498 e=0.821
+     black  is dark : f=0.99 e=0.879 c=0.771    says: I know black is always dark.  (f=0.99, e=0.88, c=0.77)
+     black  is light: f=0.01 e=0.082 c=0.846    says: I know black is never light.  (f=0.01, e=0.08, c=0.85)
+     black  'sometimes dark, sometimes light': own evidence w=10.341 c_own=0.838 | fed back K=1.063 -> c=0.851 e=0.033
+     white  is dark : f=0.01 e=0.082 c=0.846    says: I know white is never dark.  (f=0.01, e=0.08, c=0.85)
+     white  is light: f=0.99 e=0.879 c=0.771    says: I know white is always light.  (f=0.99, e=0.88, c=0.77)
+     white  'sometimes dark, sometimes light': own evidence w=10.341 c_own=0.838 | fed back K=1.063 -> c=0.851 e=0.033
+     RULE  colour -> MIX(dark|light): mean a=0.854  evidence E=6.743 (schema prior E0=4.748, A0=0.94)  coupling k~2.4  transfer confidence c_rule=0.420
+           members {'red': {'w': 1.0, 'conforms': 0.945, 'K': 0.988}, 'blue': {'w': 1.0, 'conforms': 0.945, 'K': 0.988}, 'green': {'w': 1.0, 'conforms': 0.945, 'K': 0.988}}
+     RULE  colour*1 -> MIX(dark|light): mean a=0.161  evidence E=5.872 (schema prior E0=0.000, A0=0.50)  coupling k~2.0  transfer confidence c_rule=0.481
+           members {'black': {'w': 10.341, 'conforms': 0.982, 'K': 1.063}, 'white': {'w': 10.341, 'conforms': 0.982, 'K': 1.063}}
+     measured realism of own projections v = {'plain': 0.5, 'MIX': 0.9128319921321503}   trust = sense:0.945, teacher:0.500, stranger:0.500
+  [NEWBORN] hears (ISA grey colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [NEWBORN]   IMAGINED (kept out of the ledger): grey under MIX(dark|light): e=0.473 c=0.150 predicted realism R=0.581
+  [EXPERIENCED] hears (ISA grey colour y=1) from stranger: predicted e=0.500 c=0.000 surprise=0.693 nats
+  [EXPERIENCED]   IMAGINED (kept out of the ledger): grey under MIX(dark|light): e=0.540 c=0.325 predicted realism R=0.910
+  [NEWBORN] about grey, never described: I have only heard that grey is sometimes dark.  (f=0.56, e=0.50, c=0.04)
+  [NEWBORN] grey 'sometimes dark, sometimes light': e=0.473 c=0.150
+  [EXPERIENCED] about grey, never described: I have only heard that grey is sometimes dark.  (f=0.56, e=0.51, c=0.18)
+  [EXPERIENCED] grey 'sometimes dark, sometimes light': e=0.540 c=0.325
+==============================================================================================================
+IMAGINATION JOURNAL of the colour episode (what was constructed, how real it turned out)
+  [NEWBORN] blue   MIX(dark|light): imagined e=0.512 (c=0.017, predicted realism 0.500) -> world f=1.00; squared error 0.238; realism after 0.567
+  [NEWBORN] green  MIX(dark|light): imagined e=0.512 (c=0.017, predicted realism 0.500) -> world f=1.00; squared error 0.238; realism after 0.641
+  [NEWBORN] black  MIX(dark|light): imagined e=0.551 (c=0.068, predicted realism 0.581) -> world f=0.00; squared error 0.304; realism after 0.404
+  [NEWBORN] white  MIX(dark|light): imagined e=0.478 (c=0.081, predicted realism 0.492) -> world f=0.00; squared error 0.229; realism after 0.000
+  [NEWBORN] ledger lines=44 units=11; imagination never wrote a ledger line; allocations: ["new concept MIX(dark|light)  (conflict mass 0.40 >= 0.25 on 'red')", "new category colour*1 under 'colour' = ['black', 'white']: two groups explain the evidence on MIX(dark|light) better than one (log evidence ratio 1.17 > log 3)"]
+  [EXPERIENCED] blue   MIX(dark|light): imagined e=0.684 (c=0.262, predicted realism 0.905) -> world f=1.00; squared error 0.100; realism after 0.942
+  [EXPERIENCED] green  MIX(dark|light): imagined e=0.684 (c=0.262, predicted realism 0.905) -> world f=1.00; squared error 0.100; realism after 0.945
+  [EXPERIENCED] black  MIX(dark|light): imagined e=0.714 (c=0.304, predicted realism 0.910) -> world f=0.00; squared error 0.510; realism after 0.713
+  [EXPERIENCED] white  MIX(dark|light): imagined e=0.592 (c=0.213, predicted realism 0.889) -> world f=0.00; squared error 0.350; realism after 0.000
+  [EXPERIENCED] ledger lines=128 units=35; imagination never wrote a ledger line; allocations: ["new concept MIX(high|low)  (conflict mass 0.75 >= 0.25 on 'flute')", 'new concept MIX(sweet|sour)  (anticipated: lived contrast pairs behaved as dimensions)', 'new concept MIX(big|small)  (anticipated: lived contrast pairs behaved as dimensions)', 'new concept MIX(dark|light)  (anticipated: lived contrast pairs behaved as dimensions)', "new category colour*1 under 'colour' = ['black', 'white']: two groups explain the evidence on MIX(dark|light) better than one (log evidence ratio 1.17 > log 3)"]
+==============================================================================================================
+SOURCES  trust is learned only from evidence that did not come from the source itself
+  trust after 6 statements each: friend=0.806  liar=0.168  (both started at 0.500)
+  coal is dark: f=0.96 e=0.835 c=0.732   coal is light: f=0.07 e=0.201 c=0.689
+
+wall time 32.4 s

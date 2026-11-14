@@ -1,0 +1,116 @@
+== A1. told ONCE that X is v1 (tau_told = 0.3), then m other TRUE statements about X; v1 never denied ==
+   m    W+     W-      f      c      e     | corrected (open world, chi_told = 0): f, c, e
+    0   0.30   0.00   1.000  0.231  0.615   |  1.000 0.231 0.615
+    1   0.30   0.18   0.619  0.326  0.539   |  1.000 0.231 0.615
+    2   0.30   0.35   0.464  0.393  0.486   |  1.000 0.231 0.615
+    3   0.30   0.49   0.379  0.442  0.446   |  1.000 0.231 0.615
+    5   0.30   0.75   0.286  0.512  0.390   |  1.000 0.231 0.615
+   10   0.30   1.28   0.190  0.613  0.310   |  1.000 0.231 0.615
+   20   0.30   2.10   0.125  0.705  0.236   |  1.000 0.231 0.615
+   50   0.30   3.80   0.073  0.804  0.157   |  1.000 0.231 0.615
+   -> after TWO unrelated statements the design holds the uncontradicted fact at f < 1/2.
+
+== A2. X has K permanent true properties; every statement names one of them (uniform); 4000 statements ==
+   K   f*(theory)  f_sim   c_sim   e_sim   e_sim(threshold variant: only e>1/2 counts as predicted)
+    2    0.618      0.618   0.999   0.618    0.618
+    3    0.500      0.500   0.999   0.500    0.505
+    5    0.390      0.390   0.998   0.390    0.500
+   10    0.282      0.282   0.998   0.282    0.500
+   50    0.133      0.131   0.995   0.133    0.499
+   -> every one of these facts is TRUE and was never contradicted; the design ends convinced (c ~ 1)
+      that each holds with frequency f*(1/K) < 1/2 for K >= 4; with the threshold variant it ends at
+      e ~ 1/2 with c ~ 1, which §2.6 reports as 'conflict'.
+
+== B. explicit denial.  Stream: 'X v1' once, then n times 'X not v1' (symbols X, not, v1 in one moment) ==
+   The only route to w- in §2.5 is 'predicted, did not occur'.  In a denial v1 DOES occur.
+   n denials   W+(X->v1)  W-(X->v1)   e(X->v1)
+       0         0.30       0.00      0.615
+       1         0.60       0.00      0.688
+       2         0.90       0.00      0.737
+       5         1.80       0.00      0.821
+      10         3.30       0.00      0.884
+   -> ten denials raise e(X->v1) from 0.615 to 0.884.  A told contradiction has no path to W-,
+      while silence (part A) has one.  Both are the wrong way round.
+
+== C. trust in a 100% honest teller.  The teller told all K true properties of each of 200 objects once.
+      Then the senses show an object with ONE of its true properties per moment (4000 moments). ==
+   Design: sensed occurrence on a told tie confirms the teller; 'predicted, did not occur' refutes it.
+   K   tau_honest(C3 literal: w- += e_trust)  tau_honest(plain: w- += 1)  theory f*(1/K), 1/K | tau_liar(literal)
+    2         0.618                           0.500                  0.618   0.500 |    0.008
+    5         0.390                           0.200                  0.390   0.200 |    0.008
+   10         0.282                           0.100                  0.282   0.100 |    0.008
+   50         0.133                           0.020                  0.133   0.020 |    0.008
+   -> the trust earned by an honest teller measures how many properties the objects have (the co-mention
+      rate), not honesty.  For K >= 4 an honest teller ends BELOW 1/2.
+   corrected, same stream: the sight channel's completeness is its own repetition rate; a glimpse of another
+   aspect is then not a refutation.  Precision A of each teller, refereed by sight (prior 1.3/0.7):
+   K    chi_sight (true 1/K)   A_honest   A_liar
+    2        0.474 (0.500)        0.927     0.014
+    5        0.161 (0.200)        0.884     0.017
+   10        0.069 (0.100)        0.832     0.022
+   50        0.011 (0.020)        0.608     0.067
+
+== D. generated world: 200 objects x 20 properties, 5 true per object; 6000 told statements (teller names
+      one property per statement); 15% of pairs are also LOOKED at (closed sense: present/absent), 3 looks. ==
+
+   teller precision q = 1.0
+   DESIGN    learned tau_told = 0.201   (true precision 1.0)
+   DESIGN   :  Brier over all pairs never looked at = 0.3152
+      true , told      n=  855  mean e=0.290  right side of 1/2:  0.4%  undecided:  0.0%  Brier=0.509
+      true , not told  n=    3  mean e=0.500  right side of 1/2:  0.0%  undecided: 100.0%  Brier=0.250
+      false, not told  n= 2533  mean e=0.500  right side of 1/2:  0.0%  undecided: 100.0%  Brier=0.250
+      false, told(lie)  n=    0
+   CORRECTED learned: base rate b = 0.234 (true 0.25); precision of consistent assertions A = 0.991 -> reliability rho = 0.989;  completeness chi = 0.199 (true 0.200)
+   CORRECTED:  Brier over all pairs never looked at = 0.0233
+      true , told      n=  855  mean e=0.771  right side of 1/2: 89.0%  undecided:  0.0%  Brier=0.085
+      true , not told  n=    3  mean e=0.042  right side of 1/2:  0.0%  undecided:  0.0%  Brier=0.918
+      false, not told  n= 2533  mean e=0.036  right side of 1/2: 100.0%  undecided:  0.0%  Brier=0.001
+      false, told(lie)  n=    0
+   CORRECTED without the base rate (b = 1/2 as in the design): A = 0.991, rho = 0.983, chi = 0.199
+   CORRECTED(b=1/2):  Brier over all pairs never looked at = 0.0228
+      true , told      n=  855  mean e=0.807  right side of 1/2: 91.7%  undecided:  0.0%  Brier=0.068
+      true , not told  n=    3  mean e=0.092  right side of 1/2:  0.0%  undecided:  0.0%  Brier=0.825
+      false, not told  n= 2533  mean e=0.080  right side of 1/2: 100.0%  undecided:  0.0%  Brier=0.006
+      false, told(lie)  n=    0
+   CORRECTED, no closed channel (chi = 0, rho = birth prior 0.3):  Brier over all pairs never looked at = 0.2194
+      true , told      n=  855  mean e=0.641  right side of 1/2: 100.0%  undecided:  0.0%  Brier=0.129
+      true , not told  n=    3  mean e=0.500  right side of 1/2:  0.0%  undecided: 100.0%  Brier=0.250
+      false, not told  n= 2533  mean e=0.500  right side of 1/2:  0.0%  undecided: 100.0%  Brier=0.250
+      false, told(lie)  n=    0
+   completeness from the teller's own repetition rate: chi = 0.173
+   CORRECTED, no closed channel (chi = own repetition rate, rho = birth prior 0.3):  Brier over all pairs never looked at = 0.1345
+      true , told      n=  855  mean e=0.615  right side of 1/2: 94.9%  undecided:  0.0%  Brier=0.151
+      true , not told  n=    3  mean e=0.360  right side of 1/2:  0.0%  undecided:  0.0%  Brier=0.410
+      false, not told  n= 2533  mean e=0.358  right side of 1/2: 100.0%  undecided:  0.0%  Brier=0.128
+      false, told(lie)  n=    0
+
+   teller precision q = 0.7
+   DESIGN    learned tau_told = 0.141   (true precision 0.7)
+   DESIGN   :  Brier over all pairs never looked at = 0.2641
+      true , told      n=  841  mean e=0.253  right side of 1/2:  0.8%  undecided:  0.0%  Brier=0.562
+      true , not told  n=   17  mean e=0.500  right side of 1/2:  0.0%  undecided: 100.0%  Brier=0.250
+      false, not told  n= 1362  mean e=0.500  right side of 1/2:  0.0%  undecided: 100.0%  Brier=0.250
+      false, told(lie)  n= 1171  mean e=0.240  right side of 1/2: 96.8%  undecided:  0.0%  Brier=0.067
+   CORRECTED learned: base rate b = 0.234 (true 0.25); precision of consistent assertions A = 0.646 -> reliability rho = 0.538;  completeness chi = 0.140 (true 0.140)
+   CORRECTED:  Brier over all pairs never looked at = 0.0950
+      true , told      n=  841  mean e=0.526  right side of 1/2: 66.8%  undecided:  0.0%  Brier=0.237
+      true , not told  n=   17  mean e=0.125  right side of 1/2:  0.0%  undecided:  0.0%  Brier=0.766
+      false, not told  n= 1362  mean e=0.123  right side of 1/2: 100.0%  undecided:  0.0%  Brier=0.015
+      false, told(lie)  n= 1171  mean e=0.268  right side of 1/2: 99.0%  undecided:  0.0%  Brier=0.076
+   CORRECTED without the base rate (b = 1/2 as in the design): A = 0.646, rho = 0.293, chi = 0.140
+   CORRECTED(b=1/2):  Brier over all pairs never looked at = 0.1666
+      true , told      n=  841  mean e=0.593  right side of 1/2: 88.2%  undecided:  0.0%  Brier=0.170
+      true , not told  n=   17  mean e=0.365  right side of 1/2:  0.0%  undecided:  0.0%  Brier=0.403
+      false, not told  n= 1362  mean e=0.364  right side of 1/2: 100.0%  undecided:  0.0%  Brier=0.132
+      false, told(lie)  n= 1171  mean e=0.447  right side of 1/2: 90.2%  undecided:  0.0%  Brier=0.201
+   CORRECTED, no closed channel (chi = 0, rho = birth prior 0.3):  Brier over all pairs never looked at = 0.2667
+      true , told      n=  841  mean e=0.638  right side of 1/2: 100.0%  undecided:  0.0%  Brier=0.131
+      true , not told  n=   17  mean e=0.500  right side of 1/2:  0.0%  undecided: 100.0%  Brier=0.250
+      false, not told  n= 1362  mean e=0.500  right side of 1/2:  0.0%  undecided: 100.0%  Brier=0.250
+      false, told(lie)  n= 1171  mean e=0.619  right side of 1/2:  0.0%  undecided:  0.0%  Brier=0.384
+   completeness from the teller's own repetition rate: chi = 0.052
+   CORRECTED, no closed channel (chi = own repetition rate, rho = birth prior 0.3):  Brier over all pairs never looked at = 0.2002
+      true , told      n=  841  mean e=0.635  right side of 1/2: 100.0%  undecided:  0.0%  Brier=0.134
+      true , not told  n=   17  mean e=0.379  right side of 1/2:  0.0%  undecided:  0.0%  Brier=0.386
+      false, not told  n= 1362  mean e=0.375  right side of 1/2: 100.0%  undecided:  0.0%  Brier=0.141
+      false, told(lie)  n= 1171  mean e=0.559  right side of 1/2:  4.5%  undecided:  0.0%  Brier=0.314

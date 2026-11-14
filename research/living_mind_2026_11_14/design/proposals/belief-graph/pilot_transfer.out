@@ -1,0 +1,18 @@
+
+WORLD mixed: mean loss (nats) on observations 2-4 of every member, by domain index   [ideal: 0.693]
+variant    dom 1 dom 2 dom 3 dom 4 dom 5   | first member of domains 2..D, obs 2-4 | obs 1 (all)
+FULL       0.784 0.762 0.725 0.734 0.751   | 0.741 +- 0.020                    | 0.695
+FROZEN     0.783 0.770 0.734 0.746 0.772   | 0.750 +- 0.021                    | 0.696
+FIXED-K1   0.799 0.781 0.743 0.758 0.786   | 0.751 +- 0.021                    | 0.694
+FLAT       0.778 0.765 0.729 0.745 0.766   | 0.746 +- 0.021                    | 0.693
+FULL+M     0.778 0.749 0.715 0.716 0.729   | 0.727 +- 0.017                    | 0.697
+FROZEN+M   0.776 0.767 0.733 0.740 0.769   | 0.752 +- 0.021                    | 0.702
+
+WORLD pure: mean loss (nats) on observations 2-4 of every member, by domain index   [ideal: ~0]
+variant    dom 1 dom 2 dom 3 dom 4 dom 5   | first member of domains 2..D, obs 2-4 | obs 1 (all)
+FULL       0.318 0.294 0.292 0.277 0.270   | 0.299 +- 0.002                    | 0.693
+FROZEN     0.321 0.327 0.323 0.320 0.327   | 0.332 +- 0.000                    | 0.691
+FIXED-K1   0.307 0.316 0.312 0.312 0.319   | 0.327 +- 0.000                    | 0.692
+FLAT       0.340 0.340 0.340 0.340 0.340   | 0.340 +- 0.000                    | 0.693
+FULL+M     0.304 0.237 0.220 0.197 0.192   | 0.247 +- 0.002                    | 0.704
+FROZEN+M   0.308 0.319 0.312 0.306 0.320   | 0.325 +- 0.000                    | 0.692

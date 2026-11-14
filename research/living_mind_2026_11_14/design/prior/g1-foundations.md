@@ -435,3 +435,188 @@ Consequence: the new core cannot define its merit as "it learns while running" o
 | Answer-sufficient, learning-sufficient and correction-sufficient states differ — exact counterexamples (mean; sum-and-count; parity) and Propositions 1–2 | "If current predictions are preserved, later learning is preserved" (weights-only transport: later differences 0.44 and 2.57); "a summary fully sufficient for a fixed model transports to every new representation" | What to keep when the future operations are unknown; a system that finds the useful transformation itself |
 | Experience-conditioned strategy choice from externally verified feedback is implemented and contract-tested (96 targeted cases) | — (never measured, so nothing refuted) | Real quality or cost gain, transfer, the MoE prior's usefulness: "EMPIRICAL VALIDATION PENDING" |
 | Five impossibility results bound every design (unseen distinction, conflicting answers, finite capacity, representation loss, computability) | "One formula guarantees lifelong learning in all worlds" | A general, controlled, resource-accounted mechanism that does all of this in one life: "henüz gösterilmiş değildir" |
+
+---
+
+## Verification
+
+Independent skeptic pass, 2026-11-14. Append-only; nothing above this line was edited.
+
+**What was done.** Every source named in the digest was re-opened and read: `docs/research/{RESEARCH_LEDGER,EXPERIENCE_CONDITIONED_COMPUTE,FRONTIER_DISCOVERY_2026_09_20,REPRESENTATION_WITNESS_AUDIT}.md`; all 14 files of `docs/research/living_learning_2026_09_20/` (the owner's request and the two observation files by headings and the passages the digest quotes; the other eleven in full); all 5 files of `docs/research/living_learning_reassessment_2026_09_20/`; the code in `research/living_learning/`, `research/living_learning_reassessment/`, `research/representation_discovery/`, `cognitive_management/research/{experience,controller,config}.py`, `benchmarks/research/experience_replay.py`, the MoE hook; every result JSON; papers 01–04 and `docs/publications/catalog.json`. Numbers were re-read from the JSON fields, not from the reports. No experiment was re-run.
+
+**Tiny checks of my own (read-only).**
+
+- SHA-256 of the seven experiment sources equals the `source_sha256` recorded in their result files (affine `70188c7c…`, adaptation `429bda2f…`, closed loop `eac76cc3…`, unknown change `69d6ab97…`, credit `6ec63c67…`, growth `3571357d…`, transport `b8f48c93…`). The stored results therefore belong to the code now in the repository.
+- Papers 01–04 contain every non-blank line of their source report except the H1 title (link targets normalised): verbatim reprints, as the digest says.
+- Arithmetic: `2·ln(400)/0.05² = 4,793.2`; `log2 25 = 4.643856`; work ratios in the witness JSON; drift-world floor `1.2²·E[u²] = 0.48`.
+
+**Overall verdict.** No quoted number in the digest was found to be wrong or invented. Of the 40 summary lines: 29 CONFIRMED, 10 CORRECTED (scope, status label or wording), 1 UNSUPPORTED as stated (a design requirement presented as if it followed from the studies). The corrections matter for design because they all point the same way: the digest states several results more generally, or more as "laws", than the studies do.
+
+### V1. Summary lines 01–40
+
+| # | Verdict | Note (file reference where a correction is made) |
+|---|---|---|
+| 01 | CONFIRMED | 437 lines, structure as described. |
+| 02 | CONFIRMED | Missing paths and the location of the witness result are right. (Body detail: `RESEARCH_LEDGER.md` is 15 lines, not 16.) |
+| 03 | CORRECTED | Proposition 1 is proved and is existence-only (`SCOPE_AND_FOUNDATIONS.md:35-43`). The relation `h ≡ h'` is a **definition** ("İki geçmişi şu şekilde eşdeğer sayabiliriz", `:47-55`), not a theorem. "The family of future operations determines the state that must be kept" is the digest's sentence. The source refuses the status of law: "H1–H4 de dört zorunlu modül veya bulunmuş temel yasa değildir" (`:137`); "Bu önermeler yeni bir evrensel öğrenme yasası değildir" (reassessment `REPORT_TR.md:54`); it is attributed to causal states and predictive state representations. See V3-1. |
+| 04 | CONFIRMED | All three witnesses exact; parity summary read from `state_transport.json` (`G = 4I₃`, `b = 0`, `b' = (0,0,0,±4)`). |
+| 05 | CORRECTED | Numbers right (0.440868 / 2.568257; 2.22e-15 and 1.11e-15; 32 + 32 lives). "Need" / "if and only if" overstates: the source proves that `P_z = A^{-T} P A^{-1}` is **sufficient** (`STATE_TRANSPORT.md:21-28`); necessity is not stated or proved there. See V3-2. |
+| 06 | CONFIRMED | `FOUNDATIONS.md:21-28`; reassessment adds `A_{P,k,B,C}`, proposed and never run. |
+| 07 | CONFIRMED | 49,000/49,000 per world. Scope as the report says: family, prime, tool ids and composition semantics supplied; "Katsayılar geniş anlamda parametredir" (`FOUNDATIONS.md:70`). |
+| 08 | CONFIRMED | `1,260 = 1,260` is asserted in code (`affine_lifecycle.py:256`) and is an identity: the same 84 compositions and 1,176 applications, moved in time. One seed (7001), workload chosen to repeat. |
+| 09 | CORRECTED | 15/15 right. The three percentages are the 39-context points only. Over all 15 comparisons the filter costs **+1.6 % to +1.8 %** in the 9 cases where the data contain no witness, and saves **1.2 % to 36.1 %** in the 6 cases where one exists (capacity 1: −21.3, −12.7, −4.8, −1.2; capacity 2: −36.1, −29.7). |
+| 10 | CORRECTED | Wording. Total prequential loss is `−log2 P(h*)`: 5.431620 bits same family, 7.0 uniform, **11.643856** under shift. `4.643856 = log2 25` is the excess over the uniform prior, not the total. Scope: identification-time invariance holds for the **same, non-adaptive** query sequence ("aynı gözlemler ve aynı sorular altında", `FOUNDATIONS.md:83`; "Sorgu seçimi aktif değildir", `ADAPTATION_EXPERIMENT.md:51`); with queries chosen from the prior it is not established. |
+| 11 | CONFIRMED | Also needs "waiting yields no information": "Pasif yeni veri de öğrenme sağlayabilir" (`SCOPE_AND_FOUNDATIONS.md:17`). Timer guarantee depends on a persistent change and a horizon that is a multiple of 20 (`CLOSED_LOOP.md:89`). Identical traces are asserted for one change date (`closed_loop_experiment.py:147-149`); the general statement rests on the proof. |
+| 12 | CONFIRMED | `UNKNOWN_CHANGE_AUDIT.md:147-164`. Conditions: fixed cost `c > 0`, noiseless probe, no side channel. |
+| 13 | CONFIRMED | Study label "Bu ailede elendi": absorbing world only. |
+| 14 | CORRECTED | "RLS … is the worst updater after a real change" is wrong on the metric quoted. See V3-3. |
+| 15 | CONFIRMED | (e) computability is a statement, not a proof. 4,794 derived, "Bu büyük doğrulama yapılmadı". |
+| 16 | CONFIRMED | "surprise alone can be noise" is argued with an untested contamination model (`PHENOMENA_AND_LITERATURE.md:74-80`), not measured. |
+| 17 | CONFIRMED | Report also says: "Temsilini değiştirebilme yeteneğinin değeri veya başka mekanizmalarla gerçekleştirilebilirliği bu sonuçla reddedilmiş değildir" (`REPRESENTATION_WITNESS_AUDIT.md:5`). |
+| 18 | CONFIRMED | Label "Bu düzenekte elendi". The baseline is the same `Learner` fed the same 12 records (`affine_lifecycle.py:206-210`): equality by construction. Its inference cost "ölçülmedi". |
+| 19 | CONFIRMED | Two different labels: knowledge → "Belirtilen Markov koşulunda reddedildi"; necessity → "Destek yok", with "Gereksiz olduğu bütün sistemler için iddia edilmedi". |
+| 20 | CONFIRMED | 20/20 read from `representation_growth.json` (`single_corrupt_label` identical in all runs). See V4-8 for what survives the wrong label. |
+| 21 | CONFIRMED | Label "Evrensel yorum elendi". |
+| 22 | CORRECTED | First claim: "Elendi", numbers right. Second claim: study label is **"Yetersiz ölçüt"**, not refuted. And "wins it" is imprecise — see V3-4. |
+| 23 | CONFIRMED | Labels: randomness and curiosity bonus → "Zorunluluk iddiası reddedildi", for this persistent-change, supplied-model instance ("'Rastgelelik gereksizdir' sonucu bütün ortamlara değil, bu kalıcı-değişim varlık örneğine aittir", `CLOSED_LOOP.md:122`). "More exploration" also rests on the persistent world at cost 20: planner 104.025 with 93.37 % detection beats the timer's 66.405 with 100 %. |
+| 24 | CONFIRMED | Addition: the loss is not specific to cost 20. At cost 1: 178.928 vs 182.171 (`h=.02`), 218.618 vs 222.010 (`h=.08`). The fixed `h=.01` policy also beats the updater in both fast worlds. |
+| 25 | CORRECTED | Scope. The "fixed registry with the same activation" is the same algorithm with a pre-filled table, so the equality is by construction. See V3-5. |
+| 26 | CONFIRMED | Four rows of reassessment `REPORT_TR.md:68-71`, each labelled "yanlışlandı". |
+| 27 | CONFIRMED | Addition in V4-2: the fixture is a full-information table. The scratchpad rerun matches the numbers the digest quotes. |
+| 28 | CONFIRMED | `experience.py:262-338`. Detail: the "negative evidence" veto comes only from records whose status is not `observed` and whose value is below 0.5, and is not decayed (`:293-294`, class docstring). |
+| 29 | CONFIRMED | `affine_lifecycle.py:46-114`. |
+| 30 | CONFIRMED | `witness_audit.py:215-231`. |
+| 31 | CONFIRMED | `representation_growth.py:91-188`. |
+| 32 | CORRECTED | The code is as cited (`credit_assignment.py:69-80`). "Weight as graded belief" is the digest's reading. The source calls RLS "güçlü istatistik referansı" and "standart çevrimiçi en küçük kareler"; `G⁻¹` is used only as an update gain and is never read out as confidence, used to abstain or used to decide. |
+| 33 | CORRECTED | "Bounds the cost" should read "makes the cost grow as `log2(N+1)` bits" — logarithmic, not bounded. This is the digest's own derivation (arithmetic correct); the study reports only `N = 24`. In mistakes the measured cost is +0.4188 [+0.3002, +0.5373] per 16 queries. |
+| 34 | CONFIRMED | `unknown_change_experiment.py:24-44`. |
+| 35 | CONFIRMED | `state_transport.py:34-43`; three-way diagnosis at `SCOPE_AND_FOUNDATIONS.md:90`. |
+| 36 | CONFIRMED | All present in code. |
+| 37 | CORRECTED | "Every" is too strong. See V3-6. |
+| 38 | UNSUPPORTED as stated | These are the digest's design proposals. The sources explicitly decline to turn their distinctions into mandatory structure. See V3-7. |
+| 39 | CONFIRMED | Both quotes exact (`REPORT_TR.md:81`; reassessment `REPORT_TR.md:76`). One-sided as written; see V4-1. |
+| 40 | CONFIRMED | Matches reassessment `REPORT_TR.md:82-87` and `RESEARCH_LOG.md:58`. |
+
+### V2. Numbered laws L1–L20 (section 7)
+
+CONFIRMED as written: L1, L2, L3, L4, L5, L6, L7, L9, L10, L11, L12, L14, L16, L18, L19, L20.
+
+CORRECTED: L8 (wording of the 4.643856 figure and the non-adaptive-query scope, as line 10); L13 (status: a definition plus counterexamples, as line 03; the four-contract sentence is at `STATE_TRANSPORT.md:89`, not in `SCOPE_AND_FOUNDATIONS.md` §2–4); L15 ("needs" → proved sufficient, as line 05); L17 (identity by construction, as line 25).
+
+Warning W2 in section 9 and the last cell of the credit row in section 10 carry the same error as line 14.
+
+### V3. Corrections in detail
+
+**V3-1. Status of the "central law".** Proved: Proposition 1 (an update function exists iff the summary never merges histories that a continuation separates) and Proposition 2 (same argument for re-representation). Both are existence statements; the source says they give neither a computable nor an efficient nor a learnable update. Exact: the three counterexamples. Not proved, and labelled by the source as research hypotheses with narrow witnesses: H1–H4, including "a state that represents future update needs sustains learning over wider continuation families". The sentence that answering, additive learning, correction and new representation are different contracts reads "farklı yeterlilik sözleşmeleri **olabilir**" and is followed immediately by "Fakat bütün öğrenicilerin bir metrik matrisi, geçmiş arşivi veya büyüyen özellik listesi tutması gerektiğini de göstermez" (`STATE_TRANSPORT.md:89`). The definition cannot be used as an algorithm: "gelecek cevaplar zaten biliniyormuş gibi bir oracle kullanılarak algoritma yazılamaz" (`SCOPE_AND_FOUNDATIONS.md:55`). What the new core may take from it: a refutation recipe for any compression (two merged histories plus one separating continuation), not a construction rule.
+
+**V3-2. Transport of the learner.** Proved in the source: with `P_z = A^{-T} P A^{-1}` the two trajectories coincide for any shared stream. Not in the source: that nothing else works. (It does follow in one line when the vectors `e·x` met along the stream span the space, since `P_z A x = A^{-T} P x` on a spanning set forces the equality; that is my derivation, not the study's.) The experiment compares exactly one alternative (`P_z = I`), with a transformation supplied by the researcher, on a linear learner, and the report disclaims any performance reading: "Equivalence of future update dynamics under reparameterization, not superiority of any optimizer" (`state_transport.json`, `protocol.claim`).
+
+**V3-3. RLS after a real change.** `credit_assignment.json`, regime `incompatible_drift`, 32 seeds, final clean MSE on new inputs and mean phase-2 service error:
+
+| Method | New inputs (final) | Phase-2 service error |
+|---|---:|---:|
+| anchored, one step | 0.000551 | 0.114784 |
+| anchored, two steps | 0.001106 | 0.085943 |
+| anchored + replay | 0.181190 | 0.367110 |
+| online RLS | 0.509150 | 0.989025 |
+| writes to current input | 0.566597 | 0.537370 |
+| never learns | 0.576636 | 0.560457 |
+| frozen after old | 1.943304 | 1.886111 |
+
+On final error RLS is the worst of the **correctly attributing** learners, but the wrong-attribution learner (0.566597) is worse, so "worst updater" is false for the number the digest quotes. On service error during the changed phase RLS is the worst of everything that keeps updating, worse than never learning. The more useful reading: RLS ends at old 0.454760 / new 0.509150, mean 0.481955, which is the conflict floor `Δ²/4 = 0.48` for one prediction that must serve both eras. An accumulate-only belief converges to the compromise that is right for neither era. The source's own sentence: "Koruma politikası, geçerliliği değerlendiren bir mekanizma olmadan kontrolü tamamlamaz. RLS'ye unutma faktörü veya değişim algılaması eklemek mümkündür; bu deneyde uygulanmadı" (`CREDIT_ASSIGNMENT.md:90`).
+
+**V3-4. Time-to-first-success.** `adaptation_results.json`, labels until sustained zero held-out risk:
+
+| Condition | Uniform | Learned family | Scrambled |
+|---|---:|---:|---:|
+| same family | 8.1375 | 6.4438 | 7.6375 |
+| family shift | 8.0188 | 8.0188 | 7.3250 |
+
+In the same family the scrambled control beats the **uniform baseline** by 0.5 labels while its mean risk is 0.01224 worse and its mistakes are indistinguishable (+0.0375 [−0.1062, +0.1812]); the real learned prior still has the best value. Under shift the scrambled control has the best value of the three. The lesson stands (the metric can reward a learner that is not better), but the study's verdict is "Yetersiz ölçüt", and the metric did not contradict the main result in the same-family condition.
+
+**V3-5. Growth versus the "fixed registry".** In `representation_growth.py` the mode `fixed_expanded_lazy` runs the same `candidates()`, `discover()` and `observe()` code as `growth`; the only difference is that `self.features` starts with all 26 definitions (`:83`, `:91-108`). Identical predictions and identical counters in 20/20 seeds are therefore guaranteed, not discovered. What it establishes: with a fixed generator, "forming a concept when needed" and "activating a latent one when needed" are the same computation. What it does not establish: that any independently designed fixed structure of equal expressive power matches growth. The one independent fixed control, `fixed_expanded_sparse`, does differ: 565 candidate fits against 489, 26 stored definitions against 9, and 2,000/2,000 on the cold triple task where growth scores 0/2,000. The report dismisses the storage and fit differences as not general ("genel bellek alt sınırı … göstermez"; "Büyümenin benzersiz bilgi avantajı değildir"), and they were not tested as cost advantages under a budget.
+
+**V3-6. "Every apparent advantage vanished."** The owner's own paper says "güçlü rakipler **birçok** ilk üstünlük yorumunu sınırlar" (paper 03, "Bulguların yorumu"). Two groups have to be separated.
+
+*Erased, and erased by logic rather than by measurement:* witness filter (`C_D ⇒ W_D`), raw examples plus the same induction (same code), lazy compilation (same operations at another time), lazy registry (same code path). In all four the rival computes the same deterministic function of the same information, so equality could not have failed; the experiments check that the implementations respect the argument ("küçük deney uygulamanın bu gerekçeye uyduğunu kontrol eder", `REPRESENTATION_WITNESS_AUDIT.md:71`). The one place where a difference could exist, cost under a budget that cuts the computation short, was not measured competitively anywhere in this group: interrupted searches are only marked `inconclusive`, counters are "not CPU/FLOPs", the induction cost of the raw-memory rival "ölçülmedi".
+
+*Not erased — advantages that survived their own controls, each with a measured price outside its assumption:*
+
+| Advantage that survived | Evidence | Price outside the assumption |
+|---|---|---|
+| Carried family prior, same family | −1.2344 mistakes [−1.3404, −1.1283], n=40; scrambled partition does not reproduce it | +0.4188 mistakes, +4.643856 bits under shift |
+| Right versus wrong attribution of late feedback | 0.100364 [0.086869, 0.113858], n=32 | needs a supplied episode id and a trace that outlasts the delay |
+| Re-testing versus frozen avoidance | 140.695 / 141.395 against 0, persistent change | −12 to −240 when nothing changes; negative for every probing policy in the eight-step world |
+| Belief-updated probing | 69.527959 vs 65.668642; 37.323585 vs 26.621452 (exact, prior average) | loses in the fast worlds at both costs |
+| Transport of update state | final MSE 0.000351 vs 0.027625; 0.010339 vs 1.110122 | nine extra numbers; transformation supplied; reported as dynamics equality, not as superiority |
+| Accumulated statistics or replay for still-valid old skill | 0.000070 and 0.000957 against 0.216505 | 0.509150 and 0.181190 against 0.001106 after a real change |
+
+Corrected statement: every claim that a different **form or timing** of the same information yields more learning was erased, by argument. Advantages of holding the **right extra state** (a correct prior, a correct attribution, a correct update metric, accumulated statistics) are real in these studies and are all conditional.
+
+**V3-7. Requirements in section 9 and line 38.** R2's five-field belief ("value, accumulated evidence, validity conditions, provenance, version of the machinery") and R3's "two ledgers that never mix" are not results of any study. They are reasonable syntheses, and should enter the design as proposals to be tested. The sources repeatedly refuse this step: "Bunlar araştırılacak alternatiflerdir; tek bir mimariye zorunlu modüller olarak çevrilmemelidir" (`SCOPE_AND_FOUNDATIONS.md:76`); "Bu bir modül veya mimari listesi değildir" (reassessment `REPORT_TR.md:89`); "Bunlar tek bir veri yapısı zorunluluğu değil, test edilebilir işlevlerdir" (`CLOSED_LOOP.md:124`). Sourced in a narrower form: for a belief to be re-testable, its validity conditions, the refuting observation, the action that reaches it and the behaviour to update "hesaplanabilir kalmalıdır" (`CLOSED_LOOP.md:124`); prediction that drifts with time and weights that move only on a real outcome "ayrı kaydedilir" (`UNKNOWN_CHANGE.md:30`), in one absorbing family. Internal work is also allowed to create derived structure (the compiled macros), so "only the world moves weights" must be read as "only the world moves evidence about the world".
+
+### V4. Important things the digest missed
+
+1. **The architecture statements are two-sided.** The digest quotes only the side that says leaving the Transformer is not shown to be necessary. The same sources also say: the owner's request — "Transformer'ın yanlış olduğunu söylemiyorum. / Yeni bir mimarinin zorunlu olduğunu söylemiyorum. / … Araştırmanın kendisi karar versin." (`REQUEST_ORIGINAL_TR.md:607-613`) and "Cevahir'in gelecekteki architecture'ı bu araştırmanın sonucu olsun. Araştırma mevcut architecture'ın sonucu olmasın." (`:741-743`); the report — none of the results needs "biyolojik kimya veya belirli bir neural architecture" (`REPORT_TR.md:85`); the discovery record — "Mevcut katmanları kaldırmak için bu aşamada gerekçe bulunmadı" (`FRONTIER_DISCOVERY_2026_09_20.md:128`). And the plain fact: no experiment in this group ran a neural network; all are standard-library symbolic or three-weight linear learners, and "Bu deneylerin hiçbiri mevcut Cevahir ağının matematiksel ifade sınırını ölçmedi" (`REPORT_TR.md:81`). This group is silent on the Transformer in both directions.
+2. **The replay fixture is a full-information table.** `benchmarks/research/experience_replay.py` feeds the store the outcome of both strategies for every training sample (`train_feedback_counts.adaptive = 8` for 4 rows in the rerun). The deployed controller with `exploration_rate = 0` never observes a strategy it did not execute. The 0.35 → 0.75 mean quality on the 6-row fixture is therefore obtained with strictly more information than the live loop can collect.
+3. **A stronger "consistent so far, confidently wrong" case in the witness JSON.** The digest reports capacity-1 at 3 contexts (5/155 correct, coverage 0.806). In the capacity-2 world at 6 and at 12 contexts the selected model answers all 155 held-out contexts (zero abstentions) and is right on 95 (0.613). Abstaining on unseen keys gives no protection when the key has been seen but the representation is too coarse. Not discussed in the report.
+4. **Candidate generation and acceptance are separate problems.** "Bir doğrulama filtresinin varlığı yeni yapıyı edinme algoritmasının yerini tutmaz; aday üretimiyle kabul denetimi iki ayrı bilimsel sorudur" (`SCOPE_AND_FOUNDATIONS.md:129`). For a core that "imagines and measures how real its constructions are": a good measure of reality does not produce constructions worth measuring.
+5. **The stated currency for a new operation language.** "Yeni işlem dili, salt sözdizimsel genişleme değil; arama, yürütme, paylaşma ve düzeltme maliyetlerinde ölçülen bir değişim olarak sınanmalıdır" (`SCOPE_AND_FOUNDATIONS.md:125`). Together with V3-6 this is where the earlier programme says a concept-forming core has to show its merit. Same paragraph family: "'Önceden hiçbir yapı olmasın' talebi burada kullanılmamalıdır: çalışan bir hesaplayıcı zaten gözlem kodu, işlem kuralları ve kaynak kısıtları taşır" (`:119`).
+6. **The test for "the way of constructing improves" is already specified.** Two versions that receive the same new-task examples and differ only in the update state `η`; transplanting `η` must carry the difference and resetting it must remove it (`SCOPE_AND_FOUNDATIONS.md:115`); gain to be shown "aynı yeni kanıt altında daha iyi güncellenebilmekle", not by better answers (`:123`). Never run; in this group experience only re-weighted supplied alternatives: three family counters (adaptation) and three hazard weights (unknown change).
+7. **Storage form is not a behavioural distinction.** "Her programın kodunu parametre sayarsak bütün sonlu öğrenme durumları parametreleştirilebilir ve başlangıçtaki ayrım içeriksizleşir" (`FOUNDATIONS.md:70`); "Davranış ölçümü … aynı işlevi gerçekleştiren iki kodlamanın birini 'gerçek', diğerini 'sahte' ilan edemez" (`SOURCES.md:32`). "Weights are graded beliefs" and "not a snapshot" must be defined by interventions (reset, transplant, removal of raw access, change of budget), or they are names.
+8. **A wrong label removes the use of a concept, not the concept.** In `representation_growth.json` the corrupted task loses its head (0 correct, 100 abstentions) while the feature node stays and the task built on it stays 100/100. The report: the features are "doğruluğu tanımından gelen çarpım fonksiyonlarıdır" — definitions, not falsifiable facts. Only the claim "this concept explains this task" is exposed to evidence.
+9. **Three named, untested candidates for the noise-versus-change gap.** Prior mixing `q⁻ = (1−ρ)q + ρp₀` ("deneysel olarak doğrulanmış değildir", `FOUNDATIONS.md:85`); contamination likelihood `(1−ε)P_signal + εQ` ("genel sağlamlık çözümü değildir", `PHENOMENA_AND_LITERATURE.md:74-80`); a forgetting factor or change detector on RLS ("uygulanmadı", `CREDIT_ASSIGNMENT.md:90`). The gap is open, but the first experiments are obvious.
+10. **Paper 03's own finding sentence**, omitted in section 5.7: "Kalıcı doğru cevap, çıkarım maliyeti, güncelleme aktarımı ve değişim altında fayda aynı ölçü değildir; güçlü rakipler birçok ilk üstünlük yorumunu sınırlar."
+11. **Smaller numeric omissions.** Delay itself costs: RLS phase-2 service error 0.006461 with immediate feedback, 0.022569 with delay. Eight-step world detection rates: timer 37.0 %, random 35.9 %, planner 50.8 % at cost 1 and 8.3 % at cost 20. Credit-experiment persistence is same-process serialisation, not a restart (`credit_assignment.json`, `provenance.limitations`).
+
+### V5. What I could not or did not verify
+
+- No experiment was re-executed; reproduction rests on the recorded `verification.json` files and on the source-hash match above.
+- Whether the digest's author read every file "in full" cannot be checked; the content matches the files wherever I compared.
+- Line references in `closed_loop_experiment.py` and `witness_audit.py` were spot-checked, not all of them.
+- The owner's request (745 lines) and the two observation files were checked by headings, the phenomenon list and the quoted passages, not line by line.
+
+### V6. Corrected consolidated list
+
+```
+01 SCOPE   40 digest lines re-checked against reports, code and JSON: 29 confirmed, 10 corrected, 1 unsupported as stated; no wrong number. 7/7 sources hash to the recorded source_sha256.
+02 LAW     [PROOF, existence only] exact online update u exists iff c(h)=c(h') => c(hz)=c(h'z) (SCOPE_AND_FOUNDATIONS.md:35-43). h≡h' over (Z,Q) is a DEFINITION used to refute compressions, not a law ("bulunmuş temel yasa değildir").
+03 LAW     [PROOF + 3 exact witnesses] T with phi1=T(phi0) exists iff phi0 never merges what phi1 separates. Mean (0,2)/(1) -> 2 vs 2.5; (sum,count)=(2,2), remove A -> 2 vs 1; parity G=4I, b=0, b'=(0,0,0,±4). Answer / continue / retract / re-represent "can be" different contracts (STATE_TRANSPORT.md:89); no structure is mandated.
+04 LAW     [PROOF of sufficiency + 64 lives] z=Ax, v=A^-T w keeps outputs; P_z=A^-T P A^-1 keeps the learner (2.22e-15); weights-only drifts 0.44 / 2.57. "Only if" is not proved in the source. Linear, A supplied.
+05 LAW     [CONTRACT] G_{Q,B}(E)=R(s0)-R(sE) under J; reset removes, transplant carries. Learnability A_{P,k,B,C} proposed, never run.
+06 LAW     [PROOF for F_101 + exact, 25 seeds] separate training is not logically necessary: 1,960/1,960. Family, ids, composition supplied.
+07 LAW     [PROOF] I(W;S')<=I(W;S); capability at a fixed budget can still rise (0 -> 1,176/1,176 after 84 units; one seed, repeating workload).
+08 LAW     [IDENTITIES BY CONSTRUCTION] same information => same answers: witness filter (15/15), raw + same induction, lazy compile (1,260=1,260), lazy registry (20/20). Cost under a cut budget was never measured competitively.
+09 LAW     [PROOF + exact] positive priors do not move identification time for the same non-adaptive queries (0 [0,0]); total log loss = -log2 P(h*): 5.4316 / 7.0 / 11.6439 bits (shift excess log2 25 = 4.643856).
+10 LAW     [PROOF + exact] evidence lock: no discriminating action and no passive channel => identical histories (0/181 detected).
+11 LAW     [PROOF, coupling] P_{Wtau}(detect)=P_{W0}(L>=tau) -> 0 under finite lifetime probe cost (fixed c>0, noiseless, no side channel).
+12 LAW     [PROOF + exact, absorbing family] nested failures = last failure; waiting moves p(t,f), not the weights.
+13 LAW     [n=32 + analytic] attribution / accumulation / validity are separate: wrong attribution +0.100364 [0.0869,0.1139]; right attribution lets the old skill rot 0.000905 -> 0.216505; RLS 0.000070 and replay 0.000957 retain it.
+14 LAW     [PROOFS] walls: unseen distinction; conflict (error >=1/2, MSE >=Delta^2/4); 2^M states; representation loss; computability (statement). Sample bill 4,794 derived, never run.
+15 LAW     [ARITHMETIC] belief, action tendency and value differ (.0545 -> .744862 across threshold .1; .049 -> .051 flips an action).
+16 REFUTED "elendi" (completed deterministic search): witness filtering learns from fewer observations. Work +1.6..+1.8% when no witness exists (9/15), -1.2..-36.1% when one does (6/15).
+17 REFUTED "Bu düzenekte elendi": learned rule > raw examples + same inference. "Destek yok": a sleep phase is necessary. "Markov koşulunda reddedildi": internal work adds world knowledge.
+18 REFUTED "Elendi": immediate retraction is noise-robust (affine rule revoked; growth head removed 20/20, the concept node itself survives). Wrong label / changed world / wrong representation are not separated anywhere; three fixes are named and untested (rho-mixing, epsilon-contamination, RLS forgetting).
+19 REFUTED "Evrensel yorum elendi": a passed finite check certifies generalisation (cubic 0/98, zero abstentions). Unreported: capacity-2 world at 6 and 12 contexts, full coverage, 95/155 correct.
+20 REFUTED "Elendi": more past helps every task (3.6688 -> 4.0875). "Yetersiz ölçüt", not refuted: time to first success (scrambled 7.64 beats uniform 8.14 with risk +0.012 worse; the learned prior still wins it in-family at 6.44).
+21 REFUTED "Zorunluluk iddiası reddedildi", persistent-change instance only: randomness is needed; a curiosity bonus is needed. "Elendi": any deviation gives evidence; more exploration is better.
+22 REFUTED "Elendi": Bayesian updating is better in every world. Loses at h=.02 and h=.08 at both costs (cost 20: 124.72 vs 150.99, 157.82 vs 190.77; cost 1: 178.93 vs 182.17, 218.62 vs 222.01).
+23 REFUTED "desteklenmedi; genel biçimi yanlış": growth beats an equally expressive fixed structure. Growth 0/2,000 without its stepping stone; the independent fixed-sparse control 2,000/2,000 (565 vs 489 fits, 26 vs 9 definitions).
+24 REFUTED "yanlışlandı" x4: preserved predictions preserve learning; a sufficient summary transports to any representation; right attribution suffices for retention; raw replay is necessary.
+25 CORRECT  RLS is not the worst updater after change on final error (0.509150; wrong attribution 0.566597). It is worst on phase-2 service error (0.989025) and ends on the conflict floor 0.48: accumulate-only belief is right for neither era.
+26 CORRECT  Not every advantage vanished (paper 03: "birçok"). Survived their controls, each with a price outside its assumption: in-family prior, right attribution, re-test vs avoidance, belief-updated probing on the prior average, update-state transport, accumulated statistics for valid old skill.
+27 UNMEASURED paper 01 H1/H2 ("EMPIRICAL VALIDATION PENDING"). The fixture gain 0.35 -> 0.75 uses outcomes of both strategies per sample; the live controller (exploration 0) never has them.
+28 MECH    evidence ledger, beliefs recomputed per call, one count per sample, logged propensity - cognitive_management/research/experience.py:262-338
+29 MECH    version-stamped dependencies, invalidate and abstain - research/living_learning/affine_lifecycle.py:46-114
+30 MECH    witness as a need trigger only - research/representation_discovery/witness_audit.py:215-231
+31 MECH    two-parent executable concept nodes; 16-row discover, 4-row validate, drop window; deletion as causal test - research/living_learning_reassessment/representation_growth.py:91-188
+32 MECH    (w, G^-1) recursive update - research/living_learning_reassessment/credit_assignment.py:69-80. "Graded belief" is the digest's reading: G^-1 is never read as confidence; no validity term.
+33 MECH    never-zero family counters - research/living_learning/adaptation_experiment.py:39-49,148. Shift cost grows as log2(N+1) bits (digest's derivation; logarithmic, not bounded).
+34 MECH    last-failure sufficient statistic + belief-state DP - research/living_learning/unknown_change_experiment.py:24-44; update-state transport - research/living_learning_reassessment/state_transport.py:34-43
+35 MECH    hygiene: frozen predictions, self-charged work meters, `inconclusive`, transplant and fresh process, kept negatives.
+36 CORE    Unsupported as requirements (digest's synthesis; sources refuse to mandate structure): the 5-field belief tuple, "two ledgers that never mix". Sourced: refuter and reaching action stay computable (CLOSED_LOOP.md:124); prediction and weights recorded separately (UNKNOWN_CHANGE.md:30).
+37 CORE    Missed: generating candidates and accepting them are separate problems (SCOPE_AND_FOUNDATIONS.md:129); merit of a new operation language is to be measured in search / execution / sharing / correction cost (:125); no tabula rasa (:119).
+38 CORE    Missed: the test for "construction improves" is specified and never run - same new examples, only eta differs, transplant carries, reset removes (:115).
+39 CORE    Architecture is two-sided: no experiment here ran a neural network or measured the Cevahir net (REPORT_TR.md:81); the request says "Transformer'ın yanlış olduğunu söylemiyorum ... Araştırmanın kendisi karar versin" (REQUEST_ORIGINAL_TR.md:607-613) and no "belirli bir neural architecture" is necessary (REPORT_TR.md:85).
+40 OPEN    unchanged: origin of candidate distinctions and languages; attribution without an id; what to keep for unknown futures; label vs world vs representation; own capacity vs world; one life, one state, bounded resources.
+```

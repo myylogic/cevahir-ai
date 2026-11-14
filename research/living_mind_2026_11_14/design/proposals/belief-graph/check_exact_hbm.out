@@ -1,0 +1,11 @@
+regime   kind       n | mean abs error vs exact hierarchical Bayes:  model   own-Laplace  pooled-Laplace | max(model)
+mixed    member   168 |                                              0.0181   0.0606       0.0855        | 0.0825
+mixed    new       36 |                                              0.0122   0.0673       0.0195        | 0.0448
+skewed   member   168 |                                              0.0145   0.0946       0.0615        | 0.1526
+skewed   new       36 |                                              0.0211   0.2285       0.0314        | 0.0497
+pure     member   168 |                                              0.0103   0.1302       0.3404        | 0.0709
+pure     new       36 |                                              0.0179   0.1412       0.0587        | 0.0593
+hetero   member   168 |                                              0.0204   0.0738       0.1777        | 0.1458
+hetero   new       36 |                                              0.0221   0.1360       0.0367        | 0.0942
+ALL               816 |                                              0.0163   0.0992       0.1434        | 0.1526
+category splits allowed: False | scenarios (of 36 per regime) in which a sub-category was formed: {'mixed': 0, 'skewed': 0, 'pure': 0, 'hetero': 0}

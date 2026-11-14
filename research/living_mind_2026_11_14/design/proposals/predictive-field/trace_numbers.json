@@ -1,0 +1,332 @@
+{
+ "lam": 1.4901623580655217,
+ "eta0": -2.698473563990056,
+ "p0": 0.06306348766287775,
+ "novice": {
+  "s1_red_dark": 0.23,
+  "s1_red_isa_colour": 0.23,
+  "s2_refined_alone": 0.57,
+  "s2_rule": 0.7401826340069144,
+  "s2_rule_prior": 0.5,
+  "s2_red_after_feedback": 0.8022530027426625,
+  "s2_red_isa_colour": 0.5998812563706482,
+  "s2_red_down_nats": 1.118584448750296,
+  "s2_red_own_nats": 2.9803247161310433
+ },
+ "brute_check": {
+  "rule": 0.7401826340069143,
+  "red": 0.8022530027426625,
+  "member": 0.5998812563706482
+ },
+ "brute_max_abs_err": 1.1102230246251565e-16,
+ "questions": [
+  [
+   0.2513,
+   "enumerate: which other [colour] are there?  (P_unknown 0.63, E[new] 1.67, 0.147 nats each, follow-up 0.009)"
+  ],
+  [
+   0.2079,
+   "confirm: is [red] a [colour]?"
+  ],
+  [
+   0.169,
+   "confirm rule: are all [colour] V?"
+  ],
+  [
+   0.141,
+   "confirm: is [red] really V?"
+  ]
+ ],
+ "imagine_blue": 0.22256943885063465,
+ "after_enumeration": {
+  "rule": 0.7401826340069144,
+  "red": 0.8022530027426625
+ },
+ "verification": [
+  {
+   "text": "blue is a dark colour",
+   "rule": 0.8772611132563315,
+   "red": 0.8452652093986451,
+   "member_red": 0.6683815937153346,
+   "subject": 0.789716780469516,
+   "predicted_before": 0.22256943885063465
+  },
+  {
+   "text": "blue also has light shades",
+   "rule": 0.9408360434987278,
+   "red": 0.8652136218168347,
+   "member_red": 0.7001510165460709,
+   "subject": 0.9433946633956574,
+   "predicted_before": 0.789716780469516
+  },
+  {
+   "text": "green is a dark colour",
+   "rule": 0.9755479156798181,
+   "red": 0.8761054425303728,
+   "member_red": 0.7174971015572995,
+   "subject": 0.8524264706447865,
+   "predicted_before": 0.26580932515653144
+  },
+  {
+   "text": "green also has light shades",
+   "rule": 0.9888598260135314,
+   "red": 0.8802824267031968,
+   "member_red": 0.7241492788615314,
+   "subject": 0.9624541203871407,
+   "predicted_before": 0.8524264706447865
+  }
+ ],
+ "brute_max_abs_err_3members": 2.220446049250313e-16,
+ "red_ceiling": 0.8837779678582582,
+ "counterexample": {
+  "rule": 0.9761346242365485,
+  "red": 0.8762895387490288,
+  "black": 0.06840008237581416
+ },
+ "units": 8,
+ "concepts": 9,
+ "statements": 13,
+ "histories": {
+  "novice (no history)": {
+   "p_H": 0.5,
+   "beta": [
+    1.0,
+    1.0
+   ],
+   "tests": {},
+   "rule": 0.7401826340069144,
+   "red": 0.8022530027426625,
+   "refined_alone": 0.57,
+   "first": 0.23
+  },
+  "seasoned (3 of 4 earlier generalisations held)": {
+   "p_H": 0.7331336950731159,
+   "beta": [
+    3.3602276027987816,
+    1.2231486972956562
+   ],
+   "tests": {
+    "('animal', 'size')": 31.158177262344743,
+    "('tool', 'weight')": 31.158177262344743,
+    "('food', 'taste')": 31.158177262344743,
+    "('stone', 'surface')": 0.21232315683164146
+   },
+   "rule": 0.8867030893694975,
+   "red": 0.8482278934760006,
+   "refined_alone": 0.57,
+   "first": 0.23
+  },
+  "burnt (1 of 4 earlier generalisations held)": {
+   "p_H": 0.3990295816934909,
+   "beta": [
+    1.4506017610367894,
+    2.1847221036260795
+   ],
+   "tests": {
+    "('animal', 'size')": 31.158177262344743,
+    "('tool', 'weight')": 0.21232315683164146,
+    "('food', 'taste')": 0.21232315683164146,
+    "('stone', 'surface')": 0.21232315683164146
+   },
+   "rule": 0.6541672676295002,
+   "red": 0.7752632758761739,
+   "refined_alone": 0.57,
+   "first": 0.23
+  }
+ },
+ "resonance": [
+  [
+   1,
+   0.7402,
+   0.8494
+  ],
+  [
+   2,
+   0.7946,
+   0.8577
+  ],
+  [
+   3,
+   0.7958,
+   0.8579
+  ],
+  [
+   5,
+   0.7959,
+   0.8579
+  ],
+  [
+   10,
+   0.7959,
+   0.8579
+  ],
+  [
+   30,
+   0.7959,
+   0.8579
+  ]
+ ],
+ "imagination_as_evidence": [
+  [
+   0,
+   0.7402
+  ],
+  [
+   1,
+   0.8244
+  ],
+  [
+   3,
+   0.9372
+  ],
+  [
+   10,
+   0.9989
+  ],
+  [
+   30,
+   1.0
+  ]
+ ],
+ "retraction": {
+  "max_abs_diff": 0.0,
+  "same_keys": true,
+  "rule_dormant": true,
+  "units": 2,
+  "concepts": 6
+ },
+ "lexical": [
+  [
+   "k\u0131rm\u0131z\u0131",
+   "k\u0131rm\u0131z\u0131",
+   1.0,
+   -0.0
+  ],
+  [
+   "k\u0131rm\u0131z\u0131n\u0131n",
+   "k\u0131rm\u0131z\u0131",
+   0.695,
+   2.44
+  ],
+  [
+   "k\u0131rm\u0131z\u0131d\u0131r",
+   "k\u0131rm\u0131z\u0131",
+   0.71,
+   2.32
+  ],
+  [
+   "k\u0131rm\u0131z\u0131ya",
+   "k\u0131rm\u0131z\u0131",
+   0.768,
+   1.86
+  ],
+  [
+   "k\u0131r\u0131c\u0131",
+   "k\u0131rm\u0131z\u0131",
+   0.234,
+   6.13
+  ],
+  [
+   "mavi",
+   "k\u0131rm\u0131z\u0131",
+   -0.046,
+   8.37
+  ],
+  [
+   "renk",
+   "renk",
+   1.0,
+   0.0
+  ],
+  [
+   "rengi",
+   "renk",
+   0.422,
+   4.63
+  ]
+ ],
+ "question_sensitivity_alpha": {
+  "0.5": [
+   [
+    0.208,
+    "confirm: is [red] a [colour]?"
+   ],
+   [
+    0.169,
+    "confirm rule: are all [colour] V?"
+   ]
+  ],
+  "0.82": [
+   [
+    0.208,
+    "confirm: is [red] a [colour]?"
+   ],
+   [
+    0.206,
+    "enumerate: which other [colour] are there?"
+   ]
+  ],
+  "1.0": [
+   [
+    0.251,
+    "enumerate: which other [colour] are there?"
+   ],
+   [
+    0.208,
+    "confirm: is [red] a [colour]?"
+   ]
+  ],
+  "2.0": [
+   [
+    0.503,
+    "enumerate: which other [colour] are there?"
+   ],
+   [
+    0.208,
+    "confirm: is [red] a [colour]?"
+   ]
+  ]
+ },
+ "variants": {
+  "membership given, p_H = 0.27 (fitted to 0.77)": [
+   0.7697449867604105,
+   0.9009903443069766
+  ],
+  "membership given, p_H = 0.50": [
+   0.9003836283534636,
+   0.9571649601919894
+  ],
+  "membership graded 0.23, p_H = 0.50 (the trace)": [
+   0.7401826340069144,
+   0.8022530027426625
+  ]
+ },
+ "robust_200_seeds": {
+  "64": 200,
+  "256": 200
+ },
+ "order_invariance": {
+  "S1 then S2": [
+   0.7401826340069144,
+   0.8022530027426625,
+   0.5998812563706482
+  ],
+  "S1 (frames swapped) then S2": [
+   0.7401826340069144,
+   0.8022530027426625,
+   0.5998812563706482
+  ],
+  "S2 then S1": [
+   0.7401826340069144,
+   0.8022530027426625,
+   0.5998812563706482
+  ],
+  "S2 then S1 (frames swapped)": [
+   0.7401826340069144,
+   0.8022530027426625,
+   0.5998812563706482
+  ]
+ },
+ "random_trees_max_abs_err": 3.4416913763379853e-15,
+ "adf_identity_err": 1.3322676295501878e-15
+}

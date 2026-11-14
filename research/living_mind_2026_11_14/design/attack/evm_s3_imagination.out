@@ -1,0 +1,71 @@
+== A. u is followed by v1 with p = 0.6 and by v2 with 0.4 (sensed, 300 real moments).  After each real
+      moment the mind idles r steps: top prediction fed back as an 'imagined' event, LEARN always on. ==
+   without imagination the design's own rule gives f* = 0.686 / 0.549 (its known bias); truth 0.6 / 0.4
+   40 lives per row.  'wrong' = share of lives that end expecting the 40% successor MORE than the 60% one.
+   r    wrong   | lives that locked on v1: f(v1) f(v2) | lives that locked on v2: f(v1) f(v2) | tau_imagined | W read / W lived
+    0    0.0%   |            0.685 0.551            |              nan   nan            |    0.500     |      1.00
+    1   27.5%   |            0.800 0.424            |            0.535 0.700            |    0.649     |      1.64
+    3   32.5%   |            0.884 0.318            |            0.406 0.815            |    0.647     |      2.75
+   10   40.0%   |            0.952 0.204            |            0.267 0.918            |    0.637     |      6.07
+   -> with idle steps the mind does not converge on the world: it LOCKS onto whichever successor was ahead
+      early and drives it to f ~ 0.95, the other to ~ 0.2.  In about four lives out of ten that is the WRONG
+      one (the 40% successor believed at 0.92, the 60% one at 0.25), after 300 lived moments, for good.
+      tau_imagined settles at 0.5-0.7 (the hit rate of the top prediction): imagined evidence is taken at more
+      than half the weight of sensed evidence, and the W the mind reads is several times the W it lived.
+   persistence: with 3000 lived moments instead of 300 (r = 10), 40 of 40 lives keep the direction they
+   locked at; wrong share 40.0%.
+
+   variant: a sceptical birth prior on the trust tie (9 units of negative evidence, tau_imagined = 0.05 at birth), r = 10:
+   wrong 32.5%; lives locked on v1: f = 0.951 / 0.206; tau_imagined ends at 0.637; W read / W lived = 6.37
+   (the prior delays the loop, it does not remove it: trust is learned from hits, and the top prediction hits)
+
+   variant: the imagined event is SAMPLED in proportion to e instead of taken as the top (r = 10):
+   f(u->v1) over 40 lives: mean 0.635, sd 0.012, min 0.612, max 0.658;  W read / W lived = 7.00
+   (no lock-in, but the conviction read is still a multiple of what was lived: a Polya urn adds weight, not information)
+
+   variant: C3 read literally for the trust tie (an imagined event CONFIRMS the imagined prediction):
+   r =  1: tau_imagined = 0.782, f(u->v1) = 0.704, f(u->v2) = 0.521
+   r = 10: tau_imagined = 0.955, f(u->v1) = 0.590, f(u->v2) = 0.563
+   closed form of that fixed point after n self-confirmations: tau = [(n-1) + sqrt((n-1)^2 + 2n)] / (2n): n=1: 0.707, n=3: 0.860, n=10: 0.952, n=100: 0.995
+
+   corrected (imagined events write no evidence; raw counts):
+   r = 10: f(u->v1) = 0.592, f(u->v2) = 0.408, lived W = read W = 300.0
+
+== B. the deposit iota*R.  Conclusion i -> v reached through i -ABSTRACT-> g -EXPECT-> v; i was NEVER observed.
+      'Evidence not on the chain' = the tie i -> v itself.  First cycle: none, so R = 1/2 whatever g says. ==
+   The deposit is written on i -> v, which is not on the chain, so the next cycle reads it back.
+   tau_im  iota |  cycles:   1       5       20      100     (c and e of a conclusion that was never observed)
+    0.5    1.0 |          c=0.20 e=0.60   c=0.62 e=0.81   c=0.89 e=0.95   c=0.98 e=0.99
+    0.5    0.3 |          c=0.07 e=0.53   c=0.30 e=0.65   c=0.68 e=0.84   c=0.93 e=0.97
+    0.9    1.0 |          c=0.31 e=0.66   c=0.76 e=0.88   c=0.94 e=0.97   c=0.99 e=0.99
+   -> conviction 0.9+ about something never met, from idle cycles alone.  Each cycle lowers the drive
+      D = sum use*(1-c) of §5, so each cycle is FELT as relief: the loop is rewarded by the design's own signal.
+
+   sign of the deposit.  i was SEEN twice not to be v (W- = 2 sensed).  R = e = 0.167 < 1/2, and the design
+   still writes iota*R on the POSITIVE side.  tau_im = 0.5, iota = 1:
+     cycle   1: R = 0.167, W+ = 0.08, e(i->v) = 0.189
+     cycle   5: R = 0.266, W+ = 0.54, e(i->v) = 0.293
+     cycle  10: R = 0.406, W+ = 1.41, e(i->v) = 0.433
+     cycle  15: R = 0.533, W+ = 2.62, e(i->v) = 0.555
+     cycle  20: R = 0.632, W+ = 4.11, e(i->v) = 0.648
+     cycle  30: R = 0.756, W+ = 7.64, e(i->v) = 0.765
+   -> after 13 idle cycles e(i -> v) > 1/2: the mind expects what it has twice seen to be false.
+
+== C. calibration of R for NOVEL constructions over a life (T8).  Three domains; in each, a new category is met,
+      ONE member is observed (closed look), and the mind constructs the same value for a sibling it never saw.
+      The sibling really has that value with probability s = q^2 + (1-q)^2:  q = 0.95 / 0.75 / 0.55. ==
+   Brier score of R against what later turned out, mean of 20 lives of 1500 constructions
+   (lower is better; R = 1/2 always gives 0.250)
+                                              first 100    last 500
+   design  R (leave-path-out)                   0.250       0.250     (R = 1/2 for every novel construction)
+   design  R after 5 rehearsals                 0.242       0.233
+   design  e of the conclusion after deposit    0.220       0.214
+   corrected R (learned horizon per domain)     0.209       0.187
+   best possible (R = s of the domain)          0.198       0.187
+   per domain, last 500 constructions:   true s | design R | design R(5 rehearsals) | design tau_self | corrected R
+     q = 0.95                             0.905    0.500        0.857               0.916          0.905
+     q = 0.75                             0.625    0.500        0.825               0.707          0.630
+     q = 0.55                             0.505    0.500        0.808               0.619          0.510
+   -> the design's R cannot improve: for a construction that is new, 'the evidence not on the chain' is empty.
+      Its self-trust does separate the domains (biased upward by the e-weighted rule), but §6 uses it only as
+      the weight of a deposit.  The corrected R is the same quantity put where it belongs.

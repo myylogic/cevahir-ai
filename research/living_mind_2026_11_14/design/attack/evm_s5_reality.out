@@ -1,0 +1,45 @@
+== 1. two routes that share NO tie and ALL their evidence.
+      i is a member of g and of g'.  Both have the same six other members j1..j6; each j was seen once with v.
+      (§3 creates a new category unit for every frame slot, so such twins are the normal case.) ==
+   W(g -> v) = W(g' -> v) = 6   (the same six observations, copied twice by the Up rule)
+   the conclusion i -> v is produced by the chain  i -> g -> v.
+   'evidence that does not lie on the chain' = own evidence of i -> v (none) + what the Down rule brings
+   through every other route, here i -> g' -> v:
+     1 twin category besides g:  W_outside =  3.0  ->  R = 0.875
+     2 twin categories besides g:  W_outside =  6.0  ->  R = 0.929
+     5 twin categories besides g:  W_outside = 15.0  ->  R = 0.969
+   by EVIDENCE the outside is empty (the six observations are the chain): R should be 'unknown', not 0.875-0.97.
+   Leave-path-out removes ties; the Up rule has already copied their evidence onto other ties.
+
+== 2. 'the chain that produced it' is not defined by §2.2 (settling sums ALL incoming ties in parallel).
+      i is a member of g (six members seen with v) and of h (four members seen WITHOUT v). ==
+   if the producing chain is i -> g -> v:  R = e from the h-route alone = 0.167
+   if the producing chain is i -> h -> v:  R = e from the g-route alone = 0.875
+   what settling actually computes (both routes at once):               e = 0.583
+   Same state, same tie, three numbers.  R is a function of an attribution the dynamics do not make.
+
+== 3. shared prefix.  Two chains  i -> a -> b -> v  and  i -> a -> c -> v  (EXPECT ties). ==
+   Leaving out the first chain removes the tie i -> a.  The second chain starts with the same tie, so nothing
+   reaches v any more:  W_outside = 0  ->  R = 0.500, although a -> c -> v is independent evidence for the
+   second half.  With one category (or one context) per instance this is the general case: every route out of
+   i shares its first tie, and R = 1/2 for every conclusion that is not already known directly.
+
+== 4. the conclusion's own evidence is on BOTH sides.  i was seen three times with v; g has i and one other
+      member j seen once without v. ==
+   chain i -> g -> v says f = 0.50 (i's own evidence is half of the rule);  without i it says f = 0.00
+   R = e from i's own evidence = 0.875.   The 'outside' evidence (i's sightings) is also inside the chain.
+
+== 5. self-trust learned in a world with NO regularity.  Members of a category have v or not, independently,
+      with probability 1/2.  Every member is seen once.  The mind then constructs  i -> g -> v  for each member
+      and the senses check it later (the member's value does not change).  Hit rate of the construction: ==
+   m    design: rule contains i's own evidence   leave-one-out: rule built without i   (chance = 0.500)
+    2        1.000  (decided  50%)                      0.500  (decided 100%)
+    3        0.750  (decided 100%)                      0.498  (decided  50%)
+    5        0.688  (decided 100%)                      0.503  (decided  63%)
+   10        0.664  (decided  75%)                      0.500  (decided 100%)
+   30        0.584  (decided  86%)                      0.500  (decided 100%)
+  100        0.543  (decided  92%)                      0.500  (decided 100%)
+   -> the design's self-trust rises above chance exactly where nothing can be constructed, most for small
+      categories: the construction is 'confirmed' by the member's own earlier observation, which the Up rule
+      put into the rule.  Trust in 'my own construction' is identifiable only if the referee evidence is
+      excluded from the construction (leave-one-out by evidence, not by tie).
