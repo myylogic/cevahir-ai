@@ -3,6 +3,11 @@
 
 Statistics come from the frozen CEV-11 package (``cev11.stats``): the exact sign-flip permutation test, Holm's
 step-down adjustment and the t-interval. Edits and streams are averaged within a world first.
+
+Primary tests: H1 G(FEC-A) - G(FT-ALL), margin 0.04; H2a G(FEC-A) - G(FEC-TOP); H2b against the best exact
+one-step variant; H3 net facts per write of FEC* against every sequential comparator (intersection-union);
+H4a gated against ungated read. The contrasts of the first draft (FT-L, FEC-0, composite S against one selected
+comparator) are secondary tests.
 """
 from __future__ import annotations
 

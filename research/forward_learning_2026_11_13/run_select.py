@@ -4,9 +4,11 @@
     python research/forward_learning_2026_11_13/run_select.py [--results DIR] [--out FILE]
 
 Reads results/discovery/w0.jsonl and w1.jsonl (both must be complete) and writes results/selection.json: step
-caps (4 x the discovery median per arm), the best exact one-step variant BP*, the stream learner FEC* and the
-best sequential comparator CMP*, and the gate operating points (theta*, gain*) at hard-negative leak <= 2% and
-prose bpb change <= 0.01. The file carries its own sha256 and is part of the freeze manifest.
+caps (4 x the discovery median per arm; one common cap for the unit-normalised stream arms), the best exact
+one-step variant BP*, the stream learner FEC* (by net facts per write; CMP* is descriptive, H3 is tested against
+every comparator), and the gate operating points (theta*, gain*) at hard-negative leak <= 2% and prose bpb
+change <= 0.01. The file carries its own sha256, the engine and configuration hashes of the discovery records,
+and is part of the freeze manifest.
 """
 import os
 import pathlib
