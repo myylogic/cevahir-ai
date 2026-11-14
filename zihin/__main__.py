@@ -21,6 +21,7 @@ learned yet: during your words the act threshold is raised, afterwards it is the
     !yas                 / !age     developmental profile: moments and nights lived, words known, concepts, phrases
     !kaydet <yol>        / !save    save the mind (with integrity manifest)
     !yukle <yol>         / !load    load a saved mind
+    !tasinabilir <yol>   / !portable  save a copy for conversation without the experience ledger (small file)
     !cik                 / !quit
 The text adapter splits words and punctuation; the alphabet is open (a new word is a new symbol at any time). The
 mind never sees text, only symbols on the "text" channel; meaning is in the ties.
@@ -34,7 +35,7 @@ from typing import List
 
 from . import IMITATED, SENSED, TOLD, Config, Event, Mind, read
 from .events import PROVENANCE
-from .persist import load, save
+from .persist import export_portable, load, save
 from .store import W_NEG, W_POS
 
 CHANNEL = "text"
@@ -287,7 +288,7 @@ def main(argv=None) -> None:
         if not line:
             continue
         try:
-            if line.startswith("?"):
+            if line.startswith("?") and not chat:
                 print(session.ask(line[1:].strip()))
             elif line.startswith("!"):
                 cmd, _, rest = line[1:].partition(" ")
@@ -331,6 +332,8 @@ def main(argv=None) -> None:
                     print("  %d an, %s" % (session.mind.t, session.mind.size()))
                 elif cmd in ("kaydet", "save"):
                     print("  kaydedildi: %s" % save(session.mind, rest.strip()))
+                elif cmd in ("tasinabilir", "portable"):
+                    print("  taşınabilir kopya: %s" % export_portable(session.mind, rest.strip()))
                 elif cmd in ("yukle", "load"):
                     session = Session(load(rest.strip()))
                     print("  yüklendi: %d an" % session.mind.t)

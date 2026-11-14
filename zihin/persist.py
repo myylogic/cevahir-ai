@@ -58,6 +58,17 @@ def save(mind: Mind, path: str) -> Dict[str, object]:
     return manifest
 
 
+def export_portable(mind: Mind, path: str) -> Dict[str, object]:
+    """A copy for conversation only: the same substance without the experience ledger (much smaller file).
+
+    It learns while you talk to it like any mind, but single experiences can no longer be retracted (the ledger
+    that makes retraction exact stays with the original mind)."""
+    twin = mind.clone()                                    # clone drops the ledger
+    twin.S.log, twin.S.keep_log = {}, False
+    twin.cfg.keep_log, twin.cfg.log_path = False, None
+    return save(twin, path)
+
+
 def load(path: str, live_log: str = None) -> Mind:
     """Read a mind saved by ``save``; verifies the file hash and the substance digest."""
     if not path.endswith(".zihin"):
