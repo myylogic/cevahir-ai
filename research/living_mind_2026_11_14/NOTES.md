@@ -1,0 +1,132 @@
+# Zihin phase 1a — running notes (decisions, findings, open points)
+
+Branch `feat/zihin` (from main 82d4b8f). Specification: VISION.md and LEAD_DESIGN.md (design v0 "Zihin") of
+2026-11-14. Code: `zihin/` (core), `tests/evolution/test_zihin_*.py` (unit tests),
+`research/living_mind_2026_11_14/` (test world, runs, this log).
+
+How to read this file: section 1 is the map of the code, section 2 the reading of the design that was built
+(every place where the text left a choice), section 3 the findings (where the design did not work as written,
+smallest repro, smallest principled change, both kept behind switches), section 4 the constants and why,
+section 5 the measured results, section 6 what is missing and what phase 1b should do first.
+
+## 1. Module map
+
+| file | content |
+|---|---|
+| `zihin/events.py` | event (channel, symbol, provenance, intensity), channel kinds, open alphabet per channel |
+| `zihin/evidence.py` | frequency, conviction, expectation; the dyadic grid that makes sums exact |
+| `zihin/store.py` | unit table, tie table (COO) that grow; additive experience log; `retract`, `undo_last`; caches rebuildable from tensors |
+| `zihin/learn.py` | the one rule: lag-1 and lag-0 EXPECT learning, induction up, learned trust (`judge`) |
+| `zihin/form.py` | recruitment of composed units, slot / frame induction with emergent categories, chunking |
+| `zihin/read.py` | support down (effective evidence), predictions, drive, conflict (read only) |
+| `zihin/act.py` | act decision (accumulate to threshold), imagination (flag), control knobs (flag) |
+| `zihin/mind.py` | `Config`, `Mind.step` = one moment; feelings; undo, retract, clone |
+
+## 2. Reading of the design that was built
+
+Events. `Event(channel, symbol, prov, intensity)`; time is the moment of `Mind.step`. An atomic unit is keyed
+by (channel, symbol). Channel kinds: sense, act, feel, knob, source. The core knows only the kind.
+Provenance is an attribute of the EVENT (given by the channel adapter): the same channel can carry what
+another says (`told`), what another is observed doing (`imitated`), what the world shows (`sensed`) and what
+the mind did itself (`acted`, the echo of its own act).
+
+Evidence. Six classes as in the design. Stored evidence is raw; trust is applied when a tie is read. Trust of
+`sensed` and `acted` is 1 by definition (direct experience; they are the judges). Trust of every other class
+is the expectation of the tie (source unit of the class -> "holds"), an ordinary EXPECT(lag 0) tie whose
+evidence is written by `learn.judge`. With no evidence that expectation is 1/2, so at birth told = imitated =
+inferred = imagined = 0.5; this is not a chosen constant, it is the value of the rule with nothing lived.
+(The design's example value 0.3 is used in one unit test through `trust_fixed`.) Per-teller trust is NOT built:
+evidence has one slot per class, not per source (open point 6.x).
+
+Judging (learned trust). When direct experience adds an amount d to a tie, the evidence of each learned-trust
+class on that tie that has not been judged yet is judged in the share min(1, d): what agrees with the direct
+experience is positive evidence for "source holds", what disagrees negative. The judged mass is kept in two
+more additive tables per tie (`checked`), so each claim is judged once however often the fact is sensed again.
+
+Episode. The design says "if the focus holds a tuple matched by no composed unit, recruit". Built as: the
+items (events of sense / act channels) since the last silent moment form the episode tuple (at most F items);
+its composed unit is recognised or recruited at every moment (so the composed units are the prefixes of
+utterances). A moment without outside events ends the episode. Feelings are not items of tuples.
+
+Activation. Perceived units get their intensity; items and recognised tuples that stay in the focus are
+carried with decay d per moment; a recognised composed unit has the mean activation of its parts (bottom-up
+through PART). Categories get a_instance * (2e - 1) through ABSTRACT; a frame (tuple with a category in place
+of an item) gets the mean of its parts. Derived activations are recomputed every moment (not integrated),
+because the literal formula "a <- kWTA(decay a + in + lateral)" iterated T times saturates everything at 1.
+
+Learning (step 5). Sources: grounded units of the last focus. Targets of lag-1 ties: the atomic units that
+occur now, with evidence g * a_u * intensity. A tie whose target did not occur gets negative evidence
+g * a_u * e only if the target's CHANNEL reported something else in this moment (a silent channel is not a
+failed prediction). Lag-0 ties are learned among ATOMIC units of the focus only (composed units and categories
+are already tied to their members by PART / ABSTRACT).
+
+Induction up (section 4). A generalisation that is in the last focus because of an instance acquires what the
+instance tie acquired, capped at one experience per instance tie and discounted by the ABSTRACT expectation,
+in the provenance class of the confirming event. (Generalisations are therefore NOT also learned by the
+ordinary positive rule; doing both, as the two sections literally say, would count everything twice.)
+
+Support down. Computed at read time (`read.effective`), never stored, so it needs no retraction of its own.
+
+Acts. An act unit is an atomic unit on a channel of kind `act`; the same unit is active when others emit the
+symbol and when the mind does. Decision: pooled expectation of imitated evidence on S -> X and own outcome
+evidence on (S, X) -> relief; accumulate 2e - 1 per settling iteration; emit when the sum reaches theta
+within T iterations. Own repetitions (class `acted` on S -> X) are a record, not a reason.
+
+Feelings. surprise (as in the design, capped at 1), relief = sum over EXPECT ties that got evidence in this
+moment of use * (conviction after - conviction before), squashed r / (r + k); load = ties / body budget;
+conflict = sum of c * (1 - |2f - 1|) over the lag-1 ties of the context unit, squashed. Emitted as events of
+the channel `feel` with the amount as intensity; provenance `acted` while an own act awaits its outcome.
+
+Retraction. Every increment of a moment is logged. `retract(m)` subtracts exactly these increments (ledger
+level); structure born in m that no other moment used is tombstoned. `undo_last()` additionally gives the rows
+back and restores the working state, so that the whole state is bit-identical to the state before the moment.
+Retraction is NOT a counterfactual replay: later moments computed their increments in a world that contained
+m (measured in T9 as the "counterfactual gap").
+
+## 3. Findings (design as written vs. what was needed)
+
+(filled while building; each item: what the text says, smallest repro, smallest principled change, switch)
+
+F1. Feelings and lateral activation capture the focus. As written, the four feelings enter every moment like
+any event and EXPECT(lag 0) activation is added to every unit. Repro (`dev1` scenario, 21 statements): from
+the third statement on the focus holds surprise, relief and the first four words ever heard, all at 1.0,
+sustained by each other; new composed units never enter the focus, so nothing is learned about them
+(prediction for a told fact: no tie at all). Change: `evoke="grounded_first"` (what is present keeps the
+activation of its presence and is ranked before what is only called to mind) and `feel_focus=False`
+(feelings are outcomes that ties can point to, not contents of the focus). Both kept as switches.
+
+F2. Evidence of a general context swamps specific knowledge when expectations are summed ("votes", the
+settling formula used as prediction rule). Change: `predict="specific"`: read the most specific unit of the
+context (the composed unit of the episode) with its support.
+
+F3. Support down as written lets a strong category override an exception: W_eff = W_own + lam e W(g -> v) grows
+without bound with the number of confirming instances. Change: `support="capped"`: one generalisation counts
+at most lam * e(i -> g) experiences.
+
+F4. Induction as written counts confirming instances only: the tie g -> v never receives negative evidence
+from the instances of g that hold something else, so every value any member has looks like a rule (f = 1).
+Change: `general_miss=True`: a generalisation in the focus gets the ordinary negative evidence for what it
+expected and did not occur.
+
+F5. The context of the previous utterance (decay 6/7 per moment) outranks everything derived in the next
+utterance and creates ties across unrelated utterances. Change: `clear_on_pause=True`.
+
+F6. A copied act that never brings relief can never be given up as written: negative evidence needs an
+existing expectation, and the tie (S, X) -> relief does not exist before relief has occurred once. Change:
+`act_expect_relief=True`: acting is itself an expectation of relief, with the expectation the mind acted on.
+
+## 4. Constants
+
+F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit
+of accumulated net expectation; with T = 6 an act needs e >= 0.5 + 1/12). decay = 1 - 1/F (the time constant
+of the context equals the focus span; no separate constant). induct_cap = 1 (an instance counts as one
+experience). Evidence grid 2**-30 (exact sums below 2**22). e_chunk = 0.9, m_chunk = 5: NOT derived, knob
+defaults; chunking is off in the world runs and tested in isolation. Nothing was tuned to a target number.
+
+## 5. Results
+
+(see RESULTS.md and results/*.jsonl; summary copied here when the runs are done)
+
+## 6. Missing / open
+
+(filled at the end)
