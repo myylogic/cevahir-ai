@@ -88,6 +88,7 @@ class Config:
     knobs: bool = False             # section 8, simple first version
     babble_every: int = 0           # with knobs: emit one knob act every N idle moments (exploration)
     keep_log: bool = True
+    log_path: Optional[str] = None  # keep the experience log on disk at this path (memory stays small)
     undo_depth: int = 1             # how many of the latest moments keep their working state for undo
 
     @classmethod
@@ -127,6 +128,9 @@ class Mind:
         self.cfg = cfg if cfg is not None else Config()
         self.S = Substance(n_slots=N_PROV, keep_log=self.cfg.keep_log)
         self.S.bind_repeats = self.cfg.bind_repeats
+        if self.cfg.keep_log and self.cfg.log_path:
+            from .store import DiskLog
+            self.S.log = DiskLog(self.cfg.log_path, keep=max(4, self.cfg.undo_depth + 2))
         self.ch = Channels()
         self.t = 0
         self.knob = {"F": self.cfg.F, "theta": self.cfg.theta, "gain": self.cfg.gain}

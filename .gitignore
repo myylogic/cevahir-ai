@@ -53,3 +53,6 @@ private_data/
 *.zihin
 *.zihin.json
 *.zihin.tmp
+zihin_logs/
+*.zihin.log
+*.zihin.log.live

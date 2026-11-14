@@ -38,7 +38,15 @@ from .persist import load, save
 from .store import W_NEG, W_POS
 
 CHANNEL = "text"
-VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True),
+def _log_path() -> str:
+    import os
+    import time
+    os.makedirs("zihin_logs", exist_ok=True)
+    return os.path.join("zihin_logs", "defter-%d.log" % int(time.time() * 1000))
+
+
+VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True,
+                                               log_path=_log_path()),
             "members": lambda: Config.changed(support="members"), "changed": Config.changed}
 
 
