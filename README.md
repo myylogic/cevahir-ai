@@ -14,6 +14,43 @@ I want developers, especially young people in Türkiye, to have a foundation the
 
 I am continuing Cevahir as an **open-source research and educational legacy**, with productization no longer its goal. The engineering work and research on learning throughout a system's operating life continue together.
 
+## New core: Cevahir Zihin — a mind that learns while living (November 2026)
+
+In November 2026 I started a new core, separate from the Transformer: **Zihin** (Turkish for "mind"). What I am after is not a fixed network but a mind that runs its own network while living, builds concepts from its experiences and measures what it builds. The Transformer engine and all earlier research remain below, unchanged.
+
+**Why this is not a Transformer:**
+
+| Transformer | Cevahir Zihin |
+|---|---|
+| train → freeze → use | learning is living: it learns at every moment, there is no separate training phase |
+| fixed dimension, fixed vocabulary, embedding vectors | growing units and ties, open alphabet; no fixed dimension |
+| next token by softmax | conviction: every belief has a strength and a source; if nothing accumulates to threshold, it stays silent |
+| new knowledge damages old knowledge, retraining needed | new knowledge is added, old knowledge stays bit-identical |
+| knowledge is spread over weights, a single example cannot be removed | a single experience can be retracted exactly from the core |
+| no record of where a belief came from | every piece of evidence keeps its source (told, sensed, imitated, own act, inferred, imagined); trust in sources is learned |
+
+**Measured results** (two generated worlds, 5 seeds; details in [results](research/living_mind_2026_11_14/RESULTS.md) and [notes](research/living_mind_2026_11_14/NOTES.md)):
+
+- A first hearing is weak and conviction grows with hearings (c 0.41 after one, 0.78 after four or more); a correction weighs old evidence instead of deleting it (120/120).
+- It finds hidden classes by itself (Jaccard 1.00).
+- Generalisation to never-seen instances improves with age: 93% / 81% after 600 experiences, 100% / 90% after 1500. The earlier reading rule got worse with age; eight failed attempts and the cause are recorded.
+- No forgetting: facts learned early are bit-identical hundreds of experiences later; living a second domain does not disturb the first (10/10).
+- A single experience can be retracted exactly (10/10).
+- It imitates first, then detaches from what it copied by its outcomes, while keeping the knowledge that others act so (T7).
+- Chat: it says what it watched, answers questions it never watched by relations ("what does a bird do" → "a bird sings"), stays silent when it knows nothing, and stops giving a copied answer once told it was wrong.
+
+**Not yet:** learning to learn (T6) came out negative; asking its own questions (T4) and imagining with a measured sense of reality (T8) are not built yet. On real data its chat is mostly imitation and it may answer questions about itself with others' answers. No comparison against a Transformer on the same stream of experiences has been made; the worlds are small. This is not a claim of consciousness or of general intelligence; neither can be measured for any machine today. The aim and the road map are explicit: a mind that learns by living, builds its own concepts, makes sense of what it acquired and knows itself. The design layers (deliberate focus, automatic reflexes, inner and outer voice, drives and will, knowing itself) are [here](research/living_mind_2026_11_14/LAYERS.md), the vision [here](research/living_mind_2026_11_14/design/VISION.md).
+
+**Try it:**
+
+```
+python -m zihin                      # a new mind
+!ogret dialogues.tsv                 # each line: utterance<TAB>answer (JSON and Word documents too: !oku)
+!konus                               # chat mode
+!dogru  /  !yanlis                   # how its last answer was received (good / bad)
+!yas   !neden <text> => <word>   !unut <n>   !kaydet <name>
+```
+
 ## Read the engine as a book
 
 **[Cevahir AI — Anatomy of an AI Engine: table of contents](docs/book/README.md)**

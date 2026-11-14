@@ -14,6 +14,43 @@ Bu projeyle özellikle Türkiye'deki gençlerin bir dil modelinin iç işleyişi
 
 Cevahir'i bundan sonra **açık kaynak bir araştırma ve eğitim mirası** olarak sürdürüyorum; ürünleşme artık projenin hedefi değil. Mühendislik çalışmalarıyla sistemin çalıştığı süre boyunca öğrenmesine yönelik araştırma birlikte devam ediyor.
 
+## Yeni çekirdek: Cevahir Zihin — yaşarken öğrenen bir zihin (Kasım 2026)
+
+Kasım 2026'da Transformer'dan ayrı, yeni bir çekirdek üzerinde çalışmaya başladım: **Zihin**. Aradığım şey sabit bir ağ değil; ağın kendisini yaşarken işleten, deneyimlerinden kavram kuran ve kurduğunu ölçen bir zihin. Eski Transformer motoru ve önceki bütün araştırmalar aşağıda olduğu gibi duruyor.
+
+**Neden Transformer değil:**
+
+| Transformer | Cevahir Zihin |
+|---|---|
+| eğit → dondur → kullan | öğrenmek yaşamaktır: her an öğrenir, ayrı bir eğitim aşaması yoktur |
+| sabit boyut, sabit sözlük, gömme vektörleri | büyüyen birimler ve bağlar, açık alfabe; sabit boyut yoktur |
+| softmax ile sonraki token | kanaat: her inancın gücü ve kaynağı vardır; hiçbir şey eşiğe birikmezse susar |
+| yeni bilgi eskisini bozar, yeniden eğitim gerekir | yeni bilgi eklenir, eskisi bayt bayt korunur |
+| bilgi ağırlıklara dağılmıştır, tek bir örnek geri alınamaz | tek bir deneyim çekirdekten tam olarak geri alınabilir |
+| bir bilginin nereden geldiği tutulmaz | her kanıt kaynağıyla tutulur (anlatılan, görülen, taklit, kendi eylemi, çıkarım, hayal); kaynağa güven de yaşanarak öğrenilir |
+
+**Ölçülmüş sonuçlar** (üretilmiş iki dünya, 5 tohum; ayrıntılar [sonuçlar](research/living_mind_2026_11_14/RESULTS.md) ve [notlar](research/living_mind_2026_11_14/NOTES.md) dosyalarında):
+
+- İlk duyuş zayıftır, kanaat dinledikçe artar (1 duyuşta c 0.41, 4+ duyuşta 0.78); bir düzeltme eski kanıtı silmez, tartar (120/120).
+- Gizli sınıfları kendisi bulur (Jaccard 1.00).
+- Hiç görülmemiş örneğe genelleme yaşadıkça iyileşir: 600 deneyimde %93 / %81, 1500 deneyimde %100 / %90. Önceki okuma kuralı yaşlandıkça kötüleşiyordu; sekiz başarısız deneme ve bunun nedeni kayıtlıdır.
+- Unutmaz: erken öğrenilen bilgiler yüzlerce deneyim sonra bayt bayt aynıdır; ikinci bir alanı yaşamak ilkini bozmaz (10/10).
+- Tek bir deneyim kesin olarak geri alınabilir (10/10).
+- Önce taklit eder, sonra sonuçlarına bakarak kopyaladığından kopar; "başkaları böyle yapar" bilgisini korur (T7).
+- Sohbet: izlediği diyalogları söyler; izlemediği sorulara ilişki kurarak cevap verir ("kuş ne yapar" → "kuş öter"); bilmediğinde susar; "yanlış" denen kopyalanmış bir cevabı bir daha söylemez.
+
+**Henüz yapamadıkları:** Öğrenmeyi öğrenmek (T6) olumsuz çıktı. Kendi kendine soru sormak (T4) ve hayal edip gerçekliğini ölçmek (T8) henüz yok. Gerçek veride sohbet büyük ölçüde taklittir; kendisi hakkındaki sorulara başkalarının cevabıyla karşılık verebilir. Aynı deneyim akışında bir Transformer ile karşılaştırma yapılmadı; dünyalar küçüktür. Bu çalışma bir bilinç ya da yapay genel zekâ iddiası değildir; bunlar bugün hiçbir makine için ölçülemiyor. Hedef ve yol haritası açıktır: yaşayarak öğrenen, kendi kavramlarını kuran, edindiğini anlamlandıran ve kendini bilen bir zihin. Tasarımın katmanları (bilinçli odak, otomatik refleksler, iç ve dış ses, yönlendiriciler ve irade, kendini bilmek) [burada](research/living_mind_2026_11_14/LAYERS.md), vizyon [burada](research/living_mind_2026_11_14/design/VISION.md).
+
+**Denemek için:**
+
+```
+python -m zihin                      # yeni bir zihin
+!ogret diyaloglar.tsv                # her satır: söz<TAB>karşılık (JSON ve Word belgeleri de okunur: !oku)
+!konus                               # sohbet modu
+!dogru  /  !yanlis                   # zihnin son cevabının nasıl karşılandığı
+!yas   !neden <söz> => <kelime>   !unut <no>   !kaydet <ad>
+```
+
 ## Yapay zeka motorunu kitap olarak okuyun
 
 **[Cevahir AI — Bir Yapay Zeka Motorunun Anatomisi: İçindekiler](docs/book/README.md)**
