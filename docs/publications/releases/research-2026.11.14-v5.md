@@ -24,7 +24,8 @@ This edition adds, since v4:
   imitation then detachment by outcomes (T7). A terminal chat (`python -m zihin`) answers watched dialogues, answers
   some unwatched questions by relations (F12), stays silent when it knows nothing and stops a copied answer after
   negative feedback (F15). Not yet: learning to learn (T6 negative), its own questions (T4), imagination with a reality
-  score (T8), a Transformer baseline on the same stream; small worlds. Design layers for what comes next: `LAYERS.md`.
+  score (T8); small worlds. Against a small Transformer on the identical stream (`baseline_transformer.py`): better on
+  never-seen instances than online and converged baselines, no interference, exact millisecond retraction (small-data regime only). Design layers for what comes next: `LAYERS.md`.
 
 No claim of consciousness or novelty is made. Reports are research preprints and are not peer reviewed. The
 DOI will identify this exact archive; it is not scientific or identity certification.
