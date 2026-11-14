@@ -151,6 +151,17 @@ F9. (2026-11-14) Which classification predicts which dimension is learned, by th
    Measured on 600-experience lives (5 seeds, 2 domains) and, following the owner's criterion (the outcome at the
    end of a life matters, not the speed of learning), on 1500-experience lives against changed (results_long/).
 
+F10. (2026-11-14) Acquisition versus meaning (owner: "the deciding consciousness making sense of what it has
+   acquired is an art of its own"). oracle_t3.py shows the right knowledge for a held-out instance is in the core
+   (class frame exists 100%, right on top 80%) but is selected in 30-53%. Four steps tried, all logged:
+   (a) F9 judged with e(g -> v): reliabilities stay at 1/2 because most generalisations have no opinion on v when
+   judged (raw w+ = w- = 1.45 on average); (b) reflection: idle moments re-read lived instances with the present
+   generalisations, leaving out the instance's own contribution (reflective); (c) trusted pooling: generalisations
+   pooled like provenance classes with tau_g = max(0, 2 r_g - 1) (trusted); (d) verdicts only where g has an
+   opinion on the channel, w+ = c f(g -> v), w- = c (1 - f). Right answers 58-73%, no reading uniformly better.
+   Remaining suspect: frames outside the focus never get negative evidence (F7), so their f is not meaningful;
+   honest_reflective / honest_trusted (F7 + F10) under test.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit
