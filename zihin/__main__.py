@@ -6,6 +6,11 @@
 Every plain line is something you TELL the mind (provenance "told"), one word per moment, then a silent moment.
 Commands (Turkish, with English aliases):
     !gordum <metin>      / !saw     the same, as something the mind SENSES itself (provenance "sensed")
+    !izle <soz> || <karsilik> / !watch  the mind WATCHES two others talk (provenance "imitated"): how one answers
+    !ogret <dosya>       / !teach   watch every line of a file: "soz<TAB>karsilik" dialogues or plain sentences
+    !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
+Turn taking (while you speak the mind listens, then it may speak until it falls silent) is set by the session, not
+learned yet: during your words the act threshold is raised, afterwards it is the mind's own.
     ?<metin>             / ?        what does the mind expect after this beginning (nothing is lived; a clone is asked)
     !neden <metin> => <kelime> / !why   white-box belief: own and effective evidence, per source
     !gecmis              / !history what you have told, with numbers
@@ -24,7 +29,7 @@ import re
 import sys
 from typing import List
 
-from . import SENSED, TOLD, Config, Event, Mind, read
+from . import IMITATED, SENSED, TOLD, Config, Event, Mind, read
 from .events import PROVENANCE
 from .persist import load, save
 from .store import W_NEG, W_POS
@@ -50,6 +55,43 @@ class Session:
             moments.append(self.mind.t)
         self.mind.step([])
         self.history.append((len(self.history) + 1, text, moments))
+
+    def listen(self, text: str, prov: int) -> None:
+        """Hear an utterance while not speaking (turn taking set by the session)."""
+        theta = self.mind.knob["theta"]
+        self.mind.knob["theta"] = 1e9
+        try:
+            for symbol in words(text):
+                self.mind.step([Event(CHANNEL, symbol, prov)])
+        finally:
+            self.mind.knob["theta"] = theta
+
+    def watch(self, first: str, answer: str) -> None:
+        """Two others talk: one says ``first``, another answers ``answer``; the mind only watches."""
+        self.listen(first, IMITATED)
+        self.listen(answer, IMITATED)
+        self.mind.step([])
+        self.history.append((len(self.history) + 1, "[izledi] %s || %s" % (first, answer), []))
+
+    def reply(self, text: str, limit: int = 12) -> str:
+        """You speak (told), then the mind may speak: its own acts, one symbol per moment, until silence.
+
+        The turn passes to the mind with your last word: it decides in that very moment (the context of your
+        whole utterance is present), and each symbol it says comes back as its own echo in the next moment.
+        """
+        start = self.mind.t + 1
+        symbols = words(text)
+        if not symbols:
+            return "(sessiz)"
+        self.listen(" ".join(symbols[:-1]), TOLD)
+        acts = self.mind.step([Event(CHANNEL, symbols[-1], TOLD)])
+        said: List[str] = []
+        while acts and len(said) < limit:
+            said += [str(e.symbol) for e in acts if e.channel == CHANNEL]
+            acts = self.mind.step([])                    # the echo of its own act arrives here
+        self.mind.step([])
+        self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
+        return " ".join(said) if said else "(sessiz)"
 
     def ask(self, text: str, top: int = 5) -> str:
         twin = self.mind.clone()
@@ -109,6 +151,7 @@ def main(argv=None) -> None:
         mind = Mind(VARIANTS[args.variant]())
         mind.add_channel(CHANNEL, "act")
     session = Session(mind)
+    chat = False
     print("Zihin — anlat, sor (?...), !neden, !unut, !kaydet, !cik. %d an yaşanmış." % mind.t)
     for line in sys.stdin if not sys.stdin.isatty() else iter(lambda: input("> "), None):
         line = line.strip()
@@ -123,6 +166,26 @@ def main(argv=None) -> None:
                     break
                 elif cmd in ("gordum", "saw"):
                     session.live(rest, SENSED)
+                elif cmd in ("izle", "watch"):
+                    first, _, answer = rest.partition("||")
+                    session.watch(first.strip(), answer.strip())
+                elif cmd in ("ogret", "teach"):
+                    n = 0
+                    with open(rest.strip(), encoding="utf-8") as f:
+                        for raw in f:
+                            raw = raw.rstrip("\n")
+                            if not raw.strip():
+                                continue
+                            if "\t" in raw:
+                                first, answer = raw.split("\t", 1)
+                                session.watch(first, answer)
+                            else:
+                                session.live(raw, IMITATED)
+                            n += 1
+                    print("  %d satır izlendi, %d an" % (n, session.mind.t))
+                elif cmd in ("konus", "chat"):
+                    chat = not chat
+                    print("  sohbet modu %s" % ("açık" if chat else "kapalı"))
                 elif cmd in ("neden", "why"):
                     prefix, _, value = rest.partition("=>")
                     print(session.why(prefix.strip(), value.strip()))
@@ -140,6 +203,8 @@ def main(argv=None) -> None:
                     print("  yüklendi: %d an" % session.mind.t)
                 else:
                     print("  bilinmeyen komut")
+            elif chat:
+                print("  zihin: %s" % session.reply(line))
             else:
                 session.live(line, TOLD)
         except Exception as exc:  # keep the session alive
