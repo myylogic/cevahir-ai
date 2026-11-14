@@ -51,7 +51,12 @@ class Config:
     predict: str = "votes"          # "votes" = as written, "specific" = changed
     neg_weight: str = "e"           # failed expectation weighted by e (as written) or by 1 ("one")
     induct_cap: float = 1.0         # each instance counts at most one experience in induction
+    general_miss: bool = False      # changed: a generalisation in the focus gets negative evidence for what
+                                    # it expected and did not occur (the ordinary rule of step 5)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
+    evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
+    feel_focus: bool = True         # feelings compete for the focus like any event (as written)
+    body_ties: int = 1_000_000      # tie budget of the body; load = ties / budget
     slots: bool = True              # slot / frame induction
     typed_frames: bool = True       # existing categories stand in for their instances
     chunking: bool = False          # fuse reliable successions into one item
@@ -69,6 +74,14 @@ class Config:
     knobs: bool = False             # section 8, simple first version
     babble_every: int = 0           # with knobs: emit one knob act every N idle moments (exploration)
     keep_log: bool = True
+
+    @classmethod
+    def changed(cls, **over) -> "Config":
+        """The design with the smallest principled changes the prototype found necessary (NOTES.md)."""
+        base = dict(support="capped", predict="specific", evoke="grounded_first", feel_focus=False,
+                    clear_on_pause=True, general_miss=True)
+        base.update(over)
+        return cls(**base)
 
 
 class Mind:
@@ -105,6 +118,7 @@ class Mind:
         self.act_hope: Dict[int, float] = {}
         self.hoping: Optional[Tuple[int, float]] = None
         self.chunked: List[int] = []
+        self.prov_of: Dict[int, int] = {}
         self.idle = 0
         self.babbled = 0
         self.imagined = 0
@@ -223,13 +237,15 @@ class Mind:
         F = self.knob["F"]
         decay = cfg.decay if cfg.decay is not None else 1.0 - 1.0 / F
         base: Dict[int, float] = {u: decay * a for u, a in self.carry.items()}
-        for unit, intensity, _, _ in percepts:
-            if intensity > 0:
+        for unit, intensity, prov, channel in percepts:
+            if intensity > 0 and (cfg.feel_focus or self.ch.kind(channel) != "feel"):
                 base[unit] = max(base.get(unit, 0.0), min(1.0, intensity))
+                self.prov_of[unit] = prov
         context = recognise(self, slot) if has_items else None
         parts = tuple(self.episode)
         if context is not None:
             base[context] = sum(base.get(p, 0.0) for p in parts) / len(parts)
+            self.prov_of[context] = slot
         self.context = context if context is not None else (parts[0] if len(parts) == 1 else None)
         if self.hoping is not None and has_items:          # the echo of an own act has just arrived
             act_unit, hope = self.hoping
@@ -262,7 +278,11 @@ class Mind:
                         gens[frame] = (context, e)
         grounded = dict(base)
         grounded.update(derived)
-        ranked = self._winners(grounded, {}, virtual, F)
+        first = cfg.evoke == "grounded_first"
+        fresh = {u for u, a, _, _ in percepts if a > 0}
+        if context is not None:
+            fresh.add(context)
+        ranked = self._winners(grounded, {}, virtual, F, first, fresh)
         for _ in range(cfg.T if cfg.lag0 else 0):
             evoked: Dict[int, float] = {}
             for key, a_u in ranked:
@@ -276,7 +296,7 @@ class Mind:
                                 cfg.k)
                 for v, x in zip(S.t_dst[ids].tolist(), (a_u * (2.0 * e - 1.0)).tolist()):
                     evoked[v] = evoked.get(v, 0.0) + x
-            again = self._winners(grounded, evoked, virtual, F)
+            again = self._winners(grounded, evoked, virtual, F, first, fresh)
             if [k for k, _ in again] == [k for k, _ in ranked]:
                 ranked = again
                 break
@@ -297,24 +317,33 @@ class Mind:
         self.focus = focus
         self.carry = {u: a for u, a, _ in focus if u in base}
         self.act_hope = {u: h for u, h in self.act_hope.items() if u in self.carry}
+        self.prov_of = {u: p for u, p in self.prov_of.items() if u in self.carry}
         S.use_units(torch.tensor([u for u, _, _ in focus], dtype=I64))
 
     @staticmethod
-    def _winners(grounded, evoked, virtual, F):
-        """k-winners: the F most active candidates (ties: existing units by id, then frames to be recruited)."""
+    def _winners(grounded, evoked, virtual, F, grounded_first=False, fresh=()):
+        """k-winners: the F most active candidates.
+
+        Equal activations are ordered: perceived or recognised in this very moment, then older units by id,
+        then frames still to be recruited. As written (``grounded_first`` False) activation through
+        EXPECT(lag 0) adds to every unit. With ``grounded_first`` what is present (perceived, recognised, or
+        active through an instance) keeps the activation of its presence and is ranked before what is only
+        called to mind.
+        """
         scored = []
         for unit, a in grounded.items():
-            a = min(1.0, a + evoked.get(unit, 0.0))
+            if not grounded_first:
+                a = min(1.0, a + evoked.get(unit, 0.0))
             if a > 0.0:
-                scored.append((-a, 0, (unit,), unit))
+                scored.append((0, -a, 0 if unit in fresh else 1, 0, (unit,), unit))
         for unit, a in evoked.items():
             if unit not in grounded and a > 0.0:
-                scored.append((-min(1.0, a), 0, (unit,), unit))
+                scored.append((1 if grounded_first else 0, -min(1.0, a), 1, 0, (unit,), unit))
         for parts, (a, _, _) in virtual.items():
             if a > 0.0:
-                scored.append((-a, 1, parts, parts))
-        scored.sort(key=lambda s: s[:3])
-        return [(key, -neg) for neg, _, _, key in scored[:F]]
+                scored.append((0, -a, 1, 1, parts, parts))
+        scored.sort(key=lambda s: s[:5])
+        return [(key, -neg) for _, neg, _, _, _, key in scored[:F]]
 
     def _feel(self, surprise: float) -> None:
         """Step 6: the mind's own state as events of the next moment (intensity carries the amount)."""
@@ -331,9 +360,9 @@ class Mind:
             before = torch.clamp(after - gained, min=0.0)
             relief = float((S.t_use[unique] * (conviction(after, k) - conviction(before, k)))[expect].sum())
             relief = max(0.0, relief)
-        F2 = float(self.knob["F"] ** 2)
         conflict = conflict_of(self, self.context) if self.context is not None else 0.0
-        self.felt = {"surprise": surprise, "relief": relief / (relief + k), "load": touched / (touched + F2),
+        self.felt = {"surprise": surprise, "relief": relief / (relief + k),
+                     "load": min(1.0, S.n_ties / float(self.cfg.body_ties)),
                      "conflict": conflict / (conflict + k), "relief_raw": relief, "drive": total_drive(self)}
         prov = ACTED if self.act_hope or self.hoping is not None else SENSED
         for name in FEELINGS:
@@ -341,7 +370,7 @@ class Mind:
 
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "context", "pending",
-                  "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined")
+                  "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}

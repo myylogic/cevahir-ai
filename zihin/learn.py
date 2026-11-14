@@ -121,29 +121,48 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
             record[v][1] += float(got[0])
             record[v][4] = slot
         changes[unit] = record
-    induce(mind, changes)
+    induce(mind, changes, occurred, slot_of_channel)
 
 
-def induce(mind, changes: Dict[int, Dict[int, list]]) -> None:
+def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel) -> None:
     """Section 4 "up": a generalisation in the last focus acquires what its instance acquired.
 
     Each instance tie counts at most ``induct_cap`` (raw evidence), discounted by the expectation of the
     ABSTRACT relation. The evidence keeps the provenance class of the event that gave it to the instance.
     """
-    S, cap = mind.S, mind.cfg.induct_cap
+    S, cfg, cap = mind.S, mind.cfg, mind.cfg.induct_cap
+    activation = {unit: a for unit, a, _ in mind.last_focus}
+    missed = set()
     for general, instance, e_abs in mind.last_gens:
         record = changes.get(instance)
-        if not record or e_abs <= 0.5:
+        if record is None or e_abs <= 0.5:
             continue
         for v, (pos0, pos1, neg0, neg1, slot_pos, slot_neg) in record.items():
             up = (min(pos1, cap) - min(pos0, cap)) * e_abs
             down = (min(neg1, cap) - min(neg0, cap)) * e_abs
             if up > 0.0:
                 add_evidence1(mind, W_POS, slot_pos, S.tie(general, v, EXPECT, 1), up)
-            if down > 0.0:
+            if down > 0.0 and not cfg.general_miss:
                 tie = S.find_tie(general, v, EXPECT, 1)
                 if tie >= 0:
                     add_evidence1(mind, W_NEG, slot_neg, tie, down)
+        if cfg.general_miss and general not in missed and general in activation:
+            missed.add(general)
+            ties = S.out.get((general, EXPECT, 1), [])
+            if not ties:
+                continue
+            ids = torch.tensor(ties, dtype=I64)
+            dst = S.t_dst[ids]
+            w_pos, w_neg = tie_mass(mind, ids)
+            e = expectation(w_pos, w_neg, cfg.k)
+            channel = S.u_channel[dst]
+            present = torch.tensor([occurred[d][0] if d in occurred else 0.0 for d in dst.tolist()], dtype=F64)
+            miss = mind.knob["gain"] * activation[general] * e * (1.0 - present)
+            for ch, slot in slot_of_channel.items():
+                on = channel == ch
+                if bool(on.any()):
+                    add_evidence(mind, W_NEG, slot, ids[on], miss[on])
+                    S.use_ties(ids[on])
 
 
 def learn_together(mind, focus: List[Tuple[int, float, bool]], slot: int) -> None:
@@ -164,4 +183,5 @@ def learn_together(mind, focus: List[Tuple[int, float, bool]], slot: int) -> Non
             S.use_ties(ids)
         for other, a_v in present.items():
             if other != unit:
-                add_evidence1(mind, W_POS, slot, S.tie(unit, other, EXPECT, 0), g * a_u * a_v)
+                add_evidence1(mind, W_POS, mind.prov_of.get(other, SENSED), S.tie(unit, other, EXPECT, 0),
+                              g * a_u * a_v)
