@@ -100,6 +100,41 @@ different frequency (temperament); an act with immediate pleasure and a delayed 
 after the delayed consequence has been lived, while the immediate pleasure expectation stays as it was (the drive is
 not erased, it is outweighed); an ablation without consequence lags never stops.
 
+## L6. Meaning of consequences: the same lesson, weighed differently in another context (owner, 2026-11-14)
+
+Owner: "The secret of learning while living is observing the consequences of an experience, making sense of them
+and evaluating them. A child loves how fire looks, holds a burning stick, its hand burns; it notices that fire
+harmed it and does not take fire in its hand again. The same person as an adult may choose to enter a burning
+house if someone they value is inside. Composite behaviour. The deciding consciousness making sense of what it has
+acquired is an art of its own." (The example is an illustration; the structure is what is built.)
+
+In the substance this needs nothing new beyond L5, only that its parts are kept apart:
+
+- The lesson is evidence on a consequence tie, and it generalises like any knowledge: (holding X) -> harm, lived on
+  one instance, reaches other instances through categories (section 4) and the F9 reliability of the frame.
+- The lesson is never erased by a later choice. Entering the fire does not subtract from (fire, enter) -> harm;
+  that evidence stays exactly as lived (like "others do X" in T7, measured bit-identical).
+- A decision is the sum over the consequences that the CURRENT context (the composed situation unit and its
+  generalisations) leads to, each weighted by the value it brings:
+
+      A(X | context) = sum_t sum_j value_j * sum_L gamma^L (2 e_L(context, X -> v_j) - 1)  (+ imagined terms)
+
+  Values are not constants either: how much an outcome matters (value_j) is itself evidence (which outcomes were
+  followed by relief or by loss in this life), so what a mind is willing to bear grows with its biography.
+- "Composite behaviour" is the composition of situations: the larger context (house, fire, someone valued inside)
+  is a composed unit with its own consequence ties; its expectations are read before the generalisation (fire ->
+  harm) as the specific is read before the general everywhere in Zihin (section 4, nested and F9 readings).
+
+The child and the adult are the same person (owner). In Zihin terms: one substance and one biography. The adult's
+decision is taken by the very structure that still holds the child's lesson; there is no reset, no retraining, no
+second model. What changed in between is only what was added: more composed situations, more consequence ties,
+learned values and knobs. T13 therefore runs in ONE life (the avoidance phase and the later choice are moments of
+the same mind), and the continuity checks of T5/T9 (early evidence bit-identical, exact ledger) apply across it.
+
+Test T13 (consequence meaning): after one own harmful outcome the act is avoided in new instances of the same kind
+(generalised avoidance); in a context whose stake has a higher learned value the act is taken although the harm
+expectation is unchanged; the harm evidence is bit-identical before and after that choice.
+
 ## What would make this testable (to be added to the benchmark)
 
 - T10 automation: after an act has been reliable in a situation for long enough, it is emitted while the focus is
