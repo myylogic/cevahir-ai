@@ -8,7 +8,7 @@ Commands (Turkish, with English aliases):
     !gordum <metin>      / !saw     the same, as something the mind SENSES itself (provenance "sensed")
     !izle <soz> || <karsilik> / !watch  the mind WATCHES two others talk (provenance "imitated"): how one answers
     !ogret <dosya>       / !teach   watch every line of a file: "soz<TAB>karsilik" dialogues or plain sentences
-    !oku <dosya|klasor>  / !read    watch every text in a file or folder (.txt .md .tsv; .docx with python-docx,
+    !oku <dosya|klasor>  / !read    watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
                                     .pdf with pypdf): sentences of documents as speech of others (imitated)
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
 Turn taking (while you speak the mind listens, then it may speak until it falls silent) is set by the session, not
@@ -41,9 +41,32 @@ VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=T
             "members": lambda: Config.changed(support="members"), "changed": Config.changed}
 
 
+def lower_tr(text: str) -> str:
+    """Turkish lower case (I -> ı, İ -> i) so that a word at the start of a sentence is the same symbol."""
+    return text.replace("I", "ı").replace("İ", "i").lower()
+
+
 def words(text: str) -> List[str]:
-    """Text channel adapter: words and punctuation as symbols."""
-    return re.findall(r"\w+|[^\w\s]", text, flags=re.UNICODE)
+    """Text channel adapter: words and punctuation as symbols, in Turkish lower case."""
+    return re.findall(r"\w+|[^\w\s]", lower_tr(text), flags=re.UNICODE)
+
+
+ASK_KEYS = ("soru", "question", "input", "prompt", "söz", "soz")
+ANSWER_KEYS = ("cevap", "answer", "output", "response", "karşılık", "karsilik")
+
+
+def dialogues_of(data) -> List[tuple]:
+    """(utterance, answer) pairs from JSON: a list of objects with a question-like and an answer-like field."""
+    pairs = []
+    for item in data if isinstance(data, list) else []:
+        if not isinstance(item, dict):
+            continue
+        keys = {k.lower(): v for k, v in item.items() if isinstance(v, str)}
+        ask = next((keys[k] for k in ASK_KEYS if k in keys), None)
+        answer = next((keys[k] for k in ANSWER_KEYS if k in keys), None)
+        if ask and answer:
+            pairs.append((ask, answer))
+    return pairs
 
 
 def sentences(text: str) -> List[str]:
@@ -126,6 +149,16 @@ class Session:
         start, lived, skipped = time.time(), 0, []
         for name in files:
             try:
+                if name.lower().endswith(".json"):
+                    import json
+                    with open(name, encoding="utf-8") as f:
+                        pairs = dialogues_of(json.load(f))
+                    for first, answer in pairs:
+                        self.watch(first, answer)
+                        lived += 1
+                    if not pairs:
+                        skipped.append(os.path.basename(name))
+                    continue
                 if name.lower().endswith(".tsv"):
                     with open(name, encoding="utf-8", errors="replace") as f:
                         for raw in f:
