@@ -270,7 +270,45 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     for target, (w_pos, w_neg) in own_mass(mind, unit, 1, trust).items():
         c = conviction(w_pos + w_neg, cfg.k)
         out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
+    if cfg.backoff and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
+        for target, e in continuation_backoff(mind, unit, trust).items():
+            out[target] = max(out.get(target, 0.0), e)
     return out
+
+
+def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F16: starting needs a reason, continuing follows the words. When nothing in the whole present situation
+    expects a next symbol, the end of the sequence that is going on now (the items after the last perceived event,
+    e.g. the mind's own utterance after its partner's ended) is read instead: its longest suffix that has lived
+    continuations speaks, with its own evidence scaled by lam. It never reaches back across a perceived event, so
+    it cannot start an utterance, only carry one on."""
+    S, cfg = mind.S, mind.cfg
+    if not int(S.u_kind[unit]) & COMPOSED:
+        return {}
+    parts = S.parts(unit)
+    start = 0
+    for j, p in enumerate(parts):
+        channel = int(S.u_channel[p])
+        if channel >= 0 and mind.ch.kind(channel) == "sense":
+            start = j + 1
+    tail = parts[start:]
+    heard = set(parts[:start])                          # what the partner just said is an echo, not knowledge
+    first = 1 if len(tail) == len(parts) else 0         # the whole tuple is the unit itself, read already
+    for i in range(first, len(tail)):
+        suffix = tail[i:]
+        if not suffix:
+            continue
+        piece = suffix[0] if len(suffix) == 1 else S.tuple_index.get(suffix)
+        if piece is None:
+            continue
+        out = {}
+        for target, (w_pos, w_neg) in own_mass(mind, piece, 1, trust).items():
+            if _world(mind, target) and w_pos > 0.0 and target not in heard:
+                c = cfg.lam * conviction(w_pos + w_neg, cfg.k)
+                out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
+        if any(e > 0.5 for e in out.values()):
+            return out
+    return {}
 
 
 def trusted_map(mind, unit: int) -> Dict[int, float]:

@@ -229,6 +229,19 @@ F15. (2026-11-14) Speech judged by its consequences (L5 will, T7 applied to spee
    copied answer is not said again; another answer that was approved is kept; the copied knowledge is still
    expected ("on" 0.79 before, 0.87 after). Records of the chat only; not yet a multi-seed test.
 
+F16. (2026-11-14) Speaking from what was read. Two parts. (1) Turn ends are perceived: the end of each utterance
+   (Enter in text) is an event on a sense channel; in watched dialogues it ends both speakers' utterances, in chat it
+   ends the partner's, and the turn passes there (the mind no longer completes its partner's sentence and then answers
+   it; it stops when its own utterance's lived continuation is the turn end). (2) Starting needs a reason, continuing
+   follows the words: when nothing in the whole present situation expects a next symbol, the end of the sequence going
+   on now (the items after the last perceived event) is read, its longest suffix with lived continuations speaks
+   (scaled by lam); it never reaches back across a perceived event, so it can carry an utterance on but not start one,
+   and it does not repeat what the partner just said (an echo is not knowledge). Result (results/fourth_chat_knowledge.txt,
+   data/school_*.txt/tsv): after reading five sentences and watching three "X nedir?" questions answered, "su nedir"
+   -> "su ateşi söndürür ve bitkileri sular ." and "güneş nedir" -> "güneş dünyayı ısıtır ve aydınlatır ." (never asked),
+   "zürafa nedir" -> "zürafa" and silence (nothing known). The start comes from F12 (SELF, NEXT), the rest from the
+   continuation of its own words. A toy demonstration, not yet a multi-seed test.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit

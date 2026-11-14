@@ -49,7 +49,7 @@ def _log_path() -> str:
 
 
 VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True,
-                                               neg_floor=1.0 / 14, log_path=_log_path()),
+                                               neg_floor=1.0 / 14, backoff=True, log_path=_log_path()),
             "members": lambda: Config.changed(support="members"), "changed": Config.changed}
 
 
