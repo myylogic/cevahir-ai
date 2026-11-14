@@ -215,6 +215,22 @@ class Substance:
         self.out.setdefault((src, form, -1 if form == PART else lag), []).append(tie)
         self.inc.setdefault((dst, form), []).append(tie)
 
+    _UNIT_ARRAYS = ("u_kind", "u_channel", "u_symbol", "u_arity", "u_birth", "u_use", "u_alive")
+    _TIE_ARRAYS = ("t_src", "t_dst", "t_form", "t_lag", "t_use", "t_last", "t_birth", "t_alive")
+
+    def __getstate__(self):
+        """Saved and copied without the spare capacity (the rows beyond n_units / n_ties are zeros); the arrays
+        grow again on demand exactly as they do while living."""
+        state = self.__dict__.copy()
+        n, t = self.n_units, self.n_ties
+        for name in self._UNIT_ARRAYS:
+            state[name] = getattr(self, name)[:max(n, 1)].clone()
+        for name in self._TIE_ARRAYS:
+            state[name] = getattr(self, name)[:max(t, 1)].clone()
+        state["t_w"] = self.t_w[:, :max(t, 1)].clone()
+        state["_cu"], state["_ct"] = max(n, 1), max(t, 1)
+        return state
+
     def slot_keys(self, parts: Tuple[int, ...]):
         """Slot keys of a tuple: (key, positions). Without ``bind_repeats`` one key per position (as written);
         with it, all positions holding the same unit form one slot (a variable that occurs more than once)."""

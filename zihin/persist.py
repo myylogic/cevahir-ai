@@ -78,6 +78,11 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
     that is unique to this load, so two loads of the same saved mind never write into the same file."""
     if not path.endswith(".zihin"):
         path += ".zihin"
+    if not os.path.exists(path) and os.path.exists(path + ".gz"):   # a compressed mind: unpack it once
+        import gzip
+        with gzip.open(path + ".gz", "rb") as src, open(path + ".tmp", "wb") as dst:
+            shutil.copyfileobj(src, dst, 1 << 20)
+        os.replace(path + ".tmp", path)
     with open(path + ".json", encoding="utf-8") as f:
         manifest = json.load(f)
     if manifest.get("format") != FORMAT:
