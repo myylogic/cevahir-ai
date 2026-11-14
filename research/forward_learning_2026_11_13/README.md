@@ -8,7 +8,10 @@ pre-trained here.
 **State: engine code, study code and tests only. The protocol is NOT FROZEN, the discovery jobs have not been
 run, no operating point is selected and there is no result.** A reduced smoke run on discovery world 0 proved the
 pipeline end to end and reproduced the numbers of the two v1 pilots; its numbers are not protocol data
-(`PROTOCOL.md` §9).
+(`PROTOCOL.md` §9). An independent review on 2026-11-14 put three primary tests back to what the methods review
+had required (H1 against FT-ALL, H2a against FEC-TOP, H3 on net facts per write against every comparator),
+replaced the stream's step-cap rule and tightened the integrity checks; `PROTOCOL.md` §4.1 lists what still
+deviates from the source proposals, including the comparators that are not run.
 
 ## What the mechanism is, and what it is not
 
@@ -22,7 +25,8 @@ Both source proposals (FEC and DEFTER) were judged **incremental** by their nove
 output error applied to MLP weights is FPO; the target-embedding write is Backward Lens; the path-order family is
 Highway-BP; stop-gradient through attention scores is TinT; the RLS write is RLSEdit / AlphaEdit / OWM; fast
 weights in the MLP projection are In-Place TTT and Fast Weight Layers; the in-layer least-squares solve is
-MesaNet. What the study may add is narrow and listed in `PROTOCOL.md` §1.2. The meta-trained DEFTER arm (learned
+MesaNet; further close work (FAAST, MobiEdit, LoCA, Titans, RETS) is in the table of `PROTOCOL.md` §1.1. What
+the study may add is narrow and listed in `PROTOCOL.md` §1.2. The meta-trained DEFTER arm (learned
 key map, write gate and feedback; new pre-training) is out of scope and listed as future work.
 
 ## Files
@@ -49,7 +53,7 @@ The base weights are not in the repository. Point `CEV_BASES` at the folder that
 
 ```bash
 export CEV_BASES=/path/to/living_learning_paradigm_2026_11_13/results/bases
-# smoke: 6 edits and a 30-fact stream; measured 174 s on one thread; writes to results/smoke unless --out is given
+# smoke: 6 edits and a 30-fact stream; measured 174-215 s on one thread; writes to results/smoke unless --out is given
 OMP_NUM_THREADS=1 python research/forward_learning_2026_11_13/run_world.py --run discovery --world 0 --smoke
 # discovery (worlds 0 and 1), record check, selection
 OMP_NUM_THREADS=1 python research/forward_learning_2026_11_13/run_world.py --run discovery --world 0
@@ -68,13 +72,17 @@ python research/forward_learning_2026_11_13/analyze.py
 python research/forward_learning_2026_11_13/verify.py --rerun --crosscheck
 ```
 
-Estimated compute (from the smoke timings, not measured end to end): about one core-hour per world.
+Estimated compute (from the smoke timings, not measured end to end): about one core-hour per world, ±25%.
+A run may only use the base of its own world (the seed in the base's world file is checked), a record file cut
+by a kill is repaired on resume, and the selection is tied to the engine module the discovery records were made
+with: change the engine after discovery and the discovery jobs have to be run again.
 
 ## Limits
 
 A 3.4M-parameter model, a synthetic templated world with the relation phrase directly before the object, 48
 possible answers, one tokenizer. The forward-learning layer is an optional module that attaches through hooks; it
 is not wired into the product's generation, training or serving paths. The smoke already shows where the idea is
-weak: in a stream the tape-free writes damage untouched facts that share the old answer, the capacity law as
+weak: in a stream the tape-free writes damage untouched facts that share the old answer, a capped
+exact-gradient step had a better net than both forward-learning arms on the one base probed, the capacity law as
 first proposed missed by about a factor two on one base, and ledger retraction was far from a replay without the
 fact. These are expectations to be tested, not results.

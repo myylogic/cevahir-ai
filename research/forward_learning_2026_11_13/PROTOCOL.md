@@ -1,6 +1,6 @@
 # FWL — learning in the forward pass: protocol
 
-Status: NOT FROZEN (draft of 2026-11-13)
+Status: NOT FROZEN (draft of 2026-11-13, revised 2026-11-14 after an independent review; see §4.1)
 
 This protocol merges two reviewed proposals of the 2026-11-13 research programme: FEC ("Forward Error Credit",
 lens *beyond-backprop-forward*) and DEFTER (lens *no-freeze-learning*). Both were judged **incremental** by their
@@ -9,6 +9,9 @@ novelty reviews and **fixable** by their methods reviews. The mechanism is imple
 holds the study that measures it. **Nothing has been measured under this protocol.** The discovery jobs have not
 been run, no operating point is selected, and no forward-learning arm has touched a confirmatory base. A reduced
 smoke run on discovery world 0 proved the pipeline and is described in §9; its numbers are not protocol data.
+An independent review (2026-11-14) changed three primary tests back to what the methods review of FEC had
+required, replaced the step-cap rule of the stream and tightened the integrity checks; §4.1 lists every
+deviation from the two source proposals that remains.
 
 To freeze: settle §11, run the discovery jobs, run `run_select.py`, replace the status line by
 `Status: FROZEN <YYYY-MM-DD>` and run `verify.py --freeze`. Confirmatory worlds are refused before that.
@@ -23,15 +26,17 @@ To freeze: settle §11, run the discovery jobs, run `run_select.py`, replace the
    OWM'de, MLP izdüşümünde hızlı ağırlık In-Place TTT ve Fast Weight Layers'ta, katman içi en küçük kareler
    MesaNet'te, dikkat skorlarında dur-gradyan TinT'te var. Burada yalnız eleştirilerin ayakta bıraktığı dar
    maddeler sınanıyor (§1).
-3. **Hipotezler.** H1: tek okumalı FEC-A, FT-L'den en çok 0,05 geride (sızıntı ve bpb korumalarıyla). H2a:
-   dikkatle yönlendirme (FEC-A − FEC-0) ≥ 0,05; H2b: FEC-A, tek adımlı tam gradyandan en çok 0,05 geride; rastgele
-   geri besleme denetimi ≤ %10 kurulum. H3: 100 olguluk akışta FEC, en iyi ardışık karşılaştırıcıdan (ardışık
-   FT-L, izdüşümü eşlenmiş tam gradyan, RLSEdit-benzeri, HEBB) en çok 0,05 geride. H4a: zor olumsuzlarda sızıntı
+3. **Hipotezler.** H1: tek okumalı FEC-A, FT-ALL'dan (güçlü karşılaştırıcı) en çok 0,04 geride (sızıntı ve bpb
+   korumalarıyla). H2a: dikkatle yönlendirme (FEC-A − FEC-TOP) ≥ 0,05; H2b: FEC-A, tek adımlı tam gradyandan en çok
+   0,05 geride; rastgele geri besleme denetimi ≤ %10 kurulum. H3: 100 olguluk akışta FEC'in yazım başına net olgu
+   sayısı, ardışık karşılaştırıcıların **her birinden** (ardışık FT-L, izdüşümü eşlenmiş tam gradyan,
+   RLSEdit-benzeri, HEBB) en çok 0,05 geride. H4a: zor olumsuzlarda sızıntı
    ≤ %2 çalışma noktasında kapılı okuma, kapısız okumayı ≥ 10 puan geçer; H4b: kapasite dizi öngörüsü ±%25
    içinde. H5: defterden geri alma ile "olgu hiç görülmedi" yeniden oynatması arasındaki fark ≤ 0,05 nat.
 4. **Birim.** Dünya (bağımsız ön-eğitimli CEV-11 tabanı), n = 8 doğrulayıcı taban; yeni ön-eğitim yok.
-5. **Dürüst öngörü.** H3'ün ve H5'in desteklenmemesi bekleniyor; H4b için DEFTER v2'nin yazıldığı biçim tek
-   keşif tabanındaki duman koşusunda yaklaşık 2 kat şaştı (§9).
+5. **Dürüst öngörü.** H3'ün ve H5'in desteklenmemesi bekleniyor (tek keşif tabanındaki yoklamada adım tavanı
+   verilen tam gradyan kolu iki FEC kolunu da geçti, §9); H2a belirsiz (FEC-TOP pilotların bir kısmında FEC-A ile
+   aynı düzeyde); H4b için DEFTER v2'nin yazıldığı biçim duman koşusunda yaklaşık 2 kat şaştı (§9).
 6. **Kapsam dışı.** Meta-eğitimli DEFTER kolu (yeni ön-eğitim ister), yol-sınıfı çekirdeği (PCK) ve kesik krediyle
    ön-eğitim; hepsi ileriki iş (§10).
 
@@ -60,6 +65,12 @@ gave them. "Not found" means not found in those searches (41 and about 45 querie
 | The statistic nu (variance reduction at a key) | approximate linear dependence in kernel RLS, sparse online Gaussian processes, linear-bandit bonus | textbook (cited from memory by the reviews) |
 | Rank-one gradient structure, learned gradient transforms for edits; reversal of rank-one edits | MEND; Youssef et al. | arXiv 2110.11309; 2505.20819 |
 | Next-token-loss updates of the last blocks' MLPs with an inner backward pass | TTT-E2E | arXiv 2512.23675 |
+| Forward-only, closed-form fast weights by ridge regression on key-value pairs at test time | FAAST | Bao et al., arXiv 2605.04651 |
+| Backprop-free editing: forward-only (zeroth-order) gradient estimates with ROME's closed-form write | MobiEdit | arXiv 2506.13772 |
+| A learned low-rank map from the final prediction error to a local correction per block, then closed-form solves (a learned counterpart of the routing here) | LoCA | Wang et al., arXiv 2608.03020 |
+| Surprise-driven test-time writes with gates and forgetting | Titans | Behrouz et al., arXiv 2501.00663 |
+| Editing the MLP at the last relation token (prediction site) and its over-generalisation to other subjects (our same-old-answer damage) | RETS | Liu et al., AAAI 2025, arXiv 2408.15091 |
+| Interference of sequential closed-form edits with non-orthogonal keys, growing with the number of edits | Knowledge in Superposition; PRUNE | arXiv 2408.07413; 2405.16821 |
 | The score identity E_{y~p}[delta] = 0; linear associative-memory algebra (kernel law); deterministic equivalents | textbook | — |
 
 ### 1.2 What the reviews left standing (the only candidates for a contribution)
@@ -91,8 +102,8 @@ self-learning. Before any statement leaves this repository the searches must be 
 All names are from `forward_learning.py`; every numbered statement is a test in
 `tests/evolution/test_forward_learning_engine.py` or `test_forward_learning_memory.py`.
 
-- **Model.** `CevahirNeuralNetwork` in eval mode, pre-norm, sequential residual, RMSNorm, no MoE (anything else
-  is refused): x_0 = E[tok], u_k = x_{k-1} + attn_k(n1_k(x_{k-1})), x_k = u_k + W_2^k h_k with h_k the fc2 input,
+- **Model.** `CevahirNeuralNetwork` in eval mode, pre-norm, sequential residual, RMSNorm, no MoE, standard
+  softmax attention, plain floating-point `ffn.fc2` layers on the CPU (anything else is refused): x_0 = E[tok], u_k = x_{k-1} + attn_k(n1_k(x_{k-1})), x_k = u_k + W_2^k h_k with h_k the fc2 input,
   logits c·tanh(z/c), z = U n_o(x_L).
 - **Output error** (`output_error`): delta_t = J_{n_o}(x_L)ᵀ Uᵀ[s ⊙ (p_t − e_y)], s = 1 − tanh²(z/c). Equals
   ∂(−log p_t[y])/∂x_L (≤ 1e-5 in float32, ≤ 1e-10 in float64; with and without the cap; tied and untied output:
@@ -120,7 +131,8 @@ All names are from `forward_learning.py`; every numbered statement is a test in
   population) and S_q (queries), delta = tr[S_w(I/ξ + N S_w/(1+delta))⁻¹], mean nu = 1 − tr[S_q(I + ξN
   S_w/(1+delta))⁻¹]/tr S_q; mixture form with one self-energy per stored-key class (§5.4).
 
-Corrections carried over from the methods reviews, all reflected in the code and tests: the score identity is not
+Corrections to the *mechanism* carried over from the methods reviews, reflected in the code and tests (the
+required changes to the *experiment* are tracked one by one in §4.1): the score identity is not
 a lock (the write is normalised and step-searched; the protection is that only `read` + `write` on tokens
 supplied by the caller ever write); the kernel law and the RLS guarantee are exact only for top-block writes; a
 write below the top block invalidates the KV cache (cleared by the learner); every arm, BASE included, is
@@ -143,6 +155,7 @@ step with the RLS projector.
   this limit.
 - **Disclosure.** CEV-11's confirmatory records are on disk and its report is public: the world-level means of
   the comparators (FT-L 0.847, FT-ALL 0.931, G = mean(PE6, IE5)) were known when the margins below were chosen.
+  For that reason H1 is tested against the stronger of the two (FT-ALL), as the methods review required.
   The comparators are run fresh by this study with CEV-11's frozen selection (`FT-L` layer 0, eps 0.02, lr 1e-3,
   60 steps; `FT-ALL` lr 1e-4, 40 steps) and cross-checked against CEV-11's records of the same edits
   (`verify.py --crosscheck`).
@@ -163,17 +176,22 @@ G = mean(PE6, IE5) per world over **all** edits, a failed install counting 0 in 
 
 | | Statistic per world | Test | Guards / controls | Honest prediction |
 |---|---|---|---|---|
-| **H1** single-read edit | G(FEC-A, `nll` install) − G(FT-L) | non-inferiority, margin 0.05 (null: ≤ −0.05) | Leak_RD, Leak_C (= RC), Leak_RN of FEC-A not above FT-L by more than 0.02; Δbpb ≤ 0.01 (upper 95% bounds) | supported, with low confidence (v1 pilot: FEC-A 0.905 on 14 discovery edits under the `greedy` rule; FT-L 0.865 on CEV-11's 40 selection edits) |
-| **H2a** routing | G(FEC-A) − G(FEC-0), `greedy` install | superiority, SESOI 0.05 | RAND-0 installs ≤ 10% of edits, else "control failed" | supported under `greedy` (pilot +0.11 to +0.14); at ceiling under `nll` |
+| **H1** single-read edit | G(FEC-A, `nll` install) − G(FT-ALL) | non-inferiority, margin 0.04 (null: ≤ −0.04; half of the resolved FT-ALL − FT-L gap) | Leak_RD, Leak_C (= RC), Leak_RN of FEC-A not above FT-ALL by more than 0.02; Δbpb ≤ 0.01 (upper 95% bounds) | supported, with low confidence (v2 pilot: 0.985 on 12 edits of one discovery world under the `nll` rule; FT-ALL 0.931 on CEV-11's confirmatory worlds). With world SDs of 0.03–0.04 this test can fail |
+| **H2a** routing | G(FEC-A) − G(FEC-TOP), `greedy` install | superiority, SESOI 0.05 | RAND-0 installs ≤ 10% of edits, else "control failed" | **uncertain**: FEC-TOP has no routing and was level with FEC-A in the v1 pilot (0.91 / 0.905) and on discovery world 1 (0.89 / 0.89), but behind it on discovery world 0 (0.66 / 0.92; the smoke's six edits 0.833 / 0.950); FEC v2 expects a difference within ±0.05 |
 | **H2b** truncated credit | G(FEC-A) − G(BP★), `greedy` install; BP★ = the best of {BP-1, BP-1b, BP-pred} on discovery | non-inferiority, margin 0.05 | as H2a | supported (pilot: FEC-A level with BP-pred) |
-| **H3** stream | S(FEC★) − S(CMP★) at N = 100, mean over the world's streams; S = (R + (PF6 + IF)/2)/2 − Dmg_A | non-inferiority, margin 0.05 | — | **not supported**: the tape-free rules put more of the write on entities sharing the old answer |
+| **H3** stream | Net/write(FEC★) − Net/write(c) at N = 100 for **every** sequential comparator c, mean over the world's streams; Net/write = (retained facts − Dmg_A × never-edited relation-A facts the base knows) / N | intersection–union non-inferiority, margin 0.05 net facts per write against each comparator: p = the largest of the five sign-flip p-values; refuted when the 95% upper bound against any one comparator is below −0.05 | — | **not supported**: the tape-free rules put more of the write on entities sharing the old answer; on discovery world 0 the capped exact-gradient step was ahead of both FEC arms at N = 30 (§9) |
 | **H4a** gate | recall_other(gated at θ★) − recall_other(ungated at γ★) on the gate arm, N = 100 | superiority, SESOI 0.10 | hard-negative leak of the gated read: upper 95% bound ≤ 0.05 (point limit 0.02 reported) | uncertain |
 
-FEC★ ∈ {FEC-TOP+RLS, FEC-A+RLS}; CMP★ ∈ {FT-L-seq, BP-1+RLS, RLSEdit, HEBB-TOP+RLS, HEBB-0+RLS}; both are the
-discovery maxima of S and are fixed in the selection file. The comparator set contains an RLSEdit-style
-sequential rank-one editor and the Backward-Lens-style target-embedding rule, not only naive fine-tuning: the
-v1 stream claim compared a projector arm with fine-tuning that had none, and the methods review showed that most
-of that gap was the projector.
+FEC★ ∈ {FEC-TOP+RLS, FEC-A+RLS} is the discovery maximum of net facts per write and is fixed in the selection
+file. The comparators are {FT-L-seq, BP-1+RLS, RLSEdit, HEBB-TOP+RLS, HEBB-0+RLS}: an RLSEdit-style sequential
+rank-one editor, a projector-matched exact-gradient step and the Backward-Lens-style target-embedding rule, not
+only naive fine-tuning (the v1 stream claim compared a projector arm with fine-tuning that had none, and the
+methods review showed that most of that gap was the projector). **No single "best comparator" is picked on
+discovery.** The discovery streams run without step caps (the caps are their product), and without a cap the
+exact-gradient arm collapses, so a discovery ranking of the comparators would exclude it by construction. H3
+therefore asks for non-inferiority to every comparator; CMP★ (the discovery maximum of net facts per write among
+the comparators) is kept in the selection file for the secondary tests only. Sequential FT-L has no projector and
+is the naive reference of the set.
 
 **Threshold hypotheses (not in the Holm family; reported as estimates against their limits).**
 
@@ -191,11 +209,37 @@ of that gap was the projector.
   world-mean KL is ≤ 0.05 nat and the retention difference lies within ±0.02; **refuted** if the lower bound of
   the KL is above 0.05 nat. The gap is reported as a measurement whatever the label. Honest prediction: refuted.
 
-**Secondary, registered, unadjusted** (same three-outcome rule): routing against the right reference, G(FEC-A) −
-G(FEC-TOP) under both install rules (the methods review: FEC-0 is low because it writes a misaligned field into
-the lower blocks, not because routing is absent); H1 against FT-ALL with margin 0.04; H1 under the `greedy` rule;
-H2a under the `nll` rule; H3 on net facts per write and as a superiority test; the same-old-answer leak (SO
-family) of FEC-A against BP★ (v2 pilot: the tape-free rules lose selectivity, not transfer).
+**Secondary, registered, unadjusted** (same three-outcome rule): G(FEC-A) − G(FEC-0) under both install rules
+(the v1 form of H2a; the methods review: FEC-0 is low because it writes a misaligned field into the lower blocks,
+not because routing is absent, so this contrast would be confirmed even if routing added nothing); H2a under the
+`nll` rule; H1 against FT-L with margin 0.05 (the v1 form of H1); H1 under the `greedy` rule; H3 on the composite
+S = (R + (PF6 + IF)/2)/2 − Dmg_A against CMP★ (the v1 form of H3; S mixes rates over populations of different
+size and is positive for arms whose net is negative) and as a superiority test on net facts per write against
+CMP★; the same-old-answer leak (SO family) of FEC-A against BP★ (v2 pilot: the tape-free rules lose selectivity,
+not transfer); the capacity knee of H4b with the crossing of the measured mean (§5.4).
+
+### 4.1 Deviations from the source proposals and their reviews (complete list)
+
+The two methods reviews judged the proposals "fixable" on condition of numbered changes. The table says, for
+every change to the experiment, whether this protocol follows it. Rows marked *restored* were deviations in the
+first draft of this protocol (it tested H1 against FT-L, H2a against FEC-0 and H3 on the composite S) and were
+put back by the independent review of 2026-11-14.
+
+| Source | Required | Here |
+|---|---|---|
+| FEC methods R1 | 42 edits per world from CEV-11's list, paired by `edit_id`, disclosure | followed; the comparators are re-run fresh and cross-checked instead of reused |
+| FEC methods R2 | H1 against FT-ALL, margin 0.04, NLL-matched installs | followed (*restored*). **Not followed:** FT on all six fc2 and FT-L on block 6 in Part A are not run |
+| FEC methods R3 | H2a = FEC-A − FEC-TOP; H2b one-sided against the best exact one-step variant | followed (*restored*). The install rule of H2 is `greedy`, not NLL-matched (open point §11.1) |
+| FEC methods R4 | projector-matched backprop arms: multi-step FT on fc2 and on block 6 with the RLS-projected gradient, same criterion and cap | **partly**: only the one-step arm BP-1+RLS. The multi-step projected arms (FT-fc2+RLS, FT-L6+RLS of FEC v2) are **not implemented**; they would be the strongest comparators of H3 |
+| FEC methods R5 | damage on the edited relation, by shared old answer; net facts per write as the primary H3 quantity | followed (*restored*). "Usable capacity" is not computed |
+| FEC methods R6 | leak families "same old object" and "shares the first token of the new object"; kernel-law prediction of top-block leak | SO is measured; the first-token family and the kernel-law prediction are **not** |
+| FEC methods R7 | μ = 0, no write below a norm, a cap for every arm, capped write = failure | followed; the stream cap is one common cap (§5.2) |
+| FEC methods R10 | RAND-0 seeded per edit, G over all edits, three outcomes, guards on interval bounds | followed |
+| FEC v2 | path-class kernel (P1–P4), derived mixtures, margin ratios, exploratory paraphrase bases | out of scope (§10) |
+| DEFTER methods 1, v2 H1(b) | a like-for-like episodic store over the same keys (KEY-kNN) next to the gated fast weights | **not run**: H4a compares the gate with a global gain only, so it says nothing about fast weights against an episodic store |
+| DEFTER v2 arms | INPLACE (In-Place TTT replica), HEBB as a meta-trained arm, kNN-cache, TTT-FT, EPI-SLOT | **not run** (they need meta-training or belong to its H5; §10) |
+| DEFTER v2 H2 | knee = median familiarity crossing θ, against the law | followed as worded; the law predicts the mean, so the crossing of the measured mean is recorded too |
+| DEFTER v2 H4b | retraction unit = chain, 40 facts per model, 90% bounds | one read per fact (write = chain), 7 facts per world, 95% bounds |
 
 ## 5. Experiment
 
@@ -207,8 +251,8 @@ as the learned positions, all six fc2 writable (FEC-TOP, HEBB-TOP: the last), no
 Arms: FEC-TOP, FEC-0, FEC-1, FEC-A, HEBB-TOP, HEBB-0, RAND-0, BP-1 (exact fields, global norm), BP-1b (per-block
 norm), BP-pred (exact fields at the loss positions) — each under both install criteria — and FT-L, FT-ALL
 (CEV-11's code and frozen selection). Step caps from the discovery selection (4 × the discovery median of the
-installing step per arm and criterion; RAND-0 takes FEC-0's cap); a capped search that does not install is a
-failed install. Families: CEV-11's WF, PF6, PF5, IF5, RN, RD, RB, RC, plus **SO** (up to 6 other probe-pool
+installing step per arm and criterion; RAND-0 takes FEC-0's cap; single edits are independent, so an arm's own
+median is not distorted by earlier writes); a capped search that does not install is a failed install. Families: CEV-11's WF, PF6, PF5, IF5, RN, RD, RB, RC, plus **SO** (up to 6 other probe-pool
 entities whose old answer equals the edit's old answer, 7 formal frames). Prose bpb on 40 held-out texts for
 FEC-A, FEC-TOP and FT-L on the first 12 edits.
 
@@ -220,7 +264,12 @@ FEC-TOP+RLS, FEC-A+RLS, FEC-TOP (no projector; ablation), FEC-TOP+RLS+G (capacit
 HEBB-TOP+RLS, HEBB-0+RLS, BP-1+RLS (one projected exact-gradient step), FT-L-seq (CEV-11's FT-L applied fact
 after fact) and RLSEdit (CEV-11's ROOT site and value search on the current model, written with the RLS gain
 g = Pk/(1/ξ + kᵀPk) under the same prior; if the plain RLS write misses the criterion, larger scales from the
-common grid are tried). Same install criterion (`nll`) and the discovery caps for all.
+common grid are tried). Same install criterion (`nll`) for all, and **one common step cap** for every arm whose
+step is the Frobenius norm of a unit-normalised write (all learner arms): 4 × the median installing step of
+FEC-TOP+RLS and FEC-A+RLS over the discovery streams. RLSEdit's step is a multiple of its own value search and
+keeps 4 × its own discovery median; FT-L-seq has no step search. The first draft gave every arm 4 × its own
+median; that is no cap for an arm that collapses in the uncapped discovery run, because its steps grow with the
+damage (§9), and FEC v2 asks for "the same step cap for all".
 
 Metrics: R = retention in the lived frame; PF6, IF = the other formal and the informal frames of all written
 facts; **Dmg_A** = share of 120 untouched entities' relation-A facts the base knew whose greedy answer changed
@@ -249,7 +298,11 @@ the trained case frames with a seeded counterfactual object. **Registered form: 
 classes — the prediction site and the later object positions — with their shares and whitened second moments
 S_c, S_q from the unit-normalised prediction-site reference keys, one self-energy per class:
 delta_c = ξ tr(S_c R), R = (I + ξN Σ_c share_c S_c/(1+delta_c))⁻¹, mean nu = 1 − tr(S_q R)/tr S_q; N counts
-stored keys. The two-population form as written in the DEFTER proposal (one class, C0-pool entities only) is
+stored keys. The registered measured knee is the crossing of the probes' **median** (the wording of the DEFTER
+proposal) while the law predicts their **mean**; the crossing of the measured mean is recorded next to it
+(`knees_mean`) and reported as a secondary, so a failure of H4b can be told apart from a skewed distribution.
+The reference frames are all trained case frames, the measured probes use the genitive frame only; this
+mismatch is part of what H4b tests and is not corrected. The two-population form as written in the DEFTER proposal (one class, C0-pool entities only) is
 computed and reported next to it (`predicted_v2`, `knees_v2`).
 
 **Disclosure:** the mixture form and the larger reference set were chosen after the smoke on discovery world 0
@@ -265,29 +318,42 @@ without the fact, measure the same. KL(replay ‖ retract), total variation, P(f
 
 ## 6. Discovery selection (`run_select.py`, worlds 0 and 1 only)
 
-Step caps (4 × median installing step, single arms per criterion and stream arms); BP★ (highest pooled G under
-`greedy`); FEC★ and CMP★ (highest pooled S at N = 100); for each gate arm θ★ and γ★ = the setting with the
+Step caps (single arms: 4 × the median installing step per arm and criterion; stream: the common cap of §5.2);
+BP★ (highest pooled G under `greedy`); FEC★ (highest pooled net facts per write at N = 100; CMP★ likewise, for
+secondary tests only); for each gate arm θ★ and γ★ = the setting with the
 highest pooled recall_other among those with pooled hard-negative leak ≤ 2% and Δbpb ≤ 0.01 (if none is feasible
 the most conservative setting is taken and the arm is reported as infeasible at the budget). The file carries
-the hashes of the discovery records and its own sha256.
+the hashes of the discovery records, the engine and configuration hashes of their headers, and its own sha256.
+The selection is refused at the freeze when the engine module is no longer the one the discovery records were
+made with, or when they were not made with the registered configuration. Known limit: the discovery streams run
+uncapped, so FEC★ and the gate operating points are chosen under conditions that differ from the capped
+confirmatory streams; a wrong FEC★ can only hurt the FEC side of H3 and H4a.
 
 ## 7. Statistics
 
 World-level paired differences; exact sign-flip permutation test (256 patterns, smallest one-sided p = 1/256;
 with five Holm tests the smallest adjusted p is 5/256 ≈ 0.0195, so a primary test can pass only if at least
 seven of the eight worlds agree in sign after the margin); Holm step-down over {H1, H2a, H2b, H3, H4a} at
-α = 0.05 (an untested member keeps p = 1); two-sided 95% t-intervals (df = 7) with all per-world values listed.
+α = 0.05 (an untested member keeps p = 1); H3 enters the family with the largest of its five p-values
+(intersection–union: no correction is needed inside the union, and a comparator without records makes H3
+untestable instead of being dropped); two-sided 95% t-intervals (df = 7) with all per-world values listed.
 Functions:
 `cev11.stats.signflip_pvalue`, `holm_adjusted`, `t_interval` (the frozen CEV-11 package). `analyze.py` refuses
-incomplete world files.
+incomplete world files and records whose header does not carry the configuration of the frozen selection or the
+engine of the discovery records; it writes into `decisions.json` whether the freeze manifest still matches.
+A base folder is accepted only for the world it was pre-trained for (the seed in its world file), so `--base`
+cannot put a confirmatory base under a discovery or smoke run. An existing freeze manifest is never overwritten
+by a different one.
 
 ## 8. Compute (estimate from the smoke timings; not measured end to end)
 
-One thread per job. Part A: about 7 s preparation per edit and 1.1–1.5 s per (edit, arm, criterion), i.e. about
-30 minutes per world. Part B: about 0.15 s per forward-learning write, 0.5 s per FT-L write, 1.2 s per RLSEdit
-write, 5–10 s per evaluation; with the gate sweep (prose bpb at every setting in discovery) and the retraction
-replays about 25–30 minutes per world. Confirmatory package: about 8 core-hours; discovery: about 2. If this must
-be cut: drop the second stream, then the `greedy` criterion of the arms that are in no hypothesis.
+One thread per job. The smoke took 174 s in the author's run and 215 s in the reviewer's (same machine class,
+other light jobs running), so every figure here carries about ±25%. Part A: about 7 s preparation per edit and
+1.1–1.5 s per (edit, arm, criterion), i.e. about 30 minutes per world. Part B: about 0.15 s per forward-learning
+write, 0.5 s per FT-L write, 1.2 s per RLSEdit write, 5–10 s per evaluation; with the gate sweep (prose bpb at
+every setting in discovery) and the retraction replays about 25–30 minutes per world. Confirmatory package:
+about 8 core-hours; discovery: about 2. If this must be cut: drop the second stream, then the `greedy` criterion
+of the arms that are in no hypothesis.
 
 ## 9. Smoke on discovery world 0 (pipeline proof; not protocol data)
 
@@ -296,7 +362,8 @@ install criterion (`greedy`) of the v1 pilots, so that the engine can be compare
 
 Measured on 2026-11-14: 174 s on one thread with the machine's other three cores busy (Part A 87 s: 34 s
 preparation, 53 s for 6 edits x 9 arms; Part B 87 s), 76 records; a second run gave the same records apart from
-the wall-clock fields. Small samples, one base, operating points not selected: none of the numbers below is a
+the wall-clock fields. The reviewer's run of the same command measured 215 s (Part A 102 s: 41 s preparation,
+61 s arms; Part B 112 s) and reproduced every number of the tables below. Small samples, one base, operating points not selected: none of the numbers below is a
 finding.
 
 **Closed forms on a trained base** (6 sentences): output error against autograd 7.5e-7 (relative), FEC-A and
@@ -345,6 +412,23 @@ of the rule's fc2 gradient with backprop, blocks 1..6: FEC-A 0.351, 0.445, 0.505
   fact's token probability 8.5e-5 where the replay gave 6.7e-3, and kept 0.931 of the other facts where the replay
   kept 0.966. Ledger retraction is exact arithmetic and, on this evidence, far from "never seen".
 
+**Reviewer probe of the step cap (2026-11-14; discovery world 0, the smoke's 30-fact stream and `greedy`
+criterion; one base, not protocol data).** This probe is the reason for the common cap of §5.2 and for testing
+H3 against every comparator; it is a use of a discovery world for a design decision and must stay visible.
+
+| arm, cap | installed of 30 | retention | Dmg_A | net facts per write |
+|---|---|---|---|---|
+| BP-1+RLS, no cap (first step 22.6; steps up to 128) | 15 | 0.133 | 0.983 | −10.03 |
+| BP-1+RLS, cap 13.3 (4 × its own median over the first 10 facts) | 24 | 0.667 | 0.200 | −1.40 |
+| BP-1+RLS, cap 8.0 (the same for 5.66 and 4.0) | 22 | 0.667 | 0.017 | **+0.49** |
+| FEC-TOP+RLS, no cap / cap 8.0 | 30 / 29 | 1.000 / 0.967 | 0.200 / 0.150 | −1.07 / −0.58 |
+| FEC-A+RLS, no cap / cap 5.66 | 30 / 29 | 0.867 / 0.933 | 0.108 / 0.108 | −0.25 / −0.19 |
+
+Reading: the exact-gradient step is not a weak comparator that "collapses"; it collapses only when its first
+steps are unbounded, and with the step budget of the FEC arms it was the only arm with a positive net on this
+stream. Under the first draft's rules it could not have become the H3 comparator (uncapped on discovery) and
+would have run the confirmatory streams with a cap of 4 × 8.0 = 32. H3 is expected to fail.
+
 ## 10. Out of scope (future work)
 
 - **The meta-trained DEFTER arm.** Slow weights trained through the write rule (key map, feedback correction,
@@ -355,6 +439,10 @@ of the rule's fc2 gradient with backprop, blocks 1..6: FEC-A 0.351, 0.445, 0.505
   instrument and its hypotheses are not.
 - Pre-training with truncated credit; paraphrase bases with a non-adjacent object position; the Gauss–Newton
   and true-gradient value switches; a KV-cached streaming reader.
+- **Comparators the source proposals asked for and this study does not run** (§4.1): multi-step fine-tuning
+  with the RLS-projected gradient (FT-fc2+RLS, FT-L6+RLS), FT on all six fc2 and FT-L on block 6 for single
+  edits, an episodic store over the same keys (KEY-kNN), the In-Place TTT replica, kNN-cache and TTT-FT. A
+  positive H3 or H4a must be reported with this list next to it.
 
 ## 11. Open points before the freeze
 
@@ -367,7 +455,14 @@ of the rule's fc2 gradient with backprop, blocks 1..6: FEC-A 0.351, 0.445, 0.505
 4. The knee threshold of H4b when θ★ is not one of 0.3, 0.5, 0.7.
 5. Whether stream 1 is kept (compute) and whether the gate arm of H4a should be fixed to the top-block arm,
    where the kernel law and the capacity trace are exact.
-6. Full-text check of FPO, Backward Lens, Highway-BP, TinT, RLSEdit, In-Place TTT, FWL and MesaNet.
+6. Full-text check of FPO, Backward Lens, Highway-BP, TinT, RLSEdit, In-Place TTT, FWL, MesaNet, FAAST and
+   MobiEdit.
+7. Whether the multi-step projected fine-tuning arm (FT-fc2+RLS) and the episodic store (KEY-kNN) are added
+   before the freeze (§4.1). Without them H3 and H4a are tested against a weaker set than the proposals promised.
+8. Whether the discovery streams are run a second time with the caps, so that FEC★ and the gate operating points
+   are selected under the conditions of the confirmatory streams (about one more core-hour).
+9. The margin of H3 (0.05 net facts per write, from FEC v2) was set before any capped stream was seen; the
+   spread of net facts per write across worlds is unknown.
 
 ## 12. Commands
 
