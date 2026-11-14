@@ -59,6 +59,41 @@ Interoceptive channels (load, memory, speed, failure; later sensors of the hardw
 is L2 applied to body triggers: (body state -> internal act such as prune, slow down, ask for resources). Acts that
 change the mind's resources outside the sandbox are outward acts and pass the gate.
 
+## L5. Drives and will (owner, 2026-11-14)
+
+Owner: "By nature a human tends to mate and to chase pleasures; strong reinforcers such as serotonin and dopamine
+wrap the mind. Why does not every mind act with the same strength or direction? These directors are models too.
+But the upper consciousness can, when needed, show the will to take the more likely and the right decision."
+
+In the substance:
+
+- Value signals are interoceptive channels like the feelings: pleasure, pain (later: any body-specific value).
+  A body adapter may give a few innate ties with innate evidence (trust_prior), e.g. (sensed X -> pleasure).
+  The innate GAIN of each value channel (how much one pleasure event counts) is a body constant that differs
+  between minds: temperament. Same rule, different gains, different lives -> different strength and direction.
+- A drive toward an act is the pooled expectation (S, X) -> pleasure at lag 1 (immediate). Consequences are ties
+  at longer lags: (S, X) -> harm / relief / pleasure at lag L > 1, learned by the same rule when the outcome
+  arrives later (the episode keeps a trace of its acts; the trace is the only thing a longer lag needs).
+- Will is the deliberate layer weighing the act before it is emitted. The act's accumulated evidence over the
+  settling iterations is
+
+      A(X) = sum_t [ (2 e_now(S, X) - 1)  +  sum_L gamma^L (2 e_L(S, X) - 1)  +  imagined(S, X) ]
+
+  where e_now is the immediate drive, e_L the learned later consequences discounted by gamma (a knob), and
+  imagined(S, X) the reality-scored constructions of where X leads (section 6), each weighted by self-trust.
+  X is emitted only if A(X) crosses theta. A strong immediate drive with a reliably bad later consequence does not
+  cross: that is a veto. An automatic act (L2) is subject to the same veto as soon as the conflict (high drive and
+  high harm expectation at once) is felt, because conflict is an event that wins the focus and brings the act back
+  under deliberation.
+- Differences between minds are therefore of three measurable kinds: innate gains (body), lived evidence (biography)
+  and learned knobs (gamma, theta, self-trust: how far ahead and how cautiously this mind decides). None is written
+  as a rule for a specific behaviour.
+
+Test T12 (drives and will): two minds with different innate pleasure gains living the same stream act with
+different frequency (temperament); an act with immediate pleasure and a delayed harm is first taken, then vetoed
+after the delayed consequence has been lived, while the immediate pleasure expectation stays as it was (the drive is
+not erased, it is outweighed); an ablation without consequence lags never stops.
+
 ## What would make this testable (to be added to the benchmark)
 
 - T10 automation: after an act has been reliable in a situation for long enough, it is emitted while the focus is

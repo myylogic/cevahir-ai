@@ -202,7 +202,8 @@ def judge_generalisations(mind, changes: Dict[int, Dict[int, list]]) -> None:
         kind = int(S.u_kind[instance])
         if not kind & COMPOSED or kind & SLOTTED:
             continue
-        lived = [v for v, r in record.items() if r[1] > r[0] and int(S.u_channel[v]) >= 0
+        lived = [v for v, r in record.items() if r[1] > r[0] and r[0] == 0.0 and r[2] == 0.0  # first time only
+                 and int(S.u_channel[v]) >= 0
                  and mind.ch.kind(int(S.u_channel[v])) in ("sense", "act")]
         if not lived:
             continue
