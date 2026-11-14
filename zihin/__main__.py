@@ -8,6 +8,8 @@ Commands (Turkish, with English aliases):
     !gordum <metin>      / !saw     the same, as something the mind SENSES itself (provenance "sensed")
     !izle <soz> || <karsilik> / !watch  the mind WATCHES two others talk (provenance "imitated"): how one answers
     !ogret <dosya>       / !teach   watch every line of a file: "soz<TAB>karsilik" dialogues or plain sentences
+    !oku <dosya|klasor>  / !read    watch every text in a file or folder (.txt .md .tsv; .docx with python-docx,
+                                    .pdf with pypdf): sentences of documents as speech of others (imitated)
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
 Turn taking (while you speak the mind listens, then it may speak until it falls silent) is set by the session, not
 learned yet: during your words the act threshold is raised, afterwards it is the mind's own.
@@ -42,6 +44,27 @@ VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=T
 def words(text: str) -> List[str]:
     """Text channel adapter: words and punctuation as symbols."""
     return re.findall(r"\w+|[^\w\s]", text, flags=re.UNICODE)
+
+
+def sentences(text: str) -> List[str]:
+    """Split a document into sentences (and lines), keeping only those with at least two words."""
+    parts = re.split(r"(?<=[.!?…])\s+|\n+", text)
+    return [p.strip() for p in parts if len(words(p)) >= 2]
+
+
+def read_document(path: str) -> str:
+    """Plain text of a document. .docx needs python-docx, .pdf needs pypdf (only if such files are present)."""
+    low = path.lower()
+    if low.endswith((".txt", ".md", ".tsv", ".csv")):
+        with open(path, encoding="utf-8", errors="replace") as f:
+            return f.read()
+    if low.endswith(".docx"):
+        import docx  # python-docx
+        return "\n".join(p.text for p in docx.Document(path).paragraphs)
+    if low.endswith(".pdf"):
+        from pypdf import PdfReader
+        return "\n".join(page.extract_text() or "" for page in PdfReader(path).pages)
+    return ""
 
 
 class Session:
@@ -93,6 +116,42 @@ class Session:
         self.mind.step([])
         self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
         return " ".join(said) if said else "(sessiz)"
+
+    def read_path(self, path: str) -> str:
+        """Watch the texts of a file or of every supported file under a folder; report what was lived."""
+        import os
+        import time
+        files = [path] if os.path.isfile(path) else sorted(
+            os.path.join(root, name) for root, _, names in os.walk(path) for name in names)
+        start, lived, skipped = time.time(), 0, []
+        for name in files:
+            try:
+                if name.lower().endswith(".tsv"):
+                    with open(name, encoding="utf-8", errors="replace") as f:
+                        for raw in f:
+                            if "\t" in raw:
+                                first, answer = raw.rstrip("\n").split("\t", 1)
+                                self.watch(first, answer)
+                                lived += 1
+                    continue
+                text = read_document(name)
+            except Exception as exc:
+                skipped.append("%s (%s)" % (os.path.basename(name), exc))
+                continue
+            if not text:
+                skipped.append(os.path.basename(name))
+                continue
+            for sentence in sentences(text):
+                self.listen(sentence, IMITATED)
+                self.mind.step([])
+                lived += 1
+            self.history.append((len(self.history) + 1, "[okudu] %s" % os.path.basename(name), []))
+        took = time.time() - start
+        out = "  %d dosya, %d cümle/diyalog, %d an, %.0f sn (%.1f ms/an)" % (
+            len(files) - len(skipped), lived, self.mind.t, took, 1000 * took / max(1, self.mind.t))
+        if skipped:
+            out += "\n  okunamayan: " + ", ".join(skipped[:10])
+        return out
 
     def ask(self, text: str, top: int = 5) -> str:
         twin = self.mind.clone()
@@ -184,6 +243,8 @@ def main(argv=None) -> None:
                                 session.live(raw, IMITATED)
                             n += 1
                     print("  %d satır izlendi, %d an" % (n, session.mind.t))
+                elif cmd in ("oku", "read"):
+                    print(session.read_path(rest.strip()))
                 elif cmd in ("konus", "chat"):
                     chat = not chat
                     print("  sohbet modu %s" % ("açık" if chat else "kapalı"))
