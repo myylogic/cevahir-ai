@@ -247,7 +247,7 @@ class Mind:
         context = recognise(self, slot) if has_items else None
         parts = tuple(self.episode)
         if context is not None:
-            base[context] = sum(base.get(p, 0.0) for p in parts) / len(parts)
+            base[context] = 1.0                            # recognised now: the whole tuple is present
             self.prov_of[context] = slot
         self.context = context if context is not None else (parts[0] if len(parts) == 1 else None)
         if self.hoping is not None and has_items:          # the echo of an own act has just arrived
@@ -271,7 +271,7 @@ class Mind:
                     gens[category] = (unit, e)
                 bare.append((unit, len(S.inc.get((category, ABSTRACT), ())), -derived[category], (0, category),
                              category))
-        if context is not None and cfg.typed_frames:
+        if context is not None:
             for pos, part in enumerate(parts):
                 for category, e in cats.get(part, []):
                     a_frame = (sum(base.get(p, 0.0) for j, p in enumerate(parts) if j != pos)
@@ -279,6 +279,8 @@ class Mind:
                     frame_parts = parts[:pos] + (category,) + parts[pos + 1:]
                     frame = S.tuple_index.get(frame_parts)
                     if frame is None:
+                        if not cfg.typed_frames:
+                            continue
                         virtual[frame_parts] = (a_frame, context, e)
                     else:
                         derived[frame] = max(derived.get(frame, 0.0), a_frame)
