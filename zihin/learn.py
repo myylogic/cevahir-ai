@@ -113,9 +113,10 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
             present = torch.tensor([occurred[d][0] if d in occurred else 0.0 for d in dst.tolist()], dtype=F64)
             weight = e if cfg.neg_weight == "e" else torch.ones_like(e)
             miss = g * a_u * weight * (1.0 - present)
+            expected = (e >= cfg.neg_floor) if cfg.neg_floor > 0.0 else torch.ones_like(present, dtype=torch.bool)
             reporting = torch.zeros(ids.numel(), dtype=torch.bool)
             for ch, slot in slot_of_channel.items():
-                on = channel == ch
+                on = (channel == ch) & expected
                 if bool(on.any()):
                     reporting |= on
                     got = add_evidence(mind, W_NEG, slot, ids[on], miss[on], relief=ch not in echo)
@@ -185,8 +186,9 @@ def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel)
             channel = S.u_channel[dst]
             present = torch.tensor([occurred[d][0] if d in occurred else 0.0 for d in dst.tolist()], dtype=F64)
             miss = mind.knob["gain"] * strength * e * (1.0 - present)
+            expected = (e >= cfg.neg_floor) if cfg.neg_floor > 0.0 else torch.ones_like(present, dtype=torch.bool)
             for ch, slot in slot_of_channel.items():
-                on = channel == ch
+                on = (channel == ch) & expected
                 if bool(on.any()):
                     add_evidence(mind, W_NEG, slot, ids[on], miss[on])
                     S.use_ties(ids[on])
@@ -317,6 +319,34 @@ def reflect(mind, budget: int = 1) -> None:
     mind.reflect_cursor = cursor
 
 
+def learn_value(mind, percepts) -> None:
+    """L5, consequences: a signal on a channel of kind "value" (good or bad for this mind, as its body adapter
+    defines) is evidence for every step of the episode that led to it: each composed context in the episode's
+    trace gets EXPECT lag 2 ("later in the same episode") to the value unit. The trace is the only memory a
+    consequence needs; nothing names what is good or bad here."""
+    S, g = mind.S, mind.knob["gain"]
+    trace = getattr(mind, "trace", [])
+    if not trace:
+        return
+    for unit, intensity, slot, channel in percepts:
+        if intensity <= 0.0 or mind.ch.kind(channel) != "value":
+            continue
+        for step_unit in dict.fromkeys(trace):
+            add_evidence1(mind, W_POS, slot, S.tie(step_unit, unit, EXPECT, 2), g * intensity)
+
+
+def learn_facets(mind, items: List[int], facets: List[Tuple[int, float, int]], slot: int) -> None:
+    """Facets (parts or features of an item on a channel of kind "facet", e.g. subword pieces of a word, later
+    features of a seen object) hold together with the items of the same moment: EXPECT lag 0 in both directions,
+    positive evidence g x intensity. They never enter the episode or the focus; the context learns to expect them
+    in the next moment like any percept (learn_follow), so a context can expect a suffix of a word it never met."""
+    g = mind.knob["gain"]
+    for item in items:
+        for facet, intensity, _ in facets:
+            add_evidence1(mind, W_POS, slot, mind.S.tie(item, facet, EXPECT, 0), g * intensity)
+            add_evidence1(mind, W_POS, slot, mind.S.tie(facet, item, EXPECT, 0), g * intensity)
+
+
 def learn_together(mind, focus: List[Tuple[int, float, bool]], slot: int) -> None:
     """EXPECT lag 0 among the grounded units of the focus; expected but absent partners get negative evidence."""
     S, cfg = mind.S, mind.cfg
@@ -331,8 +361,9 @@ def learn_together(mind, focus: List[Tuple[int, float, bool]], slot: int) -> Non
             w_pos, w_neg = tie_mass(mind, ids)
             e = expectation(w_pos, w_neg, cfg.k)
             weight = e if cfg.neg_weight == "e" else torch.ones_like(e)
-            add_evidence(mind, W_NEG, slot, ids, g * a_u * weight * (1.0 - here))
-            S.use_ties(ids)
+            keep = ((e >= cfg.neg_floor) | (here > 0.0)) if cfg.neg_floor > 0.0 else torch.ones_like(here, dtype=torch.bool)
+            add_evidence(mind, W_NEG, slot, ids[keep], (g * a_u * weight * (1.0 - here))[keep])
+            S.use_ties(ids[keep])
         for other, a_v in present.items():
             if other != unit:
                 add_evidence1(mind, W_POS, mind.prov_of.get(other, SENSED), S.tie(unit, other, EXPECT, 0),

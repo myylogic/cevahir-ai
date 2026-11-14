@@ -1,0 +1,14 @@
+Zihin — anlat, sor (?...), !neden, !unut, !kaydet, !cik. 0 an yaşanmış.
+  4 satır izlendi, 32 an
+  beklentiler (e = eyleme esas beklenti):
+    on                   e 0.793
+  sohbet modu açık
+  zihin: on iki gece takılıyorum
+  not edildi (kötü)
+  zihin: (sessiz)
+  not edildi (kötü)
+  zihin: (sessiz)
+  zihin: yedi gibi erken kalkarım
+  sohbet modu kapalı
+  beklentiler (e = eyleme esas beklenti):
+    on                   e 0.871

@@ -25,7 +25,7 @@ N_PROV = len(PROVENANCE)
 # Classes that are direct experience: their trust is 1 by definition and they judge the other classes.
 REFERENCE: Tuple[int, ...] = (SENSED, ACTED)
 
-CHANNEL_KINDS = ("sense", "act", "feel", "knob", "source")
+CHANNEL_KINDS = ("sense", "act", "feel", "knob", "source", "facet", "value")
 
 
 @dataclass(frozen=True)

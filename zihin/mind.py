@@ -29,7 +29,7 @@ from . import act as act_mod
 from .events import ACTED, IMAGINED, IMITATED, N_PROV, PROVENANCE, REFERENCE, SENSED, Channels, Event
 from .evidence import conviction, expectation
 from .form import categories_of, compose, confirm_parts, maybe_chunk, recognise
-from .learn import learn_follow, learn_together, reflect
+from .learn import learn_facets, learn_follow, learn_together, learn_value, reflect
 from .read import conflict_of, predictions, total_drive
 from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS, Substance
 
@@ -49,6 +49,8 @@ class Config:
     lam: float = 0.5                # support factor of section 4 (design: 0.5)
     support: str = "raw"            # "raw" = as written; "capped", "nested" = changed; "none" = ablation
     predict: str = "votes"          # "votes" = as written, "specific" = changed
+    neg_floor: float = 0.0          # F14: a failed prediction is recorded only if it was expected (e >= floor);
+                                    # 0 = every tie of a present unit, as written
     neg_weight: str = "e"           # failed expectation weighted by e (as written) or by 1 ("one")
     induct_cap: float = 1.0         # each instance counts at most one experience in induction
     general_miss: bool = False      # changed: a generalisation in the focus gets negative evidence for what
@@ -153,6 +155,8 @@ class Mind:
         self.last_gens: List[Tuple[int, int, float]] = []
         self.carry: Dict[int, float] = {}
         self.episode: List[int] = []
+        self.trace: List[int] = []                   # composed contexts of this episode (L5)
+        self.value_sign: Dict[Tuple[str, Hashable], float] = {}  # set by the adapter: which value signal is good/bad
         self.context: Optional[int] = None
         self.pending: List[Event] = []
         self.predicted: Dict[int, float] = {}
@@ -228,6 +232,7 @@ class Mind:
             if kind == "knob" and event.prov == ACTED and cfg.knobs:
                 act_mod.apply_knob(self, event.symbol)
         learn_follow(self, percepts)                       # step 5 for the previous moment
+        learn_value(self, percepts)                        # L5: a value signal reaches every step of the episode
         surprise = self._surprise(percepts)
         slot = items[0][1] if items else SENSED
         if items:
@@ -242,8 +247,15 @@ class Mind:
             if cfg.clear_on_pause:
                 self.carry = {}
         self._settle(percepts, slot, bool(items))          # steps 1 and 2
+        if items and self.context is not None and (not self.trace or self.trace[-1] != self.context):
+            self.trace.append(self.context)                # the episode's trace (for consequences, L5)
+        elif not items:
+            self.trace = []
         if cfg.lag0:
             learn_together(self, [f for f in self.focus if int(S.u_kind[f[0]]) & ATOMIC], slot)
+        facets = [(u, i, c) for u, i, p, c in percepts if i > 0 and self.ch.kind(c) == "facet"]
+        if facets and items:                               # facets of this moment go with its items (lag 0)
+            learn_facets(self, [u for u, _ in items], facets, slot)
         self.predicted = predictions(self)                 # step 3
         acts = act_mod.decide(self)                        # step 4
         if cfg.imagine and not items:
@@ -281,7 +293,10 @@ class Mind:
         decay = cfg.decay if cfg.decay is not None else 1.0 - 1.0 / F
         base: Dict[int, float] = {u: decay * a for u, a in self.carry.items()}
         for unit, intensity, prov, channel in percepts:
-            if intensity > 0 and (cfg.feel_focus or self.ch.kind(channel) != "feel"):
+            kind = self.ch.kind(channel)
+            if kind in ("facet", "value"):                 # facets and value signals do not compete for focus
+                continue
+            if intensity > 0 and (cfg.feel_focus or kind != "feel"):
                 base[unit] = max(base.get(unit, 0.0), min(1.0, intensity))
                 self.prov_of[unit] = prov
         context = recognise(self, slot) if has_items else None
@@ -447,7 +462,7 @@ class Mind:
             self.pending.append(Event("feel", name, prov, self.felt[name]))
 
     # ------------------------------------------------------------------ transient state, undo, retraction
-    _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "context", "pending",
+    _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of")
 
     def _snapshot(self):
