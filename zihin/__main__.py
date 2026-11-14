@@ -18,6 +18,7 @@ learned yet: during your words the act threshold is raised, afterwards it is the
     !gecmis              / !history what you have told, with numbers
     !unut <no>           / !forget  retract that utterance exactly (its evidence is removed from the core)
     !boyut               / !size    units, ties, bytes, moments
+    !yas                 / !age     developmental profile: moments and nights lived, words known, concepts, phrases
     !kaydet <yol>        / !save    save the mind (with integrity manifest)
     !yukle <yol>         / !load    load a saved mind
     !cik                 / !quit
@@ -88,6 +89,33 @@ def read_document(path: str) -> str:
         from pypdf import PdfReader
         return "\n".join(page.extract_text() or "" for page in PdfReader(path).pages)
     return ""
+
+
+def profile(mind: Mind) -> str:
+    """Developmental profile measured from the substance (nothing assigned)."""
+    from .evidence import conviction
+    from .store import ATOMIC, CATEGORY, COMPOSED, EXPECT, SLOTTED
+    S = mind.S
+    n = S.n_units
+    kinds = S.u_kind[:n]
+    cid = mind.ch.id(CHANNEL) if mind.ch.has(CHANNEL) else -1
+    words_seen = known = 0
+    for unit in range(n):
+        if not int(kinds[unit]) & ATOMIC or int(S.u_channel[unit]) != cid:
+            continue
+        words_seen += 1
+        ties = S.out.get((unit, EXPECT, 1), [])
+        if ties:
+            mass = float(max((S.t_w[0, t] * mind.trust).sum() + (S.t_w[1, t] * mind.trust).sum() for t in ties))
+            known += conviction(mass, mind.cfg.k) >= 0.5
+    phrases = int(((kinds & COMPOSED).bool() & ~(kinds & SLOTTED).bool()).sum())
+    lines = ["  yaşanmış an: %d   gece (uyku döngüsü): %d" % (mind.t, getattr(mind, "nights", 0)),
+             "  karşılaştığı kelime: %d   kanaat kazandığı kelime (c >= 0.5): %d" % (words_seen, known),
+             "  kurduğu kavram (kategori): %d   çerçeve: %d   birleşik birim (dizi): %d" % (
+                 int((kinds & CATEGORY).bool().sum()), int((kinds & SLOTTED).bool().sum()), phrases),
+             "  bağ: %d   öz: %.1f MB" % (S.n_ties, mind.size()["core_tensors"] / 1e6),
+             "  (insan yaşı karşılığı verilmez: kaynaklı bir gelişim normu olmadan sayı uydurulmaz)"]
+    return "\n".join(lines)
 
 
 class Session:
@@ -289,6 +317,8 @@ def main(argv=None) -> None:
                         print("  %3d  %s" % (number, text))
                 elif cmd in ("unut", "forget"):
                     print(session.forget(int(rest)))
+                elif cmd in ("yas", "yaş", "age"):
+                    print(profile(session.mind))
                 elif cmd in ("boyut", "size"):
                     print("  %d an, %s" % (session.mind.t, session.mind.size()))
                 elif cmd in ("kaydet", "save"):
