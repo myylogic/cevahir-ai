@@ -130,6 +130,7 @@ def profile(mind: Mind) -> str:
 
 
 FACETS = "parca"
+TURN, TURN_END = "sira", "⏎"          # the end of someone's utterance (Enter) is perceived, like a pause in speech
 VALUE = "deger"
 VALUE_SIGN = {(VALUE, "iyi"): 1.0, (VALUE, "kötü"): -1.0}     # the adapter defines what is good and bad
 
@@ -143,6 +144,9 @@ class Session:
             mind.add_channel(FACETS, "facet")
         mind.add_channel(VALUE, "value")
         mind.value_sign = dict(VALUE_SIGN)
+        known = mind.ch.has(TURN) and mind.ch.symbol_index(mind.ch.id(TURN), TURN_END, create=False) >= 0
+        self.turns = mind.t == 0 or known       # a mind that never lived turn ends keeps the older turn passing
+        mind.add_channel(TURN, "sense")
         self.open_turn = False                # the mind has just answered; feedback may still come
 
     def events(self, symbol: str, prov: int) -> List[Event]:
@@ -158,6 +162,7 @@ class Session:
         """Hear (told) or sense an utterance while listening: the mind does not speak into it."""
         start = self.mind.t + 1
         self.listen(text, prov)
+        self.end_of_turn(prov)
         self.mind.step([])
         self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
 
@@ -171,10 +176,25 @@ class Session:
         finally:
             self.mind.knob["theta"] = theta
 
+    def end_of_turn(self, prov: int, listening: bool = True) -> List[Event]:
+        """Someone's utterance has ended: a perceived event. While listening the mind does not speak into it."""
+        if not self.turns:
+            return []
+        theta = self.mind.knob["theta"]
+        if listening:
+            self.mind.knob["theta"] = 1e9
+        try:
+            return self.mind.step([Event(TURN, TURN_END, prov)])
+        finally:
+            self.mind.knob["theta"] = theta
+
     def watch(self, first: str, answer: str) -> None:
-        """Two others talk: one says ``first``, another answers ``answer``; the mind only watches."""
+        """Two others talk: one says ``first``, another answers ``answer``; the mind only watches. The end of each
+        utterance is perceived, so the mind can learn who speaks when (turn taking is watched, not coded)."""
         self.listen(first, IMITATED)
+        self.end_of_turn(IMITATED)
         self.listen(answer, IMITATED)
+        self.end_of_turn(IMITATED)
         self.mind.step([])
         self.history.append((len(self.history) + 1, "[izledi] %s || %s" % (first, answer), []))
 
@@ -189,8 +209,12 @@ class Session:
         symbols = words(text)
         if not symbols:
             return "(sessiz)"
-        self.listen(" ".join(symbols[:-1]), TOLD)
-        acts = self.mind.step(self.events(symbols[-1], TOLD))
+        if self.turns:                                   # the turn passes when your utterance has ended
+            self.listen(" ".join(symbols), TOLD)
+            acts = self.end_of_turn(TOLD, listening=False)
+        else:                                            # older minds: the turn passes with your last word
+            self.listen(" ".join(symbols[:-1]), TOLD)
+            acts = self.mind.step(self.events(symbols[-1], TOLD))
         said: List[str] = []
         while acts and len(said) < limit:
             said += [str(e.symbol) for e in acts if e.channel == CHANNEL]
