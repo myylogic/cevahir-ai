@@ -78,3 +78,16 @@ def test_quitting_ends_its_life():
     assert life.done.is_set()
     life.thread.join(5)
     assert not life.thread.is_alive()
+
+
+def test_with_no_real_thought_it_asks_about_what_it_wants_to_know(capsys):
+    session, life, heard, words = living(beat=0.02, think_after=0.05, speak_after=0.1, sleep_after=0,
+                                         real_enough=1.01)   # no thought is real enough
+    life.start()
+    life.put("güneş")
+    assert life.handled.wait(10)
+    deadline = time.time() + 20
+    while not life.spoke and time.time() < deadline:
+        time.sleep(0.05)
+    life.stop()
+    assert life.spoke and words[-1] == "?"

@@ -19,6 +19,12 @@ from typing import List, Tuple
 EYE, LOOK = "goz", "gorunum"
 
 
+def _pixels(img) -> list:
+    """The pixels of an image as a flat list (get_flattened_data in newer Pillow, getdata in older ones)."""
+    flat = getattr(img, "get_flattened_data", None)
+    return list(flat() if flat is not None else img.getdata())
+
+
 def _palette(r: float, g: float, b: float) -> str:
     mx, mn = max(r, g, b), min(r, g, b)
     light = (mx + mn) / 2.0
@@ -39,9 +45,9 @@ def features(path: str) -> Tuple[str, List[str]]:
     from PIL import Image
     img = Image.open(path).convert("RGB")
     small = img.resize((32, 32))
-    px = list(small.getdata())
+    px = _pixels(small)
     gray9 = img.convert("L").resize((9, 8))
-    g = list(gray9.getdata())
+    g = _pixels(gray9)
     bits = [1 if g[r * 9 + c] > g[r * 9 + c + 1] else 0 for r in range(8) for c in range(8)]
     value = 0
     for b in bits:
@@ -84,7 +90,7 @@ def _figure(img) -> List[str]:
     """Position- and size-free aspects of what stands out from the background (the border's typical colour): how
     much of its bounding box it fills, its width to height, and its own dominant colour."""
     small = img.resize((64, 64))
-    px = list(small.getdata())
+    px = _pixels(small)
     border = [px[i] for i in range(64)] + [px[63 * 64 + i] for i in range(64)] + \
         [px[i * 64] for i in range(64)] + [px[i * 64 + 63] for i in range(64)]
     bg = tuple(sorted(c[k] for c in border)[len(border) // 2] for k in range(3))

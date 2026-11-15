@@ -278,12 +278,63 @@ def verdict(mind, record) -> Tuple[str, int, int]:
     return "acik", judged, len(new)
 
 
-def sleep(session, cycles: int = 5) -> Dict[str, object]:
+def seen_with(mind, word: str, limit: int = 1) -> List[str]:
+    """The images lived with a word (the image perceived in the moment before the word: an EXPECT tie from an image
+    gist on the eye channel to the word), most supported first."""
+    from .__main__ import CHANNEL
+    from .gorme import EYE
+    from .store import EXPECT, W_POS
+    S = mind.S
+    if not mind.ch.has(EYE):
+        return []
+    eye = mind.ch.id(EYE)
+    unit = _unit(mind, CHANNEL, word)
+    if unit < 0:
+        return []
+    found = {}
+    for tie in S.inc.get((unit, EXPECT), ()):
+        src = int(S.t_src[tie])
+        if int(S.u_channel[src]) == eye:
+            found[src] = found.get(src, 0.0) + float((S.t_w[W_POS, tie] * mind.trust).sum())
+    best = sorted(found, key=lambda u: -found[u])[:limit]
+    return [str(mind.symbol_of(u)[1]) for u in best if found[u] > 0.0]
+
+
+def dream(session, topic: str, links: int = 3) -> List[dict]:
+    """One dream: a chain of imaginings, each carried on from the word of the last one the mind is least sure of
+    (free association). In each, what the mind has seen with the dreamt word is seen again (the image re-lived as
+    imagined), and the imagining is kept with its claims (remember_dream). Returns the dream's records."""
+    from .__main__ import CHANNEL
+    from .gorme import EYE
+    mind = session.mind
+    records, visited = [], set()
+    for _ in range(links):
+        if not topic or topic in visited:
+            break
+        visited.add(topic)
+        seen = seen_with(mind, topic)
+        for gist in seen:                                  # it sees in its dream what it saw with this word, as it
+            mind.step([Event(EYE, gist, IMAGINED)])        # saw it: the image first, then the word comes to mind
+        thought, construction, reality, other = imagine(session, topic)
+        if construction:
+            record = remember_dream(mind, topic, other, construction, round(reality, 2))
+        elif thought:
+            record = remember_dream(mind, topic, "", [topic] + thought, None)
+        else:
+            break
+        record["seen"] = seen
+        records.append(record)
+        topic = topic_of(session, " ".join(record["words"][1:]))   # what this imagining leaves it least sure of
+    return records
+
+
+def sleep(session, cycles: int = 3) -> Dict[str, object]:
     """Sleep: dreams, then sorting. The mind dreams about the last topic and about what it is unsure of (words it
-    uses but holds with little conviction): each dream is a thought, carried over to a counterpart where it has one
-    (imagine), lived as imagined and kept with its claims. Then everything imagined is sorted against what is real:
-    the evidence on its trust in its own imagination (sort_dreams), and each kept dream's verdict (true, false,
-    still open). Returns the night's dreams, the verdicts of the dreams reality has judged, and the sorting."""
+    uses but holds with little conviction); each dream is a chain of imaginings carried on by free association, and
+    what it saw with a dreamt word it sees again. Then everything imagined is sorted against what is real: the
+    evidence on its trust in its own imagination (sort_dreams), and each kept dream's verdict (true, false, still
+    open). Returns the night's dreams (each a list of imaginings), the verdicts of the dreams reality has judged, and
+    the sorting."""
     from .__main__ import CHANNEL
     from .web import wanted_topics
     mind = session.mind
@@ -297,11 +348,10 @@ def sleep(session, cycles: int = 5) -> Dict[str, object]:
     before_night = len(getattr(mind, "dreams", None) or [])
     dreams = []
     for topic in topics[:cycles]:
-        thought, construction, reality, other = imagine(session, topic)
-        if construction:
-            dreams.append(remember_dream(mind, topic, other, construction, round(reality, 2)))
-        elif thought:
-            dreams.append(remember_dream(mind, topic, "", [topic] + thought, None))
+        mind.step([])                                      # each dream begins in silence
+        chain = dream(session, topic)
+        if chain:
+            dreams.append(chain)
     before = float(mind.trust[IMAGINED])
     sorting = sort_dreams(mind)
     sorting["trust_before"] = before

@@ -48,6 +48,7 @@ mind never sees text, only symbols on the "text" channel; meaning is in the ties
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from typing import Dict, List
@@ -184,6 +185,7 @@ class Session:
         mind.add_channel(EAR, "sense")          # a heard thing likewise
         mind.add_channel(SOUND, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
+        self.seen: Dict[str, str] = {}          # the file names of images shown in this session, by gist
         self.curious = True                     # the curiosity reflex (T4) is on in conversation
         self.thinking = True                    # what is heard calls thoughts to mind; one may be said (T8)
         from .mind import INNER_CHANNEL, SELF_CHANNEL
@@ -379,20 +381,45 @@ class Session:
             out.append((topic, thought, reality))
         return out
 
-    def think_aloud(self, thoughts: List[tuple], say=None, least: int = 3) -> List[str]:
+    def think_aloud(self, thoughts: List[tuple], say=None, least: int = 3, more: int = 2) -> List[str]:
         """Think, then speak: of the thoughts its words called to mind, the first that says something (``least``
-        words) and is real enough by the same measure as an act (reality >= 1/2 + theta / 2T) is said aloud."""
+        words) and is real enough by the same measure as an act (reality >= 1/2 + theta / 2T) is said aloud. Then it
+        may go on (speaking at length when it has more to say): up to ``more`` further thoughts, each about the word of
+        the last one it is least sure of, said while they stay real enough and new. Returns what it said."""
+        from .dusunce import think, topic_of
         mind = self.mind
         real_enough = 0.5 + mind.knob["theta"] / (2.0 * mind.cfg.T)
+        said: List[str] = []
+
+        def aloud(words_):
+            for w in words_:                             # what it thought, said aloud (its own acts)
+                mind.step([Event(CHANNEL, w, ACTED)])
+                if say is not None:
+                    say(w)
+            mind.step([])
+            said.extend(words_)
+
         for topic, thought, reality in thoughts:
             if len(thought) >= least and reality >= real_enough:
-                for w in [topic] + thought:              # what it thought, said aloud (its own acts)
-                    mind.step([Event(CHANNEL, w, ACTED)])
-                    if say is not None:
-                        say(w)
-                mind.step([])
-                return [topic] + thought
-        return []
+                aloud([topic] + thought)
+                break
+        if not said:
+            return []
+        spoken = {tuple(said)}
+        for _ in range(more):
+            topic = topic_of(self, " ".join(said[-len(thought):]))
+            if not topic:
+                break
+            mind.unknown, held = 0.0, mind.unknown
+            mind.step([])
+            mind.unknown = held
+            thought, reality = think(self, topic)
+            line = tuple([topic] + thought)
+            if len(thought) < least or reality < real_enough or line in spoken:
+                break
+            spoken.add(line)
+            aloud(list(line))
+        return said
 
     def known_before(self, text: str) -> Dict[str, int]:
         """How firmly each word of an utterance was known before it was heard (ties held with conviction >= 1/2)."""
@@ -541,18 +568,22 @@ class Session:
         return "  böyle bir numara yok"
 
 
-def night_report(night) -> List[str]:
+def night_report(night, names: Dict[str, str] = None) -> List[str]:
     """What the mind can tell of a night: its dreams, which earlier dreams reality has judged, its trust in its
     imagination before and after."""
     lines = []
-    for d in night["dreams"]:
-        new = sum(1 for claim in d["claims"] if claim[3] + claim[4] == 0)
-        note = "   (yeni bir şey kurmadım, bildiğimi hatırladım)" if not new else ""
-        if d["other"]:
-            lines.append("  rüyamda (%s yerine %s): %s   [gerçeklik %.2f]%s" % (d["about"], d["other"],
+    for chain in night["dreams"]:
+        lines.append("  rüyamda:")
+        for d in chain:
+            new = sum(1 for claim in d["claims"] if claim[3] + claim[4] == 0)
+            note = "   (yeni bir şey kurmadım, bildiğimi hatırladım)" if not new else ""
+            for gist in d.get("seen", []):
+                lines.append("    %s gördüm" % (names.get(gist, "bir görüntü") if names else "bir görüntü"))
+            if d["other"]:
+                lines.append("    (%s yerine %s): %s   [gerçeklik %.2f]%s" % (d["about"], d["other"],
                                                                           " ".join(d["words"]), d["reality"], note))
-        else:
-            lines.append("  rüyamda: %s%s" % (" ".join(d["words"]), note))
+            else:
+                lines.append("    %s%s" % (" ".join(d["words"]), note))
     for v, d in night["judged"]:
         lines.append("  %s: %s" % ("doğru çıktı" if v == "dogru" else "yanlış çıktı", " ".join(d["words"])))
     srt = night["sorting"]
@@ -567,8 +598,9 @@ class Life:
 
     What you type arrives as an event of that time and is heard in order; what the mind says comes out word by word
     as it says it. Between your lines it lives on, one silent moment at a time: after a short silence it thinks
-    (inner voice, kept as imagined); after a longer one it may speak first, when its thought was real enough; after
-    a long one it sleeps, dreams and sorts its dreams. Commands are handled in the same stream."""
+    (inner voice, kept as imagined); after a longer one it speaks first: its thought, when it was real enough, else
+    a question about the word it most wants to know (T4); after a long one it sleeps, dreams and sorts its dreams.
+    Commands are handled in the same stream."""
 
     STOP = object()
 
@@ -638,22 +670,29 @@ class Life:
                 topic = topic_of(self.session)
                 words_, reality = think(self.session, topic) if topic else ([], 0.0)
                 self.thought = (topic, words_, reality)
-        if (self.thought and not self.spoke and quiet >= self.speak_after and self.thought[1]
-                and self.thought[2] >= self.real_enough):
+        if self.thought and not self.spoke and quiet >= self.speak_after:
             topic, words_, reality = self.thought
-            print("\n  zihin (kendiliğinden):", end="", flush=True)
-            with self.lock:
-                for w in [topic] + words_:              # it says aloud what it thought (its own acts)
-                    self.session.mind.step([Event(CHANNEL, w, ACTED)])
-                    self.say(w)
-                self.session.mind.step([])
+            if words_ and reality >= self.real_enough:
+                said = [topic] + words_                  # it says aloud what it thought (its own acts)
+            else:                                        # nothing real enough to say: it asks about what it most
+                from .web import wanted_topics           # wants to know (T4: curiosity takes the initiative)
+                with self.lock:
+                    wanted = wanted_topics(self.session.mind, CHANNEL, 1)
+                said = [wanted[0], "?"] if wanted else []
+            if said:
+                print("\n  zihin (kendiliğinden):", end="", flush=True)
+                with self.lock:
+                    for w in said:
+                        self.session.mind.step([Event(CHANNEL, w, ACTED)])
+                        self.say(w)
+                    self.session.mind.step([])
+                print("\n> ", end="", flush=True)
             self.spoke = True
-            print("\n> ", end="", flush=True)
         if not self.slept and self.sleep_after and quiet >= self.sleep_after:
             with self.lock:
                 night = dream_sleep(self.session)
             self.slept = True
-            print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night)), end="", flush=True)
+            print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night, self.session.seen)), end="", flush=True)
 
 
 def pieces_for(mind, choice: str = None):
@@ -894,6 +933,7 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     from .gorme import features
                     gist, facets = features(rest.strip())
                     session.view = (gist, facets)
+                    session.seen[gist] = os.path.basename(rest.strip())
                     print("  görüyorum (%d yön); bir sonraki sözün bu resimle birlikte algılanacak" % len(facets))
                 elif cmd in ("dinle", "hear"):
                     from .isitme import features as hearing
@@ -918,7 +958,8 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     print("  konuşan: %s" % session.partner)
                 elif cmd in ("uyu", "sleep"):
                     from .dusunce import sleep as dream_sleep
-                    print("\n".join(night_report(dream_sleep(session, int(rest) if rest.strip().isdigit() else 5))))
+                    print("\n".join(night_report(dream_sleep(session, int(rest) if rest.strip().isdigit() else 3),
+                                                  session.seen)))
                 elif cmd in ("kendin", "introspect"):
                     from .kendilik import self_report
                     print(self_report(session.mind, CHANNEL))
