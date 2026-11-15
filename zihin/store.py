@@ -422,22 +422,20 @@ class Substance:
     # vector of finite values without a sign bit (every trust the mind uses); any other trust takes the rows.
     def _fusable(self, trust: torch.Tensor):
         """trust by t_cls (0 and WIDE give 0), or None for a trust the fused reads do not cover. Kept for the last
-        trust tensor while it is unchanged (the tensor is held, so its identity is not reused; _version counts its
-        in-place changes)."""
-        if isinstance(trust, torch.Tensor):
-            hit = self.__dict__.get("_lut")
-            if hit is not None and hit[0] is trust and hit[1] == trust._version:
-                return hit[2]
-            tr = trust.numpy()
-        else:
-            tr = np.asarray(trust, dtype=np.float64)
+        trust values: the key is the values themselves, so a change made through .numpy() or .data (which does not
+        count in the tensor's _version) can never leave a stale lookup."""
+        tr = trust.numpy() if isinstance(trust, torch.Tensor) else np.asarray(trust, dtype=np.float64)
+        key = tr.tobytes() if tr.dtype == np.float64 else None
+        hit = self.__dict__.get("_lut")
+        if key is not None and hit is not None and hit[0] == key:
+            return hit[1]
         if tr.shape != (self.P,) or tr.dtype != np.float64 or np.signbit(tr).any() or not np.isfinite(tr).all():
             lut = None
         else:
             lut = np.zeros(WIDE + 1)
             lut[1:self.P + 1] = tr
-        if isinstance(trust, torch.Tensor):
-            self._lut = (trust, trust._version, lut)
+        if key is not None:
+            self._lut = (key, lut)
         return lut
 
     def _fused(self, ids: torch.Tensor, trust, total: bool):
@@ -868,7 +866,7 @@ class Substance:
         if self._touch1:
             parts.append(np.array(self._touch1, dtype=np.int64))
         if parts:                                # the ties whose W tables changed in this moment
-            touched = np.concatenate(parts) if len(parts) > 1 else parts[0]
+            touched = (np.concatenate(parts) if len(parts) > 1 else parts[0]).astype(np.int64, copy=False)
             if self.keep_log:
                 ids = torch.from_numpy(np.unique(touched))      # ascending and distinct, as sorted(set(...))
                 cur.last = (ids, self.t_last[ids].clone())
