@@ -301,7 +301,7 @@ class Substance:
     _UNIT_ARRAYS = ("u_kind", "u_channel", "u_symbol", "u_arity", "u_birth", "u_use", "u_alive")
     _TIE_ARRAYS = ("t_src", "t_dst", "t_form", "t_lag", "t_cls", "t_row", "t_use", "t_last", "t_birth", "t_alive")
     _ROW_ARRAYS = ("r_tie", "r_was")
-    _CACHES = ("_out_ids", "_views", "_class_ids", "_npv", "_parts", "_slot_keys", "_touch", "_touch1")
+    _CACHES = ("_out_ids", "_views", "_class_ids", "_npv", "_parts", "_slot_keys", "_touch", "_touch1", "_lut")
 
     def __getstate__(self):
         """Saved and copied without the spare capacity (the rows beyond n_units / n_ties / n_rows are zeros); the
@@ -419,11 +419,23 @@ class Substance:
     # exactly that sum (it turns -0.0 into +0.0, as the zeros do). Full rows keep the row reduction. Valid for a trust
     # vector of finite values without a sign bit (every trust the mind uses); any other trust takes the rows.
     def _fusable(self, trust: torch.Tensor):
-        tr = trust.numpy() if isinstance(trust, torch.Tensor) else np.asarray(trust, dtype=np.float64)
+        """trust by t_cls (0 and WIDE give 0), or None for a trust the fused reads do not cover. Kept for the last
+        trust tensor while it is unchanged (the tensor is held, so its identity is not reused; _version counts its
+        in-place changes)."""
+        if isinstance(trust, torch.Tensor):
+            hit = self.__dict__.get("_lut")
+            if hit is not None and hit[0] is trust and hit[1] == trust._version:
+                return hit[2]
+            tr = trust.numpy()
+        else:
+            tr = np.asarray(trust, dtype=np.float64)
         if tr.shape != (self.P,) or tr.dtype != np.float64 or np.signbit(tr).any() or not np.isfinite(tr).all():
-            return None
-        lut = np.zeros(WIDE + 1)
-        lut[1:self.P + 1] = tr
+            lut = None
+        else:
+            lut = np.zeros(WIDE + 1)
+            lut[1:self.P + 1] = tr
+        if isinstance(trust, torch.Tensor):
+            self._lut = (trust, trust._version, lut)
         return lut
 
     def _fused(self, ids: torch.Tensor, trust, total: bool):
