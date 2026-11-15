@@ -48,6 +48,8 @@ def think(session, topic: str, limit: int = 15) -> Tuple[List[str], float]:
         if not said:
             break
         word = said[0].symbol
+        if _circling(thought + [str(word)]):               # a thought that goes round in a circle says nothing new
+            break
         index = mind.ch.symbol_index(cid, word, create=False)
         unit = mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
         scores.append(_reality(mind, unit) if unit >= 0 else 0.5)
@@ -59,6 +61,25 @@ def think(session, topic: str, limit: int = 15) -> Tuple[List[str], float]:
     mind.step([])                                          # the thought ends; the episode closes
     reality = sum(scores) / len(scores) if scores else 0.0
     return thought, reality
+
+
+def _circling(words_: List[str]) -> bool:
+    """The last stretch of words repeats the stretch just before it (a cycle of one to four words)."""
+    for n in range(1, 5):
+        if len(words_) >= 2 * n and words_[-n:] == words_[-2 * n:-n]:
+            return True
+    return False
+
+
+def frequent_words(mind, k: int = 200) -> set:
+    """The k most used words of the mind's life (they carry the language, not a topic; frequency decides)."""
+    from .__main__ import CHANNEL
+    from .store import ATOMIC
+    S = mind.S
+    cid = mind.ch.id(CHANNEL)
+    atoms = [u for u in range(S.n_units) if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid]
+    top = sorted(atoms, key=lambda u: -float(S.u_use[u]))[:k]
+    return {str(mind.ch.symbol(cid, int(S.u_symbol[u]))) for u in top}
 
 
 def topic_of(session, text: str = None) -> str:
@@ -300,7 +321,7 @@ def seen_with(mind, word: str, limit: int = 1) -> List[str]:
     return [str(mind.symbol_of(u)[1]) for u in best if found[u] > 0.0]
 
 
-def dream(session, topic: str, links: int = 3) -> List[dict]:
+def dream(session, topic: str, links: int = 3, frequent: set = None) -> List[dict]:
     """One dream: a chain of imaginings, each carried on from the word of the last one the mind is least sure of
     (free association). In each, what the mind has seen with the dreamt word is seen again (the image re-lived as
     imagined), and the imagining is kept with its claims (remember_dream). Returns the dream's records."""
@@ -324,8 +345,36 @@ def dream(session, topic: str, links: int = 3) -> List[dict]:
             break
         record["seen"] = seen
         records.append(record)
-        topic = topic_of(session, " ".join(record["words"][1:]))   # what this imagining leaves it least sure of
+        rest = [w for w in record["words"][1:] if not frequent or w not in frequent]
+        topic = topic_of(session, " ".join(rest))          # what this imagining leaves it least sure of
     return records
+
+
+def day_residue(session, n: int, utterances: int = 12) -> List[str]:
+    """What the day was about: the words of the recent utterances the mind is least sure of (highest drive), the
+    most used words of its whole life left out (frequency decides, no word list)."""
+    from .__main__ import CHANNEL, words
+    from .read import drive_of
+    mind = session.mind
+    cid = mind.ch.id(CHANNEL)
+    S = mind.S
+    scored = {}
+    for _, text, _ in session.history[-utterances:]:
+        if text.startswith("[") or text.startswith("!"):
+            continue
+        for w in words(text):
+            if len(w) < 4 or not w.isalpha() or w in scored:
+                continue
+            index = mind.ch.symbol_index(cid, w, create=False)
+            unit = S.atom_index.get((cid, index), -1) if index >= 0 else -1
+            if unit >= 0:
+                scored[w] = (drive_of(mind, unit), float(S.u_use[unit]))
+    if not scored:
+        return []
+    uses = sorted(u for _, u in scored.values())
+    common = uses[int(0.8 * (len(uses) - 1))] if len(uses) >= 5 else float("inf")
+    ranked = sorted((w for w, (d, u) in scored.items() if u <= common), key=lambda w: -scored[w][0])
+    return ranked[:n]
 
 
 def sleep(session, cycles: int = 3) -> Dict[str, object]:
@@ -338,18 +387,16 @@ def sleep(session, cycles: int = 3) -> Dict[str, object]:
     from .__main__ import CHANNEL
     from .web import wanted_topics
     mind = session.mind
-    topics = []
-    last = topic_of(session)
-    if last:
-        topics.append(last)
-    for w in wanted_topics(mind, CHANNEL, cycles * 2):
-        if w not in topics:
+    frequent = frequent_words(mind)
+    topics = [w for w in day_residue(session, cycles) if w not in frequent]   # what the day was about, then what
+    for w in wanted_topics(mind, CHANNEL, cycles * 2):                         # it is unsure of
+        if w not in topics and w not in frequent:
             topics.append(w)
     before_night = len(getattr(mind, "dreams", None) or [])
     dreams = []
     for topic in topics[:cycles]:
         mind.step([])                                      # each dream begins in silence
-        chain = dream(session, topic)
+        chain = dream(session, topic, frequent=frequent)
         if chain:
             dreams.append(chain)
     before = float(mind.trust[IMAGINED])

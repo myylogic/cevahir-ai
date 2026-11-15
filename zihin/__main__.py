@@ -341,8 +341,13 @@ class Session:
                 acts = self.mind.step([])
                 if not acts:
                     acts = self.mind.step([])
+        from .dusunce import _circling
         while acts and len(said) < limit:
             words_now = [str(e.symbol) for e in acts if e.channel == CHANNEL]
+            if words_now and _circling(said + words_now):   # speech that goes round in a circle has ended
+                self.mind.pending = [e for e in self.mind.pending if e.channel != CHANNEL]
+                self.mind.step([])
+                break
             said += words_now
             for w in words_now:
                 if say is not None:
@@ -405,9 +410,11 @@ class Session:
                 break
         if not said:
             return []
+        from .dusunce import _circling, frequent_words
+        frequent = frequent_words(mind)
         spoken = {tuple(said)}
         for _ in range(more):
-            topic = topic_of(self, " ".join(said[-len(thought):]))
+            topic = topic_of(self, " ".join(w for w in said[-len(thought):] if w not in frequent))
             if not topic:
                 break
             mind.unknown, held = 0.0, mind.unknown
@@ -415,7 +422,7 @@ class Session:
             mind.unknown = held
             thought, reality = think(self, topic)
             line = tuple([topic] + thought)
-            if len(thought) < least or reality < real_enough or line in spoken:
+            if len(thought) < least or reality < real_enough or line in spoken or _circling(said + list(line)):
                 break
             spoken.add(line)
             aloud(list(line))
