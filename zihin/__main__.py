@@ -586,7 +586,10 @@ def night_report(night, names: Dict[str, str] = None) -> List[str]:
             note = "   (yeni bir şey kurmadım, bildiğimi hatırladım)" if not new else ""
             for gist in d.get("seen", []):
                 lines.append("    %s gördüm" % (names.get(gist, "bir görüntü") if names else "bir görüntü"))
-            if d["other"]:
+            if d["other"] and d.get("kind") == "çıkarım":
+                lines.append("    (%s üzerinden çıkarım): %s   [gerçeklik %.2f]%s" % (d["other"], " ".join(d["words"]),
+                                                                              d["reality"], note))
+            elif d["other"]:
                 lines.append("    (%s yerine %s): %s   [gerçeklik %.2f]%s" % (d["about"], d["other"],
                                                                           " ".join(d["words"]), d["reality"], note))
             else:
@@ -953,12 +956,16 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     if not topic:
                         print("  düşünecek bir konu yok")
                     else:
-                        from .dusunce import imagine
+                        from .dusunce import frequent_words, imagine, infer
                         thought, construction, reality, other = imagine(session, topic)
                         print("  (iç ses, %s): %s" % (topic, " ".join(thought) or "…"))
                         if construction:
                             print("  (hayal: %s da/de böyle mi?): %s   [gerçeklik %.2f]" % (
                                 other, " ".join(construction), reality))
+                        _, inferred, certainty, mate = infer(session, topic, frequent=frequent_words(session.mind))
+                        if inferred:
+                            print("  (çıkarım, %s üzerinden): %s   [gerçeklik %.2f]" % (
+                                mate, " ".join(inferred), certainty))
                 elif cmd in ("kim", "who"):
                     if rest.strip():
                         session.partner = lower_tr(rest.strip()).split()[0]

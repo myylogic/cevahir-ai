@@ -124,3 +124,24 @@ def test_a_dream_is_a_chain_and_sees_what_was_seen_with_its_words(tmp_path):
     unit = session.mind.S.atom_index[(eye, session.mind.ch.symbol_index(eye, gist, create=False))]
     assert float(session.mind.S.t_w[W_POS, :session.mind.S.n_ties, IMAGINED].sum()) > 0.0
     assert unit >= 0
+
+
+def test_imagination_reasons_by_a_shared_stem_and_life_judges_the_inference():
+    from zihin.dusunce import dream as dream_chain, infer
+    mind = Mind(Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
+                               backoff=True, resemblance=True, race=True))
+    mind.add_channel(CHANNEL, "act")
+    session = Session(mind)
+    for _ in range(3):
+        session.live("kedi bir hayvandır .", TOLD)
+        session.live("hayvanlar nefes alır ve büyür .", TOLD)
+    mind.step([])
+    thought, construction, reality, mate = infer(session, "kedi")
+    assert mate == "hayvanlar" and construction[:3] == ["kedi", "nefes", "alır"]
+    assert 0.5 <= reality < 0.75                      # supported only by generalisation: a hypothesis
+    chain = dream_chain(session, "kedi")
+    record = next(d for d in chain if d.get("kind") == "çıkarım")
+    assert verdict(mind, record)[0] == "acik"
+    session.live("kedi nefes alır .", TOLD)
+    assert verdict(mind, record)[0] in ("dogru", "acik")
+    assert verdict(mind, record)[0] != "yanlis"

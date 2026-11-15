@@ -347,3 +347,24 @@ older convention, kept by the session). It is a private mind and is not in the r
 - A self question can be answered with the answer others gave in the dialogues it read (a city), and in a long
   session the same question can meet hesitation.
 - Dreams are still shallow constructions.
+
+## T8, second form: imagination that reasons by a shared stem (2026-11-15)
+
+`dusunce.infer`. The mind thinks about X. For a word of that thought whose stem other lived words share, it thinks
+about such a word W and carries what follows W over to X.
+
+- Example: "kedi bir hayvandır" and "hayvanlar nefes alır ve büyür" give "kedi nefes alır ve büyür".
+- Stems come from the repository's tokenizer infrastructure: the morphological root ("kök:") and the first two
+  syllables of a longer word ("gövde:", added to the word pieces). The morphology alone over-stems or does not split
+  ("kedi" → "ke"; "hayvandır" unsplit). Hay-van-dır and hay-van-lar share "hayvan" by syllables.
+- The construction is scored for reality from lived evidence only. A claim nothing lived supports stays near one
+  half, so it is a hypothesis. It is lived as imagined and kept as a dream, so life later judges it (F22).
+- Dreams now reason first and fall back to analogy; `!dusun` shows the inference too.
+
+Test (`tests/evolution/test_zihin_sleep.py`): on the toy above, the inference carries "nefes alır" over to "kedi"
+with reality between 1/2 and 3/4, and a later "kedi nefes alır" does not refute it.
+
+**Limit, seen on the large private mind.** A two-syllable stem shared by chance makes a false mate ("bilgi-sayar" and
+"bilgi-ner"), and the carried thought is then nonsense ("kuantum , öğrenmek isterim ."). So inference is used only
+in imagination (dreams and `!dusun`), where life judges it, and never in what the mind says as an answer.
+A better stem relation (shared contexts as well as shared form) is open.
