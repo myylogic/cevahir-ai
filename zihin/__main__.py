@@ -151,6 +151,8 @@ VARIANTS = {"speaking": speaking,
             "members": lambda folder=None: Config.changed(support="members"),
             "changed": lambda folder=None: Config.changed()}          # folder: where the session ledger is kept
 
+NEWER = ("backoff", "resemblance", "race", "situations", "explore")   # mechanisms a loaded mind may lack (--ac)
+
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
 
@@ -1132,6 +1134,8 @@ def main(argv=None) -> None:
                                                "I -> ı, İ -> i) or 'diger' (plain lower case, for other languages); "
                                                "a mind keeps the convention it was raised with")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
+    ap.add_argument("--ac", default="", help="switch on, for a loaded mind, mechanisms that new minds are raised with "
+                    "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own settings")
     args = ap.parse_args(argv)
     keep_at = clean_path(args.kayit) if args.kayit else home_mind()    # ~ and quotes as in the commands
     ledgers = os.path.dirname(os.path.abspath(keep_at))   # session ledgers live next to the kept mind
@@ -1144,6 +1148,18 @@ def main(argv=None) -> None:
             mind.cfg.keep_log, mind.cfg.log_path = True, _log_path(ledgers)
             mind.S.keep_log = True
             mind.S.log = DiskLog(mind.cfg.log_path, keep=max(4, mind.cfg.undo_depth + 2))
+        newer = [k for k in NEWER if args.variant == "speaking" and not getattr(mind.cfg, k, False)]  # speaking has all
+        asked = [k.strip() for k in args.ac.split(",") if k.strip()]
+        for k in asked:
+            if k not in NEWER:
+                print("  (--ac: bilinmeyen mekanizma '%s'; seçenekler: %s)" % (k, ", ".join(NEWER)))
+            elif not getattr(mind.cfg, k, False):
+                setattr(mind.cfg, k, True)
+                print("  açıldı: %s (bu zihin onunla büyümedi; senin isteğinle açıldı)" % k)
+        rest = [k for k in newer if k not in asked]
+        if rest:
+            print("  (bu zihin şu mekanizmalarla büyümedi ve onlarsız yaşar: %s; açmak için --ac %s)" % (
+                ", ".join(rest), ",".join(rest)))
         if args.dil and args.dil != getattr(mind, "dil", "tr"):
             print("  (bu zihin '%s' harf kuralıyla büyüdü ve onu korur; --dil %s yeni bir zihin içindir)" % (
                 getattr(mind, "dil", "tr"), args.dil))

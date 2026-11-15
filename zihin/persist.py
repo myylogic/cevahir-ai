@@ -175,12 +175,8 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
         if f.name not in mind.cfg.__dict__:
             value = f.default if f.default is not dataclasses.MISSING else f.default_factory()
             setattr(mind.cfg, f.name, value)
-    if mind.cfg.support == "members" and mind.cfg.bind_repeats:      # a speaking mind reads with today's rules
-        mind.cfg.backoff = True
-        mind.cfg.resemblance = True
-        mind.cfg.race = True
-        mind.cfg.situations = True
-        mind.cfg.explore = True
+    # A mind keeps the configuration it was raised with: nothing is switched on at load. Settings added after it was
+    # saved take their defaults above (off); the program turns a newer mechanism on only when asked to (--ac).
     if not ledger:
         mind.S.log, mind.S.keep_log = {}, False
         mind.cfg.keep_log, mind.cfg.log_path = False, None
