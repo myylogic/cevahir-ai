@@ -16,6 +16,7 @@ increments bit for bit, in any order, and subtracting the increments of one mome
 """
 from __future__ import annotations
 
+import numpy as np
 import torch
 
 GRID_BITS = 30
@@ -38,8 +39,20 @@ def weigh(w: torch.Tensor, trust: torch.Tensor) -> torch.Tensor:
     return (w * trust).sum(-1)
 
 
+def _plain(x) -> bool:
+    """A 1-D float64 CPU tensor that numpy can read in place (no grad): elementwise IEEE operations on it give the
+    same bits in numpy as in torch, at a fraction of the per-call cost on the short vectors read here."""
+    return type(x) is torch.Tensor and x.dtype is torch.float64 and x.ndim == 1 and x.is_cpu and not x.requires_grad
+
+
 def frequency(w_pos, w_neg):
     """f = W+ / (W+ + W-); 1/2 when there is no evidence. Works on floats and on tensors."""
+    if _plain(w_pos) and _plain(w_neg) and w_pos.shape == w_neg.shape:
+        p = w_pos.numpy()
+        total = p + w_neg.numpy()
+        f = np.full(total.shape, 0.5)
+        np.divide(p, total, out=f, where=total > 0)     # where(total > 0, w_pos / total, 1/2), element for element
+        return torch.from_numpy(f)
     total = w_pos + w_neg
     if isinstance(total, torch.Tensor):
         safe = torch.where(total > 0, total, torch.ones_like(total))
@@ -49,9 +62,26 @@ def frequency(w_pos, w_neg):
 
 def conviction(w_total, k: float = 1.0):
     """c = W / (W + k)."""
+    if _plain(w_total):
+        t = w_total.numpy()
+        c = t + k
+        np.divide(t, c, out=c)
+        return torch.from_numpy(c)
     return w_total / (w_total + k)
 
 
 def expectation(w_pos, w_neg, k: float = 1.0):
     """e = c (f - 1/2) + 1/2 with c = W / (W + k); 1/2 when there is no evidence."""
+    if _plain(w_pos) and _plain(w_neg) and w_pos.shape == w_neg.shape:
+        # the same operations on the same values as below, each once: W, f, c, then c (f - 1/2) + 1/2
+        p = w_pos.numpy()
+        total = p + w_neg.numpy()
+        f = np.full(total.shape, 0.5)
+        np.divide(p, total, out=f, where=total > 0)
+        c = total + k
+        np.divide(total, c, out=c)
+        f -= 0.5
+        np.multiply(c, f, out=f)
+        f += 0.5
+        return torch.from_numpy(f)
     return conviction(w_pos + w_neg, k) * (frequency(w_pos, w_neg) - 0.5) + 0.5
