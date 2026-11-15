@@ -2,21 +2,28 @@
 
 [English](README.md) · [Türkçe](README-TR.md)
 
-[Research archive DOI: 10.5281/zenodo.24235648](https://doi.org/10.5281/zenodo.24235648) · [Research reports](docs/publications/README.md)
+[Research archive DOI (always the latest version): 10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660) · [Research reports](docs/publications/README.md)
 
 > **Latest update — November 2026: Cevahir Zihin, a mind that learns by living. Not a Transformer.**
 >
-> The model living in this repository is not a neural network but a **Living Evidence Mind**. It has no weight
-> matrices, embedding vectors, backpropagation or softmax attention. It keeps every relation as a tie and counts each
-> tie's evidence **by where it came from**: seen with its own eyes, told, imitated, its own act, inferred or imagined.
-> It reads what to expect from a single rule: `e = c·(f − ½) + ½`.
+> The new model in this repository, Cevahir Zihin (`zihin/`, what `python -m zihin` runs), is not a neural network
+> but a **Living Evidence Mind**. It has no weight matrices, embedding vectors, backpropagation or softmax attention.
+> It keeps every relation as a tie and keeps each tie's evidence **by where it came from**: seen with its own eyes,
+> told, imitated, its own act, inferred or imagined. It reads what to expect from a single rule:
+> `e = c·(f − ½) + ½`. The earlier Transformer engine described below is still in the repository.
 >
-> - **Attention:** at each moment only seven units enter the focus (the **Seven-Place Focus**). Attention is local
->   and readable, and its cost does not grow with the length of the past.
-> - **Forgetting:** any single experience can be retracted exactly (**Exact Retraction**).
-> - **Not knowing:** it feels when it does not know and says so.
-> - **Dreams:** in sleep it dreams, then sorts which of its imaginings came out true.
-> - **Learning from consequences:** it finds correct code from whether the code it writes passes a test.
+> - **Attention:** at each moment only seven units enter the focus (the **Seven-Place Focus**). There is no context
+>   window: it never looks back over the past and reads only the ties of the units in focus, so the time per moment
+>   grows only slowly as the mind grows (about 2 ms on a small mind, about 4 ms at 3 million ties).
+> - **Forgetting:** while its ledger is kept, the evidence of any single experience can be taken back exactly
+>   (**Exact Retraction**); in the program this covers what you typed in the current session (`!unut`).
+> - **Not knowing:** it feels when it does not know (a measured inner state) and learns to say so: after the
+>   `!kendini_tani` lessons it answers "bilmiyorum , öğrenmek isterim" ("I don't know, I'd like to learn"); a new mind
+>   asks the unknown word back.
+> - **Dreams:** in sleep it dreams about the day's topics, and on later nights sorts which of its imaginings came out
+>   true.
+> - **Learning from consequences:** in a research test (six tiny functions, three candidate completions each) it
+>   learned from test results alone to choose the completion that passes; writing new code is still open.
 >
 > **There is no separate training phase; the model learns in every conversation. Please speak to it kindly.**
 >
@@ -26,27 +33,50 @@
 
 ### Run Cevahir Zihin on your computer
 
+It needs Python 3.11 or newer. Linux / macOS:
+
 ```
 git clone https://github.com/myylogic/cevahir-ai
 cd cevahir-ai
-pip install torch numpy           # optional: python-docx (Word), pillow (images)
-python -m zihin                   # Linux / macOS
-.\cevahir.ps1                     # Windows PowerShell
+python3 -m venv .venv && . .venv/bin/activate
+pip install torch numpy           # optional: python-docx (Word), pypdf (PDF), pillow (images)
+python -m zihin
 ```
 
-On first start the mind is empty and learns by living with you. If you have files to teach it:
+Windows PowerShell:
 
 ```
-!oku my_documents/                # .txt .md .docx .pdf documents, .json/.tsv dialogues, source code
-!ogret dialogues.tsv              # each line: question<TAB>answer
-!izle hello || hi                 # let it watch an exchange
-!dogru  /  !yanlis                # how you received its last answer (good / bad)
-!uyu    !dusun <topic>   !kendin  # sleep and dream, inner voice, introspection
+git clone https://github.com/myylogic/cevahir-ai
+cd cevahir-ai
+pip install torch numpy
+.\cevahir.ps1                     # if scripts are blocked: powershell -ExecutionPolicy Bypass -File .\cevahir.ps1
 ```
 
-Cevahir was raised on Turkish data. To speak another language with it, let it live a small dataset in that language
-(a few hundred question-answer pairs or texts) with `!ogret` or `!oku`. A mind file carries what it has read, so do
-not share a mind raised on private documents.
+Start it inside the `cevahir-ai` folder. The program speaks Turkish: it first asks "Seninle konuşan kim?" (who is
+talking to you?; type your name). On first start the mind is empty and knows no language; it learns by living with
+you. If you have files to teach it, type these at the program's prompt, not in the shell (each command has an English
+alias):
+
+```
+!oku my_documents/                # !read: .txt .md .docx .pdf documents, .json/.tsv dialogues, source code
+!ogret dialogues.tsv              # !teach: each line question<TAB>answer, saved as UTF-8
+!izle hello || hi                 # !watch: let it watch an exchange
+!kendini_tani                     # !self: lessons about itself, including saying "bilmiyorum" (Turkish)
+!dogru  /  !yanlis                # !good / !bad: how you received its last answer
+!uyu    !dusun <topic>   !kendin  # !sleep, !think, !introspect: dream, inner voice, introspection
+!cik                              # !quit
+```
+
+While it is open it lives in its own time: it thinks and may speak after a silence, and sleeps after ten minutes
+(`--yasamsiz` turns this off). The mind is saved at the end of every session to `~/.cevahir/zihin/cevahir.zihin`
+(Windows: `%USERPROFILE%\.cevahir\zihin\cevahir.zihin`; `CEVAHIR_HOME` changes the folder; `--kaydetme` does not
+save).
+
+The minds raised so far lived the author's private Turkish data and are not in this repository. Your copy learns the
+language you teach it with `!ogret` and `!oku`. Its built-in lessons are Turkish, so teach their equivalents in your
+language, and start it with `--dil diger` so that capital letters are lowered without Turkish rules. After a dozen
+pairs it answers the questions it was shown; how much data a new language needs for questions it has not seen has
+not been measured. A mind file carries what it has read, so do not share a mind raised on private documents.
 
 ---
 
@@ -72,18 +102,18 @@ In November 2026 I started a new core, separate from the Transformer: **Zihin** 
 | fixed dimension, fixed vocabulary, embedding vectors | growing units and ties, open alphabet; no fixed dimension |
 | next token by softmax | conviction: every belief has a strength and a source; if nothing accumulates to threshold, it stays silent |
 | new knowledge damages old knowledge, retraining needed | new knowledge is added, old knowledge stays bit-identical |
-| knowledge is spread over weights, a single example cannot be removed | a single experience can be retracted exactly from the core |
+| knowledge is spread over weights, a single example cannot be removed | while its ledger is kept, the evidence of a single experience can be retracted exactly from the core |
 | no record of where a belief came from | every piece of evidence keeps its source (told, sensed, imitated, own act, inferred, imagined); trust in sources is learned |
 
 **Measured results** (two generated worlds, 5 seeds; details in [results](research/living_mind_2026_11_14/RESULTS.md) and [notes](research/living_mind_2026_11_14/NOTES.md)):
 
 - A first hearing is weak and conviction grows with hearings (c 0.41 after one, 0.78 after four or more); a correction weighs old evidence instead of deleting it (120/120).
 - It finds hidden classes by itself (Jaccard 1.00).
-- Generalisation to never-seen instances improves with age: 93% / 81% after 600 experiences, 100% / 90% after 1500. The earlier reading rule got worse with age; eight failed attempts and the cause are recorded.
+- On instances never told the asked dimension, generalisation improves with age: 93% / 81% (two domains) after 600 experiences, 100% / 90% after 1500. The earlier reading rule got worse with age; eight failed attempts and the cause are recorded.
 - No forgetting: facts learned early are bit-identical hundreds of experiences later; living a second domain does not disturb the first (10/10).
-- A single experience can be retracted exactly (10/10).
+- The evidence of a single experience can be retracted exactly (10/10); this is exact for the evidence, not for the structure the experience created.
 - It imitates first, then detaches from what it copied by its outcomes, while keeping the knowledge that others act so (T7).
-- Against a small Transformer on the identical stream of experiences (5 seeds × 2 worlds, identical probes): on never-seen instances Zihin reaches 90% / 97% and 75% / 95%; a Transformer trained online in one pass 67% / 57% and 60% / 50%; one trained to convergence on the whole stream 77% / 67% and 53% / 53%. A second domain lowers the Transformer's knowledge of the first from 0.85 to 0.74 and leaves Zihin's at 1.00. Retracting one experience takes 20–77 ms in Zihin and is exact; the Transformer's exact counterpart is retraining from scratch. This comparison is in the small-data, learn-while-living regime; the Transformers are small and the gap may close with far more data.
+- Against a small Transformer on the identical stream of experiences (5 seeds × 2 worlds, identical probes; Zihin in its "members" configuration): on instances never told the asked dimension Zihin reaches 90% / 97% and 75% / 95%; a Transformer trained online in one pass 67% / 57% and 60% / 50%; one trained to convergence on the whole stream 77% / 67% and 53% / 53%. A second domain lowers the one-pass Transformer's accuracy on the first from 0.85 to 0.74 and leaves Zihin's at 1.00. The configuration the chat program runs was not in this comparison and does poorly in these worlds (held-out 0.55 and 0.04 after 600 experiences). Retracting one experience takes 20–77 ms in Zihin and is exact; the Transformer's exact counterpart is retraining from scratch. This comparison is in the small-data, learn-while-living regime; the Transformers are small and the gap may close with far more data.
 - Chat: it says what it watched, answers questions it never watched by relations ("what does a bird do" → "a bird sings"), stays silent when it knows nothing, and stops giving a copied answer once told it was wrong.
 - It sees and hears (first versions): image and sound files are perceived by plain pixel and signal arithmetic, with no trained network, and recognised by resemblance. New images 73% / 83% / 67% right, new sounds 93% / 97% / 93% (chance 33%; 0% with resemblance off).
 - Curiosity and imagination (first forms): with nothing to say it asks back the word it did not know, with a question tone, and learns and uses what it is told (T4). It imagines by carrying a thought over to a structurally similar concept and scores every step for reality against lived evidence (T8).
@@ -92,7 +122,7 @@ In November 2026 I started a new core, separate from the Transformer: **Zihin** 
 - Online life: from the moment a session starts it lives in its own time. Its words come out as it says them. In silence it thinks, speaks first or asks about what it most wants to know, and in a long silence it sleeps.
 - Turkish structure (opt-in): with `--parca cevahir` a mind lives each word with its root, suffix and stem pieces from the repository's own tokenizer infrastructure, so words built alike resemble each other. Raised with pieces from birth, a mind grew about five times as many ties per moment and ran out of memory, so pieces are off by default.
 - Learning code from its consequences (first test): on six tiny functions it first watches mostly wrong completions. Then the code it writes is actually run, and the test result comes back as a good/bad signal; when it hesitates it tries the alternative whose consequences it knows least. By round 4 it writes passing code for all six tasks; without the signal it stays at 0%, and without trying at 11%.
-- Learning to learn (F24, off by default): from its own outcomes it learns how far a kind of "voice" can be believed (how many members speak, how much they agree), and it carries this into a new domain. Early learning speeds up in one direction (+0.055; 7 of 10 lives) but not in the other; the result is mixed.
+- Learning to learn (F24, off by default): from its own outcomes it learns how far a kind of "voice" can be believed (how many members speak, how much they agree), and it carries this into a new domain. Early learning speeds up in one direction (+0.058 ± 0.025; better in 7 of 10 lives) but not in the other; the result is mixed.
 - Speed and memory: the core is 2–3.8x faster per moment with bit-identical results. Memory per tie went from 239 to 69 bytes: on a mind with 3 million ties the core shrank from 777 MB to 223 MB and the file from 930 MB to 377 MB. Old mind files are converted on load. The memory layout costs 13–32% per moment.
 - A self: an innate "self" unit is present in every moment the mind speaks or thinks. By introspection it reads what it has said and thought, and how much, in its own life.
 

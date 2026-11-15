@@ -2,21 +2,27 @@
 
 [English](README.md) · [Türkçe](README-TR.md)
 
-[Araştırma arşivi DOI: 10.5281/zenodo.24235648](https://doi.org/10.5281/zenodo.24235648) · [Araştırma yayınları](docs/publications/README.md)
+[Araştırma arşivi DOI (her zaman son sürüm): 10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660) · [Araştırma yayınları](docs/publications/README.md)
 
 > **Son güncelleme — Kasım 2026: Cevahir Zihin, yaşayarak öğrenen bir zihin. Transformer değil.**
 >
-> Depoda yaşayan model bir sinir ağı değil, bir **Yaşayan Kanıt Zihni**. Ağırlık matrisi, gömme vektörü, geri
-> yayılım ve softmax dikkati yok. Her ilişkiyi bir bağ olarak tutar ve her bağın kanıtını **nereden geldiğine göre**
-> sayar: kendisi mi gördü, biri mi söyledi, taklit mi etti, kendisi mi yaptı, çıkarım mı yaptı, hayal mi etti. Ne
-> bekleyeceğini tek bir kuraldan okur: `e = c·(f − ½) + ½`.
+> Bu depodaki yeni model Cevahir Zihin (`zihin/`, `python -m zihin` ile çalışan) bir sinir ağı değil, bir **Yaşayan
+> Kanıt Zihni**. Ağırlık matrisi, gömme vektörü, geri yayılım ve softmax dikkati yok. Her ilişkiyi bir bağ olarak
+> tutar ve her bağın kanıtını **nereden geldiğine göre** ayrı tutar: kendisi mi gördü, biri mi söyledi, taklit mi
+> etti, kendisi mi yaptı, çıkarım mı yaptı, hayal mi etti. Ne bekleyeceğini tek bir kuraldan okur:
+> `e = c·(f − ½) + ½`. Aşağıda anlatılan önceki Transformer motoru da depoda duruyor.
 >
-> - **Dikkat:** her an yalnız yedi birim odağa girer (**Yedili Odak**). Dikkat yerel ve okunabilirdir; maliyeti
->   geçmişin uzunluğuyla büyümez.
-> - **Unutma:** öğrendiği tek bir deneyimi tam olarak geri alabilir (**Kesin Unutma**).
-> - **Bilmemek:** bilmediğini bir iç his olarak fark eder ve "bilmiyorum" der.
-> - **Rüya:** uykuda rüya görür ve hayallerinden hangisinin doğru çıktığını ayıklar.
-> - **Sonuçtan öğrenme:** yazdığı kodun testten geçip geçmediğine bakarak doğru kodu bulur.
+> - **Dikkat:** her an yalnız yedi birim odağa girer (**Yedili Odak**). Bağlam penceresi yoktur; geçmişe dönüp
+>   bakmaz, yalnız odaktaki birimlerin bağlarını okur. Bu yüzden an başına süre zihin büyüdükçe yalnız yavaşça artar
+>   (küçük bir zihinde yaklaşık 2 ms, 3 milyon bağda yaklaşık 4 ms).
+> - **Unutma:** defteri tutulduğu sürece tek bir deneyimin kanıtını tam olarak geri alır (**Kesin Unutma**);
+>   programda bu, o oturumda yazdıklarınız için geçerlidir (`!unut`).
+> - **Bilmemek:** bilmediğini ölçülen bir iç his olarak fark eder ve bunu söylemeyi öğrenir: `!kendini_tani`
+>   derslerinden sonra "bilmiyorum , öğrenmek isterim" der; yeni bir zihin bilinmeyen kelimeyi geri sorar.
+> - **Rüya:** uykuda günün konuları üzerine rüya görür; sonraki gecelerde hayallerinden hangisinin doğru çıktığını
+>   ayıklar.
+> - **Sonuçtan öğrenme:** bir araştırma testinde (altı küçük fonksiyon, her biri üç aday tamamlama) testten geçen
+>   tamamlamayı yalnız test sonuçlarından seçmeyi öğrendi; yeni kod yazmak hâlâ açık.
 >
 > **Ayrı bir eğitim aşaması yoktur; model her konuşmada öğrenir. Ona kibar konuşun.**
 >
@@ -26,27 +32,50 @@
 
 ### Cevahir Zihin'i bilgisayarınızda çalıştırın
 
+Python 3.11 ya da daha yenisi gerekir. Linux / macOS:
+
 ```
 git clone https://github.com/myylogic/cevahir-ai
 cd cevahir-ai
-pip install torch numpy           # isteğe bağlı: python-docx (Word), pillow (resim)
-python -m zihin                   # Linux / macOS
-.\cevahir.ps1                     # Windows PowerShell
+python3 -m venv .venv && . .venv/bin/activate
+pip install torch numpy           # isteğe bağlı: python-docx (Word), pypdf (PDF), pillow (resim)
+python -m zihin
 ```
 
-İlk açılışta zihin boştur ve sizinle yaşayarak öğrenir. Öğretmek istediğiniz dosyalar varsa:
+Windows PowerShell:
+
+```
+git clone https://github.com/myylogic/cevahir-ai
+cd cevahir-ai
+pip install torch numpy
+.\cevahir.ps1                     # betikler engelliyse: powershell -ExecutionPolicy Bypass -File .\cevahir.ps1
+```
+
+Programı `cevahir-ai` klasörünün içinde başlatın. Önce "Seninle konuşan kim?" diye sorar; adınızı yazın. İlk
+açılışta zihin boştur ve sizinle yaşayarak öğrenir. Öğretmek istediğiniz dosyalar varsa, komutları kabukta değil
+programın içinde yazın:
 
 ```
 !oku belgelerim/                  # .txt .md .docx .pdf belgeler, .json/.tsv diyaloglar, kaynak kod
-!ogret diyaloglar.tsv             # her satır: soru<TAB>cevap
+!ogret diyaloglar.tsv             # her satır: soru<TAB>cevap (UTF-8 olarak kaydedin)
 !izle selam || merhaba            # bir konuşmayı izletmek
+!kendini_tani                     # kendisi hakkında dersler; "bilmiyorum" demeyi de içerir
 !dogru  /  !yanlis                # son cevabını nasıl karşıladığınız
 !uyu    !dusun <konu>    !kendin  # rüya, iç ses, iç gözlem
+!cik                              # çıkış
 ```
 
-Cevahir Türkçe verilerle büyütüldü. Başka bir dilde konuşmak istiyorsanız o dilde küçük bir veri setini (birkaç yüz
-soru-cevap ya da metin) `!ogret` veya `!oku` ile ona yaşatın. Zihin dosyası okuduklarını içinde taşır; özel
-belgelerle yetiştirdiğiniz bir zihni paylaşmayın.
+Açık kaldığı sürece kendi zamanında yaşar: düşünür, bir sessizliğin ardından kendiliğinden konuşabilir, on dakika
+sonra uyur (`--yasamsiz` bunu kapatır). Zihin her oturumun sonunda `~/.cevahir/zihin/cevahir.zihin` dosyasına
+kaydedilir (Windows: `%USERPROFILE%\.cevahir\zihin\cevahir.zihin`; klasörü `CEVAHIR_HOME` değiştirir; `--kaydetme`
+kaydetmez).
+
+Şimdiye kadar yetiştirilen zihinler yazarın özel Türkçe verilerini yaşadı ve bu depoda değildir. Sizin kopyanız,
+`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Yerleşik dersleri Türkçedir; başka bir dilde konuşacaksanız
+onların karşılıklarını o dilde öğretin ve programı `--dil diger` ile başlatın, böylece büyük harfler Türkçe kurallar
+olmadan küçültülür. Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
+için ne kadar veri gerektiği ölçülmedi. Zihin dosyası okuduklarını içinde taşır; özel belgelerle yetiştirdiğiniz bir
+zihni paylaşmayın.
 
 ---
 
@@ -72,18 +101,18 @@ Kasım 2026'da Transformer'dan ayrı, yeni bir çekirdek üzerinde çalışmaya 
 | sabit boyut, sabit sözlük, gömme vektörleri | büyüyen birimler ve bağlar, açık alfabe; sabit boyut yoktur |
 | softmax ile sonraki token | kanaat: her inancın gücü ve kaynağı vardır; hiçbir şey eşiğe birikmezse susar |
 | yeni bilgi eskisini bozar, yeniden eğitim gerekir | yeni bilgi eklenir, eskisi bayt bayt korunur |
-| bilgi ağırlıklara dağılmıştır, tek bir örnek geri alınamaz | tek bir deneyim çekirdekten tam olarak geri alınabilir |
+| bilgi ağırlıklara dağılmıştır, tek bir örnek geri alınamaz | defteri tutulduğu sürece tek bir deneyimin kanıtı çekirdekten tam olarak geri alınabilir |
 | bir bilginin nereden geldiği tutulmaz | her kanıt kaynağıyla tutulur (anlatılan, görülen, taklit, kendi eylemi, çıkarım, hayal); kaynağa güven de yaşanarak öğrenilir |
 
 **Ölçülmüş sonuçlar** (üretilmiş iki dünya, 5 tohum; ayrıntılar [sonuçlar](research/living_mind_2026_11_14/RESULTS.md) ve [notlar](research/living_mind_2026_11_14/NOTES.md) dosyalarında):
 
 - İlk duyuş zayıftır, kanaat dinledikçe artar (1 duyuşta c 0.41, 4+ duyuşta 0.78); bir düzeltme eski kanıtı silmez, tartar (120/120).
 - Gizli sınıfları kendisi bulur (Jaccard 1.00).
-- Hiç görülmemiş örneğe genelleme yaşadıkça iyileşir: 600 deneyimde %93 / %81, 1500 deneyimde %100 / %90. Önceki okuma kuralı yaşlandıkça kötüleşiyordu; sekiz başarısız deneme ve bunun nedeni kayıtlıdır.
+- Sorulan boyutu hiç söylenmemiş örneklerde genelleme yaşadıkça iyileşir: 600 deneyimde %93 / %81 (iki alan), 1500 deneyimde %100 / %90. Önceki okuma kuralı yaşlandıkça kötüleşiyordu; sekiz başarısız deneme ve bunun nedeni kayıtlıdır.
 - Unutmaz: erken öğrenilen bilgiler yüzlerce deneyim sonra bayt bayt aynıdır; ikinci bir alanı yaşamak ilkini bozmaz (10/10).
-- Tek bir deneyim kesin olarak geri alınabilir (10/10).
+- Tek bir deneyimin kanıtı kesin olarak geri alınabilir (10/10); bu kanıt için kesindir, deneyimin kurduğu yapı için değil.
 - Önce taklit eder, sonra sonuçlarına bakarak kopyaladığından kopar; "başkaları böyle yapar" bilgisini korur (T7).
-- Aynı deneyim akışında küçük bir Transformer ile karşılaştırma (5 tohum × 2 dünya, aynı sorular): hiç görülmemiş örneğe genellemede Zihin %90 / %97 ve %75 / %95; yaşarken tek geçişte eğitilen Transformer %67 / %57 ve %60 / %50; akışın tamamında yakınsayana kadar eğitilen Transformer %77 / %67 ve %53 / %53. İkinci bir alan, Transformer'da ilk alanın bilgisini 0.85'ten 0.74'e düşürür, Zihin'de 1.00 kalır. Tek bir deneyimi geri almak Zihin'de 20–77 ms ve tamdır; Transformer'da tam karşılığı sıfırdan yeniden eğitimdir. Bu karşılaştırma az veriyle yaşarken öğrenme koşulundadır; Transformer'lar küçüktür ve çok daha fazla veriyle fark kapanabilir.
+- Aynı deneyim akışında küçük bir Transformer ile karşılaştırma (5 tohum × 2 dünya, aynı sorular; Zihin "members" ayarında): sorulan boyutu hiç söylenmemiş örneklerde Zihin %90 / %97 ve %75 / %95; yaşarken tek geçişte eğitilen Transformer %67 / %57 ve %60 / %50; akışın tamamında yakınsayana kadar eğitilen Transformer %77 / %67 ve %53 / %53. İkinci bir alan, tek geçişli Transformer'ın ilk alandaki doğruluğunu 0.85'ten 0.74'e düşürür, Zihin'de 1.00 kalır. Sohbet programının çalıştırdığı ayar bu karşılaştırmada yoktu ve bu dünyalarda kötü sonuç verir (600 deneyimde 0.55 ve 0.04). Tek bir deneyimi geri almak Zihin'de 20–77 ms ve tamdır; Transformer'da tam karşılığı sıfırdan yeniden eğitimdir. Bu karşılaştırma az veriyle yaşarken öğrenme koşulundadır; Transformer'lar küçüktür ve çok daha fazla veriyle fark kapanabilir.
 - Sohbet: izlediği diyalogları söyler; izlemediği sorulara ilişki kurarak cevap verir ("kuş ne yapar" → "kuş öter"); bilmediğinde susar; "yanlış" denen kopyalanmış bir cevabı bir daha söylemez.
 - Görür ve duyar (ilk sürüm): resim ve ses dosyalarını eğitilmiş bir ağ olmadan, piksel ve ses aritmetiğiyle algılar ve benzerlikle tanır. Yeni resimlerde %73 / %83 / %67, yeni seslerde %93 / %97 / %93 doğru (şans %33; benzerlik kapalıyken %0).
 - Merak ve hayal (ilk biçimler): söyleyecek bir şeyi yokken bilmediği kelimeyi soru tonuyla geri sorar, açıklananı öğrenip kullanır (T4). Bir düşünceyi yapıca benzediği bir kavrama taşıyarak hayal kurar ve her adımın gerçekliğini yaşanmış kanıta göre ölçer (T8).
@@ -92,7 +121,7 @@ Kasım 2026'da Transformer'dan ayrı, yeni bir çekirdek üzerinde çalışmaya 
 - Çevrimiçi yaşam: oturum açıldığı andan itibaren kendi zamanında yaşar. Söyledikleri kelime kelime akar. Sessizlikte düşünür, konuşmayı kendisi başlatır ya da en çok merak ettiği kelimeyi sorar, uzun sessizlikte uyur.
 - Türkçe yapısı (isteğe bağlı): `--parca cevahir` ile bir zihin kelimeleri deponun kendi tokenizer altyapısından gelen kök, ek ve gövde parçalarıyla birlikte yaşar; böyle yapılmış kelimeler birbirine benzer. Doğuştan parçalarla büyüyen bir zihin an başına yaklaşık beş kat bağ kurup belleği tükettiği için varsayılan kapalıdır.
 - Kodu sonucundan öğrenmek (ilk test): altı küçük fonksiyonda önce çoğunlukla yanlış tamamlamalar izler, sonra kendi yazdığı kod gerçekten çalıştırılır ve test sonucu iyi/kötü sinyali olarak geri döner. Kararsız kaldığında sonucunu en az bildiği seçeneği dener. 4. turda altı görevin hepsinde testten geçen kod yazar; sonuç sinyali olmadan %0, deneme olmadan %11'de kalır.
-- Öğrenmeyi öğrenmek (F24, varsayılan kapalı): hangi tür "sese" (kaç üye konuşuyor, ne kadar hemfikirler) ne kadar güvenileceğini kendi sonuçlarından öğrenir ve bunu yeni bir alana taşır. Bir yönde erken öğrenme hızlanır (+0.055; 10 hayatın 7'sinde), ters yönde hızlanmaz; sonuç karışıktır.
+- Öğrenmeyi öğrenmek (F24, varsayılan kapalı): hangi tür "sese" (kaç üye konuşuyor, ne kadar hemfikirler) ne kadar güvenileceğini kendi sonuçlarından öğrenir ve bunu yeni bir alana taşır. Bir yönde erken öğrenme hızlanır (+0.058 ± 0.025; 10 hayatın 7'sinde daha iyi), ters yönde hızlanmaz; sonuç karışıktır.
 - Hız ve bellek: çekirdek, sonuçlar bit bit aynı kalarak an başına 2–3.8 kat hızlandı. Bağ başına bellek de 239 bayttan 69 bayta indi: 3 milyon bağlı bir zihnin çekirdeği 777 MB'tan 223 MB'a, dosyası 930 MB'tan 377 MB'a düştü. Eski zihin dosyaları yüklenirken kendiliğinden dönüştürülür. Bellek düzeni an başına %13–32 yavaşlık getirdi.
 - Kendilik: konuştuğu ve düşündüğü her anda bulunan doğuştan bir "ben" birimi vardır. İç gözlemle kendi yaşamından neyi ne kadar söyleyip düşündüğünü okur.
 
