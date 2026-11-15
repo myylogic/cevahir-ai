@@ -580,7 +580,7 @@ class Mind:
                                  dtype=torch.bool)                  # by channel id; index -1 (no channel) -> False
             channels = S.u_channel[S.t_dst[unique]].long()
             expect = (S.t_form[unique] == EXPECT) & world[channels]
-            after = ((S.t_w[W_POS, unique] + S.t_w[W_NEG, unique]) * self.trust).sum(-1)
+            after = ((S.t_w[W_POS].index_select(0, unique) + S.t_w[W_NEG].index_select(0, unique)) * self.trust).sum(-1)
             before = torch.clamp(after - gained, min=0.0)
             relief = float((S.t_use[unique] * (conviction(after, k) - conviction(before, k)))[expect].sum())
             relief = max(0.0, relief)
