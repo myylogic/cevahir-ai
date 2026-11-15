@@ -30,10 +30,11 @@ Commands (Turkish, with English aliases):
                                     !dinle ben.wav  then  "bu benim sesim"; later  !dinle baska.wav  then  "bu kim"
     !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
                                     reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
-    !uyu [n]             / !sleep   sleep: n dreams (imagination about the last topic and what it is unsure of), then
-                                    sorting: its imaginings weighed against what is real (trust in its imagination
-                                    follows), and which earlier dreams life has since shown true or false
-                                    (it also sleeps by itself after 10 minutes of silence)
+    !uyu [n]             / !sleep   sleep: n dreams (imagination about what the day was about: the words most
+                                    characteristic of the recent history by the mind's own memory; and about what it
+                                    is unsure of), then sorting: its imaginings weighed against what is real (trust in
+                                    its imagination follows), and which earlier dreams life has since shown true or
+                                    false (it also sleeps by itself after 10 minutes of silence)
     !kendin              / !introspect  what it can say about itself from its own evidence (its self unit)
     !arastir <konu>      / !research  on your command: search the web (Google Custom Search if GOOGLE_API_KEY and
                                     GOOGLE_CSE_ID are set, otherwise Wikipedia) and read what is found (pages printed)
@@ -70,6 +71,7 @@ import signal
 import sys
 import threading
 import time
+from dataclasses import dataclass, field
 from typing import Dict, List, NamedTuple
 
 from . import ACTED, IMITATED, SENSED, TOLD, Config, Event, Mind, read
@@ -350,7 +352,26 @@ VALUE = "deger"
 VALUE_SIGN = {(VALUE, "iyi"): 1.0, (VALUE, "kötü"): -1.0}     # the adapter defines what is good and bad
 
 
-DAY = 12                                # the recent utterances that are "the day" (dusunce.day_residue)
+DAY = 12                                # the recent history entries that are "the day" (dusunce.day_residue)
+READ, TAUGHT, WATCHED, CHAT = "read", "taught", "watched", "chat"   # kinds of history entries; a line lived without
+                                                                     # an answer is of its provenance ("told", "sensed")
+
+
+@dataclass
+class Entry:
+    """One entry of a session's history: what was lived, as !gecmis shows it and !unut takes it back.
+
+    ``kind`` says what it was (a line "told" or "sensed", a "chat" line with the mind's answer, a file "read" or
+    "taught", a dialogue "watched"); ``text`` is how !gecmis shows it (never parsed); ``moments`` are the moments it
+    lived (!unut retracts each through the ledger); ``heard`` is the last utterance the mind heard in it (a thought
+    after a silence is about it, dusunce.topic_of); ``counts`` are the words lived in it, heard or said, with how often
+    (the day residue weighs them, dusunce.day_residue)."""
+    number: int
+    kind: str
+    text: str
+    moments: List[int]
+    heard: str = ""
+    counts: Dict[str, int] = field(default_factory=dict)
 
 
 class _indices_rebuilt_once:
@@ -381,9 +402,8 @@ class Session:
     def __init__(self, mind: Mind, pieces=None) -> None:
         self.mind = mind
         self.dil = getattr(mind, "dil", "tr")  # the mind's language convention (how its text is lower-cased)
-        self.history: List[tuple] = []        # (number, text, moments)
+        self.history: List[Entry] = []        # what was lived in this session, entry by entry
         self.numbered = 0                     # the last number given to a history entry (numbers are never reused)
-        self.lines: Dict[int, List[str]] = {}  # number -> the last lines of what was read, taught or watched
         self.answered = None                  # the path (mind.trace) of the last answer, kept for its feedback
         self.pieces = pieces                  # optional subword tokenizer: pieces of each word as facets
         if pieces is not None:
@@ -424,24 +444,20 @@ class Session:
     def lower(self, text: str) -> str:
         return lower(text, self.dil)
 
-    def remember(self, text: str, moments: List[int], said: List[str] = ()) -> int:
-        """A new entry of the history: what was lived, with its moments (``!unut`` retracts them exactly); for what
-        was read, taught or watched also its last lines (they are the day's utterances). Returns its number."""
+    def remember(self, kind: str, text: str, moments: List[int], heard: List[str] = (), said: List[str] = ()) -> int:
+        """A new entry of the history (see Entry): its kind, how !gecmis shows it, its moments, the utterances heard
+        in it (in order) and the words the mind said in it. Returns its number."""
+        counts: Dict[str, int] = {}
+        for word in [w for utterance in heard for w in self.body(utterance)] + list(said):
+            counts[word] = counts.get(word, 0) + 1
         self.numbered += 1
-        self.history.append((self.numbered, text, moments))
-        if said:
-            self.lines[self.numbered] = list(said[-DAY:])
+        self.history.append(Entry(self.numbered, kind, text, list(moments), heard[-1] if heard else "", counts))
         return self.numbered
 
-    def recent_utterances(self, n: int = DAY) -> List[str]:
-        """The texts of the last ``n`` utterances lived in this session, oldest first: a typed line is one, an entry
-        of what was read, taught or watched gives its last lines."""
-        out: List[str] = []
-        for number, text, _ in reversed(self.history):
-            out.extend(reversed(self.lines.get(number) or [text]))
-            if len(out) >= n:
-                break
-        return list(reversed(out[:n]))
+    def last_heard(self) -> str:
+        """The last utterance the mind heard in this session, whatever the entry it belongs to: a line told, the
+        partner's line in a chat, the answer of a dialogue watched, the last sentence of a file read or taught."""
+        return next((entry.heard for entry in reversed(self.history) if entry.heard), "")
 
     def events(self, symbol: str, prov: int, speaker: str = None) -> List[Event]:
         """One word as an event on the text channel, with its subword pieces and its speaker as facets."""
@@ -462,7 +478,7 @@ class Session:
         self.end_of_turn(prov, tone=self.tone(text))
         self.mind.step([])
         if keep:
-            self.remember(text, list(range(start, self.mind.t + 1)))
+            self.remember(PROVENANCE[prov], text, list(range(start, self.mind.t + 1)), [text])
 
     def listen(self, text: str, prov: int, speaker: str = None) -> None:
         """Hear an utterance while not speaking (turn taking set by the session). ``speaker``: who says it, perceived
@@ -573,7 +589,7 @@ class Session:
             for w in asked:
                 if say is not None:
                     say(w)
-        self.remember(text, list(range(start, self.mind.t + 1)))
+        self.remember(CHAT, text, list(range(start, self.mind.t + 1)), [text], said)
         self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
         self.answered = list(self.mind.trace)            # ... and the path that led to the answer is kept for them
         return " ".join(said) if said else "(sessiz)"
@@ -782,7 +798,7 @@ class Session:
             finally:                                     # what was lived of this file is one entry of the history
                 moments = list(range(first_moment, self.mind.t + 1))
                 if moments:
-                    self.remember("[okudu] %s" % os.path.basename(name), moments, said)
+                    self.remember(READ, "[okudu] %s" % os.path.basename(name), moments, said)
         took = time.time() - start
         out = "  %d dosya, %d cümle/diyalog, %d an, %.0f sn (%.1f ms/an)" % (
             len(files) - len(skipped), lived, self.mind.t, took, 1000 * took / max(1, self.mind.t - t0))
@@ -821,7 +837,7 @@ class Session:
         finally:
             moments = list(range(first_moment, self.mind.t + 1))
             if moments:
-                self.remember("[öğretti] %s" % os.path.basename(path), moments, said)
+                self.remember(TAUGHT, "[öğretti] %s" % os.path.basename(path), moments, said)
         out = "  %d satır izlendi, %d an" % (n, self.mind.t)
         for note in encoding_notes({os.path.basename(path): found}):
             out += "\n  " + note
@@ -831,7 +847,8 @@ class Session:
         """``!izle``: watch two others talk (see watch); the dialogue is one entry of the history."""
         start = self.mind.t + 1
         self.watch(first, answer)
-        self.remember("[izledi] %s || %s" % (first, answer), list(range(start, self.mind.t + 1)), [first, answer])
+        self.remember(WATCHED, "[izledi] %s || %s" % (first, answer), list(range(start, self.mind.t + 1)),
+                      [first, answer])
 
     def ask(self, text: str, top: int = 5) -> str:
         twin = self.mind.clone()
@@ -879,25 +896,24 @@ class Session:
         """Retract an entry of the history exactly: each of its moments through the ledger, the latest first (a
         typed line, an answer, a file read or taught, a watched dialogue)."""
         for entry in self.history:
-            if entry[0] != number:
+            if entry.number != number:
                 continue
-            moments = entry[2]
+            moments = entry.moments
             if not moments:
-                return "  '%s' geri alınamaz: yaşanmış anı kayıtlı değil" % entry[1]
+                return "  '%s' geri alınamaz: yaşanmış anı kayıtlı değil" % entry.text
             log = self.mind.S.log
             if any(m not in log for m in moments):
                 return "  '%s' geri alınamaz: bu zihin deneyim defteri tutmuyor (--defter-yok ya da defteri olmadan " \
-                       "yüklendi)" % entry[1]
+                       "yüklendi)" % entry.text
             removed = 0
             with _indices_rebuilt_once(self.mind.S):
                 for m in reversed(moments):
                     report = self.mind.retract(m)
                     removed += sum(v for v in report.values() if isinstance(v, int))
             self.history.remove(entry)
-            self.lines.pop(number, None)
             if not removed:
-                return "  '%s': %d an geri alındı ama çekirdekte çıkarılacak kaydı yoktu" % (entry[1], len(moments))
-            return "  '%s' geri alındı (kanıtı çekirdekten çıkarıldı; %d kayıt)" % (entry[1], removed)
+                return "  '%s': %d an geri alındı ama çekirdekte çıkarılacak kaydı yoktu" % (entry.text, len(moments))
+            return "  '%s' geri alındı (kanıtı çekirdekten çıkarıldı; %d kayıt)" % (entry.text, removed)
         return "  böyle bir numara yok"
 
 
@@ -1257,8 +1273,8 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     prefix, _, value = rest.partition("=>")
                     print(session.why(prefix.strip(), value.strip()))
                 elif cmd in ("gecmis", "history"):
-                    for number, text, _ in session.history:
-                        print("  %3d  %s" % (number, text))
+                    for entry in session.history:
+                        print("  %3d  %s" % (entry.number, entry.text))
                 elif cmd in ("unut", "forget"):
                     print(session.forget(int(rest)))
                 elif cmd in ("arastir", "araştır", "research"):

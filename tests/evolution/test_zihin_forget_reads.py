@@ -19,7 +19,7 @@ import re
 import pytest
 
 from zihin import TOLD, Config, Mind
-from zihin.__main__ import CHANNEL, Session, _one_line
+from zihin.__main__ import CHANNEL, READ, Entry, Session, _one_line
 
 ANIMALS = ("Kedi evcil bir hayvandır. Kediler balık sever. Zürafa uzun boyunlu bir hayvandır. Zürafalar yaprak "
            "yer. Penguen soğuk yerlerde yaşar.")
@@ -64,14 +64,15 @@ def test_what_was_read_taught_or_watched_is_taken_back_and_a_probe_changes_back(
     session.live("Bugün hava güzel.", TOLD)
     before = session.ask(probe)
     run(session, command.format(doc=tmp_path / "hayvanlar.txt", tsv=tmp_path / "ders.tsv"), capsys)
-    number, text, moments = session.history[-1]
+    entry = session.history[-1]
+    number, text, moments = entry.number, entry.text, entry.moments
     assert text.startswith(("[okudu] hayvanlar.txt", "[öğretti] ders.tsv", "[izledi] Zürafa ne yer?"))
     assert moments == list(range(moments[0], session.mind.t + 1)) and len(moments) > 5
     assert session.ask(probe) != before                  # what was lived changed what it expects
     out = run(session, "!unut %d" % number, capsys)
     assert "geri alındı" in out and records(out) > 0
     assert session.ask(probe) == before                  # ... and taking it back changes it back
-    assert [n for n, _, _ in session.history] == [1]     # the typed line stays
+    assert [e.number for e in session.history] == [1]   # the typed line stays
 
 
 def indices(S) -> tuple:
@@ -85,12 +86,12 @@ def test_taking_back_a_read_equals_retracting_each_of_its_moments(tmp_path):
         session.read_path(str(tmp_path / "hayvanlar.txt"))
         session.live("Kedi evcil bir hayvandır.", TOLD)  # later life keeps some of what the read built
     assert one.mind.S.digest() == other.mind.S.digest()
-    number = one.history[-2][0]
+    number = one.history[-2].number
     alive = lambda S: int(S.t_alive[:S.n_ties].sum())
     held = alive(one.mind.S)
     assert "geri alındı" in one.forget(number)
     assert alive(one.mind.S) < held                      # ties the read built were removed: the indices changed
-    for m in reversed(other.history[-2][2]):
+    for m in reversed(other.history[-2].moments):
         other.mind.retract(m)
     assert one.mind.S.digest() == other.mind.S.digest()
     assert indices(one.mind.S) == indices(other.mind.S)
@@ -107,7 +108,7 @@ def test_nothing_is_reported_as_taken_back_with_no_records(tmp_path, capsys):
     out = run(session, "!unut 1", capsys)
     assert "geri alınamaz" in out and "defter" in out and "geri alındı" not in out
     assert session.mind.S.digest() == digest and len(session.history) == 1
-    session.history.append((99, "[okudu] boş.txt", []))         # an entry that lived no moment
+    session.history.append(Entry(99, READ, "[okudu] boş.txt", []))   # an entry that lived no moment
     out = run(session, "!unut 99", capsys)
     assert "geri alınamaz" in out and "geri alındı" not in out
 
@@ -118,5 +119,5 @@ def test_history_numbers_are_never_given_twice():
         session.live(text, TOLD)
     session.forget(2)
     session.live("Dört.", TOLD)
-    assert [n for n, _, _ in session.history] == [1, 3, 4]
-    assert "Dört." in session.forget(4) and [n for n, _, _ in session.history] == [1, 3]
+    assert [e.number for e in session.history] == [1, 3, 4]
+    assert "Dört." in session.forget(4) and [e.number for e in session.history] == [1, 3]

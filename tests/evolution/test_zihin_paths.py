@@ -60,7 +60,7 @@ def test_tilde_quotes_and_spaces_in_paths(monkeypatch, tmp_path, capsys):
     assert run(s, "!oku %s 2" % (tmp_path / "notlar 2024"), capsys).startswith("  1 dosya, 2 cümle")
     assert run(s, "!ogret ~/ders.tsv", capsys).startswith("  4 satır izlendi")
     assert run(s, "!ogret '%s'" % (tmp_path / "ders.tsv"), capsys).startswith("  4 satır izlendi")
-    assert [text for _, text, _ in s.history] == ["[okudu] a.txt", "[okudu] a.txt", "[okudu] b.txt",
+    assert [entry.text for entry in s.history] == ["[okudu] a.txt", "[okudu] a.txt", "[okudu] b.txt",
                                                   "[okudu] b.txt", "[öğretti] ders.tsv", "[öğretti] ders.tsv"]
 
 
@@ -200,4 +200,4 @@ def test_a_file_that_is_not_text_is_refused_and_nothing_of_it_is_lived(tmp_path,
     s = session()
     out = run(s, "!oku %s" % folder, capsys)
     assert out.startswith("  1 dosya, 3 cümle") and "resim.txt (metin dosyası değil: NUL" in out
-    assert [text for _, text, _ in s.history] == ["[okudu] hayvanlar.txt"]
+    assert [entry.text for entry in s.history] == ["[okudu] hayvanlar.txt"]

@@ -106,16 +106,16 @@ def frequent_words(mind, k: int = FREQUENT, relative: bool = False) -> set:
 
 
 def topic_of(session, text: str = None) -> str:
-    """What to think about: the utterance's (by default the last one's) least known content word (the highest
-    drive), among the words the mind has met."""
+    """What to think about: the least known content word (the highest drive) of an utterance, among the words the
+    mind has met; by default of the last utterance it heard in the session, whatever the history entry it belongs to
+    (a line told, a chat, a dialogue watched, the last sentence of a file read or taught; Session.last_heard)."""
     from .__main__ import CHANNEL
     from .read import drive_of
     mind = session.mind
     if text is None:
-        if not session.history:
-            return ""
-        text = session.history[-1][1]
-    if text.startswith("["):
+        last_heard = getattr(session, "last_heard", None)
+        text = last_heard() if last_heard is not None else ""
+    if not text:
         return ""
     cid = mind.ch.id(CHANNEL)
     best, best_drive = "", -1.0
@@ -465,54 +465,66 @@ def dream(session, topic: str, links: int = 3, frequent: set = None) -> List[dic
     return records
 
 
-def day_residue(session, n: int, utterances: int = 12) -> List[str]:
-    """What the day was about: the words of the recent utterances the mind is least sure of (highest drive), the
-    most used words of its whole life left out (frequency decides, no word list). The recent utterances are those
-    of the session's history; what was read, taught or watched counts with its last lines."""
+def tau(mind, unit: int) -> float:
+    """How telling a unit is by the mind's own memory: 1 / (1 + the number of composed contexts holding it), the
+    weight the core gives a part when it calls up lived situations (read.py, F23). A word every context holds tells
+    little about any one of them; one that few contexts hold is particular. In a speaking mind the composed contexts
+    are the utterance so far, so a word late in an utterance is held by fewer of them than one early in it, and the
+    last words of sentences weigh most: what the memory holds, stated here, not corrected."""
+    from .store import PART
+    return 1.0 / (1 + len(mind.S.inc.get((unit, PART), ())))
+
+
+def day_residue(session, n: int, entries: int = 12, leave_out=()) -> List[str]:
+    """What the day was about: the words most characteristic of the session's recent history entries relative to the
+    mind, by its own evidence: how often a word was lived in the last ``entries`` entries (heard or said: a line, a
+    chat, a dialogue watched, a whole file read or taught, Entry.counts) times tau(u) = 1 / (1 + the number of composed
+    contexts holding it). A word the day repeated and few contexts hold is what it was about; one every context holds
+    is not. The same measure for every kind of entry; no word-shape rule (what a word looks like decides nothing).
+    ``leave_out``: words not offered (sleep leaves out the frequent ones)."""
     from .__main__ import CHANNEL
-    from .read import drive_of
     mind = session.mind
-    cid = mind.ch.id(CHANNEL)
-    S = mind.S
-    scored = {}
-    recent = session.recent_utterances(utterances) if hasattr(session, "recent_utterances") else \
-        [text for _, text, _ in session.history[-utterances:]]
-    for text in recent:
-        if text.startswith("[") or text.startswith("!"):
-            continue
-        for w in _words(session, text):
-            if len(w) < 4 or not w.isalpha() or w in scored:
-                continue
-            index = mind.ch.symbol_index(cid, w, create=False)
-            unit = S.atom_index.get((cid, index), -1) if index >= 0 else -1
-            if unit >= 0:
-                scored[w] = (drive_of(mind, unit), float(S.u_use[unit]))
-    if not scored:
+    if not mind.ch.has(CHANNEL):
         return []
-    uses = sorted(u for _, u in scored.values())
-    common = uses[int(0.8 * (len(uses) - 1))] if len(uses) >= 5 else float("inf")
-    ranked = sorted((w for w, (d, u) in scored.items() if u <= common), key=lambda w: -scored[w][0])
-    return ranked[:n]
+    cid = mind.ch.id(CHANNEL)
+    counts: Dict[str, int] = {}
+    for entry in reversed(session.history[-entries:] if entries else []):      # the latest first: ties go to it
+        for w, c in getattr(entry, "counts", {}).items():
+            counts[w] = counts.get(w, 0) + c
+    scored = []
+    for w, c in counts.items():
+        if w in leave_out:
+            continue
+        index = mind.ch.symbol_index(cid, w, create=False)
+        unit = mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
+        if unit >= 0:
+            scored.append((c * tau(mind, unit), w))
+    scored.sort(key=lambda sw: -sw[0])                     # stable: equal weights keep the latest entry's order
+    return [w for _, w in scored[:n]]
 
 
 def sleep(session, cycles: int = 3) -> Dict[str, object]:
-    """Sleep: dreams, then sorting. The mind dreams about the last topic and about what it is unsure of (words it
-    uses but holds with little conviction); each dream is a chain of imaginings carried on by free association, and
-    what it saw with a dreamt word it sees again. Then everything imagined is sorted against what is real: the
-    evidence on its trust in its own imagination (sort_dreams), and each kept dream's verdict (true, false, still
-    open). Returns the night's dreams (each a list of imaginings), the verdicts of the dreams reality has judged, and
-    the sorting."""
+    """Sleep: dreams, then sorting. The mind dreams about what the day was about (day_residue) and about what it is
+    unsure of (words it uses but holds with little conviction, wanted_topics), in that order, until ``cycles`` dreams
+    were dreamt or no topic is left: a topic it can think nothing after (a word that only ends what it heard, such as
+    the last word of a sentence) gives no dream, and the next one is tried. Each dream is a chain of imaginings carried
+    on by free association, and what it saw with a dreamt word it sees again. Then everything imagined is sorted
+    against what is real: the evidence on its trust in its own imagination (sort_dreams), and each kept dream's
+    verdict (true, false, still open). Returns the night's dreams (each a list of imaginings), the verdicts of the
+    dreams reality has judged, and the sorting."""
     from .__main__ import CHANNEL
     from .web import wanted_topics
     mind = session.mind
     frequent = frequent_words(mind, relative=True)                              # a small mind keeps topics too
-    topics = [w for w in day_residue(session, cycles) if w not in frequent]   # what the day was about, then what
+    topics = day_residue(session, cycles, leave_out=frequent)                   # what the day was about, then what
     for w in wanted_topics(mind, CHANNEL, cycles * 2):                         # it is unsure of
         if w not in topics and w not in frequent:
             topics.append(w)
     before_night = len(getattr(mind, "dreams", None) or [])
     dreams = []
-    for topic in topics[:cycles]:
+    for topic in topics:
+        if len(dreams) >= cycles:
+            break
         mind.step([])                                      # each dream begins in silence
         chain = dream(session, topic, frequent=frequent)
         if chain:
