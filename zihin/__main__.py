@@ -567,8 +567,9 @@ class Life:
 
     What you type arrives as an event of that time and is heard in order; what the mind says comes out word by word
     as it says it. Between your lines it lives on, one silent moment at a time: after a short silence it thinks
-    (inner voice, kept as imagined); after a longer one it may speak first, when its thought was real enough; after
-    a long one it sleeps, dreams and sorts its dreams. Commands are handled in the same stream."""
+    (inner voice, kept as imagined); after a longer one it speaks first: its thought, when it was real enough, else
+    a question about the word it most wants to know (T4); after a long one it sleeps, dreams and sorts its dreams.
+    Commands are handled in the same stream."""
 
     STOP = object()
 
@@ -638,17 +639,24 @@ class Life:
                 topic = topic_of(self.session)
                 words_, reality = think(self.session, topic) if topic else ([], 0.0)
                 self.thought = (topic, words_, reality)
-        if (self.thought and not self.spoke and quiet >= self.speak_after and self.thought[1]
-                and self.thought[2] >= self.real_enough):
+        if self.thought and not self.spoke and quiet >= self.speak_after:
             topic, words_, reality = self.thought
-            print("\n  zihin (kendiliğinden):", end="", flush=True)
-            with self.lock:
-                for w in [topic] + words_:              # it says aloud what it thought (its own acts)
-                    self.session.mind.step([Event(CHANNEL, w, ACTED)])
-                    self.say(w)
-                self.session.mind.step([])
+            if words_ and reality >= self.real_enough:
+                said = [topic] + words_                  # it says aloud what it thought (its own acts)
+            else:                                        # nothing real enough to say: it asks about what it most
+                from .web import wanted_topics           # wants to know (T4: curiosity takes the initiative)
+                with self.lock:
+                    wanted = wanted_topics(self.session.mind, CHANNEL, 1)
+                said = [wanted[0], "?"] if wanted else []
+            if said:
+                print("\n  zihin (kendiliğinden):", end="", flush=True)
+                with self.lock:
+                    for w in said:
+                        self.session.mind.step([Event(CHANNEL, w, ACTED)])
+                        self.say(w)
+                    self.session.mind.step([])
+                print("\n> ", end="", flush=True)
             self.spoke = True
-            print("\n> ", end="", flush=True)
         if not self.slept and self.sleep_after and quiet >= self.sleep_after:
             with self.lock:
                 night = dream_sleep(self.session)
