@@ -307,7 +307,7 @@ class Session:
             self.end_of_turn(TOLD, tone=self.tone(answer))
         self.mind.step([])
 
-    def reply(self, text: str, limit: int = 80) -> str:
+    def reply(self, text: str, limit: int = 80, say=None) -> str:
         """You speak (told), then the mind may speak: its own acts, one symbol per moment, until silence.
 
         The turn passes to the mind with your last word: it decides in that very moment (the context of your
@@ -332,10 +332,18 @@ class Session:
                 acts = self.mind.step([])
         said: List[str] = []
         while acts and len(said) < limit:
-            said += [str(e.symbol) for e in acts if e.channel == CHANNEL]
+            words_now = [str(e.symbol) for e in acts if e.channel == CHANNEL]
+            said += words_now
+            for w in words_now:
+                if say is not None:
+                    say(w)                               # out as it is said (online life)
             acts = self.mind.step([])                    # the echo of its own act arrives here
         if not knew and self.curious:                    # what it did not know it asks about (T4)
-            said += self.wonder(text, before)
+            asked = self.wonder(text, before)
+            said += asked
+            for w in asked:
+                if say is not None:
+                    say(w)
         self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
         self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
         return " ".join(said) if said else "(sessiz)"
@@ -504,60 +512,98 @@ def night_report(night) -> List[str]:
     return lines
 
 
-class LifeClock:
-    """The mind lives while nobody types: after a short silence it thinks about the last topic (inner voice, kept as
-    imagined); after a longer silence, if that thought was real enough, it says it (it speaks first), once per
-    silence. It never speaks into someone's turn; a lock keeps the clock and the conversation from living at once."""
+class Life:
+    """Online life: from the moment the session starts the mind lives in its own time, not only when it is asked.
 
-    def __init__(self, session, lock, think_after: float = 20.0, speak_after: float = 60.0,
-                 real_enough: float = 0.75, sleep_after: float = 600.0) -> None:
+    What you type arrives as an event of that time and is heard in order; what the mind says comes out word by word
+    as it says it. Between your lines it lives on, one silent moment at a time: after a short silence it thinks
+    (inner voice, kept as imagined); after a longer one it may speak first, when its thought was real enough; after
+    a long one it sleeps, dreams and sorts its dreams. Commands are handled in the same stream."""
+
+    STOP = object()
+
+    def __init__(self, session, handle, lock, beat: float = 2.0, think_after: float = 10.0, speak_after: float = 45.0,
+                 sleep_after: float = 600.0, real_enough: float = 0.75, pace: float = 0.05) -> None:
+        import queue
         import threading
         import time
-        self.session, self.lock = session, lock
-        self.think_after, self.speak_after, self.real_enough = think_after, speak_after, real_enough
-        self.sleep_after = sleep_after
-        self.last_input = time.time()
-        self.thought = None                 # (topic, words, reality) of this silence
-        self.spoke = False
-        self.slept = False
-        self.stop = threading.Event()
+        self.session, self.handle, self.lock = session, handle, lock
+        self.beat, self.think_after, self.speak_after, self.sleep_after = beat, think_after, speak_after, sleep_after
+        self.real_enough, self.pace = real_enough, pace
+        self.inbox = queue.Queue()
+        self.idle_since = time.time()
+        self.thought, self.spoke, self.slept = None, False, False
+        self.handled = threading.Event()
+        self.done = threading.Event()
         self.thread = threading.Thread(target=self._run, daemon=True)
+        session.voice = self.say
 
-    def heard(self) -> None:
+    def say(self, word: str) -> None:
         import time
-        self.last_input, self.thought, self.spoke, self.slept = time.time(), None, False, False
+        print(" " + word, end="", flush=True)
+        time.sleep(self.pace)
 
     def start(self) -> None:
         self.thread.start()
 
+    def put(self, line: str) -> None:
+        self.handled.clear()
+        self.inbox.put(line)
+
+    def stop(self) -> None:
+        self.inbox.put(self.STOP)
+        self.thread.join(timeout=30)
+
     def _run(self) -> None:
+        import queue
         import time
-        from .dusunce import think, topic_of
-        while not self.stop.wait(3.0):
-            quiet = time.time() - self.last_input
-            if self.thought is None and quiet >= self.think_after:
+        while True:
+            try:
+                line = self.inbox.get(timeout=self.beat)
+            except queue.Empty:
+                line = None
+            if line is self.STOP:
+                break
+            if line is not None:
                 with self.lock:
-                    topic = topic_of(self.session)
-                    if topic:
-                        words_, reality = think(self.session, topic)
-                        self.thought = (topic, words_, reality)
-                    else:
-                        self.thought = ("", [], 0.0)
-            if (self.thought and not self.spoke and quiet >= self.speak_after and self.thought[1]
-                    and self.thought[2] >= self.real_enough):
-                with self.lock:
-                    topic, words_, reality = self.thought
-                    for w in [topic] + words_:              # it says aloud what it thought (its own acts)
-                        self.session.mind.step([Event(CHANNEL, w, ACTED)])
-                    self.session.mind.step([])
-                    self.spoke = True
-                print("\n  zihin (kendiliğinden): %s %s\n> " % (topic, " ".join(words_)), end="", flush=True)
-            if not self.slept and self.sleep_after and quiet >= self.sleep_after:
-                from .dusunce import sleep as dream_sleep
-                with self.lock:                             # a long silence: it sleeps, dreams and sorts its dreams
-                    night = dream_sleep(self.session)
-                    self.slept = True
-                print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night)), end="", flush=True)
+                    going_on = self.handle(line)
+                self.idle_since, self.thought, self.spoke, self.slept = time.time(), None, False, False
+                if going_on is False:
+                    self.done.set()
+                self.handled.set()
+                if going_on is False:
+                    break
+                continue
+            try:
+                self._silence(time.time() - self.idle_since)
+            except Exception as exc:  # its life goes on
+                print("\n  hata: %s\n> " % exc, end="", flush=True)
+
+    def _silence(self, quiet: float) -> None:
+        from .dusunce import sleep as dream_sleep, think, topic_of
+        with self.lock:
+            self.session.mind.step([])                   # a silent moment of its life
+        if self.thought is None and quiet >= self.think_after:
+            with self.lock:
+                topic = topic_of(self.session)
+                words_, reality = think(self.session, topic) if topic else ([], 0.0)
+                self.thought = (topic, words_, reality)
+        if (self.thought and not self.spoke and quiet >= self.speak_after and self.thought[1]
+                and self.thought[2] >= self.real_enough):
+            topic, words_, reality = self.thought
+            print("\n  zihin (kendiliğinden):", end="", flush=True)
+            with self.lock:
+                for w in [topic] + words_:              # it says aloud what it thought (its own acts)
+                    self.session.mind.step([Event(CHANNEL, w, ACTED)])
+                    self.say(w)
+                self.session.mind.step([])
+            self.spoke = True
+            print("\n> ", end="", flush=True)
+        if not self.slept and self.sleep_after and quiet >= self.sleep_after:
+            with self.lock:
+                night = dream_sleep(self.session)
+            self.slept = True
+            print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night)), end="", flush=True)
 
 
 def home_mind() -> str:
@@ -652,13 +698,40 @@ def main(argv=None) -> None:
     lines = sys.stdin if not interactive else iter(lambda: input("> "), None)
     import threading
     lock = threading.RLock()
-    clock = None
-    if interactive and not args.yasamsiz:
-        clock = LifeClock(session, lock)
-        clock.start()
-        print("  (sessiz kaldığında düşünür; bir süre sonra konuşmayı kendisi başlatabilir. Kapatmak: --yasamsiz)")
+    if interactive and not args.yasamsiz:              # online: it lives from now on, in its own time
+        state = {"chat": chat, "turns": 0}
+
+        def handle(line):
+            out = _one_line(session, line, state["chat"], args, keep, state["turns"])
+            if out is None:
+                return False
+            if isinstance(out, tuple):
+                state["chat"], state["turns"] = out
+            else:
+                state["turns"] = out
+            return True
+
+        life = Life(session, handle, lock)
+        life.start()
+        print("  (çevrimiçi: oturum açık kaldıkça yaşar; sustuğunda düşünür, bir süre sonra kendisi konuşabilir, uzun "
+              "sessizlikte uyur ve rüya görür. Kapatmak: --yasamsiz)")
+        try:
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                life.put(line)
+                life.handled.wait()                      # its answer comes out before the next prompt
+                if life.done.is_set():
+                    break
+        except (KeyboardInterrupt, EOFError):
+            print()
+        finally:
+            life.stop()
+            keep("sohbet sonu")
+        return
     try:
-        _session_loop(session, lines, chat, args, keep, lock, clock)
+        _session_loop(session, lines, chat, args, keep, lock, None)
     except (KeyboardInterrupt, EOFError):
         print()
     finally:
@@ -800,7 +873,12 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                 else:
                     print("  bilinmeyen komut")
             elif chat:
-                print("  zihin: %s" % session.reply(line))
+                if getattr(session, "voice", None) is not None:      # online: words come out as they are said
+                    print("  zihin:", end="", flush=True)
+                    answer = session.reply(line, say=session.voice)
+                    print(" (sessiz)" if answer == "(sessiz)" else "", flush=True)
+                else:
+                    print("  zihin: %s" % session.reply(line))
                 if args.his:
                     print(feelings(session.mind))
                 turns_since_save += 1
