@@ -344,9 +344,10 @@ older convention, kept by the session). It is a private mind and is not in the r
 
 **Held-out teacher questions** (60 random questions generated from his documents and never watched; aggregate only):
 
-| exact answer | mean token F1 | "bilmiyorum" | silent |
-|---|---|---|---|
-| 17% (10/60) | 0.38 | 23% (14/60) | 0 |
+| questions | exact answer | mean token F1 | "bilmiyorum" | silent |
+|---|---|---|---|---|
+| 60 | 17% (10/60) | 0.38 | 23% (14/60) | 0 |
+| 200 (later, with the faster core and exploration) | 18% (36/200) | 0.42 | 18% (36/200) | 0 |
 
 **Chat** (no content quoted):
 
