@@ -24,12 +24,14 @@ import heapq
 from dataclasses import dataclass, field
 from typing import Dict, Hashable, Iterable, List, Optional, Tuple
 
+import numpy as np
 import torch
 
 from . import act as act_mod
 from .events import ACTED, IMAGINED, IMITATED, N_PROV, PROVENANCE, REFERENCE, SENSED, Channels, Event
 from .evidence import conviction, expectation
-from .form import categories_of, compose, confirm_parts, maybe_chunk, recognise
+from .form import (READ_CACHES, SMALL, categories_of, compose, confirm_parts, expectations, kind_masks, masses,
+                   masses_py, maybe_chunk, mv_view, np_view, parts_of, recognise)
 from .learn import learn_facets, learn_follow, learn_together, learn_value, reflect, tie_mass
 from .read import conflict_of, predictions, total_drive
 from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, PART, SLOTTED, W_NEG, W_POS, Substance
@@ -220,17 +222,17 @@ class Mind:
 
     def _trust(self) -> torch.Tensor:
         """Trust per provenance class: 1 for direct experience, else the expectation of (source -> holds)."""
-        trust = torch.ones(N_PROV, dtype=F64)
+        trust = [1.0] * N_PROV                              # set as plain numbers, made a tensor once
         for p in range(N_PROV):
             if p in REFERENCE:
                 continue
             if p in self.cfg.trust_fixed:
-                trust[p] = self.cfg.trust_fixed[p]
+                trust[p] = float(self.cfg.trust_fixed[p])
                 continue
             tie = self.source_tie[p]
             trust[p] = expectation(self.S.cell(W_POS, tie, SENSED), self.S.cell(W_NEG, tie, SENSED),
                                    self.cfg.k)
-        return trust
+        return torch.tensor(trust, dtype=F64)
 
     # ------------------------------------------------------------------ one moment
     def step(self, events: Iterable[Event] = ()) -> List[Event]:
@@ -282,23 +284,33 @@ class Mind:
         elif not items:
             self.trace = []
         if cfg.lag0:
-            learn_together(self, [f for f in self.focus if int(S.u_kind[f[0]]) & ATOMIC], slot)
+            kinds = mv_view(self, "u_kind")
+            learn_together(self, [f for f in self.focus if kinds[f[0]] & ATOMIC], slot)
         facets = [(u, i, c) for u, i, p, c in percepts if i > 0 and self.ch.kind(c) in ("facet", "context")]
         if facets and items:                               # facets of this moment go with its items (lag 0)
             learn_facets(self, [u for u, _ in items], facets, slot)
         listening = self.knob["theta"] >= 1e8              # spoken to: it cannot speak now
-        self.predicted = predictions(self, "own" if listening else None)   # step 3 (cheap while listening)
-        acts = [] if listening else act_mod.decide(self)   # step 4: no decision to take while listening
-        self._unknowing(items, acts, listening)
-        if cfg.imagine and not items:
-            act_mod.imagine(self)
-        if cfg.reflect and cfg.reliability and not items:
-            reflect(self, cfg.reflect)
-        if cfg.knobs and not items and not acts:
-            acts = act_mod.babble(self)
-        for event in acts:
-            self.pending.append(event)
-        self._feel(surprise)                               # step 6
+        self._read_memo = {}                               # nothing is written while predicting, deciding, feeling
+        try:                                               # (read.py reads each unit once in this stretch)
+            self.predicted = predictions(self, "own" if listening else None)   # step 3 (cheap while listening)
+            acts = [] if listening else act_mod.decide(self)   # step 4: no decision to take while listening
+            self._unknowing(items, acts, listening)
+            imagine = cfg.imagine and not items
+            rethink = cfg.reflect and cfg.reliability and not items
+            babble = cfg.knobs and not items and not acts
+            if imagine or rethink or babble:
+                self._read_memo = None                     # these write (or add a channel): read afresh after
+            if imagine:
+                act_mod.imagine(self)
+            if rethink:
+                reflect(self, cfg.reflect)
+            if babble:
+                acts = act_mod.babble(self)
+            for event in acts:
+                self.pending.append(event)
+            self._feel(surprise)                           # step 6
+        finally:
+            self._read_memo = None
         entry = S.end()
         entry.undo = undo
         previous = S.log.get(self.t - cfg.undo_depth)
@@ -324,12 +336,11 @@ class Mind:
             return
         inner = self.ch.id(INNER_CHANNEL)
         acted = any(self.ch.has(e.channel) and self.ch.kind(self.ch.id(e.channel)) == "act" for e in acts)
-        outer = any(int(self.S.u_channel[u]) != inner and self.ch.kind(int(self.S.u_channel[u])) == "sense"
-                    for u, _ in items)
+        channels = mv_view(self, "u_channel")
+        outer = any(channels[u] != inner and self.ch.kind(channels[u]) == "sense" for u, _ in items)
         if outer:
-            best = max((e for u, e in self.predicted.items()
-                        if int(self.S.u_channel[u]) >= 0 and self.ch.kind(int(self.S.u_channel[u])) == "act"),
-                       default=0.5)
+            act = kind_masks(self)[5]
+            best = max((e for u, e in self.predicted.items() if act[channels[u]]), default=0.5)
             # a best answer that would have been said were it alone is hesitation between rivals, not not knowing
             alone = 2.0 * (best - 0.5) * self.cfg.T >= self.knob["theta"]
             self.unknown = 0.0 if acted or alone else 1.0 - 2.0 * max(0.0, best - 0.5)
@@ -345,10 +356,11 @@ class Mind:
         occurred = {u for u, a, _, ch in percepts if a > 0 and self.ch.kind(ch) in ("sense", "act")}
         if not occurred:
             return 0.0
-        channels = {int(S.u_channel[u]) for u in occurred}
+        unit_channel = mv_view(self, "u_channel")
+        channels = {unit_channel[u] for u in occurred}
         unexpected = sum(1.0 - self.predicted.get(u, 0.5) for u in occurred) / len(occurred)
         failed = [e for u, e in self.predicted.items()
-                  if e > 0.5 and u not in occurred and int(S.u_channel[u]) in channels]
+                  if e > 0.5 and u not in occurred and unit_channel[u] in channels]
         return min(1.0, unexpected + (sum(failed) / len(failed) if failed else 0.0))
 
     def _settle(self, percepts, slot: int, has_items: bool) -> None:
@@ -397,7 +409,7 @@ class Mind:
                 grounded[key] = a_frame
             if key in gens:
                 self.gens.append((key, gens[key][0], gens[key][1]))
-                if int(S.u_kind[key]) & SLOTTED:
+                if mv_view(self, "u_kind")[key] & SLOTTED:
                     confirm_parts(self, key, slot)
             focus.append((key, a, key in grounded))
         self.focus = focus
@@ -418,7 +430,7 @@ class Mind:
         for unit, a in base.items():
             if (unit, ABSTRACT) in inc:
                 return None
-            if (unit, PART, -1) in out and any((p, ABSTRACT) in inc for p in S.out_ids((unit, PART, -1))[1].tolist()):
+            if (unit, PART, -1) in out and any((p, ABSTRACT) in inc for p in parts_of(self, unit)):
                 return None
             if a > 0.0:
                 scored.append(((0, 0, 0, 0), -a, 0 if unit in fresh else 1, 0, (unit,), unit))
@@ -508,7 +520,7 @@ class Mind:
             if first and len(present) >= F:
                 break                                  # what is only called to mind ranks after all that is present
             if in_play is None:
-                in_play = torch.tensor(list(grounded), dtype=I64)
+                in_play = np.array(list(grounded), dtype=np.int64)
             evoked = self._evoked(ranked, in_play, spread)
             again = self._winners(grounded, evoked, virtual, F, first, fresh, order, present)
             if [k for k, _ in again] == [k for k, _ in ranked]:
@@ -521,28 +533,49 @@ class Mind:
         """EXPECT(lag 0) activation from the atomic units of the focus, summed per target (``in_play``: the units
         already grounded). ``spread`` keeps, per unit, its targets and 2e - 1 for the rest of this settling
         (nothing is written while settling)."""
-        S = self.S
-        dsts, vals = [], []
+        S, k = self.S, self.cfg.k
+        kinds = mv_view(self, "u_kind")
+        dsts, vals, small = [], [], True
         for key, a_u in ranked:
-            if isinstance(key, tuple) or not int(S.u_kind[key]) & ATOMIC:
+            if isinstance(key, tuple) or not kinds[key] & ATOMIC:
                 continue
             if key not in spread:
-                if S.out.get((key, EXPECT, 0)):
-                    ids, dst = S.out_ids((key, EXPECT, 0))
-                    w_pos, w_neg = tie_mass(self, ids)
-                    spread[key] = (dst, 2.0 * expectation(w_pos, w_neg, self.cfg.k) - 1.0)
-                else:
+                ties = S.out.get((key, EXPECT, 0))
+                if not ties:
                     spread[key] = None
+                elif len(ties) <= SMALL:                   # a few ties: targets and 2e - 1 in plain numbers
+                    w_pos, w_neg = masses_py(self, ties)
+                    dst = mv_view(self, "t_dst")
+                    spread[key] = ([dst[t] for t in ties],
+                                   [2.0 * expectation(p, n, k) - 1.0 for p, n in zip(w_pos, w_neg)])
+                else:
+                    ids, dst = S.out_ids((key, EXPECT, 0))
+                    w = masses(self, ids)
+                    spread[key] = (dst.numpy(), 2.0 * expectations(w[0], w[1], k) - 1.0)
             if spread[key] is None:
                 continue
-            dsts.append(spread[key][0])
-            vals.append(a_u * spread[key][1])
+            targets, value = spread[key]
+            if isinstance(targets, list):
+                dsts.append(targets)
+                vals.append([a_u * x for x in value])
+            else:
+                small = False
+                dsts.append(targets)
+                vals.append(a_u * value)
         if not dsts:
             return {}
-        dst_all, val_all = torch.cat(dsts), torch.cat(vals)    # summed per target in one pass (same sums)
-        unique, inverse = torch.unique(dst_all, return_inverse=True)
-        summed = torch.zeros(unique.numel(), dtype=F64).index_add_(0, inverse, val_all)
-        keep = (summed > 0.0) | torch.isin(unique, in_play)    # a negative sum matters only for a unit in play
+        if small:                                          # summed per target in order of occurrence, from 0
+            summed: Dict[int, float] = {}
+            for targets, value in zip(dsts, vals):
+                for d, x in zip(targets, value):
+                    summed[d] = summed.get(d, 0.0) + x
+            play = set(in_play.tolist())
+            return {d: summed[d] for d in sorted(summed) if summed[d] > 0.0 or d in play}
+        dst_all = np.concatenate([np.asarray(d, dtype=np.int64) for d in dsts])   # summed per target in one pass
+        val_all = np.concatenate([np.asarray(v, dtype=np.float64) for v in vals])
+        unique, inverse = np.unique(dst_all, return_inverse=True)
+        summed = np.bincount(inverse, weights=val_all, minlength=unique.size)   # in order, from 0, as index_add_
+        keep = (summed > 0.0) | np.isin(unique, in_play)       # a negative sum matters only for a unit in play
         return dict(zip(unique[keep].tolist(), summed[keep].tolist()))
 
     @staticmethod
@@ -624,20 +657,19 @@ class Mind:
     def _feel(self, surprise: float) -> None:
         """Step 6: the mind's own state as events of the next moment (intensity carries the amount)."""
         S, k = self.S, self.cfg.k
-        relief, touched = 0.0, 0
+        relief = 0.0
         if self._gained:
             ids, gain = self._gains()
-            unique, inverse = torch.unique(ids, return_inverse=True)
-            gained = torch.zeros(unique.numel(), dtype=F64).index_add_(0, inverse, gain)
-            touched = int(unique.numel())
-            world = torch.tensor([self.ch.kind(c) in ("sense", "act") for c in range(len(self.ch.names))] + [False],
-                                 dtype=torch.bool)                  # by channel id; index -1 (no channel) -> False
-            channels = S.u_channel[S.t_dst[unique]].long()
-            expect = (S.t_form[unique] == EXPECT) & world[channels]
-            pos, neg = S.w2(unique)
-            after = ((pos + neg) * self.trust).sum(-1)
-            before = torch.clamp(after - gained, min=0.0)
-            relief = float((S.t_use[unique] * (conviction(after, k) - conviction(before, k)))[expect].sum())
+            unique, inverse = np.unique(ids, return_inverse=True)
+            gained = np.bincount(inverse, weights=gain, minlength=unique.size)   # in order, from 0, as index_add_
+            world = kind_masks(self)[0]                         # by channel id; index -1 (no channel) -> False
+            channels = np_view(self, "u_channel")[np_view(self, "t_dst")[unique]]
+            expect = (np_view(self, "t_form")[unique] == EXPECT) & world[channels]
+            ties = unique[expect]                               # only these enter the sum: read only them
+            after = masses(self, ties, total=True)
+            before = np.maximum(after - gained[expect], 0.0)   # clamp at 0 (the sign of a zero changes nothing below)
+            terms = np_view(self, "t_use")[ties] * (after / (after + k) - before / (before + k))
+            relief = float(torch.from_numpy(terms).sum())       # the same values summed by torch in the same order
             relief = max(0.0, relief)
         conflict = conflict_of(self, self.context) if self.context is not None else 0.0
         self.felt = {"surprise": surprise, "relief": relief / (relief + k),
@@ -648,25 +680,25 @@ class Mind:
         for name in FEELINGS:
             self.pending.append(Event("feel", name, prov, self.felt[name]))
 
-    def _gains(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        """The gains of this moment in the order they were made: entries are (ids, gains) tensors or, for one tie,
-        (id, gain) numbers (``learn.add_evidence1``)."""
+    def _gains(self) -> Tuple[np.ndarray, np.ndarray]:
+        """The gains of this moment in the order they were made, as int64 / float64 arrays: entries are (ids, gains)
+        tensors (or arrays) or, for one tie, (id, gain) numbers (``learn.add_evidence1``)."""
         ids, gains, run_i, run_g = [], [], [], []
         for i, a in self._gained:
-            if isinstance(i, torch.Tensor):
+            if isinstance(i, (torch.Tensor, np.ndarray, list, tuple)):
                 if run_i:
-                    ids.append(torch.tensor(run_i, dtype=I64))
-                    gains.append(torch.tensor(run_g, dtype=F64))
+                    ids.append(np.array(run_i, dtype=np.int64))
+                    gains.append(np.array(run_g, dtype=np.float64))
                     run_i, run_g = [], []
-                ids.append(i)
-                gains.append(a)
+                ids.append(i.numpy() if isinstance(i, torch.Tensor) else np.asarray(i, dtype=np.int64))
+                gains.append(a.numpy() if isinstance(a, torch.Tensor) else np.asarray(a, dtype=np.float64))
             else:
                 run_i.append(i)
                 run_g.append(a)
         if run_i:
-            ids.append(torch.tensor(run_i, dtype=I64))
-            gains.append(torch.tensor(run_g, dtype=F64))
-        return torch.cat(ids), torch.cat(gains)
+            ids.append(np.array(run_i, dtype=np.int64))
+            gains.append(np.array(run_g, dtype=np.float64))
+        return np.concatenate(ids), np.concatenate(gains)
 
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
@@ -699,6 +731,8 @@ class Mind:
         state = self.__dict__.copy()
         state.pop("_facet_cache", None)                   # caches, rebuilt on demand
         state.pop("_situation_cache", None)
+        for name in READ_CACHES:
+            state.pop(name, None)
         return state
 
     def clone(self) -> "Mind":

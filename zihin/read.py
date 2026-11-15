@@ -20,20 +20,45 @@ from __future__ import annotations
 import math
 from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 import torch
 
 from .evidence import conviction, expectation, frequency
-from .form import categories_of
-from .store import ABSTRACT, CATEGORY, COMPOSED, EXPECT, I64, PART, RELY, SLOTTED, W_NEG, W_POS
+from .form import (SMALL, categories_of, expectations, kind_masks, mass1, mass1_total, masses, masses_py, mv_view,
+                   np_view, parts_of, trust_entry)
+from .store import ABSTRACT, CATEGORY, COMPOSED, EXPECT, F64, I64, PART, RELY, SLOTTED, W_NEG, W_POS
+
+
+def _memo_key(mind, kind: str, unit: int, lag: int, trust: Optional[torch.Tensor]):
+    """The open read memo of the mind and a key for one reading, or (None, None). ``Mind.step`` opens the memo for
+    a stretch of the moment in which nothing is written (predicting and deciding, and feeling when no writer ran),
+    so a reading that depends only on the substance, the trust and the channels is the same each time it is made
+    there; ``trust`` enters the key by its bytes."""
+    memo = mind.__dict__.get("_read_memo")
+    if memo is None:
+        return None, None
+    return memo, (kind, unit, lag, trust_entry(mind, mind.trust if trust is None else trust)[0])
 
 
 def generalisations(mind, unit: int) -> List[Tuple[int, float]]:
     """(generalisation unit, expectation that ``unit`` is its instance), only where that exceeds 1/2."""
+    memo, key = _memo_key(mind, "gen", unit, 0, None)
+    if memo is not None:
+        hit = memo.get(key)
+        if hit is not None:
+            return list(hit)
+    found = _generalisations(mind, unit)
+    if memo is not None:
+        memo[key] = tuple(found)
+    return found
+
+
+def _generalisations(mind, unit: int) -> List[Tuple[int, float]]:
     S = mind.S
     found = categories_of(mind, unit)
-    kind = int(S.u_kind[unit])
+    kind = mv_view(mind, "u_kind")[unit]
     if kind & COMPOSED and not kind & SLOTTED:
-        parts = S.parts(unit)
+        parts = parts_of(mind, unit)
         for pos, part in enumerate(parts):
             for category, e in categories_of(mind, part):
                 if getattr(S, "bind_repeats", False):
@@ -47,18 +72,76 @@ def generalisations(mind, unit: int) -> List[Tuple[int, float]]:
 
 def own_mass(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = None) -> Dict[int, Tuple[float, float]]:
     """Trust-weighted (W+, W-) of the EXPECT ties leaving ``unit``, by target."""
-    S = mind.S
-    if not S.out.get((unit, EXPECT, lag)):
+    found = _unit_arrays(mind, unit, lag, trust)
+    if found is None:
         return {}
-    ids, dst = S.out_ids((unit, EXPECT, lag))
-    trust = mind.trust if trust is None else trust
-    pos, neg = S.w2(ids)
-    if lag == 1 and getattr(mind.cfg, "rivals", False):
-        w_pos, w_neg = rival_mass(mind, dst, (pos * trust).sum(-1), (neg * trust).sum(-1))
-        return {d: (p, n) for d, p, n in zip(dst.tolist(), w_pos.tolist(), w_neg.tolist())}
-    w_pos = (pos * trust).sum(-1).tolist()
-    w_neg = (neg * trust).sum(-1).tolist()
-    return {d: (p, n) for d, p, n in zip(dst.tolist(), w_pos, w_neg)}
+    dst, w_pos, w_neg = found
+    if isinstance(dst, list):
+        return dict(zip(dst, zip(w_pos, w_neg)))
+    return dict(zip(dst.tolist(), zip(w_pos.tolist(), w_neg.tolist())))
+
+
+def _unit_arrays(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = None):
+    """(targets, W+, W-) of ``own_mass`` in tie order (lists for a few ties, read-only arrays for more), or None when
+    ``unit`` has no EXPECT tie of this lag."""
+    S = mind.S
+    ties = S.out.get((unit, EXPECT, lag))
+    if not ties:
+        return None
+    memo, key = _memo_key(mind, "own", unit, lag, trust)
+    if memo is not None:
+        hit = memo.get(key)
+        if hit is not None:
+            return hit
+    rivals = lag == 1 and getattr(mind.cfg, "rivals", False)
+    if len(ties) <= SMALL and not rivals:
+        dst = mv_view(mind, "t_dst")
+        w_pos, w_neg = masses_py(mind, ties, trust)
+        found = ([dst[t] for t in ties], w_pos, w_neg)
+    else:
+        ids, dst = S.out_ids((unit, EXPECT, lag))
+        w = masses(mind, ids, trust)
+        w_pos, w_neg = w[0], w[1]
+        if rivals:
+            w_pos, w_neg = rival_mass(mind, dst, torch.from_numpy(w_pos), torch.from_numpy(w_neg))
+            w_pos, w_neg = w_pos.numpy(), w_neg.numpy()
+        found = (dst.numpy(), w_pos, w_neg)
+        for a in found:
+            a.flags.writeable = False
+    if memo is not None:
+        memo[key] = found
+    return found
+
+
+def _world_pos(mind, unit: int, trust: Optional[torch.Tensor] = None):
+    """(targets, W+) of the lag-1 ties of ``unit`` on sense/act channels with W+ > 0, in tie order: the items of
+    {v: p for v, (p, n) in own_mass(mind, unit, 1, trust).items() if _world(mind, v) and p > 0.0}."""
+    memo, key = _memo_key(mind, "world+", unit, 1, trust)
+    if memo is not None:
+        hit = memo.get(key)
+        if hit is not None:
+            return hit
+    found = _unit_arrays(mind, unit, 1, trust)
+    if found is None:
+        out = ((), ())
+    elif isinstance(found[0], list):
+        world, channel = kind_masks(mind)[3], mv_view(mind, "u_channel")
+        pairs = [(v, p) for v, p in zip(found[0], found[1]) if world[channel[v]] and p > 0.0]
+        out = (tuple(v for v, _ in pairs), tuple(p for _, p in pairs))
+    else:
+        d, p, _ = found
+        keep = kind_masks(mind)[0][np_view(mind, "u_channel")[d]] & (p > 0.0)
+        out = (tuple(d[keep].tolist()), tuple(p[keep].tolist()))
+    if memo is not None:
+        memo[key] = out
+    return out
+
+
+def _continuing(mind, unit: int, exclude=()) -> set:
+    """The targets of ``continuations(mind, unit, exclude)`` (its keys), without their expectations."""
+    targets, _ = _world_pos(mind, unit)
+    exclude = set(exclude)
+    return {v for v in targets if v != unit and v not in exclude}
 
 
 def rival_mass(mind, dst: torch.Tensor, w_pos: torch.Tensor, w_neg: torch.Tensor):
@@ -86,7 +169,7 @@ def effective(mind, unit: int, trust: Optional[torch.Tensor] = None, support: Op
     if support in ("nested", "choice", "reliable", "trusted", "members"):                    # masses are only defined for the additive forms
         support = "capped"
     mass = own_mass(mind, unit, 1, trust)
-    kind = int(mind.S.u_kind[unit])
+    kind = mv_view(mind, "u_kind")[unit]
     if support == "none" or kind & (CATEGORY | SLOTTED):
         return mass
     for general, e_abs in generalisations(mind, unit):
@@ -105,9 +188,10 @@ def extension(mind, general: int) -> int:
     """How many instances a generalisation covers: the fillers of its category (of the category that stands
     in, for a frame). Smaller = more specific."""
     S = mind.S
-    if int(S.u_kind[general]) & CATEGORY:
+    kinds = mv_view(mind, "u_kind")
+    if kinds[general] & CATEGORY:
         return len(S.inc.get((general, ABSTRACT), ()))
-    sizes = [len(S.inc.get((p, ABSTRACT), ())) for p in S.parts(general) if int(S.u_kind[p]) & CATEGORY]
+    sizes = [len(S.inc.get((p, ABSTRACT), ())) for p in parts_of(mind, general) if kinds[p] & CATEGORY]
     return min(sizes) if sizes else 0
 
 
@@ -126,15 +210,16 @@ def expect_map(mind, unit: int) -> Dict[int, float]:
     the same category, lets the specific override the general, and lets own evidence override both.
     """
     cfg = mind.cfg
-    if cfg.support == "members" and not int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
+    general = mv_view(mind, "u_kind")[unit] & (CATEGORY | SLOTTED)
+    if cfg.support == "members" and not general:
         return members_map(mind, unit)
-    if cfg.support == "trusted" and not int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
+    if cfg.support == "trusted" and not general:
         return trusted_map(mind, unit)
-    if cfg.support == "reliable" and not int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
+    if cfg.support == "reliable" and not general:
         return reliable_map(mind, unit)
-    if cfg.support == "choice" and not int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
+    if cfg.support == "choice" and not general:
         return choice_map(mind, unit)
-    if cfg.support != "nested" or int(mind.S.u_kind[unit]) & (CATEGORY | SLOTTED):
+    if cfg.support != "nested" or general:
         return {v: expectation(p, n, cfg.k) for v, (p, n) in effective(mind, unit).items()}
     own = own_mass(mind, unit)
     gens = sorted(((extension(mind, g), g, e_abs) for g, e_abs in generalisations(mind, unit)),
@@ -174,8 +259,7 @@ def reliable_map(mind, unit: int) -> Dict[int, float]:
     cfg, S = mind.cfg, mind.S
     best = None
     for general, e_abs in generalisations(mind, unit):
-        mass = {t: pn for t, pn in own_mass(mind, general).items()
-                if int(S.u_channel[t]) >= 0 and mind.ch.kind(int(S.u_channel[t])) in ("sense", "act")}
+        mass = {t: pn for t, pn in own_mass(mind, general).items() if _world(mind, t)}
         if not mass:
             continue
         r = reliability(mind, general)
@@ -197,8 +281,8 @@ def reliable_map(mind, unit: int) -> Dict[int, float]:
 
 
 def _world(mind, unit: int) -> bool:
-    channel = int(mind.S.u_channel[unit])
-    return channel >= 0 and mind.ch.kind(channel) in ("sense", "act")
+    """The unit is on a sense or act channel."""
+    return kind_masks(mind)[3][mv_view(mind, "u_channel")[unit]]
 
 
 SELF, NEXT = -1, -2   # F12 relational targets of a frame: "the filler of my slot", "what the filler goes on with"
@@ -206,8 +290,18 @@ SELF, NEXT = -1, -2   # F12 relational targets of a frame: "the filler of my slo
 
 def continuations(mind, unit: int, exclude=()) -> Dict[int, float]:
     """Own lag-1 expectations of a unit on sense/act targets, without ``exclude`` (the fixed words of a frame)."""
-    return {v: expectation(p, n, mind.cfg.k) for v, (p, n) in own_mass(mind, unit).items()
-            if _world(mind, v) and v not in exclude and v != unit and p > 0.0}
+    found = _unit_arrays(mind, unit)
+    if found is None:
+        return {}
+    d, w_pos, w_neg = found
+    if isinstance(d, list):
+        world, channel, k = kind_masks(mind)[3], mv_view(mind, "u_channel"), mind.cfg.k
+        return {v: expectation(p, n, k) for v, p, n in zip(d, w_pos, w_neg)
+                if world[channel[v]] and v not in exclude and v != unit and p > 0.0}
+    keep = kind_masks(mind)[0][np_view(mind, "u_channel")[d]] & (w_pos > 0.0) & (d != unit)
+    if exclude:
+        keep &= ~np.isin(d, np.fromiter(exclude, dtype=np.int64))
+    return dict(zip(d[keep].tolist(), expectations(w_pos[keep], w_neg[keep], mind.cfg.k).tolist()))
 
 
 def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None):
@@ -230,8 +324,9 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
 def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None):
     """``member_mass`` and, fifth, how many members voted (the numerosity of the voice, F24)."""
     S, k = mind.S, mind.cfg.k
-    parts = S.parts(frame)
-    cats = {p for p in parts if int(S.u_kind[p]) & CATEGORY}
+    parts = parts_of(mind, frame)
+    kinds = mv_view(mind, "u_kind")
+    cats = {p for p in parts if kinds[p] & CATEGORY}
     if len(cats) != 1:
         return {}, 0.0, (), (), 0
     category = cats.pop()
@@ -242,22 +337,24 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
     members = voted = 0.0
     voters = 0
     looks = None                                       # F18: the read instance's filler and its facets
-    if getattr(mind.cfg, "resemblance", False) and exclude is not None and int(S.u_kind[exclude]) & COMPOSED:
+    if getattr(mind.cfg, "resemblance", False) and exclude is not None and kinds[exclude] & COMPOSED:
         from .learn import facet_set, facet_similarity
-        filler = S.parts(exclude)[where[0]] if where and len(S.parts(exclude)) > where[0] else None
+        held = parts_of(mind, exclude)
+        filler = held[where[0]] if where and len(held) > where[0] else None
         looks = (filler, facet_set(mind, filler)) if filler is not None else None
         if looks is not None and not looks[1]:
             looks = None
+    src = mv_view(mind, "t_src")
     for tie in S.inc.get((category, ABSTRACT), ()):
-        x = int(S.t_src[tie])
+        x = src[tie]
         instance = S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts)))
         if instance is None or instance == exclude:
             continue
-        own = {v: p for v, (p, n) in own_mass(mind, instance, 1, trust).items() if _world(mind, v) and p > 0.0}
-        total = sum(own.values())
+        targets, own = _world_pos(mind, instance, trust)   # its sense/act targets with W+ > 0, and their W+
+        total = sum(own)
         if total <= 0.0:
             continue
-        e_x = expectation(float((S.w1(W_POS, tie) * mind.trust).sum()), float((S.w1(W_NEG, tie) * mind.trust).sum()), k)
+        e_x = expectation(*mass1(mind, tie), k)
         weight = e_x
         if looks is not None:                          # members that look like the item speak louder (GCM):
             sim = facet_similarity(mind, looks[0], x, looks[1])   # vote x exp(-sensitivity x (1 - similarity))
@@ -267,8 +364,8 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
         members += e_x
         voted += weight
         voters += 1
-        goes_on = continuations(mind, x, fixed) if relational else {}
-        for v, p in own.items():
+        goes_on = _continuing(mind, x, fixed) if relational else ()
+        for v, p in zip(targets, own):
             key = SELF if relational and v == x else NEXT if v in goes_on else v
             shares[key] = shares.get(key, 0.0) + weight * p / total
     if voted <= 0.0:
@@ -298,8 +395,7 @@ def _holds(mind, symbol) -> Tuple[float, float]:
     tie = mind.S.find_tie(unit, mind.holds, EXPECT, 0) if unit >= 0 else -1
     if tie < 0:
         return 0.0, 0.0
-    S = mind.S
-    return float((S.w1(W_POS, tie) * mind.trust).sum()), float((S.w1(W_NEG, tie) * mind.trust).sum())
+    return mass1(mind, tie)
 
 
 def voice_credibility(mind, kind: Tuple[int, int]) -> float:
@@ -320,8 +416,7 @@ def voice_credibility(mind, kind: Tuple[int, int]) -> float:
 def _claim(mind, unit: int, mass, where, fixed) -> Tuple[Optional[int], float]:
     """F24: what a voice claims for ``unit``: its top value (SELF and NEXT resolved as in ``members_map``) and its
     frequency f."""
-    S = mind.S
-    filler = S.parts(unit)[where[0]] if where and int(S.u_kind[unit]) & COMPOSED else None
+    filler = parts_of(mind, unit)[where[0]] if where and mv_view(mind, "u_kind")[unit] & COMPOSED else None
     claim, claim_f = None, -1.0
     for target, (w_pos, w_neg) in mass.items():
         if target == SELF:
@@ -369,7 +464,7 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     if best is not None:
         _, e_abs, c_members, mass, where, fixed, kind, spoke = best
         c = cfg.lam * e_abs * c_members
-        filler = S.parts(unit)[where[0]] if where and int(S.u_kind[unit]) & COMPOSED else None
+        filler = parts_of(mind, unit)[where[0]] if where and mv_view(mind, "u_kind")[unit] & COMPOSED else None
         for target, (w_pos, w_neg) in mass.items():
             if target == SELF:
                 target = filler
@@ -407,22 +502,24 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
     conviction lam * s * conviction(voters), s the voters' weighted similarity: a weak resemblance (an unknown word
     in the utterance) cannot make the mind speak and leaves room for its curiosity."""
     S, cfg = mind.S, mind.cfg
-    if not int(S.u_kind[unit]) & COMPOSED:
+    if not mv_view(mind, "u_kind")[unit] & COMPOSED:
         return {}
     key = (unit, mind.t, id(trust) if trust is not None else None)
     cache = getattr(mind, "_situation_cache", None)
     if cache is not None and cache[0] == key:
         return cache[1]
-    heard = S.parts(unit)
+    heard = parts_of(mind, unit)
     n = len(heard)
+    channels = mv_view(mind, "u_channel")
+    sense, act = kind_masks(mind)[4:6]
     event = -1                                          # the last perceived event of the situation (the turn end)
     for j, p in enumerate(heard):
-        channel = int(S.u_channel[p])
-        if channel >= 0 and mind.ch.kind(channel) == "sense":
+        if sense[channels[p]]:
             event = j
     out: Dict[int, float] = {}
     if n >= 2 and event >= 1:
         d_event = n - 1 - event
+        symbols = mv_view(mind, "u_symbol")
 
         def held(p):                                     # how many lived contexts hold the part
             return len(S.inc.get((p, PART), ()))
@@ -431,8 +528,8 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
             return 1.0 / (1 + held(p))
 
         def word(p):
-            c = int(S.u_channel[p])
-            return c >= 0 and mind.ch.kind(c) == "act" and str(mind.symbol_of(p)[1]).isalpha()
+            c = channels[p]
+            return act[c] and str(mind.ch.symbol(c, symbols[p])).isalpha()
 
         # the lived situations are called up through the rarest of the parts they must share at the same place from
         # the end (the last part, or a word of the utterance): the contexts holding it there, ending with the same part
@@ -440,15 +537,16 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
         # the whole memory.
         anchors = sorted(((n - 1 - j, heard[j]) for j in range(event) if word(heard[j])), key=lambda x: held(x[1]))
         lived, seen, budget = [], {unit}, 20000
+        src, lag = mv_view(mind, "t_src"), mv_view(mind, "t_lag")
         for d_anchor, anchor in anchors:                 # each word of the utterance calls up its situations, the
             for tie in S.inc.get((anchor, PART), ()):     # rarest word first, within a bounded effort
                 budget -= 1
-                c = int(S.t_src[tie])
+                c = src[tie]
                 if c in seen:
                     continue
-                t = S.parts(c)
+                t = parts_of(mind, c)
                 L = len(t)
-                if L > max(d_anchor, d_event) and int(S.t_lag[tie]) == L - 1 - d_anchor and t[-1] == heard[-1] \
+                if L > max(d_anchor, d_event) and lag[tie] == L - 1 - d_anchor and t[-1] == heard[-1] \
                         and t[L - 1 - d_event] == heard[event]:
                     seen.add(c)
                     lived.append((t, c))
@@ -467,8 +565,8 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
             same = [d for d in range(min(n, L)) if t[L - 1 - d] == heard[n - 1 - d]]
             if not any(word(heard[n - 1 - d]) for d in same if d > d_event):   # a word of the utterance itself
                 continue
-            own = {v: p for v, (p, q) in own_mass(mind, u, 1, trust).items() if _world(mind, v) and p > 0.0}
-            total = sum(own.values())
+            targets, own = _world_pos(mind, u, trust)
+            total = sum(own)
             if total <= 0.0:
                 continue
             shared = {heard[n - 1 - d] for d in same}
@@ -478,7 +576,7 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
             voted += g
             similar += g * s
             voters += 1
-            for v, p in own.items():
+            for v, p in zip(targets, own):
                 shares[v] = shares.get(v, 0.0) + g * p / total
         if voted > 0.0:
             c = cfg.lam * (similar / voted) * conviction(float(voters), cfg.k)
@@ -494,13 +592,13 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
     continuations speaks, with its own evidence scaled by lam. It never reaches back across a perceived event, so
     it cannot start an utterance, only carry one on."""
     S, cfg = mind.S, mind.cfg
-    if not int(S.u_kind[unit]) & COMPOSED:
+    if not mv_view(mind, "u_kind")[unit] & COMPOSED:
         return {}
-    parts = S.parts(unit)
+    parts = parts_of(mind, unit)
+    channels, sense = mv_view(mind, "u_channel"), kind_masks(mind)[4]
     start = 0
     for j, p in enumerate(parts):
-        channel = int(S.u_channel[p])
-        if channel >= 0 and mind.ch.kind(channel) == "sense":
+        if sense[channels[p]]:
             start = j + 1
     tail = parts[start:]
     heard = set(parts[:start])                          # what the partner just said is an echo, not knowledge
@@ -582,9 +680,13 @@ def predictions(mind, mode: Optional[str] = None) -> Dict[int, float]:
     cfg = mind.cfg
     mode = cfg.predict if mode is None else mode
     if mode == "own":                                  # the present context's own evidence only (no generalisation)
-        if mind.context is None:
+        found = _unit_arrays(mind, mind.context) if mind.context is not None else None
+        if found is None:
             return {}
-        return {v: expectation(p, n, cfg.k) for v, (p, n) in own_mass(mind, mind.context).items()}
+        dst, w_pos, w_neg = found
+        if isinstance(dst, list):
+            return {v: expectation(p, n, cfg.k) for v, p, n in zip(dst, w_pos, w_neg)}
+        return dict(zip(dst.tolist(), expectations(w_pos, w_neg, cfg.k).tolist()))
     if mode == "specific":
         if mind.context is None:
             return {}
@@ -620,15 +722,24 @@ def drive_of(mind, unit: int) -> float:
     the mind's own feelings (otherwise feeling something would itself be a relief; see NOTES.md).
     """
     S = mind.S
-    ties = S.out.get((unit, EXPECT, 1), [])
+    ties = S.out.get((unit, EXPECT, 1))
     if not ties:
         return 0.0
-    ids = torch.tensor(ties, dtype=I64)
-    world = torch.tensor([c >= 0 and mind.ch.kind(c) in ("sense", "act")
-                          for c in S.u_channel[S.t_dst[ids]].tolist()])
-    pos, neg = S.w2(ids)
-    total = ((pos + neg) * mind.trust).sum(-1)
-    return float((S.t_use[ids] * (1.0 - conviction(total, mind.cfg.k)))[world].sum())
+    k = mind.cfg.k
+    if len(ties) <= SMALL:                             # a few ties: the terms in plain numbers
+        world, channel, dst, use = kind_masks(mind)[3], mv_view(mind, "u_channel"), mv_view(mind, "t_dst"), \
+            mv_view(mind, "t_use")
+        terms = []
+        for t in ties:
+            if world[channel[dst[t]]]:
+                total = mass1_total(mind, t)
+                terms.append(use[t] * (1.0 - total / (total + k)))
+        return float(torch.tensor(terms, dtype=F64).sum())   # the same values summed by torch in the same order
+    ids, dst = S.out_ids((unit, EXPECT, 1))
+    world = kind_masks(mind)[0][np_view(mind, "u_channel")[dst.numpy()]]
+    total = masses(mind, ids, total=True)
+    terms = np_view(mind, "t_use")[ids.numpy()] * (1.0 - total / (total + k))
+    return float(torch.from_numpy(terms[world]).sum())  # the same values summed by torch in the same order
 
 
 def total_drive(mind) -> float:
@@ -639,6 +750,18 @@ def total_drive(mind) -> float:
 def conflict_of(mind, unit: int) -> float:
     """Mass of the lag-1 ties of ``unit`` with frequency near 1/2 and high conviction (section 2.6)."""
     total = 0.0
-    for p, n in own_mass(mind, unit).values():
-        total += conviction(p + n, mind.cfg.k) * (1.0 - abs(2.0 * frequency(p, n) - 1.0))
+    found = _unit_arrays(mind, unit)
+    if found is None:
+        return total
+    _, p, n = found
+    k = mind.cfg.k
+    if isinstance(p, list):
+        for a, b in zip(p, n):
+            total += conviction(a + b, k) * (1.0 - abs(2.0 * frequency(a, b) - 1.0))
+        return total
+    w = p + n
+    some = w > 0
+    terms = w / (w + mind.cfg.k) * (1.0 - np.abs(2.0 * np.where(some, p / np.where(some, w, 1.0), 0.5) - 1.0))
+    for term in terms.tolist():                        # added one by one in tie order, as before
+        total += term
     return total
