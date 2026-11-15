@@ -473,6 +473,8 @@ def feelings(mind: Mind) -> str:
 
 def main(argv=None) -> None:
     import os
+    import torch
+    torch.set_num_threads(1)                             # the substance's operations are small: one thread is faster
     ap = argparse.ArgumentParser(prog="python -m zihin")
     ap.add_argument("--load", help="a saved mind to live on (otherwise the mind of this computer's home folder)")
     ap.add_argument("--yeni", action="store_true", help="start a new, empty mind")
