@@ -148,6 +148,12 @@ At each moment, roughly each word, the mind lives these steps:
   goes on with counted as "next" and never as the value. In a world where the value follows the asked thing directly
   ("<relation> <entity> <value>"), members that had all lived the same value were read as agreeing on "next", which
   pointed at the asked thing's own habits. Held-out answers in that world went from 3% to 81%.
+- **Analogy by Interchangeability (F29).** Two words are interchangeable as far as they filled the same lived places
+  before the utterance being read; a place shared by few is more telling than one shared by everything. What a
+  category's members lived carries over to a new instance through its interchangeability with them (the analogy rule
+  of NARS); the members still decide what is claimed, the analogy only how firmly it holds. "selam , adın ne ?" is now
+  answered like the lived "merhaba , adın ne ?", and "ismin ne ?" like "adın ne ?" where adın and ismin filled the same
+  places in what was read; a word never met carries nothing over.
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -328,6 +334,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Sequence Starts | Dizi Başları | F26 | |
 | Lived Exclusion | Yaşanmış Dışlama | F27 | |
 | Exact Relations | Kesin İlişkiler | F28 | |
+| Analogy by Interchangeability | Yerine Geçebilirlik Benzetmesi | F29 | the distributional hypothesis; NARS analogy |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

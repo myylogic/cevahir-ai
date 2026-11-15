@@ -1726,3 +1726,88 @@ exact_relations`).
 in these worlds. Most of that was its speaking into the stream (a protocol the worlds were not made for) and NEXT taking
 the members' agreement. Listening, with F26–F28, it reaches 0.78 and 0.81, with members, exceptions and the hidden classes
 all at 1.00. The "members" configuration's 0.93 in nitelik is not reached.
+
+## Analogy by Interchangeability (F29): what two words have in common, read from the places they filled (2026-11-15)
+
+**The failure, decision by decision.** In the meaning world, 9 of the 17 wordings never watched failed just under the
+speaking line, with the right first word leading at e = 0.562–0.580 (white box at the turn end of every probe). In
+most of them, the frame that spoke was born at the probe moment from one lived instance. For example, `[X] , adın ne
+<turn end>` had the single member merhaba, whose instance was lived four times and answered "adım". It spoke with
+c = 1/2 · 0.667 · conviction(0.667) = 0.133, so e = 0.567. The mind's own knowledge that merhaba and selam (or adın
+and ismin) stand in the same places in many other lived frames was not used: the new category's memberships start
+from one recognition.
+
+**Interchangeability.** A category is a lived place: the fillers of one slot of contexts that differ only there. Two
+words y and x are interchangeable to the extent that they filled the same places:
+
+- **For.** Each shared place g counts m_y m_x / (n_g − 1). Here m = 2e − 1 is a membership's evidence above
+  ignorance, and the place's evidence is shared among its n_g members. A place of two is a whole piece; the place of
+  everything that ends an utterance is almost none.
+- **Against.** A place where one is a member and the other is held not to be (e < 1/2).
+- **Only what was lived before the present run of items counts** (`memberships_before`, the ABSTRACT tie's birth).
+  The utterance being read cannot vouch for itself: its own frames would otherwise make every new word similar to the
+  words it replaces. `Mind.episode_start` keeps the moment the run began.
+
+| pair (seed 0 / seed 1) | shared places | W+ | conviction |
+|---|---|---|---|
+| merhaba / selam | 8 / 8, mostly of two | 3.31 / 3.78 | 0.77 / 0.79 |
+| adın / ismin | 7 / 2 | 0.78 / 0.22 | 0.44 / 0.18 |
+| hızlı / çabuk, doktor / hekim, cevap / yanıt | 2–7 | 0.17–0.72 | 0.14–0.42 |
+| merhaba / hello, merhaba / selamlar | 1, of ten | 0.04–0.05 | 0.03–0.05 |
+| merhaba / evet, merhaba / teşekkürler, evet / hayır | 1, of ten | 0.04–0.06 | 0.04–0.06 |
+| araba / doktor, cevap / kedi, adın / nerede | 0 | 0 | 0 |
+
+**The reading** (`read.member_analogy`, `Config.analogy`, on in the speaking configuration):
+
+- The members of the frame the members' reading chose carry what they lived over to the read instance by the analogy
+  of NARS. From "x's instance went on with v" (f1, c1) and "y and x are interchangeable" (f2, c2): f = f1 f2,
+  c = c1 c2 f2.
+- The members' conclusions add as evidence: each member's instance is one lived source.
+- The members keep the frequency of every claim. The analogy only decides how firmly a claim holds for this instance:
+  the conviction is the stronger of the members' breadth (F11) and the depth carried over.
+
+**Two forms that failed first** (measured, kept here):
+
+1. **Lived contexts one interchangeable word away, pooled by revision and joined by the choice rule.** The meaning
+   world gained as much, and "hi" told once was answered as merhaba in 3 of 3 seeds. But the listening worlds fell:
+   nitelik 0.783 → 0.650, iliski 0.812 → 0.600 (though iliski at 60 experiences rose 0.393 → 0.628). In those worlds
+   every entity fills the same places as every other, so the pooled neighbours' values competed with the class frame.
+2. **Inside the chosen frame, with the analogy's own frequencies.** The worlds were fine (iliski 0.812 → 0.850), but
+   the teacher protocol fell 120 → 58. The literal second word of one interchangeable subject was carried over
+   against the 1357 other members, who all agree on START, not on that word.
+
+The commit message of 77c8b69 credited the final form with the 3 of 3 for "hi"; that came from the first form. With
+the final form, "hi" is answered from its told meaning in 1 of 3 seeds, as before.
+
+**Measured, final form** (`meaning_switches.py`, `speaking_worlds.py --listen`, `recall_once.py`):
+
+| | off | on |
+|---|---|---|
+| meaning world (3 seeds), paraphrases with a greeting in front | 0.17 | **0.67** |
+| meaning world, synonym paraphrases | 0.33 | **0.56** |
+| meaning world, extra word / form variant / restructured | 0.33 / 0 / 0 | 0.33 / 0 / 0 |
+| greetings and meaning questions | | same replies |
+| listening worlds, held-out at 600: nitelik / iliski | 0.783 / 0.812 | 0.783 / 0.812 |
+| members, exceptions, hidden classes | 1.00 | 1.00 |
+| template-free recall, two words: exact / valid / silent | 90 / 145 / 32 | 90 / 146 / 31 |
+| template-free recall, one word | 23 / 47 / 109 | 23 / 47 / 109 |
+| teacher protocol, taught form | 120 (F1 0.745) | 120 (F1 0.744) |
+
+- **Now answered** (seed 0): "selam , adın ne ?", "selam , nasılsın ?", "hi , nasılsın ?", "ismin ne ?" and "senin
+  ismin ne ?". In seeds where adın and ismin shared fewer read places, the two "ismin" wordings stay just under the
+  line.
+- **The five hard wordings stay silent:** "adını söyler misin ?", "nasılsınız ?" (a form never met), "keyfin nasıl ?",
+  "ne haber ?", "evin nerede ?". No wrong answer appeared anywhere.
+- **Still out of reach:**
+  - an extra word in front ("peki adın ne ?": nothing says that "peki" changes nothing);
+  - a word form never met;
+  - a restructured question;
+  - greetings lived once or twice (hello, selamlar), whose interchangeability evidence is too small to carry anything.
+- **Cost.** Answering moments that read large categories are about 18% slower (teacher protocol 112 → 132 s for 200
+  answers).
+- **Exactness.** With the switch off, all 17 configurations are bit-identical to the committed code, and the
+  lesson-free gate is unchanged. Tests: `test_zihin_analogy.py` (7), including the hand-checkable 2/9 of two places of
+  two members and the exclusion of the present run.
+- **Prior work.** Interchangeability from shared contexts is the distributional hypothesis (Harris), weighted as
+  telling places are, and the carrying over is NARS's analogy rule. What is ours is reading both from the mind's own
+  induced places, at the moment of use, inside the members' reading.
