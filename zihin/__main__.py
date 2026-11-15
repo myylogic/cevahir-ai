@@ -11,6 +11,8 @@ Commands (Turkish, with English aliases):
     !oku <dosya|klasor>  / !read    watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
                                     .pdf with pypdf): sentences of documents as speech of others (imitated)
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
+    !kim <ad>            / !who     who is talking now (perceived at the start of every utterance)
+    !kendini_tani [n]    / !self    lessons about itself (true things told to it), n times
     !arastir <konu>      / !research  on your command: look the topic up in Wikipedia and read it (pages are printed)
     !kendini_gelistir [n] / !improve  the mind picks n topics it wants to know (high drive) and researches them; it
                                     measures what each way of reading gave it and chooses its way by that
@@ -78,6 +80,8 @@ def dialogues_of(data) -> List[tuple]:
             continue
         keys = {k.lower(): v for k, v in item.items() if isinstance(v, str)}
         ask = next((keys[k] for k in ASK_KEYS if k in keys), None)
+        if "instruction" in keys:                         # instruction datasets: the instruction, then its input
+            ask = (keys["instruction"] + " " + keys.get("input", "")).strip()
         answer = next((keys[k] for k in ANSWER_KEYS if k in keys), None)
         if ask and answer:
             pairs.append((ask, answer))
@@ -133,7 +137,10 @@ def profile(mind: Mind) -> str:
 
 
 FACETS = "parca"
-TURN, TURN_END = "sira", "⏎"          # the end of someone's utterance (Enter) is perceived, like a pause in speech
+TURN, TURN_END = "sira", "⏎"
+PERSON, SOMEONE = "kisi", "biri"
+TONE = "ton"                          # how an utterance ends (? ! .) is perceived with its end, like intonation
+FINAL = (".", "?", "!", "…")     # who is speaking is perceived (like a face or a voice); "biri" = someone unknown          # the end of someone's utterance (Enter) is perceived, like a pause in speech
 VALUE = "deger"
 VALUE_SIGN = {(VALUE, "iyi"): 1.0, (VALUE, "kötü"): -1.0}     # the adapter defines what is good and bad
 
@@ -150,11 +157,16 @@ class Session:
         known = mind.ch.has(TURN) and mind.ch.symbol_index(mind.ch.id(TURN), TURN_END, create=False) >= 0
         self.turns = mind.t == 0 or known       # a mind that never lived turn ends keeps the older turn passing
         mind.add_channel(TURN, "sense")
+        mind.add_channel(PERSON, "facet")       # who speaks accompanies the words; it is not part of the sentence
+        mind.add_channel(TONE, "facet")
+        self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
         self.open_turn = False                # the mind has just answered; feedback may still come
 
-    def events(self, symbol: str, prov: int) -> List[Event]:
-        """One word as an event on the text channel, with its subword pieces as facets of the same moment."""
+    def events(self, symbol: str, prov: int, speaker: str = None) -> List[Event]:
+        """One word as an event on the text channel, with its subword pieces and its speaker as facets."""
         out = [Event(CHANNEL, symbol, prov)]
+        if speaker:
+            out.append(Event(PERSON, speaker, SENSED))
         if self.pieces is not None and symbol.isalpha():
             parts = [p for p in self.pieces.tokenize(symbol) if p.strip()]
             if len(parts) > 1:
@@ -164,41 +176,70 @@ class Session:
     def live(self, text: str, prov: int) -> None:
         """Hear (told) or sense an utterance while listening: the mind does not speak into it."""
         start = self.mind.t + 1
-        self.listen(text, prov)
-        self.end_of_turn(prov)
+        self.listen(text, prov, speaker=self.partner)
+        self.end_of_turn(prov, tone=self.tone(text))
         self.mind.step([])
         self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
 
-    def listen(self, text: str, prov: int) -> None:
-        """Hear an utterance while not speaking (turn taking set by the session)."""
+    def listen(self, text: str, prov: int, speaker: str = None) -> None:
+        """Hear an utterance while not speaking (turn taking set by the session). ``speaker``: who says it, perceived
+        at its start (kept out when the mind never lived speakers, so older minds are read as before)."""
         theta = self.mind.knob["theta"]
         self.mind.knob["theta"] = 1e9
         try:
-            for symbol in words(text):
-                self.mind.step(self.events(symbol, prov))
+            for symbol in self.body(text):
+                self.mind.step(self.events(symbol, prov, speaker))
         finally:
             self.mind.knob["theta"] = theta
 
-    def end_of_turn(self, prov: int, listening: bool = True) -> List[Event]:
-        """Someone's utterance has ended: a perceived event. While listening the mind does not speak into it."""
+    def body(self, text: str) -> List[str]:
+        """The words of an utterance without its closing punctuation (that is perceived with the end, see tone)."""
+        symbols = words(text)
+        if self.turns:
+            while symbols and symbols[-1] in FINAL:
+                symbols = symbols[:-1]
+        return symbols
+
+    @staticmethod
+    def tone(text: str) -> str:
+        symbols = words(text)
+        return "?" if symbols and symbols[-1] == "?" else ("!" if symbols and symbols[-1] == "!" else ".")
+
+    def end_of_turn(self, prov: int, listening: bool = True, tone: str = None) -> List[Event]:
+        """Someone's utterance has ended: a perceived event, with how it ended (? ! .) as a facet. While listening
+        the mind does not speak into it."""
         if not self.turns:
             return []
         theta = self.mind.knob["theta"]
         if listening:
             self.mind.knob["theta"] = 1e9
         try:
-            return self.mind.step([Event(TURN, TURN_END, prov)])
+            events = [Event(TURN, TURN_END, prov)]
+            if tone:
+                events.append(Event(TONE, tone, prov))
+            return self.mind.step(events)
         finally:
             self.mind.knob["theta"] = theta
 
-    def watch(self, first: str, answer: str) -> None:
+    def watch(self, first: str, answer: str, prov: int = IMITATED, asker: str = SOMEONE) -> None:
         """Two others talk: one says ``first``, another answers ``answer``; the mind only watches. The end of each
-        utterance is perceived, so the mind can learn who speaks when (turn taking is watched, not coded)."""
-        self.listen(first, IMITATED)
-        self.end_of_turn(IMITATED)
-        self.listen(answer, IMITATED)
-        self.end_of_turn(IMITATED)
+        utterance is perceived, so the mind can learn who speaks when (turn taking is watched, not coded). The one
+        who asks is perceived (someone, unless named); the one who answers is the role the mind takes in a chat."""
+        self.listen(first, prov, speaker=asker)
+        self.end_of_turn(prov, tone=self.tone(first))
+        self.listen(answer, prov)
+        self.end_of_turn(prov, tone=self.tone(answer))
         self.mind.step([])
+
+    def lessons_about_itself(self, times: int = 1) -> int:
+        """L8: true things about the mind, told to it (provenance told). Returns how many utterances were lived."""
+        from .kendilik import LESSONS
+        n = 0
+        for _ in range(times):
+            for question, answer in LESSONS:
+                self.watch(question, answer, prov=TOLD)
+                n += 1
+        return n
         self.history.append((len(self.history) + 1, "[izledi] %s || %s" % (first, answer), []))
 
     def reply(self, text: str, limit: int = 12) -> str:
@@ -213,8 +254,8 @@ class Session:
         if not symbols:
             return "(sessiz)"
         if self.turns:                                   # the turn passes when your utterance has ended
-            self.listen(" ".join(symbols), TOLD)
-            acts = self.end_of_turn(TOLD, listening=False)
+            self.listen(text, TOLD, speaker=self.partner)
+            acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
         else:                                            # older minds: the turn passes with your last word
             self.listen(" ".join(symbols[:-1]), TOLD)
             acts = self.mind.step(self.events(symbols[-1], TOLD))
@@ -240,7 +281,7 @@ class Session:
         self.open_turn = False
         return "  not edildi (%s)" % ("iyi" if good else "kötü")
 
-    def read_path(self, path: str) -> str:
+    def read_path(self, path: str, cap: int = 0) -> str:
         """Watch the texts of a file or of every supported file under a folder; report what was lived."""
         import os
         import time
@@ -274,7 +315,9 @@ class Session:
             if not text:
                 skipped.append(os.path.basename(name))
                 continue
-            for sentence in sentences(text):
+            for i, sentence in enumerate(sentences(text)):
+                if cap and i >= cap:
+                    break
                 self.listen(sentence, IMITATED)
                 self.mind.step([])
                 lived += 1
@@ -372,6 +415,7 @@ def main(argv=None) -> None:
     ap.add_argument("--kayit", help="where the mind is kept (default: the home folder, see home_mind)")
     ap.add_argument("--kaydetme", action="store_true", help="do not save what was learned in this session")
     ap.add_argument("--his", action="store_true", help="show the mind's feelings after each answer")
+    ap.add_argument("--kim", help="who is talking to the mind (asked at the start if not given)")
     ap.add_argument("--parca", help="subword tokenizer (ByteLevelBPE json): word pieces enter as facets")
     ap.add_argument("--defter-yok", dest="no_ledger", action="store_true",
                     help="no experience ledger: smaller and faster, but !unut cannot retract")
@@ -399,6 +443,11 @@ def main(argv=None) -> None:
         pieces = ByteLevelBPE.load(args.parca)
     session = Session(mind, pieces)
     interactive = sys.stdin.isatty()
+    name = args.kim
+    if not name and interactive:
+        name = input("Seninle konuşan kim? (adını yaz, boş bırakırsan 'biri') > ").strip()
+    if name:
+        session.partner = lower_tr(name).split()[0]
     chat = interactive                                   # at a terminal you talk to it right away
     autosave = not args.kaydetme
     turns_since_save = 0
@@ -464,7 +513,11 @@ def _session_loop(session, lines, chat, args, keep) -> None:
                             n += 1
                     print("  %d satır izlendi, %d an" % (n, session.mind.t))
                 elif cmd in ("oku", "read"):
-                    print(session.read_path(rest.strip()))
+                    target, _, cap = rest.strip().rpartition(" ")
+                    if cap.isdigit() and target:
+                        print(session.read_path(target.strip(), int(cap)))
+                    else:
+                        print(session.read_path(rest.strip()))
                 elif cmd in ("dogru", "doğru", "good", "iyi"):
                     print(session.feedback(True))
                 elif cmd in ("yanlis", "yanlış", "bad", "kotu", "kötü"):
@@ -495,6 +548,12 @@ def _session_loop(session, lines, chat, args, keep) -> None:
                             report.get("ways")))
                 elif cmd in ("his", "feel"):
                     print(feelings(session.mind))
+                elif cmd in ("kim", "who"):
+                    if rest.strip():
+                        session.partner = lower_tr(rest.strip()).split()[0]
+                    print("  konuşan: %s" % session.partner)
+                elif cmd in ("kendini_tani", "kendini_tanı", "self"):
+                    print("  kendisi hakkında %d söz yaşadı" % session.lessons_about_itself(int(rest) if rest.strip().isdigit() else 1))
                 elif cmd in ("yas", "yaş", "age"):
                     print(profile(session.mind))
                 elif cmd in ("boyut", "size"):
