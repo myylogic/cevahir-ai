@@ -1398,3 +1398,47 @@ GPU (`lowend_profile.py`, `results/lowend_profile.jsonl`; an independent verifie
   locality"); consolidating rarely used ties in sleep (this changes learning and must be measured).
 - `lowend_profile.py` builds its fresh teacher mind with the lessons that were removed later the same day
   (`lessons_about_itself`), so that step runs only at the commits before d628100.
+
+## Same data, same questions: Zihin against Transformers trained from scratch (2026-11-15)
+
+The owner believes that a Transformer trained on this little data could not even give these answers. Tested with the
+repository's own Transformer (`CevahirNeuralNetwork` from `src/neural_network.py`, standalone on CPU), trained from
+scratch on exactly what the fresh Zihin mind of the F25 teacher protocol lived (recorded from a real session:
+1358 teacher pairs, the lessons of that time, 13,290 sentences of the owner's documents; 195,332 moments), and asked
+the same 200 held-out questions, scored by the same function (`same_data_duel.py`, `results/same_data_duel.jsonl`;
+numbers only; an independent verifier re-scored every answer and retrained two models bit for bit).
+
+| | exact | token F1 | "bilmiyorum" |
+|---|---|---|---|
+| Zihin, fresh, lived once | 0.130 (26) | 0.300 | 0.170 |
+| Transformer 1M / 4M, BPE, one pass in lived order | 0 / 0 | 0.007 / 0.063 | 0 / 0 |
+| Transformer 1M, Zihin's own units, one pass | 0 | 0.000 (silent) | 0 |
+| Transformer 1M / 4M, BPE, 20 / 10 epochs | 0 / 0 | 0.045 / 0.056 | 0.005 / 0.030 |
+| Transformer 1M, Zihin's own units, 20 epochs | 0 | 0.100 | 0.255 |
+| a lookup that does not learn: the first document sentence that starts with the asked word | 0.930 (186) | 0.946 | |
+
+- At the mind's own exposure (one pass) no Transformer gave a usable answer; with 15–30 times the exposure (10–20
+  epochs, 14–34 minutes on two threads) none answered exactly and the best F1 was 0.100 against Zihin's 0.300.
+- The tokenizer does not explain the gap: with exactly Zihin's units the Transformer did better than with BPE, still
+  far below.
+- **A second attempt to make the Transformer as strong as possible** (an independent verifier, about 1.5 hours: a
+  larger learning rate, 27 epochs, fine-tuning on the question form, beam search and sampling) reached at best 3 of
+  200 exact and F1 0.135 under the protocol, against Zihin's 26 and 0.300. It was stopped before it finished. Given
+  the first words of the answer instead of the question (a diagnostic, not the protocol), the same model completed
+  34% exactly: it holds much of the documents' text but cannot reach it from a one-word question.
+- **The limits are large.** The first many-epoch runs stopped at an epoch cap (best epochs 14 of 20, 18 of 20, 10 of
+  10), only 1M–4M models were run, one seed each. The BPE models also met a case mismatch (they were trained on raw
+  case and asked lower-cased questions), and the word-level 1M model has only 111,720 parameters outside its
+  embeddings. A larger or longer-trained Transformer may do better; this shows that one to two hours of training per
+  model on this machine got nowhere near.
+- **The task itself is weak.** The teacher questions were generated from the documents by a template ("<X> nedir ?",
+  answered by the first sentence that starts with X; `research/living_mind_2026_11_14/teacher_qa.py`), so a lookup
+  that learns nothing answers 186 of 200. Belief (1) holds for this small budget on this task; it is not shown in
+  principle, and Zihin's 13% is far from what the data allows. The audit of 2026-11-15 also flags these generated
+  dialogues as canned content: they will not be used to raise minds again, and the next evaluations will use
+  questions the owner writes or template-free cloze probes.
+- `same_data_duel.py` recorded the stream through the lessons of that time (`lessons_about_itself`,
+  `not_knowing_lesson`), so it runs only at the commits before d628100; between runs the script was edited and the
+  epoch cap was lowered from 24 to 20 after a restart.
+- Memory and time on the same machine: Zihin peaked at 1.85 GB living and 1.91 GB answering (753 ms per answer on a
+  loaded machine); the Transformers at 0.94–1.83 GB training and 0.54–0.57 GB answering (39–255 ms).
