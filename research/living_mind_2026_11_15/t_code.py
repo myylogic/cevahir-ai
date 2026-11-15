@@ -50,11 +50,12 @@ def passes(name: str, args: str, written: str, test) -> bool:
         return False
 
 
-def run(seed: int, rounds: int, consequences: bool, explore: bool = True) -> dict:
+def run(seed: int, rounds: int, consequences: bool, explore: bool = True, **over) -> dict:
+    """One life; ``over``: further settings of the configuration (none: the configuration of the first results)."""
     torch.manual_seed(seed)
     rng = random.Random(seed)
     mind = Mind(Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
-                               backoff=True, resemblance=True, race=True, situations=True, explore=explore))
+                               backoff=True, resemblance=True, race=True, situations=True, explore=explore, **over))
     mind.add_channel(CHANNEL, "act")
     session = Session(mind)
     session.curious = False                              # this test is about writing code, not asking
