@@ -43,7 +43,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from typing import List
+from typing import Dict, List
 
 from . import ACTED, IMITATED, SENSED, TOLD, Config, Event, Mind, read
 from .events import PROVENANCE
@@ -171,6 +171,7 @@ class Session:
         mind.add_channel(EYE, "sense")          # a seen thing is present in the episode, its aspects are facets
         mind.add_channel(LOOK, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
+        self.curious = True                     # the curiosity reflex (T4) is on in conversation
         self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
         self.open_turn = False                # the mind has just answered; feedback may still come
 
@@ -269,6 +270,7 @@ class Session:
         symbols = words(text)
         if not symbols:
             return "(sessiz)"
+        before = self.known_before(text) if self.curious else {}   # what it knew of these words before hearing them
         if self.turns:                                   # the turn passes when your utterance has ended
             self.listen(text, TOLD, speaker=self.partner)
             acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
@@ -279,9 +281,38 @@ class Session:
         while acts and len(said) < limit:
             said += [str(e.symbol) for e in acts if e.channel == CHANNEL]
             acts = self.mind.step([])                    # the echo of its own act arrives here
+        if not said and self.curious:
+            said = self.wonder(text, before)
         self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
         self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
         return " ".join(said) if said else "(sessiz)"
+
+    def known_before(self, text: str) -> Dict[str, int]:
+        """How firmly each word of an utterance was known before it was heard (ties held with conviction >= 1/2)."""
+        from .web import firm_knowledge
+        mind = self.mind
+        cid = mind.ch.id(CHANNEL)
+        out = {}
+        for w in self.body(text):
+            index = mind.ch.symbol_index(cid, w, create=False)
+            unit = mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
+            out[w] = firm_knowledge(mind, unit) if unit >= 0 else 0
+        return out
+
+    def wonder(self, text: str, before: Dict[str, int] = None) -> List[str]:
+        """T4, an innate curiosity reflex (LAYERS.md L2): when the mind has nothing to say and its partner used a word it
+        knows nothing about, it says that word back with a question tone, as a child does ("kuantum ?"). What follows
+        (an explanation) is learned like anything else; nothing here is about a language or a topic."""
+        mind = self.mind
+        before = self.known_before(text) if before is None else before
+        unknown = [(0, w) for w in self.body(text) if len(w) >= 4 and w.isalpha() and before.get(w, 0) == 0]
+        if not unknown:
+            return []
+        word = unknown[0][1]                             # the first word it knows nothing about (topics come early)
+        mind.step([Event(CHANNEL, word, ACTED)])
+        mind.step([Event(CHANNEL, "?", ACTED)])
+        mind.step([])
+        return [word, "?"]
 
     def close_turn(self) -> None:
         if self.open_turn:
