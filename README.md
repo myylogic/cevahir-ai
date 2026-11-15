@@ -42,7 +42,7 @@ In November 2026 I started a new core, separate from the Transformer: **Zihin** 
 
 **Not yet:** learning to learn (T6) came out negative; asking its own questions (T4) and imagining with a measured sense of reality (T8) are not built yet. On real data its chat is mostly imitation and it may answer questions about itself with others' answers. The worlds are small and the Transformer comparison covers only the small-data regime. This is not a claim of consciousness or of general intelligence; neither can be measured for any machine today. The aim and the road map are explicit: a mind that learns by living, builds its own concepts, makes sense of what it acquired and knows itself. The design layers (deliberate focus, automatic reflexes, inner and outer voice, drives and will, knowing itself) are [here](research/living_mind_2026_11_14/LAYERS.md), the vision [here](research/living_mind_2026_11_14/design/VISION.md).
 
-**Try it:**
+**Try it** (full guide in Turkish: [docs/ZIHIN_KILAVUZ.md](docs/ZIHIN_KILAVUZ.md); from PowerShell: `.\cevahir.ps1`):
 
 ```
 python -m zihin                      # a new mind

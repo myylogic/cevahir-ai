@@ -42,7 +42,7 @@ Kasım 2026'da Transformer'dan ayrı, yeni bir çekirdek üzerinde çalışmaya 
 
 **Henüz yapamadıkları:** Öğrenmeyi öğrenmek (T6) olumsuz çıktı. Kendi kendine soru sormak (T4) ve hayal edip gerçekliğini ölçmek (T8) henüz yok. Gerçek veride sohbet büyük ölçüde taklittir; kendisi hakkındaki sorulara başkalarının cevabıyla karşılık verebilir. Dünyalar küçüktür ve Transformer karşılaştırması yalnızca az veri koşulunda yapıldı. Bu çalışma bir bilinç ya da yapay genel zekâ iddiası değildir; bunlar bugün hiçbir makine için ölçülemiyor. Hedef ve yol haritası açıktır: yaşayarak öğrenen, kendi kavramlarını kuran, edindiğini anlamlandıran ve kendini bilen bir zihin. Tasarımın katmanları (bilinçli odak, otomatik refleksler, iç ve dış ses, yönlendiriciler ve irade, kendini bilmek) [burada](research/living_mind_2026_11_14/LAYERS.md), vizyon [burada](research/living_mind_2026_11_14/design/VISION.md).
 
-**Denemek için:**
+**Denemek için** (ayrıntılı kılavuz: [docs/ZIHIN_KILAVUZ.md](docs/ZIHIN_KILAVUZ.md); PowerShell'den: `.\cevahir.ps1`):
 
 ```
 python -m zihin                      # yeni bir zihin
