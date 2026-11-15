@@ -99,7 +99,8 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
         mind = pickle.load(f)
     if manifest and mind.S.digest() != manifest["substance_digest"]:
         raise ValueError("substance digest does not match the manifest")
-    for name, default in (("trace", list), ("value_sign", dict), ("dreams", list), ("unknown", float)):   # minds saved before these existed
+    for name, default in (("trace", list), ("value_sign", dict), ("dreams", list), ("unknown", float),
+                          ("voice", dict)):                         # minds saved before these existed
         if not hasattr(mind, name):
             setattr(mind, name, default())
     import dataclasses
