@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from zihin import Config, Mind
 from zihin.__main__ import CHANNEL, Session
+from zihin.events import ACTED
 from zihin.mind import INNER_CHANNEL, NOT_KNOWING
 
 
@@ -50,6 +51,7 @@ def test_not_knowing_is_felt_only_when_called_on_and_without_an_answer():
     assert felt_events(session, lambda: session.watch("kedi nedir ?", "kedi bir hayvandır .")) == []
     felt = felt_events(session, lambda: session.reply("zorbalak nedir ?"))
     assert len(felt) == 1 and felt[0].symbol == NOT_KNOWING and 0.0 < felt[0].intensity <= 1.0
+    assert felt[0].prov == ACTED                      # its own percept: certain, and it judges nothing (JUDGES)
 
 
 def test_a_mind_that_never_lived_it_does_not_say_bilmiyorum():

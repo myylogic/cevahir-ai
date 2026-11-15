@@ -345,7 +345,9 @@ class Mind:
             alone = 2.0 * (best - 0.5) * self.cfg.T >= self.knob["theta"]
             self.unknown = 0.0 if acted or alone else 1.0 - 2.0 * max(0.0, best - 0.5)
         elif not items and not acted and getattr(self, "unknown", 0.0) > 0.0:
-            self.pending.append(Event(INNER_CHANNEL, NOT_KNOWING, SENSED, self.unknown))
+            # booked as the mind's own percept (acted: certain, self-produced), not as sensed experience of the world,
+            # so its ties never judge what it was told (events.JUDGES)
+            self.pending.append(Event(INNER_CHANNEL, NOT_KNOWING, ACTED, self.unknown))
             self.unknown = 0.0
         else:
             self.unknown = 0.0
