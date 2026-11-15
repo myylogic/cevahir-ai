@@ -9,8 +9,10 @@ What is pinned here
   path matches. The value's lag-1 ties differ, because time passed: typed at once the answer's last focus is tied to
   the value that follows it; after silent moments the moment before the value is a silent one and nothing is.
 * Typed at once, feedback is what it always was: the kept path is the episode's trace itself.
-* "not edildi" is said only when the value evidence grew. An answer that ended in a question leaves no path, and after
-  the mind spoke on its own the answer is no longer reached: the program says that nothing was learned.
+* "not edildi" is said only when the value evidence grew. A silence of hesitation leaves no path (its silent moments
+  ended the episode), and after the mind spoke on its own the answer is no longer reached: the program says that
+  nothing was learned. A silence after not knowing leaves the episode of its not knowing (L7) as its path, and the
+  feedback reaches it: no coded question closes the reply any more.
 * Through the real life clock: "!dogru" typed after several silent beats is learned.
 """
 from __future__ import annotations
@@ -80,12 +82,27 @@ def test_typed_at_once_the_kept_path_is_the_trace_itself():
 
 
 def test_an_answer_that_left_no_path_is_not_reported_as_learned():
-    session = taught()
-    answer = session.reply("kuantum nedir ?")
-    assert answer.endswith("kuantum ?")                  # it asked back: the reply closed its own episode
+    mind = Mind(Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
+                               backoff=True, resemblance=True, race=True, situations=True))
+    mind.add_channel(CHANNEL, "act")
+    session = Session(mind)
+    for _ in range(2):                                   # two answers equally supported: it hesitates, it does not
+        session.watch("hangi renk ?", "mavi .")          # feel not knowing, and its silent moments end the episode
+        session.watch("hangi renk ?", "yeşil .")
+    assert session.reply("hangi renk ?") == "(sessiz)" and session.answered == []
     message = session.feedback(True)
     assert "not edildi" not in message and "öğrenilmedi" in message
     assert value_paths(session.mind) == {}
+
+
+def test_feedback_on_a_silence_after_not_knowing_reaches_that_episode():
+    from zihin.mind import INNER_CHANNEL, NOT_KNOWING
+    session = taught()
+    assert session.reply("kuantum nedir ?") == "(sessiz)"   # nothing is asked back for it (no curiosity reflex)
+    felt = session.mind.unit_of(INNER_CHANNEL, NOT_KNOWING)
+    assert session.answered == [felt]                    # the path is the episode it lived: its not knowing
+    assert "not edildi (iyi)" in session.feedback(True)  # the owner's feedback reaches it (nothing cut it off)
+    assert list(value_paths(session.mind)) == [felt]
 
 
 def living(**clock):

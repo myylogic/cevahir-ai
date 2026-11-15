@@ -7,7 +7,8 @@ What is pinned here
   falling silent, and the same alternative is chosen again under the same knowledge (deterministic).
 * An alternative that led to "kötü" is not tried again while untried alternatives remain; after "iyi" the mind keeps
   the one that led there.
-* Nothing well supported is not hesitation: a question about something unknown still meets not knowing.
+* Nothing well supported is not hesitation: a question about something unknown still meets not knowing (the mind
+  feels it, L7) and no try is made; nothing is said for it (the curiosity reflex is gone).
 * Writing tiny functions: after watching mostly wrong completions, with the test results as consequences the mind
   writes passing code for every task within a few rounds; without the consequences it does not.
 """
@@ -25,7 +26,7 @@ def raised(explore: bool = True) -> Session:
                                backoff=True, resemblance=True, race=True, situations=True, explore=explore))
     mind.add_channel(CHANNEL, "act")
     session = Session(mind)
-    session.curious = session.thinking = False
+    session.thinking = False
     for _ in range(2):
         session.watch("hangi renk ?", "mavi .")
         session.watch("hangi renk ?", "yeşil .")
@@ -51,9 +52,16 @@ def test_a_bad_try_is_not_repeated_and_a_good_one_is_kept():
 
 
 def test_nothing_well_supported_is_still_not_knowing():
+    from zihin.mind import INNER_CHANNEL, NOT_KNOWING
     session = raised()
-    session.curious = True
-    assert session.reply("kuantum nedir ?").endswith("kuantum ?")
+    mind, felt, step = session.mind, [], session.mind.step
+
+    def recorded(events=()):
+        felt.extend(e.symbol for e in list(mind.pending) + list(events) if e.channel == INNER_CHANNEL)
+        return step(events)
+    mind.step = recorded
+    assert session.reply("kuantum nedir ?") == "(sessiz)"
+    assert felt == [NOT_KNOWING]
 
 
 def test_code_is_learned_from_its_tests():

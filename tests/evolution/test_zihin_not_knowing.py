@@ -8,6 +8,8 @@ What is pinned here
   It answers what it knows without feeling it; watching others never makes it feel it.
 * The core holds no sentences to say: a mind that has not lived how one says it does not say "bilmiyorum".
 * There are no scripted lessons about the mind or about not knowing in the core (removed at the owner's decision).
+* Nothing in the session asks back for the mind: the curiosity reflex that wrote the unknown word and '?' into the mind
+  as its own acts is gone. A mind that has not lived how to ask stays silent; nothing is lived as its speech.
 """
 from __future__ import annotations
 
@@ -62,3 +64,21 @@ def test_the_core_holds_no_scripted_lessons():
         assert not hasattr(kendilik, name)
     for name in ("lessons_about_itself", "not_knowing_lesson"):
         assert not hasattr(Session, name)
+
+
+def test_nothing_in_the_session_asks_back_for_the_mind():
+    from zihin import ACTED
+    assert not hasattr(Session, "wonder") and not hasattr(Session, "known_before")
+    empty = Mind(Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
+                                backoff=True, resemblance=True, race=True, situations=True))
+    empty.add_channel(CHANNEL, "act")
+    for session in (Session(empty), raised()):
+        assert not hasattr(session, "curious")
+        mind, acted, step = session.mind, [], session.mind.step
+
+        def recorded(events=()):
+            acted.extend(e for e in list(mind.pending) + list(events) if e.prov == ACTED)
+            return step(events)
+        mind.step = recorded
+        assert session.reply("zorbalak nedir ?") == "(sessiz)"
+        assert acted == []                               # nothing was lived as its own speech

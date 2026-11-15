@@ -465,7 +465,6 @@ class Session:
         mind.add_channel(SOUND, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
         self.seen: Dict[str, str] = {}          # the file names of images shown in this session, by gist
-        self.curious = True                     # the curiosity reflex (T4) is on in conversation
         self.thinking = True                    # what is heard calls thoughts to mind; one may be said (T8)
         from .mind import INNER_CHANNEL, SELF_CHANNEL
         if not mind.ch.has(SELF_CHANNEL):       # minds born before the self unit existed get it now
@@ -596,7 +595,6 @@ class Session:
         symbols = self.words(text)
         if not symbols:
             return "(sessiz)"
-        before = self.known_before(text) if self.curious else {}   # what it knew of these words before hearing them
         thoughts = self.associations(text) if self.turns and self.thinking else []
         if self.turns:                                   # the turn passes when your utterance has ended
             self.listen(text, TOLD, speaker=self.partner)
@@ -604,13 +602,10 @@ class Session:
         else:                                            # older minds: the turn passes with your last word
             self.listen(" ".join(symbols[:-1]), TOLD)
             acts = self.mind.step(self.events(symbols[-1], TOLD))
-        knew = bool(acts)
-        thought = False
         said: List[str] = []
         if not acts and self.turns:                      # nothing at once: it thinks about what was asked first
             unknown = getattr(self.mind, "unknown", 0.0)
             said = self.think_aloud(thoughts, say)
-            thought = bool(said)
             if not said:                                 # its thought was not real enough: a moment passes and it
                 self.mind.unknown = unknown              # feels its not knowing (L7); what it says then is its own
                 acts = self.mind.step([])
@@ -628,12 +623,6 @@ class Session:
                 if say is not None:
                     say(w)                               # out as it is said (online life)
             acts = self.mind.step([])                    # the echo of its own act arrives here
-        if not knew and not thought and self.curious:    # what it did not know it asks about (T4)
-            asked = self.wonder(text, before)
-            said += asked
-            for w in asked:
-                if say is not None:
-                    say(w)
         self.remember(CHAT, text, list(range(start, self.mind.t + 1)), [text], said)
         self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
         self.answered = list(self.mind.trace)            # ... and the path that led to the answer is kept for them
@@ -704,33 +693,6 @@ class Session:
             aloud(list(line))
         return said
 
-    def known_before(self, text: str) -> Dict[str, int]:
-        """How firmly each word of an utterance was known before it was heard (ties held with conviction >= 1/2)."""
-        from .web import firm_knowledge
-        mind = self.mind
-        cid = mind.ch.id(CHANNEL)
-        out = {}
-        for w in self.body(text):
-            index = mind.ch.symbol_index(cid, w, create=False)
-            unit = mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
-            out[w] = firm_knowledge(mind, unit) if unit >= 0 else 0
-        return out
-
-    def wonder(self, text: str, before: Dict[str, int] = None) -> List[str]:
-        """T4, an innate curiosity reflex (LAYERS.md L2): when the mind has nothing to say and its partner used a word it
-        knows nothing about, it says that word back with a question tone, as a child does ("kuantum ?"). What follows
-        (an explanation) is learned like anything else; nothing here is about a language or a topic."""
-        mind = self.mind
-        before = self.known_before(text) if before is None else before
-        unknown = [(0, w) for w in self.body(text) if len(w) >= 4 and w.isalpha() and before.get(w, 0) == 0]
-        if not unknown:
-            return []
-        word = unknown[0][1]                             # the first word it knows nothing about (topics come early)
-        mind.step([Event(CHANNEL, word, ACTED)])
-        mind.step([Event(CHANNEL, "?", ACTED)])
-        mind.step([])
-        return [word, "?"]
-
     def close_turn(self) -> None:
         self.answered = None
         if self.open_turn:
@@ -766,8 +728,8 @@ class Session:
         if spoken_over:
             return "  öğrenilmedi (%s): zihin cevabından sonra kendiliğinden konuştu; geri bildirim o cevaba artık " \
                    "ulaşmıyor" % label
-        return "  öğrenilmedi (%s): bu cevap zihinde bir yol bırakmadı (soruyla, sesli düşünceyle ya da sessizlikle " \
-               "bitti); geri bildirim bir şey öğretmedi" % label
+        return "  öğrenilmedi (%s): bu cevap zihinde bir yol bırakmadı (sesli düşünceyle ya da sessizlikle bitti); " \
+               "geri bildirim bir şey öğretmedi" % label
 
     def _path_value(self, path: List[int], label: str) -> float:
         """The positive evidence the steps of a path hold toward a value ("later in the episode", EXPECT lag 2)."""
