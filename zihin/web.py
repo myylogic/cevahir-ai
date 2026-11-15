@@ -292,6 +292,7 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
     mind = session.mind
     dil = getattr(session, "dil", getattr(mind, "dil", "tr"))
     adapter = getattr(session, "words", None) or (lambda text: words(text, dil))
+    check = getattr(session, "check", None)            # a long reading stops between sentences when asked (Ctrl+C)
     chooser = WayChooser(mind)
     way = way or chooser.choose()
     try:
@@ -322,6 +323,8 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
         for sentence in sentences(text, dil):
             if lived >= budget:
                 break
+            if check is not None:
+                check()
             session.listen(sentence, IMITATED)
             mind.step([])
             lived += 1

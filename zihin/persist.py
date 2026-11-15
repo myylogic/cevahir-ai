@@ -5,6 +5,12 @@ A saved mind is two files: ``<name>.zihin`` (the pickled Mind: tensors, indices,
 and ``<name>.zihin.json`` (manifest: sha256 of the file, digest of the substance tensors, sizes, moments lived).
 ``load`` refuses a file whose bytes or substance digest do not match the manifest. Pickle executes code when
 loaded: load only minds you saved yourself.
+
+A save never leaves a mind that does not load: its new files are written beside the old ones (``.tmp``), the
+manifest last, and only then put in place. Stopped before its manifest was whole (Ctrl+C, a crash, a killed thread),
+the save leaves the mind saved before untouched, and its own files are removed (at once when it is stopped by an
+exception, else by the next ``load`` or ``save`` of that mind); stopped while its files were being put in place, it is
+finished by the next ``load`` or ``save`` of that mind (``_finish_save``).
 """
 from __future__ import annotations
 
@@ -30,32 +36,85 @@ def _sha256(path: str) -> str:
     return h.hexdigest()
 
 
+def _remove(path: str) -> None:
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
+
+
+def _finish_save(path: str) -> None:
+    """Make what an earlier save of ``path`` left whole again, before the mind is read or saved.
+
+    A save stopped while its files were being put in place left its whole manifest as ``.json.tmp``: when the mind
+    file (and the ledger) that manifest names are there, still as ``.tmp`` or already in place, they are put in place
+    and the manifest last. Anything else a save left (a ``.tmp`` without a whole manifest, or files that are not the
+    ones its manifest names) belongs to a save that did not get that far: it is removed, and the mind saved before
+    stays as it was."""
+    pending = path + ".json.tmp"
+    leftovers = (path + ".tmp", path + ".log.tmp", pending)
+    if not os.path.exists(pending):
+        for leftover in leftovers[:2]:
+            _remove(leftover)
+        return
+    try:
+        with open(pending, encoding="utf-8") as f:
+            manifest = json.load(f)
+    except ValueError:
+        manifest = None
+
+    def named(new: str, final: str, key: str) -> bool:      # the file that manifest names: new, or already in place
+        found = new if os.path.exists(new) else final
+        return os.path.exists(found) and _sha256(found) == manifest.get(key)
+    whole = isinstance(manifest, dict) and manifest.get("format") == FORMAT and named(path + ".tmp", path, "sha256") \
+        and (not manifest.get("log_sha256") or named(path + ".log.tmp", path + ".log", "log_sha256"))
+    if not whole:
+        for leftover in leftovers:
+            _remove(leftover)
+        return
+    for tmp, final in ((path + ".log.tmp", path + ".log"), (path + ".tmp", path)):
+        if os.path.exists(tmp):
+            os.replace(tmp, final)
+    os.replace(pending, path + ".json")
+
+
 def save(mind: Mind, path: str) -> Dict[str, object]:
-    """Write the mind atomically and its manifest; returns the manifest. A disk log is copied beside it."""
+    """Write the mind and its manifest; returns the manifest. A disk log is copied beside it. The new files are
+    written as ``.tmp`` beside the old ones, the manifest last, and then put in place (see the module's docstring):
+    a save that does not finish leaves the mind saved before as it was, and no file of its own."""
     if not path.endswith(".zihin"):
         path += ".zihin"
+    _finish_save(path)                                     # a save of this mind stopped earlier is finished first
     log = mind.S.log if isinstance(mind.S.log, DiskLog) else None
     live_path = log.path if log else None
     log_sha = None
-    if log:
-        if os.path.exists(live_path):
-            shutil.copyfile(live_path, path + ".log")
-        else:
-            open(path + ".log", "wb").close()
-        log_sha = _sha256(path + ".log")
-        log.path = os.path.basename(path) + ".log"          # stored relative to the saved mind
-    tmp = path + ".tmp"
+    tmp, manifest_tmp = path + ".tmp", path + ".json.tmp"
     try:
-        with open(tmp, "wb") as f:
-            pickle.dump(mind, f, protocol=pickle.HIGHEST_PROTOCOL)
-    finally:
         if log:
-            log.path = live_path
+            if os.path.exists(live_path):
+                shutil.copyfile(live_path, path + ".log.tmp")
+            else:
+                open(path + ".log.tmp", "wb").close()
+            log_sha = _sha256(path + ".log.tmp")
+            log.path = os.path.basename(path) + ".log"      # stored relative to the saved mind
+        try:
+            with open(tmp, "wb") as f:
+                pickle.dump(mind, f, protocol=pickle.HIGHEST_PROTOCOL)
+        finally:
+            if log:
+                log.path = live_path
+        manifest = {"format": FORMAT, "file": os.path.basename(path), "sha256": _sha256(tmp),
+                    "substance_digest": mind.S.digest(), "moments": mind.t, "log_sha256": log_sha, **mind.size()}
+        with open(manifest_tmp, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2)
+    except BaseException:                                  # stopped before its files were whole: nothing is left
+        for leftover in (tmp, manifest_tmp, path + ".log.tmp"):
+            _remove(leftover)
+        raise
+    if log:                                                # whole: put in place, the manifest last
+        os.replace(path + ".log.tmp", path + ".log")
     os.replace(tmp, path)
-    manifest = {"format": FORMAT, "file": os.path.basename(path), "sha256": _sha256(path),
-                "substance_digest": mind.S.digest(), "moments": mind.t, "log_sha256": log_sha, **mind.size()}
-    with open(path + ".json", "w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2)
+    os.replace(manifest_tmp, path + ".json")
     return manifest
 
 
@@ -83,11 +142,16 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
         path = path[:-3]
     if not path.endswith(".zihin"):
         path += ".zihin"
+    _finish_save(path)                                     # a save stopped while its files were put in place
     if not os.path.exists(path) and os.path.exists(path + ".gz"):   # a compressed mind: unpack it once
         import gzip
-        with gzip.open(path + ".gz", "rb") as src, open(path + ".tmp", "wb") as dst:
-            shutil.copyfileobj(src, dst, 1 << 20)
-        os.replace(path + ".tmp", path)
+        try:
+            with gzip.open(path + ".gz", "rb") as src, open(path + ".gz.tmp", "wb") as dst:
+                shutil.copyfileobj(src, dst, 1 << 20)
+        except BaseException:
+            _remove(path + ".gz.tmp")
+            raise
+        os.replace(path + ".gz.tmp", path)
     manifest = {}
     if os.path.exists(path + ".json"):
         with open(path + ".json", encoding="utf-8") as f:
@@ -126,6 +190,10 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
         if manifest.get("log_sha256") and _sha256(saved_log) != manifest["log_sha256"]:
             raise ValueError("experience log does not match the manifest")
         live = live_log or "%s.live-%d-%d" % (saved_log, os.getpid(), time.time_ns())
-        shutil.copyfile(saved_log, live)                    # the saved ledger is never written to
+        try:
+            shutil.copyfile(saved_log, live)                # the saved ledger is never written to
+        except BaseException:                              # a copy that did not finish is not left behind
+            _remove(live)
+            raise
         mind.S.log.path = live
     return mind

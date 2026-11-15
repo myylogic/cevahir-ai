@@ -263,6 +263,7 @@ def infer(session, topic: str, limit: int = 12, frequent: set = None) -> Tuple[L
     imagined, so later life judges it (F22). Returns (thought about X, construction, reality, W)."""
     from .__main__ import CHANNEL
     mind = session.mind
+    check = getattr(session, "check", None)              # long thinking stops between thoughts when asked (Ctrl+C)
     thought, _ = think(session, topic, limit)
     for w in thought:
         if len(w) < 4 or not w.isalpha() or (frequent and w in frequent) or w == topic:
@@ -270,6 +271,8 @@ def infer(session, topic: str, limit: int = 12, frequent: set = None) -> Tuple[L
         for mate in root_mates(session, w)[:5]:
             if mate == topic or mate in thought:
                 continue
+            if check is not None:
+                check()
             mind.step([])
             carried, _ = think(session, mate, limit)
             carried = [c for c in carried if c != topic]
@@ -438,10 +441,13 @@ def dream(session, topic: str, links: int = 3, frequent: set = None) -> List[dic
     from .__main__ import CHANNEL
     from .gorme import EYE
     mind = session.mind
+    check = getattr(session, "check", None)              # a dream stops between its imaginings when asked (Ctrl+C)
     records, visited = [], set()
     for _ in range(links):
         if not topic or topic in visited:
             break
+        if check is not None:
+            check()
         visited.add(topic)
         seen = seen_with(mind, topic)
         for gist in seen:                                  # it sees in its dream what it saw with this word, as it
@@ -516,6 +522,7 @@ def sleep(session, cycles: int = 3) -> Dict[str, object]:
     from .__main__ import CHANNEL
     from .web import wanted_topics
     mind = session.mind
+    check = getattr(session, "check", None)              # stopped between dreams (Ctrl+C): the night is not sorted
     frequent = frequent_words(mind, relative=True)                              # a small mind keeps topics too
     topics = day_residue(session, cycles, leave_out=frequent)                   # what the day was about, then what
     for w in wanted_topics(mind, CHANNEL, cycles * 2):                         # it is unsure of
@@ -526,6 +533,8 @@ def sleep(session, cycles: int = 3) -> Dict[str, object]:
     for topic in topics:
         if len(dreams) >= cycles:
             break
+        if check is not None:
+            check()
         mind.step([])                                      # each dream begins in silence
         chain = dream(session, topic, frequent=frequent)
         if chain:

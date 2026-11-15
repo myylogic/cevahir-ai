@@ -58,6 +58,11 @@ learned yet: during your words the act threshold is raised, afterwards it is the
     !yukle <yol>         / !load    load a saved mind
     !tasinabilir <yol>   / !portable  save a copy for conversation without the experience ledger (small file)
     !cik                 / !quit
+Ctrl+C during a long command (!oku, !ogret, !unut, !arastir, !kendini_gelistir, !uyu, and its sleep while you are
+silent) stops it at its next sentence, line or moment, never inside one: what it lived until then is whole and in
+the history; then the session ends and the mind is saved. Pressed again before the command has stopped, Ctrl+C does
+not wait: the session ends without saving and the mind saved before stays as it was (so does it when the command does
+not stop in 30 seconds). A save that does not finish never replaces the mind saved before.
 The text adapter splits words and punctuation; the alphabet is open (a new word is a new symbol at any time). The
 mind never sees text, only symbols on the "text" channel; meaning is in the ties.
 """
@@ -415,9 +420,15 @@ class _indices_rebuilt_once:
             self.S.rebuild_indices()
 
 
+class Interrupted(Exception):
+    """A long command was asked to stop (Ctrl+C): raised by Session.check between two sentences, lines, dialogues or
+    moments, never inside a moment, so what was lived until then is whole."""
+
+
 class Session:
-    def __init__(self, mind: Mind, pieces=None) -> None:
+    def __init__(self, mind: Mind, pieces=None, stop: threading.Event = None) -> None:
         self.mind = mind
+        self.stop = stop if stop is not None else threading.Event()   # set: long commands stop at their next check
         self.dil = getattr(mind, "dil", "tr")  # the mind's language convention (how its text is lower-cased)
         self.history: List[Entry] = []        # what was lived in this session, entry by entry
         self.numbered = 0                     # the last number given to a history entry (numbers are never reused)
@@ -457,6 +468,12 @@ class Session:
     def words(self, text: str) -> List[str]:
         """The text adapter with this mind's language convention: everything the session reads and hears."""
         return words(text, self.dil)
+
+    def check(self) -> None:
+        """Called by long commands between two sentences, lines, dialogues or moments (never inside a moment): when
+        the session was asked to stop (Ctrl+C), the command stops here with what it lived so far (Interrupted)."""
+        if self.stop.is_set():
+            raise Interrupted()
 
     def lower(self, text: str) -> str:
         return lower(text, self.dil)
@@ -752,7 +769,9 @@ class Session:
 
     def read_path(self, path: str, cap: int = 0) -> str:
         """Watch the texts of a file or of every supported file under a folder; report what was lived. Each file read
-        enters the history with the moments it lived (so ``!unut`` takes it back) and its last lines."""
+        is an entry of the history (Entry: the moments it lived, so ``!unut`` takes it back, the words it lived and its
+        last sentence). Asked to stop (Ctrl+C), it stops before the next sentence or dialogue: what was read until then
+        stays lived and in the history."""
         import time
         if not os.path.exists(path):
             return "  böyle bir dosya ya da klasör yok: %s" % path
@@ -760,74 +779,90 @@ class Session:
             os.path.join(root, name) for root, _, names in os.walk(path) for name in names)
         start, lived, skipped, t0 = time.time(), 0, [], self.mind.t
         found: Dict[str, TextFile] = {}                  # how each text file was decoded (encoding_notes)
-        for name in files:
-            first_moment, said = self.mind.t + 1, []
-            try:
+        reached, stopped = 0, False                      # files begun; asked to stop (Ctrl+C) on the way
+        try:
+            for name in files:
+                self.check()
+                reached += 1
+                first_moment, said = self.mind.t + 1, []
                 try:
-                    if name.lower().endswith(".json"):
-                        import json
-                        f, found[os.path.basename(name)] = open_text(name)
-                        with f:
-                            pairs = dialogues_of(json.load(f))
-                        for first, answer in pairs[:cap] if cap else pairs:
-                            self.watch(first, answer)
-                            said += [first, answer]
-                            lived += 1
-                        if not pairs:
-                            skipped.append(os.path.basename(name))
+                    try:
+                        if name.lower().endswith(".json"):
+                            import json
+                            f, found[os.path.basename(name)] = open_text(name)
+                            with f:
+                                pairs = dialogues_of(json.load(f))
+                            for first, answer in pairs[:cap] if cap else pairs:
+                                self.check()
+                                self.watch(first, answer)
+                                said += [first, answer]
+                                lived += 1
+                            if not pairs:
+                                skipped.append(os.path.basename(name))
+                            continue
+                        if name.lower().endswith(".tsv"):
+                            f, found[os.path.basename(name)] = open_text(name)
+                            with f:
+                                watched = 0
+                                for raw in f:
+                                    if cap and watched >= cap:
+                                        break
+                                    if "\t" in raw:
+                                        self.check()
+                                        first, answer = raw.rstrip("\n").split("\t", 1)
+                                        self.watch(first, answer)
+                                        said += [first, answer]
+                                        lived += 1
+                                        watched += 1
+                            continue
+                        encodings = []
+                        text = read_document(name, encodings)
+                        if encodings:
+                            found[os.path.basename(name)] = encodings[0]
+                    except Interrupted:
+                        raise
+                    except NotText as exc:
+                        skipped.append("%s (metin dosyası değil: %s)" % (os.path.basename(name), exc))
                         continue
-                    if name.lower().endswith(".tsv"):
-                        f, found[os.path.basename(name)] = open_text(name)
-                        with f:
-                            watched = 0
-                            for raw in f:
-                                if cap and watched >= cap:
-                                    break
-                                if "\t" in raw:
-                                    first, answer = raw.rstrip("\n").split("\t", 1)
-                                    self.watch(first, answer)
-                                    said += [first, answer]
-                                    lived += 1
-                                    watched += 1
+                    except Exception as exc:
+                        skipped.append("%s (%s)" % (os.path.basename(name), exc))
                         continue
-                    encodings = []
-                    text = read_document(name, encodings)
-                    if encodings:
-                        found[os.path.basename(name)] = encodings[0]
-                except NotText as exc:
-                    skipped.append("%s (metin dosyası değil: %s)" % (os.path.basename(name), exc))
-                    continue
-                except Exception as exc:
-                    skipped.append("%s (%s)" % (os.path.basename(name), exc))
-                    continue
-                if not text:
-                    skipped.append(os.path.basename(name))
-                    continue
-                lines = [ln.strip() for ln in text.splitlines() if len(self.words(ln)) >= 2] \
-                    if name.lower().endswith(CODE) else sentences(text, self.dil)   # code: each line an utterance
-                for i, sentence in enumerate(lines):
-                    if cap and i >= cap:
-                        break
-                    self.listen(sentence, IMITATED)
-                    self.mind.step([])
-                    said.append(sentence)
-                    lived += 1
-            finally:                                     # what was lived of this file is one entry of the history
-                moments = list(range(first_moment, self.mind.t + 1))
-                if moments:
-                    self.remember(READ, "[okudu] %s" % os.path.basename(name), moments, said)
+                    if not text:
+                        skipped.append(os.path.basename(name))
+                        continue
+                    lines = [ln.strip() for ln in text.splitlines() if len(self.words(ln)) >= 2] \
+                        if name.lower().endswith(CODE) else sentences(text, self.dil)   # code: each line an utterance
+                    for i, sentence in enumerate(lines):
+                        if cap and i >= cap:
+                            break
+                        self.check()
+                        self.listen(sentence, IMITATED)
+                        self.mind.step([])
+                        said.append(sentence)
+                        lived += 1
+                finally:                                 # what was lived of this file is one entry of the history
+                    moments = list(range(first_moment, self.mind.t + 1))
+                    if moments:
+                        self.remember(READ, "[okudu] %s" % os.path.basename(name), moments, said)
+        except Interrupted:
+            stopped = True
         took = time.time() - start
-        out = "  %d dosya, %d cümle/diyalog, %d an, %.0f sn (%.1f ms/an)" % (
-            len(files) - len(skipped), lived, self.mind.t, took, 1000 * took / max(1, self.mind.t - t0))
+        out = "%s  %d dosya, %d cümle/diyalog, %d an, %.0f sn (%.1f ms/an)" % (
+            "\n" if stopped else "", reached - len(skipped), lived, self.mind.t, took,
+            1000 * took / max(1, self.mind.t - t0))           # stopped: on a new line after the ^C
         if skipped:
             out += "\n  okunamayan: " + ", ".join(skipped[:10])
         for note in encoding_notes({name: f for name, f in found.items() if name not in skipped}):
             out += "\n  " + note
+        if stopped:
+            out += "\n  yarıda kesildi (Ctrl+C): okunduğu kadarı yaşandı ve geçmişte; dosyaların %d/%d tanesine " \
+                   "başlanmıştı" % (reached, len(files))
         return out
 
     def teach(self, path: str) -> str:
         """``!ogret``: watch every line of a file, "soz<TAB>karsilik" dialogues or plain sentences (told by someone,
-        imitated); the whole file is one entry of the history (``!unut`` takes it back). Reports what was lived."""
+        imitated); the whole file is one entry of the history (``!unut`` takes it back). Reports what was lived. Asked
+        to stop (Ctrl+C), it stops before the next line; what was watched until then stays lived and in the history."""
         if not os.path.exists(path):
             return "  böyle bir dosya yok: %s" % path
         if os.path.isdir(path):
@@ -836,13 +871,14 @@ class Session:
             f, found = open_text(path)
         except NotText as exc:
             return "  okunmadı: %s metin dosyası değil (%s)" % (os.path.basename(path), exc)
-        first_moment, said, n = self.mind.t + 1, [], 0
+        first_moment, said, n, stopped = self.mind.t + 1, [], 0, False
         try:
             with f:
                 for raw in f:
                     raw = raw.rstrip("\n")
                     if not raw.strip():
                         continue
+                    self.check()
                     if "\t" in raw:
                         first, answer = raw.split("\t", 1)
                         self.watch(first, answer)
@@ -851,13 +887,17 @@ class Session:
                         self.live(raw, IMITATED, keep=False)
                         said.append(raw)
                     n += 1
+        except Interrupted:
+            stopped = True
         finally:
             moments = list(range(first_moment, self.mind.t + 1))
             if moments:
                 self.remember(TAUGHT, "[öğretti] %s" % os.path.basename(path), moments, said)
-        out = "  %d satır izlendi, %d an" % (n, self.mind.t)
+        out = "%s  %d satır izlendi, %d an" % ("\n" if stopped else "", n, self.mind.t)
         for note in encoding_notes({os.path.basename(path): found}):
             out += "\n  " + note
+        if stopped:
+            out += "\n  yarıda kesildi (Ctrl+C): izlendiği kadarı yaşandı ve geçmişte"
         return out
 
     def observe(self, first: str, answer: str) -> None:
@@ -927,11 +967,17 @@ class Session:
         left = [m for m in moments if not taken_back(log, m)]
         before = "" if len(left) == len(moments) else \
             "; %d anı önceki !unut geri almıştı" % (len(moments) - len(left))
-        removed = 0
-        with _indices_rebuilt_once(self.mind.S):
-            for m in reversed(left):
-                report = self.mind.retract(m)
-                removed += sum(v for v in report.values() if isinstance(v, int))
+        removed, done = 0, 0
+        try:
+            with _indices_rebuilt_once(self.mind.S):
+                for m in reversed(left):
+                    self.check()                         # asked to stop: between two moments, each taken back whole
+                    report = self.mind.retract(m)
+                    removed += sum(v for v in report.values() if isinstance(v, int))
+                    done += 1
+        except Interrupted:
+            return "\n  '%s' yarıda kesildi (Ctrl+C): %d/%d anı geri alındı (%d kayıt); kalanını '!unut %d' geri alır" % (
+                entry.text, len(moments) - len(left) + done, len(moments), removed, number)
         self.history.remove(entry)
         if not removed and not before:
             return "  '%s': %d an geri alındı ama çekirdekte çıkarılacak kaydı yoktu" % (entry.text, len(moments))
@@ -973,9 +1019,14 @@ class Life:
     as it says it. Between your lines it lives on, one silent moment at a time: after a short silence it thinks
     (inner voice, kept as imagined); after a longer one it speaks first: its thought, when it was real enough, else
     a question about the word it most wants to know (T4); after a long one it sleeps, dreams and sorts its dreams.
-    Commands are handled in the same stream."""
+    Commands are handled in the same stream.
+
+    Ending it (Ctrl+C, !cik, the end of input) asks the session to stop: a long command stops at its next sentence,
+    line or moment (Session.check), its life ends, and only then is the mind saved; a life that cannot be stopped is
+    left unsaved (see main)."""
 
     STOP = object()
+    WAIT = 30.0                            # seconds the end of a session waits for a running command to stop
 
     def __init__(self, session, handle, lock, beat: float = 2.0, think_after: float = 10.0, speak_after: float = 45.0,
                  sleep_after: float = 600.0, real_enough: float = 0.75, pace: float = 0.05) -> None:
@@ -999,43 +1050,60 @@ class Life:
         time.sleep(self.pace)
 
     def start(self) -> None:
+        self.session.stop.clear()
         self.thread.start()
 
     def put(self, line: str) -> None:
         self.handled.clear()
         self.inbox.put(line)
 
-    def stop(self) -> None:
+    def stop(self, wait: float = None) -> bool:
+        """End its life: the session is asked to stop (a running command stops at its next sentence, line or moment),
+        then the thread is waited for, at most ``wait`` seconds (Life.WAIT; a second Ctrl+C ends the waiting). True
+        when the thread has ended: only then may the mind be saved, nothing changes it any more."""
+        self.session.stop.set()
         self.inbox.put(self.STOP)
-        self.thread.join(timeout=30)
+        deadline = time.time() + (self.WAIT if wait is None else wait)
+        try:
+            while self.thread.is_alive() and time.time() < deadline:
+                self.thread.join(0.1)
+        except KeyboardInterrupt:                        # asked again: no more waiting
+            pass
+        return not self.thread.is_alive()
 
     def _run(self) -> None:
         import queue
-        import time
-        while True:
-            try:
-                line = self.inbox.get(timeout=self.beat)
-            except queue.Empty:
-                line = None
-            if line is self.STOP:
-                break
-            if line is not None:
-                with self.lock:
-                    going_on = self.handle(line)
-                self.idle_since, self.thought, self.spoke, self.slept = time.time(), None, False, False
-                if going_on is False:
-                    self.done.set()
-                self.handled.set()
-                if going_on is False:
+        try:
+            while not self.session.stop.is_set():
+                try:
+                    line = self.inbox.get(timeout=self.beat)
+                except queue.Empty:
+                    line = None
+                if line is self.STOP:
                     break
-                continue
-            try:
-                self._silence(time.time() - self.idle_since)
-            except Exception as exc:  # its life goes on
-                print("\n  hata: %s\n> " % exc, end="", flush=True)
+                if line is not None:
+                    with self.lock:
+                        going_on = self.handle(line)
+                    self.idle_since, self.thought, self.spoke, self.slept = time.time(), None, False, False
+                    if going_on is False:
+                        self.done.set()
+                    self.handled.set()
+                    if going_on is False:
+                        break
+                    continue
+                try:
+                    self._silence(time.time() - self.idle_since)
+                except Interrupted:                      # asked to stop while it thought or slept
+                    break
+                except Exception as exc:  # its life goes on
+                    print("\n  hata: %s\n> " % exc, end="", flush=True)
+        finally:
+            self.handled.set()                           # nobody waits for a line its life will not handle
 
     def _silence(self, quiet: float) -> None:
         from .dusunce import sleep as dream_sleep, think, topic_of
+        if self.session.stop.is_set():
+            return
         with self.lock:
             self.session.mind.step([])                   # a silent moment of its life
         if self.thought is None and quiet >= self.think_after:
@@ -1183,14 +1251,22 @@ def main(argv=None) -> None:
 
     saved_at = [mind.t]
 
-    def keep(reason: str) -> None:
+    def keep(reason: str) -> bool:
+        """Save what was learned (the substance as it is now, without the ledger). A save that does not finish
+        leaves the mind saved before as it was (persist.save); it is said, and the session goes on to its end."""
         if not autosave or session.mind.t == saved_at[0]:   # nothing new was lived: nothing to keep
-            return
+            return True
+        started = time.time()
+        try:
+            export_portable(session.mind, keep_at)
+        except (Exception, KeyboardInterrupt) as exc:
+            print("  kaydedilemedi (%s): %s; en son kaydedilen zihin olduğu gibi duruyor" % (
+                reason, str(exc) or type(exc).__name__), flush=True)
+            return False
         saved_at[0] = session.mind.t
-        started = __import__("time").time()
-        export_portable(session.mind, keep_at)           # the substance as it is now; atomic
         print("  öğrendiklerim kaydedildi (%s): %s.zihin, %d an, %.0f sn" % (
-            reason, keep_at, session.mind.t, __import__("time").time() - started), flush=True)
+            reason, keep_at, session.mind.t, time.time() - started), flush=True)
+        return True
 
     print("Cevahir — %d an yaşamış bir zihin. %s" % (
         mind.t, "Yaz, konuşalım. Komutlar: !his !yas !dogru !yanlis !unut !cik" if chat else
@@ -1198,7 +1274,6 @@ def main(argv=None) -> None:
     if autosave:
         print("  (her sohbetin sonunda öğrendikleri kendiliğinden kaydedilir: %s.zihin)" % keep_at)
     lines = sys.stdin if not interactive else iter(lambda: input("> "), None)
-    import threading
     lock = threading.RLock()
     if interactive and not args.yasamsiz:              # online: it lives from now on, in its own time
         state = {"chat": chat, "turns": 0}
@@ -1223,26 +1298,38 @@ def main(argv=None) -> None:
                 if not line:
                     continue
                 life.put(line)
-                life.handled.wait()                      # its answer comes out before the next prompt
+                while not life.handled.wait(0.2):        # its answer comes out before the next prompt; Ctrl+C is
+                    pass                                 # heard while it waits (on every system)
                 if life.done.is_set():
                     break
         except (KeyboardInterrupt, EOFError):
-            print()
+            if life.handled.is_set():                    # a running command's report begins on a new line itself
+                print()
         finally:
-            life.stop()
-            keep("sohbet sonu")
-            drop_ledger(session.mind)                    # kept without it (or not kept: --kaydetme): dead weight
+            if life.stop():                              # its life has ended: nothing changes the mind any more
+                keep("sohbet sonu")
+                drop_ledger(session.mind)                # kept without it (or not kept: --kaydetme): dead weight
+            else:
+                print("\n  zihin durdurulamadı: bir komutu %g saniyede bitmedi. Bu oturumda yaşadıkları kaydedilmedi; "
+                      "en son kaydedilen zihin olduğu gibi duruyor." % Life.WAIT, flush=True)
+                abandon(session.mind)
         return
+    interrupt = _Interrupt(session)                      # Ctrl+C during a command: it stops between two moments
     try:
-        _session_loop(session, lines, chat, args, keep, lock, None)
+        with interrupt:
+            _session_loop(session, lines, chat, args, keep, lock, None, interrupt)
     except (KeyboardInterrupt, EOFError):
         print()
     finally:
-        keep("sohbet sonu")
-        drop_ledger(session.mind)                        # reached only when keeping did not fail
+        if interrupt.forced:                             # stopped at once, perhaps inside a moment: not kept
+            print("  komut beklenmeden kesildi; zihin bir anın ortasında kalmış olabilir, bu haliyle kaydedilmedi. "
+                  "En son kaydedilen zihin olduğu gibi duruyor.", flush=True)
+        else:
+            keep("sohbet sonu")
+        drop_ledger(session.mind)                        # kept without it, or not kept: dead weight either way
 
 
-def _session_loop(session, lines, chat, args, keep, lock=None, clock=None) -> None:
+def _session_loop(session, lines, chat, args, keep, lock=None, clock=None, interrupt=None) -> None:
     import contextlib
     turns_since_save = 0
     for line in lines:
@@ -1252,11 +1339,69 @@ def _session_loop(session, lines, chat, args, keep, lock=None, clock=None) -> No
         if clock is not None:
             clock.heard()
         with (lock if lock is not None else contextlib.nullcontext()):
-            turns_since_save = _one_line(session, line, chat, args, keep, turns_since_save)
+            if interrupt is not None:
+                interrupt.busy = True
+            try:
+                turns_since_save = _one_line(session, line, chat, args, keep, turns_since_save)
+            finally:
+                if interrupt is not None:
+                    interrupt.busy = False
             if turns_since_save is None:
                 break
             if isinstance(turns_since_save, tuple):         # the chat toggle came back with the new mode
                 chat, turns_since_save = turns_since_save
+        if session.stop.is_set():                        # asked to stop (Ctrl+C) during a command: the session ends
+            break
+
+
+class _Interrupt:
+    """Ctrl+C in a session without a life thread (--yasamsiz, or lines from a pipe or a file), where commands run in
+    the main thread. While a command runs, the first Ctrl+C asks it to stop at its next sentence, line or moment
+    (Session.check): the mind is not cut inside a moment, the session ends after that command, and the mind is kept.
+    A second Ctrl+C while it runs stops it at once: the mind may then be cut inside a moment (``forced``) and is not
+    saved. Between commands Ctrl+C ends the session at once, as before. A signal handler can be set only in the
+    main thread; anywhere else nothing changes."""
+
+    def __init__(self, session) -> None:
+        self.session, self.busy, self.forced, self.installed, self.previous = session, False, False, False, None
+
+    def __enter__(self) -> "_Interrupt":
+        if threading.current_thread() is threading.main_thread():
+            self.previous = signal.signal(signal.SIGINT, self.heard)
+            self.installed = True
+        return self
+
+    def __exit__(self, *exc) -> bool:
+        if self.installed:
+            signal.signal(signal.SIGINT, self.previous if self.previous is not None else signal.default_int_handler)
+            self.installed = False
+        return False
+
+    def heard(self, signum, frame) -> None:
+        if not self.busy:                                # between commands: the session ends at once
+            raise KeyboardInterrupt
+        if self.session.stop.is_set():                   # asked a second time: at once, wherever it is
+            self.forced = True
+            raise KeyboardInterrupt
+        self.session.stop.set()                          # the command stops at its next check
+
+
+def abandon(mind) -> None:
+    """When the life thread could not be stopped: the mind is not saved, and its session's ledger is not left on
+    disk. The ledger is pointed at the null device first, so what the thread still writes goes nowhere and the file is
+    not made again once deleted; then it is deleted. A save the thread itself may be making is left alone: the mind
+    saved before stays until that save is whole, and what an unfinished save leaves is removed by the next load or
+    save of that mind (persist._finish_save)."""
+    from .store import DiskLog
+    log = getattr(mind.S, "log", None)
+    if isinstance(log, DiskLog):
+        path, log.path = log.path, os.devnull
+        name = os.path.basename(path)
+        if (name.startswith("defter-") or ".live-" in name) and os.path.exists(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
 
 
 def _one_line(session, line, chat, args, keep, turns_since_save):
@@ -1371,7 +1516,7 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     print("  taşınabilir kopya: %s" % export_portable(session.mind, clean_path(rest)))
                 elif cmd in ("yukle", "yükle", "load"):
                     replaced = session.mind
-                    fresh = Session(load(clean_path(rest)), session.pieces)
+                    fresh = Session(load(clean_path(rest)), session.pieces, stop=session.stop)
                     session.__dict__.update(fresh.__dict__)     # the same session object: autosave follows it
                     drop_ledger(replaced)                       # the mind it replaces is gone, and its ledger
                     print("  yüklendi: %d an" % session.mind.t)
@@ -1392,6 +1537,8 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     turns_since_save = 0
             else:
                 session.live(line, TOLD)
+        except Interrupted:                              # a long command asked to stop (Ctrl+C) between two moments
+            print("\n  yarıda kesildi (Ctrl+C): o ana kadar yaşadıkları yaşandı")
         except Exception as exc:  # keep the session alive
             print("  hata: %s" % exc)
     return turns_since_save
