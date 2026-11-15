@@ -373,9 +373,9 @@ class Mind:
                              category))
         if context is not None:
             for pos, part in enumerate(parts):
+                others = sum(base.get(p, 0.0) for j, p in enumerate(parts) if j != pos) if cats.get(part) else 0.0
                 for category, e in cats.get(part, []):
-                    a_frame = (sum(base.get(p, 0.0) for j, p in enumerate(parts) if j != pos)
-                               + base.get(part, 0.0) * (2.0 * e - 1.0)) / len(parts)
+                    a_frame = (others + base.get(part, 0.0) * (2.0 * e - 1.0)) / len(parts)
                     if cfg.bind_repeats:
                         if part in parts[:pos]:
                             continue                       # the slot of this unit was built at its first position
@@ -501,7 +501,8 @@ class Mind:
         conflict = conflict_of(self, self.context) if self.context is not None else 0.0
         self.felt = {"surprise": surprise, "relief": relief / (relief + k),
                      "load": min(1.0, S.n_ties / float(self.cfg.body_ties)),
-                     "conflict": conflict / (conflict + k), "relief_raw": relief, "drive": total_drive(self)}
+                     "conflict": conflict / (conflict + k), "relief_raw": relief,
+                     "drive": self.felt.get("drive", 0.0) if self.knob["theta"] >= 1e8 else total_drive(self)}
         prov = ACTED if self.act_hope or self.hoping is not None else SENSED
         for name in FEELINGS:
             self.pending.append(Event("feel", name, prov, self.felt[name]))
