@@ -1,15 +1,23 @@
 # -*- coding: utf-8 -*-
 """Living with a Zihin mind from the terminal.
 
-    python -m zihin [--load PATH] [--variant members]
+    python -m zihin [--load PATH] [--variant members] [--dil tr|diger]
+
+The mind of this computer is kept in $CEVAHIR_HOME/zihin/cevahir.zihin (default ~/.cevahir/zihin; --kayit elsewhere).
+A session's experience ledger (what makes !unut exact) is written next to it as defter-<ms>-<pid>.log and deleted at a
+clean exit, once the mind has been saved without it (and at exit with --kaydetme); --defter-yok keeps none. --dil sets
+how a new mind's text is lower-cased: tr (default, Turkish: I -> ı, İ -> i) or diger (plain lower case); a mind keeps
+the convention it was raised with.
 
 Every plain line is something you TELL the mind (provenance "told"), one word per moment, then a silent moment.
 Commands (Turkish, with English aliases):
     !gordum <metin>      / !saw     the same, as something the mind SENSES itself (provenance "sensed")
     !izle <soz> || <karsilik> / !watch  the mind WATCHES two others talk (provenance "imitated"): how one answers
     !ogret <dosya>       / !teach   watch every line of a file: "soz<TAB>karsilik" dialogues or plain sentences
-    !oku <dosya|klasor>  / !read    watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
-                                    .pdf with pypdf): sentences of documents as speech of others (imitated)
+    !oku <dosya|klasor> [n] / !read watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
+                                    .pdf with pypdf): sentences of documents as speech of others (imitated), at most n
+                                    of each. Paths: ~ is expanded, one pair of quotes removed, spaces allowed; text files
+                                    are read as UTF-8 (with or without a byte order mark), else as cp1254 (said so)
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
     !kim <ad>            / !who     who is talking now (perceived at the start of every utterance)
     !gor <resim>         / !see     show an image with your next utterance (it is seen at its start), e.g.
@@ -28,13 +36,17 @@ Commands (Turkish, with English aliases):
     !kendini_gelistir [n] / !improve  the mind picks n topics it wants to know (high drive) and researches them; it
                                     measures what each way of reading gave it and chooses its way by that
     !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
-                                    the path that led to it is remembered and weighed next time, L5)
+                                    the path that led to it is remembered and weighed next time, L5). The answer stays
+                                    open for it until the feedback or the next utterance (yours, or the mind's own),
+                                    however long the online life ran in between; "not edildi" only when it was learned
 Turn taking (while you speak the mind listens, then it may speak until it falls silent) is set by the session, not
 learned yet: during your words the act threshold is raised, afterwards it is the mind's own.
     ?<metin>             / ?        what does the mind expect after this beginning (nothing is lived; a clone is asked)
     !neden <metin> => <kelime> / !why   white-box belief: own and effective evidence, per source
-    !gecmis              / !history what you have told, with numbers
-    !unut <no>           / !forget  retract that utterance exactly (its evidence is removed from the core)
+    !gecmis              / !history what was lived in this session, with numbers: your lines, the mind's answers,
+                                    files read (!oku, one entry per file) or taught (!ogret), watched dialogues (!izle)
+    !unut <no>           / !forget  retract that entry exactly (its evidence is removed from the core, every moment
+                                    through the ledger); not with --defter-yok
     !boyut               / !size    units, ties, bytes, moments
     !yas                 / !age     developmental profile: moments and nights lived, words known, concepts, phrases
     !kaydet <yol>        / !save    save the mind (with integrity manifest)
@@ -58,17 +70,42 @@ from .persist import export_portable, load, save
 from .store import W_NEG, W_POS
 
 CHANNEL = "text"
-def _log_path() -> str:
-    import os
+
+
+def home_folder() -> str:
+    """The folder of this computer's mind: $CEVAHIR_HOME/zihin (default ~/.cevahir/zihin). The ledgers of its sessions
+    are kept there too, never in the working folder."""
+    home = os.environ.get("CEVAHIR_HOME") or os.path.join(os.path.expanduser("~"), ".cevahir")
+    return os.path.join(home, "zihin")
+
+
+_ISSUED = set()                         # ledger paths given out in this process (two minds never share one)
+
+
+def _log_path(folder: str = None) -> str:
+    """A new session ledger (the experience log that makes !unut exact): ``folder``/defter-<ms>-<pid>.log, by default
+    in the home folder next to the kept mind. The program deletes it at a clean exit (main): the kept mind is saved
+    without it."""
     import time
-    os.makedirs("zihin_logs", exist_ok=True)
-    return os.path.join("zihin_logs", "defter-%d.log" % int(time.time() * 1000))
+    folder = folder or home_folder()
+    os.makedirs(folder, exist_ok=True)
+    ms = int(time.time() * 1000)
+    while True:
+        path = os.path.join(folder, "defter-%d-%d.log" % (ms, os.getpid()))
+        if path not in _ISSUED and not os.path.exists(path):
+            _ISSUED.add(path)
+            return path
+        ms += 1
 
 
-VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True,
-                                               neg_floor=1.0 / 14, backoff=True, resemblance=True, race=True,
-                                               situations=True, explore=True, log_path=_log_path()),
-            "members": lambda: Config.changed(support="members"), "changed": Config.changed}
+VARIANTS = {"speaking": lambda folder=None: Config.changed(support="members", bind_repeats=True, next_only_present=True,
+                                                          neg_floor=1.0 / 14, backoff=True, resemblance=True,
+                                                          race=True, situations=True, explore=True,
+                                                          log_path=_log_path(folder)),
+            "members": lambda folder=None: Config.changed(support="members"),
+            "changed": lambda folder=None: Config.changed()}          # folder: where the session ledger is kept
+
+DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
 
 def lower_tr(text: str) -> str:
@@ -76,9 +113,56 @@ def lower_tr(text: str) -> str:
     return text.replace("I", "ı").replace("İ", "i").lower()
 
 
-def words(text: str) -> List[str]:
-    """Text channel adapter: words and punctuation as symbols, in Turkish lower case."""
-    return re.findall(r"\w+|[^\w\s]", lower_tr(text), flags=re.UNICODE)
+def lower(text: str, dil: str = "tr") -> str:
+    """Lower case by a mind's language convention: "tr" Turkish rules (lower_tr), "diger" plain str.lower."""
+    return text.lower() if dil == "diger" else lower_tr(text)
+
+
+def words(text: str, dil: str = "tr") -> List[str]:
+    """Text channel adapter: words and punctuation as symbols, lower-cased by the mind's convention (default
+    Turkish)."""
+    return re.findall(r"\w+|[^\w\s]", lower(text, dil), flags=re.UNICODE)
+
+
+def clean_path(raw: str) -> str:
+    """A path as typed: surrounding spaces and one pair of surrounding quotes removed, ~ expanded (spaces inside
+    are part of the path)."""
+    path = raw.strip()
+    if len(path) >= 2 and path[0] == path[-1] and path[0] in "\"'":
+        path = path[1:-1]
+    return os.path.expanduser(path)
+
+
+def path_and_cap(rest: str):
+    """The argument of !oku: a path (see clean_path) and an optional last number, the most sentences to read. When
+    the whole argument names an existing file or folder ("notlar 2024") it is the path, with no number."""
+    whole = clean_path(rest)
+    head, _, tail = rest.strip().rpartition(" ")
+    if not os.path.exists(whole) and tail.isdigit() and head.strip() and os.path.exists(clean_path(head)):
+        return clean_path(head), int(tail)
+    return whole, 0
+
+
+def text_encoding(path: str) -> str:
+    """How a text file is read: "utf-8-sig" (UTF-8; a byte order mark is not read as a symbol) when the whole file
+    decodes as UTF-8, else "cp1254" (Turkish ANSI, as Excel and Notepad save on Turkish Windows). The file is decoded
+    block by block once before anything is lived, so a file is never half taught in one encoding."""
+    import codecs
+    decoder = codecs.getincrementaldecoder("utf-8-sig")()
+    try:
+        with open(path, "rb") as f:
+            for block in iter(lambda: f.read(1 << 20), b""):
+                decoder.decode(block)
+        decoder.decode(b"", final=True)
+    except UnicodeDecodeError:
+        return "cp1254"
+    return "utf-8-sig"
+
+
+def open_text(path: str):
+    """A text file opened for reading in its encoding (text_encoding); returns (file, encoding)."""
+    encoding = text_encoding(path)
+    return open(path, encoding=encoding, errors="replace"), encoding
 
 
 ASK_KEYS = ("soru", "question", "input", "prompt", "söz", "soz")
@@ -101,22 +185,28 @@ def dialogues_of(data) -> List[tuple]:
     return pairs
 
 
-def sentences(text: str) -> List[str]:
+def sentences(text: str, dil: str = "tr") -> List[str]:
     """Split a document into sentences (and lines), keeping only those with at least two words."""
     parts = re.split(r"(?<=[.!?…])\s+|\n+", text)
-    return [p.strip() for p in parts if len(words(p)) >= 2]
+    return [p.strip() for p in parts if len(words(p, dil)) >= 2]
 
 
 CODE = (".py", ".js", ".ts", ".java", ".c", ".h", ".cpp", ".cs", ".go", ".rs", ".ps1", ".sh", ".yml", ".yaml",
         ".toml", ".ini", ".cfg", ".html", ".css", ".sql")      # source code is read as a language too, line by line
 
 
-def read_document(path: str) -> str:
-    """Plain text of a document. .docx needs python-docx, .pdf needs pypdf (only if such files are present)."""
+def read_document(path: str, encodings: list = None) -> str:
+    """Plain text of a document. .docx needs python-docx, .pdf needs pypdf (only if such files are present). Text
+    files are read as UTF-8, else as cp1254 (text_encoding); the encoding a text file was read with is appended to
+    ``encodings`` when given."""
     low = path.lower()
     if low.endswith((".txt", ".md", ".tsv", ".csv") + CODE):
-        with open(path, encoding="utf-8", errors="replace") as f:
-            return f.read()
+        f, encoding = open_text(path)
+        with f:
+            text = f.read()
+        if encodings is not None:
+            encodings.append(encoding)
+        return text
     if low.endswith(".docx"):
         import docx  # python-docx
         return "\n".join(p.text for p in docx.Document(path).paragraphs)
@@ -164,10 +254,41 @@ VALUE = "deger"
 VALUE_SIGN = {(VALUE, "iyi"): 1.0, (VALUE, "kötü"): -1.0}     # the adapter defines what is good and bad
 
 
+DAY = 12                                # the recent utterances that are "the day" (dusunce.day_residue)
+
+
+class _indices_rebuilt_once:
+    """Retracting many moments with the substance's indices rebuilt once, after the last one.
+
+    ``Substance.retract`` rebuilds every index from the tensors after each moment that removed a tie or a unit, an
+    O(ties) pass; for the 1782 moments of a read guide that was 269 s of a 270 s ``!unut``. Nothing in a retraction
+    reads the indices (only the ledger entry and the tensors) and the rebuild is a function of the tensors alone, so
+    one rebuild at the end gives the same tensors and the same indices as one per moment (pinned by a test). A
+    ``retract_many`` in store.py would say this directly; store.py is not changed here."""
+
+    def __init__(self, substance) -> None:
+        self.S, self.wanted = substance, False
+
+    def __enter__(self):
+        def later() -> None:
+            self.wanted = True
+        self.S.rebuild_indices = later
+        return self
+
+    def __exit__(self, *exc) -> None:
+        del self.S.rebuild_indices                       # the class's own method again
+        if self.wanted:
+            self.S.rebuild_indices()
+
+
 class Session:
     def __init__(self, mind: Mind, pieces=None) -> None:
         self.mind = mind
+        self.dil = getattr(mind, "dil", "tr")  # the mind's language convention (how its text is lower-cased)
         self.history: List[tuple] = []        # (number, text, moments)
+        self.numbered = 0                     # the last number given to a history entry (numbers are never reused)
+        self.lines: Dict[int, List[str]] = {}  # number -> the last lines of what was read, taught or watched
+        self.answered = None                  # the path (mind.trace) of the last answer, kept for its feedback
         self.pieces = pieces                  # optional subword tokenizer: pieces of each word as facets
         if pieces is not None:
             mind.add_channel(FACETS, "facet")
@@ -200,6 +321,32 @@ class Session:
         self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
         self.open_turn = False                # the mind has just answered; feedback may still come
 
+    def words(self, text: str) -> List[str]:
+        """The text adapter with this mind's language convention: everything the session reads and hears."""
+        return words(text, self.dil)
+
+    def lower(self, text: str) -> str:
+        return lower(text, self.dil)
+
+    def remember(self, text: str, moments: List[int], said: List[str] = ()) -> int:
+        """A new entry of the history: what was lived, with its moments (``!unut`` retracts them exactly); for what
+        was read, taught or watched also its last lines (they are the day's utterances). Returns its number."""
+        self.numbered += 1
+        self.history.append((self.numbered, text, moments))
+        if said:
+            self.lines[self.numbered] = list(said[-DAY:])
+        return self.numbered
+
+    def recent_utterances(self, n: int = DAY) -> List[str]:
+        """The texts of the last ``n`` utterances lived in this session, oldest first: a typed line is one, an entry
+        of what was read, taught or watched gives its last lines."""
+        out: List[str] = []
+        for number, text, _ in reversed(self.history):
+            out.extend(reversed(self.lines.get(number) or [text]))
+            if len(out) >= n:
+                break
+        return list(reversed(out[:n]))
+
     def events(self, symbol: str, prov: int, speaker: str = None) -> List[Event]:
         """One word as an event on the text channel, with its subword pieces and its speaker as facets."""
         out = [Event(CHANNEL, symbol, prov)]
@@ -211,13 +358,15 @@ class Session:
                 out += [Event(FACETS, p.strip(), prov) for p in parts]
         return out
 
-    def live(self, text: str, prov: int) -> None:
-        """Hear (told) or sense an utterance while listening: the mind does not speak into it."""
+    def live(self, text: str, prov: int, keep: bool = True) -> None:
+        """Hear (told) or sense an utterance while listening: the mind does not speak into it. ``keep``: the utterance
+        is an entry of the history (not when it is part of a larger one, a taught file)."""
         start = self.mind.t + 1
         self.listen(text, prov, speaker=self.partner)
         self.end_of_turn(prov, tone=self.tone(text))
         self.mind.step([])
-        self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
+        if keep:
+            self.remember(text, list(range(start, self.mind.t + 1)))
 
     def listen(self, text: str, prov: int, speaker: str = None) -> None:
         """Hear an utterance while not speaking (turn taking set by the session). ``speaker``: who says it, perceived
@@ -242,7 +391,7 @@ class Session:
 
     def body(self, text: str) -> List[str]:
         """The words of an utterance without its closing punctuation (that is perceived with the end, see tone)."""
-        symbols = words(text)
+        symbols = self.words(text)
         if self.turns and self.tones:
             while symbols and symbols[-1] in FINAL:
                 symbols = symbols[:-1]
@@ -287,7 +436,7 @@ class Session:
         """
         self.close_turn()
         start = self.mind.t + 1
-        symbols = words(text)
+        symbols = self.words(text)
         if not symbols:
             return "(sessiz)"
         before = self.known_before(text) if self.curious else {}   # what it knew of these words before hearing them
@@ -328,8 +477,9 @@ class Session:
             for w in asked:
                 if say is not None:
                     say(w)
-        self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
+        self.remember(text, list(range(start, self.mind.t + 1)))
         self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
+        self.answered = list(self.mind.trace)            # ... and the path that led to the answer is kept for them
         return " ".join(said) if said else "(sessiz)"
 
     def associations(self, text: str, tries: int = 2) -> List[tuple]:
@@ -425,77 +575,166 @@ class Session:
         return [word, "?"]
 
     def close_turn(self) -> None:
+        self.answered = None
         if self.open_turn:
             self.mind.step([])
             self.open_turn = False
 
     def feedback(self, good: bool) -> str:
-        """How the mind's last answer was received: a value event at the end of the same episode."""
+        """How the mind's last answer was received: a value event at the end of the same episode (L5: every step of
+        the path that led to the answer gets evidence toward the value, learn.learn_value).
+
+        The path is the answer's episode trace, kept from the answer until the feedback or the next utterance and
+        given back to the mind for the moment the value arrives. The online life lives silent moments meanwhile (and
+        may think or sleep), and a silent moment ends an episode (mind.trace is emptied); typed at once, the kept path
+        is the trace itself. What the mind lives is the same either way: the same moments, the value reaching the path
+        it would reach had it been typed at once. Says "not edildi" only when the value evidence grew."""
         if not self.open_turn:
             return "  geri bildirim, zihnin cevabından hemen sonra verilmeli"
-        self.mind.step([Event(VALUE, "iyi" if good else "kötü", SENSED)])
+        label = "iyi" if good else "kötü"
+        spoken_over = self.answered is None              # the mind spoke on its own after its answer
+        path = list(self.answered or [])
+        self.answered = None
+        before = self._path_value(path, label)
+        self.mind.trace = list(path)
+        self.mind.step([Event(VALUE, label, SENSED)])
         self.mind.step([])
         self.open_turn = False
-        return "  not edildi (%s)" % ("iyi" if good else "kötü")
+        if path and self._path_value(path, label) > before:
+            return "  not edildi (%s)" % label
+        if spoken_over:
+            return "  öğrenilmedi (%s): zihin cevabından sonra kendiliğinden konuştu; geri bildirim o cevaba artık " \
+                   "ulaşmıyor" % label
+        return "  öğrenilmedi (%s): bu cevap zihinde bir yol bırakmadı (soruyla, sesli düşünceyle ya da sessizlikle " \
+               "bitti); geri bildirim bir şey öğretmedi" % label
+
+    def _path_value(self, path: List[int], label: str) -> float:
+        """The positive evidence the steps of a path hold toward a value ("later in the episode", EXPECT lag 2)."""
+        from .store import EXPECT
+        S, value = self.mind.S, self.mind.unit_of(VALUE, label)
+        if value < 0:
+            return 0.0
+        ties = (S.find_tie(unit, value, EXPECT, 2) for unit in dict.fromkeys(path))
+        return sum(float(S.w1(W_POS, tie).sum()) for tie in ties if tie >= 0)
 
     def read_path(self, path: str, cap: int = 0) -> str:
-        """Watch the texts of a file or of every supported file under a folder; report what was lived."""
-        import os
+        """Watch the texts of a file or of every supported file under a folder; report what was lived. Each file read
+        enters the history with the moments it lived (so ``!unut`` takes it back) and its last lines."""
         import time
+        if not os.path.exists(path):
+            return "  böyle bir dosya ya da klasör yok: %s" % path
         files = [path] if os.path.isfile(path) else sorted(
             os.path.join(root, name) for root, _, names in os.walk(path) for name in names)
         start, lived, skipped, t0 = time.time(), 0, [], self.mind.t
+        recoded = []                                     # files that are not UTF-8, read as cp1254
         for name in files:
+            first_moment, said = self.mind.t + 1, []
             try:
-                if name.lower().endswith(".json"):
-                    import json
-                    with open(name, encoding="utf-8") as f:
-                        pairs = dialogues_of(json.load(f))
-                    for first, answer in pairs[:cap] if cap else pairs:
-                        self.watch(first, answer)
-                        lived += 1
-                    if not pairs:
-                        skipped.append(os.path.basename(name))
+                try:
+                    if name.lower().endswith(".json"):
+                        import json
+                        f, encoding = open_text(name)
+                        with f:
+                            pairs = dialogues_of(json.load(f))
+                        if encoding == "cp1254":
+                            recoded.append(os.path.basename(name))
+                        for first, answer in pairs[:cap] if cap else pairs:
+                            self.watch(first, answer)
+                            said += [first, answer]
+                            lived += 1
+                        if not pairs:
+                            skipped.append(os.path.basename(name))
+                        continue
+                    if name.lower().endswith(".tsv"):
+                        f, encoding = open_text(name)
+                        if encoding == "cp1254":
+                            recoded.append(os.path.basename(name))
+                        with f:
+                            watched = 0
+                            for raw in f:
+                                if cap and watched >= cap:
+                                    break
+                                if "\t" in raw:
+                                    first, answer = raw.rstrip("\n").split("\t", 1)
+                                    self.watch(first, answer)
+                                    said += [first, answer]
+                                    lived += 1
+                                    watched += 1
+                        continue
+                    encodings = []
+                    text = read_document(name, encodings)
+                    if "cp1254" in encodings:
+                        recoded.append(os.path.basename(name))
+                except Exception as exc:
+                    skipped.append("%s (%s)" % (os.path.basename(name), exc))
                     continue
-                if name.lower().endswith(".tsv"):
-                    with open(name, encoding="utf-8", errors="replace") as f:
-                        watched = 0
-                        for raw in f:
-                            if cap and watched >= cap:
-                                break
-                            if "\t" in raw:
-                                first, answer = raw.rstrip("\n").split("\t", 1)
-                                self.watch(first, answer)
-                                lived += 1
-                                watched += 1
+                if not text:
+                    skipped.append(os.path.basename(name))
                     continue
-                text = read_document(name)
-            except Exception as exc:
-                skipped.append("%s (%s)" % (os.path.basename(name), exc))
-                continue
-            if not text:
-                skipped.append(os.path.basename(name))
-                continue
-            lines = [ln.strip() for ln in text.splitlines() if len(words(ln)) >= 2] if name.lower().endswith(CODE) \
-                else sentences(text)                     # code: each line is an utterance of that language
-            for i, sentence in enumerate(lines):
-                if cap and i >= cap:
-                    break
-                self.listen(sentence, IMITATED)
-                self.mind.step([])
-                lived += 1
-            self.history.append((len(self.history) + 1, "[okudu] %s" % os.path.basename(name), []))
+                lines = [ln.strip() for ln in text.splitlines() if len(self.words(ln)) >= 2] \
+                    if name.lower().endswith(CODE) else sentences(text, self.dil)   # code: each line an utterance
+                for i, sentence in enumerate(lines):
+                    if cap and i >= cap:
+                        break
+                    self.listen(sentence, IMITATED)
+                    self.mind.step([])
+                    said.append(sentence)
+                    lived += 1
+            finally:                                     # what was lived of this file is one entry of the history
+                moments = list(range(first_moment, self.mind.t + 1))
+                if moments:
+                    self.remember("[okudu] %s" % os.path.basename(name), moments, said)
         took = time.time() - start
         out = "  %d dosya, %d cümle/diyalog, %d an, %.0f sn (%.1f ms/an)" % (
             len(files) - len(skipped), lived, self.mind.t, took, 1000 * took / max(1, self.mind.t - t0))
         if skipped:
             out += "\n  okunamayan: " + ", ".join(skipped[:10])
+        if recoded:
+            out += "\n  UTF-8 değil, cp1254 (Türkçe ANSI) olarak okundu: " + ", ".join(recoded[:10])
         return out
+
+    def teach(self, path: str) -> str:
+        """``!ogret``: watch every line of a file, "soz<TAB>karsilik" dialogues or plain sentences (told by someone,
+        imitated); the whole file is one entry of the history (``!unut`` takes it back). Reports what was lived."""
+        if not os.path.exists(path):
+            return "  böyle bir dosya yok: %s" % path
+        if os.path.isdir(path):
+            return "  bu bir klasör: %s (klasörler !oku ile okunur)" % path
+        f, encoding = open_text(path)
+        first_moment, said, n = self.mind.t + 1, [], 0
+        try:
+            with f:
+                for raw in f:
+                    raw = raw.rstrip("\n")
+                    if not raw.strip():
+                        continue
+                    if "\t" in raw:
+                        first, answer = raw.split("\t", 1)
+                        self.watch(first, answer)
+                        said += [first, answer]
+                    else:
+                        self.live(raw, IMITATED, keep=False)
+                        said.append(raw)
+                    n += 1
+        finally:
+            moments = list(range(first_moment, self.mind.t + 1))
+            if moments:
+                self.remember("[öğretti] %s" % os.path.basename(path), moments, said)
+        out = "  %d satır izlendi, %d an" % (n, self.mind.t)
+        if encoding == "cp1254":
+            out += "\n  UTF-8 değil, cp1254 (Türkçe ANSI) olarak okundu: %s" % os.path.basename(path)
+        return out
+
+    def observe(self, first: str, answer: str) -> None:
+        """``!izle``: watch two others talk (see watch); the dialogue is one entry of the history."""
+        start = self.mind.t + 1
+        self.watch(first, answer)
+        self.remember("[izledi] %s || %s" % (first, answer), list(range(start, self.mind.t + 1)), [first, answer])
 
     def ask(self, text: str, top: int = 5) -> str:
         twin = self.mind.clone()
         twin.knob["theta"] = 1e9                         # listening: the clone does not speak into the question
-        for symbol in words(text):
+        for symbol in self.words(text):
             twin.step(self.events(symbol, TOLD))
         expected = sorted(twin.expected(CHANNEL, "specific").items(), key=lambda kv: -kv[1])[:top]
         drive = read.total_drive(twin)
@@ -514,7 +753,7 @@ class Session:
     def why(self, text: str, value: str) -> str:
         twin = self.mind.clone()
         twin.knob["theta"] = 1e9                         # listening: the clone does not speak into the question
-        for symbol in words(text):
+        for symbol in self.words(text):
             twin.step(self.events(symbol, TOLD))
         if twin.context is None or not twin.ch.has(CHANNEL):
             return "  bağlam yok"
@@ -535,14 +774,28 @@ class Session:
         return "\n".join(out)
 
     def forget(self, number: int) -> str:
+        """Retract an entry of the history exactly: each of its moments through the ledger, the latest first (a
+        typed line, an answer, a file read or taught, a watched dialogue)."""
         for entry in self.history:
-            if entry[0] == number:
-                removed = 0
-                for m in reversed(entry[2]):
+            if entry[0] != number:
+                continue
+            moments = entry[2]
+            if not moments:
+                return "  '%s' geri alınamaz: yaşanmış anı kayıtlı değil" % entry[1]
+            log = self.mind.S.log
+            if any(m not in log for m in moments):
+                return "  '%s' geri alınamaz: bu zihin deneyim defteri tutmuyor (--defter-yok ya da defteri olmadan " \
+                       "yüklendi)" % entry[1]
+            removed = 0
+            with _indices_rebuilt_once(self.mind.S):
+                for m in reversed(moments):
                     report = self.mind.retract(m)
                     removed += sum(v for v in report.values() if isinstance(v, int))
-                self.history.remove(entry)
-                return "  '%s' geri alındı (kanıtı çekirdekten çıkarıldı; %d kayıt)" % (entry[1], removed)
+            self.history.remove(entry)
+            self.lines.pop(number, None)
+            if not removed:
+                return "  '%s': %d an geri alındı ama çekirdekte çıkarılacak kaydı yoktu" % (entry[1], len(moments))
+            return "  '%s' geri alındı (kanıtı çekirdekten çıkarıldı; %d kayıt)" % (entry[1], removed)
         return "  böyle bir numara yok"
 
 
@@ -663,6 +916,7 @@ class Life:
             if said:
                 print("\n  zihin (kendiliğinden):", end="", flush=True)
                 with self.lock:
+                    self.session.answered = None         # its own utterance: feedback no longer reaches the answer
                     for w in said:
                         self.session.mind.step([Event(CHANNEL, w, ACTED)])
                         self.say(w)
@@ -698,11 +952,25 @@ def pieces_for(mind, choice: str = None):
 
 def home_mind() -> str:
     """Where the one mind of this computer lives: $CEVAHIR_HOME/zihin/cevahir (default ~/.cevahir)."""
-    import os
-    home = os.environ.get("CEVAHIR_HOME") or os.path.join(os.path.expanduser("~"), ".cevahir")
-    folder = os.path.join(home, "zihin")
+    folder = home_folder()
     os.makedirs(folder, exist_ok=True)
     return os.path.join(folder, "cevahir")
+
+
+def ledger_of(mind) -> str:
+    """The file of a mind's experience ledger (None when it keeps none, or keeps it in memory)."""
+    from .store import DiskLog
+    log = getattr(mind.S, "log", None)
+    return log.path if isinstance(log, DiskLog) else None
+
+
+def drop_ledger(mind) -> None:
+    """Delete the ledger file of a mind's session: one this program made for it (defter-*.log, or the live copy a
+    load makes of a saved ledger, *.live-*), never a saved mind's own ledger."""
+    path = ledger_of(mind)
+    name = os.path.basename(path) if path else ""
+    if (name.startswith("defter-") or ".live-" in name) and os.path.exists(path):
+        os.remove(path)
 
 
 def _exists(path: str) -> bool:
@@ -738,20 +1006,28 @@ def main(argv=None) -> None:
                                     "they multiply the ties per moment), 'yok' (none), or a ByteLevelBPE json")
     ap.add_argument("--defter-yok", dest="no_ledger", action="store_true",
                     help="no experience ledger: smaller and faster, but !unut cannot retract")
+    ap.add_argument("--dil", choices=DIL, help="how a NEW mind's text is lower-cased: 'tr' (default; Turkish rules, "
+                                               "I -> ı, İ -> i) or 'diger' (plain lower case, for other languages); "
+                                               "a mind keeps the convention it was raised with")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
     args = ap.parse_args(argv)
     keep_at = args.kayit or home_mind()
+    ledgers = os.path.dirname(os.path.abspath(keep_at))   # session ledgers live next to the kept mind
     source = None if args.yeni else (args.load or (keep_at if _exists(keep_at) else None))
     if source:
         print("zihin yükleniyor: %s ..." % source, flush=True)
-        mind = load(source, ledger=not args.no_ledger)
+        mind = load(source, live_log=_log_path(ledgers), ledger=not args.no_ledger)   # a saved ledger: copied there
         if not args.no_ledger and not mind.S.keep_log:      # a mind saved without a ledger: keep one from now on
             from .store import DiskLog
-            mind.cfg.keep_log, mind.cfg.log_path = True, _log_path()
+            mind.cfg.keep_log, mind.cfg.log_path = True, _log_path(ledgers)
             mind.S.keep_log = True
             mind.S.log = DiskLog(mind.cfg.log_path, keep=max(4, mind.cfg.undo_depth + 2))
+        if args.dil and args.dil != getattr(mind, "dil", "tr"):
+            print("  (bu zihin '%s' harf kuralıyla büyüdü ve onu korur; --dil %s yeni bir zihin içindir)" % (
+                getattr(mind, "dil", "tr"), args.dil))
     else:
-        mind = Mind(VARIANTS[args.variant]())
+        mind = Mind(VARIANTS[args.variant](ledgers))
+        mind.dil = args.dil or "tr"                         # kept with the mind (persist: minds saved before are tr)
         if args.no_ledger:
             mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path = {}, False, False, None
         mind.add_channel(CHANNEL, "act")
@@ -761,7 +1037,7 @@ def main(argv=None) -> None:
     if not name and interactive:
         name = input("Seninle konuşan kim? (adını yaz, boş bırakırsan 'biri') > ").strip()
     if name:
-        session.partner = lower_tr(name).split()[0]
+        session.partner = session.lower(name).split()[0]
     chat = interactive                                   # at a terminal you talk to it right away
     autosave = not args.kaydetme
     turns_since_save = 0
@@ -816,6 +1092,7 @@ def main(argv=None) -> None:
         finally:
             life.stop()
             keep("sohbet sonu")
+            drop_ledger(session.mind)                    # kept without it (or not kept: --kaydetme): dead weight
         return
     try:
         _session_loop(session, lines, chat, args, keep, lock, None)
@@ -823,6 +1100,7 @@ def main(argv=None) -> None:
         print()
     finally:
         keep("sohbet sonu")
+        drop_ledger(session.mind)                        # reached only when keeping did not fail
 
 
 def _session_loop(session, lines, chat, args, keep, lock=None, clock=None) -> None:
@@ -859,27 +1137,12 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     session.live(rest, SENSED)
                 elif cmd in ("izle", "watch"):
                     first, _, answer = rest.partition("||")
-                    session.watch(first.strip(), answer.strip())
+                    session.observe(first.strip(), answer.strip())
                 elif cmd in ("ogret", "teach"):
-                    n = 0
-                    with open(rest.strip(), encoding="utf-8") as f:
-                        for raw in f:
-                            raw = raw.rstrip("\n")
-                            if not raw.strip():
-                                continue
-                            if "\t" in raw:
-                                first, answer = raw.split("\t", 1)
-                                session.watch(first, answer)
-                            else:
-                                session.live(raw, IMITATED)
-                            n += 1
-                    print("  %d satır izlendi, %d an" % (n, session.mind.t))
+                    print(session.teach(clean_path(rest)))
                 elif cmd in ("oku", "read"):
-                    target, _, cap = rest.strip().rpartition(" ")
-                    if cap.isdigit() and target:
-                        print(session.read_path(target.strip(), int(cap)))
-                    else:
-                        print(session.read_path(rest.strip()))
+                    target, cap = path_and_cap(rest)
+                    print(session.read_path(target, cap))
                 elif cmd in ("dogru", "doğru", "good", "iyi"):
                     print(session.feedback(True))
                 elif cmd in ("yanlis", "yanlış", "bad", "kotu", "kötü"):
@@ -940,7 +1203,7 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                                 mate, " ".join(inferred), certainty))
                 elif cmd in ("kim", "who"):
                     if rest.strip():
-                        session.partner = lower_tr(rest.strip()).split()[0]
+                        session.partner = session.lower(rest.strip()).split()[0]
                     print("  konuşan: %s" % session.partner)
                 elif cmd in ("uyu", "sleep"):
                     from .dusunce import sleep as dream_sleep
@@ -958,8 +1221,10 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                 elif cmd in ("tasinabilir", "portable"):
                     print("  taşınabilir kopya: %s" % export_portable(session.mind, rest.strip()))
                 elif cmd in ("yukle", "load"):
+                    replaced = session.mind
                     fresh = Session(load(rest.strip()), session.pieces)
                     session.__dict__.update(fresh.__dict__)     # the same session object: autosave follows it
+                    drop_ledger(replaced)                       # the mind it replaces is gone, and its ledger
                     print("  yüklendi: %d an" % session.mind.t)
                 else:
                     print("  bilinmeyen komut")

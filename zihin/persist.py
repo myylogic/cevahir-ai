@@ -103,8 +103,8 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
     if manifest and mind.S.digest() != manifest["substance_digest"]:
         raise ValueError("substance digest does not match the manifest")
     for name, default in (("trace", list), ("value_sign", dict), ("dreams", list), ("unknown", float),
-                          ("voice", dict)):                         # minds saved before these existed
-        if not hasattr(mind, name):
+                          ("voice", dict), ("dil", lambda: "tr")):  # minds saved before these existed (their text
+        if not hasattr(mind, name):                                 # was lower-cased by Turkish rules)
             setattr(mind, name, default())
     import dataclasses
     for f in dataclasses.fields(type(mind.cfg)):                      # settings added after the mind was saved
