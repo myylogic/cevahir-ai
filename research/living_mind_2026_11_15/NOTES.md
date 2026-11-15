@@ -299,6 +299,18 @@ The principled repair belongs in the core. A new tie would take into account how
 it existed (a base rate from `u_use` and `t_birth`). This changes learning for every mind, so it waits for a
 measured study against the F11-F21 results.
 
+**Design for that study** (not built):
+
+- **(a) Implicit failures at birth.** When X→Y is born at a moment when X has already been lived n times, it starts
+  with W− equal to the trust-weighted n·g. Y had never followed X before, or the tie would exist. This is the same
+  frequency a full record would give, and F14 still governs later failures.
+- **(b) A normalised reading of alternatives.** f(Y | X) = W+(X→Y) / Σ_Y' W+(X→Y'), so rivals share one mass instead
+  of each holding its own.
+
+(a) keeps the per-tie semantics and every reading as they are; (b) changes every reading. Start with (a) behind a
+flag. Measure it on the T1-T3 worlds and on held-out chat; dreams and thinking should improve with it, since both
+are hurt by the echo of the last hearing.
+
 ## T8 in conversation: think, then speak (2026-11-15)
 
 The owner asked for this: "it should be able to think and speak". As the words of an utterance are heard, the ones
