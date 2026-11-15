@@ -683,3 +683,38 @@ It stays behind `Config.voices`, off by default.
 - an outcome retracts exactly;
 - the lesson holds no word: it carries into a new vocabulary (a fresh mind reads 1/2) and grows there;
 - off by default.
+
+## Speed, bit-identical (2026-11-15)
+
+A helper agent's work, reviewed and merged here. Commits on the `speed` branch: 3d9f7ba, 79361e4, 2bf1a89, 06cbad8.
+
+**What changed, at a glance:**
+
+- The focus is not re-ranked when what is present already fills it, and the F winners are picked without sorting
+  every candidate (`heapq.nsmallest`, exact because every key ends in a unique tuple).
+- Lag-0 spreading reads each unit once per settling.
+- Tie-id tensors are kept between moments, invalidated on undo.
+- One-tie evidence and judging run in plain numbers with the same rounding.
+- `judge` reads the four tables once and passes over classes with nothing open.
+- Records are written only for what was acquired, where nothing else reads them.
+
+**Exactness.**
+
+- The substance digest is unchanged on the small public run, on the two large private minds after 60 dialogues, and
+  in 17 configurations, including mid-run undo and retraction.
+- After merging into this branch, the digest of the small run is also identical before and after the merge (548
+  moments, d8ba0375…).
+
+**Speed** (ms per moment, watching, no profiler):
+
+| run | before | after |
+|---|---|---|
+| small run | 2.9 | 1.4-1.5 |
+| cevahir2 (1.33M ties) | 6.7-7.7 | 2.6-2.7 |
+| cevahir3 (2.54M ties) | 12.6-13.1 | 3.2-3.5 |
+
+Growth with memory is now small: 2.6 → 3.3 ms between 1.3M and 2.5M ties, where it was 7 → 12.6. The time side of
+the scaling bottleneck above is largely solved. The memory side (bytes per tie, structure-only rows) is not.
+
+What remains per moment on the large mind: `learn_follow` (~0.8 ms) and `learn_together` (~0.7 ms), mostly gathers
+over long lag-0 lists that are bound by memory speed; `_feel` (~0.25 ms).
