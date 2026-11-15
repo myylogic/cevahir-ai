@@ -336,8 +336,8 @@ While it is open it lives in its own time: it thinks and may speak after a silen
 save).
 
 The minds raised so far lived the author's private Turkish data and are not in this repository. Your copy learns the
-language you teach it with `!ogret` and `!oku`. For a language other than Turkish, start it with `--dil diger` so
-that capital letters are lowered without Turkish rules. After a dozen
+language you teach it with `!ogret` and `!oku`. Note that the text adapter lowers capital letters by
+Turkish rules (I becomes ı), which matters for other languages. After a dozen
 pairs it answers the questions it was shown; how much data a new language needs for questions it has not seen has
 not been measured. A mind file carries what it has read, so do not share a mind raised on private documents. Full
 guide (Turkish): [ZIHIN_KILAVUZ.md](ZIHIN_KILAVUZ.md).

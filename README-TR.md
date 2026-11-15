@@ -70,8 +70,8 @@ kaydedilir (Windows: `%USERPROFILE%\.cevahir\zihin\cevahir.zihin`; klasörü `CE
 kaydetmez).
 
 Şimdiye kadar yetiştirilen zihinler yazarın özel Türkçe verilerini yaşadı ve bu depoda değildir. Sizin kopyanız,
-`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Türkçe dışında bir dilde konuşacaksanız programı `--dil diger` ile
-başlatın, böylece büyük harfler Türkçe kurallar olmadan küçültülür. Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
+`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Metin bağdaştırıcısının büyük harfleri Türkçe
+kurallarla küçülttüğünü (I → ı) unutmayın; bu başka diller için önemlidir. Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
 için ne kadar veri gerektiği ölçülmedi. Zihin dosyası okuduklarını içinde taşır; özel belgelerle yetiştirdiğiniz bir
 zihni paylaşmayın.
 
