@@ -11,6 +11,11 @@ What is pinned here
 * Nothing is reported as taken back with 0 records: an entry with no moments, or a mind that keeps no ledger, is
   refused with the reason, and the mind is unchanged.
 * History numbers are never given twice.
+* An interrupted !unut is resumed by the next one: the moments it already took back are skipped (a retry failed with
+  KeyError before), and in the end the mind is exactly as after one uninterrupted !unut.
+* "!unut" with something that is not a number says what it needs; a number that is not in the history says so.
+* !yas and !boyut count the units and ties the mind holds now, so what !unut took back is no longer counted (the dead
+  rows stay in the tables).
 """
 from __future__ import annotations
 
@@ -121,3 +126,58 @@ def test_history_numbers_are_never_given_twice():
     session.live("Dört.", TOLD)
     assert [e.number for e in session.history] == [1, 3, 4]
     assert "Dört." in session.forget(4) and [e.number for e in session.history] == [1, 3]
+
+
+def test_an_interrupted_forget_is_resumed_and_takes_every_moment_back_once(tmp_path, monkeypatch):
+    (tmp_path / "hayvanlar.txt").write_text(ANIMALS, encoding="utf-8")
+    one, other = taught(), taught()
+    for session in (one, other):
+        session.read_path(str(tmp_path / "hayvanlar.txt"))
+    number = one.history[-1].number
+    real, taken = one.mind.retract, []
+
+    def interrupted(m):
+        if len(taken) == 3:
+            raise KeyboardInterrupt                      # Ctrl+C between two moments of the retraction
+        taken.append(m)
+        return real(m)
+    monkeypatch.setattr(one.mind, "retract", interrupted)
+    with pytest.raises(KeyboardInterrupt):
+        one.forget(number)
+    assert taken == one.history[-1].moments[-3:][::-1]  # three moments, the latest first, are taken back ...
+    assert [e.number for e in one.history] == [number]  # ... and the entry is still there
+    monkeypatch.setattr(one.mind, "retract", real)
+    out = one.forget(number)
+    assert "geri alındı" in out and "3 anı önceki !unut geri almıştı" in out and one.history == []
+    other.forget(other.history[-1].number)
+    assert one.mind.S.digest() == other.mind.S.digest()
+    assert indices(one.mind.S) == indices(other.mind.S)
+
+
+def test_forget_needs_a_number(capsys):
+    session = taught()
+    for line in ("!unut x", "!unut", "!unut -1", "!unut 2.5"):
+        out = run(session, line, capsys)
+        assert "bir numara ister" in out and "hata" not in out
+    assert "böyle bir numara yok" in run(session, "!unut 99", capsys)
+
+
+def counted(session, capsys) -> dict:
+    out = run(session, "!yas", capsys) + run(session, "!boyut", capsys)
+    found = {name: int(re.search(pattern, out).group(1)) for name, pattern in (
+        ("words", r"karşılaştığı kelime: (\d+)"), ("phrases", r"birleşik birim \(dizi\): (\d+)"),
+        ("ties", r"bağ: (\d+)"), ("units", r"'units': (\d+)"), ("ties2", r"'ties': (\d+)"))}
+    assert found["ties"] == found["ties2"]
+    return found
+
+
+def test_age_and_size_count_what_the_mind_holds_now(tmp_path, capsys):
+    (tmp_path / "hayvanlar.txt").write_text(ANIMALS, encoding="utf-8")
+    session = taught()
+    before = counted(session, capsys)
+    session.read_path(str(tmp_path / "hayvanlar.txt"))
+    read = counted(session, capsys)
+    assert all(read[name] > before[name] for name in before)
+    assert "geri alındı" in session.forget(session.history[-1].number)
+    assert counted(session, capsys) == before           # what was taken back is not counted any more
+    assert session.mind.S.n_ties > before["ties"]       # (its rows are still in the tables, dead)

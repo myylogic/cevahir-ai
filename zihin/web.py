@@ -230,7 +230,8 @@ def wanted_topics(mind, channel: str, n: int, skip_frequent: int = 100) -> List[
     if not mind.ch.has(channel):
         return []
     cid = mind.ch.id(channel)
-    atoms = [u for u in range(S.n_units) if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid]
+    atoms = [u for u in range(S.n_units)
+             if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid and S.u_alive[u]]   # not what !unut took back
     by_use = sorted(atoms, key=lambda u: -float(S.u_use[u]))
     skip = min(skip_frequent, len(by_use) // 5)            # a young mind knows few words: skip a fifth of them
     scored = []

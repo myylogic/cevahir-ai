@@ -98,7 +98,8 @@ def frequent_words(mind, k: int = FREQUENT, relative: bool = False) -> set:
     from .store import ATOMIC
     S = mind.S
     cid = mind.ch.id(CHANNEL)
-    atoms = [u for u in range(S.n_units) if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid]
+    atoms = [u for u in range(S.n_units)
+             if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid and S.u_alive[u]]   # not what !unut took back
     if relative:
         k = frequent_cut(len(atoms), k)
     top = sorted(atoms, key=lambda u: -float(S.u_use[u]))[:k]
@@ -235,7 +236,7 @@ def root_mates(session, word: str) -> List[str]:
             return []
         by_root: Dict[str, List[str]] = {}
         for u in range(S.n_units):
-            if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid:
+            if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid and S.u_alive[u]:
                 w = str(mind.ch.symbol(cid, int(S.u_symbol[u])))
                 if w.isalpha() and len(w) > 2:
                     for root in _stems(pieces, w):

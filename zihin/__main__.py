@@ -314,13 +314,30 @@ def read_document(path: str, encodings: list = None) -> str:
     return ""
 
 
+def live_counts(mind: Mind) -> tuple:
+    """(units, ties) the mind holds now; those !unut took back are kept in the tables but are dead, not counted."""
+    S = mind.S
+    return int(S.u_alive[:S.n_units].sum()), int(S.t_alive[:S.n_ties].sum())
+
+
+def taken_back(log, m: int) -> bool:
+    """Whether moment m of a ledger was already retracted (a disk ledger keeps the set, a ledger in memory marks the
+    entry)."""
+    retracted = getattr(log, "retracted", None)
+    if retracted is not None:
+        return m in retracted
+    entry = log.get(m)
+    return entry is not None and bool(entry.retracted)
+
+
 def profile(mind: Mind) -> str:
     """Developmental profile measured from the substance (nothing assigned)."""
     from .evidence import conviction
     from .store import ATOMIC, CATEGORY, COMPOSED, EXPECT, SLOTTED
     S = mind.S
     n = S.n_units
-    kinds = S.u_kind[:n]
+    alive = S.u_alive[:n]
+    kinds = S.u_kind[:n] * alive                        # units !unut took back are not counted (kind 0)
     cid = mind.ch.id(CHANNEL) if mind.ch.has(CHANNEL) else -1
     words_seen = known = 0
     for unit in range(n):
@@ -336,7 +353,7 @@ def profile(mind: Mind) -> str:
              "  karşılaştığı kelime: %d   kanaat kazandığı kelime (c >= 0.5): %d" % (words_seen, known),
              "  kurduğu kavram (kategori): %d   çerçeve: %d   birleşik birim (dizi): %d" % (
                  int((kinds & CATEGORY).bool().sum()), int((kinds & SLOTTED).bool().sum()), phrases),
-             "  bağ: %d   öz: %.1f MB" % (S.n_ties, mind.size()["core_tensors"] / 1e6),
+             "  bağ: %d   öz: %.1f MB" % (live_counts(mind)[1], mind.size()["core_tensors"] / 1e6),
              "  (insan yaşı karşılığı verilmez: kaynaklı bir gelişim normu olmadan sayı uydurulmaz)"]
     return "\n".join(lines)
 
@@ -894,27 +911,31 @@ class Session:
 
     def forget(self, number: int) -> str:
         """Retract an entry of the history exactly: each of its moments through the ledger, the latest first (a
-        typed line, an answer, a file read or taught, a watched dialogue)."""
-        for entry in self.history:
-            if entry.number != number:
-                continue
-            moments = entry.moments
-            if not moments:
-                return "  '%s' geri alınamaz: yaşanmış anı kayıtlı değil" % entry.text
-            log = self.mind.S.log
-            if any(m not in log for m in moments):
-                return "  '%s' geri alınamaz: bu zihin deneyim defteri tutmuyor (--defter-yok ya da defteri olmadan " \
-                       "yüklendi)" % entry.text
-            removed = 0
-            with _indices_rebuilt_once(self.mind.S):
-                for m in reversed(moments):
-                    report = self.mind.retract(m)
-                    removed += sum(v for v in report.values() if isinstance(v, int))
-            self.history.remove(entry)
-            if not removed:
-                return "  '%s': %d an geri alındı ama çekirdekte çıkarılacak kaydı yoktu" % (entry.text, len(moments))
-            return "  '%s' geri alındı (kanıtı çekirdekten çıkarıldı; %d kayıt)" % (entry.text, removed)
-        return "  böyle bir numara yok"
+        typed line, an answer, a file read or taught, a watched dialogue). Each moment is taken back whole, and an
+        interrupted !unut is resumed by the next one: the moments already taken back are skipped (retracting one
+        twice is refused by the core), so in the end every moment of the entry is taken back once."""
+        entry = next((e for e in self.history if e.number == number), None)
+        if entry is None:
+            return "  böyle bir numara yok (!gecmis numaraları gösterir)"
+        moments = entry.moments
+        if not moments:
+            return "  '%s' geri alınamaz: yaşanmış anı kayıtlı değil" % entry.text
+        log = self.mind.S.log
+        if any(m not in log for m in moments):
+            return "  '%s' geri alınamaz: bu zihin deneyim defteri tutmuyor (--defter-yok ya da defteri olmadan " \
+                   "yüklendi)" % entry.text
+        left = [m for m in moments if not taken_back(log, m)]
+        before = "" if len(left) == len(moments) else \
+            "; %d anı önceki !unut geri almıştı" % (len(moments) - len(left))
+        removed = 0
+        with _indices_rebuilt_once(self.mind.S):
+            for m in reversed(left):
+                report = self.mind.retract(m)
+                removed += sum(v for v in report.values() if isinstance(v, int))
+        self.history.remove(entry)
+        if not removed and not before:
+            return "  '%s': %d an geri alındı ama çekirdekte çıkarılacak kaydı yoktu" % (entry.text, len(moments))
+        return "  '%s' geri alındı (kanıtı çekirdekten çıkarıldı; %d kayıt%s)" % (entry.text, removed, before)
 
 
 def night_report(night, names: Dict[str, str] = None) -> List[str]:
@@ -1276,7 +1297,11 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     for entry in session.history:
                         print("  %3d  %s" % (entry.number, entry.text))
                 elif cmd in ("unut", "forget"):
-                    print(session.forget(int(rest)))
+                    if rest.strip().isdigit():
+                        print(session.forget(int(rest)))
+                    else:
+                        print("  !unut bir numara ister: geri alınacak girdinin numarası (!gecmis gösterir), "
+                              "örneğin !unut 3")
                 elif cmd in ("arastir", "araştır", "research"):
                     from .web import research
                     report = research(session, rest.strip())
@@ -1334,7 +1359,9 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                 elif cmd in ("yas", "yaş", "age"):
                     print(profile(session.mind))
                 elif cmd in ("boyut", "size"):
-                    print("  %d an, %s" % (session.mind.t, session.mind.size()))
+                    size = session.mind.size()
+                    size["units"], size["ties"] = live_counts(session.mind)    # what !unut took back is not counted
+                    print("  %d an, %s" % (session.mind.t, size))
                 elif cmd in ("kaydet", "save", "tasinabilir", "portable", "yukle", "yükle", "load") \
                         and not clean_path(rest):
                     print("  bir yol yazın: !%s <yol>" % cmd)
