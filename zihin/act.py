@@ -41,8 +41,8 @@ def act_expectation(mind, act_unit: int, imitated_pos: float, imitated_neg: floa
     if outcome is not None:
         tie = S.find_tie(outcome, mind.feel_unit["relief"], EXPECT, 1)
         if tie >= 0:
-            imitated_pos += float((S.t_w[W_POS, tie] * mind.trust).sum())
-            imitated_neg += float((S.t_w[W_NEG, tie] * mind.trust).sum())
+            imitated_pos += float((S.w1(W_POS, tie) * mind.trust).sum())
+            imitated_neg += float((S.w1(W_NEG, tie) * mind.trust).sum())
     return expectation(imitated_pos, imitated_neg, mind.cfg.k)
 
 
@@ -68,8 +68,8 @@ def consequence(mind, act_unit: int) -> float:
             continue
         tie = S.find_tie(path, value_unit, EXPECT, 2)
         if tie >= 0:
-            w_pos = float((S.t_w[W_POS, tie] * mind.trust).sum())
-            w_neg = float((S.t_w[W_NEG, tie] * mind.trust).sum())
+            w_pos = float((S.w1(W_POS, tie) * mind.trust).sum())
+            w_neg = float((S.w1(W_NEG, tie) * mind.trust).sum())
             total += sign * (2.0 * expectation(w_pos, w_neg, mind.cfg.k) - 1.0)
     return total
 
@@ -127,7 +127,7 @@ def _value_evidence(mind, unit: int) -> float:
         value_unit = S.atom_index.get((cid, index), -1) if index >= 0 else -1
         tie = S.find_tie(unit, value_unit, EXPECT, 2) if value_unit >= 0 else -1
         if tie >= 0:
-            known += float(((S.t_w[W_POS, tie] + S.t_w[W_NEG, tie]) * mind.trust).sum())
+            known += float(((S.w1(W_POS, tie) + S.w1(W_NEG, tie)) * mind.trust).sum())
     return known
 
 
@@ -250,7 +250,7 @@ def imagine(mind) -> int:
                 if expectation(w_pos, w_neg, cfg.k) <= 0.5 or sum(own.get(target, (0.0, 0.0))) > 0.0:
                     continue
                 tie = S.find_tie(instance, target, EXPECT, 1)
-                if tie >= 0 and float(S.t_w[W_POS, tie, IMAGINED] + S.t_w[W_NEG, tie, IMAGINED]) > 0.0:
+                if tie >= 0 and float(S.w1(W_POS, tie)[IMAGINED] + S.w1(W_NEG, tie)[IMAGINED]) > 0.0:
                     continue
                 rest = effective(mind, instance, skip=general).get(target, (0.0, 0.0))
                 reality = expectation(rest[0], rest[1], cfg.k) if cfg.reality else 1.0

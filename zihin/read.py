@@ -52,12 +52,12 @@ def own_mass(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = None
         return {}
     ids, dst = S.out_ids((unit, EXPECT, lag))
     trust = mind.trust if trust is None else trust
+    pos, neg = S.w2(ids)
     if lag == 1 and getattr(mind.cfg, "rivals", False):
-        w_pos, w_neg = rival_mass(mind, dst, (S.t_w[W_POS].index_select(0, ids) * trust).sum(-1),
-                                  (S.t_w[W_NEG].index_select(0, ids) * trust).sum(-1))
+        w_pos, w_neg = rival_mass(mind, dst, (pos * trust).sum(-1), (neg * trust).sum(-1))
         return {d: (p, n) for d, p, n in zip(dst.tolist(), w_pos.tolist(), w_neg.tolist())}
-    w_pos = (S.t_w[W_POS].index_select(0, ids) * trust).sum(-1).tolist()
-    w_neg = (S.t_w[W_NEG].index_select(0, ids) * trust).sum(-1).tolist()
+    w_pos = (pos * trust).sum(-1).tolist()
+    w_neg = (neg * trust).sum(-1).tolist()
     return {d: (p, n) for d, p, n in zip(dst.tolist(), w_pos, w_neg)}
 
 
@@ -157,8 +157,9 @@ def reliability(mind, general: int) -> float:
     if not ties:
         return 0.5
     ids = torch.tensor(ties, dtype=I64)
-    w_pos = float((S.t_w[W_POS, ids] * mind.trust).sum())
-    w_neg = float((S.t_w[W_NEG, ids] * mind.trust).sum())
+    pos, neg = S.w2(ids)
+    w_pos = float((pos * mind.trust).sum())
+    w_neg = float((neg * mind.trust).sum())
     return expectation(w_pos, w_neg, mind.cfg.k)
 
 
@@ -256,7 +257,7 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
         total = sum(own.values())
         if total <= 0.0:
             continue
-        e_x = expectation(float((S.t_w[W_POS, tie] * mind.trust).sum()), float((S.t_w[W_NEG, tie] * mind.trust).sum()), k)
+        e_x = expectation(float((S.w1(W_POS, tie) * mind.trust).sum()), float((S.w1(W_NEG, tie) * mind.trust).sum()), k)
         weight = e_x
         if looks is not None:                          # members that look like the item speak louder (GCM):
             sim = facet_similarity(mind, looks[0], x, looks[1])   # vote x exp(-sensitivity x (1 - similarity))
@@ -277,7 +278,7 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
             voters)
 
 
-VOICE_CHANNEL = "ses"   # F24: the mind's own channel for the kinds of voices that speak for an instance
+VOICE_CHANNEL = "sesler"   # F24: the mind's own channel for the kinds of voices (not "ses": the hearing facets use it)
 VOICE_ALL = "*"         # F24: the unit of every voice (what voices in general have been worth)
 
 
@@ -298,7 +299,7 @@ def _holds(mind, symbol) -> Tuple[float, float]:
     if tie < 0:
         return 0.0, 0.0
     S = mind.S
-    return float((S.t_w[W_POS, tie] * mind.trust).sum()), float((S.t_w[W_NEG, tie] * mind.trust).sum())
+    return float((S.w1(W_POS, tie) * mind.trust).sum()), float((S.w1(W_NEG, tie) * mind.trust).sum())
 
 
 def voice_credibility(mind, kind: Tuple[int, int]) -> float:
@@ -625,7 +626,8 @@ def drive_of(mind, unit: int) -> float:
     ids = torch.tensor(ties, dtype=I64)
     world = torch.tensor([c >= 0 and mind.ch.kind(c) in ("sense", "act")
                           for c in S.u_channel[S.t_dst[ids]].tolist()])
-    total = ((S.t_w[W_POS, ids] + S.t_w[W_NEG, ids]) * mind.trust).sum(-1)
+    pos, neg = S.w2(ids)
+    total = ((pos + neg) * mind.trust).sum(-1)
     return float((S.t_use[ids] * (1.0 - conviction(total, mind.cfg.k)))[world].sum())
 
 

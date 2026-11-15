@@ -218,7 +218,7 @@ def firm_knowledge(mind, unit: int) -> int:
     S = mind.S
     n = 0
     for tie in S.out.get((unit, EXPECT, 1), []):
-        w = float(((S.t_w[W_POS, tie] + S.t_w[W_NEG, tie]) * mind.trust).sum())
+        w = float(((S.w1(W_POS, tie) + S.w1(W_NEG, tie)) * mind.trust).sum())
         n += conviction(w, mind.cfg.k) >= 0.5
     return n
 
@@ -258,8 +258,8 @@ class WayChooser:
 
     def expectation(self, way: str) -> Tuple[float, float]:
         S, tie = self.mind.S, self._tie(way)
-        w_pos = float((S.t_w[W_POS, tie] * self.mind.trust).sum())
-        w_neg = float((S.t_w[W_NEG, tie] * self.mind.trust).sum())
+        w_pos = float((S.w1(W_POS, tie) * self.mind.trust).sum())
+        w_neg = float((S.w1(W_NEG, tie) * self.mind.trust).sum())
         return expectation(w_pos, w_neg, self.mind.cfg.k), w_pos + w_neg
 
     def choose(self) -> str:
