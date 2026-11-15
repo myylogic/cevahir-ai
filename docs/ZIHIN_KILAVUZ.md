@@ -43,9 +43,11 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
 - Hiç bütün olarak duymadığı bir söze, en çok benzeyen yaşanmış durumlarda ne söylendiyse onunla karşılık verebilir.
   Benzerlik zayıfsa (örneğin sözde bilmediği bir kelime varsa) uydurmaz.
 - Cevap uzunluğu sınırı 80 kelimedir; söyleyecek bir şeyi kalmayınca kendisi durur.
-- Yeni bir zihin, kelimeleri deponun kendi tokenizer altyapısındaki parçalarıyla birlikte yaşar: kök, ekler ve son
-  hece (`yapıyorsun` → kök `yap`, ekler `ıyor`, `sun`). Böyle yapılmış kelimeler birbirine benzer. Parçasız
-  büyümüş bir zihin parçasız devam eder (`--parca cevahir` ile açılabilir, `--parca yok` ile kapatılır).
+- Kelime parçaları (isteğe bağlı): `--parca cevahir` ile yeni bir zihin kelimeleri deponun kendi tokenizer
+  altyapısındaki parçalarıyla birlikte yaşar: kök, ekler, gövde ve son hece (`yapıyorsun` → kök `yap`, ekler `ıyor`,
+  `sun`). Böyle yapılmış kelimeler birbirine benzer. Dikkat: doğuştan parçalarla büyüyen bir zihin an başına yaklaşık
+  beş kat bağ kurdu ve 219 bin anda belleği tüketti; bu yüzden varsayılan kapalı. Parçalarla büyümüş bir zihin
+  parçalarını korur.
 - 10 dakika sessizlikte uyur: günün konuları ve emin olmadığı kelimeler üzerine rüya görür. Rüya çağrışımla bağlanan
   hayallerden oluşur: ortak kökten çıkarım ("kedi bir hayvandır" + "hayvanlar nefes alır" → "kedi nefes alır") ya da
   bir düşünceyi benzediği bir kavrama taşımak. Bir kelimeyle birlikte gösterdiğin resmi rüyasında yeniden "görür".

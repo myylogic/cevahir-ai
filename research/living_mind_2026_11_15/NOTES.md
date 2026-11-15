@@ -731,3 +731,20 @@ the scaling bottleneck above is largely solved. The memory side (bytes per tie, 
 
 What remains per moment on the large mind: `learn_follow` (~0.8 ms) and `learn_together` (~0.7 ms), mostly gathers
 over long lag-0 lists that are bound by memory speed; `_feel` (~0.25 ms).
+
+## Word pieces from birth: a memory explosion (2026-11-15)
+
+To compare with the morning mind, a mind was raised from scratch on the same curriculum with today's conventions:
+tones, and the repository tokenizer's pieces as facets from birth.
+
+**What happened.**
+
+- It ran at 2.2-4.8 ms per moment.
+- It grew about five times as many ties per moment: 6.45M ties at 116k moments, about 55 per moment, against 11 for
+  the mind raised without pieces. Its core tensors were already 1.5 GB at that point.
+- At 219k moments its process held 13.4 GB, and it was killed for lack of memory while saving.
+
+**Consequence.** Pieces are now opt-in for a new mind (`--parca cevahir`). A mind raised with pieces keeps them, and
+a mind raised without them keeps living without them. Where the ties come from (facet binding for every item, joining
+categories by resemblance through very common pieces such as a frequent suffix or last syllable, or both) is open.
+Pieces become a default again only once their tie cost is measured and bounded.
