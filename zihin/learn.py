@@ -120,7 +120,7 @@ def judge1(mind, table: int, tie: int, amount: float) -> None:
     for slot in range(S.P):
         if slot in REFERENCE or mind.source_tie[slot] < 0:
             continue
-        _, cls, ev, row, ex = v                             # taken again after a write: it can widen the tie
+        cls, ev, row, ex = v[1:5]                           # taken again after a write: it can widen the tie
         c = cls[tie]
         if c == WIDE:
             r = row[tie]
@@ -156,7 +156,7 @@ def judge(mind, table: int, ids: torch.Tensor, amounts: torch.Tensor) -> None:
     judged = _judged_classes(mind)
     if not judged[0] or not ids.numel():
         return
-    _, cls_v, ev_v, row_v, ex_v = S.views()
+    cls_v, ev_v, row_v, ex_v = S.views()[1:5]
     idn = ids.numpy()
     c = cls_v[idn]
     ev = ev_v.take(idn, axis=1)                             # copies: the values before any write below
@@ -251,7 +251,7 @@ def _sums(mind, ids: torch.Tensor, raw: bool):
         return None
     lut, one = tables
     S = mind.S
-    _, cls_v, ev_v, row_v, _ = S.views()
+    cls_v, ev_v, row_v = S.views()[1:4]
     idn = ids.numpy()
     c = cls_v[idn]
     ev = ev_v.take(idn, axis=1)
@@ -281,7 +281,7 @@ def _expect_np(w_pos: np.ndarray, w_neg: np.ndarray, k: float) -> np.ndarray:
 
 def _raw1(S, table: int, tie: int) -> float:
     """``float(S.w1(table, tie).sum())``: a tie of one class holds one value and zeros, whose sum is that value."""
-    _, cls, ev, _, _ = S.views()
+    cls, ev = S.views()[1:3]
     c = cls[tie]
     if c == WIDE:
         return float(S.w1(table, tie).sum())
@@ -788,7 +788,11 @@ def facet_set(mind, unit: int) -> set:
     if ties and facets:
         ids, dst = S.out_ids((unit, EXPECT, 0))
         dstn = dst.numpy()
-        sel = np.flatnonzero(np.isin(S.u_channel.numpy()[dstn], facets))
+        channel = S.u_channel.numpy()[dstn]
+        on = channel == facets[0]
+        for c in facets[1:]:
+            on |= channel == c
+        sel = np.flatnonzero(on)
         if sel.size:                                        # in list order, as the ties were walked
             idn = ids.numpy()
             for p, raw in zip(sel.tolist(), _raw_np(S, W_POS, idn[sel]).tolist()):
@@ -808,7 +812,7 @@ def _raw_np(S, table: int, idn: np.ndarray) -> np.ndarray:
     if one is None:
         one = _ONES[S.P] = np.zeros(128)
         one[1:S.P + 1] = 1.0
-    _, cls_v, ev_v, row_v, _ = S.views()
+    cls_v, ev_v, row_v = S.views()[1:4]
     c = cls_v[idn]
     r = ev_v[table].take(idn) * one.take(c)
     r += 0.0
