@@ -316,3 +316,34 @@ report was answered with the report's own sentence about that group, which the m
 word. An unknown word still met curiosity.
 
 Tests: `tests/evolution/test_zihin_think_aloud.py`.
+
+## The morning mind, measured (2026-11-15)
+
+The mind given to the owner was raised by continuing cevahir2 (122k moments) with:
+
+- the teacher questions from his documents (`ogretmen.tsv`);
+- the lessons about itself and about not knowing;
+- his Word documents;
+- capped samples of the psychology dialogues, the Turkish datasets and the subject books;
+- the five public first dialogues.
+
+It reached 295k moments, 3.25M ties and 203k composed units, and it lived with closing punctuation as words (the
+older convention, kept by the session). It is a private mind and is not in the repository.
+
+**Held-out teacher questions** (60 random questions generated from his documents and never watched; aggregate only):
+
+| exact answer | mean token F1 | "bilmiyorum" | silent |
+|---|---|---|---|
+| 17% (10/60) | 0.38 | 23% (14/60) | 0 |
+
+**Chat** (no content quoted):
+
+- greetings, its name, what it is, where it lives and its sleep habit are answered from what it was told;
+- unknown topics get "bilmiyorum , öğrenmek isterim ." followed by the unknown word asked back;
+- watched questions get their answers.
+
+**Weak points:**
+
+- A self question can be answered with the answer others gave in the dialogues it read (a city), and in a long
+  session the same question can meet hesitation.
+- Dreams are still shallow constructions.
