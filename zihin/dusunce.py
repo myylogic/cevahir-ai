@@ -31,11 +31,19 @@ def _reality(mind, unit_symbol) -> float:
     return members_map(mind, mind.context, trust).get(unit_symbol, 0.5)
 
 
+def _words(session, text: str) -> List[str]:
+    """The session's text adapter (its mind's language convention), else the default one."""
+    adapter = getattr(session, "words", None)
+    if adapter is None:
+        from .__main__ import words as adapter
+    return adapter(text)
+
+
 def think(session, topic: str, limit: int = 15) -> Tuple[List[str], float]:
     """Think about ``topic`` inwardly. Returns the inner words and the reality score R (mean over steps)."""
-    from .__main__ import CHANNEL, words
+    from .__main__ import CHANNEL
     mind = session.mind
-    symbols = words(topic)
+    symbols = _words(session, topic)
     if not symbols:
         return [], 0.0
     cid = mind.ch.id(CHANNEL)
@@ -71,13 +79,28 @@ def _circling(words_: List[str]) -> bool:
     return False
 
 
-def frequent_words(mind, k: int = 200) -> set:
-    """The k most used words of the mind's life (they carry the language, not a topic; frequency decides)."""
+FREQUENT = 200        # how many of the most used words carry the language rather than a topic, at most
+SHARE = 10            # ... and in a smaller vocabulary at most one word in SHARE (sleep, see frequent_words)
+
+
+def frequent_cut(vocabulary: int, k: int = FREQUENT, share: int = SHARE) -> int:
+    """How many words count as frequent in a vocabulary of a given size when the cut is relative: the most used
+    ceil(vocabulary / share), at most k. A fixed number of words is a share that grows as the vocabulary shrinks:
+    200 is a tenth of 2000 words, all of a mind that met 200, and a mind whose every word is frequent has no topic
+    left to dream about. Equal to k from k * share words on (2000 by default), so larger minds are cut as before."""
+    return min(k, -(-vocabulary // share))
+
+
+def frequent_words(mind, k: int = FREQUENT, relative: bool = False) -> set:
+    """The k most used words of the mind's life (they carry the language, not a topic; frequency decides). With
+    ``relative``, k is cut to the vocabulary (frequent_cut): the same words from 2000 words on."""
     from .__main__ import CHANNEL
     from .store import ATOMIC
     S = mind.S
     cid = mind.ch.id(CHANNEL)
     atoms = [u for u in range(S.n_units) if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid]
+    if relative:
+        k = frequent_cut(len(atoms), k)
     top = sorted(atoms, key=lambda u: -float(S.u_use[u]))[:k]
     return {str(mind.ch.symbol(cid, int(S.u_symbol[u]))) for u in top}
 
@@ -85,7 +108,7 @@ def frequent_words(mind, k: int = 200) -> set:
 def topic_of(session, text: str = None) -> str:
     """What to think about: the utterance's (by default the last one's) least known content word (the highest
     drive), among the words the mind has met."""
-    from .__main__ import CHANNEL, words
+    from .__main__ import CHANNEL
     from .read import drive_of
     mind = session.mind
     if text is None:
@@ -96,7 +119,7 @@ def topic_of(session, text: str = None) -> str:
         return ""
     cid = mind.ch.id(CHANNEL)
     best, best_drive = "", -1.0
-    for w in words(text):
+    for w in _words(session, text):
         if len(w) < 4 or not w.isalpha():
             continue
         index = mind.ch.symbol_index(cid, w, create=False)
@@ -153,10 +176,10 @@ def imagine(session, topic: str, limit: int = 12) -> Tuple[List[str], List[str],
     over to Y, and score that construction for reality step by step from all evidence except imagined (an ungrounded
     leap scores low). The construction is lived inwardly (class imagined), so later evidence can judge it.
     Returns (thought about X, construction about Y, reality of the construction, Y)."""
-    from .__main__ import CHANNEL, words
+    from .__main__ import CHANNEL
     mind = session.mind
     thought, _ = think(session, topic, limit)
-    symbols = words(topic)
+    symbols = _words(session, topic)
     if not symbols or not thought:
         return thought, [], 0.0, ""
     x = _unit(mind, CHANNEL, symbols[-1])
@@ -444,17 +467,20 @@ def dream(session, topic: str, links: int = 3, frequent: set = None) -> List[dic
 
 def day_residue(session, n: int, utterances: int = 12) -> List[str]:
     """What the day was about: the words of the recent utterances the mind is least sure of (highest drive), the
-    most used words of its whole life left out (frequency decides, no word list)."""
-    from .__main__ import CHANNEL, words
+    most used words of its whole life left out (frequency decides, no word list). The recent utterances are those
+    of the session's history; what was read, taught or watched counts with its last lines."""
+    from .__main__ import CHANNEL
     from .read import drive_of
     mind = session.mind
     cid = mind.ch.id(CHANNEL)
     S = mind.S
     scored = {}
-    for _, text, _ in session.history[-utterances:]:
+    recent = session.recent_utterances(utterances) if hasattr(session, "recent_utterances") else \
+        [text for _, text, _ in session.history[-utterances:]]
+    for text in recent:
         if text.startswith("[") or text.startswith("!"):
             continue
-        for w in words(text):
+        for w in _words(session, text):
             if len(w) < 4 or not w.isalpha() or w in scored:
                 continue
             index = mind.ch.symbol_index(cid, w, create=False)
@@ -479,7 +505,7 @@ def sleep(session, cycles: int = 3) -> Dict[str, object]:
     from .__main__ import CHANNEL
     from .web import wanted_topics
     mind = session.mind
-    frequent = frequent_words(mind)
+    frequent = frequent_words(mind, relative=True)                              # a small mind keeps topics too
     topics = [w for w in day_residue(session, cycles) if w not in frequent]   # what the day was about, then what
     for w in wanted_topics(mind, CHANNEL, cycles * 2):                         # it is unsure of
         if w not in topics and w not in frequent:
