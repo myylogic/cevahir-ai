@@ -76,4 +76,31 @@ def features(path: str) -> Tuple[str, List[str]]:
     names = ("yatay", "capraz1", "dikey", "capraz2")
     facets.append("kenar=%s" % names[max(range(4), key=lambda i: hist[i])])
     facets.append("yogunluk=%d" % min(3, int(total / (30 * 30 * 40))))
+    facets += _figure(img)
     return "g%016x" % value, facets
+
+
+def _figure(img) -> List[str]:
+    """Position- and size-free aspects of what stands out from the background (the border's typical colour): how
+    much of its bounding box it fills, its width to height, and its own dominant colour."""
+    small = img.resize((64, 64))
+    px = list(small.getdata())
+    border = [px[i] for i in range(64)] + [px[63 * 64 + i] for i in range(64)] + \
+        [px[i * 64] for i in range(64)] + [px[i * 64 + 63] for i in range(64)]
+    bg = tuple(sorted(c[k] for c in border)[len(border) // 2] for k in range(3))
+    mask = [sum(abs(p[k] - bg[k]) for k in range(3)) > 60 for p in px]
+    xs = [i % 64 for i, m in enumerate(mask) if m]
+    ys = [i // 64 for i, m in enumerate(mask) if m]
+    if len(xs) < 20:
+        return ["figur=yok"]
+    w, h = max(xs) - min(xs) + 1, max(ys) - min(ys) + 1
+    fill = len(xs) / float(w * h)
+    aspect = w / float(h)
+    counts = {}
+    for i, m in enumerate(mask):
+        if m:
+            k = _palette(*px[i])
+            counts[k] = counts.get(k, 0) + 1
+    colour = max(counts, key=counts.get)
+    return ["doluluk=%d" % min(9, int(fill * 10)), "oran=%s" % ("yatik" if aspect > 1.25 else "dik" if aspect < 0.8 else "esit"),
+            "figur_renk=%s" % colour]

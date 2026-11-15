@@ -268,6 +268,25 @@ F18-pre. (2026-11-15) Thinking and a life clock. The inner voice (zihin/dusunce.
    "ateş çok güzel" and a silence). Limit, stated: thinking twice about the same topic gives the same thought; real
    thinking should connect (ateş ısıtır, güneş de ısıtır), the next step of imagination.
 
+F18. (2026-11-15) Seeing and recognising by resemblance. An image adapter (zihin/gorme.py, plain arithmetic, no trained
+   network) turns an image into a seen thing (its 64-bit difference hash as an item on the sense channel "goz") and its
+   aspects as facets (hash bytes, a 4x4 colour layout, dominant colours, edge orientation and density, and
+   position-free figure aspects: how much of its bounding box the figure fills, width to height, the figure's colour).
+   Core: a new item joins the categories of the items it resembles (evidence = the similarity of the nearest member,
+   provenance inferred), and when a category speaks for an item its members are weighted by resemblance (GCM:
+   vote x exp(-F (1 - similarity))), frequencies from the weighted votes, conviction from how many members there are.
+   Similarity is weighted Jaccard with facets weighted by how telling they are (1 / items perceived with them), and
+   facets no other item ever had are left out (they cannot be shared, they only drowned every comparison). Context
+   facets (who speaks, how an utterance ends) are a different kind and never count as appearance: counting the speaker
+   had silenced generalisation across speakers (found and fixed in the same round).
+F19. (2026-11-15) Choosing among alternatives. One act per channel per moment makes the candidates of a channel
+   mutually exclusive; they race on their advantage over the strongest rival (over 1/2 when there is none):
+   rate = 2 (score_leader - score_rival), score = e + consequences/2. With no rival it is the rule as before; when all
+   are equally (un)supported nothing leads and the mind stays silent. Found with the vision test: the right name led
+   (share 0.43 against 0.29 and 0.28 before F18's fixes, about 0.74 after) but no single name could pass 1/2 on its own.
+   Vision test (t_vision.py, 3 kinds of drawing, 3 named images per kind, 10 new images per kind, 3 seeds): 73%, 83%,
+   67% right (chance 33%); with resemblance off 0% in every seed. All earlier chat behaviours unchanged.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit

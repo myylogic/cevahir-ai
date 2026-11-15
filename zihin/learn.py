@@ -353,13 +353,17 @@ def _facet_weight(mind, facet: int) -> float:
 
 
 def facet_similarity(mind, a: int, b: int, fa: set = None) -> float:
-    """Weighted Jaccard overlap of the facet sets of two items, each facet weighted by how telling it is
-    (0 when either has none)."""
+    """Weighted Jaccard overlap of the facet sets of two items, each facet weighted by how telling it is (1 / the
+    number of items it was perceived with). A facet no other item has ever had cannot be shared by anything, so it
+    says nothing about resemblance and is left out of the comparison. 0 when either has no comparable facet."""
     fa = facet_set(mind, a) if fa is None else fa
     fb = facet_set(mind, b)
+    degree = {f: len(mind.S.out.get((f, EXPECT, 0), [])) for f in fa | fb}
+    fa = {f for f in fa if degree[f] > 1}
+    fb = {f for f in fb if degree[f] > 1}
     if not fa or not fb:
         return 0.0
-    w = {f: _facet_weight(mind, f) for f in fa | fb}
+    w = {f: 1.0 / degree[f] for f in fa | fb}
     union = sum(w.values())
     return sum(w[f] for f in fa & fb) / union if union > 0 else 0.0
 

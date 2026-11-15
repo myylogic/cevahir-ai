@@ -40,7 +40,7 @@ def draw(kind, rng, path):
 def life(seed, taught, tested, resemblance, folder):
     rng = random.Random(seed)
     cfg = Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
-                         backoff=True, resemblance=resemblance)
+                         backoff=True, resemblance=resemblance, race=True)
     mind = Mind(cfg)
     mind.add_channel(CHANNEL, "act")
     s = Session(mind)

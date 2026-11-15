@@ -104,6 +104,7 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
     if mind.cfg.support == "members" and mind.cfg.bind_repeats:      # a speaking mind reads with today's rules
         mind.cfg.backoff = True
         mind.cfg.resemblance = True
+        mind.cfg.race = True
     if not ledger:
         mind.S.log, mind.S.keep_log = {}, False
         mind.cfg.keep_log, mind.cfg.log_path = False, None
