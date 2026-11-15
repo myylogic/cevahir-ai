@@ -102,7 +102,8 @@ def test_a_night_keeps_dreams_counts_itself_and_reports_a_judged_dream_once(tmp_
 
 
 def test_a_dream_is_a_chain_and_sees_what_was_seen_with_its_words(tmp_path):
-    from PIL import Image
+    import pytest
+    Image = pytest.importorskip("PIL.Image")             # seeing needs Pillow (optional dependency)
     from zihin.gorme import EYE, features
     from zihin.dusunce import dream as dream_chain, seen_with
     session = new_session()
