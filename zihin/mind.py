@@ -90,6 +90,9 @@ class Config:
                                     # only where it names the very value the member lived; the value itself always counts
     exclusive: bool = False         # F27 (Lived Exclusion): what an instance was lived to be followed by on a channel
                                     # counts against what a generalisation proposes there that it never went on with
+    analogy: bool = False           # F29 (Analogy by Interchangeability): what a frame's members lived carries over to
+                                    # the read instance as far as its filler is interchangeable with them (NARS analogy),
+                                    # interchangeability read from the lived places both have filled
     starts: bool = False            # F26 (Sequence Starts): how sequences that began with a word went on (read from the
                                     # composed units of two items) is a relation of frames (START) and the reading of a
                                     # one-item utterance (F16), apart from what followed the word anywhere
@@ -199,6 +202,7 @@ class Mind:
         self.babbled = 0
         self.unknown = 0.0                           # L7: how much it did not know when the world last called on it
         self.witnesses = []                          # Substitution Evidence: (expected, occurred) pairs to be judged
+        self.episode_start = 0                       # the moment the present run of items began (after a pause)
         self.voice: Dict[int, tuple] = {}            # F24: context -> (voice that spoke, every voice heard), as
                                                      # (kind, claim, f) each; judged by what comes next
         self.imagined = 0
@@ -282,7 +286,9 @@ class Mind:
         slot = items[0][1] if items else SENSED
         if items:
             self.idle = 0
-            for unit, _ in items:
+            if not self.episode:
+                self.episode_start = self.t                # a run of items begins after a pause (F29 reads what was
+            for unit, _ in items:                          # lived before it)
                 self.episode.append(unit)
                 maybe_chunk(self, slot)
             self.episode = self.episode[-self.knob["F"]:]
@@ -718,7 +724,7 @@ class Mind:
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
-                  "unknown", "voice", "witnesses")
+                  "unknown", "voice", "witnesses", "episode_start")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}

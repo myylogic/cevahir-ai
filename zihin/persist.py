@@ -167,9 +167,10 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
     if manifest and mind.S.digest() != manifest["substance_digest"]:
         raise ValueError("substance digest does not match the manifest")
     for name, default in (("trace", list), ("value_sign", dict), ("dreams", list), ("unknown", float),
-                          ("voice", dict), ("dil", lambda: "tr"), ("witnesses", list)):  # minds saved before these existed (their text
-        if not hasattr(mind, name):                                 # was lower-cased by Turkish rules)
-            setattr(mind, name, default())
+                          ("voice", dict), ("dil", lambda: "tr"), ("witnesses", list),     # minds saved before
+                          ("episode_start", lambda: mind.t)):          # these existed (their text was lower-cased
+        if not hasattr(mind, name):                                 # by Turkish rules; the present run of items
+            setattr(mind, name, default())                          # is taken to begin at the moment of loading)
     import dataclasses
     for f in dataclasses.fields(type(mind.cfg)):                      # settings added after the mind was saved
         if f.name not in mind.cfg.__dict__:

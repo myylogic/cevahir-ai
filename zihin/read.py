@@ -425,6 +425,100 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
     return out[:4]
 
 
+def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, exact: bool) -> List[List[int]]:
+    """The keys under which each value a member x lived counts, in the order of ``targets``: the value itself, or the
+    relation it stands in to x (F12 SELF and NEXT, F26 START: the first that holds, before the value). F28 (``exact``):
+    the value itself always, and with it the most specific relation that names exactly that value as it would be
+    resolved for the read instance (SELF, then START, then NEXT)."""
+    if exact:
+        named: Dict[int, int] = {}
+        if relational:
+            if x in targets:
+                named[x] = SELF
+            if starts:
+                best = resolve(mind, START, x, fixed)
+                if best is not None and best not in named:
+                    named[best] = START
+            best = resolve(mind, NEXT, x, fixed)
+            if best is not None and best not in named:
+                named[best] = NEXT
+        return [[v, named[v]] if v in named else [v] for v in targets]
+    goes_on = _continuing(mind, x, fixed) if relational else ()
+    keys = []
+    for v in targets:
+        if relational and v == x:
+            keys.append([SELF])
+        elif starts and v not in fixed and begins_with(mind, x, v):
+            keys.append([START])                   # F26: v is how a sequence that began with x went on
+        elif v in goes_on:
+            keys.append([NEXT])
+        else:
+            keys.append([v])
+    return keys
+
+
+def member_analogy(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None) -> Dict[int, Tuple[float, float]]:
+    """F29 (Analogy by Interchangeability): what the members of a frame's category lived, carried over to the read
+    instance through the interchangeability of its filler y with each member x (read from the places both filled
+    before the present run of items, ``interchangeability``), by the analogy of NARS: from "x's instance went on with
+    v", (f1 = v's share of what it went on with, c1 = conviction of how much it lived), and "y and x are
+    interchangeable", (f2, c2):
+        f = f1 f2,   c = c1 c2 f2,   evidence w = k c / (1 - c), split by f
+    and the members' evidence adds (revision; each member's instance is one lived source). Keyed as member_votes keys
+    (values and relations). It says how firmly the frame's claims hold for this instance, never what they are: the
+    members' reading keeps the frequency of every claim (what all members agree on), and the conviction of the claim
+    for the instance is the stronger of the members' breadth (F11) and this depth (the conviction of the evidence
+    carried over). So a value one interchangeable member lived and the others did not stays a value the members
+    disagree on. A member never seen to fill a place with y carries nothing."""
+    S, k = mind.S, mind.cfg.k
+    kinds = mv_view(mind, "u_kind")
+    if exclude is None or not kinds[exclude] & COMPOSED:
+        return {}
+    parts = parts_of(mind, frame)
+    cats = {p for p in parts if kinds[p] & CATEGORY}
+    if len(cats) != 1:
+        return {}
+    category = cats.pop()
+    where = tuple(j for j, p in enumerate(parts) if p == category)
+    held = parts_of(mind, exclude)
+    if not where or len(held) <= where[0]:
+        return {}
+    y = held[where[0]]
+    fixed = tuple(p for p in parts if p != category)
+    relational = getattr(S, "bind_repeats", False)
+    starts = relational and getattr(mind.cfg, "starts", False)
+    exact = getattr(mind.cfg, "exact_relations", False)
+    since = getattr(mind, "episode_start", mind.t)
+    src = mv_view(mind, "t_src")
+    pooled: Dict[int, List[float]] = {}
+    for tie in S.inc.get((category, ABSTRACT), ()):
+        x = src[tie]
+        if x == y:
+            continue
+        instance = S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts)))
+        if instance is None or instance == exclude:
+            continue
+        w_pos, w_neg = interchangeability(mind, y, x, since)
+        if w_pos <= 0.0:
+            continue
+        targets, own = _world_pos(mind, instance, trust)
+        total = sum(own)
+        if total <= 0.0:
+            continue
+        f2 = frequency(w_pos, w_neg)
+        c = conviction(total, k) * conviction(w_pos + w_neg, k) * f2
+        if c <= 0.0:
+            continue
+        w = k * c / (1.0 - c)
+        for v, p, keys in zip(targets, own, _value_keys(mind, x, targets, fixed, relational, starts, exact)):
+            f = (p / total) * f2
+            for key in keys:
+                acc = pooled.setdefault(key, [0.0, 0.0])
+                acc[0] += f * w
+                acc[1] += (1.0 - f) * w
+    return {key: (p, n) for key, (p, n) in pooled.items()}
+
+
 def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None):
     """``member_mass`` and, fifth, how many members voted (the numerosity of the voice, F24)."""
     S, k = mind.S, mind.cfg.k
@@ -470,35 +564,10 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
         members += e_x
         voted += weight
         voters += 1
-        if exact:                                      # F28: a relation counts for a member only where it names
-            named: Dict[int, int] = {}                 # the very value the member lived, as it would be resolved
-            if relational:                             # for the read instance; of the relations naming the same
-                if x in targets:                       # value only the most specific counts (SELF, START, NEXT);
-                    named[x] = SELF                    # the value itself always counts
-                if starts:
-                    best = resolve(mind, START, x, fixed)
-                    if best is not None and best not in named:
-                        named[best] = START
-                best = resolve(mind, NEXT, x, fixed)
-                if best is not None and best not in named:
-                    named[best] = NEXT
-            for v, p in zip(targets, own):
-                share = weight * p / total
-                shares[v] = shares.get(v, 0.0) + share
-                if v in named:
-                    shares[named[v]] = shares.get(named[v], 0.0) + share
-            continue
-        goes_on = _continuing(mind, x, fixed) if relational else ()
-        for v, p in zip(targets, own):
-            if relational and v == x:
-                key = SELF
-            elif starts and v not in fixed and begins_with(mind, x, v):
-                key = START                            # F26: v is how a sequence that began with x went on
-            elif v in goes_on:
-                key = NEXT
-            else:
-                key = v
-            shares[key] = shares.get(key, 0.0) + weight * p / total
+        for v, p, keys in zip(targets, own, _value_keys(mind, x, targets, fixed, relational, starts, exact)):
+            share = weight * p / total
+            for key in keys:
+                shares[key] = shares.get(key, 0.0) + share
     if voted <= 0.0:
         return {}, 0.0, where, fixed, 0
     scale = members / voted                            # frequencies from the weighted votes, conviction from how
@@ -588,17 +657,21 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
             score *= voice_credibility(mind, kind)
             heard.append((kind,) + _claim(mind, unit, mass, where, fixed))
         if best is None or score > best[0]:
-            best = (score, e_abs, c_members, mass, where, fixed, kind, len(heard) - 1)
+            best = (score, e_abs, c_members, mass, where, fixed, kind, len(heard) - 1, general)
     out: Dict[int, float] = {}
     if best is not None:
-        _, e_abs, c_members, mass, where, fixed, kind, spoke = best
+        _, e_abs, c_members, mass, where, fixed, kind, spoke, frame = best
         c = cfg.lam * e_abs * c_members
         filler = parts_of(mind, unit)[where[0]] if where and mv_view(mind, "u_kind")[unit] & COMPOSED else None
+        carried = member_analogy(mind, frame, unit, trust) if getattr(cfg, "analogy", False) else {}
         for target, (w_pos, w_neg) in mass.items():
+            held = c                               # F29: what the members agree on is theirs (the frequency, all
+            if target in carried:                  # members); how firmly it holds for this instance is the stronger
+                held = max(c, conviction(sum(carried[target]), cfg.k))   # of breadth and interchangeable depth
+            e = held * frequency(w_pos, w_neg) + (1.0 - held) * 0.5
             target = resolve(mind, target, filler, fixed)
             if target is None:
                 continue
-            e = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
             out[target] = max(out.get(target, 0.0), e)
         if voices and trust is None:
             mind.__dict__.setdefault("voice", {})[unit] = (heard[spoke], heard)
@@ -627,6 +700,53 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     if getattr(cfg, "situations", False) and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
         for target, e in situation_backoff(mind, unit, trust).items():
             out[target] = max(out.get(target, 0.0), e)
+    return out
+
+
+def memberships_before(mind, unit: int, since: int) -> Dict[int, float]:
+    """F29: the categories ``unit`` was lived as a member of before the moment ``since``, with the expectation of each
+    membership: a membership born in the present run of items (the utterance being read) is left out, so that what is
+    being read cannot vouch for itself."""
+    S = mind.S
+    ties = S.out.get((unit, ABSTRACT, 0))
+    if not ties:
+        return {}
+    k = mind.cfg.k
+    dst, born = mv_view(mind, "t_dst"), mv_view(mind, "t_birth")
+    w_pos, w_neg = masses_py(mind, ties)
+    return {dst[t]: expectation(p, n, k) for t, p, n in zip(ties, w_pos, w_neg) if born[t] < since}
+
+
+def interchangeability(mind, y: int, x: int, since: int) -> Tuple[float, float]:
+    """F29: (W+, W-) of "y and x are interchangeable", read from the lived places both have filled before ``since``.
+
+    A category is a lived place: the fillers of one slot of contexts that differ only there. Each place both fill is
+    one piece of evidence that they stand for each other, as strong as both memberships are above 1/2 (m = 2e - 1, the
+    one rule's evidence above ignorance) and as telling as the place is specific: it is shared among its n members,
+    so a pair receives 1/(n - 1) of it (a place of two is a whole piece, one holding everything that ends an utterance
+    is almost none). A place where one is a member and the other is held not to be (e < 1/2) counts against:
+        W+ = sum_g (m_y m_x) / (n_g - 1)  over places with both m > 0
+        W- = sum_g |m_y m_x| / (n_g - 1)  over places with opposite signs
+    Reads only; memoised for the moment."""
+    memo = mind.__dict__.get("_read_memo")
+    key = ("interchange", y, x, since)
+    if memo is not None and key in memo:
+        return memo[key]
+    S = mind.S
+    cy, cx = memberships_before(mind, y, since), memberships_before(mind, x, since)
+    w_pos = w_neg = 0.0
+    for g in cy.keys() & cx.keys():
+        n = len(S.inc.get((g, ABSTRACT), ()))
+        if n < 2:
+            continue
+        m = (2.0 * cy[g] - 1.0) * (2.0 * cx[g] - 1.0) / (n - 1)
+        if cy[g] > 0.5 and cx[g] > 0.5:
+            w_pos += m
+        elif (cy[g] - 0.5) * (cx[g] - 0.5) < 0.0:
+            w_neg -= m
+    out = (w_pos, w_neg)
+    if memo is not None:
+        memo[key] = out
     return out
 
 

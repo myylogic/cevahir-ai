@@ -61,8 +61,9 @@ def test_the_switch_is_off_by_default_and_on_for_a_chat_mind():
     finally:
         chat._log_path = made
     assert speaking.starts is True and speaking.exclusive is True and speaking.exact_relations is True
-    assert {"starts", "exclusive", "exact_relations"} <= set(chat.NEWER)   # a mind raised before them lives without
-                                                                           # them (--ac)
+    assert speaking.analogy is True
+    assert {"starts", "exclusive", "exact_relations", "analogy"} <= set(chat.NEWER)   # a mind raised before them
+                                                                                      # lives without them (--ac)
 
 
 def test_beginnings_are_counted_exactly():
