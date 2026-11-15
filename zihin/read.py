@@ -26,7 +26,7 @@ import torch
 from .evidence import conviction, expectation, frequency
 from .form import (SMALL, categories_of, expectations, kind_masks, mass1, mass1_total, masses, masses_py, mv_view,
                    np_view, parts_of, trust_entry)
-from .store import ABSTRACT, CATEGORY, COMPOSED, EXPECT, F64, I64, PART, RELY, SLOTTED, W_NEG, W_POS
+from .store import ABSTRACT, ATOMIC, CATEGORY, COMPOSED, EXPECT, F64, I64, PART, RELY, SLOTTED, W_NEG, W_POS
 
 
 def _memo_key(mind, kind: str, unit: int, lag: int, trust: Optional[torch.Tensor]):
@@ -483,10 +483,58 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     if cfg.backoff and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
         for target, e in continuation_backoff(mind, unit, trust).items():
             out[target] = max(out.get(target, 0.0), e)
+    if getattr(cfg, "substitution", False) and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
+        for target, e in substitute_backoff(mind, unit, trust).items():
+            out[target] = max(out.get(target, 0.0), e)
     if getattr(cfg, "situations", False) and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
         for target, e in situation_backoff(mind, unit, trust).items():
             out[target] = max(out.get(target, 0.0), e)
     return out
+
+
+def substitute_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """Substitute Reading (with Substitution Evidence, zihin/anlam.py): a context never lived as a whole is read
+    through the lived contexts that differ from it in one word only, a word that shares a category with the one it
+    replaces. The strength of a replacement is s = (2 e(p -> g) - 1)(2 e(q -> g) - 1) for the shared category g that
+    gives the most (both memberships read by the one rule), and the replacement context speaks with its own lived
+    evidence held with conviction lam * s * conviction(its mass): e <- c f + (1 - c) 1/2. So "ismin ne ?" is met with
+    what followed "adın ne ?" only as far as ismin and adın are known to stand in the same places; a weak equivalence
+    cannot make the mind speak. Bounded effort: at most MEMBERS members of each category are tried."""
+    S, cfg = mind.S, mind.cfg
+    kinds = mv_view(mind, "u_kind")
+    if not kinds[unit] & COMPOSED:
+        return {}
+    parts = parts_of(mind, unit)
+    out: Dict[int, float] = {}
+    for pos, p in enumerate(parts):
+        if not kinds[p] & ATOMIC:
+            continue
+        strength: Dict[int, float] = {}
+        for g, e_pg in categories_of(mind, p):
+            if e_pg <= 0.5:
+                continue
+            for tie in list(S.inc.get((g, ABSTRACT), ()))[:MEMBERS]:
+                q = int(S.t_src[tie])
+                if q == p or not kinds[q] & ATOMIC:
+                    continue
+                e_qg = expectation(*mass1(mind, tie, trust), cfg.k)
+                if e_qg > 0.5:
+                    st = (2.0 * e_pg - 1.0) * (2.0 * e_qg - 1.0)
+                    if st > strength.get(q, 0.0):
+                        strength[q] = st
+        for q, st in strength.items():
+            other = S.tuple_index.get(parts[:pos] + (q,) + parts[pos + 1:])
+            if other is None:
+                continue
+            for target, (w_pos, w_neg) in own_mass(mind, other, 1, trust).items():
+                c = cfg.lam * st * conviction(w_pos + w_neg, cfg.k)
+                e = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
+                if e > out.get(target, 0.0):
+                    out[target] = e
+    return out
+
+
+MEMBERS = 200        # members of a category tried by the substitute reading (bounded effort)
 
 
 def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:

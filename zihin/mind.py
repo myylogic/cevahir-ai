@@ -84,6 +84,8 @@ class Config:
     born_failures: bool = False     # F25: a lag-1 tie born now starts with the failures a full record would hold: the
                                     # earlier moments its source was followed by something else on the target's
                                     # channel, per class (learn.learn_follow); off keeps every earlier result
+    substitution: bool = False      # Substitution Evidence (zihin/anlam.py): y standing where x was expected, with x's
+                                    # consequences after it, is inferred evidence that y belongs to x's categories
     rivals: bool = False            # F25 (b): the frequency of a lag-1 tie is read as its share of the positive mass of
                                     # its source's ties on the same channel (read.own_mass); off as before
     bind_repeats: bool = False      # F12: a unit occurring at several positions of a tuple is one slot (variable)
@@ -189,6 +191,7 @@ class Mind:
         self.idle = 0
         self.babbled = 0
         self.unknown = 0.0                           # L7: how much it did not know when the world last called on it
+        self.witnesses = []                          # Substitution Evidence: (expected, occurred) pairs to be judged
         self.voice: Dict[int, tuple] = {}            # F24: context -> (voice that spoke, every voice heard), as
                                                      # (kind, claim, f) each; judged by what comes next
         self.imagined = 0
@@ -263,6 +266,9 @@ class Mind:
             percepts.append((self._atom(channel, SELF_SYMBOL), 1.0, own, channel))
         learn_follow(self, percepts)                       # step 5 for the previous moment
         learn_value(self, percepts)                        # L5: a value signal reaches every step of the episode
+        if cfg.substitution:
+            from .anlam import substitution
+            substitution(self, items)                      # meaning: y where x was expected, judged by what follows
         if getattr(self, "voice", None):
             self.voice = {}                                # F24: the voices of the last moment have been judged
         surprise = self._surprise(percepts)
@@ -705,7 +711,7 @@ class Mind:
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
-                  "unknown", "voice")
+                  "unknown", "voice", "witnesses")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}

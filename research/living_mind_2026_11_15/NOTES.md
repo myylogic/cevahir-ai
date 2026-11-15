@@ -1478,3 +1478,23 @@ fresh load of a file saved in each form:
   bytes keys and values, the composed units' tuple index, the per-list array headers, and torch's own 484 MB on import.
 - Not yet built: the dormancy certificate (reading only the ties that can still change, from the one rule), and a
   memory-mapped file in which the long-term store stays on disk and only the region a moment reads comes into RAM.
+
+## Substitution Evidence and the Substitute Reading: a first measurement (2026-11-15)
+
+`zihin/anlam.py` and `read.substitute_backoff`, behind `Config.substitution` (off by default). A witness is a moment
+where the mind expected x (e > 1/2) and y occurred instead; at the next moment, what follows y is read against x's
+own lived continuations: if x led to it, inferred evidence is added to y's membership of x's categories, if x led
+elsewhere, evidence against (amount 2 |e - 1/2|). The Substitute Reading then lets a context never lived as a whole be
+read through the lived context that differs from it in one word sharing a category, held with conviction
+lam · s · conviction, s = (2 e(p→g) − 1)(2 e(q→g) − 1). No word list; every increment is logged.
+
+On the T-meaning world (3 seeds, 2 days, speaking configuration):
+
+- **It does what it is for at the level of memberships.** Shared categories rose for merhaba / selam 9.7 → 13.7,
+  merhaba / hello 1.0 → 4.3, merhaba / selamlar 1.0 → 2.7, doktor / hekim 3.3 → 5.0, cevap / yanıt 4.0 → 5.7.
+- **It does not yet change what the mind says.** The right first word's expectation rose for some never-watched
+  wordings (merhabalar 0.442 → 0.574, nasılsınız 0.442 → 0.574) but stayed under the line at which it would be said
+  (0.583); "ismin ne ?" stayed at 0.576. Greetings, paraphrase answers and the meaning questions are unchanged.
+- Lowering the speaking line would make the mind speak on weak evidence everywhere, so it was not done. The flag stays
+  off; what would carry a substitution over the line is stronger evidence of equivalence (more lived substitutions,
+  consequences across the turn), not a smaller threshold.
