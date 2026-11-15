@@ -6,8 +6,9 @@ What is pinned here
 * A word's pieces are its root (when it differs from the word), the suffixes the morphology splits off and its last
   syllable; words built alike share pieces ("yapıyorsun" / "gidiyorsun": "ek:sun"; "yapıyorsun" / "yaptım": the root).
 * Short words and punctuation have no pieces.
-* A new mind is raised with these pieces and they accompany each word as facets; a mind raised without pieces keeps
-  living without them; a mind raised with them keeps them.
+* Pieces are opt-in for a new mind (raised with them it grew about five times as many ties per moment); asked for,
+  they accompany each word as facets; a mind raised with them keeps them; a mind raised without them keeps living
+  without them.
 """
 from __future__ import annotations
 
@@ -31,9 +32,10 @@ def test_words_built_alike_share_pieces():
     assert pieces.tokenize("ve") == [] and pieces.tokenize("?") == []
 
 
-def test_a_new_mind_is_raised_with_pieces_and_keeps_them():
+def test_pieces_are_opt_in_for_a_new_mind_and_kept_once_lived():
     mind = speaking_mind()
-    pieces = pieces_for(mind)
+    assert pieces_for(mind) is None                        # opt-in: no pieces unless asked
+    pieces = pieces_for(mind, "cevahir")
     assert pieces is not None
     session = Session(mind, pieces)
     session.watch("ne yapıyorsun ?", "kitap okuyorum .")

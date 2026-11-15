@@ -28,7 +28,10 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
 - Oturum açıldığı andan itibaren zihin kendi zamanında yaşar; yalnız sorulunca çalışmaz. Yazdıklarınız bu yaşama
   girdi olarak düşer; söyledikleri kelime kelime, söyledikçe ekrana gelir. Siz yazmazken sessiz anlar yaşar: 10
   saniye sessizlikte son konunun en az bildiği kelimesi üzerine kendi içinde düşünür, 45 saniye sessizlikte
-  düşüncesi yeterince gerçekse konuşmayı kendisi başlatır, 10 dakika sessizlikte uyur (`--yasamsiz` ile kapatılır).
+  düşüncesi yeterince gerçekse onu söyler, değilse en çok merak ettiği kelimeyi sorar; 10 dakika sessizlikte uyur
+  (`--yasamsiz` ile kapatılır).
+- Kararsızlık: sırası geldiğinde iki iyi desteklenmiş cevap arasında kalırsa susmaz, sonucunu en az bildiği cevabı
+  dener. `!yanlis` dediğin bir cevabı bir dahaki sefer denemez, başka bir cevap dener; `!dogru` dediğini tutar.
 - Her sohbetin sonunda (Ctrl+C dahil) ve uzun sohbetlerde 50 cevapta bir öğrendikleri kendiliğinden kaydedilir.
 - Bilmemek: sıra kendisine geldiğinde söyleyecek bir şey bulamazsa, bir an geçer ve bilmediğini bir iç his olarak
   algılar. O anda ne denir, bunu yaşayarak öğrenir (`!kendini_tani` bu dersleri de verir): "bilmiyorum" der ve
@@ -40,12 +43,16 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
 - Hiç bütün olarak duymadığı bir söze, en çok benzeyen yaşanmış durumlarda ne söylendiyse onunla karşılık verebilir.
   Benzerlik zayıfsa (örneğin sözde bilmediği bir kelime varsa) uydurmaz.
 - Cevap uzunluğu sınırı 80 kelimedir; söyleyecek bir şeyi kalmayınca kendisi durur.
-- Yeni bir zihin, kelimeleri deponun kendi tokenizer altyapısındaki parçalarıyla birlikte yaşar: kök, ekler ve son
-  hece (`yapıyorsun` → kök `yap`, ekler `ıyor`, `sun`). Böyle yapılmış kelimeler birbirine benzer. Parçasız
-  büyümüş bir zihin parçasız devam eder (`--parca cevahir` ile açılabilir, `--parca yok` ile kapatılır).
-- 10 dakika sessizlikte uyur: son konu ve emin olmadığı kelimeler üzerine rüya görür (bir düşünceyi benzediği bir
-  kavrama taşıyarak hayal kurar), sonra hayallerini yaşadıklarıyla tartar. Hangi hayalinin doğru, hangisinin yanlış
-  çıktığını söyler; yanlış çıkan bir hayal silinmez, gerçek kanıt ona ağır basar. `!uyu` ile isteyince de uyur.
+- Kelime parçaları (isteğe bağlı): `--parca cevahir` ile yeni bir zihin kelimeleri deponun kendi tokenizer
+  altyapısındaki parçalarıyla birlikte yaşar: kök, ekler, gövde ve son hece (`yapıyorsun` → kök `yap`, ekler `ıyor`,
+  `sun`). Böyle yapılmış kelimeler birbirine benzer. Dikkat: doğuştan parçalarla büyüyen bir zihin an başına yaklaşık
+  beş kat bağ kurdu ve 219 bin anda belleği tüketti; bu yüzden varsayılan kapalı. Parçalarla büyümüş bir zihin
+  parçalarını korur.
+- 10 dakika sessizlikte uyur: günün konuları ve emin olmadığı kelimeler üzerine rüya görür. Rüya çağrışımla bağlanan
+  hayallerden oluşur: ortak kökten çıkarım ("kedi bir hayvandır" + "hayvanlar nefes alır" → "kedi nefes alır") ya da
+  bir düşünceyi benzediği bir kavrama taşımak. Bir kelimeyle birlikte gösterdiğin resmi rüyasında yeniden "görür".
+  Sonra hayallerini yaşadıklarıyla tartar; hangi hayalinin doğru, hangisinin yanlış çıktığını söyler. Yanlış çıkan
+  hayal silinmez, gerçek kanıt ona ağır basar. `!uyu` ile isteyince de uyur.
 
 ## Komutlar
 
@@ -56,7 +63,7 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
 | `!his` | iç sinyaller: şaşkınlık, rahatlama, çatışma, yük, dürtü |
 | `!yas` | gelişim profili: yaşanmış an, bildiği kelime, kurduğu kavram |
 | `!kendin` | iç gözlem: kendi sesiyle ne kadar konuştuğu, kendi içinde ne kadar düşündüğü, kendini en çok neyle bağladığı |
-| `!dusun [konu]` | iç sesini dinlemek: bir konu üzerine düşünür, benzeştirdiği bir kavrama aktararak hayal kurar; her hayalin gerçeklik puanı yazılır |
+| `!dusun [konu]` | iç sesini dinlemek: bir konu üzerine düşünür, benzeştirdiği bir kavrama aktararak hayal kurar ve ortak kökten çıkarım yapar; her hayalin gerçeklik puanı yazılır |
 | `!kim <ad>` | konuşan kişiyi değiştirmek |
 | `!gor <resim>` | bir resmi bir sonraki sözünüzle birlikte göstermek (örn. `!gor ben.jpg` sonra `ben muhammed`) |
 | `!dinle <ses.wav>` | bir sesi bir sonraki sözünüzle birlikte duyurmak (örn. `!dinle sesim.wav` sonra `bu benim sesim`) |

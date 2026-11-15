@@ -712,12 +712,13 @@ class Life:
 
 
 def pieces_for(mind, choice: str = None):
-    """Word pieces for this mind: the repository's own tokenizer ("cevahir") for a new mind and for a mind raised
-    with pieces, none ("yok") for a mind raised without them (a mind keeps how it was raised), or a ByteLevelBPE json
-    when one is named."""
+    """Word pieces for this mind: a mind raised with pieces keeps them, a mind raised without them keeps living
+    without them; a new mind lives without them unless asked ("cevahir": the repository's own tokenizer, or a
+    ByteLevelBPE json). Pieces are opt-in for new minds: raised with them from birth, a mind grew about five times
+    as many ties per moment (55 against 11) and ran out of memory at 219k moments (NOTES)."""
     import os
     lived = mind.ch.has(FACETS) and mind.ch.sizes()[mind.ch.id(FACETS)] > 0
-    choice = choice or ("cevahir" if mind.t == 0 or lived else "yok")
+    choice = choice or ("cevahir" if lived else "yok")
     if choice == "yok":
         return None
     repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -768,8 +769,8 @@ def main(argv=None) -> None:
     ap.add_argument("--yasamsiz", action="store_true", help="no life clock: the mind does not think or speak first "
                                                             "while you are silent")
     ap.add_argument("--parca", help="word pieces as facets: 'cevahir' (the repository's own tokenizer: root, suffixes, "
-                                    "last syllable; default for new minds and minds raised with pieces), 'yok' (none), "
-                                    "or a ByteLevelBPE json")
+                                    "stem, last syllable; kept by minds raised with pieces, opt-in for new minds: "
+                                    "they multiply the ties per moment), 'yok' (none), or a ByteLevelBPE json")
     ap.add_argument("--defter-yok", dest="no_ledger", action="store_true",
                     help="no experience ledger: smaller and faster, but !unut cannot retract")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
