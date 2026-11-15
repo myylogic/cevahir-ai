@@ -160,14 +160,16 @@ At each moment, roughly each word, the mind lives these steps:
   consequences it knows least instead of staying silent. It does this only at the start of its turn, or where good or
   bad was already met in this situation. An answer that was called wrong is not tried again next time; another one
   is.
-- **Think, then Speak.** The least certain words of what it heard call its knowledge to mind. These thoughts are
-  lived as inner voice with the imagined origin. If it has no answer at once, it says the first thought that is real
-  enough by lived evidence.
+- **Inner Voice.** With `!dusun`, or after ten seconds of silence, the mind thinks about the best topic of what it
+  last heard (the most telling and least known word). Its thoughts are lived as inner voice with the imagined origin
+  and can shape what it later decides only through what they leave in it; nothing is said for the mind. (Until
+  15 November 2026 the program also called thoughts before each reply and said the first real-enough one for the mind,
+  "Think, then Speak"; that injection was removed.)
 - **Felt Not-Knowing.** Not knowing is a measured inner state, not an output:
   `u = 1 − 2·max(0, best expectation − ½)`. The state is perceived on its own after a silent moment. What one says
   then is learned from the people the mind lives with and from its data; the core holds no sentence for it.
-  **Curiosity**, an innate reflex of the chat program, asks back the unknown word with a question tone. A mind that
-  has not lived how one says it asks the word back or stays silent. Hesitating between two strong answers is not not-knowing, and it does not raise the
+  How to ask is learned in the same way (the coded curiosity reflex that asked back an unknown word with '?' was
+  removed on 15 November 2026). A mind that has not lived how one says it stays silent. Hesitating between two strong answers is not not-knowing, and it does not raise the
   feeling.
 
 ## 7. Imagination, dreams and reasoning
@@ -288,7 +290,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |
-| Think, then Speak | Önce Düşün | T8 in conversation | |
+| Inner Voice | İç Ses | thinking lived as imagined (the earlier "Think, then Speak" injection was removed) | |
 | Trying in Hesitation | Kararsızlıkta Deneme | exploration | |
 | Shared-Stem Inference | Ortak Kök Çıkarımı | T8, second form | |
 | Online Life | Çevrimiçi Yaşam | lives in its own time during a session | |
@@ -330,14 +332,14 @@ you. Commands are typed at the program's prompt, not in the shell; each has an E
 !cik                              # !quit
 ```
 
-While it is open it lives in its own time: it thinks and may speak after a silence, and sleeps after ten minutes
-(`--yasamsiz` turns this off). The mind is saved at the end of every session to `~/.cevahir/zihin/cevahir.zihin`
+While it is open it lives in its own time: it lives silent moments, thinks inwardly after ten seconds of silence and
+sleeps after ten minutes (`--yasamsiz` turns this off); it says something only when its own decision produces words. The mind is saved at the end of every session to `~/.cevahir/zihin/cevahir.zihin`
 (Windows: `%USERPROFILE%\.cevahir\zihin\cevahir.zihin`; `CEVAHIR_HOME` changes the folder; `--kaydetme` does not
 save).
 
 The minds raised so far lived the author's private Turkish data and are not in this repository. Your copy learns the
-language you teach it with `!ogret` and `!oku`. Note that the text adapter lowers capital letters by
-Turkish rules (I becomes ı), which matters for other languages. After a dozen
+language you teach it with `!ogret` and `!oku`. For a language other than Turkish, start a new mind with `--dil diger`
+so that capital letters are lowered without Turkish rules (a mind keeps the rule it was raised with). After a dozen
 pairs it answers the questions it was shown; how much data a new language needs for questions it has not seen has
 not been measured. A mind file carries what it has read, so do not share a mind raised on private documents. Full
 guide (Turkish): [ZIHIN_KILAVUZ.md](ZIHIN_KILAVUZ.md).

@@ -64,14 +64,14 @@ programın içinde yazın:
 !cik                              # çıkış
 ```
 
-Açık kaldığı sürece kendi zamanında yaşar: düşünür, bir sessizliğin ardından kendiliğinden konuşabilir, on dakika
-sonra uyur (`--yasamsiz` bunu kapatır). Zihin her oturumun sonunda `~/.cevahir/zihin/cevahir.zihin` dosyasına
+Açık kaldığı sürece kendi zamanında yaşar: sessiz anlar yaşar, on saniye sessizlikten sonra içinden düşünür, on dakika
+sonra uyur (`--yasamsiz` bunu kapatır); bir şey söylemesi yalnız kendi kararı söz çıkarırsa olur. Zihin her oturumun sonunda `~/.cevahir/zihin/cevahir.zihin` dosyasına
 kaydedilir (Windows: `%USERPROFILE%\.cevahir\zihin\cevahir.zihin`; klasörü `CEVAHIR_HOME` değiştirir; `--kaydetme`
 kaydetmez).
 
 Şimdiye kadar yetiştirilen zihinler yazarın özel Türkçe verilerini yaşadı ve bu depoda değildir. Sizin kopyanız,
-`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Metin bağdaştırıcısının büyük harfleri Türkçe
-kurallarla küçülttüğünü (I → ı) unutmayın; bu başka diller için önemlidir. Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
+`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Türkçe dışında bir dil için yeni bir zihni `--dil diger`
+ile başlatın; böylece büyük harfler Türkçe kurallar olmadan küçültülür (bir zihin büyüdüğü kuralı korur). Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
 için ne kadar veri gerektiği ölçülmedi. Zihin dosyası okuduklarını içinde taşır; özel belgelerle yetiştirdiğiniz bir
 zihni paylaşmayın.
 
@@ -113,10 +113,10 @@ Kasım 2026'da Transformer'dan ayrı, yeni bir çekirdek üzerinde çalışmaya 
 - Aynı deneyim akışında küçük bir Transformer ile karşılaştırma (5 tohum × 2 dünya, aynı sorular; Zihin "members" ayarında): sorulan boyutu hiç söylenmemiş örneklerde Zihin %90 / %97 ve %75 / %95; yaşarken tek geçişte eğitilen Transformer %67 / %57 ve %60 / %50; akışın tamamında yakınsayana kadar eğitilen Transformer %77 / %67 ve %53 / %53. İkinci bir alan, tek geçişli Transformer'ın ilk alandaki doğruluğunu 0.85'ten 0.74'e düşürür, Zihin'de 1.00 kalır. Sohbet programının çalıştırdığı ayar bu karşılaştırmada yoktu ve bu dünyalarda kötü sonuç verir (600 deneyimde 0.55 ve 0.04). Tek bir deneyimi geri almak Zihin'de 20–77 ms ve tamdır; Transformer'da tam karşılığı sıfırdan yeniden eğitimdir. Bu karşılaştırma az veriyle yaşarken öğrenme koşulundadır; Transformer'lar küçüktür ve çok daha fazla veriyle fark kapanabilir.
 - Sohbet: izlediği diyalogları söyler; izlemediği sorulara ilişki kurarak cevap verir ("kuş ne yapar" → "kuş öter"); bilmediğinde susar; "yanlış" denen kopyalanmış bir cevabı bir daha söylemez.
 - Görür ve duyar (ilk sürüm): resim ve ses dosyalarını eğitilmiş bir ağ olmadan, piksel ve ses aritmetiğiyle algılar ve benzerlikle tanır. Yeni resimlerde %73 / %83 / %67, yeni seslerde %93 / %97 / %93 doğru (şans %33; benzerlik kapalıyken %0).
-- Merak ve hayal (ilk biçimler): söyleyecek bir şeyi yokken bilmediği kelimeyi soru tonuyla geri sorar, açıklananı öğrenip kullanır (T4). Bir düşünceyi yapıca benzediği bir kavrama taşıyarak hayal kurar ve her adımın gerçekliğini yaşanmış kanıta göre ölçer (T8).
+- Hayal (ilk biçim): bir düşünceyi yapıca benzediği bir kavrama taşıyarak hayal kurar ve her adımın gerçekliğini yaşanmış kanıta göre ölçer (T8).
 - Uyku ve rüya: uykuda son konu ve emin olmadığı kelimeler üzerine rüya görür. Rüya, çağrışımla birbirine bağlanan hayallerden oluşur; bir kelimeyle birlikte gördüğü resmi rüyasında yeniden "görür". Sonra hayallerini yaşadıklarıyla tartar, önceki rüyalarından hangisinin doğru, hangisinin yanlış çıktığını söyler ve kendi hayallerine ne kadar güveneceğini buradan öğrenir. Yanlış çıkan hayal silinmez; gerçek kanıt ona ağır basar.
-- Bilmemek ve düşünmek: sıra kendisine geldiğinde hemen bir cevabı yoksa, duyduğu kelimelerin çağrıştırdığı düşüncelerden yeterince gerçek olanı söyler. Bu gerçeklik, yaşanmış kanıta göre ölçülür. Öyle bir düşünce de yoksa bilmediğini bir iç his olarak algılar ve "bilmiyorum" demeyi yaşayarak öğrenir. Bilmediği kelimeyi sorar.
-- Çevrimiçi yaşam: oturum açıldığı andan itibaren kendi zamanında yaşar. Söyledikleri kelime kelime akar. Sessizlikte düşünür, konuşmayı kendisi başlatır ya da en çok merak ettiği kelimeyi sorar, uzun sessizlikte uyur.
+- Bilmemek ve düşünmek: sıra kendisine geldiğinde hemen bir cevabı yoksa bir sessiz an geçer; bu anda bilmediğini bir iç his olarak algılayabilir ve yeniden karar verir. Söylediği, yalnız kendi kararlarının çıkardığı sözlerdir. Bilmediğini nasıl söyleyeceğini ve nasıl soru soracağını birlikte yaşadığı insanlardan ve verilerinden öğrenir. 15 Kasım 2026'ya kadar sohbet programında zihin adına konuşan kodlanmış refleksler vardı (bilinmeyen kelimeyi '?' ile geri sorma, bir düşünceyi onun yerine söyleme, sessizlikten sonra ilk sözü kodla başlatma); o gün kaldırıldı. Bu yüzden yeni bir zihin, nasıl cevap vereceğini yaşayana kadar susar.
+- Çevrimiçi yaşam: oturum açıldığı andan itibaren kendi zamanında yaşar. Söyledikleri kelime kelime akar. Sessizlikte sessiz anlar yaşar (bir şey söylemesi yalnız kendi kararı söz çıkarırsa olur), 10 saniye sonra içinden düşünür, 10 dakika sonra uyur; bu iki süre şimdilik doğuştan bir ritimdir, ileride zihnin kendi kanıtından okunabilir.
 - Türkçe yapısı (isteğe bağlı): `--parca cevahir` ile bir zihin kelimeleri deponun kendi tokenizer altyapısından gelen kök, ek ve gövde parçalarıyla birlikte yaşar; böyle yapılmış kelimeler birbirine benzer. Doğuştan parçalarla büyüyen bir zihin an başına yaklaşık beş kat bağ kurup belleği tükettiği için varsayılan kapalıdır.
 - Kodu sonucundan öğrenmek (ilk test): altı küçük fonksiyonda önce çoğunlukla yanlış tamamlamalar izler, sonra kendi yazdığı kod gerçekten çalıştırılır ve test sonucu iyi/kötü sinyali olarak geri döner. Kararsız kaldığında sonucunu en az bildiği seçeneği dener. 4. turda altı görevin hepsinde testten geçen kod yazar; sonuç sinyali olmadan %0, deneme olmadan %11'de kalır.
 - Öğrenmeyi öğrenmek (F24, varsayılan kapalı): hangi tür "sese" (kaç üye konuşuyor, ne kadar hemfikirler) ne kadar güvenileceğini kendi sonuçlarından öğrenir ve bunu yeni bir alana taşır. Bir yönde erken öğrenme hızlanır (+0.058 ± 0.025; 10 hayatın 7'sinde daha iyi), ters yönde hızlanmaz; sonuç karışıktır.

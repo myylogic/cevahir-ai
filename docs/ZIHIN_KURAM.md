@@ -147,14 +147,16 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
 - **Kararsızlıkta Deneme (Trying in Hesitation):** iyi desteklenen seçenekler arasında kalındığında susmak yerine,
   sonucunu en az bildiği denenir. Bu yalnız sıra yeni geldiğinde ya da o durumda daha önce iyi veya kötü bir sonuç
   yaşanmışsa olur. "Yanlış" denen bir cevap bir dahaki sefer denenmez, başka bir cevap denenir.
-- **Önce Düşün (Think, then Speak):** duyulan sözün en az emin olunan kelimeleri, zihne bildiklerini çağrıştırır.
-  Bunlar iç ses olarak, hayal kökeniyle yaşanır. Hemen bir cevap yoksa, yaşanmış kanıta göre yeterince gerçek olan
-  ilk düşünce söylenir.
+- **İç Ses (Inner Voice):** `!dusun` ile ya da on saniyelik bir sessizlikten sonra zihin, son duyduğu sözün en iyi
+  konusu (en ayırt edici ve en az bilinen kelime) üzerine düşünür. Düşünceleri iç ses olarak, hayal kökeniyle yaşanır
+  ve zihnin sonraki kararlarını yalnız onda bıraktıklarıyla etkileyebilir; zihin adına hiçbir şey söylenmez.
+  (15 Kasım 2026'ya kadar program her cevaptan önce düşünceler çağırıp yeterince gerçek ilkini onun yerine
+  söylüyordu, "Önce Düşün"; bu kaldırıldı.)
 - **Bilmeme Hissi (Felt Not-Knowing):** bilmemek bir çıktı değil, ölçülen bir iç haldir:
   `u = 1 − 2·max(0, en iyi beklenti − ½)`. Bu hal bir sessiz anın ardından tek başına algılanır. O anda ne
   denileceği, zihnin birlikte yaşadığı insanlardan ve verilerinden öğrenilir; çekirdekte bunun için hazır bir cümle
-  yoktur. Sohbet programındaki doğuştan bir refleks olan **merak**, bilinmeyen kelimeyi soru tonuyla geri sorar. Bunu
-  nasıl söyleyeceğini yaşamamış bir zihin kelimeyi geri sorar ya da susar. İki güçlü cevap
+  yoktur. Soru sormak da aynı yolla öğrenilir (bilinmeyen kelimeyi '?' ile geri soran kodlanmış merak refleksi 15 Kasım
+  2026'da kaldırıldı). Bunu nasıl söyleyeceğini yaşamamış bir zihin susar. İki güçlü cevap
   arasında kalmak bilmemek değildir; o durumda bilmeme hissi doğmaz.
 
 ## 7. Hayal, rüya ve akıl
@@ -274,7 +276,7 @@ Hepsi notlarda ölçümleriyle durur.
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |
-| Önce Düşün | Think, then Speak | T8 sohbette | |
+| İç Ses | Inner Voice | hayal olarak yaşanan düşünme (önceki "Önce Düşün" kodu kaldırıldı) | |
 | Kararsızlıkta Deneme | Trying in Hesitation | keşif | |
 | Ortak Kök Çıkarımı | Shared-Stem Inference | T8 ikinci biçim | |
 | Çevrimiçi Yaşam | Online Life | oturum boyunca kendi zamanında yaşar | |
@@ -316,13 +318,13 @@ yazılır:
 !cik                              # çıkış
 ```
 
-Açık kaldığı sürece kendi zamanında yaşar: düşünür, bir sessizliğin ardından kendiliğinden konuşabilir, on dakika
-sonra uyur (`--yasamsiz` bunu kapatır). Zihin her oturumun sonunda `~/.cevahir/zihin/cevahir.zihin` dosyasına
+Açık kaldığı sürece kendi zamanında yaşar: sessiz anlar yaşar, on saniye sessizlikten sonra içinden düşünür, on dakika
+sonra uyur (`--yasamsiz` bunu kapatır); bir şey söylemesi yalnız kendi kararı söz çıkarırsa olur. Zihin her oturumun sonunda `~/.cevahir/zihin/cevahir.zihin` dosyasına
 kaydedilir (Windows: `%USERPROFILE%\.cevahir\zihin\cevahir.zihin`; klasörü `CEVAHIR_HOME` değiştirir; `--kaydetme`
 kaydetmez).
 
 Şimdiye kadar yetiştirilen zihinler yazarın özel Türkçe verilerini yaşadı ve bu depoda değildir. Sizin kopyanız,
-`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Metin bağdaştırıcısının büyük harfleri Türkçe
-kurallarla küçülttüğünü (I → ı) unutmayın; bu başka diller için önemlidir. Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
+`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Türkçe dışında bir dil için yeni bir zihni `--dil diger`
+ile başlatın; böylece büyük harfler Türkçe kurallar olmadan küçültülür (bir zihin büyüdüğü kuralı korur). Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
 için ne kadar veri gerektiği ölçülmedi. Zihin dosyası okuduklarını içinde taşır; özel belgelerle yetiştirdiğiniz bir
 zihni paylaşmayın. Ayrıntılı kılavuz: [ZIHIN_KILAVUZ.md](ZIHIN_KILAVUZ.md).

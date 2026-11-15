@@ -26,19 +26,19 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
 ## Yaşam (çevrimiçi)
 
 - Oturum açıldığı andan itibaren zihin kendi zamanında yaşar; yalnız sorulunca çalışmaz. Yazdıklarınız bu yaşama
-  girdi olarak düşer; söyledikleri kelime kelime, söyledikçe ekrana gelir. Siz yazmazken sessiz anlar yaşar: 10
-  saniye sessizlikte son konunun en az bildiği kelimesi üzerine kendi içinde düşünür, 45 saniye sessizlikte
-  düşüncesi yeterince gerçekse onu söyler, değilse en çok merak ettiği kelimeyi sorar; 10 dakika sessizlikte uyur
-  (`--yasamsiz` ile kapatılır).
+  girdi olarak düşer; söyledikleri kelime kelime, söyledikçe ekrana gelir. Siz yazmazken sessiz anlar yaşar ve
+  bir şey söylemesi yalnız kendi kararı söz çıkarırsa olur; 10 saniye sessizlikte son duyduğu sözün en iyi konusu
+  üzerine içinden düşünür, 10 dakika sessizlikte uyur (`--yasamsiz` ile kapatılır). Bu iki süre şimdilik doğuştan bir
+  ritimdir.
 - Kararsızlık: sırası geldiğinde iki iyi desteklenmiş cevap arasında kalırsa susmaz, sonucunu en az bildiği cevabı
   dener. `!yanlis` dediğin bir cevabı bir dahaki sefer denemez, başka bir cevap dener; `!dogru` dediğini tutar.
 - Her sohbetin sonunda (Ctrl+C dahil) ve uzun sohbetlerde 50 cevapta bir öğrendikleri kendiliğinden kaydedilir.
 - Bilmemek: sıra kendisine geldiğinde söyleyecek bir şey bulamazsa, bir an geçer ve bilmediğini bir iç his olarak
   algılar. O anda ne denir, bunu sizinle ve verileriyle yaşayarak öğrenir; çekirdekte bunun için hazır bir cümle yoktur.
-  Bilmediği kelimeyi soru tonuyla sorar ("kuantum ?"). Açıkladığınızı öğrenir ve sonra kullanır.
-- Önce düşünür, sonra konuşur: duyduğu sözün en az emin olduğu kelimeleri ona bildiklerini çağrıştırır (iç sesi,
-  hayal olarak yaşanır ve yaşanmış kanıta göre gerçekliği ölçülür). Hemen bir cevabı yoksa, yeterince gerçek olan
-  ilk düşüncesini söyler; yoksa bilmediğini hisseder.
+  Nasıl soru soracağını da yaşayarak öğrenir; kodlanmış bir merak refleksi yoktur. Açıkladığınızı öğrenir ve sonra
+  kullanır.
+- İç ses: `!dusun` ile ya da on saniyelik sessizlikten sonra, son duyduğu sözün en iyi konusu üzerine içinden düşünür
+  (hayal olarak yaşanır, yaşanmış kanıta göre gerçekliği ölçülür). Onun yerine hiçbir düşünce söylenmez.
 - Hiç bütün olarak duymadığı bir söze, en çok benzeyen yaşanmış durumlarda ne söylendiyse onunla karşılık verebilir.
   Benzerlik zayıfsa (örneğin sözde bilmediği bir kelime varsa) uydurmaz.
 - Cevap uzunluğu sınırı 80 kelimedir; söyleyecek bir şeyi kalmayınca kendisi durur.
