@@ -307,7 +307,10 @@ def test_ledger_pack_is_id_sorted_and_subsettable(base, address):
     assert torch.equal(pa.KU, pb.KU) and torch.equal(pa.R, pb.R) and torch.equal(pa.Y, pb.Y)
     assert a.sha256() == b.sha256()
     sub = a.pack(address, sorted(eps)[:2])
-    assert sub.n == 2 and torch.equal(sub.KU, pa.KU[:2])
+    assert sub.n == 2
+    # the address embedding is one batched matmul: BLAS does not promise bit-identical rows across batch sizes
+    # (seen on CI), so the subset's rows are compared with float64 rounding allowed and nothing more
+    torch.testing.assert_close(sub.KU, pa.KU[:2], rtol=0.0, atol=1e-12)
     with pytest.raises(ValueError):
         EP.EpisodeLedger().pack(address)
 
