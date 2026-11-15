@@ -301,7 +301,7 @@ class Substance:
     _UNIT_ARRAYS = ("u_kind", "u_channel", "u_symbol", "u_arity", "u_birth", "u_use", "u_alive")
     _TIE_ARRAYS = ("t_src", "t_dst", "t_form", "t_lag", "t_cls", "t_row", "t_use", "t_last", "t_birth", "t_alive")
     _ROW_ARRAYS = ("r_tie", "r_was")
-    _CACHES = ("_out_ids", "_views", "_class_ids", "_npv", "_parts", "_slot_keys", "_touch", "_touch1", "_lut")
+    _CACHES = ("_out_ids", "_views", "_class_ids", "_npv", "_parts", "_slot_keys", "_lut")
 
     def __getstate__(self):
         """Saved and copied without the spare capacity (the rows beyond n_units / n_ties / n_rows are zeros); the
@@ -323,10 +323,12 @@ class Substance:
 
     def __setstate__(self, state) -> None:
         t_w = state.pop("t_w", None)
-        state.pop("_touched", None)              # the per-moment set of minds saved before ``_touch``
+        touched = state.pop("_touched", None)    # the moment's touched ties as kept before ``_touch`` (a set)
         state.pop("_views", None)
         self.__dict__.update(state)
-        self._out_ids, self._npv, self._parts, self._touch, self._touch1 = {}, None, {}, [], []
+        self._out_ids, self._npv, self._parts = {}, None, {}
+        self.__dict__.setdefault("_touch", [])
+        self.__dict__.setdefault("_touch1", sorted(touched) if touched else [])
         self.__dict__.setdefault("version", 0)
         if t_w is not None:                      # saved before the narrow layout: the same values, stored anew
             self._from_tables(t_w)
