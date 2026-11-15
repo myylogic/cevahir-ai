@@ -1811,3 +1811,56 @@ the final form, "hi" is answered from its told meaning in 1 of 3 seeds, as befor
 - **Prior work.** Interchangeability from shared contexts is the distributional hypothesis (Harris), weighted as
   telling places are, and the carrying over is NARS's analogy rule. What is ours is reading both from the mind's own
   induced places, at the moment of use, inside the members' reading.
+
+## Corroboration (F30): independent lived evidence about the same claim adds up (2026-11-15)
+
+**The gap.** The members' reading lets one frame speak and consults the situations most like the present one (F23)
+only when nothing else expects anything. Two independent readings that agree never add up. For "peki adın ne ?", the
+frame `[X] adın ne <end>` (its one member: "senin adın ne ?", lived four times) said "adım" at 0.567, and the bare
+lived question "adın ne ?" (twelve times), found by F23, said it at 0.547. Each stayed under the speaking line alone.
+
+**F30** (`read.corroborated`, `Config.corroborate`, on in the speaking configuration):
+
+- **The revision.** The claims of the frame that speaks are revised with what the lived situations most like the
+  present one say about the same values, by the revision rule of NARS. Each reading's (f, c) is turned into evidence
+  w = k c / (1 - c), and the evidence adds: W+ = f1 w1 + f2 w2, W- = (1 - f1) w1 + (1 - f2) w2.
+- **Disagreement counts.** A value's share of the situations' votes is f2, so situations that went on otherwise count
+  against it.
+- **No lived context is counted twice.** The situations leave out the frame's members' instances, and every frame:
+  a frame is a generalisation, not a lived situation, and its own ties hold its members' evidence as literal values.
+- **Values only the situations claim** are left to F23's own reading, which speaks when nothing else does.
+
+**A latent fault found on the way.** F23 itself counts frames among the lived situations, because a frame holds the
+same words at the same places. In its fallback use this lets a frame's literal values vote. In the toy of
+`test_zihin_exact_relations.py` with loose relations, it voted "armut" and "kiraz" against the SELF relation, and the
+first corroboration silenced "muz nedir ?". Corroboration now reads only lived situations. F23's own fallback is left
+as it was for now (changing it changes every F23 answer and needs its own measurement).
+
+**Measured** (`meaning_switches.py --set corroborate=0|1` with F26–F29 on; `speaking_worlds.py --listen`;
+`recall_once.py`):
+
+| | F29 | F29 + F30 |
+|---|---|---|
+| meaning world, a greeting in front (selam, selamlar, hello, hi) | 0.67 | **1.00** |
+| meaning world, an extra word ("peki adın ne ?") | 0.33 | **0.67** |
+| meaning world, synonyms | 0.56 | **0.67** |
+| meaning world, form variant / restructured | 0 / 0 | 0 / 0, all silent |
+| greetings and meaning questions | | same replies |
+| listening worlds, held-out at 600 | 0.783 / 0.812 | 0.783 / 0.812 |
+| teacher protocol, taught form | 120 | 120 |
+| template-free recall, two words / one word (valid) | 146 / 47 | 146 / 47 |
+
+- **The meaning world over the day.**
+  - A greeting in front: 0.17 → 0.67 (F29) → 1.00 (F30).
+  - Synonyms: 0.33 → 0.56 → 0.67.
+  - An extra word: 0.33 → 0.67.
+  - The five hard wordings stayed silent throughout ("adını söyler misin ?", "nasılsınız ?", "keyfin nasıl ?", "ne
+    haber ?", "evin nerede ?").
+- **The worlds of the first lives do not change.** They hold no perceived event inside an utterance, so F23 finds no
+  situation there. Recall from one reading does not change either (the inner voice brings words to mind without one).
+- **A narrow life generalises what it lived.** In a toy where every "... ne ?" question was the name question, "keyfin
+  ne ?" is answered with the name: the induction from what it lived, pinned in `test_zihin_corroboration.py`. Where
+  other "... ne ?" questions had other answers, it stays silent.
+- **Cost.** About 13% slower answers in the teacher protocol (F23 is now read whenever a frame speaks after a
+  perceived event).
+- **Exactness.** With the switch off, all 17 configurations are bit-identical and the lesson-free gate is unchanged.

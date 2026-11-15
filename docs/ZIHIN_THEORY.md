@@ -154,6 +154,10 @@ At each moment, roughly each word, the mind lives these steps:
   of NARS); the members still decide what is claimed, the analogy only how firmly it holds. "selam , adın ne ?" is now
   answered like the lived "merhaba , adın ne ?", and "ismin ne ?" like "adın ne ?" where adın and ismin filled the same
   places in what was read; a word never met carries nothing over.
+- **Corroboration (F30).** Independent lived evidence about the same claim adds up (the revision rule of NARS): the
+  claims of the frame that speaks are revised with what the most similar lived situations say about the same values,
+  each lived context counted once. "peki adın ne ?" is answered because the frame of questions with a word before
+  "adın ne" and the lived bare question agree; where similar situations disagree, nothing is added.
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -335,6 +339,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Lived Exclusion | Yaşanmış Dışlama | F27 | |
 | Exact Relations | Kesin İlişkiler | F28 | |
 | Analogy by Interchangeability | Yerine Geçebilirlik Benzetmesi | F29 | the distributional hypothesis; NARS analogy |
+| Corroboration | Bağımsız Kanıtların Birleşmesi | F30 | NARS revision |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

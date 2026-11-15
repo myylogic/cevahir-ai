@@ -205,6 +205,27 @@ def excluded(mind, out: Dict[int, float], own: Dict[int, Tuple[float, float]]) -
             out[target] = (1.0 - conviction(total, k)) * out[target]
 
 
+def corroborated(mind, unit: int, trust, frame: int, claims: Dict[int, Tuple[float, float, float]],
+                 out: Dict[int, float]) -> None:
+    """F30 (Corroboration): independent lived evidence about the same claim adds up (the revision rule of NARS).
+    The claims of the frame that spoke (for each value: its conviction and frequency) are revised with what the lived
+    situations most like the present one (F23) say about the same value, counting only lived situations the frame's
+    reading did not count (its members' instances and every frame are left out, so no lived context is counted twice):
+        w = k c / (1 - c) for each reading;  W+ = f1 w1 + f2 w2,  W- = (1 - f1) w1 + (1 - f2) w2
+    f2 is the value's share of the situations' votes: situations that went on otherwise count against it. Values only
+    the situations claim are left to F23's own reading (it speaks when nothing else does). Writes into ``out``."""
+    k = mind.cfg.k
+    c_sit, shares = situation_evidence(mind, unit, trust, frozenset(_member_instances(mind, frame, unit)),
+                                       lived_only=True)
+    if c_sit <= 0.0:
+        return
+    w2 = k * c_sit / (1.0 - c_sit)
+    for target, (_, held, f) in claims.items():
+        w1 = k * held / (1.0 - held)
+        f2 = shares.get(target, 0.0)
+        out[target] = expectation(f * w1 + f2 * w2, (1.0 - f) * w1 + (1.0 - f2) * w2, k)
+
+
 def _begins(mind, unit: int) -> bool:
     """F26: ``unit`` is the present context and the whole present episode, one item after a pause: the moment is the
     beginning of a sequence."""
@@ -519,6 +540,25 @@ def member_analogy(mind, frame: int, exclude: int, trust: Optional[torch.Tensor]
     return {key: (p, n) for key, (p, n) in pooled.items()}
 
 
+def _member_instances(mind, frame: int, exclude: int) -> set:
+    """F30: the lived contexts the members' reading of ``frame`` counts (its members' instances, the read one left out)."""
+    S = mind.S
+    parts = parts_of(mind, frame)
+    kinds = mv_view(mind, "u_kind")
+    cats = {p for p in parts if kinds[p] & CATEGORY}
+    if len(cats) != 1:
+        return set()
+    category = cats.pop()
+    where = tuple(j for j, p in enumerate(parts) if p == category)
+    src = mv_view(mind, "t_src")
+    found = set()
+    for tie in S.inc.get((category, ABSTRACT), ()):
+        instance = S.tuple_index.get(tuple(src[tie] if j in where else p for j, p in enumerate(parts)))
+        if instance is not None and instance != exclude:
+            found.add(instance)
+    return found
+
+
 def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None):
     """``member_mass`` and, fifth, how many members voted (the numerosity of the voice, F24)."""
     S, k = mind.S, mind.cfg.k
@@ -664,15 +704,22 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
         c = cfg.lam * e_abs * c_members
         filler = parts_of(mind, unit)[where[0]] if where and mv_view(mind, "u_kind")[unit] & COMPOSED else None
         carried = member_analogy(mind, frame, unit, trust) if getattr(cfg, "analogy", False) else {}
+        corroborate = getattr(cfg, "corroborate", False) and getattr(cfg, "situations", False)
+        claims: Dict[int, Tuple[float, float, float]] = {}
         for target, (w_pos, w_neg) in mass.items():
             held = c                               # F29: what the members agree on is theirs (the frequency, all
             if target in carried:                  # members); how firmly it holds for this instance is the stronger
                 held = max(c, conviction(sum(carried[target]), cfg.k))   # of breadth and interchangeable depth
-            e = held * frequency(w_pos, w_neg) + (1.0 - held) * 0.5
+            f = frequency(w_pos, w_neg)
+            e = held * f + (1.0 - held) * 0.5
             target = resolve(mind, target, filler, fixed)
             if target is None:
                 continue
             out[target] = max(out.get(target, 0.0), e)
+            if corroborate and (target not in claims or e > claims[target][0]):
+                claims[target] = (e, held, f)
+        if claims:
+            corroborated(mind, unit, trust, frame, claims, out)
         if voices and trust is None:
             mind.__dict__.setdefault("voice", {})[unit] = (heard[spoke], heard)
     own = own_mass(mind, unit, 1, trust)
@@ -796,6 +843,22 @@ MEMBERS = 200        # members of a category tried by the substitute reading (bo
 
 
 def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F23: a situation never lived as a whole is met with what followed the lived situations most like it (see
+    ``situation_evidence``): e = c f + (1 - c) 1/2 for every value the voters lived."""
+    if not mv_view(mind, "u_kind")[unit] & COMPOSED:
+        return {}
+    key = (unit, mind.t, id(trust) if trust is not None else None)
+    cache = getattr(mind, "_situation_cache", None)
+    if cache is not None and cache[0] == key:
+        return cache[1]
+    c, shares = situation_evidence(mind, unit, trust)
+    out = {v: c * share + (1.0 - c) * 0.5 for v, share in shares.items()}
+    mind._situation_cache = (key, out)
+    return out
+
+
+def situation_evidence(mind, unit: int, trust: Optional[torch.Tensor] = None, leave_out=frozenset(),
+                       lived_only: bool = False):
     """F23: a situation never lived as a whole is met with what followed the lived situations most like it.
 
     The situation is the present context: someone's utterance up to its perceived end (the turn end), and what the
@@ -806,14 +869,13 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
     has; it must share a word of the utterance, not only punctuation and the end. Each such context votes its own
     evidence on what came next, weighted exp(-F (1 - s)) as exemplars are (GCM, as F18). The votes are held with
     conviction lam * s * conviction(voters), s the voters' weighted similarity: a weak resemblance (an unknown word
-    in the utterance) cannot make the mind speak and leaves room for its curiosity."""
+    in the utterance) cannot make the mind speak and leaves room for its curiosity.
+    Returns (c, {value: its share f of the votes}); (0, {}) when no lived situation votes. ``leave_out``: lived
+    contexts not to count (F30: those another reading has already counted). ``lived_only``: frames are left out too
+    (a frame is a generalisation, not a lived situation: its own evidence is its members', literal values only)."""
     S, cfg = mind.S, mind.cfg
     if not mv_view(mind, "u_kind")[unit] & COMPOSED:
-        return {}
-    key = (unit, mind.t, id(trust) if trust is not None else None)
-    cache = getattr(mind, "_situation_cache", None)
-    if cache is not None and cache[0] == key:
-        return cache[1]
+        return 0.0, {}
     heard = parts_of(mind, unit)
     n = len(heard)
     channels = mv_view(mind, "u_channel")
@@ -822,7 +884,6 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
     for j, p in enumerate(heard):
         if sense[channels[p]]:
             event = j
-    out: Dict[int, float] = {}
     if n >= 2 and event >= 1:
         d_event = n - 1 - event
         symbols = mv_view(mind, "u_symbol")
@@ -866,7 +927,10 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
         shares: Dict[int, float] = {}
         voted = similar = 0.0
         voters = 0
+        kinds = mv_view(mind, "u_kind")
         for t, u in lived:
+            if u in leave_out or (lived_only and kinds[u] & SLOTTED):
+                continue
             L = len(t)
             same = [d for d in range(min(n, L)) if t[L - 1 - d] == heard[n - 1 - d]]
             if not any(word(heard[n - 1 - d]) for d in same if d > d_event):   # a word of the utterance itself
@@ -886,9 +950,8 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
                 shares[v] = shares.get(v, 0.0) + g * p / total
         if voted > 0.0:
             c = cfg.lam * (similar / voted) * conviction(float(voters), cfg.k)
-            out = {v: c * (w / voted) + (1.0 - c) * 0.5 for v, w in shares.items()}
-    mind._situation_cache = (key, out)
-    return out
+            return c, {v: w / voted for v, w in shares.items()}
+    return 0.0, {}
 
 
 def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:

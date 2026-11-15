@@ -90,6 +90,8 @@ class Config:
                                     # only where it names the very value the member lived; the value itself always counts
     exclusive: bool = False         # F27 (Lived Exclusion): what an instance was lived to be followed by on a channel
                                     # counts against what a generalisation proposes there that it never went on with
+    corroborate: bool = False       # F30 (Corroboration): the claims of the frame that speaks are revised with what the
+                                    # lived situations it did not count (F23) say about the same values (NARS revision)
     analogy: bool = False           # F29 (Analogy by Interchangeability): what a frame's members lived carries over to
                                     # the read instance as far as its filler is interchangeable with them (NARS analogy),
                                     # interchangeability read from the lived places both have filled
