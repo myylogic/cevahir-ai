@@ -28,6 +28,7 @@ import hashlib
 import os
 import pickle
 from array import array
+from bisect import bisect_left
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -75,6 +76,148 @@ def tie_key(src: int, dst: int, form: int, lag: int) -> int:
     4-tuple. Units and ties are below 2^31, a form below 2^3 and a lag below 2^8 - 1 (PART lags are positions), so
     the fields never overlap and the key is unique."""
     return (((src << 31) | dst) << 11) | (form << 8) | (lag + 1)
+
+
+KEY_MASK = (1 << 31) - 1
+
+
+class TieIndex:
+    """The lookup tie (src, dst, form, lag) -> id, held as a long-term store and a day store (a log-structured merge:
+    the memory counterpart of consolidating the day in sleep). Exact: a lookup returns the id a dict would return.
+
+    The long-term store keeps, per (form, lag), the keys src * 2^31 + dst sorted, with their tie ids, in two numpy
+    arrays: 12 bytes a tie instead of about 100 for a dict entry with its key and value objects. The ties made since
+    the last merge are in a small dict, the day store. A lookup asks the day store first, then bisects the long-term
+    keys of its (form, lag). A merge (in sleep, when a mind is saved, or when the day store grows past an eighth of the
+    long-term store) sorts the day's ties in. A removed tie (undo of the newest moment) leaves the day store, or is
+    marked gone in the long-term store until the next merge. As a mapping (len, iteration, get, ==) its keys are
+    tie_key(src, dst, form, lag), as the dict it replaces."""
+    __slots__ = ("base", "day", "gone", "n_base")
+
+    def __init__(self) -> None:
+        self.base: Dict[Tuple[int, int], tuple] = {}   # (form, lag) -> (keys, ids, keys view, ids view)
+        self.day: Dict[int, int] = {}                  # tie_key -> id: the ties made since the last merge
+        self.gone: set = set()                         # long-term ids removed since the last merge
+        self.n_base = 0
+
+    # -- the store's own calls
+    def find(self, src: int, dst: int, form: int, lag: int) -> int:
+        tie = self.day.get(tie_key(src, dst, form, lag))
+        if tie is not None:
+            return tie
+        b = self.base.get((form, lag))
+        if b is not None:
+            k = (src << 31) | dst
+            kv = b[2]
+            i = bisect_left(kv, k)
+            if i < len(kv) and kv[i] == k:
+                tie = b[3][i]
+                if not self.gone or tie not in self.gone:
+                    return tie
+        return -1
+
+    def add(self, src: int, dst: int, form: int, lag: int, tie: int) -> None:
+        self.day[tie_key(src, dst, form, lag)] = tie
+        if len(self.day) > max(1 << 16, self.n_base >> 3):
+            self.merge()
+
+    def remove(self, src: int, dst: int, form: int, lag: int) -> None:
+        if self.day.pop(tie_key(src, dst, form, lag), None) is None:
+            tie = self.find(src, dst, form, lag)
+            if tie >= 0:
+                self.gone.add(tie)
+
+    def merge(self) -> None:
+        """Sort the day's ties into the long-term store and drop the gone ones (in sleep, at save, or when the day
+        store has grown): the same lookups before and after."""
+        if not self.day and not self.gone:
+            return
+        new: Dict[Tuple[int, int], list] = {}
+        for key, tie in self.day.items():
+            group = ((key >> 8) & 7, (key & 255) - 1)
+            new.setdefault(group, []).append((((key >> 42) << 31) | ((key >> 11) & KEY_MASK), tie))
+        gone = np.fromiter(self.gone, dtype=np.int32, count=len(self.gone)) if self.gone else None
+        base, total = {}, 0
+        for group in set(self.base) | set(new):
+            keys, ids = (self.base[group][0], self.base[group][1]) if group in self.base else \
+                (np.empty(0, np.int64), np.empty(0, np.int32))
+            if gone is not None and ids.size:
+                keep = ~np.isin(ids, gone)
+                keys, ids = keys[keep], ids[keep]
+            if group in new:
+                rows = new[group]
+                keys = np.concatenate((keys, np.fromiter((k for k, _ in rows), dtype=np.int64, count=len(rows))))
+                ids = np.concatenate((ids, np.fromiter((t for _, t in rows), dtype=np.int32, count=len(rows))))
+                order = np.argsort(keys, kind="stable")
+                keys, ids = keys[order], ids[order]
+            if keys.size:
+                base[group] = (keys, ids, memoryview(keys), memoryview(ids))
+                total += keys.size
+        self.base, self.day, self.gone, self.n_base = base, {}, set(), total
+
+    @classmethod
+    def from_arrays(cls, src: np.ndarray, dst: np.ndarray, form: np.ndarray, lag: np.ndarray,
+                    alive: np.ndarray) -> "TieIndex":
+        """The index of the live ties of the tie columns, built at once (the long-term store, an empty day)."""
+        index = cls()
+        idx = np.flatnonzero(alive)
+        keys = (src[idx].astype(np.int64) << 31) | dst[idx].astype(np.int64)
+        groups = form[idx].astype(np.int64) * 256 + (lag[idx].astype(np.int64) + 1)
+        for g in np.unique(groups).tolist():
+            sel = groups == g
+            k, ids = keys[sel], idx[sel].astype(np.int32)
+            order = np.argsort(k, kind="stable")
+            k, ids = k[order], ids[order]
+            index.base[(g // 256, g % 256 - 1)] = (k, ids, memoryview(k), memoryview(ids))
+            index.n_base += k.size
+        return index
+
+    # -- a mapping keyed by tie_key, as the dict it replaces (tests, research tools)
+    def _decode(self, key: int) -> Tuple[int, int, int, int]:
+        return key >> 42, (key >> 11) & KEY_MASK, (key >> 8) & 7, (key & 255) - 1
+
+    def get(self, key, default=None):
+        tie = self.find(*self._decode(key)) if isinstance(key, int) else -1
+        return default if tie < 0 else tie
+
+    def __getitem__(self, key):
+        tie = self.get(key, -1)
+        if tie < 0:
+            raise KeyError(key)
+        return tie
+
+    def __contains__(self, key) -> bool:
+        return self.get(key, -1) >= 0
+
+    def items(self):
+        for (form, lag), (keys, ids, _, _) in self.base.items():
+            for k, tie in zip(keys.tolist(), ids.tolist()):
+                if not self.gone or tie not in self.gone:
+                    yield tie_key(k >> 31, k & KEY_MASK, form, lag), tie
+        yield from self.day.items()
+
+    def keys(self):
+        return (k for k, _ in self.items())
+
+    def __iter__(self):
+        return self.keys()
+
+    def __len__(self) -> int:
+        return self.n_base - len(self.gone) + len(self.day)
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, (TieIndex, dict)):
+            return dict(self.items()) == dict(other.items())
+        return NotImplemented
+
+    def __getstate__(self):
+        self.merge()                                   # saved consolidated: the long-term arrays alone
+        return {group: (keys, ids) for group, (keys, ids, _, _) in self.base.items()}
+
+    def __setstate__(self, state) -> None:
+        self.base = {group: (keys, ids, memoryview(keys), memoryview(ids)) for group, (keys, ids) in state.items()}
+        self.day, self.gone = {}, set()
+        self.n_base = sum(keys.size for keys, _ in state.values())
 
 
 class DiskLog:
@@ -278,7 +421,7 @@ class Substance:
 
     # ------------------------------------------------------------------ caches
     def _clear_indices(self) -> None:
-        self.tie_index: Dict[int, int] = {}                     # tie_key(src, dst, form, lag) -> tie
+        self.tie_index = TieIndex()                             # (src, dst, form, lag) -> tie, see TieIndex
         self.out: Dict[Tuple[int, int, int], array] = {}        # (src, form, lag) -> tie ids; PART uses lag -1
         self.inc: Dict[Tuple[int, int], array] = {}             # (dst, form) -> tie ids
         self.atom_index: Dict[Tuple[int, int], int] = {}       # (channel, symbol index) -> unit
@@ -288,12 +431,13 @@ class Substance:
         self._out_ids: Dict[Tuple[int, int, int], tuple] = {}  # out key -> (count, ids, dst) as tensors
         self._parts: Dict[int, tuple] = {}     # composed unit -> (its PART list, its length, parts), see ``parts``
 
-    def _index_tie(self, tie: int, src: int, dst: int, form: int, lag: int) -> None:
+    def _index_tie(self, tie: int, src: int, dst: int, form: int, lag: int, lookup: bool = True) -> None:
         # Compact indices (exact: the same ids in the same order). A tie's key is one packed integer instead of a
         # 4-tuple, and an adjacency list is an array of 32-bit ids (4 bytes each) instead of a list of Python ints
         # (8 bytes of pointer plus about 32 of int object each): the memory a mind needs per tie falls, and reading a
         # list into numpy needs no conversion. Iteration, len, truth, slicing, remove and append behave as a list's.
-        self.tie_index[tie_key(src, dst, form, lag)] = tie
+        if lookup:
+            self.tie_index.add(src, dst, form, lag, tie)
         key = (src, form, -1 if form == PART else lag)
         ties = self.out.get(key)
         if ties is None:
@@ -381,9 +525,10 @@ class Substance:
     def _compact_indices(self) -> None:
         """Indices saved before the compact form (4-tuple tie keys, lists of ids) are converted once on load: the same
         keys and ids in the same order."""
-        index = self.__dict__.get("tie_index")
-        if index and isinstance(next(iter(index)), tuple):
-            self.tie_index = {tie_key(*k): v for k, v in index.items()}
+        if not isinstance(self.__dict__.get("tie_index"), TieIndex):   # a dict, of 4-tuples or packed keys
+            v = self._np()
+            n = self.n_ties
+            self.tie_index = TieIndex.from_arrays(v.src[:n], v.dst[:n], v.form[:n], v.lag[:n], v.alive[:n])
         for name in ("out", "inc"):
             table = self.__dict__.get(name)
             if table and not isinstance(next(iter(table.values())), array):
@@ -684,7 +829,9 @@ class Substance:
             src, dst = v.src[start:stop].tolist(), v.dst[start:stop].tolist()
             form, lag = v.form[start:stop].tolist(), v.lag[start:stop].tolist()
             for j in np.flatnonzero(v.alive[start:stop]).tolist():
-                self._index_tie(start + j, src[j], dst[j], form[j], lag[j])
+                self._index_tie(start + j, src[j], dst[j], form[j], lag[j], lookup=False)
+        n = self.n_ties
+        self.tie_index = TieIndex.from_arrays(v.src[:n], v.dst[:n], v.form[:n], v.lag[:n], v.alive[:n])
         alive, kinds = v.ualive[:self.n_units].tolist(), v.kind[:self.n_units].tolist()
         channel, symbol, birth = (v.channel[:self.n_units].tolist(), v.symbol[:self.n_units].tolist(),
                                   v.ubirth[:self.n_units].tolist())
@@ -798,11 +945,11 @@ class Substance:
         return unit
 
     def find_tie(self, src: int, dst: int, form: int, lag: int) -> int:
-        return self.tie_index.get(tie_key(src, dst, form, lag), -1)
+        return self.tie_index.find(src, dst, form, lag)
 
     def tie(self, src: int, dst: int, form: int, lag: int) -> int:
         """The tie (src, dst, form, lag), created with zero evidence if it does not exist."""
-        tie = self.tie_index.get(tie_key(src, dst, form, lag), -1)
+        tie = self.tie_index.find(src, dst, form, lag)
         if tie >= 0:
             return tie
         if self.n_ties == self._ct:
@@ -1095,7 +1242,7 @@ class Substance:
                 continue
             src, dst = int(v.src[tie]), int(v.dst[tie])
             form, lag = int(v.form[tie]), int(v.lag[tie])
-            self.tie_index.pop(tie_key(src, dst, form, lag), None)
+            self.tie_index.remove(src, dst, form, lag)
             self._out_ids.pop((src, form, -1 if form == PART else lag), None)
             if form == PART:
                 self._parts.pop(src, None)
