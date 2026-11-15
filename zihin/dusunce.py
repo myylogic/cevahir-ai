@@ -40,43 +40,91 @@ def _words(session, text: str) -> List[str]:
 
 
 def think(session, topic: str, limit: int = 15) -> Tuple[List[str], float]:
-    """Think about ``topic`` inwardly. Returns the inner words and the reality score R (mean over steps)."""
+    """Think about ``topic`` inwardly. Returns the inner words and the reality score R (mean over steps).
+
+    The topic is brought to mind (imagined, not heard): a topic of several words is taken in word by word, the mind
+    deciding nothing until its last word, as it takes in what it hears. From then on the inner voice is the mind's own
+    decisions, each lived as imagined (go_on): it ends when the mind decides nothing, or when it comes round to a
+    composed context this episode already lived; ``limit`` words are only a safety cap."""
     from .__main__ import CHANNEL
     mind = session.mind
     symbols = _words(session, topic)
     if not symbols:
         return [], 0.0
-    cid = mind.ch.id(CHANNEL)
-    acts = []
-    for i, symbol in enumerate(symbols):                   # the topic is brought to mind (imagined, not heard)
-        acts = mind.step([Event(CHANNEL, symbol, IMAGINED)])
+    acts = take_in(mind, [[Event(CHANNEL, symbol, IMAGINED)] for symbol in symbols])   # the topic is brought to mind
     thought, scores = [], []
-    while acts and len(thought) < limit:
-        said = [e for e in acts if e.channel == CHANNEL]
-        if not said:
-            break
-        word = said[0].symbol
-        if _circling(thought + [str(word)]):               # a thought that goes round in a circle says nothing new
-            break
-        index = mind.ch.symbol_index(cid, word, create=False)
-        unit = mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
-        scores.append(_reality(mind, unit) if unit >= 0 else 0.5)
-        thought.append(str(word))
-        # the inner word comes back as imagined, not as an act heard by others
-        mind.pending = [Event(e.channel, e.symbol, IMAGINED, e.intensity) if e.channel == CHANNEL and e.prov == ACTED
-                        else e for e in mind.pending]
-        acts = mind.step([])
-    mind.step([])                                          # the thought ends; the episode closes
-    reality = sum(scores) / len(scores) if scores else 0.0
+
+    def heard(words_: List[str]) -> None:                  # each word as it is decided, before its echo comes back
+        for word in words_:
+            unit = mind.unit_of(CHANNEL, word)
+            scores.append(_reality(mind, unit) if unit >= 0 else 0.5)
+            thought.append(word)
+    go_on(mind, acts, heard, limit, imagined=True)
+    mind.step([])                                          # the thought ends; the episode closes (a silent moment:
+    reality = sum(scores) / len(scores) if scores else 0.0  # no context, so nothing is decided in it)
     return thought, reality
 
 
-def _circling(words_: List[str]) -> bool:
-    """The last stretch of words repeats the stretch just before it (a cycle of one to four words)."""
-    for n in range(1, 5):
-        if len(words_) >= 2 * n and words_[-n:] == words_[-2 * n:-n]:
-            return True
-    return False
+def take_in(mind, moments: List[List[Event]]) -> List[Event]:
+    """Live these moments one after another without deciding until the last (the session's way of taking in an
+    utterance: the act threshold is raised while it lasts); returns what the mind decides in the last one."""
+    for events in moments[:-1]:
+        hear_without_deciding(mind, events)
+    return mind.step(moments[-1]) if moments else []
+
+
+def hear_without_deciding(mind, events: List[Event] = ()) -> None:
+    """One moment in which the mind perceives (what is pending from the last moment, and ``events``) but decides
+    nothing: the act threshold is raised for it, as while someone else speaks."""
+    theta = mind.knob["theta"]
+    mind.knob["theta"] = 1e9
+    try:
+        mind.step(list(events))
+    finally:
+        mind.knob["theta"] = theta
+
+
+def comes_round(mind) -> bool:
+    """Whether the echo of what the mind has just decided (its pending acts, perceived in the next moment) brings back a
+    composed context this episode already lived: the episode tuple that moment would make (its last F items) is a
+    composed unit already in the episode's trace."""
+    items = []
+    for e in mind.pending:
+        if e.intensity <= 0 or not mind.ch.has(e.channel):
+            continue
+        channel = mind.ch.id(e.channel)
+        if mind.ch.kind(channel) not in ("sense", "act"):
+            continue
+        unit = mind._atom(channel, e.symbol, create=False)
+        if unit < 0:                                       # a symbol never met: a context never lived
+            return False
+        items.append(unit)
+    key = tuple((list(mind.episode) + items)[-mind.knob["F"]:]) if items else ()
+    if len(key) < 2:
+        return False
+    context = mind.S.tuple_index.get(key)
+    return context is not None and context in mind.trace
+
+
+def go_on(mind, acts: List[Event], out, limit: int, imagined: bool = False) -> None:
+    """Carry on from what the mind has just decided: ``out`` gets the words of each decision (text channel) as they
+    are decided; their echo comes back in the next moment (``imagined``: relabelled imagined, the inner voice; else as
+    its own acts, speech), where it decides again. It ends when the mind decides nothing, or when the echo brings back
+    a composed context this episode already lived (comes_round): the echo is then perceived while the mind does not
+    decide again, so no echo is dropped and no decision is left unsaid. ``limit`` moments are a safety cap, ended the
+    same way."""
+    from .__main__ import CHANNEL
+    moments = 0
+    while acts:
+        out([str(e.symbol) for e in acts if e.channel == CHANNEL])
+        if imagined:                                       # the inner word comes back as imagined, not as speech
+            mind.pending = [Event(e.channel, e.symbol, IMAGINED, e.intensity) if e.channel == CHANNEL and
+                            e.prov == ACTED else e for e in mind.pending]
+        moments += 1
+        if moments >= limit or comes_round(mind):
+            hear_without_deciding(mind)
+            return
+        acts = mind.step([])
 
 
 FREQUENT = 200        # how many of the most used words carry the language rather than a topic, at most

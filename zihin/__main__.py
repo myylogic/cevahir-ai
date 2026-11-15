@@ -614,21 +614,21 @@ class Session:
         return " ".join(said) if said else "(sessiz)"
 
     def speak(self, acts: List[Event], say=None, limit: int = 80) -> List[str]:
-        """The mind says what it decided: each word of ``acts`` is said (``say``: out as it is said) and comes back as
-        its own echo in the next moment, where it decides again, until it decides nothing. Returns the words said."""
-        from .dusunce import _circling
+        """The mind says what it decided: every word its decisions emit is said (``say``: out as it is said) and comes
+        back as its own echo in the next moment, where it decides again (dusunce.go_on). Its speech ends when it decides
+        nothing, or when the echo brings back a composed context this episode already lived (it has come round to a
+        situation it was in): the echo is heard and it does not decide again there. ``limit`` moments are only a safety
+        cap, ended the same way. No echo is ever dropped and nothing it decided is left unsaid. Returns the words
+        said."""
+        from .dusunce import go_on
         said: List[str] = []
-        while acts and len(said) < limit:
-            words_now = [str(e.symbol) for e in acts if e.channel == CHANNEL]
-            if words_now and _circling(said + words_now):   # speech that goes round in a circle has ended
-                self.mind.pending = [e for e in self.mind.pending if e.channel != CHANNEL]
-                self.mind.step([])
-                break
-            said += words_now
+
+        def out(words_now: List[str]) -> None:
+            said.extend(words_now)
             for w in words_now:
                 if say is not None:
                     say(w)                               # out as it is said (online life)
-            acts = self.mind.step([])                    # the echo of its own act arrives here
+        go_on(self.mind, acts, out, limit)
         return said
 
     def close_turn(self) -> None:
