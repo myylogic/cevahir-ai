@@ -26,7 +26,6 @@ def raised(explore: bool = True) -> Session:
                                backoff=True, resemblance=True, race=True, situations=True, explore=explore))
     mind.add_channel(CHANNEL, "act")
     session = Session(mind)
-    session.thinking = False
     for _ in range(2):
         session.watch("hangi renk ?", "mavi .")
         session.watch("hangi renk ?", "yeşil .")

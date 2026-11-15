@@ -465,7 +465,6 @@ class Session:
         mind.add_channel(SOUND, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
         self.seen: Dict[str, str] = {}          # the file names of images shown in this session, by gist
-        self.thinking = True                    # what is heard calls thoughts to mind; one may be said (T8)
         from .mind import INNER_CHANNEL, SELF_CHANNEL
         if not mind.ch.has(SELF_CHANNEL):       # minds born before the self unit existed get it now
             mind.add_channel(SELF_CHANNEL, "context")
@@ -585,33 +584,40 @@ class Session:
         self.mind.step([])
 
     def reply(self, text: str, limit: int = 80, say=None) -> str:
-        """You speak (told), then the mind may speak: its own acts, one symbol per moment, until silence.
+        """You speak (told), then the mind may speak: what its own decision emits, one symbol per moment, until silence.
 
-        The turn passes to the mind with your last word: it decides in that very moment (the context of your
-        whole utterance is present), and each symbol it says comes back as its own echo in the next moment.
-        """
+        The turn passes to the mind when your utterance has ended (older minds: with your last word): it decides in
+        that very moment, the context of your whole utterance present. When it decides nothing, a silent moment passes
+        (in which it may feel its not knowing, L7) and it lives the next one; what it decides then is its own too. The
+        words said are exactly the words its decisions emit (speak): no thought is said for it, nothing is asked back
+        for it, nothing it decided is left unsaid. The answer's path (its episode trace) is kept for "!dogru" and
+        "!yanlis"."""
         self.close_turn()
         start = self.mind.t + 1
         symbols = self.words(text)
         if not symbols:
             return "(sessiz)"
-        thoughts = self.associations(text) if self.turns and self.thinking else []
         if self.turns:                                   # the turn passes when your utterance has ended
             self.listen(text, TOLD, speaker=self.partner)
             acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
         else:                                            # older minds: the turn passes with your last word
             self.listen(" ".join(symbols[:-1]), TOLD)
             acts = self.mind.step(self.events(symbols[-1], TOLD))
-        said: List[str] = []
-        if not acts and self.turns:                      # nothing at once: it thinks about what was asked first
-            unknown = getattr(self.mind, "unknown", 0.0)
-            said = self.think_aloud(thoughts, say)
-            if not said:                                 # its thought was not real enough: a moment passes and it
-                self.mind.unknown = unknown              # feels its not knowing (L7); what it says then is its own
+        if not acts and self.turns:                      # nothing at once: a moment passes in silence (it may feel its
+            acts = self.mind.step([])                    # not knowing, L7), then the next; what it decides is its own
+            if not acts:
                 acts = self.mind.step([])
-                if not acts:
-                    acts = self.mind.step([])
+        said = self.speak(acts, say, limit)
+        self.remember(CHAT, text, list(range(start, self.mind.t + 1)), [text], said)
+        self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
+        self.answered = list(self.mind.trace)            # ... and the path that led to the answer is kept for them
+        return " ".join(said) if said else "(sessiz)"
+
+    def speak(self, acts: List[Event], say=None, limit: int = 80) -> List[str]:
+        """The mind says what it decided: each word of ``acts`` is said (``say``: out as it is said) and comes back as
+        its own echo in the next moment, where it decides again, until it decides nothing. Returns the words said."""
         from .dusunce import _circling
+        said: List[str] = []
         while acts and len(said) < limit:
             words_now = [str(e.symbol) for e in acts if e.channel == CHANNEL]
             if words_now and _circling(said + words_now):   # speech that goes round in a circle has ended
@@ -623,74 +629,6 @@ class Session:
                 if say is not None:
                     say(w)                               # out as it is said (online life)
             acts = self.mind.step([])                    # the echo of its own act arrives here
-        self.remember(CHAT, text, list(range(start, self.mind.t + 1)), [text], said)
-        self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
-        self.answered = list(self.mind.trace)            # ... and the path that led to the answer is kept for them
-        return " ".join(said) if said else "(sessiz)"
-
-    def associations(self, text: str, tries: int = 2) -> List[tuple]:
-        """What the words of an utterance call to mind as they are heard (T8): for the words the mind is least sure of
-        (the highest drive first, up to ``tries``), a thought of its inner voice, kept as imagined and scored for
-        reality from lived evidence only. Thought before the utterance is taken in, so a thought is what the mind
-        knew, not an echo of what it is being told. Returns (word, thought, reality) triples."""
-        from .dusunce import think
-        from .read import drive_of
-        mind = self.mind
-        cid = mind.ch.id(CHANNEL)
-        topics = []
-        for w in dict.fromkeys(self.body(text)):
-            index = mind.ch.symbol_index(cid, w, create=False) if len(w) >= 4 and w.isalpha() else -1
-            unit = mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
-            if unit >= 0:
-                topics.append((drive_of(mind, unit), w))
-        topics.sort(reverse=True)
-        out = []
-        for _, topic in topics[:tries]:
-            mind.step([])                                # a fresh inner episode for each thought
-            thought, reality = think(self, topic)
-            out.append((topic, thought, reality))
-        return out
-
-    def think_aloud(self, thoughts: List[tuple], say=None, least: int = 3, more: int = 2) -> List[str]:
-        """Think, then speak: of the thoughts its words called to mind, the first that says something (``least``
-        words) and is real enough by the same measure as an act (reality >= 1/2 + theta / 2T) is said aloud. Then it
-        may go on (speaking at length when it has more to say): up to ``more`` further thoughts, each about the word of
-        the last one it is least sure of, said while they stay real enough and new. Returns what it said."""
-        from .dusunce import think, topic_of
-        mind = self.mind
-        real_enough = 0.5 + mind.knob["theta"] / (2.0 * mind.cfg.T)
-        said: List[str] = []
-
-        def aloud(words_):
-            for w in words_:                             # what it thought, said aloud (its own acts)
-                mind.step([Event(CHANNEL, w, ACTED)])
-                if say is not None:
-                    say(w)
-            mind.step([])
-            said.extend(words_)
-
-        for topic, thought, reality in thoughts:
-            if len(thought) >= least and reality >= real_enough:
-                aloud([topic] + thought)
-                break
-        if not said:
-            return []
-        from .dusunce import _circling, frequent_words
-        frequent = frequent_words(mind)
-        spoken = {tuple(said)}
-        for _ in range(more):
-            topic = topic_of(self, " ".join(w for w in said[-len(thought):] if w not in frequent))
-            if not topic:
-                break
-            mind.unknown, held = 0.0, mind.unknown
-            mind.step([])
-            mind.unknown = held
-            thought, reality = think(self, topic)
-            line = tuple([topic] + thought)
-            if len(thought) < least or reality < real_enough or line in spoken or _circling(said + list(line)):
-                break
-            spoken.add(line)
-            aloud(list(line))
         return said
 
     def close_turn(self) -> None:
@@ -728,8 +666,8 @@ class Session:
         if spoken_over:
             return "  öğrenilmedi (%s): zihin cevabından sonra kendiliğinden konuştu; geri bildirim o cevaba artık " \
                    "ulaşmıyor" % label
-        return "  öğrenilmedi (%s): bu cevap zihinde bir yol bırakmadı (sesli düşünceyle ya da sessizlikle bitti); " \
-               "geri bildirim bir şey öğretmedi" % label
+        return "  öğrenilmedi (%s): bu cevap zihinde bir yol bırakmadı (sessizlikle bitti); geri bildirim bir şey " \
+               "öğretmedi" % label
 
     def _path_value(self, path: List[int], label: str) -> float:
         """The positive evidence the steps of a path hold toward a value ("later in the episode", EXPECT lag 2)."""

@@ -77,7 +77,7 @@ def test_nothing_in_the_session_asks_back_for_the_mind():
         mind, acted, step = session.mind, [], session.mind.step
 
         def recorded(events=()):
-            acted.extend(e for e in list(mind.pending) + list(events) if e.prov == ACTED)
+            acted.extend(e for e in list(mind.pending) + list(events) if e.channel == CHANNEL and e.prov == ACTED)
             return step(events)
         mind.step = recorded
         assert session.reply("zorbalak nedir ?") == "(sessiz)"
