@@ -30,22 +30,27 @@ Commands (Turkish, with English aliases):
                                     !dinle ben.wav  then  "bu benim sesim"; later  !dinle baska.wav  then  "bu kim"
     !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
                                     reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
-    !uyu [n]             / !sleep   sleep: n dreams (imagination about what the day was about: the words most
-                                    characteristic of the recent history by the mind's own memory; and about what it
-                                    is unsure of), then sorting: its imaginings weighed against what is real (trust in
-                                    its imagination follows), and which earlier dreams life has since shown true or
-                                    false (it also sleeps by itself after 10 minutes of silence)
+    !uyu [n]             / !sleep   sleep: n dreams (each a chain of its own inner voice, about what the day was
+                                    about and about what it most wants to know, both by its own evidence: telling and
+                                    not yet well known), then sorting: its imaginings weighed against what is real
+                                    (trust in its imagination follows), and which earlier dreams life has since shown
+                                    true or false
     !kendin              / !introspect  what it can say about itself from its own evidence (its self unit)
     !arastir <konu>      / !research  on your command: search the web (Google Custom Search if GOOGLE_API_KEY and
                                     GOOGLE_CSE_ID are set, otherwise Wikipedia) and read what is found (pages printed)
-    !kendini_gelistir [n] / !improve  the mind picks n topics it wants to know (high drive) and researches them; it
-                                    measures what each way of reading gave it and chooses its way by that
+    !kendini_gelistir [n] / !improve  the n topics it most wants to know by its own evidence (telling and not yet well
+                                    known: tau x drive) are researched; it measures what each way of reading gave it
+                                    and chooses its way by that
     !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
                                     the path that led to it is remembered and weighed next time, L5). The answer stays
                                     open for it until the feedback or the next utterance (yours, or the mind's own),
                                     however long the online life ran in between; "not edildi" only when it was learned
 Turn taking (while you speak the mind listens, then it may speak until it falls silent) is set by the session, not
-learned yet: during your words the act threshold is raised, afterwards it is the mind's own.
+learned yet: during your words the act threshold is raised, afterwards it is the mind's own. What the mind says is
+only what its own decisions emit; nothing is said or asked for it.
+Online life (at a terminal, unless --yasamsiz): between your lines the mind lives silent moments, each as any moment
+(what its own decision says in one is said). An innate rhythm, a setting of the program awaiting the owner's decision,
+not something the mind learned: once per silence it thinks inwardly after 10 seconds and sleeps after 10 minutes.
     ?<metin>             / ?        what does the mind expect after this beginning (nothing is lived; a clone is asked)
     !neden <metin> => <kelime> / !why   white-box belief: own and effective evidence, per source
     !gecmis              / !history what was lived in this session, with numbers: your lines, the mind's answers,
@@ -387,7 +392,8 @@ VALUE_SIGN = {(VALUE, "iyi"): 1.0, (VALUE, "kötü"): -1.0}     # the adapter de
 
 DAY = 12                                # the recent history entries that are "the day" (dusunce.day_residue)
 READ, TAUGHT, WATCHED, CHAT = "read", "taught", "watched", "chat"   # kinds of history entries; a line lived without
-                                                                     # an answer is of its provenance ("told", "sensed")
+SPOKE = "spoke"                                                      # an answer is of its provenance ("told", "sensed");
+                                                                     # what the mind said on its own in its life: spoke
 
 
 @dataclass
@@ -395,7 +401,8 @@ class Entry:
     """One entry of a session's history: what was lived, as !gecmis shows it and !unut takes it back.
 
     ``kind`` says what it was (a line "told" or "sensed", a "chat" line with the mind's answer, a file "read" or
-    "taught", a dialogue "watched"); ``text`` is how !gecmis shows it (never parsed); ``moments`` are the moments it
+    "taught", a dialogue "watched", what the mind said on its own in a silent moment of its life, "spoke"); ``text``
+    is how !gecmis shows it (never parsed); ``moments`` are the moments it
     lived (!unut retracts each through the ledger); ``heard`` is the last utterance the mind heard in it (a thought
     after a silence is about it, dusunce.topic_of); ``counts`` are the words lived in it, heard or said, with how often
     (the day residue weighs them, dusunce.day_residue)."""
@@ -924,10 +931,14 @@ class Life:
     """Online life: from the moment the session starts the mind lives in its own time, not only when it is asked.
 
     What you type arrives as an event of that time and is heard in order; what the mind says comes out word by word
-    as it says it. Between your lines it lives on, one silent moment at a time: after a short silence it thinks
-    (inner voice, kept as imagined); after a longer one it speaks first: its thought, when it was real enough, else
-    a question about the word it most wants to know (T4); after a long one it sleeps, dreams and sorts its dreams.
-    Commands are handled in the same stream.
+    as it says it. Between your lines it lives on, one silent moment at a time, each lived as any moment: when its own
+    decision in one of them emits words, they are said (Session.speak) and it is an entry of the history (kind
+    "spoke"); nothing is said for it (no first speech after a silence, no question about a word it wants to know).
+
+    An innate rhythm, declared here and awaiting the owner's decision: once per silence, after THINK_AFTER seconds it
+    thinks (inner voice, lived as imagined, about the best topic of the last utterance it heard, dusunce.topic_of) and
+    after SLEEP_AFTER seconds it sleeps (dreams, then sorting). The clock is a setting of the program, not something
+    the mind learned; --yasamsiz turns the whole life clock off. Commands are handled in the same stream.
 
     Ending it (Ctrl+C, !cik, the end of input) asks the session to stop: a long command stops at its next sentence,
     line or moment (Session.check), its life ends, and only then is the mind saved; a life that cannot be stopped is
@@ -935,18 +946,19 @@ class Life:
 
     STOP = object()
     WAIT = 30.0                            # seconds the end of a session waits for a running command to stop
+    THINK_AFTER = 10.0                     # innate rhythm (declared, awaiting the owner's decision): one inner thought
+    SLEEP_AFTER = 600.0                    # ... and one sleep per silence, after these many seconds of it
 
-    def __init__(self, session, handle, lock, beat: float = 2.0, think_after: float = 10.0, speak_after: float = 45.0,
-                 sleep_after: float = 600.0, real_enough: float = 0.75, pace: float = 0.05) -> None:
+    def __init__(self, session, handle, lock, beat: float = 2.0, think_after: float = THINK_AFTER,
+                 sleep_after: float = SLEEP_AFTER, pace: float = 0.05) -> None:
         import queue
         import threading
         import time
         self.session, self.handle, self.lock = session, handle, lock
-        self.beat, self.think_after, self.speak_after, self.sleep_after = beat, think_after, speak_after, sleep_after
-        self.real_enough, self.pace = real_enough, pace
+        self.beat, self.think_after, self.sleep_after, self.pace = beat, think_after, sleep_after, pace
         self.inbox = queue.Queue()
         self.idle_since = time.time()
-        self.thought, self.spoke, self.slept = None, False, False
+        self.thought, self.slept = None, False
         self.handled = threading.Event()
         self.done = threading.Event()
         self.thread = threading.Thread(target=self._run, daemon=True)
@@ -992,7 +1004,7 @@ class Life:
                 if line is not None:
                     with self.lock:
                         going_on = self.handle(line)
-                    self.idle_since, self.thought, self.spoke, self.slept = time.time(), None, False, False
+                    self.idle_since, self.thought, self.slept = time.time(), None, False
                     if going_on is False:
                         self.done.set()
                     self.handled.set()
@@ -1013,36 +1025,31 @@ class Life:
         if self.session.stop.is_set():
             return
         with self.lock:
-            self.session.mind.step([])                   # a silent moment of its life
-        if self.thought is None and quiet >= self.think_after:
+            start = self.session.mind.t + 1
+            acts = self.session.mind.step([])            # a silent moment of its life, lived as any moment
+            if acts:                                     # its own decision emitted something: it is said
+                self._speak(acts, start)
+        if self.thought is None and quiet >= self.think_after:     # innate rhythm: one inner thought per silence
             with self.lock:
                 topic = topic_of(self.session)
                 words_, reality = think(self.session, topic) if topic else ([], 0.0)
                 self.thought = (topic, words_, reality)
-        if self.thought and not self.spoke and quiet >= self.speak_after:
-            topic, words_, reality = self.thought
-            if words_ and reality >= self.real_enough:
-                said = [topic] + words_                  # it says aloud what it thought (its own acts)
-            else:                                        # nothing real enough to say: it asks about what it most
-                from .web import wanted_topics           # wants to know (T4: curiosity takes the initiative)
-                with self.lock:
-                    wanted = wanted_topics(self.session.mind, CHANNEL, 1)
-                said = [wanted[0], "?"] if wanted else []
-            if said:
-                print("\n  zihin (kendiliğinden):", end="", flush=True)
-                with self.lock:
-                    self.session.answered = None         # its own utterance: feedback no longer reaches the answer
-                    for w in said:
-                        self.session.mind.step([Event(CHANNEL, w, ACTED)])
-                        self.say(w)
-                    self.session.mind.step([])
-                print("\n> ", end="", flush=True)
-            self.spoke = True
-        if not self.slept and self.sleep_after and quiet >= self.sleep_after:
+        if not self.slept and self.sleep_after and quiet >= self.sleep_after:   # innate rhythm: one sleep
             with self.lock:
                 night = dream_sleep(self.session)
             self.slept = True
             print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night, self.session.seen)), end="", flush=True)
+
+    def _speak(self, acts: List[Event], start: int) -> None:
+        """What the mind decided in a silent moment of its life is said, word by word, until it decides nothing
+        (Session.speak); it is its own utterance, an entry of the history, and the answer before it is spoken over
+        (feedback no longer reaches that answer)."""
+        print("\n  zihin (kendiliğinden):", end="", flush=True)
+        self.session.answered = None
+        said = self.session.speak(acts, self.say)
+        self.session.remember(SPOKE, "[kendiliğinden] %s" % " ".join(said), list(range(start, self.session.mind.t + 1)),
+                              said=said)
+        print("\n> ", end="", flush=True)
 
 
 def pieces_for(mind, choice: str = None):
@@ -1114,8 +1121,8 @@ def main(argv=None) -> None:
     ap.add_argument("--kaydetme", action="store_true", help="do not save what was learned in this session")
     ap.add_argument("--his", action="store_true", help="show the mind's feelings after each answer")
     ap.add_argument("--kim", help="who is talking to the mind (asked at the start if not given)")
-    ap.add_argument("--yasamsiz", action="store_true", help="no life clock: the mind does not think or speak first "
-                                                            "while you are silent")
+    ap.add_argument("--yasamsiz", action="store_true", help="no life clock: while you are silent the mind lives no "
+                                                            "moments, does not think and does not sleep")
     ap.add_argument("--parca", help="word pieces as facets: 'cevahir' (the repository's own tokenizer: root, suffixes, "
                                     "stem, last syllable; kept by minds raised with pieces, opt-in for new minds: "
                                     "they multiply the ties per moment), 'yok' (none), or a ByteLevelBPE json")
@@ -1198,8 +1205,10 @@ def main(argv=None) -> None:
 
         life = Life(session, handle, lock)
         life.start()
-        print("  (çevrimiçi: oturum açık kaldıkça yaşar; sustuğunda düşünür, bir süre sonra kendisi konuşabilir, uzun "
-              "sessizlikte uyur ve rüya görür. Kapatmak: --yasamsiz)")
+        print("  (çevrimiçi: oturum açık kaldıkça sessizlikte de an an yaşar; kendi kararı bir şey söylerse söylenir. "
+              "Doğuştan ritim, sahibinin kararını bekleyen bir program ayarı: her sessizlikte %g sn sonra bir kez iç "
+              "sesle düşünür, %g dk sonra bir kez uyur. Kapatmak: --yasamsiz)" % (Life.THINK_AFTER,
+                                                                                  Life.SLEEP_AFTER / 60))
         try:
             for line in lines:
                 line = line.strip()

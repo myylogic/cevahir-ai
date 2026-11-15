@@ -119,7 +119,7 @@ def living(**clock):
 
 
 def test_through_the_life_clock_feedback_after_silent_beats_is_learned(capsys):
-    session, life, _ = living(beat=0.02, think_after=60, speak_after=60, sleep_after=0)
+    session, life, _ = living(beat=0.02, think_after=60, sleep_after=0)
     life.start()
     life.put("Kedi ne yer?")
     assert life.handled.wait(10)
@@ -136,16 +136,34 @@ def test_through_the_life_clock_feedback_after_silent_beats_is_learned(capsys):
     assert value_paths(session.mind) == answered_then(0)[2]      # the lag-2 path, as typed at once
 
 
+def deciding_once(session, word: str) -> None:
+    """The mind's step, which at its first silent moment from now on decides ``word`` (the act is pending for the next
+    moment, as decide leaves it): a decision of the mind in a silent moment of its life (as in test_zihin_online)."""
+    from zihin import ACTED, Event
+    mind, step, state = session.mind, session.mind.step, {"armed": True}
+
+    def stepping(events=()):
+        acts = step(events)
+        if state["armed"] and not list(events) and not acts:
+            state["armed"] = False
+            act = Event(CHANNEL, word, ACTED)
+            mind.pending.append(act)
+            acts = [act]
+        return acts
+    mind.step = stepping
+
+
 def test_after_the_mind_spoke_on_its_own_feedback_no_longer_reaches_the_answer(capsys):
-    _, life, said = living(beat=0.02, think_after=0.05, speak_after=0.1, sleep_after=0, real_enough=0.0)
+    session, life, said = living(beat=0.02, think_after=60, sleep_after=0)
     life.start()
     life.put("Kedi ne yer?")
     assert life.handled.wait(10)
     answer_words = len(said)
+    deciding_once(session, "merhaba")                    # its own decision in a silent moment: it speaks on its own
     deadline = time.time() + 20
-    while not life.spoke and time.time() < deadline:
+    while len(said) == answer_words and time.time() < deadline:
         time.sleep(0.02)
-    assert life.spoke and len(said) > answer_words      # it said something of its own after its answer
+    assert len(said) > answer_words                      # it said something of its own after its answer
     life.put("!dogru")
     assert life.handled.wait(10)
     life.stop()

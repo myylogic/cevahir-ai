@@ -87,7 +87,7 @@ def test_after_a_file_was_read_the_thought_is_about_its_last_sentence(tmp_path, 
 
     def handle(line):
         return _one_line(s, line, True, Args(), lambda reason: None, 0) is not None
-    life = Life(s, handle, threading.RLock(), beat=0.02, think_after=0.05, speak_after=60, sleep_after=0, pace=0.0)
+    life = Life(s, handle, threading.RLock(), beat=0.02, think_after=0.05, sleep_after=0, pace=0.0)
     life.start()
     deadline = time.time() + 20
     while life.thought is None and time.time() < deadline:
