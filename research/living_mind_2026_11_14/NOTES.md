@@ -298,6 +298,18 @@ F20. (2026-11-15) Imagination by structural analogy, scored for reality (T8, a f
    sular" (0.60, never read, plausible). Limits: the reality score separates lived from constructed (0.80 vs about
    0.6) but not yet a plausible construction from a weak leap; continuation after frequent words drifts by association.
 
+F21. (2026-11-15) Curiosity and a self that grows from its own life. (1) T4, first form: an innate curiosity reflex
+   (LAYERS.md L2): when the mind has nothing to say and its partner used a word it knew nothing about before hearing it
+   (no tie held with conviction >= 1/2), it says the first such word back with a question tone, as a child does; what
+   the partner then explains is learned like anything else (results/sixth_curiosity.txt: "bugün kuantum fiziği okudum"
+   -> "kuantum ?"; after the explanation, "kuantum nedir" -> "kuantum çok küçük parçacıkların bilimidir"). Limit: "zürafa
+   yaprak yer" is learned but "zürafa ne yer" is not answered, the question pattern was never watched. (2) The self unit
+   (L8): an innate unit "ben" on a context channel accompanies every moment in which the mind itself speaks (acted) or
+   thinks (imagined); by the one rule it binds to what the mind says and thinks. Introspection (!kendin) reads it: how
+   much was its own speaking and thinking, and the words its self is most bound to (the most frequent words left out by
+   frequency): after a short life its own name, "zihinim", "yaşayan" and what it thought about. A self-model learned from
+   its own acts, not told; it does not yet steer what the mind says about itself (that is still the told lessons, L8).
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit

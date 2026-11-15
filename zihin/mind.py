@@ -34,6 +34,7 @@ from .read import conflict_of, predictions, total_drive
 from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS, Substance
 
 FEELINGS = ("surprise", "relief", "load", "conflict")
+SELF_CHANNEL, SELF_SYMBOL = "benlik", "ben"
 
 
 @dataclass
@@ -151,6 +152,7 @@ class Mind:
             S.add1(W_POS, SENSED, self.source_tie[p], w_pos)
             S.add1(W_NEG, SENSED, self.source_tie[p], w_neg)
         self.feel_unit = {name: self._atom(feel, name) for name in FEELINGS}
+        self.add_channel(SELF_CHANNEL, "context")          # the self: present whenever the mind itself acts or thinks
         S.end()
         # transient state (working state of the present moment; not knowledge)
         self.focus: List[Tuple[int, float, bool]] = []
@@ -235,6 +237,11 @@ class Mind:
                 items.append((unit, int(event.prov)))
             if kind == "knob" and event.prov == ACTED and cfg.knobs:
                 act_mod.apply_knob(self, event.symbol)
+        if self.ch.has(SELF_CHANNEL) and any(prov in (ACTED, IMAGINED) for _, prov in items):
+            # the mind perceives itself as the one who says or thinks this (L8): "ben" accompanies the moment
+            channel = self.ch.id(SELF_CHANNEL)
+            own = ACTED if any(prov == ACTED for _, prov in items) else IMAGINED   # speaking aloud, or thinking
+            percepts.append((self._atom(channel, SELF_SYMBOL), 1.0, own, channel))
         learn_follow(self, percepts)                       # step 5 for the previous moment
         learn_value(self, percepts)                        # L5: a value signal reaches every step of the episode
         surprise = self._surprise(percepts)

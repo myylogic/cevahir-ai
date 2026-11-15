@@ -17,6 +17,7 @@ Commands (Turkish, with English aliases):
     !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
                                     reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
     !kendini_tani [n]    / !self    lessons about itself (true things told to it), n times
+    !kendin              / !introspect  what it can say about itself from its own evidence (its self unit)
     !arastir <konu>      / !research  on your command: search the web (Google Custom Search if GOOGLE_API_KEY and
                                     GOOGLE_CSE_ID are set, otherwise Wikipedia) and read what is found (pages printed)
     !kendini_gelistir [n] / !improve  the mind picks n topics it wants to know (high drive) and researches them; it
@@ -172,6 +173,9 @@ class Session:
         mind.add_channel(LOOK, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
         self.curious = True                     # the curiosity reflex (T4) is on in conversation
+        from .mind import SELF_CHANNEL
+        if not mind.ch.has(SELF_CHANNEL):       # minds born before the self unit existed get it now
+            mind.add_channel(SELF_CHANNEL, "context")
         self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
         self.open_turn = False                # the mind has just answered; feedback may still come
 
@@ -690,6 +694,9 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     if rest.strip():
                         session.partner = lower_tr(rest.strip()).split()[0]
                     print("  konuşan: %s" % session.partner)
+                elif cmd in ("kendin", "introspect"):
+                    from .kendilik import self_report
+                    print(self_report(session.mind, CHANNEL))
                 elif cmd in ("kendini_tani", "kendini_tanı", "self"):
                     print("  kendisi hakkında %d söz yaşadı" % session.lessons_about_itself(int(rest) if rest.strip().isdigit() else 1))
                 elif cmd in ("yas", "yaş", "age"):
