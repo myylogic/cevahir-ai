@@ -61,7 +61,10 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import signal
 import sys
+import threading
+import time
 from typing import Dict, List
 
 from . import ACTED, IMITATED, SENSED, TOLD, Config, Event, Mind, read
@@ -80,14 +83,27 @@ def home_folder() -> str:
 
 
 _ISSUED = set()                         # ledger paths given out in this process (two minds never share one)
+_TEMPORARY: List[str] = []              # the temporary ledger folder of this process, once made
+
+
+def temporary_folder() -> str:
+    """The ledger folder of minds built in code (tests, research scripts): a temporary folder of this process,
+    removed with what is in it when the process exits. Nothing is written into the user's home for them."""
+    if not _TEMPORARY:
+        import atexit
+        import shutil
+        import tempfile
+        folder = tempfile.mkdtemp(prefix="zihin-defter-")
+        atexit.register(shutil.rmtree, folder, True)
+        _TEMPORARY.append(folder)
+    return _TEMPORARY[0]
 
 
 def _log_path(folder: str = None) -> str:
-    """A new session ledger (the experience log that makes !unut exact): ``folder``/defter-<ms>-<pid>.log, by default
-    in the home folder next to the kept mind. The program deletes it at a clean exit (main): the kept mind is saved
-    without it."""
-    import time
-    folder = folder or home_folder()
+    """A new session ledger (the experience log that makes !unut exact): ``folder``/defter-<ms>-<pid>.log. The program
+    passes the folder of the kept mind and deletes the ledger at exit (main: the kept mind is saved without it); with
+    no folder (a mind built in code) it is made in temporary_folder(), removed when the process exits."""
+    folder = folder or temporary_folder()
     os.makedirs(folder, exist_ok=True)
     ms = int(time.time() * 1000)
     while True:
@@ -98,10 +114,17 @@ def _log_path(folder: str = None) -> str:
         ms += 1
 
 
-VARIANTS = {"speaking": lambda folder=None: Config.changed(support="members", bind_repeats=True, next_only_present=True,
-                                                          neg_floor=1.0 / 14, backoff=True, resemblance=True,
-                                                          race=True, situations=True, explore=True,
-                                                          log_path=_log_path(folder)),
+def speaking(folder: str = None) -> Config:
+    """The configuration a chat mind is raised with. Its ledger is kept in ``folder`` (the program passes the folder
+    of the kept mind); a mind built in code without one keeps it in a temporary folder (see _log_path)."""
+    # _log_path() without an argument when no folder is given: research scripts replace it with a function of no
+    # arguments to build the configuration without a ledger file (research/living_mind_2026_11_15/t_meaning.py)
+    return Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
+                          backoff=True, resemblance=True, race=True, situations=True, explore=True,
+                          log_path=_log_path(folder) if folder else _log_path())
+
+
+VARIANTS = {"speaking": speaking,
             "members": lambda folder=None: Config.changed(support="members"),
             "changed": lambda folder=None: Config.changed()}          # folder: where the session ledger is kept
 
@@ -587,8 +610,12 @@ class Session:
         The path is the answer's episode trace, kept from the answer until the feedback or the next utterance and
         given back to the mind for the moment the value arrives. The online life lives silent moments meanwhile (and
         may think or sleep), and a silent moment ends an episode (mind.trace is emptied); typed at once, the kept path
-        is the trace itself. What the mind lives is the same either way: the same moments, the value reaching the path
-        it would reach had it been typed at once. Says "not edildi" only when the value evidence grew."""
+        is the trace itself. After silent moments the value reaches the same path with the same evidence as typed at
+        once: the lag-2 ties of every step of the path to the value (the consequence, L5). Only that path is the same.
+        The value's lag-1 ties are not: typed at once, the value comes in the moment after the answer and the answer's
+        last focus is tied to it (as to any event that follows); after silent moments the moment before it is a
+        silent one, nothing in it is tied to the value, because time passed. Says "not edildi" only when the value
+        evidence grew."""
         if not self.open_turn:
             return "  geri bildirim, zihnin cevabından hemen sonra verilmeli"
         label = "iyi" if good else "kötü"
@@ -1011,9 +1038,9 @@ def main(argv=None) -> None:
                                                "a mind keeps the convention it was raised with")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
     args = ap.parse_args(argv)
-    keep_at = args.kayit or home_mind()
+    keep_at = clean_path(args.kayit) if args.kayit else home_mind()    # ~ and quotes as in the commands
     ledgers = os.path.dirname(os.path.abspath(keep_at))   # session ledgers live next to the kept mind
-    source = None if args.yeni else (args.load or (keep_at if _exists(keep_at) else None))
+    source = None if args.yeni else (clean_path(args.load) if args.load else (keep_at if _exists(keep_at) else None))
     if source:
         print("zihin yükleniyor: %s ..." % source, flush=True)
         mind = load(source, live_log=_log_path(ledgers), ledger=not args.no_ledger)   # a saved ledger: copied there
@@ -1176,13 +1203,14 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     print(feelings(session.mind))
                 elif cmd in ("gor", "gör", "see"):
                     from .gorme import features
-                    gist, facets = features(rest.strip())
+                    image = clean_path(rest)
+                    gist, facets = features(image)
                     session.view = (gist, facets)
-                    session.seen[gist] = os.path.basename(rest.strip())
+                    session.seen[gist] = os.path.basename(image)
                     print("  görüyorum (%d yön); bir sonraki sözün bu resimle birlikte algılanacak" % len(facets))
                 elif cmd in ("dinle", "hear"):
                     from .isitme import features as hearing
-                    gist, facets = hearing(rest.strip())
+                    gist, facets = hearing(clean_path(rest))
                     session.hearing = (gist, facets)
                     print("  duyuyorum (%d yön); bir sonraki sözün bu sesle birlikte algılanacak" % len(facets))
                 elif cmd in ("dusun", "düşün", "think"):
@@ -1216,13 +1244,16 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     print(profile(session.mind))
                 elif cmd in ("boyut", "size"):
                     print("  %d an, %s" % (session.mind.t, session.mind.size()))
+                elif cmd in ("kaydet", "save", "tasinabilir", "portable", "yukle", "yükle", "load") \
+                        and not clean_path(rest):
+                    print("  bir yol yazın: !%s <yol>" % cmd)
                 elif cmd in ("kaydet", "save"):
-                    print("  kaydedildi: %s" % save(session.mind, rest.strip()))
+                    print("  kaydedildi: %s" % save(session.mind, clean_path(rest)))
                 elif cmd in ("tasinabilir", "portable"):
-                    print("  taşınabilir kopya: %s" % export_portable(session.mind, rest.strip()))
-                elif cmd in ("yukle", "load"):
+                    print("  taşınabilir kopya: %s" % export_portable(session.mind, clean_path(rest)))
+                elif cmd in ("yukle", "yükle", "load"):
                     replaced = session.mind
-                    fresh = Session(load(rest.strip()), session.pieces)
+                    fresh = Session(load(clean_path(rest)), session.pieces)
                     session.__dict__.update(fresh.__dict__)     # the same session object: autosave follows it
                     drop_ledger(replaced)                       # the mind it replaces is gone, and its ledger
                     print("  yüklendi: %d an" % session.mind.t)

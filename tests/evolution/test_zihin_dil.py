@@ -6,7 +6,7 @@ What is pinned here
 * "tr" (the default) lower-cases by Turkish rules (I -> ı, İ -> i); "diger" is plain lower case (I -> i), for
   languages that are not Turkish.
 * The session uses the mind's convention for everything it reads and hears: documents, lines, the speaker's name,
-  and what it thinks about.
+  what it thinks about, and what it researches (the topic and the pages read).
 * The convention is kept by the mind: saved and loaded with it; a mind saved before it existed is "tr".
 * The program raises a new mind with --dil; a loaded mind keeps the convention it was raised with and says so.
 """
@@ -84,3 +84,26 @@ def test_the_program_raises_a_new_mind_with_dil_and_a_loaded_mind_keeps_its_own(
     assert "'diger' harf kuralıyla büyüdü" in capsys.readouterr().out
     mind = load(str(home / "zihin" / "cevahir"), ledger=False)
     assert mind.dil == "diger" and mind.unit_of(CHANNEL, "ı") < 0
+
+
+class Pages:
+    """A source of one page (no network): what research reads."""
+
+    def search(self, topic, limit=2):
+        return ["Istanbul"]
+
+    def extract(self, title):
+        return " ".join(["Istanbul is a big city."] * 5 + ["It lies on two continents."])
+
+    def address(self, title):
+        return "test://%s" % title
+
+
+def test_research_reads_and_measures_by_the_minds_convention():
+    from zihin.web import firm_knowledge, research
+    for dil, city, not_city in (("tr", "ıstanbul", "istanbul"), ("diger", "istanbul", "ıstanbul")):
+        mind = new_mind(dil)
+        report = research(Session(mind), "Istanbul", source=Pages(), way="ozet", say=lambda line: None)
+        assert report["sentences"] == 6
+        assert mind.unit_of(CHANNEL, city) >= 0 and mind.unit_of(CHANNEL, not_city) < 0
+        assert report["firm_after"] == firm_knowledge(mind, mind.unit_of(CHANNEL, city)) > 0   # the gain is measured

@@ -5,7 +5,9 @@ What is pinned here
 -------------------
 * The path that led to an answer stays available for its feedback until the feedback or the next utterance: after
   the silent moments the life clock lives in between, and after a thought, the value reaches the same path with the
-  same evidence as feedback typed at once.
+  same evidence as feedback typed at once: the lag-2 ties of every step of the path to the value (L5). Only that
+  path matches. The value's lag-1 ties differ, because time passed: typed at once the answer's last focus is tied to
+  the value that follows it; after silent moments the moment before the value is a silent one and nothing is.
 * Typed at once, feedback is what it always was: the kept path is the episode's trace itself.
 * "not edildi" is said only when the value evidence grew. An answer that ended in a question leaves no path, and after
   the mind spoke on its own the answer is no longer reached: the program says that nothing was learned.
@@ -40,14 +42,15 @@ def taught() -> Session:
     return session
 
 
-def value_paths(mind, label: str = "iyi") -> dict:
-    """The steps tied to a value "later in the episode" (EXPECT lag 2) and their positive evidence."""
+def value_paths(mind, label: str = "iyi", lag: int = 2) -> dict:
+    """The units tied to a value at a lag (2: the steps of the path, "later in the episode"; 1: what came just before
+    it) and their positive evidence."""
     value = mind.unit_of(VALUE, label)
     if value < 0:
         return {}
     S = mind.S
     return {int(S.t_src[t]): float(S.w1(W_POS, t).sum()) for t in S.inc.get((value, EXPECT), [])
-            if int(S.t_lag[t]) == 2}
+            if int(S.t_lag[t]) == lag}
 
 
 def answered_then(silent: int, thought: bool = False):
@@ -57,15 +60,17 @@ def answered_then(silent: int, thought: bool = False):
         session.mind.step([])
     if thought:
         think(session, "kedi")                           # ... and after a short silence it thinks
-    return answer, session.feedback(True), value_paths(session.mind)
+    return answer, session.feedback(True), value_paths(session.mind), value_paths(session.mind, lag=1)
 
 
 def test_feedback_after_silent_moments_reaches_the_same_path_as_feedback_at_once():
     at_once = answered_then(0)
     assert at_once[0] == "kedi balık yer" and "not edildi (iyi)" in at_once[1]
     assert at_once[2] and all(mass > 0 for mass in at_once[2].values())
+    assert at_once[3]                                    # typed at once: the answer's last focus is tied to the value
     for later in (answered_then(1), answered_then(3), answered_then(3, thought=True)):
-        assert later == at_once
+        assert later[:3] == at_once[:3]                  # the same answer, message and lag-2 path ...
+        assert later[3] == {} != at_once[3]              # ... but not the same lag-1 ties: time passed
 
 
 def test_typed_at_once_the_kept_path_is_the_trace_itself():
@@ -111,7 +116,7 @@ def test_through_the_life_clock_feedback_after_silent_beats_is_learned(capsys):
     life.stop()
     out = capsys.readouterr().out
     assert "not edildi (iyi)" in out
-    assert value_paths(session.mind) == answered_then(0)[2]
+    assert value_paths(session.mind) == answered_then(0)[2]      # the lag-2 path, as typed at once
 
 
 def test_after_the_mind_spoke_on_its_own_feedback_no_longer_reaches_the_answer(capsys):

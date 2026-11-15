@@ -283,11 +283,14 @@ class WayChooser:
 
 def research(session, topic: str, source: Optional[Source] = None, way: Optional[str] = None,
              say: Callable[[str], None] = print) -> Dict[str, object]:
-    """Look a topic up, read it with a way of reading, measure the gain, record it. Returns a report."""
+    """Look a topic up, read it with a way of reading, measure the gain, record it. Returns a report. The topic and
+    what is read are split and lower-cased by the session's convention (its mind's dil), as everything it hears."""
     from .events import IMITATED
     from .__main__ import CHANNEL, sentences, words
     source = default_source() if source is None else source
     mind = session.mind
+    dil = getattr(session, "dil", getattr(mind, "dil", "tr"))
+    adapter = getattr(session, "words", None) or (lambda text: words(text, dil))
     chooser = WayChooser(mind)
     way = way or chooser.choose()
     try:
@@ -300,7 +303,7 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
         titles = source.search(topic)
     if not titles:
         return {"topic": topic, "read": [], "note": "bulunamadı"}
-    words_topic = words(topic)
+    words_topic = adapter(topic)
     key = words_topic[0] if words_topic else topic
     cid = mind.ch.id(CHANNEL)
     before_unit = mind.S.atom_index.get((cid, mind.ch.symbol_index(cid, key, create=False)), -1) \
@@ -315,7 +318,7 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
         read_titles.append(title)
         if isinstance(source, Wikipedia):              # Wikipedia section headings (== ... ==), one line each
             text = re.sub(r"(?m)^=+[^=\n]+=+\s*$", " ", text)
-        for sentence in sentences(text):
+        for sentence in sentences(text, dil):
             if lived >= budget:
                 break
             session.listen(sentence, IMITATED)

@@ -8,12 +8,14 @@ What is pinned here
 * A path that does not exist is said so (no "0 dosya"), and nothing is lived.
 * A UTF-8 file with a byte order mark is read without a symbol for the mark; a file that is not UTF-8 is read as
   cp1254 (Turkish ANSI, as Excel saves it) and the program says so. Both teach exactly what the UTF-8 file teaches.
+* Every path is cleaned the same way: !kaydet, !tasinabilir, !yukle, !gor, !dinle, --load and --kayit take ~, one
+  pair of quotes and spaces like !oku and !ogret; a save or load with no path asks for one.
 """
 from __future__ import annotations
 
 import pytest
 
-from zihin import Config, Mind
+from zihin import TOLD, Config, Mind
 from zihin.__main__ import CHANNEL, Session, _one_line
 
 ANIMALS = "Kedi evcil bir hayvandır. Kediler balık sever. Zürafa uzun boyunlu bir hayvandır."
@@ -65,6 +67,58 @@ def test_a_path_that_does_not_exist_is_said_so(tmp_path, capsys):
         assert "böyle bir dosya" in out and "yok" in out and "0 dosya" not in out
     assert "klasör" in run(s, "!ogret %s" % (tmp_path / "belgelerim"), capsys)
     assert s.mind.t == 0 and s.history == []
+
+
+def test_every_path_is_cleaned_the_same_way(monkeypatch, tmp_path, capsys):
+    """!kaydet, !tasinabilir, !yukle, !gor and !dinle take ~, one pair of quotes and spaces like !oku and !ogret."""
+    import wave
+
+    import numpy as np
+    from PIL import Image
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    folder = tmp_path / "zihin kayıtları"
+    folder.mkdir()
+    Image.new("RGB", (32, 32), (200, 30, 30)).save(str(folder / "kırmızı top.png"))
+    rate = 16000
+    tone = (0.5 * np.sin(2 * np.pi * 220 * np.arange(int(0.4 * rate)) / rate) * 32767).astype("<i2")
+    with wave.open(str(folder / "ses kaydı.wav"), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(rate)
+        w.writeframes(tone.tobytes())
+    s = session()
+    s.live("Kedi balık yer.", TOLD)
+    assert "kaydedildi" in run(s, '!kaydet "~/zihin kayıtları/tam"', capsys)
+    assert (folder / "tam.zihin").exists() and (folder / "tam.zihin.json").exists()
+    assert "taşınabilir" in run(s, "!tasinabilir '%s'" % (folder / "küçük"), capsys)
+    assert (folder / "küçük.zihin").exists()
+    assert "yön" in run(s, '!gor "~/zihin kayıtları/kırmızı top.png"', capsys) and s.view is not None
+    assert s.seen[s.view[0]] == "kırmızı top.png"
+    assert "yön" in run(s, "!dinle ~/zihin kayıtları/ses kaydı.wav", capsys) and s.hearing is not None
+    age = s.mind.t
+    assert "yüklendi: %d an" % age in run(s, '!yukle "~/zihin kayıtları/küçük"', capsys)
+    assert "bir yol yazın" in run(s, "!kaydet  ", capsys)
+    assert not (tmp_path / ".zihin").exists() and not list(tmp_path.glob("*.zihin"))
+
+
+def test_load_and_kayit_take_tilde_and_quotes(monkeypatch, tmp_path, capsys):
+    import io
+    import re
+    import zihin.__main__ as program
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    monkeypatch.setenv("CEVAHIR_HOME", str(tmp_path / "ev"))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("sys.stdin", io.StringIO("Kedi balık yer.\n!cik\n"))
+    program.main(["--yeni", "--kayit", "~/zihnim"])              # as PowerShell passes it: ~ not expanded
+    assert (tmp_path / "zihnim.zihin").exists()
+    monkeypatch.setattr("sys.stdin", io.StringIO("!cik\n"))
+    capsys.readouterr()
+    program.main(["--load", '"~/zihnim"', "--kaydetme"])        # quotes that reached the program
+    lived = re.search(r"Cevahir — (\d+) an", capsys.readouterr().out)
+    assert lived and int(lived.group(1)) > 0                       # the mind kept at ~/zihnim was loaded
+    assert not (tmp_path / "~").exists() and not (tmp_path / '"~').exists()
 
 
 @pytest.mark.parametrize("command", ["!oku", "!ogret"])
