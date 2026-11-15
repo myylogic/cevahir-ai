@@ -64,10 +64,13 @@ def export_portable(mind: Mind, path: str) -> Dict[str, object]:
 
     It learns while you talk to it like any mind, but single experiences can no longer be retracted (the ledger
     that makes retraction exact stays with the original mind)."""
-    twin = mind.clone()                                    # clone drops the ledger
-    twin.S.log, twin.S.keep_log = {}, False
-    twin.cfg.keep_log, twin.cfg.log_path = False, None
-    return save(twin, path)
+    held = (mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path)
+    mind.S.log, mind.S.keep_log = {}, False                # the ledger is set aside while the substance is written:
+    mind.cfg.keep_log, mind.cfg.log_path = False, None     # no copy of a large mind is made (memory stays flat)
+    try:
+        return save(mind, path)
+    finally:
+        mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path = held
 
 
 def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
@@ -99,7 +102,8 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
         mind = pickle.load(f)
     if manifest and mind.S.digest() != manifest["substance_digest"]:
         raise ValueError("substance digest does not match the manifest")
-    for name, default in (("trace", list), ("value_sign", dict), ("dreams", list), ("unknown", float)):   # minds saved before these existed
+    for name, default in (("trace", list), ("value_sign", dict), ("dreams", list), ("unknown", float),
+                          ("voice", dict)):                         # minds saved before these existed
         if not hasattr(mind, name):
             setattr(mind, name, default())
     import dataclasses

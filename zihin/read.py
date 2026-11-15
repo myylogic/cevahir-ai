@@ -204,17 +204,24 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
     ("the answer repeats the asked word", "then comes what that word goes on with") agree although their words
     differ. Returns (masses by target or SELF/NEXT, members, slot positions, fixed words).
     """
+    out = member_votes(mind, frame, exclude, trust)
+    return out[:4]
+
+
+def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None):
+    """``member_mass`` and, fifth, how many members voted (the numerosity of the voice, F24)."""
     S, k = mind.S, mind.cfg.k
     parts = S.parts(frame)
     cats = {p for p in parts if int(S.u_kind[p]) & CATEGORY}
     if len(cats) != 1:
-        return {}, 0.0, (), ()
+        return {}, 0.0, (), (), 0
     category = cats.pop()
     where = tuple(j for j, p in enumerate(parts) if p == category)
     fixed = tuple(p for p in parts if p != category)
     relational = getattr(S, "bind_repeats", False)
     shares: Dict[int, float] = {}
     members = voted = 0.0
+    voters = 0
     looks = None                                       # F18: the read instance's filler and its facets
     if getattr(mind.cfg, "resemblance", False) and exclude is not None and int(S.u_kind[exclude]) & COMPOSED:
         from .learn import facet_set, facet_similarity
@@ -240,14 +247,73 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
             weight = e_x * math.exp(-mind.knob["F"] * (1.0 - sim))
         members += e_x
         voted += weight
+        voters += 1
         goes_on = continuations(mind, x, fixed) if relational else {}
         for v, p in own.items():
             key = SELF if relational and v == x else NEXT if v in goes_on else v
             shares[key] = shares.get(key, 0.0) + weight * p / total
     if voted <= 0.0:
-        return {}, 0.0, where, fixed
+        return {}, 0.0, where, fixed, 0
     scale = members / voted                            # frequencies from the weighted votes, conviction from how
-    return {v: (w * scale, members - w * scale) for v, w in shares.items()}, members, where, fixed   # many members
+    return ({v: (w * scale, members - w * scale) for v, w in shares.items()}, members, where, fixed,  # many members
+            voters)
+
+
+VOICE_CHANNEL = "ses"   # F24: the mind's own channel for the kinds of voices that speak for an instance
+VOICE_ALL = "*"         # F24: the unit of every voice (what voices in general have been worth)
+
+
+def voice_kind(voters: int, top: float) -> Tuple[int, int]:
+    """F24: the kind of a voice as the mind perceives it, in two magnitudes: how many members speak (numerosity in
+    doubling bands: 1, 2, 3-4, 5-8, 9-16, ...) and how much they agree (the frequency of their top value in quarters,
+    so that one half, where a prediction starts to hold, is a band edge; all agreeing is a band of its own). Nothing
+    in it names a word, a class or a domain."""
+    many = (max(1, voters) - 1).bit_length() + 1
+    agree = 4 if top >= 1.0 else max(0, min(3, int(4.0 * top)))
+    return many, agree
+
+
+def _holds(mind, symbol) -> Tuple[float, float]:
+    """Trust-weighted (W+, W-) of the tie (voice unit -> holds); zeros when never lived."""
+    unit = mind.unit_of(VOICE_CHANNEL, symbol)
+    tie = mind.S.find_tie(unit, mind.holds, EXPECT, 0) if unit >= 0 else -1
+    if tie < 0:
+        return 0.0, 0.0
+    S = mind.S
+    return float((S.t_w[W_POS, tie] * mind.trust).sum()), float((S.t_w[W_NEG, tie] * mind.trust).sum())
+
+
+def voice_credibility(mind, kind: Tuple[int, int]) -> float:
+    """F24: how far a voice of this kind can be believed, read general -> specific as everywhere (``expect_map``,
+    nested): e <- e(every voice -> holds), then e <- c f + (1 - c) e with the kind's own (f, c). A kind the mind has
+    never relied on is worth what voices in general have been worth; with no such experience at all, 1/2. Reads
+    only; units and ties are made when the first outcome is lived (learn.judge_voices)."""
+    if not mind.ch.has(VOICE_CHANNEL):
+        return 0.5
+    k = mind.cfg.k
+    w_pos, w_neg = _holds(mind, VOICE_ALL)
+    e = expectation(w_pos, w_neg, k)
+    w_pos, w_neg = _holds(mind, kind)
+    c = conviction(w_pos + w_neg, k)
+    return c * frequency(w_pos, w_neg) + (1.0 - c) * e
+
+
+def _claim(mind, unit: int, mass, where, fixed) -> Tuple[Optional[int], float]:
+    """F24: what a voice claims for ``unit``: its top value (SELF and NEXT resolved as in ``members_map``) and its
+    frequency f."""
+    S = mind.S
+    filler = S.parts(unit)[where[0]] if where and int(S.u_kind[unit]) & COMPOSED else None
+    claim, claim_f = None, -1.0
+    for target, (w_pos, w_neg) in mass.items():
+        if target == SELF:
+            target = filler
+        elif target == NEXT:
+            goes_on = continuations(mind, filler, fixed) if filler is not None else {}
+            target = max(goes_on, key=goes_on.get) if goes_on else None
+        f = frequency(w_pos, w_neg)
+        if target is not None and f > claim_f:
+            claim, claim_f = target, f
+    return claim, claim_f
 
 
 def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
@@ -257,21 +323,32 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     (score = e(i -> g) conviction(members) max_v f(v)); its expectations are e <- c f + (1 - c) 1/2 with
     c = lam e(i -> g) conviction(members); SELF resolves to the word in the instance's slot and NEXT to that word's
     own strongest continuation (F12); the instance's own evidence comes last, as everywhere.
+    F24 (voices): each score is weighted by the credibility the mind has learned for voices of that kind (how many
+    members speak, how much they agree; with no such experience every kind reads 1/2 and the choice is exactly
+    F11's). For the context read with the full trust, the voice that spoke and every voice that could have spoken
+    are noted with their claims (top value, frequency), so that what comes next judges them (learn.judge_voices).
     """
     cfg, S = mind.cfg, mind.S
+    voices = getattr(cfg, "voices", False)
     best = None
+    heard = []                                         # F24: every voice that could speak: (kind, claim, f)
     for general, e_abs in generalisations(mind, unit):
-        mass, members, where, fixed = member_mass(mind, general, unit, trust)
+        mass, members, where, fixed, voters = member_votes(mind, general, unit, trust)
         if not mass:
             continue
         c_members = conviction(members, cfg.k)
         top = max(frequency(p, n) for p, n in mass.values())
         score = e_abs * c_members * top
+        kind = None
+        if voices:
+            kind = voice_kind(voters, top)
+            score *= voice_credibility(mind, kind)
+            heard.append((kind,) + _claim(mind, unit, mass, where, fixed))
         if best is None or score > best[0]:
-            best = (score, e_abs, c_members, mass, where, fixed)
+            best = (score, e_abs, c_members, mass, where, fixed, kind, len(heard) - 1)
     out: Dict[int, float] = {}
     if best is not None:
-        _, e_abs, c_members, mass, where, fixed = best
+        _, e_abs, c_members, mass, where, fixed, kind, spoke = best
         c = cfg.lam * e_abs * c_members
         filler = S.parts(unit)[where[0]] if where and int(S.u_kind[unit]) & COMPOSED else None
         for target, (w_pos, w_neg) in mass.items():
@@ -284,6 +361,8 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 continue
             e = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
             out[target] = max(out.get(target, 0.0), e)
+        if voices and trust is None:
+            mind.__dict__.setdefault("voice", {})[unit] = (heard[spoke], heard)
     for target, (w_pos, w_neg) in own_mass(mind, unit, 1, trust).items():
         c = conviction(w_pos + w_neg, cfg.k)
         out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)

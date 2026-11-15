@@ -215,6 +215,8 @@ def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel)
     S, cfg, cap = mind.S, mind.cfg, mind.cfg.induct_cap
     if cfg.reliability:
         judge_generalisations(mind, changes)
+    if getattr(cfg, "voices", False):
+        judge_voices(mind, changes)
     activation = {unit: a for unit, a, _ in mind.last_focus}
     missed = set()
     gens = list(mind.last_gens)
@@ -288,6 +290,42 @@ def judge_generalisations(mind, changes: Dict[int, Dict[int, list]]) -> None:
                 tie = S.tie(general, general, RELY, 0)
                 add_evidence1(mind, W_POS, INFERRED, tie, e_abs * verdict[0])
                 add_evidence1(mind, W_NEG, INFERRED, tie, e_abs * verdict[1])
+
+
+def judge_voices(mind, changes: Dict[int, Dict[int, list]]) -> None:
+    """F24: what comes next judges the voices that could speak for a context (learning how far to believe a voice).
+
+    When the mind read a context (F11), every generalisation whose members had lived something in its slot was a
+    voice for it; each voice's claim was noted: the value it expected most, with frequency f, and the kind of the
+    voice (read.voice_kind: how many members spoke, how much they agreed). When that context then lives a value for
+    the first time (its tie had no evidence before, so the prediction rested on the voices and not on its own past),
+    a claim held if the voice expected that value above one half and most (f > 1/2, the core's measure of a holding
+    prediction); otherwise it failed. Every voice is judged, not only the one that spoke: they were all present when
+    the context was read, and judging only the one relied on would let what was chosen decide what is learned. Each
+    claim is one experience (gain g) on the tie (kind -> holds) and on the tie (every voice -> holds) of the mind's
+    own channel ``ses``, class sensed, logged like all evidence and retractable; ``read.voice_credibility`` reads
+    them general -> specific. Nothing here names a word, a class or a domain, so what one life taught about voices
+    is there when the mind meets the next.
+    """
+    from .read import VOICE_ALL, VOICE_CHANNEL
+    spoken = getattr(mind, "voice", None)
+    if not spoken:
+        return
+    S = mind.S
+    for instance, record in changes.items():
+        voice = spoken.get(instance)
+        if voice is None:
+            continue
+        lived = [v for v, r in record.items() if r[1] > r[0] and r[0] == 0.0 and r[2] == 0.0
+                 and int(S.u_channel[v]) >= 0 and mind.ch.kind(int(S.u_channel[v])) in ("sense", "act")]
+        if not lived:
+            continue
+        channel = mind.add_channel(VOICE_CHANNEL, "knob")
+        for kind, claim, claim_f in voice[1]:
+            held = claim in lived and claim_f > 0.5
+            for symbol in (VOICE_ALL, kind):
+                tie = S.tie(mind._atom(channel, symbol), mind.holds, EXPECT, 0)
+                add_evidence1(mind, W_POS if held else W_NEG, SENSED, tie, mind.knob["gain"])
 
 
 def _verdict(mind, general: int, v: int, leave_out: float = 0.0):

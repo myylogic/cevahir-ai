@@ -57,3 +57,22 @@ def test_a_mind_without_its_manifest_loads_with_a_warning(tmp_path, capsys):
     mind = load(base + ".zihin.gz", ledger=False)
     assert mind.t > 0
     assert "doğrulanamadı" in capsys.readouterr().out
+
+
+def test_the_portable_export_makes_no_copy_and_keeps_the_live_ledger(tmp_path):
+    import os
+    from zihin.store import DiskLog
+    mind = Mind(Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
+                               backoff=True, resemblance=True, race=True, log_path=str(tmp_path / "live.log")))
+    mind.add_channel(CHANNEL, "act")
+    session = Session(mind)
+    session.watch("adın ne ?", "adım cevahir .", prov=TOLD)
+    twin = mind.clone()
+    twin.S.log, twin.S.keep_log = {}, False
+    twin.cfg.keep_log, twin.cfg.log_path = False, None
+    from zihin.persist import save
+    copied = save(twin, str(tmp_path / "kopya"))
+    direct = export_portable(mind, str(tmp_path / "dogrudan"))
+    assert direct["substance_digest"] == copied["substance_digest"] and direct["log_sha256"] is None
+    assert isinstance(mind.S.log, DiskLog) and mind.S.keep_log and mind.cfg.log_path
+    assert not os.path.exists(str(tmp_path / "dogrudan.zihin.log"))
