@@ -1,15 +1,27 @@
 # -*- coding: utf-8 -*-
 """Living with a Zihin mind from the terminal.
 
-    python -m zihin [--load PATH] [--variant members]
+    python -m zihin [--load PATH] [--variant members] [--dil tr|diger]
+
+The mind of this computer is kept in $CEVAHIR_HOME/zihin/cevahir.zihin (default ~/.cevahir/zihin; --kayit elsewhere).
+A session's experience ledger (what makes !unut exact) is written next to it as defter-<ms>-<pid>.log and deleted at a
+clean exit, once the mind has been saved without it (and at exit with --kaydetme); --defter-yok keeps none. --dil sets
+how a new mind's text is lower-cased: tr (default, Turkish: I -> ı, İ -> i) or diger (plain lower case); a mind keeps
+the convention it was raised with.
 
 Every plain line is something you TELL the mind (provenance "told"), one word per moment, then a silent moment.
 Commands (Turkish, with English aliases):
     !gordum <metin>      / !saw     the same, as something the mind SENSES itself (provenance "sensed")
     !izle <soz> || <karsilik> / !watch  the mind WATCHES two others talk (provenance "imitated"): how one answers
     !ogret <dosya>       / !teach   watch every line of a file: "soz<TAB>karsilik" dialogues or plain sentences
-    !oku <dosya|klasor>  / !read    watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
-                                    .pdf with pypdf): sentences of documents as speech of others (imitated)
+    !oku <dosya|klasor> [n] / !read watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
+                                    .pdf with pypdf): sentences of documents as speech of others (imitated), at most n
+                                    of each. Paths (here and in every command and option that takes one): ~ is
+                                    expanded, one pair of quotes removed, spaces allowed. Text files: a byte order mark
+                                    names the encoding (UTF-8, UTF-16 as Excel "Unicode Text", Notepad "Unicode" and
+                                    PowerShell 5.1 write, UTF-32); else UTF-8, a few invalid bytes replaced and counted,
+                                    or cp1254 when most non-ASCII bytes are not UTF-8 (said so); a file with NUL bytes
+                                    or many control characters is not text and is not read
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
     !kim <ad>            / !who     who is talking now (perceived at the start of every utterance)
     !gor <resim>         / !see     show an image with your next utterance (it is seen at its start), e.g.
@@ -18,39 +30,59 @@ Commands (Turkish, with English aliases):
                                     !dinle ben.wav  then  "bu benim sesim"; later  !dinle baska.wav  then  "bu kim"
     !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
                                     reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
-    !uyu [n]             / !sleep   sleep: n dreams (imagination about the last topic and what it is unsure of), then
-                                    sorting: its imaginings weighed against what is real (trust in its imagination
-                                    follows), and which earlier dreams life has since shown true or false
-                                    (it also sleeps by itself after 10 minutes of silence)
+    !uyu [n]             / !sleep   sleep: n dreams (each a chain of its own inner voice, about what the day was
+                                    about and about what it most wants to know, both by its own evidence: telling and
+                                    not yet well known), then sorting: its imaginings weighed against what is real
+                                    (trust in its imagination follows), and which earlier dreams life has since shown
+                                    true or false
     !kendin              / !introspect  what it can say about itself from its own evidence (its self unit)
     !arastir <konu>      / !research  on your command: search the web (Google Custom Search if GOOGLE_API_KEY and
                                     GOOGLE_CSE_ID are set, otherwise Wikipedia) and read what is found (pages printed)
-    !kendini_gelistir [n] / !improve  the mind picks n topics it wants to know (high drive) and researches them; it
-                                    measures what each way of reading gave it and chooses its way by that
+    !kendini_gelistir [n] / !improve  the n topics it most wants to know by its own evidence (telling and not yet well
+                                    known: tau x drive) are researched; it measures what each way of reading gave it
+                                    and chooses its way by that
     !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
-                                    the path that led to it is remembered and weighed next time, L5)
+                                    the path that led to it is remembered and weighed next time, L5). The answer stays
+                                    open for it until the feedback or the next utterance (yours, or the mind's own),
+                                    however long the online life ran in between; "not edildi" only when it was learned
 Turn taking (while you speak the mind listens, then it may speak until it falls silent) is set by the session, not
-learned yet: during your words the act threshold is raised, afterwards it is the mind's own.
+learned yet: during your words the act threshold is raised, afterwards it is the mind's own. What the mind says is
+only what its own decisions emit; nothing is said or asked for it.
+Online life (at a terminal, unless --yasamsiz): between your lines the mind lives silent moments, each as any moment
+(what its own decision says in one is said). An innate rhythm, a setting of the program awaiting the owner's decision,
+not something the mind learned: once per silence it thinks inwardly after 10 seconds and sleeps after 10 minutes.
     ?<metin>             / ?        what does the mind expect after this beginning (nothing is lived; a clone is asked)
     !neden <metin> => <kelime> / !why   white-box belief: own and effective evidence, per source
-    !gecmis              / !history what you have told, with numbers
-    !unut <no>           / !forget  retract that utterance exactly (its evidence is removed from the core)
+    !gecmis              / !history what was lived in this session, with numbers: your lines, the mind's answers,
+                                    files read (!oku, one entry per file) or taught (!ogret), watched dialogues (!izle)
+    !unut <no>           / !forget  retract that entry exactly (its evidence is removed from the core, every moment
+                                    through the ledger); not with --defter-yok
     !boyut               / !size    units, ties, bytes, moments
     !yas                 / !age     developmental profile: moments and nights lived, words known, concepts, phrases
     !kaydet <yol>        / !save    save the mind (with integrity manifest)
     !yukle <yol>         / !load    load a saved mind
     !tasinabilir <yol>   / !portable  save a copy for conversation without the experience ledger (small file)
     !cik                 / !quit
+Ctrl+C during a long command (!oku, !ogret, !unut, !arastir, !kendini_gelistir, !uyu, and its sleep while you are
+silent) stops it at its next sentence, line or moment, never inside one: what it lived until then is whole and in
+the history; then the session ends and the mind is saved. Pressed again before the command has stopped, Ctrl+C does
+not wait: the session ends without saving and the mind saved before stays as it was (so does it when the command does
+not stop in 30 seconds). A save that does not finish never replaces the mind saved before.
 The text adapter splits words and punctuation; the alphabet is open (a new word is a new symbol at any time). The
 mind never sees text, only symbols on the "text" channel; meaning is in the ties.
 """
 from __future__ import annotations
 
 import argparse
+import codecs
 import os
 import re
+import signal
 import sys
-from typing import Dict, List
+import threading
+import time
+from dataclasses import dataclass, field
+from typing import Dict, List, NamedTuple
 
 from . import ACTED, IMITATED, SENSED, TOLD, Config, Event, Mind, read
 from .events import PROVENANCE
@@ -58,17 +90,68 @@ from .persist import export_portable, load, save
 from .store import W_NEG, W_POS
 
 CHANNEL = "text"
-def _log_path() -> str:
-    import os
-    import time
-    os.makedirs("zihin_logs", exist_ok=True)
-    return os.path.join("zihin_logs", "defter-%d.log" % int(time.time() * 1000))
 
 
-VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True,
-                                               neg_floor=1.0 / 14, backoff=True, resemblance=True, race=True,
-                                               situations=True, explore=True, log_path=_log_path()),
-            "members": lambda: Config.changed(support="members"), "changed": Config.changed}
+def home_folder() -> str:
+    """The folder of this computer's mind: $CEVAHIR_HOME/zihin (default ~/.cevahir/zihin). The ledgers of its sessions
+    are kept there too, never in the working folder."""
+    home = os.environ.get("CEVAHIR_HOME") or os.path.join(os.path.expanduser("~"), ".cevahir")
+    return os.path.join(home, "zihin")
+
+
+_ISSUED = set()                         # ledger paths given out in this process (two minds never share one)
+_TEMPORARY: List[str] = []              # the temporary ledger folder of this process, once made
+
+
+def temporary_folder() -> str:
+    """The ledger folder of minds built in code (tests, research scripts): a temporary folder of this process,
+    removed with what is in it when the process exits (by the process that made it, not by a forked child that
+    exits before it). Nothing is written into the user's home for them."""
+    if not _TEMPORARY:
+        import atexit
+        import tempfile
+        folder = tempfile.mkdtemp(prefix="zihin-defter-")
+        atexit.register(_remove_temporary, folder, os.getpid())
+        _TEMPORARY.append(folder)
+    return _TEMPORARY[0]
+
+
+def _remove_temporary(folder: str, maker: int) -> None:
+    import shutil
+    if os.getpid() == maker:
+        shutil.rmtree(folder, ignore_errors=True)
+
+
+def _log_path(folder: str = None) -> str:
+    """A new session ledger (the experience log that makes !unut exact): ``folder``/defter-<ms>-<pid>.log. The program
+    passes the folder of the kept mind and deletes the ledger at exit (main: the kept mind is saved without it); with
+    no folder (a mind built in code) it is made in temporary_folder(), removed when the process exits."""
+    folder = folder or temporary_folder()
+    os.makedirs(folder, exist_ok=True)
+    ms = int(time.time() * 1000)
+    while True:
+        path = os.path.join(folder, "defter-%d-%d.log" % (ms, os.getpid()))
+        if path not in _ISSUED and not os.path.exists(path):
+            _ISSUED.add(path)
+            return path
+        ms += 1
+
+
+def speaking(folder: str = None) -> Config:
+    """The configuration a chat mind is raised with. Its ledger is kept in ``folder`` (the program passes the folder
+    of the kept mind); a mind built in code without one keeps it in a temporary folder (see _log_path)."""
+    # _log_path() without an argument when no folder is given: research scripts replace it with a function of no
+    # arguments to build the configuration without a ledger file (research/living_mind_2026_11_15/t_meaning.py)
+    return Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
+                          backoff=True, resemblance=True, race=True, situations=True, explore=True,
+                          log_path=_log_path(folder) if folder else _log_path())
+
+
+VARIANTS = {"speaking": speaking,
+            "members": lambda folder=None: Config.changed(support="members"),
+            "changed": lambda folder=None: Config.changed()}          # folder: where the session ledger is kept
+
+DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
 
 def lower_tr(text: str) -> str:
@@ -76,9 +159,129 @@ def lower_tr(text: str) -> str:
     return text.replace("I", "ı").replace("İ", "i").lower()
 
 
-def words(text: str) -> List[str]:
-    """Text channel adapter: words and punctuation as symbols, in Turkish lower case."""
-    return re.findall(r"\w+|[^\w\s]", lower_tr(text), flags=re.UNICODE)
+def lower(text: str, dil: str = "tr") -> str:
+    """Lower case by a mind's language convention: "tr" Turkish rules (lower_tr), "diger" plain str.lower."""
+    return text.lower() if dil == "diger" else lower_tr(text)
+
+
+def words(text: str, dil: str = "tr") -> List[str]:
+    """Text channel adapter: words and punctuation as symbols, lower-cased by the mind's convention (default
+    Turkish)."""
+    return re.findall(r"\w+|[^\w\s]", lower(text, dil), flags=re.UNICODE)
+
+
+def clean_path(raw: str) -> str:
+    """A path as typed: surrounding spaces and one pair of surrounding quotes removed, ~ expanded (spaces inside
+    are part of the path)."""
+    path = raw.strip()
+    if len(path) >= 2 and path[0] == path[-1] and path[0] in "\"'":
+        path = path[1:-1]
+    return os.path.expanduser(path)
+
+
+def path_and_cap(rest: str):
+    """The argument of !oku: a path (see clean_path) and an optional last number, the most sentences to read. When
+    the whole argument names an existing file or folder ("notlar 2024") it is the path, with no number."""
+    whole = clean_path(rest)
+    head, _, tail = rest.strip().rpartition(" ")
+    if not os.path.exists(whole) and tail.isdigit() and head.strip() and os.path.exists(clean_path(head)):
+        return clean_path(head), int(tail)
+    return whole, 0
+
+
+class NotText(ValueError):
+    """A file that is not text (NUL bytes, or many control characters): nothing of it is read."""
+
+
+class TextFile(NamedTuple):
+    """How a text file is read: its codec, and how many invalid byte sequences were replaced by U+FFFD."""
+    encoding: str
+    replaced: int = 0
+
+
+BOMS = ((codecs.BOM_UTF32_LE, "utf-32"), (codecs.BOM_UTF32_BE, "utf-32"), (codecs.BOM_UTF8, "utf-8-sig"),
+        (codecs.BOM_UTF16_LE, "utf-16"), (codecs.BOM_UTF16_BE, "utf-16"))  # UTF-32 LE first: it begins like UTF-16 LE
+CONTROLS = re.compile("[\x00-\x08\x0e-\x1f\x7f-\x9f]")   # control characters other than tab, line and page breaks
+UNDECODED = re.compile("[\udc80-\udcff]")                # bytes a codec could not decode (errors="surrogateescape")
+ASCII = bytes(range(0x80))
+CONTROL_SHARE = 100     # a file is not text when more than one character in CONTROL_SHARE is a control character
+
+
+def text_encoding(path: str) -> TextFile:
+    """How a text file is read, decided from the whole file (block by block) before anything is lived, so a file is
+    never half taught in one encoding:
+
+    * a byte order mark names its codec: UTF-8, UTF-16 little or big endian (Excel "Unicode Text", Notepad
+      "Unicode", PowerShell 5.1 redirection) or UTF-32; the mark is not read as a symbol;
+    * a file with NUL bytes (NUL characters, when a mark names its codec) is not text, nor one where more than one
+      character in CONTROL_SHARE is a control character other than tab, line and page breaks: NotText;
+    * without a mark it is UTF-8, and its invalid byte sequences are replaced (U+FFFD) and counted, unless most of its
+      non-ASCII bytes are invalid UTF-8 and the whole file decodes as cp1254 (Turkish ANSI, as Excel and Notepad save
+      on Turkish Windows): then it is read as cp1254. One stray byte in a UTF-8 file is one replaced character, not a
+      whole file read in the wrong encoding."""
+    with open(path, "rb") as f:
+        head = f.read(4)
+        marked = next((codec for bom, codec in BOMS if head.startswith(bom)), None)
+        codec = marked or "utf-8"
+        f.seek(0)
+        replacing = codecs.getincrementaldecoder(codec)("replace")       # how it is read
+        ignoring = codecs.getincrementaldecoder(codec)("ignore")         # ... and without what could not be decoded
+        escaping = ansi = None
+        if not marked:                       # UTF-8: each byte that is not UTF-8 kept as one mark (all are >= 0x80)
+            escaping = codecs.getincrementaldecoder(codec)("surrogateescape")
+            ansi = codecs.getincrementaldecoder("cp1254")()
+        chars = controls = undecoded = replaced = non_ascii = 0
+        for block, final in _with_final(iter(lambda: f.read(1 << 20), b"")):
+            text = replacing.decode(block, final)
+            if "\0" in text:
+                raise NotText("NUL baytları var" + ("" if marked else "; UTF-16 ise bayt sırası işaretiyle kaydedin"))
+            chars += len(text)
+            controls += len(CONTROLS.findall(text))
+            replaced += text.count("\ufffd") - ignoring.decode(block, final).count("\ufffd")
+            if escaping is not None:
+                undecoded += len(UNDECODED.findall(escaping.decode(block, final)))
+                non_ascii += len(block.translate(None, ASCII))
+                if ansi is not None:
+                    try:
+                        ansi.decode(block, final)
+                    except UnicodeDecodeError:
+                        ansi = None
+    if controls * CONTROL_SHARE > chars:
+        raise NotText("%d denetim karakteri var (%d karakterde birden çok)" % (controls, CONTROL_SHARE))
+    if undecoded and ansi is not None and 2 * undecoded > non_ascii:
+        return TextFile("cp1254")
+    return TextFile(codec, replaced)
+
+
+def _with_final(blocks):
+    """The blocks of a file, each with False, then an empty last block with True (the decoders' final call)."""
+    for block in blocks:
+        yield block, False
+    yield b"", True
+
+
+def open_text(path: str):
+    """A text file opened for reading in its encoding (text_encoding); returns (file, TextFile). NotText when it is
+    not text."""
+    found = text_encoding(path)
+    return open(path, encoding=found.encoding, errors="replace"), found
+
+
+def encoding_notes(found: Dict[str, TextFile]) -> List[str]:
+    """What the program says about how the text files it read were decoded (file name -> TextFile): files that were
+    not UTF-8, and the invalid byte sequences it replaced (U+FFFD), with how many, by encoding."""
+    notes = []
+    ansi = [name for name, f in found.items() if f.encoding == "cp1254"]
+    wide = ["%s (%s)" % (name, f.encoding.upper()) for name, f in found.items() if f.encoding in ("utf-16", "utf-32")]
+    if ansi:
+        notes.append("UTF-8 değil, cp1254 (Türkçe ANSI) olarak okundu: " + ", ".join(ansi[:10]))
+    if wide:
+        notes.append("bayt sırası işaretine göre okundu: " + ", ".join(wide[:10]))
+    for label, codecs_ in (("UTF-8", ("utf-8", "utf-8-sig")), ("UTF-16", ("utf-16",)), ("UTF-32", ("utf-32",))):
+        repaired = ["%s (%d)" % (name, f.replaced) for name, f in found.items() if f.replaced and f.encoding in codecs_]
+        if repaired:
+            notes.append("geçersiz %s dizileri \ufffd ile değiştirildi (kaç tane): %s" % (label, ", ".join(repaired[:10])))
+    return notes
 
 
 ASK_KEYS = ("soru", "question", "input", "prompt", "söz", "soz")
@@ -101,22 +304,28 @@ def dialogues_of(data) -> List[tuple]:
     return pairs
 
 
-def sentences(text: str) -> List[str]:
+def sentences(text: str, dil: str = "tr") -> List[str]:
     """Split a document into sentences (and lines), keeping only those with at least two words."""
     parts = re.split(r"(?<=[.!?…])\s+|\n+", text)
-    return [p.strip() for p in parts if len(words(p)) >= 2]
+    return [p.strip() for p in parts if len(words(p, dil)) >= 2]
 
 
 CODE = (".py", ".js", ".ts", ".java", ".c", ".h", ".cpp", ".cs", ".go", ".rs", ".ps1", ".sh", ".yml", ".yaml",
         ".toml", ".ini", ".cfg", ".html", ".css", ".sql")      # source code is read as a language too, line by line
 
 
-def read_document(path: str) -> str:
-    """Plain text of a document. .docx needs python-docx, .pdf needs pypdf (only if such files are present)."""
+def read_document(path: str, encodings: list = None) -> str:
+    """Plain text of a document. .docx needs python-docx, .pdf needs pypdf (only if such files are present). Text
+    files are decoded as text_encoding decides (NotText when they are not text); how a text file was decoded (a
+    TextFile) is appended to ``encodings`` when given."""
     low = path.lower()
     if low.endswith((".txt", ".md", ".tsv", ".csv") + CODE):
-        with open(path, encoding="utf-8", errors="replace") as f:
-            return f.read()
+        f, found = open_text(path)
+        with f:
+            text = f.read()
+        if encodings is not None:
+            encodings.append(found)
+        return text
     if low.endswith(".docx"):
         import docx  # python-docx
         return "\n".join(p.text for p in docx.Document(path).paragraphs)
@@ -126,13 +335,30 @@ def read_document(path: str) -> str:
     return ""
 
 
+def live_counts(mind: Mind) -> tuple:
+    """(units, ties) the mind holds now; those !unut took back are kept in the tables but are dead, not counted."""
+    S = mind.S
+    return int(S.u_alive[:S.n_units].sum()), int(S.t_alive[:S.n_ties].sum())
+
+
+def taken_back(log, m: int) -> bool:
+    """Whether moment m of a ledger was already retracted (a disk ledger keeps the set, a ledger in memory marks the
+    entry)."""
+    retracted = getattr(log, "retracted", None)
+    if retracted is not None:
+        return m in retracted
+    entry = log.get(m)
+    return entry is not None and bool(entry.retracted)
+
+
 def profile(mind: Mind) -> str:
     """Developmental profile measured from the substance (nothing assigned)."""
     from .evidence import conviction
     from .store import ATOMIC, CATEGORY, COMPOSED, EXPECT, SLOTTED
     S = mind.S
     n = S.n_units
-    kinds = S.u_kind[:n]
+    alive = S.u_alive[:n]
+    kinds = S.u_kind[:n] * alive                        # units !unut took back are not counted (kind 0)
     cid = mind.ch.id(CHANNEL) if mind.ch.has(CHANNEL) else -1
     words_seen = known = 0
     for unit in range(n):
@@ -148,7 +374,7 @@ def profile(mind: Mind) -> str:
              "  karşılaştığı kelime: %d   kanaat kazandığı kelime (c >= 0.5): %d" % (words_seen, known),
              "  kurduğu kavram (kategori): %d   çerçeve: %d   birleşik birim (dizi): %d" % (
                  int((kinds & CATEGORY).bool().sum()), int((kinds & SLOTTED).bool().sum()), phrases),
-             "  bağ: %d   öz: %.1f MB" % (S.n_ties, mind.size()["core_tensors"] / 1e6),
+             "  bağ: %d   öz: %.1f MB" % (live_counts(mind)[1], mind.size()["core_tensors"] / 1e6),
              "  (insan yaşı karşılığı verilmez: kaynaklı bir gelişim normu olmadan sayı uydurulmaz)"]
     return "\n".join(lines)
 
@@ -164,10 +390,67 @@ VALUE = "deger"
 VALUE_SIGN = {(VALUE, "iyi"): 1.0, (VALUE, "kötü"): -1.0}     # the adapter defines what is good and bad
 
 
+DAY = 12                                # the recent history entries that are "the day" (dusunce.day_residue)
+READ, TAUGHT, WATCHED, CHAT = "read", "taught", "watched", "chat"   # kinds of history entries; a line lived without
+SPOKE = "spoke"                                                      # an answer is of its provenance ("told", "sensed");
+                                                                     # what the mind said on its own in its life: spoke
+
+
+@dataclass
+class Entry:
+    """One entry of a session's history: what was lived, as !gecmis shows it and !unut takes it back.
+
+    ``kind`` says what it was (a line "told" or "sensed", a "chat" line with the mind's answer, a file "read" or
+    "taught", a dialogue "watched", what the mind said on its own in a silent moment of its life, "spoke"); ``text``
+    is how !gecmis shows it (never parsed); ``moments`` are the moments it
+    lived (!unut retracts each through the ledger); ``heard`` is the last utterance the mind heard in it (a thought
+    after a silence is about it, dusunce.topic_of); ``counts`` are the words lived in it, heard or said, with how often
+    (the day residue weighs them, dusunce.day_residue)."""
+    number: int
+    kind: str
+    text: str
+    moments: List[int]
+    heard: str = ""
+    counts: Dict[str, int] = field(default_factory=dict)
+
+
+class _indices_rebuilt_once:
+    """Retracting many moments with the substance's indices rebuilt once, after the last one.
+
+    ``Substance.retract`` rebuilds every index from the tensors after each moment that removed a tie or a unit, an
+    O(ties) pass; for the 1782 moments of a read guide that was 269 s of a 270 s ``!unut``. Nothing in a retraction
+    reads the indices (only the ledger entry and the tensors) and the rebuild is a function of the tensors alone, so
+    one rebuild at the end gives the same tensors and the same indices as one per moment (pinned by a test). A
+    ``retract_many`` in store.py would say this directly; store.py is not changed here."""
+
+    def __init__(self, substance) -> None:
+        self.S, self.wanted = substance, False
+
+    def __enter__(self):
+        def later() -> None:
+            self.wanted = True
+        self.S.rebuild_indices = later
+        return self
+
+    def __exit__(self, *exc) -> None:
+        del self.S.rebuild_indices                       # the class's own method again
+        if self.wanted:
+            self.S.rebuild_indices()
+
+
+class Interrupted(Exception):
+    """A long command was asked to stop (Ctrl+C): raised by Session.check between two sentences, lines, dialogues or
+    moments, never inside a moment, so what was lived until then is whole."""
+
+
 class Session:
-    def __init__(self, mind: Mind, pieces=None) -> None:
+    def __init__(self, mind: Mind, pieces=None, stop: threading.Event = None) -> None:
         self.mind = mind
-        self.history: List[tuple] = []        # (number, text, moments)
+        self.stop = stop if stop is not None else threading.Event()   # set: long commands stop at their next check
+        self.dil = getattr(mind, "dil", "tr")  # the mind's language convention (how its text is lower-cased)
+        self.history: List[Entry] = []        # what was lived in this session, entry by entry
+        self.numbered = 0                     # the last number given to a history entry (numbers are never reused)
+        self.answered = None                  # the path (mind.trace) of the last answer, kept for its feedback
         self.pieces = pieces                  # optional subword tokenizer: pieces of each word as facets
         if pieces is not None:
             mind.add_channel(FACETS, "facet")
@@ -189,8 +472,6 @@ class Session:
         mind.add_channel(SOUND, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
         self.seen: Dict[str, str] = {}          # the file names of images shown in this session, by gist
-        self.curious = True                     # the curiosity reflex (T4) is on in conversation
-        self.thinking = True                    # what is heard calls thoughts to mind; one may be said (T8)
         from .mind import INNER_CHANNEL, SELF_CHANNEL
         if not mind.ch.has(SELF_CHANNEL):       # minds born before the self unit existed get it now
             mind.add_channel(SELF_CHANNEL, "context")
@@ -199,6 +480,34 @@ class Session:
         self.hearing = None                     # a sound heard with the next utterance: (gist, facets)
         self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
         self.open_turn = False                # the mind has just answered; feedback may still come
+
+    def words(self, text: str) -> List[str]:
+        """The text adapter with this mind's language convention: everything the session reads and hears."""
+        return words(text, self.dil)
+
+    def check(self) -> None:
+        """Called by long commands between two sentences, lines, dialogues or moments (never inside a moment): when
+        the session was asked to stop (Ctrl+C), the command stops here with what it lived so far (Interrupted)."""
+        if self.stop.is_set():
+            raise Interrupted()
+
+    def lower(self, text: str) -> str:
+        return lower(text, self.dil)
+
+    def remember(self, kind: str, text: str, moments: List[int], heard: List[str] = (), said: List[str] = ()) -> int:
+        """A new entry of the history (see Entry): its kind, how !gecmis shows it, its moments, the utterances heard
+        in it (in order) and the words the mind said in it. Returns its number."""
+        counts: Dict[str, int] = {}
+        for word in [w for utterance in heard for w in self.body(utterance)] + list(said):
+            counts[word] = counts.get(word, 0) + 1
+        self.numbered += 1
+        self.history.append(Entry(self.numbered, kind, text, list(moments), heard[-1] if heard else "", counts))
+        return self.numbered
+
+    def last_heard(self) -> str:
+        """The last utterance the mind heard in this session, whatever the entry it belongs to: a line told, the
+        partner's line in a chat, the answer of a dialogue watched, the last sentence of a file read or taught."""
+        return next((entry.heard for entry in reversed(self.history) if entry.heard), "")
 
     def events(self, symbol: str, prov: int, speaker: str = None) -> List[Event]:
         """One word as an event on the text channel, with its subword pieces and its speaker as facets."""
@@ -211,13 +520,15 @@ class Session:
                 out += [Event(FACETS, p.strip(), prov) for p in parts]
         return out
 
-    def live(self, text: str, prov: int) -> None:
-        """Hear (told) or sense an utterance while listening: the mind does not speak into it."""
+    def live(self, text: str, prov: int, keep: bool = True) -> None:
+        """Hear (told) or sense an utterance while listening: the mind does not speak into it. ``keep``: the utterance
+        is an entry of the history (not when it is part of a larger one, a taught file)."""
         start = self.mind.t + 1
         self.listen(text, prov, speaker=self.partner)
         self.end_of_turn(prov, tone=self.tone(text))
         self.mind.step([])
-        self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
+        if keep:
+            self.remember(PROVENANCE[prov], text, list(range(start, self.mind.t + 1)), [text])
 
     def listen(self, text: str, prov: int, speaker: str = None) -> None:
         """Hear an utterance while not speaking (turn taking set by the session). ``speaker``: who says it, perceived
@@ -242,7 +553,7 @@ class Session:
 
     def body(self, text: str) -> List[str]:
         """The words of an utterance without its closing punctuation (that is perceived with the end, see tone)."""
-        symbols = words(text)
+        symbols = self.words(text)
         if self.turns and self.tones:
             while symbols and symbols[-1] in FINAL:
                 symbols = symbols[:-1]
@@ -280,222 +591,244 @@ class Session:
         self.mind.step([])
 
     def reply(self, text: str, limit: int = 80, say=None) -> str:
-        """You speak (told), then the mind may speak: its own acts, one symbol per moment, until silence.
+        """You speak (told), then the mind may speak: what its own decision emits, one symbol per moment, until silence.
 
-        The turn passes to the mind with your last word: it decides in that very moment (the context of your
-        whole utterance is present), and each symbol it says comes back as its own echo in the next moment.
-        """
+        The turn passes to the mind when your utterance has ended (older minds: with your last word): it decides in
+        that very moment, the context of your whole utterance present. When it decides nothing, a silent moment passes
+        (in which it may feel its not knowing, L7) and it lives the next one; what it decides then is its own too. The
+        words said are exactly the words its decisions emit (speak): no thought is said for it, nothing is asked back
+        for it, nothing it decided is left unsaid. The answer's path (its episode trace) is kept for "!dogru" and
+        "!yanlis"."""
         self.close_turn()
         start = self.mind.t + 1
-        symbols = words(text)
+        symbols = self.words(text)
         if not symbols:
             return "(sessiz)"
-        before = self.known_before(text) if self.curious else {}   # what it knew of these words before hearing them
-        thoughts = self.associations(text) if self.turns and self.thinking else []
         if self.turns:                                   # the turn passes when your utterance has ended
             self.listen(text, TOLD, speaker=self.partner)
             acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
         else:                                            # older minds: the turn passes with your last word
             self.listen(" ".join(symbols[:-1]), TOLD)
             acts = self.mind.step(self.events(symbols[-1], TOLD))
-        knew = bool(acts)
-        thought = False
-        said: List[str] = []
-        if not acts and self.turns:                      # nothing at once: it thinks about what was asked first
-            unknown = getattr(self.mind, "unknown", 0.0)
-            said = self.think_aloud(thoughts, say)
-            thought = bool(said)
-            if not said:                                 # its thought was not real enough: a moment passes and it
-                self.mind.unknown = unknown              # feels its not knowing (L7); what it says then is its own
+        if not acts and self.turns:                      # nothing at once: a moment passes in silence (it may feel its
+            acts = self.mind.step([])                    # not knowing, L7), then the next; what it decides is its own
+            if not acts:
                 acts = self.mind.step([])
-                if not acts:
-                    acts = self.mind.step([])
-        from .dusunce import _circling
-        while acts and len(said) < limit:
-            words_now = [str(e.symbol) for e in acts if e.channel == CHANNEL]
-            if words_now and _circling(said + words_now):   # speech that goes round in a circle has ended
-                self.mind.pending = [e for e in self.mind.pending if e.channel != CHANNEL]
-                self.mind.step([])
-                break
-            said += words_now
+        said = self.speak(acts, say, limit)
+        self.remember(CHAT, text, list(range(start, self.mind.t + 1)), [text], said)
+        self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
+        self.answered = list(self.mind.trace)            # ... and the path that led to the answer is kept for them
+        return " ".join(said) if said else "(sessiz)"
+
+    def speak(self, acts: List[Event], say=None, limit: int = 80) -> List[str]:
+        """The mind says what it decided: every word its decisions emit is said (``say``: out as it is said) and comes
+        back as its own echo in the next moment, where it decides again (dusunce.go_on). Its speech ends when it decides
+        nothing, or when the echo brings back a composed context this episode already lived (it has come round to a
+        situation it was in): the echo is heard and it does not decide again there. ``limit`` moments are only a safety
+        cap, ended the same way. No echo is ever dropped and nothing it decided is left unsaid. Returns the words
+        said."""
+        from .dusunce import go_on
+        said: List[str] = []
+
+        def out(words_now: List[str]) -> None:
+            said.extend(words_now)
             for w in words_now:
                 if say is not None:
                     say(w)                               # out as it is said (online life)
-            acts = self.mind.step([])                    # the echo of its own act arrives here
-        if not knew and not thought and self.curious:    # what it did not know it asks about (T4)
-            asked = self.wonder(text, before)
-            said += asked
-            for w in asked:
-                if say is not None:
-                    say(w)
-        self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
-        self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
-        return " ".join(said) if said else "(sessiz)"
-
-    def associations(self, text: str, tries: int = 2) -> List[tuple]:
-        """What the words of an utterance call to mind as they are heard (T8): for the words the mind is least sure of
-        (the highest drive first, up to ``tries``), a thought of its inner voice, kept as imagined and scored for
-        reality from lived evidence only. Thought before the utterance is taken in, so a thought is what the mind
-        knew, not an echo of what it is being told. Returns (word, thought, reality) triples."""
-        from .dusunce import think
-        from .read import drive_of
-        mind = self.mind
-        cid = mind.ch.id(CHANNEL)
-        topics = []
-        for w in dict.fromkeys(self.body(text)):
-            index = mind.ch.symbol_index(cid, w, create=False) if len(w) >= 4 and w.isalpha() else -1
-            unit = mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
-            if unit >= 0:
-                topics.append((drive_of(mind, unit), w))
-        topics.sort(reverse=True)
-        out = []
-        for _, topic in topics[:tries]:
-            mind.step([])                                # a fresh inner episode for each thought
-            thought, reality = think(self, topic)
-            out.append((topic, thought, reality))
-        return out
-
-    def think_aloud(self, thoughts: List[tuple], say=None, least: int = 3, more: int = 2) -> List[str]:
-        """Think, then speak: of the thoughts its words called to mind, the first that says something (``least``
-        words) and is real enough by the same measure as an act (reality >= 1/2 + theta / 2T) is said aloud. Then it
-        may go on (speaking at length when it has more to say): up to ``more`` further thoughts, each about the word of
-        the last one it is least sure of, said while they stay real enough and new. Returns what it said."""
-        from .dusunce import think, topic_of
-        mind = self.mind
-        real_enough = 0.5 + mind.knob["theta"] / (2.0 * mind.cfg.T)
-        said: List[str] = []
-
-        def aloud(words_):
-            for w in words_:                             # what it thought, said aloud (its own acts)
-                mind.step([Event(CHANNEL, w, ACTED)])
-                if say is not None:
-                    say(w)
-            mind.step([])
-            said.extend(words_)
-
-        for topic, thought, reality in thoughts:
-            if len(thought) >= least and reality >= real_enough:
-                aloud([topic] + thought)
-                break
-        if not said:
-            return []
-        from .dusunce import _circling, frequent_words
-        frequent = frequent_words(mind)
-        spoken = {tuple(said)}
-        for _ in range(more):
-            topic = topic_of(self, " ".join(w for w in said[-len(thought):] if w not in frequent))
-            if not topic:
-                break
-            mind.unknown, held = 0.0, mind.unknown
-            mind.step([])
-            mind.unknown = held
-            thought, reality = think(self, topic)
-            line = tuple([topic] + thought)
-            if len(thought) < least or reality < real_enough or line in spoken or _circling(said + list(line)):
-                break
-            spoken.add(line)
-            aloud(list(line))
+        go_on(self.mind, acts, out, limit)
         return said
 
-    def known_before(self, text: str) -> Dict[str, int]:
-        """How firmly each word of an utterance was known before it was heard (ties held with conviction >= 1/2)."""
-        from .web import firm_knowledge
-        mind = self.mind
-        cid = mind.ch.id(CHANNEL)
-        out = {}
-        for w in self.body(text):
-            index = mind.ch.symbol_index(cid, w, create=False)
-            unit = mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
-            out[w] = firm_knowledge(mind, unit) if unit >= 0 else 0
-        return out
-
-    def wonder(self, text: str, before: Dict[str, int] = None) -> List[str]:
-        """T4, an innate curiosity reflex (LAYERS.md L2): when the mind has nothing to say and its partner used a word it
-        knows nothing about, it says that word back with a question tone, as a child does ("kuantum ?"). What follows
-        (an explanation) is learned like anything else; nothing here is about a language or a topic."""
-        mind = self.mind
-        before = self.known_before(text) if before is None else before
-        unknown = [(0, w) for w in self.body(text) if len(w) >= 4 and w.isalpha() and before.get(w, 0) == 0]
-        if not unknown:
-            return []
-        word = unknown[0][1]                             # the first word it knows nothing about (topics come early)
-        mind.step([Event(CHANNEL, word, ACTED)])
-        mind.step([Event(CHANNEL, "?", ACTED)])
-        mind.step([])
-        return [word, "?"]
-
     def close_turn(self) -> None:
+        self.answered = None
         if self.open_turn:
             self.mind.step([])
             self.open_turn = False
 
     def feedback(self, good: bool) -> str:
-        """How the mind's last answer was received: a value event at the end of the same episode."""
+        """How the mind's last answer was received: a value event at the end of the same episode (L5: every step of
+        the path that led to the answer gets evidence toward the value, learn.learn_value).
+
+        The path is the answer's episode trace, kept from the answer until the feedback or the next utterance and
+        given back to the mind for the moment the value arrives. The online life lives silent moments meanwhile (and
+        may think or sleep), and a silent moment ends an episode (mind.trace is emptied); typed at once, the kept path
+        is the trace itself. After silent moments the value reaches the same path with the same evidence as typed at
+        once: the lag-2 ties of every step of the path to the value (the consequence, L5). Only that path is the same.
+        The value's lag-1 ties are not: typed at once, the value comes in the moment after the answer and the answer's
+        last focus is tied to it (as to any event that follows); after silent moments the moment before it is a
+        silent one, nothing in it is tied to the value, because time passed. Says "not edildi" only when the value
+        evidence grew."""
         if not self.open_turn:
             return "  geri bildirim, zihnin cevabından hemen sonra verilmeli"
-        self.mind.step([Event(VALUE, "iyi" if good else "kötü", SENSED)])
+        label = "iyi" if good else "kötü"
+        spoken_over = self.answered is None              # the mind spoke on its own after its answer
+        path = list(self.answered or [])
+        self.answered = None
+        before = self._path_value(path, label)
+        self.mind.trace = list(path)
+        self.mind.step([Event(VALUE, label, SENSED)])
         self.mind.step([])
         self.open_turn = False
-        return "  not edildi (%s)" % ("iyi" if good else "kötü")
+        if path and self._path_value(path, label) > before:
+            return "  not edildi (%s)" % label
+        if spoken_over:
+            return "  öğrenilmedi (%s): zihin cevabından sonra kendiliğinden konuştu; geri bildirim o cevaba artık " \
+                   "ulaşmıyor" % label
+        return "  öğrenilmedi (%s): bu cevap zihinde bir yol bırakmadı (sessizlikle bitti); geri bildirim bir şey " \
+               "öğretmedi" % label
+
+    def _path_value(self, path: List[int], label: str) -> float:
+        """The positive evidence the steps of a path hold toward a value ("later in the episode", EXPECT lag 2)."""
+        from .store import EXPECT
+        S, value = self.mind.S, self.mind.unit_of(VALUE, label)
+        if value < 0:
+            return 0.0
+        ties = (S.find_tie(unit, value, EXPECT, 2) for unit in dict.fromkeys(path))
+        return sum(float(S.w1(W_POS, tie).sum()) for tie in ties if tie >= 0)
 
     def read_path(self, path: str, cap: int = 0) -> str:
-        """Watch the texts of a file or of every supported file under a folder; report what was lived."""
-        import os
+        """Watch the texts of a file or of every supported file under a folder; report what was lived. Each file read
+        is an entry of the history (Entry: the moments it lived, so ``!unut`` takes it back, the words it lived and its
+        last sentence). Asked to stop (Ctrl+C), it stops before the next sentence or dialogue: what was read until then
+        stays lived and in the history."""
         import time
+        if not os.path.exists(path):
+            return "  böyle bir dosya ya da klasör yok: %s" % path
         files = [path] if os.path.isfile(path) else sorted(
             os.path.join(root, name) for root, _, names in os.walk(path) for name in names)
         start, lived, skipped, t0 = time.time(), 0, [], self.mind.t
-        for name in files:
-            try:
-                if name.lower().endswith(".json"):
-                    import json
-                    with open(name, encoding="utf-8") as f:
-                        pairs = dialogues_of(json.load(f))
-                    for first, answer in pairs[:cap] if cap else pairs:
-                        self.watch(first, answer)
-                        lived += 1
-                    if not pairs:
-                        skipped.append(os.path.basename(name))
-                    continue
-                if name.lower().endswith(".tsv"):
-                    with open(name, encoding="utf-8", errors="replace") as f:
-                        watched = 0
-                        for raw in f:
-                            if cap and watched >= cap:
-                                break
-                            if "\t" in raw:
-                                first, answer = raw.rstrip("\n").split("\t", 1)
+        found: Dict[str, TextFile] = {}                  # how each text file was decoded (encoding_notes)
+        reached, stopped = 0, False                      # files begun; asked to stop (Ctrl+C) on the way
+        try:
+            for name in files:
+                self.check()
+                reached += 1
+                first_moment, said = self.mind.t + 1, []
+                try:
+                    try:
+                        if name.lower().endswith(".json"):
+                            import json
+                            f, found[os.path.basename(name)] = open_text(name)
+                            with f:
+                                pairs = dialogues_of(json.load(f))
+                            for first, answer in pairs[:cap] if cap else pairs:
+                                self.check()
                                 self.watch(first, answer)
+                                said += [first, answer]
                                 lived += 1
-                                watched += 1
-                    continue
-                text = read_document(name)
-            except Exception as exc:
-                skipped.append("%s (%s)" % (os.path.basename(name), exc))
-                continue
-            if not text:
-                skipped.append(os.path.basename(name))
-                continue
-            lines = [ln.strip() for ln in text.splitlines() if len(words(ln)) >= 2] if name.lower().endswith(CODE) \
-                else sentences(text)                     # code: each line is an utterance of that language
-            for i, sentence in enumerate(lines):
-                if cap and i >= cap:
-                    break
-                self.listen(sentence, IMITATED)
-                self.mind.step([])
-                lived += 1
-            self.history.append((len(self.history) + 1, "[okudu] %s" % os.path.basename(name), []))
+                            if not pairs:
+                                skipped.append(os.path.basename(name))
+                            continue
+                        if name.lower().endswith(".tsv"):
+                            f, found[os.path.basename(name)] = open_text(name)
+                            with f:
+                                watched = 0
+                                for raw in f:
+                                    if cap and watched >= cap:
+                                        break
+                                    if "\t" in raw:
+                                        self.check()
+                                        first, answer = raw.rstrip("\n").split("\t", 1)
+                                        self.watch(first, answer)
+                                        said += [first, answer]
+                                        lived += 1
+                                        watched += 1
+                            continue
+                        encodings = []
+                        text = read_document(name, encodings)
+                        if encodings:
+                            found[os.path.basename(name)] = encodings[0]
+                    except Interrupted:
+                        raise
+                    except NotText as exc:
+                        skipped.append("%s (metin dosyası değil: %s)" % (os.path.basename(name), exc))
+                        continue
+                    except Exception as exc:
+                        skipped.append("%s (%s)" % (os.path.basename(name), exc))
+                        continue
+                    if not text:
+                        skipped.append(os.path.basename(name))
+                        continue
+                    lines = [ln.strip() for ln in text.splitlines() if len(self.words(ln)) >= 2] \
+                        if name.lower().endswith(CODE) else sentences(text, self.dil)   # code: each line an utterance
+                    for i, sentence in enumerate(lines):
+                        if cap and i >= cap:
+                            break
+                        self.check()
+                        self.listen(sentence, IMITATED)
+                        self.mind.step([])
+                        said.append(sentence)
+                        lived += 1
+                finally:                                 # what was lived of this file is one entry of the history
+                    moments = list(range(first_moment, self.mind.t + 1))
+                    if moments:
+                        self.remember(READ, "[okudu] %s" % os.path.basename(name), moments, said)
+        except Interrupted:
+            stopped = True
         took = time.time() - start
-        out = "  %d dosya, %d cümle/diyalog, %d an, %.0f sn (%.1f ms/an)" % (
-            len(files) - len(skipped), lived, self.mind.t, took, 1000 * took / max(1, self.mind.t - t0))
+        out = "%s  %d dosya, %d cümle/diyalog, %d an, %.0f sn (%.1f ms/an)" % (
+            "\n" if stopped else "", reached - len(skipped), lived, self.mind.t, took,
+            1000 * took / max(1, self.mind.t - t0))           # stopped: on a new line after the ^C
         if skipped:
             out += "\n  okunamayan: " + ", ".join(skipped[:10])
+        for note in encoding_notes({name: f for name, f in found.items() if name not in skipped}):
+            out += "\n  " + note
+        if stopped:
+            out += "\n  yarıda kesildi (Ctrl+C): okunduğu kadarı yaşandı ve geçmişte; dosyaların %d/%d tanesine " \
+                   "başlanmıştı" % (reached, len(files))
         return out
+
+    def teach(self, path: str) -> str:
+        """``!ogret``: watch every line of a file, "soz<TAB>karsilik" dialogues or plain sentences (told by someone,
+        imitated); the whole file is one entry of the history (``!unut`` takes it back). Reports what was lived. Asked
+        to stop (Ctrl+C), it stops before the next line; what was watched until then stays lived and in the history."""
+        if not os.path.exists(path):
+            return "  böyle bir dosya yok: %s" % path
+        if os.path.isdir(path):
+            return "  bu bir klasör: %s (klasörler !oku ile okunur)" % path
+        try:
+            f, found = open_text(path)
+        except NotText as exc:
+            return "  okunmadı: %s metin dosyası değil (%s)" % (os.path.basename(path), exc)
+        first_moment, said, n, stopped = self.mind.t + 1, [], 0, False
+        try:
+            with f:
+                for raw in f:
+                    raw = raw.rstrip("\n")
+                    if not raw.strip():
+                        continue
+                    self.check()
+                    if "\t" in raw:
+                        first, answer = raw.split("\t", 1)
+                        self.watch(first, answer)
+                        said += [first, answer]
+                    else:
+                        self.live(raw, IMITATED, keep=False)
+                        said.append(raw)
+                    n += 1
+        except Interrupted:
+            stopped = True
+        finally:
+            moments = list(range(first_moment, self.mind.t + 1))
+            if moments:
+                self.remember(TAUGHT, "[öğretti] %s" % os.path.basename(path), moments, said)
+        out = "%s  %d satır izlendi, %d an" % ("\n" if stopped else "", n, self.mind.t)
+        for note in encoding_notes({os.path.basename(path): found}):
+            out += "\n  " + note
+        if stopped:
+            out += "\n  yarıda kesildi (Ctrl+C): izlendiği kadarı yaşandı ve geçmişte"
+        return out
+
+    def observe(self, first: str, answer: str) -> None:
+        """``!izle``: watch two others talk (see watch); the dialogue is one entry of the history."""
+        start = self.mind.t + 1
+        self.watch(first, answer)
+        self.remember(WATCHED, "[izledi] %s || %s" % (first, answer), list(range(start, self.mind.t + 1)),
+                      [first, answer])
 
     def ask(self, text: str, top: int = 5) -> str:
         twin = self.mind.clone()
         twin.knob["theta"] = 1e9                         # listening: the clone does not speak into the question
-        for symbol in words(text):
+        for symbol in self.words(text):
             twin.step(self.events(symbol, TOLD))
         expected = sorted(twin.expected(CHANNEL, "specific").items(), key=lambda kv: -kv[1])[:top]
         drive = read.total_drive(twin)
@@ -514,7 +847,7 @@ class Session:
     def why(self, text: str, value: str) -> str:
         twin = self.mind.clone()
         twin.knob["theta"] = 1e9                         # listening: the clone does not speak into the question
-        for symbol in words(text):
+        for symbol in self.words(text):
             twin.step(self.events(symbol, TOLD))
         if twin.context is None or not twin.ch.has(CHANNEL):
             return "  bağlam yok"
@@ -535,15 +868,38 @@ class Session:
         return "\n".join(out)
 
     def forget(self, number: int) -> str:
-        for entry in self.history:
-            if entry[0] == number:
-                removed = 0
-                for m in reversed(entry[2]):
+        """Retract an entry of the history exactly: each of its moments through the ledger, the latest first (a
+        typed line, an answer, a file read or taught, a watched dialogue). Each moment is taken back whole, and an
+        interrupted !unut is resumed by the next one: the moments already taken back are skipped (retracting one
+        twice is refused by the core), so in the end every moment of the entry is taken back once."""
+        entry = next((e for e in self.history if e.number == number), None)
+        if entry is None:
+            return "  böyle bir numara yok (!gecmis numaraları gösterir)"
+        moments = entry.moments
+        if not moments:
+            return "  '%s' geri alınamaz: yaşanmış anı kayıtlı değil" % entry.text
+        log = self.mind.S.log
+        if any(m not in log for m in moments):
+            return "  '%s' geri alınamaz: bu zihin deneyim defteri tutmuyor (--defter-yok ya da defteri olmadan " \
+                   "yüklendi)" % entry.text
+        left = [m for m in moments if not taken_back(log, m)]
+        before = "" if len(left) == len(moments) else \
+            "; %d anı önceki !unut geri almıştı" % (len(moments) - len(left))
+        removed, done = 0, 0
+        try:
+            with _indices_rebuilt_once(self.mind.S):
+                for m in reversed(left):
+                    self.check()                         # asked to stop: between two moments, each taken back whole
                     report = self.mind.retract(m)
                     removed += sum(v for v in report.values() if isinstance(v, int))
-                self.history.remove(entry)
-                return "  '%s' geri alındı (kanıtı çekirdekten çıkarıldı; %d kayıt)" % (entry[1], removed)
-        return "  böyle bir numara yok"
+                    done += 1
+        except Interrupted:
+            return "\n  '%s' yarıda kesildi (Ctrl+C): %d/%d anı geri alındı (%d kayıt); kalanını '!unut %d' geri alır" % (
+                entry.text, len(moments) - len(left) + done, len(moments), removed, number)
+        self.history.remove(entry)
+        if not removed and not before:
+            return "  '%s': %d an geri alındı ama çekirdekte çıkarılacak kaydı yoktu" % (entry.text, len(moments))
+        return "  '%s' geri alındı (kanıtı çekirdekten çıkarıldı; %d kayıt%s)" % (entry.text, removed, before)
 
 
 def night_report(night, names: Dict[str, str] = None) -> List[str]:
@@ -557,10 +913,7 @@ def night_report(night, names: Dict[str, str] = None) -> List[str]:
             note = "   (yeni bir şey kurmadım, bildiğimi hatırladım)" if not new else ""
             for gist in d.get("seen", []):
                 lines.append("    %s gördüm" % (names.get(gist, "bir görüntü") if names else "bir görüntü"))
-            if d["other"] and d.get("kind") == "çıkarım":
-                lines.append("    (%s üzerinden çıkarım): %s   [gerçeklik %.2f]%s" % (d["other"], " ".join(d["words"]),
-                                                                              d["reality"], note))
-            elif d["other"]:
+            if d["other"]:
                 lines.append("    (%s yerine %s): %s   [gerçeklik %.2f]%s" % (d["about"], d["other"],
                                                                           " ".join(d["words"]), d["reality"], note))
             else:
@@ -578,24 +931,34 @@ class Life:
     """Online life: from the moment the session starts the mind lives in its own time, not only when it is asked.
 
     What you type arrives as an event of that time and is heard in order; what the mind says comes out word by word
-    as it says it. Between your lines it lives on, one silent moment at a time: after a short silence it thinks
-    (inner voice, kept as imagined); after a longer one it speaks first: its thought, when it was real enough, else
-    a question about the word it most wants to know (T4); after a long one it sleeps, dreams and sorts its dreams.
-    Commands are handled in the same stream."""
+    as it says it. Between your lines it lives on, one silent moment at a time, each lived as any moment: when its own
+    decision in one of them emits words, they are said (Session.speak) and it is an entry of the history (kind
+    "spoke"); nothing is said for it (no first speech after a silence, no question about a word it wants to know).
+
+    An innate rhythm, declared here and awaiting the owner's decision: once per silence, after THINK_AFTER seconds it
+    thinks (inner voice, lived as imagined, about the best topic of the last utterance it heard, dusunce.topic_of) and
+    after SLEEP_AFTER seconds it sleeps (dreams, then sorting). The clock is a setting of the program, not something
+    the mind learned; --yasamsiz turns the whole life clock off. Commands are handled in the same stream.
+
+    Ending it (Ctrl+C, !cik, the end of input) asks the session to stop: a long command stops at its next sentence,
+    line or moment (Session.check), its life ends, and only then is the mind saved; a life that cannot be stopped is
+    left unsaved (see main)."""
 
     STOP = object()
+    WAIT = 30.0                            # seconds the end of a session waits for a running command to stop
+    THINK_AFTER = 10.0                     # innate rhythm (declared, awaiting the owner's decision): one inner thought
+    SLEEP_AFTER = 600.0                    # ... and one sleep per silence, after these many seconds of it
 
-    def __init__(self, session, handle, lock, beat: float = 2.0, think_after: float = 10.0, speak_after: float = 45.0,
-                 sleep_after: float = 600.0, real_enough: float = 0.75, pace: float = 0.05) -> None:
+    def __init__(self, session, handle, lock, beat: float = 2.0, think_after: float = THINK_AFTER,
+                 sleep_after: float = SLEEP_AFTER, pace: float = 0.05) -> None:
         import queue
         import threading
         import time
         self.session, self.handle, self.lock = session, handle, lock
-        self.beat, self.think_after, self.speak_after, self.sleep_after = beat, think_after, speak_after, sleep_after
-        self.real_enough, self.pace = real_enough, pace
+        self.beat, self.think_after, self.sleep_after, self.pace = beat, think_after, sleep_after, pace
         self.inbox = queue.Queue()
         self.idle_since = time.time()
-        self.thought, self.spoke, self.slept = None, False, False
+        self.thought, self.slept = None, False
         self.handled = threading.Event()
         self.done = threading.Event()
         self.thread = threading.Thread(target=self._run, daemon=True)
@@ -607,73 +970,86 @@ class Life:
         time.sleep(self.pace)
 
     def start(self) -> None:
+        self.session.stop.clear()
         self.thread.start()
 
     def put(self, line: str) -> None:
         self.handled.clear()
         self.inbox.put(line)
 
-    def stop(self) -> None:
+    def stop(self, wait: float = None) -> bool:
+        """End its life: the session is asked to stop (a running command stops at its next sentence, line or moment),
+        then the thread is waited for, at most ``wait`` seconds (Life.WAIT; a second Ctrl+C ends the waiting). True
+        when the thread has ended: only then may the mind be saved, nothing changes it any more."""
+        self.session.stop.set()
         self.inbox.put(self.STOP)
-        self.thread.join(timeout=30)
+        deadline = time.time() + (self.WAIT if wait is None else wait)
+        try:
+            while self.thread.is_alive() and time.time() < deadline:
+                self.thread.join(0.1)
+        except KeyboardInterrupt:                        # asked again: no more waiting
+            pass
+        return not self.thread.is_alive()
 
     def _run(self) -> None:
         import queue
-        import time
-        while True:
-            try:
-                line = self.inbox.get(timeout=self.beat)
-            except queue.Empty:
-                line = None
-            if line is self.STOP:
-                break
-            if line is not None:
-                with self.lock:
-                    going_on = self.handle(line)
-                self.idle_since, self.thought, self.spoke, self.slept = time.time(), None, False, False
-                if going_on is False:
-                    self.done.set()
-                self.handled.set()
-                if going_on is False:
+        try:
+            while not self.session.stop.is_set():
+                try:
+                    line = self.inbox.get(timeout=self.beat)
+                except queue.Empty:
+                    line = None
+                if line is self.STOP:
                     break
-                continue
-            try:
-                self._silence(time.time() - self.idle_since)
-            except Exception as exc:  # its life goes on
-                print("\n  hata: %s\n> " % exc, end="", flush=True)
+                if line is not None:
+                    with self.lock:
+                        going_on = self.handle(line)
+                    self.idle_since, self.thought, self.slept = time.time(), None, False
+                    if going_on is False:
+                        self.done.set()
+                    self.handled.set()
+                    if going_on is False:
+                        break
+                    continue
+                try:
+                    self._silence(time.time() - self.idle_since)
+                except Interrupted:                      # asked to stop while it thought or slept
+                    break
+                except Exception as exc:  # its life goes on
+                    print("\n  hata: %s\n> " % exc, end="", flush=True)
+        finally:
+            self.handled.set()                           # nobody waits for a line its life will not handle
 
     def _silence(self, quiet: float) -> None:
         from .dusunce import sleep as dream_sleep, think, topic_of
+        if self.session.stop.is_set():
+            return
         with self.lock:
-            self.session.mind.step([])                   # a silent moment of its life
-        if self.thought is None and quiet >= self.think_after:
+            start = self.session.mind.t + 1
+            acts = self.session.mind.step([])            # a silent moment of its life, lived as any moment
+            if acts:                                     # its own decision emitted something: it is said
+                self._speak(acts, start)
+        if self.thought is None and quiet >= self.think_after:     # innate rhythm: one inner thought per silence
             with self.lock:
                 topic = topic_of(self.session)
                 words_, reality = think(self.session, topic) if topic else ([], 0.0)
                 self.thought = (topic, words_, reality)
-        if self.thought and not self.spoke and quiet >= self.speak_after:
-            topic, words_, reality = self.thought
-            if words_ and reality >= self.real_enough:
-                said = [topic] + words_                  # it says aloud what it thought (its own acts)
-            else:                                        # nothing real enough to say: it asks about what it most
-                from .web import wanted_topics           # wants to know (T4: curiosity takes the initiative)
-                with self.lock:
-                    wanted = wanted_topics(self.session.mind, CHANNEL, 1)
-                said = [wanted[0], "?"] if wanted else []
-            if said:
-                print("\n  zihin (kendiliğinden):", end="", flush=True)
-                with self.lock:
-                    for w in said:
-                        self.session.mind.step([Event(CHANNEL, w, ACTED)])
-                        self.say(w)
-                    self.session.mind.step([])
-                print("\n> ", end="", flush=True)
-            self.spoke = True
-        if not self.slept and self.sleep_after and quiet >= self.sleep_after:
+        if not self.slept and self.sleep_after and quiet >= self.sleep_after:   # innate rhythm: one sleep
             with self.lock:
                 night = dream_sleep(self.session)
             self.slept = True
             print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night, self.session.seen)), end="", flush=True)
+
+    def _speak(self, acts: List[Event], start: int) -> None:
+        """What the mind decided in a silent moment of its life is said, word by word, until it decides nothing
+        (Session.speak); it is its own utterance, an entry of the history, and the answer before it is spoken over
+        (feedback no longer reaches that answer)."""
+        print("\n  zihin (kendiliğinden):", end="", flush=True)
+        self.session.answered = None
+        said = self.session.speak(acts, self.say)
+        self.session.remember(SPOKE, "[kendiliğinden] %s" % " ".join(said), list(range(start, self.session.mind.t + 1)),
+                              said=said)
+        print("\n> ", end="", flush=True)
 
 
 def pieces_for(mind, choice: str = None):
@@ -698,11 +1074,25 @@ def pieces_for(mind, choice: str = None):
 
 def home_mind() -> str:
     """Where the one mind of this computer lives: $CEVAHIR_HOME/zihin/cevahir (default ~/.cevahir)."""
-    import os
-    home = os.environ.get("CEVAHIR_HOME") or os.path.join(os.path.expanduser("~"), ".cevahir")
-    folder = os.path.join(home, "zihin")
+    folder = home_folder()
     os.makedirs(folder, exist_ok=True)
     return os.path.join(folder, "cevahir")
+
+
+def ledger_of(mind) -> str:
+    """The file of a mind's experience ledger (None when it keeps none, or keeps it in memory)."""
+    from .store import DiskLog
+    log = getattr(mind.S, "log", None)
+    return log.path if isinstance(log, DiskLog) else None
+
+
+def drop_ledger(mind) -> None:
+    """Delete the ledger file of a mind's session: one this program made for it (defter-*.log, or the live copy a
+    load makes of a saved ledger, *.live-*), never a saved mind's own ledger."""
+    path = ledger_of(mind)
+    name = os.path.basename(path) if path else ""
+    if (name.startswith("defter-") or ".live-" in name) and os.path.exists(path):
+        os.remove(path)
 
 
 def _exists(path: str) -> bool:
@@ -731,27 +1121,35 @@ def main(argv=None) -> None:
     ap.add_argument("--kaydetme", action="store_true", help="do not save what was learned in this session")
     ap.add_argument("--his", action="store_true", help="show the mind's feelings after each answer")
     ap.add_argument("--kim", help="who is talking to the mind (asked at the start if not given)")
-    ap.add_argument("--yasamsiz", action="store_true", help="no life clock: the mind does not think or speak first "
-                                                            "while you are silent")
+    ap.add_argument("--yasamsiz", action="store_true", help="no life clock: while you are silent the mind lives no "
+                                                            "moments, does not think and does not sleep")
     ap.add_argument("--parca", help="word pieces as facets: 'cevahir' (the repository's own tokenizer: root, suffixes, "
                                     "stem, last syllable; kept by minds raised with pieces, opt-in for new minds: "
                                     "they multiply the ties per moment), 'yok' (none), or a ByteLevelBPE json")
     ap.add_argument("--defter-yok", dest="no_ledger", action="store_true",
                     help="no experience ledger: smaller and faster, but !unut cannot retract")
+    ap.add_argument("--dil", choices=DIL, help="how a NEW mind's text is lower-cased: 'tr' (default; Turkish rules, "
+                                               "I -> ı, İ -> i) or 'diger' (plain lower case, for other languages); "
+                                               "a mind keeps the convention it was raised with")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
     args = ap.parse_args(argv)
-    keep_at = args.kayit or home_mind()
-    source = None if args.yeni else (args.load or (keep_at if _exists(keep_at) else None))
+    keep_at = clean_path(args.kayit) if args.kayit else home_mind()    # ~ and quotes as in the commands
+    ledgers = os.path.dirname(os.path.abspath(keep_at))   # session ledgers live next to the kept mind
+    source = None if args.yeni else (clean_path(args.load) if args.load else (keep_at if _exists(keep_at) else None))
     if source:
         print("zihin yükleniyor: %s ..." % source, flush=True)
-        mind = load(source, ledger=not args.no_ledger)
+        mind = load(source, live_log=_log_path(ledgers), ledger=not args.no_ledger)   # a saved ledger: copied there
         if not args.no_ledger and not mind.S.keep_log:      # a mind saved without a ledger: keep one from now on
             from .store import DiskLog
-            mind.cfg.keep_log, mind.cfg.log_path = True, _log_path()
+            mind.cfg.keep_log, mind.cfg.log_path = True, _log_path(ledgers)
             mind.S.keep_log = True
             mind.S.log = DiskLog(mind.cfg.log_path, keep=max(4, mind.cfg.undo_depth + 2))
+        if args.dil and args.dil != getattr(mind, "dil", "tr"):
+            print("  (bu zihin '%s' harf kuralıyla büyüdü ve onu korur; --dil %s yeni bir zihin içindir)" % (
+                getattr(mind, "dil", "tr"), args.dil))
     else:
-        mind = Mind(VARIANTS[args.variant]())
+        mind = Mind(VARIANTS[args.variant](ledgers))
+        mind.dil = args.dil or "tr"                         # kept with the mind (persist: minds saved before are tr)
         if args.no_ledger:
             mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path = {}, False, False, None
         mind.add_channel(CHANNEL, "act")
@@ -761,21 +1159,29 @@ def main(argv=None) -> None:
     if not name and interactive:
         name = input("Seninle konuşan kim? (adını yaz, boş bırakırsan 'biri') > ").strip()
     if name:
-        session.partner = lower_tr(name).split()[0]
+        session.partner = session.lower(name).split()[0]
     chat = interactive                                   # at a terminal you talk to it right away
     autosave = not args.kaydetme
     turns_since_save = 0
 
     saved_at = [mind.t]
 
-    def keep(reason: str) -> None:
+    def keep(reason: str) -> bool:
+        """Save what was learned (the substance as it is now, without the ledger). A save that does not finish
+        leaves the mind saved before as it was (persist.save); it is said, and the session goes on to its end."""
         if not autosave or session.mind.t == saved_at[0]:   # nothing new was lived: nothing to keep
-            return
+            return True
+        started = time.time()
+        try:
+            export_portable(session.mind, keep_at)
+        except (Exception, KeyboardInterrupt) as exc:
+            print("  kaydedilemedi (%s): %s; en son kaydedilen zihin olduğu gibi duruyor" % (
+                reason, str(exc) or type(exc).__name__), flush=True)
+            return False
         saved_at[0] = session.mind.t
-        started = __import__("time").time()
-        export_portable(session.mind, keep_at)           # the substance as it is now; atomic
         print("  öğrendiklerim kaydedildi (%s): %s.zihin, %d an, %.0f sn" % (
-            reason, keep_at, session.mind.t, __import__("time").time() - started), flush=True)
+            reason, keep_at, session.mind.t, time.time() - started), flush=True)
+        return True
 
     print("Cevahir — %d an yaşamış bir zihin. %s" % (
         mind.t, "Yaz, konuşalım. Komutlar: !his !yas !dogru !yanlis !unut !cik" if chat else
@@ -783,7 +1189,6 @@ def main(argv=None) -> None:
     if autosave:
         print("  (her sohbetin sonunda öğrendikleri kendiliğinden kaydedilir: %s.zihin)" % keep_at)
     lines = sys.stdin if not interactive else iter(lambda: input("> "), None)
-    import threading
     lock = threading.RLock()
     if interactive and not args.yasamsiz:              # online: it lives from now on, in its own time
         state = {"chat": chat, "turns": 0}
@@ -800,32 +1205,48 @@ def main(argv=None) -> None:
 
         life = Life(session, handle, lock)
         life.start()
-        print("  (çevrimiçi: oturum açık kaldıkça yaşar; sustuğunda düşünür, bir süre sonra kendisi konuşabilir, uzun "
-              "sessizlikte uyur ve rüya görür. Kapatmak: --yasamsiz)")
+        print("  (çevrimiçi: oturum açık kaldıkça sessizlikte de an an yaşar; kendi kararı bir şey söylerse söylenir. "
+              "Doğuştan ritim, sahibinin kararını bekleyen bir program ayarı: her sessizlikte %g sn sonra bir kez iç "
+              "sesle düşünür, %g dk sonra bir kez uyur. Kapatmak: --yasamsiz)" % (Life.THINK_AFTER,
+                                                                                  Life.SLEEP_AFTER / 60))
         try:
             for line in lines:
                 line = line.strip()
                 if not line:
                     continue
                 life.put(line)
-                life.handled.wait()                      # its answer comes out before the next prompt
-                if life.done.is_set():
+                while not life.handled.wait(0.2) and life.thread.is_alive():   # its answer comes out before the
+                    pass                                 # next prompt; Ctrl+C is heard while it waits (on every system)
+                if life.done.is_set() or not life.thread.is_alive():
                     break
         except (KeyboardInterrupt, EOFError):
-            print()
+            if life.handled.is_set():                    # a running command's report begins on a new line itself
+                print()
         finally:
-            life.stop()
-            keep("sohbet sonu")
+            if life.stop():                              # its life has ended: nothing changes the mind any more
+                keep("sohbet sonu")
+                drop_ledger(session.mind)                # kept without it (or not kept: --kaydetme): dead weight
+            else:
+                print("\n  zihin durdurulamadı: bir komutu %g saniyede bitmedi. Bu oturumda yaşadıkları kaydedilmedi; "
+                      "en son kaydedilen zihin olduğu gibi duruyor." % Life.WAIT, flush=True)
+                abandon(session.mind)
         return
+    interrupt = _Interrupt(session)                      # Ctrl+C during a command: it stops between two moments
     try:
-        _session_loop(session, lines, chat, args, keep, lock, None)
+        with interrupt:
+            _session_loop(session, lines, chat, args, keep, lock, None, interrupt)
     except (KeyboardInterrupt, EOFError):
         print()
     finally:
-        keep("sohbet sonu")
+        if interrupt.forced:                             # stopped at once, perhaps inside a moment: not kept
+            print("  komut beklenmeden kesildi; zihin bir anın ortasında kalmış olabilir, bu haliyle kaydedilmedi. "
+                  "En son kaydedilen zihin olduğu gibi duruyor.", flush=True)
+        else:
+            keep("sohbet sonu")
+        drop_ledger(session.mind)                        # kept without it, or not kept: dead weight either way
 
 
-def _session_loop(session, lines, chat, args, keep, lock=None, clock=None) -> None:
+def _session_loop(session, lines, chat, args, keep, lock=None, clock=None, interrupt=None) -> None:
     import contextlib
     turns_since_save = 0
     for line in lines:
@@ -835,11 +1256,69 @@ def _session_loop(session, lines, chat, args, keep, lock=None, clock=None) -> No
         if clock is not None:
             clock.heard()
         with (lock if lock is not None else contextlib.nullcontext()):
-            turns_since_save = _one_line(session, line, chat, args, keep, turns_since_save)
+            if interrupt is not None:
+                interrupt.busy = True
+            try:
+                turns_since_save = _one_line(session, line, chat, args, keep, turns_since_save)
+            finally:
+                if interrupt is not None:
+                    interrupt.busy = False
             if turns_since_save is None:
                 break
             if isinstance(turns_since_save, tuple):         # the chat toggle came back with the new mode
                 chat, turns_since_save = turns_since_save
+        if session.stop.is_set():                        # asked to stop (Ctrl+C) during a command: the session ends
+            break
+
+
+class _Interrupt:
+    """Ctrl+C in a session without a life thread (--yasamsiz, or lines from a pipe or a file), where commands run in
+    the main thread. While a command runs, the first Ctrl+C asks it to stop at its next sentence, line or moment
+    (Session.check): the mind is not cut inside a moment, the session ends after that command, and the mind is kept.
+    A second Ctrl+C while it runs stops it at once: the mind may then be cut inside a moment (``forced``) and is not
+    saved. Between commands Ctrl+C ends the session at once, as before. A signal handler can be set only in the
+    main thread; anywhere else nothing changes."""
+
+    def __init__(self, session) -> None:
+        self.session, self.busy, self.forced, self.installed, self.previous = session, False, False, False, None
+
+    def __enter__(self) -> "_Interrupt":
+        if threading.current_thread() is threading.main_thread():
+            self.previous = signal.signal(signal.SIGINT, self.heard)
+            self.installed = True
+        return self
+
+    def __exit__(self, *exc) -> bool:
+        if self.installed:
+            signal.signal(signal.SIGINT, self.previous if self.previous is not None else signal.default_int_handler)
+            self.installed = False
+        return False
+
+    def heard(self, signum, frame) -> None:
+        if not self.busy:                                # between commands: the session ends at once
+            raise KeyboardInterrupt
+        if self.session.stop.is_set():                   # asked a second time: at once, wherever it is
+            self.forced = True
+            raise KeyboardInterrupt
+        self.session.stop.set()                          # the command stops at its next check
+
+
+def abandon(mind) -> None:
+    """When the life thread could not be stopped: the mind is not saved, and its session's ledger is not left on
+    disk. The ledger is pointed at the null device first, so what the thread still writes goes nowhere and the file is
+    not made again once deleted; then it is deleted. A save the thread itself may be making is left alone: the mind
+    saved before stays until that save is whole, and what an unfinished save leaves is removed by the next load or
+    save of that mind (persist._finish_save)."""
+    from .store import DiskLog
+    log = getattr(mind.S, "log", None)
+    if isinstance(log, DiskLog):
+        path, log.path = log.path, os.devnull
+        name = os.path.basename(path)
+        if (name.startswith("defter-") or ".live-" in name) and os.path.exists(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
 
 
 def _one_line(session, line, chat, args, keep, turns_since_save):
@@ -859,27 +1338,12 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     session.live(rest, SENSED)
                 elif cmd in ("izle", "watch"):
                     first, _, answer = rest.partition("||")
-                    session.watch(first.strip(), answer.strip())
+                    session.observe(first.strip(), answer.strip())
                 elif cmd in ("ogret", "teach"):
-                    n = 0
-                    with open(rest.strip(), encoding="utf-8") as f:
-                        for raw in f:
-                            raw = raw.rstrip("\n")
-                            if not raw.strip():
-                                continue
-                            if "\t" in raw:
-                                first, answer = raw.split("\t", 1)
-                                session.watch(first, answer)
-                            else:
-                                session.live(raw, IMITATED)
-                            n += 1
-                    print("  %d satır izlendi, %d an" % (n, session.mind.t))
+                    print(session.teach(clean_path(rest)))
                 elif cmd in ("oku", "read"):
-                    target, _, cap = rest.strip().rpartition(" ")
-                    if cap.isdigit() and target:
-                        print(session.read_path(target.strip(), int(cap)))
-                    else:
-                        print(session.read_path(rest.strip()))
+                    target, cap = path_and_cap(rest)
+                    print(session.read_path(target, cap))
                 elif cmd in ("dogru", "doğru", "good", "iyi"):
                     print(session.feedback(True))
                 elif cmd in ("yanlis", "yanlış", "bad", "kotu", "kötü"):
@@ -892,10 +1356,14 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     prefix, _, value = rest.partition("=>")
                     print(session.why(prefix.strip(), value.strip()))
                 elif cmd in ("gecmis", "history"):
-                    for number, text, _ in session.history:
-                        print("  %3d  %s" % (number, text))
+                    for entry in session.history:
+                        print("  %3d  %s" % (entry.number, entry.text))
                 elif cmd in ("unut", "forget"):
-                    print(session.forget(int(rest)))
+                    if rest.strip().isdigit():
+                        print(session.forget(int(rest)))
+                    else:
+                        print("  !unut bir numara ister: geri alınacak girdinin numarası (!gecmis gösterir), "
+                              "örneğin !unut 3")
                 elif cmd in ("arastir", "araştır", "research"):
                     from .web import research
                     report = research(session, rest.strip())
@@ -913,13 +1381,14 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     print(feelings(session.mind))
                 elif cmd in ("gor", "gör", "see"):
                     from .gorme import features
-                    gist, facets = features(rest.strip())
+                    image = clean_path(rest)
+                    gist, facets = features(image)
                     session.view = (gist, facets)
-                    session.seen[gist] = os.path.basename(rest.strip())
+                    session.seen[gist] = os.path.basename(image)
                     print("  görüyorum (%d yön); bir sonraki sözün bu resimle birlikte algılanacak" % len(facets))
                 elif cmd in ("dinle", "hear"):
                     from .isitme import features as hearing
-                    gist, facets = hearing(rest.strip())
+                    gist, facets = hearing(clean_path(rest))
                     session.hearing = (gist, facets)
                     print("  duyuyorum (%d yön); bir sonraki sözün bu sesle birlikte algılanacak" % len(facets))
                 elif cmd in ("dusun", "düşün", "think"):
@@ -928,19 +1397,12 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     if not topic:
                         print("  düşünecek bir konu yok")
                     else:
-                        from .dusunce import frequent_words, imagine, infer
-                        thought, construction, reality, other = imagine(session, topic)
-                        print("  (iç ses, %s): %s" % (topic, " ".join(thought) or "…"))
-                        if construction:
-                            print("  (hayal: %s da/de böyle mi?): %s   [gerçeklik %.2f]" % (
-                                other, " ".join(construction), reality))
-                        _, inferred, certainty, mate = infer(session, topic, frequent=frequent_words(session.mind))
-                        if inferred:
-                            print("  (çıkarım, %s üzerinden): %s   [gerçeklik %.2f]" % (
-                                mate, " ".join(inferred), certainty))
+                        thought, reality = think(session, topic)
+                        print("  iç ses (konu: %s): %s   [gerçeklik %.2f]" % (topic, " ".join(thought) or "…",
+                                                                           reality))
                 elif cmd in ("kim", "who"):
                     if rest.strip():
-                        session.partner = lower_tr(rest.strip()).split()[0]
+                        session.partner = session.lower(rest.strip()).split()[0]
                     print("  konuşan: %s" % session.partner)
                 elif cmd in ("uyu", "sleep"):
                     from .dusunce import sleep as dream_sleep
@@ -952,14 +1414,21 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                 elif cmd in ("yas", "yaş", "age"):
                     print(profile(session.mind))
                 elif cmd in ("boyut", "size"):
-                    print("  %d an, %s" % (session.mind.t, session.mind.size()))
+                    size = session.mind.size()
+                    size["units"], size["ties"] = live_counts(session.mind)    # what !unut took back is not counted
+                    print("  %d an, %s" % (session.mind.t, size))
+                elif cmd in ("kaydet", "save", "tasinabilir", "portable", "yukle", "yükle", "load") \
+                        and not clean_path(rest):
+                    print("  bir yol yazın: !%s <yol>" % cmd)
                 elif cmd in ("kaydet", "save"):
-                    print("  kaydedildi: %s" % save(session.mind, rest.strip()))
+                    print("  kaydedildi: %s" % save(session.mind, clean_path(rest)))
                 elif cmd in ("tasinabilir", "portable"):
-                    print("  taşınabilir kopya: %s" % export_portable(session.mind, rest.strip()))
-                elif cmd in ("yukle", "load"):
-                    fresh = Session(load(rest.strip()), session.pieces)
+                    print("  taşınabilir kopya: %s" % export_portable(session.mind, clean_path(rest)))
+                elif cmd in ("yukle", "yükle", "load"):
+                    replaced = session.mind
+                    fresh = Session(load(clean_path(rest)), session.pieces, stop=session.stop)
                     session.__dict__.update(fresh.__dict__)     # the same session object: autosave follows it
+                    drop_ledger(replaced)                       # the mind it replaces is gone, and its ledger
                     print("  yüklendi: %d an" % session.mind.t)
                 else:
                     print("  bilinmeyen komut")
@@ -978,6 +1447,8 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     turns_since_save = 0
             else:
                 session.live(line, TOLD)
+        except Interrupted:                              # a long command asked to stop (Ctrl+C) between two moments
+            print("\n  yarıda kesildi (Ctrl+C): o ana kadar yaşadıkları yaşandı")
         except Exception as exc:  # keep the session alive
             print("  hata: %s" % exc)
     return turns_since_save

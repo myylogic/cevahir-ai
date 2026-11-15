@@ -6,7 +6,8 @@ What is pinned here
 * A question never watched as a whole, whose words and ending were lived in watched questions, is answered with
   what followed those situations, and the answer it starts is carried on along the answers that were watched.
 * A question with a word nothing lived (an unknown topic) is not answered from resemblance: the unknown word weighs
-  most, the resemblance is weak, the mind stays silent and its curiosity asks back.
+  most, the resemblance is weak and the mind stays silent. Nothing in the session asks back for it (the curiosity
+  reflex that said the unknown word back with a question tone is gone: asking is learned like any speech).
 * A question watched as a whole keeps its own answer.
 * Without the setting the mind behaves as before (silent on the unwatched question).
 """
@@ -43,9 +44,9 @@ def test_an_unwatched_question_is_met_by_the_situations_most_like_it():
     assert session.reply("ne yapıyorsun ?").startswith("arkadaşlarla sinemaya gideceğim")
 
 
-def test_an_unknown_topic_is_not_answered_from_resemblance_and_curiosity_asks():
+def test_an_unknown_topic_is_not_answered_from_resemblance_and_nothing_is_asked_back():
     session = raised(True)
-    assert session.reply("kuantum nedir ?") == "kuantum ?"
+    assert session.reply("kuantum nedir ?") == "(sessiz)"
 
 
 def test_a_watched_question_keeps_its_own_answer():

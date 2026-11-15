@@ -56,3 +56,5 @@ private_data/
 zihin_logs/
 *.zihin.log
 *.zihin.log.live
+*.zihin.log.live-*
+defter-*.log

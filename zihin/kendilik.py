@@ -24,7 +24,8 @@ def self_report(mind, channel: str = "text", top: int = 12) -> str:
     if me < 0:
         return "  kendimle ilgili bir kanıtım yok: henüz hiç kendi sesimle konuşmadım, düşünmedim"
     cid = mind.ch.id(channel)
-    words_by_use = sorted((u for u in range(S.n_units) if int(S.u_kind[u]) & 1 and int(S.u_channel[u]) == cid),
+    words_by_use = sorted((u for u in range(S.n_units)
+                           if int(S.u_kind[u]) & 1 and int(S.u_channel[u]) == cid and S.u_alive[u]),
                           key=lambda u: -float(S.u_use[u]))
     common = set(words_by_use[:max(10, len(words_by_use) // 50)])   # the most frequent words tell nothing about anyone
     bound, spoke, thought = [], 0.0, 0.0

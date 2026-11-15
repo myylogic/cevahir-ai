@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
-"""Zihin: think, then speak (T8 in conversation).
+"""Zihin: thoughts stay inner voice; what the mind says is only what its own decisions emit.
 
 What is pinned here
 -------------------
-* Asked something it has no answer to at once, the mind thinks about the words of the question it is least sure of
-  and says a thought that is real enough (what it lived about that word), not a copy of the question.
-* The thoughts are called to mind by the words as they are heard, before the utterance is taken in: what the mind
-  knew, not an echo of the question. A word it never met calls nothing to mind.
+* Asked something it has not lived how to answer, the mind stays silent, although it can think about the topic: the
+  thought is its inner voice (lived as imagined, nothing of it spoken), and no thought is said for it. The session
+  used to think about the question's words before hearing them and write the first thought that was real enough
+  into the mind as its own speech, with the topic word put in front of it by code (removed).
+* Nothing is thought about an utterance before it is heard: the first moment of a reply perceives the first word
+  said to it, and no imagined event is lived during a reply.
+* The words said are exactly the words its decisions emitted, each lived once as the echo of its own act, in order;
+  no moment perceives the text channel twice.
 """
 from __future__ import annotations
 
-from zihin import TOLD, Config, Mind
+from zihin import ACTED, IMAGINED, TOLD, Config, Mind
 from zihin.__main__ import CHANNEL, Session
+from zihin.dusunce import think
 
 
 def raised() -> Session:
@@ -25,20 +30,49 @@ def raised() -> Session:
     return session
 
 
-def test_it_thinks_about_the_question_and_says_what_it_lived():
+def moments(session, run):
+    """The events each moment perceives while ``run`` happens (what was pending from the last moment, then the new
+    events)."""
+    mind, seen, step = session.mind, [], session.mind.step
+
+    def recorded(events=()):
+        seen.append(list(mind.pending) + list(events))
+        return step(events)
+    mind.step = recorded
+    try:
+        out = run()
+    finally:
+        mind.step = step
+    return out, seen
+
+
+def spoken(seen) -> list:
+    """The words lived as the mind's own speech (its acts on the text channel) in the recorded moments."""
+    return [str(e.symbol) for events in seen for e in events if e.channel == CHANNEL and e.prov == ACTED]
+
+
+def test_a_thought_is_never_said_for_the_mind():
     session = raised()
-    answer = session.reply("güneş hakkında ne düşünüyorsun ?")
-    assert answer.startswith("güneş dünyayı ısıtır")
-    assert "hakkında ne düşünüyorsun" not in answer
+    (thought, reality), inner = moments(session, lambda: think(session, "güneş"))
+    assert thought[:2] == ["dünyayı", "ısıtır"] and reality > 0.5      # it can think about the topic: its inner
+    assert not spoken(inner)                             # voice, nothing of it spoken
+    answer, seen = moments(session, lambda: session.reply("güneş hakkında ne düşünüyorsun ?"))
+    assert answer == "(sessiz)"                          # it has not lived how to answer this question ...
+    assert not spoken(seen)                              # ... and no thought is said for it
 
 
-def test_thoughts_are_what_it_knew_before_the_question_not_an_echo():
+def test_nothing_is_thought_before_the_utterance_is_heard():
+    assert not hasattr(Session, "associations") and not hasattr(Session, "think_aloud")
     session = raised()
-    thoughts = session.associations("güneş hakkında ne düşünüyorsun ?")
-    assert thoughts[0][0] == "güneş" and thoughts[0][1][:2] == ["dünyayı", "ısıtır"]
-    assert all("hakkında" not in thought for _, thought, _ in thoughts)
+    _, seen = moments(session, lambda: session.reply("güneş hakkında ne düşünüyorsun ?"))
+    first = [e for e in seen[0] if e.channel == CHANNEL]
+    assert [(e.symbol, e.prov) for e in first] == [("güneş", TOLD)]
+    assert not [e for events in seen for e in events if e.prov == IMAGINED]
 
 
-def test_a_word_it_never_met_calls_nothing_to_mind():
+def test_the_words_said_are_exactly_its_decisions():
     session = raised()
-    assert session.associations("masa ne işe yarar ?") == []
+    answer, seen = moments(session, lambda: session.reply("kahvaltıda ne yedin ?"))
+    assert answer == "simit ve peynir yedim"
+    assert spoken(seen) == answer.split()                # each word it said, lived once as its own act, in order
+    assert all(len([e for e in events if e.channel == CHANNEL]) <= 1 for events in seen)
