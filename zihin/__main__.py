@@ -606,6 +606,25 @@ class Life:
             print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night)), end="", flush=True)
 
 
+def pieces_for(mind, choice: str = None):
+    """Word pieces for this mind: the repository's own tokenizer ("cevahir") for a new mind and for a mind raised
+    with pieces, none ("yok") for a mind raised without them (a mind keeps how it was raised), or a ByteLevelBPE json
+    when one is named."""
+    import os
+    lived = mind.ch.has(FACETS) and mind.ch.sizes()[mind.ch.id(FACETS)] > 0
+    choice = choice or ("cevahir" if mind.t == 0 or lived else "yok")
+    if choice == "yok":
+        return None
+    repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if repo not in sys.path:
+        sys.path.insert(0, repo)
+    if choice == "cevahir":
+        from .parca import own_pieces
+        return own_pieces()
+    from tokenizer_management.byte_bpe import ByteLevelBPE
+    return ByteLevelBPE.load(choice)
+
+
 def home_mind() -> str:
     """Where the one mind of this computer lives: $CEVAHIR_HOME/zihin/cevahir (default ~/.cevahir)."""
     import os
@@ -643,7 +662,9 @@ def main(argv=None) -> None:
     ap.add_argument("--kim", help="who is talking to the mind (asked at the start if not given)")
     ap.add_argument("--yasamsiz", action="store_true", help="no life clock: the mind does not think or speak first "
                                                             "while you are silent")
-    ap.add_argument("--parca", help="subword tokenizer (ByteLevelBPE json): word pieces enter as facets")
+    ap.add_argument("--parca", help="word pieces as facets: 'cevahir' (the repository's own tokenizer: root, suffixes, "
+                                    "last syllable; default for new minds and minds raised with pieces), 'yok' (none), "
+                                    "or a ByteLevelBPE json")
     ap.add_argument("--defter-yok", dest="no_ledger", action="store_true",
                     help="no experience ledger: smaller and faster, but !unut cannot retract")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
@@ -663,12 +684,7 @@ def main(argv=None) -> None:
         if args.no_ledger:
             mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path = {}, False, False, None
         mind.add_channel(CHANNEL, "act")
-    pieces = None
-    if args.parca:
-        sys.path.insert(0, ".")
-        from tokenizer_management.byte_bpe import ByteLevelBPE
-        pieces = ByteLevelBPE.load(args.parca)
-    session = Session(mind, pieces)
+    session = Session(mind, pieces_for(mind, args.parca))
     interactive = sys.stdin.isatty()
     name = args.kim
     if not name and interactive:
