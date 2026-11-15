@@ -272,11 +272,13 @@ def _sums(mind, ids: torch.Tensor, raw: bool):
 
 
 def _expect_np(w_pos: np.ndarray, w_neg: np.ndarray, k: float) -> np.ndarray:
-    """``evidence.expectation`` step for step (the same IEEE operations): f with 1/2 where nothing was lived, c = W / (W + k)."""
-    total = w_pos + w_neg
-    pos = total > 0
-    f = np.where(pos, w_pos / np.where(pos, total, 1.0), 0.5)
-    return (total / (total + k)) * (f - 0.5) + 0.5
+    """``evidence.expectation`` step for step (the same IEEE operations): f with 1/2 where nothing was lived, c = W / (W + k).
+    Silent like torch where a mass is not finite or W + k is 0 (only with trust set outside [0, 1])."""
+    with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+        total = w_pos + w_neg
+        pos = total > 0
+        f = np.where(pos, w_pos / np.where(pos, total, 1.0), 0.5)
+        return (total / (total + k)) * (f - 0.5) + 0.5
 
 
 def _raw1(S, table: int, tie: int) -> float:
