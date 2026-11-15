@@ -23,6 +23,14 @@ pip install torch numpy python-docx pillow
 Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. Türkçe karakterler bozuk görünürse önce
 `chcp 65001`. Başlarken "Seninle konuşan kim?" diye sorar: adınızı yazın; konuşan kişi her sözle birlikte algılanır.
 
+**Tek zihin, birçok ilişki (F33).** Yeni bir zihin, adını bildiği biriyle yaşadıklarını o kişiyle birlikte de not
+eder; hatırlarken karşısında kimin olduğuna bakar. Sizinle yaşadıklarını size hatırlar; başkasına yalnız kimseye özel
+olmadan öğrendiklerini (`!oku` ile okunan belgeler, `!ogret` ile öğretilen dosyalar, kimin sorduğu söylenmeden izlenen
+konuşmalar) ve birden çok kişinin aynı biçimde öğrettiklerini söyler. Bir kişiyle yaşanan sır başka kimseye söylenmez.
+Herkesin bilmesini istediğiniz şeyi ders olarak öğretin (`!ogret`, `!oku`); sohbette anlattıklarınız sizinledir.
+Adı boş bırakırsanız konuşan "biri" olur ve söyledikleri kimseye özel sayılmaz. Daha önce yetişmiş bir zihin bunu
+`--ac company` ile açar.
+
 ## Yaşam (çevrimiçi)
 
 - Oturum açıldığı andan itibaren zihin kendi zamanında yaşar; yalnız sorulunca çalışmaz. Yazdıklarınız bu yaşama

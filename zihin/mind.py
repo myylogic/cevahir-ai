@@ -94,6 +94,8 @@ class Config:
                                     # lived situations it did not count (F23) say about the same values (NARS revision)
     lived_situations: bool = False  # F23 reads only lived situations: a frame (a generalisation, whose own ties hold its
                                     # members' evidence as literal values) does not vote as a situation of its own
+    company: bool = False           # F33 (Relational Memory): evidence is noted with the known person present, and what
+                                    # is recalled depends on who is present (zihin/iliski.py)
     paradigmatic: bool = False      # F31 (Paradigmatic Relation): a frame's value may be what stands where the filler
                                     # stands (ALIKE: the item most interchangeable with it, not a rival filler of the
                                     # frame's place), as SELF, NEXT and START are other relations to the filler
@@ -213,6 +215,7 @@ class Mind:
         self.unknown = 0.0                           # L7: how much it did not know when the world last called on it
         self.witnesses = []                          # Substitution Evidence: (expected, occurred) pairs to be judged
         self.episode_start = 0                       # the moment the present run of items began (after a pause)
+        self.company = None                          # F33: the known person present (set by the session)
         self.voice: Dict[int, tuple] = {}            # F24: context -> (voice that spoke, every voice heard), as
                                                      # (kind, claim, f) each; judged by what comes next
         self.imagined = 0
@@ -341,6 +344,9 @@ class Mind:
             self._feel(surprise)                           # step 6
         finally:
             self._read_memo = None
+        if "_personal_moment" in self.__dict__ or "personal_log" in self.__dict__:
+            from .iliski import end_moment                 # F33: this moment's notes, kept for undo and retraction
+            end_moment(self)
         entry = S.end()
         entry.undo = undo
         previous = S.log.get(self.t - cfg.undo_depth)
@@ -735,13 +741,16 @@ class Mind:
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
-                  "unknown", "voice", "witnesses", "episode_start")
+                  "unknown", "voice", "witnesses", "episode_start", "company")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}
 
     def undo_last(self) -> None:
         """Undo the most recent moment completely: tensors, sizes, alphabets and working state."""
+        if "personal_log" in self.__dict__:
+            from .iliski import forget_moment
+            forget_moment(self, self.t)
         entry = self.S.undo_last()
         for channel, size in enumerate(entry.alpha0):
             self.ch.truncate(channel, size)
@@ -759,6 +768,9 @@ class Mind:
         report = self.S.retract(m)
         self.trust = self._trust()
         self.__dict__.pop("_between_memo", None)
+        if "personal_log" in self.__dict__:
+            from .iliski import forget_moment
+            forget_moment(self, m)
         return report
 
     def __getstate__(self):

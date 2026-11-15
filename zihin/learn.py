@@ -59,6 +59,9 @@ def _add_many(mind, table: int, slot: int, ids: torch.Tensor, amounts: torch.Ten
     """``add_evidence`` for two or more ties."""
     S = mind.S
     amounts = S.add(table, slot, ids, amounts)  # snapped to the grid, aligned with ids
+    if table <= W_NEG and mind.__dict__.get("company") is not None:   # F33: noted with the person present
+        from .iliski import note
+        note(mind, table, slot, ids.tolist(), amounts.tolist())
     if table in (W_POS, W_NEG):
         if all_expect:
             claims, claimed = ids, amounts
@@ -98,6 +101,9 @@ def add_evidence1(mind, table: int, slot: int, tie: int, amount: float, relief: 
     the same order. Returns the snapped amount."""
     S = mind.S
     got = S.add1(table, slot, tie, amount)
+    if table <= W_NEG and mind.__dict__.get("company") is not None:   # F33: noted with the person present
+        from .iliski import note
+        note(mind, table, slot, (tie,), (got,))
     if table <= W_NEG and S.views()[0][tie] == EXPECT:
         if relief:
             mind._gained.append((tie, got * mind.trust.tolist()[slot]))   # one tie: (id, gain), see Mind._feel
@@ -510,6 +516,9 @@ def born_failure(mind, tie: int, v: int, rivals, entry: list) -> None:
         got = S.add1(W_NEG, slot, tie, amount)
         if slot not in REFERENCE:
             S.add1(C_NEG, slot, tie, got)
+        if mind.__dict__.get("company") is not None:   # F33: noted with the person present
+            from .iliski import note
+            note(mind, W_NEG, slot, (tie,), (got,))
         total += got
         if got > most:
             best, most = slot, got

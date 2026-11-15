@@ -164,6 +164,12 @@ At each moment, roughly each word, the mind lives these steps:
   repeats. From four definitions ("otomobil ne demek ?" -> "otomobil , araba demektir .") and the places words filled
   in what was read, "selam ne demek ?" is answered "selam , merhaba demektir". This is the paradigmatic (vertical)
   axis of language beside the syntagmatic one (Saussure, Jakobson).
+- **Relational Memory (F33).** One mind, one memory, recalled in the company of the person present. What is lived
+  while someone the mind knows is present is also noted with them. Recall then depends on who is there: what was
+  lived with no one in particular is recalled with anyone, what was lived with the person present is theirs and comes
+  last, and what was lived with others is recalled only as far as other people corroborate it (one person's alone is
+  theirs). Each person is answered from their own history, a secret lived with one person is told to no one else, and
+  what everyone taught is known with a stranger; no role or relation is coded.
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -348,6 +354,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Corroboration | Bağımsız Kanıtların Birleşmesi | F30 | NARS revision |
 | Paradigmatic Relation | Dizisel İlişki | F31 | the paradigmatic axis (Saussure, Jakobson) |
 | Relational Binding | İlişkisel Bağlama | F32 | variable binding of a frame's place |
+| Relational Memory | İlişkisel Bellek | F33 | context-dependent memory; source monitoring |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

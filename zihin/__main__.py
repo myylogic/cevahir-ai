@@ -145,7 +145,7 @@ def speaking(folder: str = None) -> Config:
     return Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
                           backoff=True, resemblance=True, race=True, situations=True, explore=True, starts=True,
                           exclusive=True, exact_relations=True, analogy=True, corroborate=True, paradigmatic=True,
-                          bind_relations=True, log_path=_log_path(folder) if folder else _log_path())
+                          bind_relations=True, company=True, log_path=_log_path(folder) if folder else _log_path())
 
 
 VARIANTS = {"speaking": speaking,
@@ -153,7 +153,8 @@ VARIANTS = {"speaking": speaking,
             "changed": lambda folder=None: Config.changed()}          # folder: where the session ledger is kept
 
 NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "exclusive",   # a loaded mind may
-         "exact_relations", "analogy", "corroborate", "paradigmatic", "bind_relations")      # lack these (--ac)
+         "exact_relations", "analogy", "corroborate", "paradigmatic", "bind_relations",      # lack these (--ac)
+         "company")
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -524,9 +525,17 @@ class Session:
                 out += [Event(FACETS, p.strip(), prov) for p in parts]
         return out
 
-    def live(self, text: str, prov: int, keep: bool = True) -> None:
+    def company(self, person: str = None) -> None:
+        """F33 (Relational Memory): who is present while what follows is lived, as this session perceives them: a
+        person it was told the name of, or no one in particular (someone unknown, a document)."""
+        if getattr(self.mind.cfg, "company", False):
+            self.mind.company = person if person and person != SOMEONE else None
+
+    def live(self, text: str, prov: int, keep: bool = True, lesson: bool = False) -> None:
         """Hear (told) or sense an utterance while listening: the mind does not speak into it. ``keep``: the utterance
-        is an entry of the history (not when it is part of a larger one, a taught file)."""
+        is an entry of the history (not when it is part of a larger one, a taught file). ``lesson``: a line of a taught
+        file, lived with no one in particular (F33)."""
+        self.company(None if lesson else self.partner)
         start = self.mind.t + 1
         self.listen(text, prov, speaker=self.partner)
         self.end_of_turn(prov, tone=self.tone(text))
@@ -588,6 +597,7 @@ class Session:
         """Two others talk: one says ``first``, another answers ``answer``; the mind only watches. The end of each
         utterance is perceived, so the mind can learn who speaks when (turn taking is watched, not coded). The one
         who asks is perceived (someone, unless named); the one who answers is the role the mind takes in a chat."""
+        self.company(asker)
         self.listen(first, prov, speaker=asker)
         self.end_of_turn(prov, tone=self.tone(first))
         self.listen(answer, prov)
@@ -608,6 +618,7 @@ class Session:
         symbols = self.words(text)
         if not symbols:
             return "(sessiz)"
+        self.company(self.partner)
         if self.turns:                                   # the turn passes when your utterance has ended
             self.listen(text, TOLD, speaker=self.partner)
             acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
@@ -702,6 +713,7 @@ class Session:
         start, lived, skipped, t0 = time.time(), 0, [], self.mind.t
         found: Dict[str, TextFile] = {}                  # how each text file was decoded (encoding_notes)
         reached, stopped = 0, False                      # files begun; asked to stop (Ctrl+C) on the way
+        self.company(None)                               # F33: a document is no one's in particular
         try:
             for name in files:
                 self.check()
@@ -809,7 +821,7 @@ class Session:
                         self.watch(first, answer)
                         said += [first, answer]
                     else:
-                        self.live(raw, IMITATED, keep=False)
+                        self.live(raw, IMITATED, keep=False, lesson=True)
                         said.append(raw)
                     n += 1
         except Interrupted:

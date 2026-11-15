@@ -70,9 +70,11 @@ def _generalisations(mind, unit: int) -> List[Tuple[int, float]]:
     return [(general, e) for general, e in found if e > 0.5]
 
 
-def own_mass(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = None) -> Dict[int, Tuple[float, float]]:
-    """Trust-weighted (W+, W-) of the EXPECT ties leaving ``unit``, by target."""
-    found = _unit_arrays(mind, unit, lag, trust)
+def own_mass(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = None,
+             whole: bool = False) -> Dict[int, Tuple[float, float]]:
+    """Trust-weighted (W+, W-) of the EXPECT ties leaving ``unit``, by target (recalled in present company, F33; with
+    ``whole``, the whole life's evidence, whoever it was lived with)."""
+    found = _unit_arrays(mind, unit, lag, trust, whole)
     if found is None:
         return {}
     dst, w_pos, w_neg = found
@@ -81,14 +83,15 @@ def own_mass(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = None
     return dict(zip(dst.tolist(), zip(w_pos.tolist(), w_neg.tolist())))
 
 
-def _unit_arrays(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = None):
+def _unit_arrays(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = None, whole: bool = False):
     """(targets, W+, W-) of ``own_mass`` in tie order (lists for a few ties, read-only arrays for more), or None when
     ``unit`` has no EXPECT tie of this lag."""
     S = mind.S
     ties = S.out.get((unit, EXPECT, lag))
     if not ties:
         return None
-    memo, key = _memo_key(mind, "own", unit, lag, trust)
+    company = getattr(mind.cfg, "company", False) and "personal" in mind.__dict__ and not whole
+    memo, key = _memo_key(mind, "own" if company or not whole else "whole", unit, lag, trust)
     if memo is not None:
         hit = memo.get(key)
         if hit is not None:
@@ -97,11 +100,21 @@ def _unit_arrays(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = 
     if len(ties) <= SMALL and not rivals:
         dst = mv_view(mind, "t_dst")
         w_pos, w_neg = masses_py(mind, ties, trust)
+        if company:                                    # F33: recalled in present company
+            from .iliski import company_view
+            seen = company_view(mind, unit, EXPECT, lag, ties, w_pos, w_neg, trust)
+            if seen is not None:
+                w_pos, w_neg = seen
         found = ([dst[t] for t in ties], w_pos, w_neg)
     else:
         ids, dst = S.out_ids((unit, EXPECT, lag))
         w = masses(mind, ids, trust)
         w_pos, w_neg = w[0], w[1]
+        if company:                                    # F33: recalled in present company
+            from .iliski import company_view
+            seen = company_view(mind, unit, EXPECT, lag, ties, w_pos, w_neg, trust)
+            if seen is not None:
+                w_pos, w_neg = np.array(seen[0]), np.array(seen[1])
         if rivals:
             w_pos, w_neg = rival_mass(mind, dst, torch.from_numpy(w_pos), torch.from_numpy(w_neg))
             w_pos, w_neg = w_pos.numpy(), w_neg.numpy()
@@ -164,6 +177,9 @@ def start_mass(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[in
     src, lag = mv_view(mind, "t_src"), mv_view(mind, "t_lag")
     world, channel = kind_masks(mind)[3], mv_view(mind, "u_channel")
     began: Dict[int, float] = {}
+    company = getattr(mind.cfg, "company", False) and "personal" in mind.__dict__
+    if company:
+        from .iliski import company_mass1
     for tie in S.inc.get((unit, PART), ()):
         c = src[tie]
         if lag[tie] != 0 or arity[c] != 2 or kinds[c] & SLOTTED or not kinds[c] & COMPOSED:
@@ -171,7 +187,9 @@ def start_mass(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[in
         v = parts_of(mind, c)[1]
         if v == unit or not world[channel[v]]:
             continue
-        w_pos, _ = mass1(mind, tie, trust)
+        w_pos, w_neg = mass1(mind, tie, trust)
+        if company:                                      # F33: beginnings lived with others are theirs
+            w_pos, w_neg = company_mass1(mind, tie, w_pos, w_neg, trust)
         if w_pos > 0.0:
             began[v] = began.get(v, 0.0) + w_pos
     total = sum(began.values())
@@ -933,8 +951,11 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     for target, (w_pos, w_neg) in own.items():
         c = conviction(w_pos + w_neg, cfg.k)
         out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
-    if getattr(cfg, "exclusive", False) and own:
-        excluded(mind, out, own)
+    lived = own_mass(mind, unit, 1, trust, whole=True) \
+        if getattr(cfg, "company", False) and "personal" in mind.__dict__ else own
+    if getattr(cfg, "exclusive", False) and lived:     # F27 reads the whole life (F33: that the instance went on
+        excluded(mind, out, lived)                     # otherwise is known whoever it was lived with; what it went
+                                                       # on with is recalled in present company)
     if getattr(cfg, "starts", False) and _begins(mind, unit):
         began = start_mass(mind, unit, trust)            # F26: the present moment is a sequence that began with this
         total = sum(p for p, _ in began.values())        # item, more specific than the item anywhere: its lived

@@ -1931,3 +1931,80 @@ selection; the vertical axis of the owner's "dikey düşünme").
 **F23 reading only lived situations** (`Config.lived_situations`, off; the fault noted with F30). With it on, the
 listening worlds (0.783 / 0.812) and every answer of the meaning world are unchanged; two "best e" values moved by
 about 0.02. Off until the teacher protocol and recall are measured with it.
+
+## Relational Memory (F33): one mind, one memory, recalled in the company of the person present (2026-11-15)
+
+**The owner's direction.** One mind develops different relational histories with different people, as a person
+does with their mother, a friend or a stranger. It is not a mind, a personality or a behaviour template per person.
+- It recognises the people it meets and ties what it lives with each of them into its one memory.
+- It learns the character of each relationship from that experience, and recalls the relevant history the next
+  time.
+- General knowledge is the whole mind's; the privacy of personal experience, and the contexts in which it may be
+  recalled, are kept.
+- Relationships may change over time.
+
+**What existed.** The chat perceived who speaks: the partner given with `--kim` or `!kim`, with every word, as a
+context facet. Nothing read it: what followed what was one evidence for everyone.
+
+**The world, T-relations** (`t_relations.py`, public, 3 seeds × 3 days, the chat's Session and speaking
+configuration).
+- Four people talk with the mind, and two strangers appear only in the probes.
+- Each person is greeted their own way ("merhaba canım , nasılsın ?", "merhaba kardeşim .", ...) and has their own
+  answers to their own questions ("en sevdiğim renk ne ?", "kedimin adı ne ?").
+- One of them alone has a secret ("sırrım ne ?" → "sırrın mavi kutuda .").
+- All four ask the mind its name and how it is, and get the same answers.
+- Between conversations it watches dialogues of someone unknown ("su nedir ?", "merhaba" → "merhaba , hoş geldin .")
+  and reads sentences.
+
+**Without F33 (the person-blind mind).**
+- Every person got the general greeting (own 0).
+- Every personal question stopped after its form ("en sevdiğin renk"): the four answers disagree.
+- The secret, lived with one person only, was told to everyone: 3 of the other 4 known people and every stranger.
+
+**F33** (`zihin/iliski.py`, `Config.company`, on in the speaking configuration).
+- **One memory and a ledger.** Every experience is lived into the one memory as before. While a known person is
+  present (`mind.company`, set by the session: the partner, or the one who asks in a watched dialogue; a document or
+  a taught file is no one's in particular), every increment on what followed what (EXPECT, lag 1 or more) and on how
+  a sequence began (PART of a two-item unit, F26) is also noted with that person. Learning reads and writes exactly
+  as before.
+- **Recall depends on who is present** (`company_view`, read wherever a unit's own evidence is read):
+  1. what was lived with no one in particular: with anyone;
+  2. what was lived with other people: only as far as they corroborate one another. Each person is one voice, their
+     share of the unit's positive evidence among the targets of each channel. n ≥ 2 voices give conviction
+     lam · conviction(n − 1): one person's voice alone is theirs (F30's principle: independent evidence adds up, and
+     the first person's evidence is not evidence about anyone else);
+  3. the person present comes last: their own evidence nests over the rest, as an instance's own evidence does.
+- **That a question went on otherwise is known from the whole life** (F27 reads the whole evidence; what it went on
+  with is recalled in company). So a stranger asking the secret question is left silent, rather than answered with
+  something a frame learned elsewhere: with recall in company alone, the frame "[X] ne ?" answered it with the name.
+- **The ledger is undone with its moment** (undo, `!unut`), and saved with the mind.
+
+**Measured** (`t_relations.py --set company=0|1`):
+
+| | without F33 | with F33 |
+|---|---|---|
+| a known person gets their own greeting / colour / cat's name | 0 / 0 / 0 | 1.00 / 1.00 / 1.00 |
+| the secret, to its person | 1.00 | 1.00 |
+| the secret, to the other known people / to strangers | 0.75 / 1.00 | 0 / 0 (silent) |
+| someone else's greeting, colour or cat's name to a known person or a stranger | 0 | 0 |
+| the name, which all four taught, to a stranger | 1.00 | 1.00 |
+| watched of no one in particular ("su nedir ?"), to anyone | 1.00 | 1.00 |
+
+- **The replies.**
+  - "merhaba canım , nasılsın" to the person greeted so, "merhaba , hoş geldin" to a stranger.
+  - "en sevdiğin renk kırmızı" to the person whose colour it is, "en sevdiğin renk" and silence to a stranger: it
+    knows how such an answer goes, not this person's.
+- **What is not right yet.** After "merhaba kardeşim" the mind says "hoş", from the general habit, where the person's
+  own greeting ended.
+- **Nothing else moves.** The other protocols have no named person, so they are unchanged with the switch on: teacher
+  protocol, recall, listening worlds and the meaning world (no note is made; reading is as before).
+- **Cost.** Raising a mind in this world takes about 20% longer (2.0 s against 1.7 s for 1638 moments). The ledger
+  noted 643 ties. It is a dictionary of rows (a few hundred bytes a tie), to be made compact before long lives with
+  people.
+- **Exactness.** With the switch off, the lesson-free gate and the 17 configurations are bit-identical.
+
+**Not yet** (next):
+- trust learned per person (whose word has held);
+- relationships changing over time (recent experience against old);
+- recognising a person from what is perceived of them (face, voice, way of speaking) rather than from the name the
+  session is given.

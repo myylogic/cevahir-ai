@@ -154,6 +154,12 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   bağladığı gibi dolgunun yerine geçeni de bağlar. Dört tanımdan ("otomobil ne demek ?" -> "otomobil , araba demektir .")
   ve kelimelerin okunanlarda doldurduğu yerlerden, "selam ne demek ?" sorusu "selam , merhaba demektir" diye
   cevaplanıyor. Bu, dilin dizimsel ekseninin yanındaki dizisel (dikey) eksendir (Saussure, Jakobson).
+- **İlişkisel Bellek (Relational Memory, F33):** tek zihin, tek bellek; hatırlama karşıdaki kişiye göre. Zihnin
+  tanıdığı biri varken yaşanan her şey o kişiyle birlikte de not edilir. Hatırlama kimin orada olduğuna bağlıdır:
+  kimseye özel olmadan yaşanan herkesle hatırlanır; karşıdaki kişiyle yaşanan onundur ve en son gelir; başkalarıyla
+  yaşanan ise yalnız başka insanlar da aynısını yaşadıkça hatırlanır (tek bir kişinin yaşadığı onundur). Herkese kendi
+  geçmişinden cevap verilir, bir kişiyle yaşanan sır başka kimseye söylenmez, herkesin öğrettiği bir yabancıyla da
+  bilinir; hiçbir rol ya da ilişki kodlanmaz.
 - **Benzerlik Oyu (Resemblance Vote):** iki şey ortak yönleriyle benzer. Bir yön, ne kadar az şeyde bulunuyorsa o
   kadar ayırt edicidir. Yeni bir şeye en çok benzeyen üyeler en yüksek sesle konuşur; ağırlık, sınıflandırmanın
   örnek tabanlı modellerindeki gibidir (genelleştirilmiş bağlam modeli). Görme ve işitme böyle tanır: yeni
@@ -335,6 +341,7 @@ Hepsi notlarda ölçümleriyle durur.
 | Bağımsız Kanıtların Birleşmesi | Corroboration | F30 | NARS birleştirmesi |
 | Dizisel İlişki | Paradigmatic Relation | F31 | dizisel eksen (Saussure, Jakobson) |
 | İlişkisel Bağlama | Relational Binding | F32 | bir çerçeve yerinin değişken bağlaması |
+| İlişkisel Bellek | Relational Memory | F33 | bağlama bağlı bellek; kaynak izleme |
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |
