@@ -1864,3 +1864,70 @@ as it was for now (changing it changes every F23 answer and needs its own measur
 - **Cost.** About 13% slower answers in the teacher protocol (F23 is now read whenever a frame speaks after a
   perceived event).
 - **Exactness.** With the switch off, all 17 configurations are bit-identical and the lesson-free gate is unchanged.
+
+## Paradigmatic Relation (F31) and Relational Binding (F32): the answer stands where the asked word stands (2026-11-15)
+
+**The gap.** A frame's members agree on a value or on a relation of the value to the filler:
+- SELF: the value is the filler itself;
+- NEXT: what the filler goes on with;
+- START: how a sequence that began with the filler went on.
+
+All three relate the value to the filler by identity or along the line of speech (the syntagmatic axis). In "otomobil
+ne demek ?" → "otomobil , araba demektir .", the word after the comma follows otomobil nowhere. It is a word that
+stands where otomobil stands: araba and otomobil fill the same places in what was read. The four members of the
+definition frame each lived their own word there (araba, doktor, cevap, hızlı), so the frame had nothing to agree on.
+"selam ne demek ?" was answered "selam ," and then silence.
+
+**F31** (`read.stand_in`, `Config.paradigmatic`). The other axis, the paradigmatic one (Saussure; Jakobson's axis of
+selection; the vertical axis of the owner's "dikey düşünme").
+- **The stand-in of y.** The item most interchangeable with y, read from the lived places both filled before the
+  present run of items (F29's interchangeability, all candidates in one pass over y's places). It must be held above ½
+  and held more than any other item. It is never y, a fixed word of the frame, or a rival filler of the frame's own
+  place: the place's fillers are what the frame tells apart, not what it relates them to.
+- **A new relation, ALIKE.** A value a member lived counts under ALIKE when it is that member's stand-in, exactly the
+  value (F28).
+  - The relation is sought only where it can hold for the members: where the share of their evidence that could name
+    it is above ½. This bounds the effort and changes no held reading.
+  - For the read instance, ALIKE resolves to the filler's stand-in: selam → merhaba.
+
+**F32** (`read.bound_frames`, `Config.bind_relations`). The word after the stand-in.
+- "selam ne demek ? ⏎ selam , merhaba" was never lived, and a frame for it would need two places.
+- A place already binds its repeats (bind_repeats: the filler itself wherever it recurs). F32 binds the filler's
+  stand-in the same way. A context whose last item is the stand-in of its prefix's filler is read through each
+  member's instance followed by that member's own stand-in: "otomobil ne demek ? ⏎ otomobil , araba" goes on with
+  "demektir".
+- **What failed first.** Binding continuations as well (NEXT, START) lowered the teacher protocol: 120 → 103 exact of
+  200, and 52 → 48 of 80 in the comparison of forms. A continuation is what follows the filler, read by the
+  context's own evidence, not a second place.
+
+**Measured** (`meaning_switches.py --set paradigmatic=0|1,bind_relations=0|1`; `recall_once.py` and
+`speaking_worlds.py --listen` with all switches of the speaking configuration):
+
+| | F30 | + F31 | + F31 + F32 |
+|---|---|---|---|
+| meaning world, "selam / hello / merhaba ne demek ?" (3 seeds) | 0 / 0 / 0 | 0.67 each | 0.67 each |
+| reply (seed 0) | "selam ," | "selam , merhaba ," | "selam , merhaba demektir" |
+| meaning world, paraphrases by wording | | unchanged | unchanged |
+| teacher protocol, taught form (200) | 120, F1 0.7444 | 120 | 120, F1 0.7444 |
+| template-free recall, two words / one word (exact, valid, silent) | 90/146/31, 23/47/109 | | same |
+| listening worlds, held-out at 600 | 0.783 / 0.812 | 0.783 / 0.812 | 0.783 / 0.812 |
+
+- **The answers.** "selam , merhaba demektir", "hello , selam demektir", "merhaba , selam demektir". Nothing in the
+  definitions names a greeting; the relation was learned from four definitions and from where the words stood.
+- **Seed 2 stays "selam ,".** In that life "otomobil" never filled a lived place with "araba" (the two were read in
+  different sentences), and "hekim" stood more where "çorba" stood ("annem X") than where "doktor" did. So only two
+  of the four members carry the relation (f = ½). That is the evidence of that life, not a slip of the reading.
+- **Cost.**
+  - Answers in the teacher protocol: about 10% slower (165 s against 150 s for 200 answers).
+  - Recall from one reading, where the inner voice reads between moments: about 20% slower with one word and 45%
+    with two (11.5 s against 9.5 s, 48 s against 33 s, all runs four at a time).
+  - What brought it there: the candidates of a stand-in in one array pass; the relation sought only where it can
+    hold; the reading kept while the moment does not change. That reading is dropped at every step, undo and
+    retraction, the way F23 keeps its reading.
+- **Exactness.** With the switches off, the lesson-free gate and the 17 configurations are bit-identical.
+- **Both are on in the speaking configuration.** A mind raised before them lives without them unless the owner
+  turns them on (`--ac paradigmatic bind_relations`).
+
+**F23 reading only lived situations** (`Config.lived_situations`, off; the fault noted with F30). With it on, the
+listening worlds (0.783 / 0.812) and every answer of the meaning world are unchanged; two "best e" values moved by
+about 0.02. Off until the teacher protocol and recall are measured with it.

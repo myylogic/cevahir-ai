@@ -148,6 +148,12 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   söyledikleriyle birleştirilir; her yaşanmış bağlam bir kez sayılır. "peki adın ne ?" sorusu, "adın ne"nin önünde bir
   kelime olan soruların çerçevesi ile yaşanmış yalın soru aynı şeyi söylediği için cevaplanıyor; benzer durumlar
   birbirini tutmuyorsa hiçbir şey eklenmez.
+- **Dizisel İlişki (Paradigmatic Relation, F31) ve İlişkisel Bağlama (Relational Binding, F32):** bir çerçevenin
+  değeri, dolgunun durduğu yerde durabilir: dolguyla en çok yer değiştirebilen öğe (çerçevenin kendi yerindeki rakip
+  dolgulardan biri değil), değerin dolguyla ilişkisidir, tıpkı aynılık ve devamın olduğu gibi; bir yer, tekrarlarını
+  bağladığı gibi dolgunun yerine geçeni de bağlar. Dört tanımdan ("otomobil ne demek ?" -> "otomobil , araba demektir .")
+  ve kelimelerin okunanlarda doldurduğu yerlerden, "selam ne demek ?" sorusu "selam , merhaba demektir" diye
+  cevaplanıyor. Bu, dilin dizimsel ekseninin yanındaki dizisel (dikey) eksendir (Saussure, Jakobson).
 - **Benzerlik Oyu (Resemblance Vote):** iki şey ortak yönleriyle benzer. Bir yön, ne kadar az şeyde bulunuyorsa o
   kadar ayırt edicidir. Yeni bir şeye en çok benzeyen üyeler en yüksek sesle konuşur; ağırlık, sınıflandırmanın
   örnek tabanlı modellerindeki gibidir (genelleştirilmiş bağlam modeli). Görme ve işitme böyle tanır: yeni
@@ -327,6 +333,8 @@ Hepsi notlarda ölçümleriyle durur.
 | Kesin İlişkiler | Exact Relations | F28 | |
 | Yerine Geçebilirlik Benzetmesi | Analogy by Interchangeability | F29 | dağılımsal varsayım; NARS benzetmesi |
 | Bağımsız Kanıtların Birleşmesi | Corroboration | F30 | NARS birleştirmesi |
+| Dizisel İlişki | Paradigmatic Relation | F31 | dizisel eksen (Saussure, Jakobson) |
+| İlişkisel Bağlama | Relational Binding | F32 | bir çerçeve yerinin değişken bağlaması |
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |

@@ -92,6 +92,14 @@ class Config:
                                     # counts against what a generalisation proposes there that it never went on with
     corroborate: bool = False       # F30 (Corroboration): the claims of the frame that speaks are revised with what the
                                     # lived situations it did not count (F23) say about the same values (NARS revision)
+    lived_situations: bool = False  # F23 reads only lived situations: a frame (a generalisation, whose own ties hold its
+                                    # members' evidence as literal values) does not vote as a situation of its own
+    paradigmatic: bool = False      # F31 (Paradigmatic Relation): a frame's value may be what stands where the filler
+                                    # stands (ALIKE: the item most interchangeable with it, not a rival filler of the
+                                    # frame's place), as SELF, NEXT and START are other relations to the filler
+    bind_relations: bool = False    # F32 (Relational Binding, with paradigmatic): a context whose last item is the
+                                    # stand-in of its prefix's frame filler (F31) is read through each member's instance
+                                    # followed by its own stand-in
     analogy: bool = False           # F29 (Analogy by Interchangeability): what a frame's members lived carries over to
                                     # the read instance as far as its filler is interchangeable with them (NARS analogy),
                                     # interchangeability read from the lived places both have filled
@@ -255,6 +263,7 @@ class Mind:
         """Live one moment with the given outside events; returns the acts the mind emits."""
         S, cfg = self.S, self.cfg
         undo = self._snapshot()
+        self.__dict__.pop("_between_memo", None)           # what was read between moments is read afresh
         self.t += 1
         S.begin(self.t, self.ch.sizes())
         self.trust = self._trust()
@@ -743,17 +752,20 @@ class Mind:
         for name, value in entry.undo.items():
             setattr(self, name, value)
         self.trust = self._trust()
+        self.__dict__.pop("_between_memo", None)
 
     def retract(self, m: int) -> Dict[str, int]:
         """Retract moment m at the level of the ledger: exactly its increments are removed."""
         report = self.S.retract(m)
         self.trust = self._trust()
+        self.__dict__.pop("_between_memo", None)
         return report
 
     def __getstate__(self):
         state = self.__dict__.copy()
         state.pop("_facet_cache", None)                   # caches, rebuilt on demand
         state.pop("_situation_cache", None)
+        state.pop("_between_memo", None)
         for name in READ_CACHES:
             state.pop(name, None)
         return state

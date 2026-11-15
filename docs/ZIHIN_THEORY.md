@@ -158,6 +158,12 @@ At each moment, roughly each word, the mind lives these steps:
   claims of the frame that speaks are revised with what the most similar lived situations say about the same values,
   each lived context counted once. "peki adın ne ?" is answered because the frame of questions with a word before
   "adın ne" and the lived bare question agree; where similar situations disagree, nothing is added.
+- **Paradigmatic Relation (F31) and Relational Binding (F32).** A frame's value may stand where its filler stands:
+  the item most interchangeable with the filler (not a rival filler of the frame's own place) is a relation of the
+  value to the filler, as identity and continuation are; and a place binds the filler's stand-in as it binds its
+  repeats. From four definitions ("otomobil ne demek ?" -> "otomobil , araba demektir .") and the places words filled
+  in what was read, "selam ne demek ?" is answered "selam , merhaba demektir". This is the paradigmatic (vertical)
+  axis of language beside the syntagmatic one (Saussure, Jakobson).
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -340,6 +346,8 @@ The models were small and the data scarce; with far more data the gap may close.
 | Exact Relations | Kesin İlişkiler | F28 | |
 | Analogy by Interchangeability | Yerine Geçebilirlik Benzetmesi | F29 | the distributional hypothesis; NARS analogy |
 | Corroboration | Bağımsız Kanıtların Birleşmesi | F30 | NARS revision |
+| Paradigmatic Relation | Dizisel İlişki | F31 | the paradigmatic axis (Saussure, Jakobson) |
+| Relational Binding | İlişkisel Bağlama | F32 | variable binding of a frame's place |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |
