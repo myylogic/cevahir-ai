@@ -33,6 +33,9 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
   algılar. O anda ne denir, bunu yaşayarak öğrenir (`!kendini_tani` bu dersleri de verir): "bilmiyorum" der ve
   bilmediği kelimeyi soru tonuyla sorar ("bilmiyorum , öğrenmek isterim kuantum ?"). Açıkladığınızı öğrenir ve
   sonra kullanır.
+- Önce düşünür, sonra konuşur: duyduğu sözün en az emin olduğu kelimeleri ona bildiklerini çağrıştırır (iç sesi,
+  hayal olarak yaşanır ve yaşanmış kanıta göre gerçekliği ölçülür). Hemen bir cevabı yoksa, yeterince gerçek olan
+  ilk düşüncesini söyler; yoksa bilmediğini hisseder.
 - Hiç bütün olarak duymadığı bir söze, en çok benzeyen yaşanmış durumlarda ne söylendiyse onunla karşılık verebilir.
   Benzerlik zayıfsa (örneğin sözde bilmediği bir kelime varsa) uydurmaz.
 - Cevap uzunluğu sınırı 80 kelimedir; söyleyecek bir şeyi kalmayınca kendisi durur.

@@ -298,3 +298,21 @@ thoughts to mind as the words are heard, before the utterance is taken in.
 The principled repair belongs in the core. A new tie would take into account how often its source was lived before
 it existed (a base rate from `u_use` and `t_birth`). This changes learning for every mind, so it waits for a
 measured study against the F11-F21 results.
+
+## T8 in conversation: think, then speak (2026-11-15)
+
+The owner asked for this: "it should be able to think and speak". As the words of an utterance are heard, the ones
+the mind is least sure of call thoughts to mind (`Session.associations`): the inner voice of F20 is kept as imagined
+and scored for reality from lived evidence only. If the mind has no answer at once when its turn comes, it says the
+first thought that says something (at least three words) and is real enough. "Real enough" is the act threshold,
+reality ≥ 1/2 + θ/2T. Only otherwise does it feel that it does not know (L7).
+
+The thoughts are called to mind before the utterance is taken in. A thought made after hearing echoed the question:
+one hearing of "X Y" makes Y as strong a continuation of X as anything read about X (see the one-shot finding above).
+Thinking before taking the utterance in avoids that echo.
+
+**On the large private mind** (no content quoted): a question about a group of people that it had read about in a
+report was answered with the report's own sentence about that group, which the mind recalled by thinking about the
+word. An unknown word still met curiosity.
+
+Tests: `tests/evolution/test_zihin_think_aloud.py`.
