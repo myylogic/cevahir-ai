@@ -39,8 +39,12 @@ Kasım 2026'da Transformer'dan ayrı, yeni bir çekirdek üzerinde çalışmaya 
 - Önce taklit eder, sonra sonuçlarına bakarak kopyaladığından kopar; "başkaları böyle yapar" bilgisini korur (T7).
 - Aynı deneyim akışında küçük bir Transformer ile karşılaştırma (5 tohum × 2 dünya, aynı sorular): hiç görülmemiş örneğe genellemede Zihin %90 / %97 ve %75 / %95; yaşarken tek geçişte eğitilen Transformer %67 / %57 ve %60 / %50; akışın tamamında yakınsayana kadar eğitilen Transformer %77 / %67 ve %53 / %53. İkinci bir alan, Transformer'da ilk alanın bilgisini 0.85'ten 0.74'e düşürür, Zihin'de 1.00 kalır. Tek bir deneyimi geri almak Zihin'de 20–77 ms ve tamdır; Transformer'da tam karşılığı sıfırdan yeniden eğitimdir. Bu karşılaştırma az veriyle yaşarken öğrenme koşulundadır; Transformer'lar küçüktür ve çok daha fazla veriyle fark kapanabilir.
 - Sohbet: izlediği diyalogları söyler; izlemediği sorulara ilişki kurarak cevap verir ("kuş ne yapar" → "kuş öter"); bilmediğinde susar; "yanlış" denen kopyalanmış bir cevabı bir daha söylemez.
+- Görür ve duyar (ilk sürüm): resim ve ses dosyalarını eğitilmiş bir ağ olmadan, piksel ve ses aritmetiğiyle algılar ve benzerlikle tanır. Yeni resimlerde %73 / %83 / %67, yeni seslerde %93 / %97 / %93 doğru (şans %33; benzerlik kapalıyken %0).
+- Merak ve hayal (ilk biçimler): söyleyecek bir şeyi yokken bilmediği kelimeyi soru tonuyla geri sorar, açıklananı öğrenip kullanır (T4). Bir düşünceyi yapıca benzediği bir kavrama taşıyarak hayal kurar ve her adımın gerçekliğini yaşanmış kanıta göre ölçer (T8).
+- Uyku ve rüya: uykuda son konu ve emin olmadığı kelimeler üzerine rüya görür. Sonra hayallerini yaşadıklarıyla tartar, önceki rüyalarından hangisinin doğru, hangisinin yanlış çıktığını söyler ve kendi hayallerine ne kadar güveneceğini buradan öğrenir. Yanlış çıkan hayal silinmez; gerçek kanıt ona ağır basar.
+- Kendilik: konuştuğu ve düşündüğü her anda bulunan doğuştan bir "ben" birimi vardır. İç gözlemle kendi yaşamından neyi ne kadar söyleyip düşündüğünü okur.
 
-**Henüz yapamadıkları:** Öğrenmeyi öğrenmek (T6) olumsuz çıktı. Kendi kendine soru sormak (T4) ve hayal edip gerçekliğini ölçmek (T8) henüz yok. Gerçek veride sohbet büyük ölçüde taklittir; kendisi hakkındaki sorulara başkalarının cevabıyla karşılık verebilir. Dünyalar küçüktür ve Transformer karşılaştırması yalnızca az veri koşulunda yapıldı. Bu çalışma bir bilinç ya da yapay genel zekâ iddiası değildir; bunlar bugün hiçbir makine için ölçülemiyor. Hedef ve yol haritası açıktır: yaşayarak öğrenen, kendi kavramlarını kuran, edindiğini anlamlandıran ve kendini bilen bir zihin. Tasarımın katmanları (bilinçli odak, otomatik refleksler, iç ve dış ses, yönlendiriciler ve irade, kendini bilmek) [burada](research/living_mind_2026_11_14/LAYERS.md), vizyon [burada](research/living_mind_2026_11_14/design/VISION.md).
+**Henüz yapamadıkları:** Öğrenmeyi öğrenmek (T6) olumsuz çıktı. Merak, hayal ve rüya ilk biçimlerindedir: gerçeklik puanı akla yatkın bir kurguyu zayıf bir sıçramadan henüz ayıramıyor; rüyalar yalnız kelimelerle görülüyor. Kendi sesi (konuşma çıktısı) yok. Gerçek veride sohbet büyük ölçüde taklittir; kendisi hakkındaki sorulara kendisine anlatılan gerçeklerle cevap verir, kendilik birimi henüz söylediklerini yönlendirmiyor. Dünyalar küçüktür ve Transformer karşılaştırması yalnızca az veri koşulunda yapıldı. Bu çalışma bir bilinç ya da yapay genel zekâ iddiası değildir; bunlar bugün hiçbir makine için ölçülemiyor. Hedef ve yol haritası açıktır: yaşayarak öğrenen, kendi kavramlarını kuran, edindiğini anlamlandıran ve kendini bilen bir zihin. Tasarımın katmanları (bilinçli odak, otomatik refleksler, iç ve dış ses, yönlendiriciler ve irade, kendini bilmek) [burada](research/living_mind_2026_11_14/LAYERS.md), vizyon [burada](research/living_mind_2026_11_14/design/VISION.md), son çalışmalar (uyku ve rüya, işitme) [burada](research/living_mind_2026_11_15/NOTES.md).
 
 **Denemek için** (ayrıntılı kılavuz: [docs/ZIHIN_KILAVUZ.md](docs/ZIHIN_KILAVUZ.md); PowerShell'den: `.\cevahir.ps1`):
 
@@ -50,6 +54,8 @@ python -m zihin                      # yeni bir zihin
 !konus                               # sohbet modu
 !dogru  /  !yanlis                   # zihnin son cevabının nasıl karşılandığı
 !yas   !neden <söz> => <kelime>   !unut <no>   !kaydet <ad>
+!gor ben.jpg   !dinle sesim.wav      # bir sonraki sözle birlikte bir resim göstermek / bir ses duyurmak
+!dusun [konu]   !uyu   !kendin       # iç sesini dinlemek / rüya görüp hayallerini ayıklamak / iç gözlem
 ```
 
 ## Yapay zeka motorunu kitap olarak okuyun
