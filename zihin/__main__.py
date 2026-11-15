@@ -150,12 +150,12 @@ def profile(mind: Mind) -> str:
 
 
 FACETS = "parca"
-TURN, TURN_END = "sira", "⏎"
-PERSON, SOMEONE = "kisi", "biri"
+TURN, TURN_END = "sira", "⏎"           # the end of someone's utterance (Enter) is perceived, like a pause in speech
+PERSON, SOMEONE = "kisi", "biri"        # who is speaking is perceived (like a face or a voice); "biri" = someone unknown
 from .gorme import EYE, LOOK
 from .isitme import EAR, SOUND
 TONE = "ton"                          # how an utterance ends (? ! .) is perceived with its end, like intonation
-FINAL = (".", "?", "!", "…")     # who is speaking is perceived (like a face or a voice); "biri" = someone unknown          # the end of someone's utterance (Enter) is perceived, like a pause in speech
+FINAL = (".", "?", "!", "…")          # closing punctuation (heard as the tone of a turn's end in minds that lived it so)
 VALUE = "deger"
 VALUE_SIGN = {(VALUE, "iyi"): 1.0, (VALUE, "kötü"): -1.0}     # the adapter defines what is good and bad
 
@@ -171,6 +171,9 @@ class Session:
         mind.value_sign = dict(VALUE_SIGN)
         known = mind.ch.has(TURN) and mind.ch.symbol_index(mind.ch.id(TURN), TURN_END, create=False) >= 0
         self.turns = mind.t == 0 or known       # a mind that never lived turn ends keeps the older turn passing
+        tone_id = mind.ch.id(TONE) if mind.ch.has(TONE) else -1
+        lived_tone = tone_id >= 0 and any(mind.ch.symbol_index(tone_id, t, create=False) >= 0 for t in FINAL)
+        self.tones = mind.t == 0 or lived_tone  # a mind that lived closing punctuation as words keeps hearing it so
         mind.add_channel(TURN, "sense")
         for name in (PERSON, TONE):             # who speaks and how it ends accompany the words as context: they are
             if mind.ch.has(name) and mind.ch.kind(mind.ch.id(name)) == "facet":   # not what a thing looks like
@@ -232,7 +235,7 @@ class Session:
     def body(self, text: str) -> List[str]:
         """The words of an utterance without its closing punctuation (that is perceived with the end, see tone)."""
         symbols = words(text)
-        if self.turns:
+        if self.turns and self.tones:
             while symbols and symbols[-1] in FINAL:
                 symbols = symbols[:-1]
         return symbols
@@ -252,7 +255,7 @@ class Session:
             self.mind.knob["theta"] = 1e9
         try:
             events = [Event(TURN, TURN_END, prov)]
-            if tone:
+            if tone and self.tones:
                 events.append(Event(TONE, tone, prov))
             return self.mind.step(events)
         finally:
@@ -279,7 +282,7 @@ class Session:
         return n
         self.history.append((len(self.history) + 1, "[izledi] %s || %s" % (first, answer), []))
 
-    def reply(self, text: str, limit: int = 12) -> str:
+    def reply(self, text: str, limit: int = 30) -> str:
         """You speak (told), then the mind may speak: its own acts, one symbol per moment, until silence.
 
         The turn passes to the mind with your last word: it decides in that very moment (the context of your
