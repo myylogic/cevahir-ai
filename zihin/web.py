@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """The internet as a channel of experience (vision 11, 13): an adapter, not a change of the core.
 
-Reading: on the owner's explicit command the session looks a topic up in Wikipedia (MediaWiki API, read only),
-takes the plain text of the article and lets the mind read it sentence by sentence, like any document: speech of
-others (provenance "imitated"), learned by the one rule. Every page read is printed (title and address).
+Reading: on the owner's explicit command the session looks a topic up (read only), takes the plain text of what it
+finds and lets the mind read it sentence by sentence, like any document: speech of others (provenance "imitated"),
+learned by the one rule. Every page read is printed (title and address). The source is Google when GOOGLE_API_KEY
+and GOOGLE_CSE_ID are set (the official Custom Search JSON API; result pages are downloaded and reduced to their
+text; google.com result pages are never scraped), otherwise Wikipedia (MediaWiki API, plain-text extracts).
 
 Wanting (design section 5): "improve yourself" picks the topics itself: words the mind uses often but holds with
 little conviction (high drive D = use x (1 - c)).
@@ -16,11 +18,14 @@ So how it learns is itself learned from outcomes and kept in the core.
 """
 from __future__ import annotations
 
+import http.client
 import json
+import os
 import re
 import urllib.parse
 import urllib.request
-from typing import Callable, Dict, List, Optional, Tuple
+from html.parser import HTMLParser
+from typing import Callable, Dict, List, Optional, Protocol, Tuple
 
 from .evidence import conviction, expectation
 from .events import ACTED
@@ -31,12 +36,26 @@ from .store import ATOMIC, EXPECT, W_NEG, W_POS
 AGENT = "CevahirZihin/0.1 (reader of public encyclopedia pages)"
 WAYS = {"ozet": 12, "derin": 60}          # how many sentences a way reads
 WAY_CHANNEL = "yol"                       # the mind's own channel for its ways of learning (internal acts)
+GOOGLE_API = "https://www.googleapis.com/customsearch/v1"
+TIMEOUT = 20.0                            # seconds allowed for one request
+MAX_PAGE = 2 * 1024 * 1024                # bytes read of one web page at most
+HTML_TYPES = ("text/html", "application/xhtml+xml")
 
 
-def _get_json(url: str, timeout: float = 20.0) -> dict:
+def _get_json(url: str, timeout: float = TIMEOUT) -> dict:
     request = urllib.request.Request(url, headers={"User-Agent": AGENT})
     with urllib.request.urlopen(request, timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
+
+
+class Source(Protocol):
+    """What research reads from: identifiers from ``search``, plain text and a printable address for each."""
+
+    def search(self, topic: str, limit: int = ...) -> List[str]: ...
+
+    def extract(self, identifier: str) -> str: ...
+
+    def address(self, identifier: str) -> str: ...
 
 
 class Wikipedia:
@@ -60,6 +79,138 @@ class Wikipedia:
 
     def address(self, title: str) -> str:
         return "https://%s.wikipedia.org/wiki/%s" % (self.lang, urllib.parse.quote(title.replace(" ", "_")))
+
+
+_SKIPPED = frozenset({"script", "style", "noscript", "nav", "header", "footer", "aside", "form",
+                      "title", "template", "svg", "button", "select", "iframe", "video", "audio", "object", "canvas"})
+_BLOCKS = frozenset({"p", "div", "br", "hr", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "li", "dl", "dt", "dd",
+                     "table", "tr", "td", "th", "caption", "blockquote", "pre", "section", "article", "main",
+                     "figure", "figcaption", "address", "details", "summary"})
+_SPACE = re.compile(r"\s+")
+_META_CHARSET = re.compile(rb"""<meta[^>]*?charset\s*=\s*["']?\s*([\w.:-]+)""", re.IGNORECASE)
+
+
+class _TextParser(HTMLParser):
+    """Collects the readable text of a page: block elements end lines, skipped elements give nothing."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: List[str] = []
+        self.skipping: List[str] = []         # open skipped elements, innermost last
+
+    def handle_starttag(self, tag: str, attrs) -> None:
+        if tag in _SKIPPED:
+            self.skipping.append(tag)
+            self.parts.append(" ")
+        elif tag in _BLOCKS:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in self.skipping:              # closes it and whatever was left open inside it
+            while self.skipping.pop() != tag:
+                pass
+            self.parts.append(" ")
+        elif tag in _BLOCKS:
+            self.parts.append("\n")
+
+    def handle_data(self, data: str) -> None:
+        if not self.skipping:
+            self.parts.append(_SPACE.sub(" ", data))
+
+
+def html_text(html: str) -> str:
+    """Readable text of an HTML page: one line per paragraph, heading or list item, whitespace collapsed."""
+    parser = _TextParser()
+    try:
+        parser.feed(html)
+        parser.close()
+    except AssertionError:                    # markup some Python versions refuse; keep what was read before it
+        pass
+    lines = (" ".join(line.split()) for line in "".join(parser.parts).split("\n"))
+    return "\n".join(line for line in lines if line)
+
+
+def _decode(raw: bytes, declared: Optional[str]) -> str:
+    """Page bytes as text: a UTF-8 byte order mark, else the declared charset (HTTP header, else a <meta> tag),
+    otherwise utf-8.
+    """
+    if raw.startswith(b"\xef\xbb\xbf"):
+        return raw[3:].decode("utf-8", errors="replace")
+    if not declared:
+        found = _META_CHARSET.search(raw[:4096])
+        declared = found.group(1).decode("ascii") if found else None
+    try:
+        return raw.decode(declared or "utf-8", errors="replace")
+    except (LookupError, ValueError):         # unknown or unusable charset name
+        return raw.decode("utf-8", errors="replace")
+
+
+def _is_web(url: str) -> bool:
+    return url.lower().startswith(("http://", "https://"))
+
+
+def _google_keys() -> Tuple[str, str]:
+    """GOOGLE_API_KEY and GOOGLE_CSE_ID from the environment ("" when unset)."""
+    return os.environ.get("GOOGLE_API_KEY", "").strip(), os.environ.get("GOOGLE_CSE_ID", "").strip()
+
+
+class GoogleSearch:
+    """Google web search through the official Custom Search JSON API (google.com pages are never scraped).
+
+    ``search`` returns result URLs, ``extract`` downloads one page and returns its readable text. The key and the
+    engine id default to GOOGLE_API_KEY and GOOGLE_CSE_ID and are never printed. ``fetch`` (API answers as JSON)
+    and ``urlopen`` (pages, called like ``urllib.request.urlopen``) can be replaced (tests).
+    """
+
+    def __init__(self, key: Optional[str] = None, cx: Optional[str] = None, lang: str = "tr",
+                 fetch: Callable[[str], dict] = _get_json, urlopen: Callable = urllib.request.urlopen) -> None:
+        env_key, env_cx = _google_keys()
+        self._key, self._cx = key or env_key, cx or env_cx
+        if not (self._key and self._cx):
+            raise ValueError("Google search needs GOOGLE_API_KEY and GOOGLE_CSE_ID")
+        self.lang, self.fetch, self.urlopen = lang, fetch, urlopen
+        self.found: Dict[str, Tuple[str, str]] = {}       # url -> (title, snippet) of every result seen
+
+    def search(self, topic: str, limit: int = 5) -> List[str]:
+        """Up to ``limit`` (at most 5) result URLs, best first; in the language ``lang`` (hl and lr)."""
+        params = {"key": self._key, "cx": self._cx, "q": topic, "num": max(1, min(int(limit), 5))}
+        if self.lang:
+            params.update(hl=self.lang, lr="lang_" + self.lang)
+        data = self.fetch(GOOGLE_API + "?" + urllib.parse.urlencode(params))
+        links: List[str] = []
+        for item in data.get("items", []):
+            link = str(item.get("link", ""))
+            if _is_web(link) and link not in links:
+                links.append(link)
+                self.found[link] = (str(item.get("title", "")), str(item.get("snippet", "")))
+        return links
+
+    def extract(self, url: str) -> str:
+        """Readable text of an HTML page; "" for other content (pdf, images) or a page that cannot be downloaded.
+
+        Only http(s) addresses are opened (ValueError otherwise); at most MAX_PAGE bytes are read.
+        """
+        if not _is_web(url):
+            raise ValueError("only http(s) pages are read, not %r" % url)
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": AGENT})
+            with self.urlopen(request, timeout=TIMEOUT) as response:
+                if response.headers.get_content_type() not in HTML_TYPES:
+                    return ""
+                charset = response.headers.get_content_charset()
+                raw = response.read(MAX_PAGE)
+        except (OSError, ValueError, http.client.HTTPException):    # unreachable, refused or broken: skipped
+            return ""
+        return html_text(_decode(raw, charset))
+
+    def address(self, url: str) -> str:
+        return url
+
+
+def default_source(lang: str = "tr") -> Source:
+    """Google (Custom Search JSON API) when GOOGLE_API_KEY and GOOGLE_CSE_ID are both set, otherwise Wikipedia."""
+    key, cx = _google_keys()
+    return GoogleSearch(key, cx, lang) if key and cx else Wikipedia(lang)
 
 
 def firm_knowledge(mind, unit: int) -> int:
@@ -130,12 +281,12 @@ class WayChooser:
         S.end()
 
 
-def research(session, topic: str, source: Optional[Wikipedia] = None, way: Optional[str] = None,
+def research(session, topic: str, source: Optional[Source] = None, way: Optional[str] = None,
              say: Callable[[str], None] = print) -> Dict[str, object]:
     """Look a topic up, read it with a way of reading, measure the gain, record it. Returns a report."""
     from .events import IMITATED
     from .__main__ import CHANNEL, sentences, words
-    source = source or Wikipedia()
+    source = default_source() if source is None else source
     mind = session.mind
     chooser = WayChooser(mind)
     way = way or chooser.choose()
