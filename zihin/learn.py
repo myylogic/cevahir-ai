@@ -28,7 +28,7 @@ stored value, record and relief entry is the same.
 from __future__ import annotations
 
 import math
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
@@ -676,14 +676,17 @@ def _verdict(mind, general: int, v: int, leave_out: float = 0.0):
     ``leave_out`` raw positive evidence on g -> v is removed first (what g received from this very instance).
     """
     S, k = mind.S, mind.cfg.k
-    channel = int(S.u_channel[v])
-    ties = [t for t in S.out.get((general, EXPECT, 1), []) if int(S.u_channel[int(S.t_dst[t])]) == channel]
-    if not ties:
+    if not S.out.get((general, EXPECT, 1)):
         return None
+    ids, dst = S.out_ids((general, EXPECT, 1))
+    dstn = dst.numpy()
+    sel = np.flatnonzero(S.u_channel.numpy()[dstn] == int(S.u_channel[v]))   # its ties on the channel of v
+    if not sel.size:
+        return None
+    idn = ids.numpy()[sel]
     best = f = total = mine = 0.0
-    for t in ties:
-        w_pos, w_neg = float(S.w1(W_POS, t).sum()), float(S.w1(W_NEG, t).sum())
-        if int(S.t_dst[t]) == v:
+    for d, w_pos, w_neg in zip(dstn[sel].tolist(), _raw_np(S, W_POS, idn).tolist(), _raw_np(S, W_NEG, idn).tolist()):
+        if d == v:
             w_pos = max(0.0, w_pos - leave_out)
             f = w_pos / (w_pos + w_neg) if w_pos + w_neg > 0.0 else 0.0
             mine = w_pos
@@ -723,22 +726,27 @@ def reflect(mind, budget: int = 1) -> None:
     n = S.n_units
     cursor = getattr(mind, "reflect_cursor", -1)
     done = tried = 0
+    kinds, alive = S.u_kind.numpy(), S.u_alive.numpy()          # no unit is made here
+    world = [c for c, kind in enumerate(mind.ch.kinds) if kind in ("sense", "act")]
     while done < budget and tried < n:
         cursor = (cursor + 1) % n
         tried += 1
-        kind = int(S.u_kind[cursor])
-        if not kind & COMPOSED or kind & SLOTTED or not bool(S.u_alive[cursor]):
+        kind = int(kinds[cursor])
+        if not kind & COMPOSED or kind & SLOTTED or not bool(alive[cursor]):
             continue
-        ties = S.out.get((cursor, EXPECT, 1), [])
         lived = {}
-        for tie in ties:
-            v = int(S.t_dst[tie])
-            channel = int(S.u_channel[v])
-            if channel < 0 or mind.ch.kind(channel) not in ("sense", "act"):
-                continue
-            raw = float(S.w1(W_POS, tie).sum())
-            if raw > 0.0:
-                lived[v] = raw
+        if world and S.out.get((cursor, EXPECT, 1)):          # its lived values on sense/act channels, in list order
+            ids, dst = S.out_ids((cursor, EXPECT, 1))
+            dstn = dst.numpy()
+            channel = S.u_channel.numpy()[dstn]
+            on = channel == world[0]
+            for c in world[1:]:
+                on |= channel == c
+            sel = np.flatnonzero(on)
+            if sel.size:
+                for p, raw in zip(sel.tolist(), _raw_np(S, W_POS, ids.numpy()[sel]).tolist()):
+                    if raw > 0.0:
+                        lived[int(dstn[p])] = raw
         if not lived:
             continue
         done += 1
