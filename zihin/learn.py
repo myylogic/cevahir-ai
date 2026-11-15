@@ -36,6 +36,8 @@ def add_evidence(mind, table: int, slot: int, ids: torch.Tensor, amounts: torch.
     S = mind.S
     if ids.numel() == 0:
         return amounts
+    if ids.numel() == 1:                        # one tie: the same steps in plain numbers
+        return torch.tensor([add_evidence1(mind, table, slot, int(ids[0]), float(amounts[0]), relief)], dtype=F64)
     amounts = S.add(table, slot, ids, amounts)  # snapped to the grid, aligned with ids
     if table in (W_POS, W_NEG):
         expect = S.t_form[ids] == EXPECT
@@ -46,8 +48,37 @@ def add_evidence(mind, table: int, slot: int, ids: torch.Tensor, amounts: torch.
     return amounts
 
 
-def add_evidence1(mind, table: int, slot: int, tie: int, amount: float) -> None:
-    add_evidence(mind, table, slot, torch.tensor([tie], dtype=I64), torch.tensor([amount], dtype=F64))
+def add_evidence1(mind, table: int, slot: int, tie: int, amount: float, relief: bool = True) -> float:
+    """``add_evidence`` for one tie in plain numbers: the same snapped increment, relief entry and judging, in
+    the same order. Returns the snapped amount."""
+    S = mind.S
+    got = S.add1(table, slot, tie, amount)
+    if table <= W_NEG and S.views()[1][tie] == EXPECT:
+        if relief:
+            mind._gained.append((tie, got * float(mind.trust[slot])))   # one tie: (id, gain), see Mind._feel
+        if slot in REFERENCE and mind.cfg.learn_trust:
+            judge1(mind, table, tie, got)
+    return got
+
+
+def judge1(mind, table: int, tie: int, amount: float) -> None:
+    """``judge`` for one tie in plain numbers (a one-element sum is that element)."""
+    S = mind.S
+    share = min(amount, 1.0)                                # torch.clamp(amount, max=1.0)
+    w = S.views()[0]
+    for slot in range(S.P):
+        if slot in REFERENCE or mind.source_tie[slot] < 0:
+            continue
+        open_pos = (float(w[W_POS, tie, slot]) - float(w[C_POS, tie, slot])) * share
+        open_neg = (float(w[W_NEG, tie, slot]) - float(w[C_NEG, tie, slot])) * share
+        if open_pos == 0.0 and open_neg == 0.0:
+            continue
+        open_pos = S.add1(C_POS, slot, tie, open_pos)
+        open_neg = S.add1(C_NEG, slot, tie, open_neg)
+        agree = open_pos if table == W_POS else open_neg
+        differ = open_neg if table == W_POS else open_pos
+        S.add1(W_POS, SENSED, mind.source_tie[slot], agree)
+        S.add1(W_NEG, SENSED, mind.source_tie[slot], differ)
 
 
 def judge(mind, table: int, ids: torch.Tensor, amounts: torch.Tensor) -> None:
