@@ -295,7 +295,9 @@ class Mind:
     def _unknowing(self, items, acts, listening: bool) -> None:
         """L7: not knowing, felt. When the world has just done something (an outer event, such as the end of someone's
         turn) and the mind, free to answer, decides nothing, the amount it does not know is kept:
-        u = 1 - 2 max(0, best - 1/2), best = the highest expectation of any act. If the next moment passes in silence
+        u = 1 - 2 max(0, best - 1/2), best = the highest expectation of any act; when the best would have been said
+        had it no rival (2 (best - 1/2) T >= theta), the silence is hesitation between answers and nothing is kept. If
+        the next moment passes in silence
         with nothing said, the mind perceives that state as an inner event of intensity u, alone in its moment, so
         what one says (or does) then can be lived and learned like anything else. The measurement is innate; how
         not knowing is expressed is not."""
@@ -313,7 +315,9 @@ class Mind:
             best = max((e for u, e in self.predicted.items()
                         if int(self.S.u_channel[u]) >= 0 and self.ch.kind(int(self.S.u_channel[u])) == "act"),
                        default=0.5)
-            self.unknown = 0.0 if acted else 1.0 - 2.0 * max(0.0, best - 0.5)
+            # a best answer that would have been said were it alone is hesitation between rivals, not not knowing
+            alone = 2.0 * (best - 0.5) * self.cfg.T >= self.knob["theta"]
+            self.unknown = 0.0 if acted or alone else 1.0 - 2.0 * max(0.0, best - 0.5)
         elif not items and not acted and getattr(self, "unknown", 0.0) > 0.0:
             self.pending.append(Event(INNER_CHANNEL, NOT_KNOWING, SENSED, self.unknown))
             self.unknown = 0.0
