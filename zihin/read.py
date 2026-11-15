@@ -291,6 +291,82 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     if cfg.backoff and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
         for target, e in continuation_backoff(mind, unit, trust).items():
             out[target] = max(out.get(target, 0.0), e)
+    if getattr(cfg, "situations", False) and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
+        for target, e in situation_backoff(mind, unit, trust).items():
+            out[target] = max(out.get(target, 0.0), e)
+    return out
+
+
+def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F23: a situation never lived as a whole is met with what followed the lived situations most like it.
+
+    The situation is the present context: someone's utterance up to its perceived end (the turn end), and what the
+    mind has said since, if anything. Lived contexts that end with the same part and hold the same perceived event at
+    the same place from the end are compared with it part by part from the end. A part counts by how telling it is,
+    1 / (1 + the number of those contexts that hold it), so a word nothing lived holds weighs most. The similarity s
+    of a lived context is the weight of the parts both have at the same place over the weight of all parts either
+    has; it must share a word of the utterance, not only punctuation and the end. Each such context votes its own
+    evidence on what came next, weighted exp(-F (1 - s)) as exemplars are (GCM, as F18). The votes are held with
+    conviction lam * s * conviction(voters), s the voters' weighted similarity: a weak resemblance (an unknown word
+    in the utterance) cannot make the mind speak and leaves room for its curiosity."""
+    S, cfg = mind.S, mind.cfg
+    if not int(S.u_kind[unit]) & COMPOSED:
+        return {}
+    key = (unit, mind.t, id(trust) if trust is not None else None)
+    cache = getattr(mind, "_situation_cache", None)
+    if cache is not None and cache[0] == key:
+        return cache[1]
+    heard = S.parts(unit)
+    n = len(heard)
+    event = -1                                          # the last perceived event of the situation (the turn end)
+    for j, p in enumerate(heard):
+        channel = int(S.u_channel[p])
+        if channel >= 0 and mind.ch.kind(channel) == "sense":
+            event = j
+    out: Dict[int, float] = {}
+    if n >= 2 and event >= 1:
+        d_event = n - 1 - event
+        lived = [(t, u) for t, u in S.tuple_index.items()
+                 if len(t) > d_event and t[-1] == heard[-1] and t[len(t) - 1 - d_event] == heard[event] and u != unit]
+        held: Dict[int, int] = {}
+        for t, _ in lived:
+            for p in set(t):
+                held[p] = held.get(p, 0) + 1
+
+        def weight(p):
+            return 1.0 / (1 + held.get(p, 0))
+
+        def word(p):
+            c = int(S.u_channel[p])
+            return c >= 0 and mind.ch.kind(c) == "act" and str(mind.symbol_of(p)[1]).isalpha()
+
+        heard_set = set(heard)
+        heard_weight = sum(weight(p) for p in heard_set)
+        shares: Dict[int, float] = {}
+        voted = similar = 0.0
+        voters = 0
+        for t, u in lived:
+            L = len(t)
+            same = [d for d in range(min(n, L)) if t[L - 1 - d] == heard[n - 1 - d]]
+            if not any(word(heard[n - 1 - d]) for d in same if d > d_event):   # a word of the utterance itself
+                continue
+            own = {v: p for v, (p, q) in own_mass(mind, u, 1, trust).items() if _world(mind, v) and p > 0.0}
+            total = sum(own.values())
+            if total <= 0.0:
+                continue
+            shared = {heard[n - 1 - d] for d in same}
+            union = heard_weight + sum(weight(p) for p in set(t) - heard_set)
+            s = sum(weight(p) for p in shared) / union
+            g = math.exp(-mind.knob["F"] * (1.0 - s))
+            voted += g
+            similar += g * s
+            voters += 1
+            for v, p in own.items():
+                shares[v] = shares.get(v, 0.0) + g * p / total
+        if voted > 0.0:
+            c = cfg.lam * (similar / voted) * conviction(float(voters), cfg.k)
+            out = {v: c * (w / voted) + (1.0 - c) * 0.5 for v, w in shares.items()}
+    mind._situation_cache = (key, out)
     return out
 
 

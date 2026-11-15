@@ -76,6 +76,8 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
     ``ledger`` False: the mind is loaded for conversation without its experience ledger (nothing is copied;
     single experiences cannot be retracted in this session). Otherwise the saved ledger is copied to a live file
     that is unique to this load, so two loads of the same saved mind never write into the same file."""
+    if path.endswith(".gz"):                               # the compressed file itself was named
+        path = path[:-3]
     if not path.endswith(".zihin"):
         path += ".zihin"
     if not os.path.exists(path) and os.path.exists(path + ".gz"):   # a compressed mind: unpack it once
@@ -83,15 +85,19 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
         with gzip.open(path + ".gz", "rb") as src, open(path + ".tmp", "wb") as dst:
             shutil.copyfileobj(src, dst, 1 << 20)
         os.replace(path + ".tmp", path)
-    with open(path + ".json", encoding="utf-8") as f:
-        manifest = json.load(f)
-    if manifest.get("format") != FORMAT:
-        raise ValueError("not a %s manifest" % FORMAT)
-    if _sha256(path) != manifest["sha256"]:
-        raise ValueError("file does not match its manifest (sha256)")
+    manifest = {}
+    if os.path.exists(path + ".json"):
+        with open(path + ".json", encoding="utf-8") as f:
+            manifest = json.load(f)
+        if manifest.get("format") != FORMAT:
+            raise ValueError("not a %s manifest" % FORMAT)
+        if _sha256(path) != manifest["sha256"]:
+            raise ValueError("file does not match its manifest (sha256)")
+    else:                                                  # a mind file that travelled without its manifest
+        print("  (uyarı: %s.json bulunamadı; dosyanın bütünlüğü doğrulanamadı)" % os.path.basename(path), flush=True)
     with open(path, "rb") as f:
         mind = pickle.load(f)
-    if mind.S.digest() != manifest["substance_digest"]:
+    if manifest and mind.S.digest() != manifest["substance_digest"]:
         raise ValueError("substance digest does not match the manifest")
     for name, default in (("trace", list), ("value_sign", dict), ("dreams", list)):   # minds saved before these existed
         if not hasattr(mind, name):
@@ -105,6 +111,7 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
         mind.cfg.backoff = True
         mind.cfg.resemblance = True
         mind.cfg.race = True
+        mind.cfg.situations = True
     if not ledger:
         mind.S.log, mind.S.keep_log = {}, False
         mind.cfg.keep_log, mind.cfg.log_path = False, None
