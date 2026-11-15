@@ -238,3 +238,63 @@ them keeps them.
 F12 relation "the answer repeats the asked word" answered just "kuantum".
 
 Tests: `tests/evolution/test_zihin_pieces.py`.
+
+## Scaling: what grows with lived data, measured (2026-11-15)
+
+The owner's question: the data will grow, so what must happen as it grows? These are measurements on the private
+minds, with counts only and no content. The runs shared the machine with other jobs, so absolute times are indicative.
+
+| mind | moments | ties | max lag-0 degree | top-100 mean lag-0 degree | watching (ms/moment) |
+|---|---|---|---|---|---|
+| first breath | 25.5k | 98k | 1288 | 76 | 4.7 |
+| cevahir2 | 122k | 1.33M | 6050 | 667 | 7.5 |
+| cevahir3 | 234k | 2.54M | 9175 | 1071 | 13.6 |
+
+**What grows** (cevahir3):
+
+- **Ties:** 10.9 per moment.
+  - EXPECT lag 1: 38%.
+  - EXPECT lag 0: 17.5%.
+  - PART: 43%. These are structure only; they carry no evidence but each holds a full evidence row.
+  - ABSTRACT: 1.5%.
+- **Composed units:** one per moment (207k); 25% were lived once.
+- **Evidence size:** 72% of ties hold less than 2 units of evidence, mostly one experience.
+- **Memory:** 239 bytes per tie, of which 192 are evidence rows (4 tables × 6 provenance classes, float64).
+
+**Two bottlenecks follow from this.**
+
+1. **Time per moment grows with memory.** The lag-0 spreading in `_settle` reads every lag-0 tie of each atomic
+   focus unit in every settling iteration. `_winners` then sorts all evoked candidates to keep F = 7. Frequent words
+   gain partners as data grows, so the cost of a moment grows with the vocabulary. A brain-like moment should cost
+   what is local to it, not what is stored.
+   - Exact fixes in progress: top-F selection without a full sort, and cached tie-id tensors (a helper agent;
+     results must keep the substance digest bit-identical).
+   - The algorithmic fix, to be designed: spreading only along ties whose expectation can still matter.
+2. **Memory per moment is about 2.6 kB.** Two million examples are about 50M moments, which is about 130 GB at
+   today's density. The plan, in order of safety:
+   - (a) structure-only ties (PART) get no evidence rows, about 43% fewer rows;
+   - (b) evidence stored only for the provenance classes a tie actually has, since most ties have one or two of six;
+   - (c) a disk-backed evidence store for minds larger than RAM;
+   - (d) consolidation in sleep, from episodic to semantic memory. Instances whose information their frames
+     already carry would hand their evidence to the frame. This needs care, because the F11 reading reads members'
+     own evidence through instances.
+
+Nothing of (a)-(d) is done yet.
+
+**Done tonight for scaling.** The F23 situation reading no longer scans the whole memory at every turn. It calls up
+lived situations through the words of the utterance, rarest first, with bounded effort.
+
+## A finding on one-shot evidence (2026-11-15; not changed)
+
+A tie that is new receives no negative evidence from the earlier moments when its source was lived without it,
+because F14 records a failure only where something was expected. So one hearing of X followed by Y gives
+e(X→Y) = 0.67, which is the same as a continuation of X lived three times with one failure (f = 0.75, more
+conviction).
+
+Seen in conversation: after a question was heard once, the inner voice was torn between what the mind had read
+three times and the word the question had just put after the topic. The session works around this by calling
+thoughts to mind as the words are heard, before the utterance is taken in.
+
+The principled repair belongs in the core. A new tie would take into account how often its source was lived before
+it existed (a base rate from `u_use` and `t_birth`). This changes learning for every mind, so it waits for a
+measured study against the F11-F21 results.
