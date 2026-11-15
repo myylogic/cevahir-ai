@@ -347,13 +347,21 @@ def facet_set(mind, unit: int) -> set:
     return out
 
 
+def _facet_weight(mind, facet: int) -> float:
+    """How telling a facet is: 1 / the number of items it was perceived with (a facet everything has tells nothing)."""
+    return 1.0 / max(1, len(mind.S.out.get((facet, EXPECT, 0), [])))
+
+
 def facet_similarity(mind, a: int, b: int, fa: set = None) -> float:
-    """Jaccard overlap of the facet sets of two items (0 when either has none)."""
+    """Weighted Jaccard overlap of the facet sets of two items, each facet weighted by how telling it is
+    (0 when either has none)."""
     fa = facet_set(mind, a) if fa is None else fa
     fb = facet_set(mind, b)
     if not fa or not fb:
         return 0.0
-    return len(fa & fb) / float(len(fa | fb))
+    w = {f: _facet_weight(mind, f) for f in fa | fb}
+    union = sum(w.values())
+    return sum(w[f] for f in fa & fb) / union if union > 0 else 0.0
 
 
 def join_by_resemblance(mind, unit: int, slot: int, neighbours: int = 20) -> None:

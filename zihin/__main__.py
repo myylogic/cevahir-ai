@@ -164,8 +164,10 @@ class Session:
         known = mind.ch.has(TURN) and mind.ch.symbol_index(mind.ch.id(TURN), TURN_END, create=False) >= 0
         self.turns = mind.t == 0 or known       # a mind that never lived turn ends keeps the older turn passing
         mind.add_channel(TURN, "sense")
-        mind.add_channel(PERSON, "facet")       # who speaks accompanies the words; it is not part of the sentence
-        mind.add_channel(TONE, "facet")
+        for name in (PERSON, TONE):             # who speaks and how it ends accompany the words as context: they are
+            if mind.ch.has(name) and mind.ch.kind(mind.ch.id(name)) == "facet":   # not what a thing looks like
+                mind.ch.kinds[mind.ch.id(name)] = "context"
+            mind.add_channel(name, "context")
         mind.add_channel(EYE, "sense")          # a seen thing is present in the episode, its aspects are facets
         mind.add_channel(LOOK, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)

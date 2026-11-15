@@ -256,11 +256,12 @@ class Mind:
             self.trace = []
         if cfg.lag0:
             learn_together(self, [f for f in self.focus if int(S.u_kind[f[0]]) & ATOMIC], slot)
-        facets = [(u, i, c) for u, i, p, c in percepts if i > 0 and self.ch.kind(c) == "facet"]
+        facets = [(u, i, c) for u, i, p, c in percepts if i > 0 and self.ch.kind(c) in ("facet", "context")]
         if facets and items:                               # facets of this moment go with its items (lag 0)
             learn_facets(self, [u for u, _ in items], facets, slot)
-        self.predicted = predictions(self)                 # step 3
-        acts = act_mod.decide(self)                        # step 4
+        listening = self.knob["theta"] >= 1e8              # spoken to: it cannot speak now
+        self.predicted = predictions(self, "own" if listening else None)   # step 3 (cheap while listening)
+        acts = [] if listening else act_mod.decide(self)   # step 4: no decision to take while listening
         if cfg.imagine and not items:
             act_mod.imagine(self)
         if cfg.reflect and cfg.reliability and not items:
@@ -297,7 +298,7 @@ class Mind:
         base: Dict[int, float] = {u: decay * a for u, a in self.carry.items()}
         for unit, intensity, prov, channel in percepts:
             kind = self.ch.kind(channel)
-            if kind in ("facet", "value"):                 # facets and value signals do not compete for focus
+            if kind in ("facet", "context", "value"):      # facets, context and value signals do not compete
                 continue
             if intensity > 0 and (cfg.feel_focus or kind != "feel"):
                 base[unit] = max(base.get(unit, 0.0), min(1.0, intensity))

@@ -17,6 +17,7 @@ units that have one of its parts replaced by a category of that part (frames).
 """
 from __future__ import annotations
 
+import math
 from typing import Dict, List, Optional, Tuple
 
 import torch
@@ -214,7 +215,7 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
     fixed = tuple(p for p in parts if p != category)
     relational = getattr(S, "bind_repeats", False)
     shares: Dict[int, float] = {}
-    members = 0.0
+    members = voted = 0.0
     looks = None                                       # F18: the read instance's filler and its facets
     if getattr(mind.cfg, "resemblance", False) and exclude is not None and int(S.u_kind[exclude]) & COMPOSED:
         from .learn import facet_set, facet_similarity
@@ -232,16 +233,22 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
         if total <= 0.0:
             continue
         e_x = expectation(float((S.t_w[W_POS, tie] * mind.trust).sum()), float((S.t_w[W_NEG, tie] * mind.trust).sum()), k)
-        if looks is not None:                          # members that look like the item speak louder
-            e_x *= facet_similarity(mind, looks[0], x, looks[1])
-            if e_x <= 0.0:
+        weight = e_x
+        if looks is not None:                          # members that look like the item speak louder (GCM):
+            sim = facet_similarity(mind, looks[0], x, looks[1])   # vote x exp(-sensitivity x (1 - similarity))
+            if sim <= 0.0:
                 continue
+            weight = e_x * math.exp(-mind.knob["F"] * (1.0 - sim))
         members += e_x
+        voted += weight
         goes_on = continuations(mind, x, fixed) if relational else {}
         for v, p in own.items():
             key = SELF if relational and v == x else NEXT if v in goes_on else v
-            shares[key] = shares.get(key, 0.0) + e_x * p / total
-    return {v: (w, members - w) for v, w in shares.items()}, members, where, fixed
+            shares[key] = shares.get(key, 0.0) + weight * p / total
+    if voted <= 0.0:
+        return {}, 0.0, where, fixed
+    scale = members / voted                            # frequencies from the weighted votes, conviction from how
+    return {v: (w * scale, members - w * scale) for v, w in shares.items()}, members, where, fixed   # many members
 
 
 def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
@@ -381,6 +388,10 @@ def predictions(mind, mode: Optional[str] = None) -> Dict[int, float]:
     """
     cfg = mind.cfg
     mode = cfg.predict if mode is None else mode
+    if mode == "own":                                  # the present context's own evidence only (no generalisation)
+        if mind.context is None:
+            return {}
+        return {v: expectation(p, n, cfg.k) for v, (p, n) in own_mass(mind, mind.context).items()}
     if mode == "specific":
         if mind.context is None:
             return {}
