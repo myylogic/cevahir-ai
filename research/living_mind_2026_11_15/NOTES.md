@@ -114,3 +114,60 @@ rate and channels, and the session wiring.
   therefore cross-bind their facets.
 - The gist names a recording, not a sound. For a steady tone the hash bits are near-ties, so the gist can change
   with volume while the facets stay the same.
+
+## Two fixes found on the large mind (2026-11-15)
+
+**Closing punctuation.** Minds raised before tones existed lived "?" as a word before the turn end. The session now
+hears punctuation as a turn-end tone, so every question such a mind had watched became a sequence it never lived,
+and it fell silent even on questions it had watched verbatim. A mind that delivered answers the evening before had
+no turn ends at all, which is why the problem showed only on the newer minds.
+
+The session now follows the convention the mind lived. Tones are used if the mind is new or has lived tone symbols;
+otherwise the punctuation stays a word. A session never switches a mind between the two
+(`tests/evolution/test_zihin_session_tone.py`).
+
+**Travelling mind files.** A mind loads when its `.zihin.gz` name is given, and when it travelled without its
+manifest. In that case it warns that the file's integrity was not checked (`tests/evolution/test_zihin_persist.py`).
+
+## F23. Meeting a situation never lived as a whole (2026-11-15)
+
+A question never watched as a whole got silence even when its words and ending had been lived in many watched
+questions. The specific context had no evidence of its own. The category reading gave only a generic prior
+(the most frequent first word of answers), and F16 never starts an utterance.
+
+**Rule** (`read.situation_backoff`, used by `members_map` when nothing else expects anything above one half).
+
+The present situation is someone's utterance up to its perceived end, plus whatever the mind has said since. It is
+compared, part by part from the end, with the lived contexts that end with the same part and hold the turn end at
+the same place.
+
+- **Weight of a part:** 1 / (1 + the number of those contexts that hold it). A word nothing lived weighs most.
+- **Similarity** of a lived context: the weight of the shared aligned parts over the weight of all parts either has.
+  It must share a word of the utterance, not only punctuation and the end.
+- **Votes:** each such context votes its own evidence on what came next, weighted exp(−F(1 − s)) as exemplars are
+  (GCM, as F18).
+- **Conviction:** the votes are held with lam · s · conviction(voters), where s is the voters' weighted similarity.
+
+So a weak resemblance cannot make the mind speak. An utterance with an unknown topic word resembles nothing
+strongly, which leaves the mind silent and lets its curiosity ask back. Because the situation includes what the mind
+has said since the turn end, an answer it starts is carried on along the answers lived in the same situations.
+
+**Tests** (`tests/evolution/test_zihin_situations.py`, toy dialogues):
+
+- "ne yapıyorsun ?", never watched, after four watched "<greeting> , ne yapıyorsun ?" → "arkadaşlarla sinemaya
+  gideceğim ." (the whole answer);
+- "kuantum nedir ?" → "kuantum ?";
+- a watched question keeps its own answer;
+- with the setting off, there is no answer.
+
+**On the large private mind** (122k moments; no private lines quoted here):
+
+- Unwatched paraphrases of everyday questions were answered with whole answers lived in similar situations, or with
+  a single fitting word.
+- Unknown topics were still met with curiosity.
+- Watched questions were unchanged.
+
+**Limits.** With only two similar situations and competing partial matches (a toy mind), the votes do not reach the
+decision threshold, so the mind stays silent. The F19 race also measures a leader against its strongest rival even
+when that rival is below one half; that inconsistency is noted and left as it is, because the vision results depend
+on it.

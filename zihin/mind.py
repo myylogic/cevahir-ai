@@ -71,6 +71,7 @@ class Config:
     resemblance: bool = False       # F18: a new item joins the categories of what it resembles (shared facets), and
                                     # members that resemble the item read speak louder
     backoff: bool = False           # F16: an utterance under way continues along the lived sequences of its end
+    situations: bool = False        # F23: an utterance never lived as a whole is met by the lived ones most like it
     bind_repeats: bool = False      # F12: a unit occurring at several positions of a tuple is one slot (variable)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
     evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
