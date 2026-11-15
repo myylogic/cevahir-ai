@@ -22,13 +22,23 @@ pip install torch numpy python-docx pillow
 Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. Türkçe karakterler bozuk görünürse önce
 `chcp 65001`. Başlarken "Seninle konuşan kim?" diye sorar: adınızı yazın; konuşan kişi her sözle birlikte algılanır.
 
-## Yaşam
+## Yaşam (çevrimiçi)
 
+- Oturum açıldığı andan itibaren zihin kendi zamanında yaşar; yalnız sorulunca çalışmaz. Yazdıklarınız bu yaşama
+  girdi olarak düşer; söyledikleri kelime kelime, söyledikçe ekrana gelir. Siz yazmazken sessiz anlar yaşar: 10
+  saniye sessizlikte son konunun en az bildiği kelimesi üzerine kendi içinde düşünür, 45 saniye sessizlikte
+  düşüncesi yeterince gerçekse konuşmayı kendisi başlatır, 10 dakika sessizlikte uyur (`--yasamsiz` ile kapatılır).
 - Her sohbetin sonunda (Ctrl+C dahil) ve uzun sohbetlerde 50 cevapta bir öğrendikleri kendiliğinden kaydedilir.
-- Siz yazmazken boş durmaz: 20 saniye sessizlikte son konunun en az bildiği kelimesi üzerine kendi içinde düşünür;
-  60 saniye sessizlikte, düşüncesi yeterince gerçekse konuşmayı kendisi başlatabilir (`--yasamsiz` ile kapatılır).
-- Bilmediği bir kelimeyle karşılaşıp söyleyecek bir şeyi olmadığında o kelimeyi soru tonuyla geri sorar
-  ("kuantum ?"); açıkladığınızı öğrenir ve sonra kullanır.
+- Bilmemek: sıra kendisine geldiğinde söyleyecek bir şey bulamazsa, bir an geçer ve bilmediğini bir iç his olarak
+  algılar. O anda ne denir, bunu yaşayarak öğrenir (`!kendini_tani` bu dersleri de verir): "bilmiyorum" der ve
+  bilmediği kelimeyi soru tonuyla sorar ("bilmiyorum , öğrenmek isterim kuantum ?"). Açıkladığınızı öğrenir ve
+  sonra kullanır.
+- Hiç bütün olarak duymadığı bir söze, en çok benzeyen yaşanmış durumlarda ne söylendiyse onunla karşılık verebilir.
+  Benzerlik zayıfsa (örneğin sözde bilmediği bir kelime varsa) uydurmaz.
+- Cevap uzunluğu sınırı 80 kelimedir; söyleyecek bir şeyi kalmayınca kendisi durur.
+- Yeni bir zihin, kelimeleri deponun kendi tokenizer altyapısındaki parçalarıyla birlikte yaşar: kök, ekler ve son
+  hece (`yapıyorsun` → kök `yap`, ekler `ıyor`, `sun`). Böyle yapılmış kelimeler birbirine benzer. Parçasız
+  büyümüş bir zihin parçasız devam eder (`--parca cevahir` ile açılabilir, `--parca yok` ile kapatılır).
 - 10 dakika sessizlikte uyur: son konu ve emin olmadığı kelimeler üzerine rüya görür (bir düşünceyi benzediği bir
   kavrama taşıyarak hayal kurar), sonra hayallerini yaşadıklarıyla tartar. Hangi hayalinin doğru, hangisinin yanlış
   çıktığını söyler; yanlış çıkan bir hayal silinmez, gerçek kanıt ona ağır basar. `!uyu` ile isteyince de uyur.

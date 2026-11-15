@@ -30,6 +30,29 @@ LESSONS: List[Tuple[str, str]] = [
 ]
 
 
+_SYLLABLES = ("ka", "zor", "bel", "tu", "mi", "rak", "sen", "do", "lup", "ve", "tin", "gar", "fi", "boz", "nu",
+              "pel", "dar", "ki", "sut", "ya", "mor", "lek", "zi", "pon")
+_ASKING = ("{} nedir ?", "{} ne demek ?", "{} nerede ?", "{} kimdir ?", "sence {} nasıl bir şey ?", "{} ne işe yarar ?")
+_NOT_KNOWING = ("bilmiyorum .", "bilmiyorum , öğrenmek isterim .")
+
+
+def not_knowing_lessons(n: int = 24, seed: int = 0) -> List[Tuple[str, str]]:
+    """Lessons in saying that one does not know (L7): questions about words nobody knows (made of Turkish syllables,
+    so they are new to any mind), each answered as one answers when one does not know. They are lived at the very
+    moment the mind itself has just felt that it does not know (the session presents them so), so the mind can bind
+    what one says to that inner state; nothing here is a rule of the core."""
+    import random
+    rng = random.Random(seed)
+    lessons, seen = [], set()
+    while len(lessons) < n:
+        word = "".join(rng.choice(_SYLLABLES) for _ in range(3))
+        if word in seen:
+            continue
+        seen.add(word)
+        lessons.append((_ASKING[len(lessons) % len(_ASKING)].format(word), _NOT_KNOWING[len(lessons) % 2]))
+    return lessons
+
+
 def self_report(mind, channel: str = "text", top: int = 12) -> str:
     """Introspection (L8): what the mind can say about itself from its own evidence, not from what it was told: the
     words its self is most bound to (what it says and thinks most), and how much of its life was its own speaking and

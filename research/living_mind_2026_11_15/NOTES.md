@@ -171,3 +171,70 @@ has said since the turn end, an answer it starts is carried on along the answers
 decision threshold, so the mind stays silent. The F19 race also measures a leader against its strongest rival even
 when that rival is below one half; that inconsistency is noted and left as it is, because the vision results depend
 on it.
+
+## L7, first form: not knowing, felt and said (2026-11-15)
+
+The owner asked for this: "it must know how to say it does not know; silence is not the solution". He had also said
+before: "the model will not just say 'I don't know'; the mind must know what not knowing means." So the measurement
+is innate and its expression is learned.
+
+**Measurement** (`Mind._unknowing`). The world sometimes calls on the mind: an outer event is perceived (the end of
+someone's turn) while the mind is free to answer. If it then decides nothing, it keeps the amount it does not know:
+
+> u = 1 − 2 · max(0, best − 1/2), where best is the highest expectation of any act.
+
+If the next moment passes in silence with nothing said, the mind perceives that state as an inner event (channel
+"ic", symbol "bilmemek", intensity u). The event is alone in its moment, because the silence ended the episode. It
+never arises while the mind listens, watches others, or answers.
+
+**Expression.** The session presents lessons (`kendilik.not_knowing_lessons`): questions about words nobody knows,
+made of Turkish syllables. Each is told at the moment the mind has itself just felt that it does not know: "bilmiyorum
+." or "bilmiyorum , öğrenmek isterim .". What follows the inner event is learned like any sequence. In conversation
+the mind takes the same silent moment before answering when it has nothing at once, perceives its not knowing, and
+says what it learned to say then. Curiosity (T4) then asks back the unknown word.
+
+**Tests** (`tests/evolution/test_zihin_not_knowing.py`):
+
+- not knowing is felt only when the mind is called on and has no answer;
+- before the lessons it never says "bilmiyorum";
+- after the lessons, "fotosentez ne demek ?" gets "bilmiyorum , öğrenmek isterim fotosentez ?", and known questions
+  keep their answers.
+
+**Limit.** Two well-supported but rival answers make the F19 race hold back, and the mind then says it does not
+know although it has two candidates. Hesitation between answers and not knowing are not told apart yet.
+
+## Online life (2026-11-15)
+
+The owner said this is not a request-and-answer exchange: from the moment the session starts the mind lives, inputs
+and outputs flow, and it is online. The session's `Life` replaces the earlier life clock.
+
+- Typed lines arrive as events in the mind's own time, in order.
+- What the mind says comes out word by word as it says it.
+- Between lines it lives silent moments, one every two seconds, so its age grows while nobody types.
+- After 10 s of silence it thinks; after 45 s it may speak first if its thought was real enough; after 10 min it
+  sleeps and dreams. Each happens once per silence.
+
+Tests: `tests/evolution/test_zihin_online.py`.
+
+## Word pieces from the repository's own tokenizer (2026-11-15)
+
+At the owner's request the pieces come from the repository's own tokenizer infrastructure (`tokenizer_management`):
+
+- the morphological root, when it differs from the word;
+- the suffixes the morphology splits off;
+- the last syllable.
+
+They accompany each word as facets on the channel "parca", so words built alike resemble each other (F18). For
+example, "yapıyorsun" and "gidiyorsun" share "ek:sun", and "yapıyorsun" and "yaptım" share "kök:yap".
+
+The 60k BPE vocabulary itself keeps frequent words whole, so its tokens add no structure for them; the syllabifier
+and the morphology of the same package do.
+
+**Who gets pieces.** A new mind is raised with them. A mind raised without them keeps living without them, because
+F18 skips members with no shared facets and switching would silence an old mind's categories. A mind raised with
+them keeps them.
+
+**Toy comparison.** With pieces, "kuantum nedir ?" got "bilmiyorum , öğrenmek isterim kuantum ?". Without pieces the
+F12 relation "the answer repeats the asked word" answered just "kuantum".
+
+Tests: `tests/evolution/test_zihin_pieces.py`.

@@ -35,6 +35,7 @@ from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS, Su
 
 FEELINGS = ("surprise", "relief", "load", "conflict")
 SELF_CHANNEL, SELF_SYMBOL = "benlik", "ben"
+INNER_CHANNEL, NOT_KNOWING = "ic", "bilmemek"     # L7: not knowing, perceived as an inner event
 
 
 @dataclass
@@ -154,6 +155,7 @@ class Mind:
             S.add1(W_NEG, SENSED, self.source_tie[p], w_neg)
         self.feel_unit = {name: self._atom(feel, name) for name in FEELINGS}
         self.add_channel(SELF_CHANNEL, "context")          # the self: present whenever the mind itself acts or thinks
+        self.add_channel(INNER_CHANNEL, "sense")           # inner events: the mind perceives its own not knowing
         S.end()
         # transient state (working state of the present moment; not knowledge)
         self.focus: List[Tuple[int, float, bool]] = []
@@ -173,6 +175,7 @@ class Mind:
         self.prov_of: Dict[int, int] = {}
         self.idle = 0
         self.babbled = 0
+        self.unknown = 0.0                           # L7: how much it did not know when the world last called on it
         self.imagined = 0
         self._gained: List[Tuple[torch.Tensor, torch.Tensor]] = []
         self.trust = self._trust()
@@ -271,6 +274,7 @@ class Mind:
         listening = self.knob["theta"] >= 1e8              # spoken to: it cannot speak now
         self.predicted = predictions(self, "own" if listening else None)   # step 3 (cheap while listening)
         acts = [] if listening else act_mod.decide(self)   # step 4: no decision to take while listening
+        self._unknowing(items, acts, listening)
         if cfg.imagine and not items:
             act_mod.imagine(self)
         if cfg.reflect and cfg.reliability and not items:
@@ -287,6 +291,34 @@ class Mind:
             previous.undo = None
         self.last_focus, self.last_gens = self.focus, self.gens
         return acts
+
+    def _unknowing(self, items, acts, listening: bool) -> None:
+        """L7: not knowing, felt. When the world has just done something (an outer event, such as the end of someone's
+        turn) and the mind, free to answer, decides nothing, the amount it does not know is kept:
+        u = 1 - 2 max(0, best - 1/2), best = the highest expectation of any act. If the next moment passes in silence
+        with nothing said, the mind perceives that state as an inner event of intensity u, alone in its moment, so
+        what one says (or does) then can be lived and learned like anything else. The measurement is innate; how
+        not knowing is expressed is not."""
+        if not self.ch.has(INNER_CHANNEL):
+            return
+        if listening:
+            if items:
+                self.unknown = 0.0
+            return
+        inner = self.ch.id(INNER_CHANNEL)
+        acted = any(self.ch.has(e.channel) and self.ch.kind(self.ch.id(e.channel)) == "act" for e in acts)
+        outer = any(int(self.S.u_channel[u]) != inner and self.ch.kind(int(self.S.u_channel[u])) == "sense"
+                    for u, _ in items)
+        if outer:
+            best = max((e for u, e in self.predicted.items()
+                        if int(self.S.u_channel[u]) >= 0 and self.ch.kind(int(self.S.u_channel[u])) == "act"),
+                       default=0.5)
+            self.unknown = 0.0 if acted else 1.0 - 2.0 * max(0.0, best - 0.5)
+        elif not items and not acted and getattr(self, "unknown", 0.0) > 0.0:
+            self.pending.append(Event(INNER_CHANNEL, NOT_KNOWING, SENSED, self.unknown))
+            self.unknown = 0.0
+        else:
+            self.unknown = 0.0
 
     def _surprise(self, percepts) -> float:
         """Mean (1 - e) of what occurred plus mean e of what was expected on a reporting channel and failed."""
@@ -476,7 +508,8 @@ class Mind:
 
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
-                  "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of")
+                  "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
+                  "unknown")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}
@@ -502,7 +535,8 @@ class Mind:
 
     def __getstate__(self):
         state = self.__dict__.copy()
-        state.pop("_facet_cache", None)                   # a cache, rebuilt on demand
+        state.pop("_facet_cache", None)                   # caches, rebuilt on demand
+        state.pop("_situation_cache", None)
         return state
 
     def clone(self) -> "Mind":
