@@ -82,3 +82,74 @@ def topic_of(session) -> str:
         if d > best_drive:
             best, best_drive = w, d
     return best
+
+
+def _unit(mind, channel_name: str, symbol: str) -> int:
+    cid = mind.ch.id(channel_name)
+    index = mind.ch.symbol_index(cid, symbol, create=False)
+    return mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
+
+
+def analogue(mind, unit: int, channel_name: str, tuples: int = 60) -> Tuple[int, float]:
+    """The concept most like ``unit`` by structure (structure mapping, a first form): in the lived sequences that
+    contain it, the other words at their places; a sequence of the same length with one of those words at the same
+    place and another unit at this unit's place makes that unit its counterpart (ateş evi ısıtır / güneş dünyayı
+    ısıtır: ateş <-> güneş). Each shared word counts by how telling it is (1 / how many sequences hold it there).
+    Returns (counterpart, strength) or (-1, 0)."""
+    from .store import PART
+    S = mind.S
+    cid = mind.ch.id(channel_name)
+    mine = sorted((int(S.t_src[t]) for t in S.inc.get((unit, PART), [])),
+                  key=lambda c: -float(S.u_use[c]))[:tuples]
+    score = {}
+    for container in mine:
+        parts = S.parts(container)
+        if unit not in parts:
+            continue
+        i = parts.index(unit)
+        for j, w in enumerate(parts):
+            if j == i or w == unit:
+                continue
+            holders = [t for t in S.inc.get((w, PART), []) if int(S.t_lag[t]) == j]
+            weight = 1.0 / max(1, len(holders))
+            for t in holders:
+                other_parts = S.parts(int(S.t_src[t]))
+                if len(other_parts) != len(parts):
+                    continue
+                y = other_parts[i]
+                if y != unit and int(S.u_kind[y]) & 1 and int(S.u_channel[y]) == cid and y not in parts:
+                    score[y] = score.get(y, 0.0) + weight
+    if not score:
+        return -1, 0.0
+    y = max(score, key=score.get)
+    return y, score[y]
+
+
+def imagine(session, topic: str, limit: int = 12) -> Tuple[List[str], List[str], float, str]:
+    """T8, a first form of imagination: think about X, find the concept Y most like X (analogue), carry X's thought
+    over to Y, and score that construction for reality step by step from all evidence except imagined (an ungrounded
+    leap scores low). The construction is lived inwardly (class imagined), so later evidence can judge it.
+    Returns (thought about X, construction about Y, reality of the construction, Y)."""
+    from .__main__ import CHANNEL, words
+    mind = session.mind
+    thought, _ = think(session, topic, limit)
+    symbols = words(topic)
+    if not symbols or not thought:
+        return thought, [], 0.0, ""
+    x = _unit(mind, CHANNEL, symbols[-1])
+    if x < 0:
+        return thought, [], 0.0, ""
+    y, strength = analogue(mind, x, CHANNEL)
+    if y < 0:
+        return thought, [], 0.0, ""
+    other = str(mind.symbol_of(y)[1])
+    construction, scores = [other], []
+    mind.step([Event(CHANNEL, other, IMAGINED)])
+    for w in thought:                                      # X's thought, said of Y, step by step
+        u = _unit(mind, CHANNEL, w)
+        scores.append(_reality(mind, u) if u >= 0 else 0.5)
+        mind.step([Event(CHANNEL, w, IMAGINED)])
+        construction.append(w)
+    mind.step([])
+    reality = sum(scores) / len(scores) if scores else 0.0
+    return thought, construction, reality, other

@@ -1,0 +1,11 @@
+Cevahir — 0 an yaşamış bir zihin. anlat, sor (?...), !konus, !neden, !unut, !kaydet, !cik
+  1 dosya, 5 cümle/diyalog, 32 an, 0 sn (1.6 ms/an)
+  1 dosya, 5 cümle/diyalog, 64 an, 0 sn (1.3 ms/an)
+  (iç ses, ateş): evi ısıtır ve yemek pişirir
+  (hayal: güneş da/de böyle mi?): güneş evi ısıtır ve yemek pişirir   [gerçeklik 0.57]
+  (iç ses, su): ateşi söndürür ve bitkileri sular
+  (hayal: yağmur da/de böyle mi?): yağmur ateşi söndürür ve bitkileri sular   [gerçeklik 0.60]
+  (iç ses, güneş): dünyayı ısıtır ve bitkileri büyütür
+  (hayal: yağmur da/de böyle mi?): yağmur dünyayı ısıtır ve bitkileri büyütür   [gerçeklik 0.58]
+  (iç ses, soba): odayı ısıtır ve bitkileri
+  (hayal: güneş da/de böyle mi?): güneş odayı ısıtır ve bitkileri   [gerçeklik 0.60]

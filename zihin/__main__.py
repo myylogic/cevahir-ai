@@ -649,8 +649,12 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     if not topic:
                         print("  düşünecek bir konu yok")
                     else:
-                        thought, reality = think(session, topic)
-                        print("  (iç ses, %s): %s   [gerçeklik %.2f]" % (topic, " ".join(thought) or "…", reality))
+                        from .dusunce import imagine
+                        thought, construction, reality, other = imagine(session, topic)
+                        print("  (iç ses, %s): %s" % (topic, " ".join(thought) or "…"))
+                        if construction:
+                            print("  (hayal: %s da/de böyle mi?): %s   [gerçeklik %.2f]" % (
+                                other, " ".join(construction), reality))
                 elif cmd in ("kim", "who"):
                     if rest.strip():
                         session.partner = lower_tr(rest.strip()).split()[0]

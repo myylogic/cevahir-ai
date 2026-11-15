@@ -287,6 +287,17 @@ F19. (2026-11-15) Choosing among alternatives. One act per channel per moment ma
    Vision test (t_vision.py, 3 kinds of drawing, 3 named images per kind, 10 new images per kind, 3 seeds): 73%, 83%,
    67% right (chance 33%); with resemblance off 0% in every seed. All earlier chat behaviours unchanged.
 
+F20. (2026-11-15) Imagination by structural analogy, scored for reality (T8, a first form). After thinking about X
+   (inner voice), the mind finds X's counterpart by structure mapping over its lived sequences: a sequence of the same
+   length that holds one of the other words of X's sequence at the same place gives the unit at X's place as a
+   counterpart (ateş evi ısıtır / güneş dünyayı ısıtır: ateş <-> güneş), each shared word counted by how telling it is.
+   X's thought is then carried over to the counterpart and every step is scored for reality from all evidence except
+   imagined and own acts; the construction is lived inwardly in the class imagined (later evidence judges it and so
+   the trust in its own constructions). results/fifth_imagination.txt: "ateş" -> "evi ısıtır ve yemek pişirir" (0.80);
+   counterpart güneş -> "güneş evi ısıtır ve yemek pişirir" (0.57); "su" -> yağmur: "yağmur ateşi söndürür ve bitkileri
+   sular" (0.60, never read, plausible). Limits: the reality score separates lived from constructed (0.80 vs about
+   0.6) but not yet a plausible construction from a weak leap; continuation after frequent words drifts by association.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit
