@@ -16,8 +16,12 @@ Commands (Turkish, with English aliases):
     !ogret <dosya>       / !teach   watch every line of a file: "soz<TAB>karsilik" dialogues or plain sentences
     !oku <dosya|klasor> [n] / !read watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
                                     .pdf with pypdf): sentences of documents as speech of others (imitated), at most n
-                                    of each. Paths: ~ is expanded, one pair of quotes removed, spaces allowed; text files
-                                    are read as UTF-8 (with or without a byte order mark), else as cp1254 (said so)
+                                    of each. Paths (here and in every command and option that takes one): ~ is
+                                    expanded, one pair of quotes removed, spaces allowed. Text files: a byte order mark
+                                    names the encoding (UTF-8, UTF-16 as Excel "Unicode Text", Notepad "Unicode" and
+                                    PowerShell 5.1 write, UTF-32); else UTF-8, a few invalid bytes replaced and counted,
+                                    or cp1254 when most non-ASCII bytes are not UTF-8 (said so); a file with NUL bytes
+                                    or many control characters is not text and is not read
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
     !kim <ad>            / !who     who is talking now (perceived at the start of every utterance)
     !gor <resim>         / !see     show an image with your next utterance (it is seen at its start), e.g.
@@ -59,13 +63,14 @@ mind never sees text, only symbols on the "text" channel; meaning is in the ties
 from __future__ import annotations
 
 import argparse
+import codecs
 import os
 import re
 import signal
 import sys
 import threading
 import time
-from typing import Dict, List
+from typing import Dict, List, NamedTuple
 
 from . import ACTED, IMITATED, SENSED, TOLD, Config, Event, Mind, read
 from .events import PROVENANCE
@@ -166,26 +171,94 @@ def path_and_cap(rest: str):
     return whole, 0
 
 
-def text_encoding(path: str) -> str:
-    """How a text file is read: "utf-8-sig" (UTF-8; a byte order mark is not read as a symbol) when the whole file
-    decodes as UTF-8, else "cp1254" (Turkish ANSI, as Excel and Notepad save on Turkish Windows). The file is decoded
-    block by block once before anything is lived, so a file is never half taught in one encoding."""
-    import codecs
-    decoder = codecs.getincrementaldecoder("utf-8-sig")()
-    try:
-        with open(path, "rb") as f:
-            for block in iter(lambda: f.read(1 << 20), b""):
-                decoder.decode(block)
-        decoder.decode(b"", final=True)
-    except UnicodeDecodeError:
-        return "cp1254"
-    return "utf-8-sig"
+class NotText(ValueError):
+    """A file that is not text (NUL bytes, or many control characters): nothing of it is read."""
+
+
+class TextFile(NamedTuple):
+    """How a text file is read: its codec, and how many invalid byte sequences were replaced by U+FFFD."""
+    encoding: str
+    replaced: int = 0
+
+
+BOMS = ((codecs.BOM_UTF32_LE, "utf-32"), (codecs.BOM_UTF32_BE, "utf-32"), (codecs.BOM_UTF8, "utf-8-sig"),
+        (codecs.BOM_UTF16_LE, "utf-16"), (codecs.BOM_UTF16_BE, "utf-16"))  # UTF-32 LE first: it begins like UTF-16 LE
+CONTROLS = re.compile("[\x00-\x08\x0e-\x1f\x7f-\x9f]")   # control characters other than tab, line and page breaks
+UNDECODED = re.compile("[\udc80-\udcff]")                # bytes a codec could not decode (errors="surrogateescape")
+ASCII = bytes(range(0x80))
+CONTROL_SHARE = 100     # a file is not text when more than one character in CONTROL_SHARE is a control character
+
+
+def text_encoding(path: str) -> TextFile:
+    """How a text file is read, decided from the whole file (block by block) before anything is lived, so a file is
+    never half taught in one encoding:
+
+    * a byte order mark names its codec: UTF-8, UTF-16 little or big endian (Excel "Unicode Text", Notepad
+      "Unicode", PowerShell 5.1 redirection) or UTF-32; the mark is not read as a symbol;
+    * a file with NUL bytes (NUL characters, when a mark names its codec) is not text, nor one where more than one
+      character in CONTROL_SHARE is a control character other than tab, line and page breaks: NotText;
+    * without a mark it is UTF-8, and its invalid byte sequences are replaced (U+FFFD) and counted, unless most of its
+      non-ASCII bytes are invalid UTF-8 and the whole file decodes as cp1254 (Turkish ANSI, as Excel and Notepad save
+      on Turkish Windows): then it is read as cp1254. One stray byte in a UTF-8 file is one replaced character, not a
+      whole file read in the wrong encoding."""
+    with open(path, "rb") as f:
+        head = f.read(4)
+        marked = next((codec for bom, codec in BOMS if head.startswith(bom)), None)
+        codec = marked or "utf-8"
+        f.seek(0)
+        kept = codecs.getincrementaldecoder(codec)("surrogateescape")    # each undecoded byte kept as one mark
+        replacing = codecs.getincrementaldecoder(codec)("replace")       # ... and as errors="replace" reads them
+        ansi = None if marked else codecs.getincrementaldecoder("cp1254")()
+        chars = controls = undecoded = replaced = non_ascii = 0
+        for block, final in _with_final(iter(lambda: f.read(1 << 20), b"")):
+            text = kept.decode(block, final)
+            if "\0" in text:
+                raise NotText("NUL baytları var" + ("" if marked else "; UTF-16 ise bayt sırası işaretiyle kaydedin"))
+            chars += len(text)
+            controls += len(CONTROLS.findall(text))
+            undecoded += len(UNDECODED.findall(text))
+            replaced += replacing.decode(block, final).count("�") - text.count("�")
+            if ansi is not None:
+                non_ascii += len(block.translate(None, ASCII))
+                try:
+                    ansi.decode(block, final)
+                except UnicodeDecodeError:
+                    ansi = None
+    if controls * CONTROL_SHARE > chars:
+        raise NotText("%d denetim karakteri var (%d karakterde birden çok)" % (controls, CONTROL_SHARE))
+    if undecoded and ansi is not None and 2 * undecoded > non_ascii:
+        return TextFile("cp1254")
+    return TextFile(codec, replaced)
+
+
+def _with_final(blocks):
+    """The blocks of a file, each with False, then an empty last block with True (the decoders' final call)."""
+    for block in blocks:
+        yield block, False
+    yield b"", True
 
 
 def open_text(path: str):
-    """A text file opened for reading in its encoding (text_encoding); returns (file, encoding)."""
-    encoding = text_encoding(path)
-    return open(path, encoding=encoding, errors="replace"), encoding
+    """A text file opened for reading in its encoding (text_encoding); returns (file, TextFile). NotText when it is
+    not text."""
+    found = text_encoding(path)
+    return open(path, encoding=found.encoding, errors="replace"), found
+
+
+def encoding_notes(found: Dict[str, TextFile]) -> List[str]:
+    """What the program says about how the text files it read were decoded (file name -> TextFile): files that were
+    not UTF-8, and the invalid UTF-8 sequences it replaced."""
+    notes = []
+    ansi = [name for name, f in found.items() if f.encoding == "cp1254"]
+    wide = ["%s (%s)" % (name, f.encoding.upper()) for name, f in found.items() if f.encoding in ("utf-16", "utf-32")]
+    repaired = ["%s (%d)" % (name, f.replaced) for name, f in found.items() if f.replaced]
+    if ansi:
+        notes.append("UTF-8 değil, cp1254 (Türkçe ANSI) olarak okundu: " + ", ".join(ansi[:10]))
+    if wide:
+        notes.append("bayt sırası işaretine göre okundu: " + ", ".join(wide[:10]))
+    if repaired:
+        notes.append("geçersiz UTF-8 dizileri � ile değiştirildi (kaç tane): " + ", ".join(repaired[:10]))
+    return notes
 
 
 ASK_KEYS = ("soru", "question", "input", "prompt", "söz", "soz")
@@ -220,15 +293,15 @@ CODE = (".py", ".js", ".ts", ".java", ".c", ".h", ".cpp", ".cs", ".go", ".rs", "
 
 def read_document(path: str, encodings: list = None) -> str:
     """Plain text of a document. .docx needs python-docx, .pdf needs pypdf (only if such files are present). Text
-    files are read as UTF-8, else as cp1254 (text_encoding); the encoding a text file was read with is appended to
-    ``encodings`` when given."""
+    files are decoded as text_encoding decides (NotText when they are not text); how a text file was decoded (a
+    TextFile) is appended to ``encodings`` when given."""
     low = path.lower()
     if low.endswith((".txt", ".md", ".tsv", ".csv") + CODE):
-        f, encoding = open_text(path)
+        f, found = open_text(path)
         with f:
             text = f.read()
         if encodings is not None:
-            encodings.append(encoding)
+            encodings.append(found)
         return text
     if low.endswith(".docx"):
         import docx  # python-docx
@@ -653,18 +726,16 @@ class Session:
         files = [path] if os.path.isfile(path) else sorted(
             os.path.join(root, name) for root, _, names in os.walk(path) for name in names)
         start, lived, skipped, t0 = time.time(), 0, [], self.mind.t
-        recoded = []                                     # files that are not UTF-8, read as cp1254
+        found: Dict[str, TextFile] = {}                  # how each text file was decoded (encoding_notes)
         for name in files:
             first_moment, said = self.mind.t + 1, []
             try:
                 try:
                     if name.lower().endswith(".json"):
                         import json
-                        f, encoding = open_text(name)
+                        f, found[os.path.basename(name)] = open_text(name)
                         with f:
                             pairs = dialogues_of(json.load(f))
-                        if encoding == "cp1254":
-                            recoded.append(os.path.basename(name))
                         for first, answer in pairs[:cap] if cap else pairs:
                             self.watch(first, answer)
                             said += [first, answer]
@@ -673,9 +744,7 @@ class Session:
                             skipped.append(os.path.basename(name))
                         continue
                     if name.lower().endswith(".tsv"):
-                        f, encoding = open_text(name)
-                        if encoding == "cp1254":
-                            recoded.append(os.path.basename(name))
+                        f, found[os.path.basename(name)] = open_text(name)
                         with f:
                             watched = 0
                             for raw in f:
@@ -690,8 +759,11 @@ class Session:
                         continue
                     encodings = []
                     text = read_document(name, encodings)
-                    if "cp1254" in encodings:
-                        recoded.append(os.path.basename(name))
+                    if encodings:
+                        found[os.path.basename(name)] = encodings[0]
+                except NotText as exc:
+                    skipped.append("%s (metin dosyası değil: %s)" % (os.path.basename(name), exc))
+                    continue
                 except Exception as exc:
                     skipped.append("%s (%s)" % (os.path.basename(name), exc))
                     continue
@@ -716,8 +788,8 @@ class Session:
             len(files) - len(skipped), lived, self.mind.t, took, 1000 * took / max(1, self.mind.t - t0))
         if skipped:
             out += "\n  okunamayan: " + ", ".join(skipped[:10])
-        if recoded:
-            out += "\n  UTF-8 değil, cp1254 (Türkçe ANSI) olarak okundu: " + ", ".join(recoded[:10])
+        for note in encoding_notes({name: f for name, f in found.items() if name not in skipped}):
+            out += "\n  " + note
         return out
 
     def teach(self, path: str) -> str:
@@ -727,7 +799,10 @@ class Session:
             return "  böyle bir dosya yok: %s" % path
         if os.path.isdir(path):
             return "  bu bir klasör: %s (klasörler !oku ile okunur)" % path
-        f, encoding = open_text(path)
+        try:
+            f, found = open_text(path)
+        except NotText as exc:
+            return "  okunmadı: %s metin dosyası değil (%s)" % (os.path.basename(path), exc)
         first_moment, said, n = self.mind.t + 1, [], 0
         try:
             with f:
@@ -748,8 +823,8 @@ class Session:
             if moments:
                 self.remember("[öğretti] %s" % os.path.basename(path), moments, said)
         out = "  %d satır izlendi, %d an" % (n, self.mind.t)
-        if encoding == "cp1254":
-            out += "\n  UTF-8 değil, cp1254 (Türkçe ANSI) olarak okundu: %s" % os.path.basename(path)
+        for note in encoding_notes({os.path.basename(path): found}):
+            out += "\n  " + note
         return out
 
     def observe(self, first: str, answer: str) -> None:

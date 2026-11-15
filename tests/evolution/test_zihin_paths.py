@@ -8,6 +8,12 @@ What is pinned here
 * A path that does not exist is said so (no "0 dosya"), and nothing is lived.
 * A UTF-8 file with a byte order mark is read without a symbol for the mark; a file that is not UTF-8 is read as
   cp1254 (Turkish ANSI, as Excel saves it) and the program says so. Both teach exactly what the UTF-8 file teaches.
+* A byte order mark names the encoding: UTF-16 little and big endian (Excel "Unicode Text", Notepad "Unicode",
+  PowerShell 5.1 redirection, with CRLF lines) and UTF-32 teach exactly what the UTF-8 file teaches.
+* One stray byte in a UTF-8 file is one replaced character (said, with how many), not the whole file in cp1254;
+  cp1254 is used only when most non-ASCII bytes are invalid UTF-8 and the file decodes cleanly as cp1254.
+* A file with NUL bytes (a binary file named .txt, UTF-16 without a mark) or with many control characters is not
+  text: it is refused with the reason and nothing of it is lived; the other files of a folder are read.
 * Every path is cleaned the same way: !kaydet, !tasinabilir, !yukle, !gor, !dinle, --load and --kayit take ~, one
   pair of quotes and spaces like !oku and !ogret; a save or load with no path asks for one.
 """
@@ -136,3 +142,62 @@ def test_a_bom_or_a_cp1254_file_teaches_what_the_utf8_file_teaches(tmp_path, cap
         assert s.mind.unit_of(CHANNEL, "nasılsın") >= 0 and s.mind.unit_of(CHANNEL, "şehridir") >= 0
     assert digests["utf8"] == digests["bom"] == digests["ansi"]
     assert "cp1254" in outs["ansi"] and "cp1254" not in outs["utf8"] + outs["bom"]
+
+
+def alphabet(s) -> set:
+    cid = s.mind.ch.id(CHANNEL)
+    return {s.mind.ch.symbol(cid, i) for i in range(s.mind.ch.sizes()[cid])}
+
+
+@pytest.mark.parametrize("command", ["!oku", "!ogret"])
+def test_a_byte_order_mark_names_the_encoding(tmp_path, capsys, command):
+    import codecs
+    windows = DIALOGUES.replace("\n", "\r\n")
+    files = {"utf8": DIALOGUES.encode("utf-8"),
+             "utf16le": codecs.BOM_UTF16_LE + windows.encode("utf-16-le"),     # Excel, Notepad, PowerShell 5.1
+             "utf16be": codecs.BOM_UTF16_BE + DIALOGUES.encode("utf-16-be"),
+             "utf32": codecs.BOM_UTF32_LE + DIALOGUES.encode("utf-32-le")}
+    digests = {}
+    for name, raw in files.items():
+        (tmp_path / ("%s.tsv" % name)).write_bytes(raw)
+        s = session()
+        out = run(s, "%s %s" % (command, tmp_path / ("%s.tsv" % name)), capsys)
+        assert "4 " in out and "cp1254" not in out and "geçersiz" not in out
+        assert ("UTF-16" in out) == name.startswith("utf16") and ("UTF-32" in out) == (name == "utf32")
+        digests[name] = s.mind.S.digest()
+    assert len(set(digests.values())) == 1
+
+
+@pytest.mark.parametrize("command", ["!oku", "!ogret"])
+def test_a_stray_byte_is_one_replaced_character_not_a_file_in_cp1254(tmp_path, capsys, command):
+    clean, stray = session(), session()
+    (tmp_path / "temiz.tsv").write_text(DIALOGUES, encoding="utf-8")
+    (tmp_path / "bozuk.tsv").write_bytes(DIALOGUES.encode("utf-8").replace(b"Merhaba!", b"Merhaba\xfe!", 1))
+    run(clean, "%s %s" % (command, tmp_path / "temiz.tsv"), capsys)
+    out = run(stray, "%s %s" % (command, tmp_path / "bozuk.tsv"), capsys)
+    assert "cp1254" not in out and "geçersiz UTF-8" in out and "bozuk.tsv (1)" in out
+    assert alphabet(stray) - alphabet(clean) == {"\ufffd"} and alphabet(clean) <= alphabet(stray)
+    (tmp_path / "karisik.tsv").write_bytes(DIALOGUES.encode("cp1254") + b"\x81\n")   # not clean cp1254 either
+    out = run(session(), "%s %s" % (command, tmp_path / "karisik.tsv"), capsys)
+    assert "cp1254" not in out and "geçersiz UTF-8" in out
+
+
+def test_a_file_that_is_not_text_is_refused_and_nothing_of_it_is_lived(tmp_path, capsys):
+    import codecs
+    (tmp_path / "resim.txt").write_bytes(b"\x89PNG\r\n\x1a\n" + bytes(range(256)) * 8)
+    (tmp_path / "isaretsiz.tsv").write_bytes(DIALOGUES.encode("utf-16-le"))         # UTF-16 without its mark
+    (tmp_path / "renkli.txt").write_text("\x1b[31mHATA\x1b[0m bir satır\n" * 20, encoding="utf-8")
+    for name in ("resim.txt", "isaretsiz.tsv", "renkli.txt"):
+        for command in ("!oku", "!ogret"):
+            s = session()
+            out = run(s, "%s %s" % (command, tmp_path / name), capsys)
+            assert "metin dosyası değil" in out and ("NUL" in out or "denetim karakteri" in out)
+            assert s.mind.t == 0 and s.history == []
+    folder = tmp_path / "karisik"
+    folder.mkdir()
+    (folder / "resim.txt").write_bytes((tmp_path / "resim.txt").read_bytes())
+    (folder / "hayvanlar.txt").write_text(ANIMALS, encoding="utf-8")
+    s = session()
+    out = run(s, "!oku %s" % folder, capsys)
+    assert out.startswith("  1 dosya, 3 cümle") and "resim.txt (metin dosyası değil: NUL" in out
+    assert [text for _, text, _ in s.history] == ["[okudu] hayvanlar.txt"]
