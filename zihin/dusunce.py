@@ -8,8 +8,11 @@ word given the present inner context, read from all evidence EXCEPT what was ima
 supports it or not). The thought is learned like any experience, in the class "imagined", so trust in its own
 constructions is learned when sensed or told evidence later lands on the same ties (learn.judge).
 
-A life clock (session) lets the mind think while nobody talks to it, and lets it speak first when a thought it had is
-real enough and the silence has lasted; it never speaks into someone else's turn.
+A dream is a chain of such thoughts: no word is put into the mind's inner voice but the topic, and no reasoning form
+is coded (the analogy that replayed a thought about X on its counterpart Y and the inference by a shared root are
+gone); what the inner voice reasons with is what the core reads with, the mind's own generalisations. Every topic is
+chosen by one measure of the mind's evidence (topic_score). The online life's clock lets the mind think while nobody
+talks to it (an innate rhythm, see Life in __main__); a thought is never said for it.
 """
 from __future__ import annotations
 
@@ -39,19 +42,21 @@ def _words(session, text: str) -> List[str]:
     return adapter(text)
 
 
-def think(session, topic: str, limit: int = 15) -> Tuple[List[str], float]:
+def think(session, topic: str, limit: int = 15, before: List[Event] = ()) -> Tuple[List[str], float]:
     """Think about ``topic`` inwardly. Returns the inner words and the reality score R (mean over steps).
 
     The topic is brought to mind (imagined, not heard): a topic of several words is taken in word by word, the mind
-    deciding nothing until its last word, as it takes in what it hears. From then on the inner voice is the mind's own
-    decisions, each lived as imagined (go_on): it ends when the mind decides nothing, or when it comes round to a
-    composed context this episode already lived; ``limit`` words are only a safety cap."""
+    deciding nothing until its last word, as it takes in what it hears; ``before``: what comes to mind in a moment
+    before the topic, taken in the same way (a dream sees again what it saw with the word, then the word). From then on
+    the inner voice is the mind's own decisions, each lived as imagined (go_on): it ends when the mind decides nothing,
+    or when it comes round to a composed context this episode already lived; ``limit`` words are only a safety cap."""
     from .__main__ import CHANNEL
     mind = session.mind
     symbols = _words(session, topic)
     if not symbols:
         return [], 0.0
-    acts = take_in(mind, [[Event(CHANNEL, symbol, IMAGINED)] for symbol in symbols])   # the topic is brought to mind
+    moments = ([list(before)] if before else []) + [[Event(CHANNEL, symbol, IMAGINED)] for symbol in symbols]
+    acts = take_in(mind, moments)                          # the topic is brought to mind
     thought, scores = [], []
 
     def heard(words_: List[str]) -> None:                  # each word as it is decided, before its echo comes back
@@ -173,71 +178,6 @@ def _unit(mind, channel_name: str, symbol: str) -> int:
     cid = mind.ch.id(channel_name)
     index = mind.ch.symbol_index(cid, symbol, create=False)
     return mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
-
-
-def analogue(mind, unit: int, channel_name: str, tuples: int = 60) -> Tuple[int, float]:
-    """The concept most like ``unit`` by structure (structure mapping, a first form): in the lived sequences that
-    contain it, the other words at their places; a sequence of the same length with one of those words at the same
-    place and another unit at this unit's place makes that unit its counterpart (ateş evi ısıtır / güneş dünyayı
-    ısıtır: ateş <-> güneş). Each shared word counts by how telling it is (1 / how many sequences hold it there).
-    Returns (counterpart, strength) or (-1, 0)."""
-    from .store import PART
-    S = mind.S
-    cid = mind.ch.id(channel_name)
-    mine = sorted((int(S.t_src[t]) for t in S.inc.get((unit, PART), [])),
-                  key=lambda c: -float(S.u_use[c]))[:tuples]
-    score = {}
-    for container in mine:
-        parts = S.parts(container)
-        if unit not in parts:
-            continue
-        i = parts.index(unit)
-        for j, w in enumerate(parts):
-            if j == i or w == unit:
-                continue
-            holders = [t for t in S.inc.get((w, PART), []) if int(S.t_lag[t]) == j]
-            weight = 1.0 / max(1, len(holders))
-            for t in holders:
-                other_parts = S.parts(int(S.t_src[t]))
-                if len(other_parts) != len(parts):
-                    continue
-                y = other_parts[i]
-                if y != unit and int(S.u_kind[y]) & 1 and int(S.u_channel[y]) == cid and y not in parts:
-                    score[y] = score.get(y, 0.0) + weight
-    if not score:
-        return -1, 0.0
-    y = max(score, key=score.get)
-    return y, score[y]
-
-
-def imagine(session, topic: str, limit: int = 12) -> Tuple[List[str], List[str], float, str]:
-    """T8, a first form of imagination: think about X, find the concept Y most like X (analogue), carry X's thought
-    over to Y, and score that construction for reality step by step from all evidence except imagined (an ungrounded
-    leap scores low). The construction is lived inwardly (class imagined), so later evidence can judge it.
-    Returns (thought about X, construction about Y, reality of the construction, Y)."""
-    from .__main__ import CHANNEL
-    mind = session.mind
-    thought, _ = think(session, topic, limit)
-    symbols = _words(session, topic)
-    if not symbols or not thought:
-        return thought, [], 0.0, ""
-    x = _unit(mind, CHANNEL, symbols[-1])
-    if x < 0:
-        return thought, [], 0.0, ""
-    y, strength = analogue(mind, x, CHANNEL)
-    if y < 0:
-        return thought, [], 0.0, ""
-    other = str(mind.symbol_of(y)[1])
-    construction, scores = [other], []
-    mind.step([Event(CHANNEL, other, IMAGINED)])
-    for w in thought:                                      # X's thought, said of Y, step by step
-        u = _unit(mind, CHANNEL, w)
-        scores.append(_reality(mind, u) if u >= 0 else 0.5)
-        mind.step([Event(CHANNEL, w, IMAGINED)])
-        construction.append(w)
-    mind.step([])
-    reality = sum(scores) / len(scores) if scores else 0.0
-    return thought, construction, reality, other
 
 
 def sort_dreams(mind) -> Dict[str, float]:
@@ -383,37 +323,34 @@ def seen_with(mind, word: str, limit: int = 1) -> List[str]:
     return [str(mind.symbol_of(u)[1]) for u in best if found[u] > 0.0]
 
 
-def dream(session, topic: str, links: int = 3) -> List[dict]:
-    """One dream: a chain of imaginings, each carried on from the word of the last one the mind is least sure of
-    (free association). In each, what the mind has seen with the dreamt word is seen again (the image re-lived as
-    imagined), and the imagining is kept with its claims (remember_dream). Returns the dream's records."""
+DREAM_CAP = 12        # imaginings in one dream at most: only a safety cap (a dream ends when the mind's race falls silent)
+
+
+def dream(session, topic: str, cap: int = DREAM_CAP) -> List[dict]:
+    """One dream: a chain of imaginings, each the mind's own inner voice about a topic (think: what it decides, lived as
+    imagined; only the topic is brought to mind), after what it saw with that word is seen again (the image re-lived
+    as imagined, the moment before the word, as it was lived). The next topic is the best topic (topic_score) of what
+    this imagining said that the dream has not dreamt of yet. The chain ends when the mind's race falls silent (it
+    thinks nothing after the topic), when no topic is left, or at the safety cap. Each imagining is kept with its
+    claims (remember_dream). Returns the dream's records."""
     from .__main__ import CHANNEL
     from .gorme import EYE
     mind = session.mind
     check = getattr(session, "check", None)              # a dream stops between its imaginings when asked (Ctrl+C)
     records, visited = [], set()
-    for _ in range(links):
-        if not topic or topic in visited:
-            break
+    while topic and topic not in visited and len(records) < cap:
         if check is not None:
             check()
         visited.add(topic)
         seen = seen_with(mind, topic)
-        for gist in seen:                                  # it sees in its dream what it saw with this word, as it
-            mind.step([Event(EYE, gist, IMAGINED)])        # saw it: the image first, then the word comes to mind
-        kind = "benzetme"                                  # analogy: a thought carried to a counterpart
-        thought, construction, reality, other = imagine(session, topic)
-        if construction:
-            record = remember_dream(mind, topic, other, construction, round(reality, 2))
-        elif thought:
-            kind = "düşünce"
-            record = remember_dream(mind, topic, "", [topic] + thought, None)
-        else:
+        thought, reality = think(session, topic, before=[Event(EYE, gist, IMAGINED) for gist in seen])
+        if not thought:                                    # its race fell silent: the dream ends
             break
-        record["kind"] = kind
+        record = remember_dream(mind, topic, "", [topic] + thought, round(reality, 2))
+        record["kind"] = "düşünce"
         record["seen"] = seen
         records.append(record)
-        topic = topic_of(session, " ".join(record["words"][1:]))   # the best topic this imagining leaves
+        topic = topic_of(session, " ".join(w for w in thought if w not in visited))
     return records
 
 

@@ -12,13 +12,19 @@ What is pinned here
   once (a second sorting with nothing newly imagined changes nothing), and deletes nothing.
 * A night keeps its dreams in the mind, counts itself, and reports an earlier dream once when life has judged it;
   the dreams survive saving and loading.
-* No word is related to another by a shared root: the inference by hand-made Turkish morphology is gone from dreams.
+* A dream is a chain of the mind's own inner voice: only the topic is brought to mind, every other word is what the
+  mind decided (lived as imagined); the next topic is the best topic of what it thought, and the chain ends when the
+  mind's race falls silent (a count of 3 links decided it before; the cap is only a safety limit). What it saw with a
+  word is seen again, alone in its moment and taken in without a decision, then the word.
+* No word is related to another by a shared root: the inference by hand-made Turkish morphology is gone from dreams,
+  and so is the analogy that replayed a thought about X on its structural counterpart (both wrote words into the
+  mind's inner voice and discarded what it decided meanwhile).
 """
 from __future__ import annotations
 
 import torch
 
-from zihin import IMAGINED, TOLD, Config, Event, Mind
+from zihin import ACTED, IMAGINED, TOLD, Config, Event, Mind
 from zihin.__main__ import CHANNEL, Session, words
 from zihin.dusunce import remember_dream, sleep, sort_dreams, verdict
 from zihin.store import W_NEG, W_POS
@@ -119,12 +125,47 @@ def test_a_dream_is_a_chain_and_sees_what_was_seen_with_its_words(tmp_path):
         session.live("güneş evi ısıtır .", TOLD)
     gist = features(str(picture))[0]
     assert seen_with(session.mind, "güneş") == [gist]
-    chain = dream_chain(session, "güneş")
+    chain, seen = moments(session, lambda: dream_chain(session, "güneş"))
     assert chain and chain[0]["seen"] == [gist]
+    first = next(i for i, events in enumerate(seen) if any(e.channel == EYE for e in events))
+    assert seen[first] == [Event(EYE, gist, IMAGINED)]            # the image first, alone in its moment ...
+    assert [(e.symbol, e.prov) for e in seen[first + 1] if e.channel == CHANNEL] == [("güneş", IMAGINED)]   # then
+    assert not [e for events in seen for e in events if e.channel == CHANNEL and e.prov == ACTED]   # the word
     eye = session.mind.ch.id(EYE)
     unit = session.mind.S.atom_index[(eye, session.mind.ch.symbol_index(eye, gist, create=False))]
     assert float(session.mind.S.t_w[W_POS, :session.mind.S.n_ties, IMAGINED].sum()) > 0.0
     assert unit >= 0
+
+
+def moments(session, run):
+    """(what ``run`` returned, the events each moment perceived: what was pending from the last moment (feelings left
+    out), then the new events)."""
+    mind, seen, step = session.mind, [], session.mind.step
+
+    def recorded(events=()):
+        seen.append([e for e in list(mind.pending) + list(events) if e.channel != "feel"])
+        return step(events)
+    mind.step = recorded
+    try:
+        out = run()
+    finally:
+        mind.step = step
+    return out, seen
+
+
+def test_a_dream_is_the_minds_own_inner_voice_and_ends_when_its_race_falls_silent():
+    from zihin.dusunce import DREAM_CAP, dream as dream_chain, think, topic_of
+    session = new_session()
+    chain, seen = moments(session, lambda: dream_chain(session, "güneş"))
+    assert 1 <= len(chain) < DREAM_CAP                   # ended by the mind, not by a count
+    imagined = [str(e.symbol) for events in seen for e in events if e.channel == CHANNEL and e.prov == IMAGINED]
+    assert imagined == [w for d in chain for w in d["words"]]   # the topic brought to mind, then what it decided
+    assert not [e for events in seen for e in events if e.channel == CHANNEL and e.prov != IMAGINED]
+    assert all(len([e for e in events if e.channel == CHANNEL]) <= 1 for events in seen)
+    dreamt = {d["about"] for d in chain}
+    following = topic_of(session, " ".join(w for w in chain[-1]["words"][1:] if w not in dreamt))
+    assert not following or not think(session, following)[0]    # what would come next: nothing, or a silent race
+    assert len(dream_chain(session, "güneş", cap=1)) == 1        # the cap is only a safety limit
 
 
 def test_no_word_is_related_to_another_by_a_shared_root():
