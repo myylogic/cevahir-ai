@@ -17,6 +17,10 @@ Commands (Turkish, with English aliases):
     !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
                                     reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
     !kendini_tani [n]    / !self    lessons about itself (true things told to it), n times
+    !uyu [n]             / !sleep   sleep: n dreams (imagination about the last topic and what it is unsure of), then
+                                    sorting: its imaginings weighed against what is real (trust in its imagination
+                                    follows), and which earlier dreams life has since shown true or false
+                                    (it also sleeps by itself after 10 minutes of silence)
     !kendin              / !introspect  what it can say about itself from its own evidence (its self unit)
     !arastir <konu>      / !research  on your command: search the web (Google Custom Search if GOOGLE_API_KEY and
                                     GOOGLE_CSE_ID are set, otherwise Wikipedia) and read what is found (pages printed)
@@ -434,26 +438,47 @@ class Session:
         return "  böyle bir numara yok"
 
 
+def night_report(night) -> List[str]:
+    """What the mind can tell of a night: its dreams, which earlier dreams reality has judged, its trust in its
+    imagination before and after."""
+    lines = []
+    for d in night["dreams"]:
+        if d["other"]:
+            lines.append("  rüyamda (%s yerine %s): %s   [gerçeklik %.2f]" % (d["about"], d["other"], " ".join(d["words"]),
+                                                                        d["reality"]))
+        else:
+            lines.append("  rüyamda: %s" % " ".join(d["words"]))
+    for v, d in night["judged"]:
+        lines.append("  %s: %s" % ("doğru çıktı" if v == "dogru" else "yanlış çıktı", " ".join(d["words"])))
+    srt = night["sorting"]
+    lines.append("  uyandım. hayal ettiklerimden gerçek kanıtla örtüşen %.1f, çelişen %.1f, sınanmamış %d; kendi "
+                 "hayallerime güvenim %.2f -> %.2f" % (srt["true"], srt["false"], int(srt["open"]), srt["trust_before"],
+                                                       srt["trust"]))
+    return lines
+
+
 class LifeClock:
     """The mind lives while nobody types: after a short silence it thinks about the last topic (inner voice, kept as
     imagined); after a longer silence, if that thought was real enough, it says it (it speaks first), once per
     silence. It never speaks into someone's turn; a lock keeps the clock and the conversation from living at once."""
 
     def __init__(self, session, lock, think_after: float = 20.0, speak_after: float = 60.0,
-                 real_enough: float = 0.75) -> None:
+                 real_enough: float = 0.75, sleep_after: float = 600.0) -> None:
         import threading
         import time
         self.session, self.lock = session, lock
         self.think_after, self.speak_after, self.real_enough = think_after, speak_after, real_enough
+        self.sleep_after = sleep_after
         self.last_input = time.time()
         self.thought = None                 # (topic, words, reality) of this silence
         self.spoke = False
+        self.slept = False
         self.stop = threading.Event()
         self.thread = threading.Thread(target=self._run, daemon=True)
 
     def heard(self) -> None:
         import time
-        self.last_input, self.thought, self.spoke = time.time(), None, False
+        self.last_input, self.thought, self.spoke, self.slept = time.time(), None, False, False
 
     def start(self) -> None:
         self.thread.start()
@@ -480,6 +505,12 @@ class LifeClock:
                     self.session.mind.step([])
                     self.spoke = True
                 print("\n  zihin (kendiliğinden): %s %s\n> " % (topic, " ".join(words_)), end="", flush=True)
+            if not self.slept and self.sleep_after and quiet >= self.sleep_after:
+                from .dusunce import sleep as dream_sleep
+                with self.lock:                             # a long silence: it sleeps, dreams and sorts its dreams
+                    night = dream_sleep(self.session)
+                    self.slept = True
+                print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night)), end="", flush=True)
 
 
 def home_mind() -> str:
@@ -694,6 +725,9 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     if rest.strip():
                         session.partner = lower_tr(rest.strip()).split()[0]
                     print("  konuşan: %s" % session.partner)
+                elif cmd in ("uyu", "sleep"):
+                    from .dusunce import sleep as dream_sleep
+                    print("\n".join(night_report(dream_sleep(session, int(rest) if rest.strip().isdigit() else 5))))
                 elif cmd in ("kendin", "introspect"):
                     from .kendilik import self_report
                     print(self_report(session.mind, CHANNEL))

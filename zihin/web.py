@@ -232,9 +232,9 @@ def wanted_topics(mind, channel: str, n: int, skip_frequent: int = 100) -> List[
     cid = mind.ch.id(channel)
     atoms = [u for u in range(S.n_units) if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid]
     by_use = sorted(atoms, key=lambda u: -float(S.u_use[u]))
-    frequent = set(by_use[:skip_frequent])
+    skip = min(skip_frequent, len(by_use) // 5)            # a young mind knows few words: skip a fifth of them
     scored = []
-    for u in by_use[skip_frequent:skip_frequent + 3000]:
+    for u in by_use[skip:skip + 3000]:
         word = str(mind.ch.symbol(cid, int(S.u_symbol[u])))
         if len(word) >= 4 and word.isalpha():
             scored.append((drive_of(mind, u), word))
