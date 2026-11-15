@@ -50,6 +50,16 @@ assert array(IDS).itemsize == 4
 ID_LIMIT = (1 << 31) - 1     # the first tie id that would not fit
 
 
+GROW_MIN = 1024              # rows added at least when an array grows
+
+
+def _growth(capacity: int) -> int:
+    """How many rows an array grows by when full: an eighth of its capacity (at least GROW_MIN). Doubling left up
+    to half of every array empty and doubled a loaded mind's tie arrays at its first new tie; an eighth keeps the
+    spare room small while each row is still copied only a bounded number of times on average."""
+    return max(GROW_MIN, capacity >> 3)
+
+
 def frame_key(where, masked: Tuple[int, ...]) -> bytes:
     """One bytes object for a slot key (the slot's positions, the tuple with -1 there): the key of frame_first and
     frame_of, a fraction of the memory of a nested tuple of Python ints. The positions become a bit mask (a single
@@ -712,7 +722,7 @@ class Substance:
         return out
 
     def _grow_units(self) -> None:
-        extra = self._cu
+        extra = _growth(self._cu)
         for name in ("u_kind", "u_arity", "u_birth", "u_use", "u_alive"):
             setattr(self, name, self._grown(getattr(self, name), extra))
         self.u_channel = self._grown(self.u_channel, extra, -1)
@@ -721,7 +731,7 @@ class Substance:
         self._npv = None
 
     def _grow_ties(self) -> None:
-        extra = self._ct
+        extra = _growth(self._ct)
         for name in self._TIE_ARRAYS:
             setattr(self, name, self._grown(getattr(self, name), extra))
         self.t_ev = self._grown(self.t_ev, extra, dim=1)
@@ -729,7 +739,7 @@ class Substance:
         self._npv = None
 
     def _grow_rows(self) -> None:
-        extra = self._cr
+        extra = _growth(self._cr)
         for name in self._ROW_ARRAYS:
             setattr(self, name, self._grown(getattr(self, name), extra))
         self.ex = self._grown(self.ex, extra, dim=1)
