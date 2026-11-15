@@ -14,6 +14,8 @@ Commands (Turkish, with English aliases):
     !kim <ad>            / !who     who is talking now (perceived at the start of every utterance)
     !gor <resim>         / !see     show an image with your next utterance (it is seen at its start), e.g.
                                     !gor ben.jpg  then  "ben buyum"; later  !gor baska.jpg  then  "bu kim"
+    !dinle <ses.wav>     / !hear    play a sound with your next utterance (it is heard at its start), e.g.
+                                    !dinle ben.wav  then  "bu benim sesim"; later  !dinle baska.wav  then  "bu kim"
     !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
                                     reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
     !kendini_tani [n]    / !self    lessons about itself (true things told to it), n times
@@ -151,6 +153,7 @@ FACETS = "parca"
 TURN, TURN_END = "sira", "⏎"
 PERSON, SOMEONE = "kisi", "biri"
 from .gorme import EYE, LOOK
+from .isitme import EAR, SOUND
 TONE = "ton"                          # how an utterance ends (? ! .) is perceived with its end, like intonation
 FINAL = (".", "?", "!", "…")     # who is speaking is perceived (like a face or a voice); "biri" = someone unknown          # the end of someone's utterance (Enter) is perceived, like a pause in speech
 VALUE = "deger"
@@ -175,11 +178,14 @@ class Session:
             mind.add_channel(name, "context")
         mind.add_channel(EYE, "sense")          # a seen thing is present in the episode, its aspects are facets
         mind.add_channel(LOOK, "facet")
+        mind.add_channel(EAR, "sense")          # a heard thing likewise
+        mind.add_channel(SOUND, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
         self.curious = True                     # the curiosity reflex (T4) is on in conversation
         from .mind import SELF_CHANNEL
         if not mind.ch.has(SELF_CHANNEL):       # minds born before the self unit existed get it now
             mind.add_channel(SELF_CHANNEL, "context")
+        self.hearing = None                     # a sound heard with the next utterance: (gist, facets)
         self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
         self.open_turn = False                # the mind has just answered; feedback may still come
 
@@ -208,10 +214,16 @@ class Session:
         theta = self.mind.knob["theta"]
         self.mind.knob["theta"] = 1e9
         try:
-            if self.view is not None:                       # the image shown with this utterance is seen first
-                gist, facets = self.view
-                self.view = None
-                self.mind.step([Event(EYE, gist, SENSED)] + [Event(LOOK, f, SENSED) for f in facets])
+            if self.view is not None or self.hearing is not None:   # what is shown and heard with this utterance
+                sensed = []                                         # comes first, both in the same moment
+                if self.view is not None:
+                    gist, facets = self.view
+                    sensed += [Event(EYE, gist, SENSED)] + [Event(LOOK, f, SENSED) for f in facets]
+                if self.hearing is not None:
+                    gist, facets = self.hearing
+                    sensed += [Event(EAR, gist, SENSED)] + [Event(SOUND, f, SENSED) for f in facets]
+                self.view = self.hearing = None
+                self.mind.step(sensed)
             for symbol in self.body(text):
                 self.mind.step(self.events(symbol, prov, speaker))
         finally:
@@ -709,6 +721,11 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     gist, facets = features(rest.strip())
                     session.view = (gist, facets)
                     print("  görüyorum (%d yön); bir sonraki sözün bu resimle birlikte algılanacak" % len(facets))
+                elif cmd in ("dinle", "hear"):
+                    from .isitme import features as hearing
+                    gist, facets = hearing(rest.strip())
+                    session.hearing = (gist, facets)
+                    print("  duyuyorum (%d yön); bir sonraki sözün bu sesle birlikte algılanacak" % len(facets))
                 elif cmd in ("dusun", "düşün", "think"):
                     from .dusunce import think, topic_of
                     topic = rest.strip() or topic_of(session)
