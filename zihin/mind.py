@@ -34,6 +34,7 @@ from .read import conflict_of, predictions, total_drive
 from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS, Substance
 
 FEELINGS = ("surprise", "relief", "load", "conflict")
+SELF_CHANNEL, SELF_SYMBOL = "benlik", "ben"
 
 
 @dataclass
@@ -66,6 +67,10 @@ class Config:
     proven_only: bool = False       # F10b: only generalisations with reliability > 1/2 speak (measured worse)
     next_only_present: bool = False # F13: EXPECT lag 1 is learned only by the previous context and the previous
                                     # item, not by older units still carried in the focus (no skip-gram smear)
+    race: bool = False              # F19: the acts of one channel race on their advantage over the strongest rival
+    resemblance: bool = False       # F18: a new item joins the categories of what it resembles (shared facets), and
+                                    # members that resemble the item read speak louder
+    backoff: bool = False           # F16: an utterance under way continues along the lived sequences of its end
     bind_repeats: bool = False      # F12: a unit occurring at several positions of a tuple is one slot (variable)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
     evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
@@ -147,6 +152,7 @@ class Mind:
             S.add1(W_POS, SENSED, self.source_tie[p], w_pos)
             S.add1(W_NEG, SENSED, self.source_tie[p], w_neg)
         self.feel_unit = {name: self._atom(feel, name) for name in FEELINGS}
+        self.add_channel(SELF_CHANNEL, "context")          # the self: present whenever the mind itself acts or thinks
         S.end()
         # transient state (working state of the present moment; not knowledge)
         self.focus: List[Tuple[int, float, bool]] = []
@@ -231,6 +237,11 @@ class Mind:
                 items.append((unit, int(event.prov)))
             if kind == "knob" and event.prov == ACTED and cfg.knobs:
                 act_mod.apply_knob(self, event.symbol)
+        if self.ch.has(SELF_CHANNEL) and any(prov in (ACTED, IMAGINED) for _, prov in items):
+            # the mind perceives itself as the one who says or thinks this (L8): "ben" accompanies the moment
+            channel = self.ch.id(SELF_CHANNEL)
+            own = ACTED if any(prov == ACTED for _, prov in items) else IMAGINED   # speaking aloud, or thinking
+            percepts.append((self._atom(channel, SELF_SYMBOL), 1.0, own, channel))
         learn_follow(self, percepts)                       # step 5 for the previous moment
         learn_value(self, percepts)                        # L5: a value signal reaches every step of the episode
         surprise = self._surprise(percepts)
@@ -253,11 +264,12 @@ class Mind:
             self.trace = []
         if cfg.lag0:
             learn_together(self, [f for f in self.focus if int(S.u_kind[f[0]]) & ATOMIC], slot)
-        facets = [(u, i, c) for u, i, p, c in percepts if i > 0 and self.ch.kind(c) == "facet"]
+        facets = [(u, i, c) for u, i, p, c in percepts if i > 0 and self.ch.kind(c) in ("facet", "context")]
         if facets and items:                               # facets of this moment go with its items (lag 0)
             learn_facets(self, [u for u, _ in items], facets, slot)
-        self.predicted = predictions(self)                 # step 3
-        acts = act_mod.decide(self)                        # step 4
+        listening = self.knob["theta"] >= 1e8              # spoken to: it cannot speak now
+        self.predicted = predictions(self, "own" if listening else None)   # step 3 (cheap while listening)
+        acts = [] if listening else act_mod.decide(self)   # step 4: no decision to take while listening
         if cfg.imagine and not items:
             act_mod.imagine(self)
         if cfg.reflect and cfg.reliability and not items:
@@ -294,7 +306,7 @@ class Mind:
         base: Dict[int, float] = {u: decay * a for u, a in self.carry.items()}
         for unit, intensity, prov, channel in percepts:
             kind = self.ch.kind(channel)
-            if kind in ("facet", "value"):                 # facets and value signals do not compete for focus
+            if kind in ("facet", "context", "value"):      # facets, context and value signals do not compete
                 continue
             if intensity > 0 and (cfg.feel_focus or kind != "feel"):
                 base[unit] = max(base.get(unit, 0.0), min(1.0, intensity))
@@ -486,6 +498,11 @@ class Mind:
         report = self.S.retract(m)
         self.trust = self._trust()
         return report
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("_facet_cache", None)                   # a cache, rebuilt on demand
+        return state
 
     def clone(self) -> "Mind":
         """A copy of the mind without the experience log (for probing without touching the life)."""

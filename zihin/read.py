@@ -17,6 +17,7 @@ units that have one of its parts replaced by a category of that part (frames).
 """
 from __future__ import annotations
 
+import math
 from typing import Dict, List, Optional, Tuple
 
 import torch
@@ -214,7 +215,14 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
     fixed = tuple(p for p in parts if p != category)
     relational = getattr(S, "bind_repeats", False)
     shares: Dict[int, float] = {}
-    members = 0.0
+    members = voted = 0.0
+    looks = None                                       # F18: the read instance's filler and its facets
+    if getattr(mind.cfg, "resemblance", False) and exclude is not None and int(S.u_kind[exclude]) & COMPOSED:
+        from .learn import facet_set, facet_similarity
+        filler = S.parts(exclude)[where[0]] if where and len(S.parts(exclude)) > where[0] else None
+        looks = (filler, facet_set(mind, filler)) if filler is not None else None
+        if looks is not None and not looks[1]:
+            looks = None
     for tie in S.inc.get((category, ABSTRACT), ()):
         x = int(S.t_src[tie])
         instance = S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts)))
@@ -225,12 +233,22 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
         if total <= 0.0:
             continue
         e_x = expectation(float((S.t_w[W_POS, tie] * mind.trust).sum()), float((S.t_w[W_NEG, tie] * mind.trust).sum()), k)
+        weight = e_x
+        if looks is not None:                          # members that look like the item speak louder (GCM):
+            sim = facet_similarity(mind, looks[0], x, looks[1])   # vote x exp(-sensitivity x (1 - similarity))
+            if sim <= 0.0:
+                continue
+            weight = e_x * math.exp(-mind.knob["F"] * (1.0 - sim))
         members += e_x
+        voted += weight
         goes_on = continuations(mind, x, fixed) if relational else {}
         for v, p in own.items():
             key = SELF if relational and v == x else NEXT if v in goes_on else v
-            shares[key] = shares.get(key, 0.0) + e_x * p / total
-    return {v: (w, members - w) for v, w in shares.items()}, members, where, fixed
+            shares[key] = shares.get(key, 0.0) + weight * p / total
+    if voted <= 0.0:
+        return {}, 0.0, where, fixed
+    scale = members / voted                            # frequencies from the weighted votes, conviction from how
+    return {v: (w * scale, members - w * scale) for v, w in shares.items()}, members, where, fixed   # many members
 
 
 def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
@@ -270,7 +288,45 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     for target, (w_pos, w_neg) in own_mass(mind, unit, 1, trust).items():
         c = conviction(w_pos + w_neg, cfg.k)
         out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
+    if cfg.backoff and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
+        for target, e in continuation_backoff(mind, unit, trust).items():
+            out[target] = max(out.get(target, 0.0), e)
     return out
+
+
+def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F16: starting needs a reason, continuing follows the words. When nothing in the whole present situation
+    expects a next symbol, the end of the sequence that is going on now (the items after the last perceived event,
+    e.g. the mind's own utterance after its partner's ended) is read instead: its longest suffix that has lived
+    continuations speaks, with its own evidence scaled by lam. It never reaches back across a perceived event, so
+    it cannot start an utterance, only carry one on."""
+    S, cfg = mind.S, mind.cfg
+    if not int(S.u_kind[unit]) & COMPOSED:
+        return {}
+    parts = S.parts(unit)
+    start = 0
+    for j, p in enumerate(parts):
+        channel = int(S.u_channel[p])
+        if channel >= 0 and mind.ch.kind(channel) == "sense":
+            start = j + 1
+    tail = parts[start:]
+    heard = set(parts[:start])                          # what the partner just said is an echo, not knowledge
+    first = 1 if len(tail) == len(parts) else 0         # the whole tuple is the unit itself, read already
+    for i in range(first, len(tail)):
+        suffix = tail[i:]
+        if not suffix:
+            continue
+        piece = suffix[0] if len(suffix) == 1 else S.tuple_index.get(suffix)
+        if piece is None:
+            continue
+        out = {}
+        for target, (w_pos, w_neg) in own_mass(mind, piece, 1, trust).items():
+            if _world(mind, target) and w_pos > 0.0 and target not in heard:
+                c = cfg.lam * conviction(w_pos + w_neg, cfg.k)
+                out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
+        if any(e > 0.5 for e in out.values()):
+            return out
+    return {}
 
 
 def trusted_map(mind, unit: int) -> Dict[int, float]:
@@ -332,6 +388,10 @@ def predictions(mind, mode: Optional[str] = None) -> Dict[int, float]:
     """
     cfg = mind.cfg
     mode = cfg.predict if mode is None else mode
+    if mode == "own":                                  # the present context's own evidence only (no generalisation)
+        if mind.context is None:
+            return {}
+        return {v: expectation(p, n, cfg.k) for v, (p, n) in own_mass(mind, mind.context).items()}
     if mode == "specific":
         if mind.context is None:
             return {}

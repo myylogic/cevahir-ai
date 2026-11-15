@@ -229,6 +229,87 @@ F15. (2026-11-14) Speech judged by its consequences (L5 will, T7 applied to spee
    copied answer is not said again; another answer that was approved is kept; the copied knowledge is still
    expected ("on" 0.79 before, 0.87 after). Records of the chat only; not yet a multi-seed test.
 
+F16. (2026-11-14) Speaking from what was read. Two parts. (1) Turn ends are perceived: the end of each utterance
+   (Enter in text) is an event on a sense channel; in watched dialogues it ends both speakers' utterances, in chat it
+   ends the partner's, and the turn passes there (the mind no longer completes its partner's sentence and then answers
+   it; it stops when its own utterance's lived continuation is the turn end). (2) Starting needs a reason, continuing
+   follows the words: when nothing in the whole present situation expects a next symbol, the end of the sequence going
+   on now (the items after the last perceived event) is read, its longest suffix with lived continuations speaks
+   (scaled by lam); it never reaches back across a perceived event, so it can carry an utterance on but not start one,
+   and it does not repeat what the partner just said (an echo is not knowledge). Result (results/fourth_chat_knowledge.txt,
+   data/school_*.txt/tsv): after reading five sentences and watching three "X nedir?" questions answered, "su nedir"
+   -> "su ateşi söndürür ve bitkileri sular ." and "güneş nedir" -> "güneş dünyayı ısıtır ve aydınlatır ." (never asked),
+   "zürafa nedir" -> "zürafa" and silence (nothing known). The start comes from F12 (SELF, NEXT), the rest from the
+   continuation of its own words. A toy demonstration, not yet a multi-seed test.
+
+F17. (2026-11-14) A life that continues across sessions, the internet as a channel, and a first steering of its own
+   learning. (1) One mind per computer lives in a home folder ($CEVAHIR_HOME/zihin, default ~/.cevahir/zihin); a
+   session loads it, talks (chat mode at a terminal), and keeps what it learned at the end of every conversation (and
+   every 50 answers), also on Ctrl+C; within a session single experiences stay exactly retractable, across sessions the
+   substance is kept without the ledger. cevahir.ps1 starts it from PowerShell. (2) Feelings as computed (surprise,
+   relief, conflict, load, drive) can be shown after each answer. (3) Internet (zihin/web.py, an adapter, no core code):
+   on the owner's command the session reads Wikipedia pages about a topic as speech of others; "improve yourself"
+   picks topics by the mind's drive (used often, held with little conviction; the most frequent words left out by
+   frequency, no list). (4) Ways of reading (a short summary, a deep read) are internal acts on the mind's own channel;
+   after each reading the gain (new ties on the topic held with conviction >= 1/2, per 100 moments) is evidence on
+   "way -> relief" with the same rule, and the way with the higher expectation is chosen next (an untried way first).
+   Tested offline with a stub source only (this container may not reach Wikipedia); the live run is on the owner's
+   computer. Weakness stated: the gain scale is absolute (a repetition that taught little still counts as mostly good);
+   the outcome should be judged relative to what the mind expected from that way.
+
+F18-pre. (2026-11-15) Thinking and a life clock. The inner voice (zihin/dusunce.py): the mind brings a topic to mind
+   and speaks inwardly with the same machinery and the same word units, nothing leaves it, each inner word returns as
+   its own echo in the class "imagined"; every step is scored for reality before it is taken (the expectation of that
+   word from all evidence except imagined and own acts). Example after reading five sentences: "ateş" -> "evi ısıtır ve
+   yemek pişirir" (reality 0.80); "zürafa" -> nothing (0.00). The life clock (session): after 20 s of silence the mind
+   thinks about the least known content word of the last utterance; after 60 s, if that thought was real enough
+   (>= 0.75), it says it, once per silence, never into someone's turn; a lock keeps the clock and the conversation from
+   living at the same moment. Tested programmatically (it spoke "ateş evi ısıtır ve yemek pişirir" after the owner's
+   "ateş çok güzel" and a silence). Limit, stated: thinking twice about the same topic gives the same thought; real
+   thinking should connect (ateş ısıtır, güneş de ısıtır), the next step of imagination.
+
+F18. (2026-11-15) Seeing and recognising by resemblance. An image adapter (zihin/gorme.py, plain arithmetic, no trained
+   network) turns an image into a seen thing (its 64-bit difference hash as an item on the sense channel "goz") and its
+   aspects as facets (hash bytes, a 4x4 colour layout, dominant colours, edge orientation and density, and
+   position-free figure aspects: how much of its bounding box the figure fills, width to height, the figure's colour).
+   Core: a new item joins the categories of the items it resembles (evidence = the similarity of the nearest member,
+   provenance inferred), and when a category speaks for an item its members are weighted by resemblance (GCM:
+   vote x exp(-F (1 - similarity))), frequencies from the weighted votes, conviction from how many members there are.
+   Similarity is weighted Jaccard with facets weighted by how telling they are (1 / items perceived with them), and
+   facets no other item ever had are left out (they cannot be shared, they only drowned every comparison). Context
+   facets (who speaks, how an utterance ends) are a different kind and never count as appearance: counting the speaker
+   had silenced generalisation across speakers (found and fixed in the same round).
+F19. (2026-11-15) Choosing among alternatives. One act per channel per moment makes the candidates of a channel
+   mutually exclusive; they race on their advantage over the strongest rival (over 1/2 when there is none):
+   rate = 2 (score_leader - score_rival), score = e + consequences/2. With no rival it is the rule as before; when all
+   are equally (un)supported nothing leads and the mind stays silent. Found with the vision test: the right name led
+   (share 0.43 against 0.29 and 0.28 before F18's fixes, about 0.74 after) but no single name could pass 1/2 on its own.
+   Vision test (t_vision.py, 3 kinds of drawing, 3 named images per kind, 10 new images per kind, 3 seeds): 73%, 83%,
+   67% right (chance 33%); with resemblance off 0% in every seed. All earlier chat behaviours unchanged.
+
+F20. (2026-11-15) Imagination by structural analogy, scored for reality (T8, a first form). After thinking about X
+   (inner voice), the mind finds X's counterpart by structure mapping over its lived sequences: a sequence of the same
+   length that holds one of the other words of X's sequence at the same place gives the unit at X's place as a
+   counterpart (ateş evi ısıtır / güneş dünyayı ısıtır: ateş <-> güneş), each shared word counted by how telling it is.
+   X's thought is then carried over to the counterpart and every step is scored for reality from all evidence except
+   imagined and own acts; the construction is lived inwardly in the class imagined (later evidence judges it and so
+   the trust in its own constructions). results/fifth_imagination.txt: "ateş" -> "evi ısıtır ve yemek pişirir" (0.80);
+   counterpart güneş -> "güneş evi ısıtır ve yemek pişirir" (0.57); "su" -> yağmur: "yağmur ateşi söndürür ve bitkileri
+   sular" (0.60, never read, plausible). Limits: the reality score separates lived from constructed (0.80 vs about
+   0.6) but not yet a plausible construction from a weak leap; continuation after frequent words drifts by association.
+
+F21. (2026-11-15) Curiosity and a self that grows from its own life. (1) T4, first form: an innate curiosity reflex
+   (LAYERS.md L2): when the mind has nothing to say and its partner used a word it knew nothing about before hearing it
+   (no tie held with conviction >= 1/2), it says the first such word back with a question tone, as a child does; what
+   the partner then explains is learned like anything else (results/sixth_curiosity.txt: "bugün kuantum fiziği okudum"
+   -> "kuantum ?"; after the explanation, "kuantum nedir" -> "kuantum çok küçük parçacıkların bilimidir"). Limit: "zürafa
+   yaprak yer" is learned but "zürafa ne yer" is not answered, the question pattern was never watched. (2) The self unit
+   (L8): an innate unit "ben" on a context channel accompanies every moment in which the mind itself speaks (acted) or
+   thinks (imagined); by the one rule it binds to what the mind says and thinks. Introspection (!kendin) reads it: how
+   much was its own speaking and thinking, and the words its self is most bound to (the most frequent words left out by
+   frequency): after a short life its own name, "zihinim", "yaşayan" and what it thought about. A self-model learned from
+   its own acts, not told; it does not yet steer what the mind says about itself (that is still the told lessons, L8).
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit

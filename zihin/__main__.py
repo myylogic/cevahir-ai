@@ -11,6 +11,17 @@ Commands (Turkish, with English aliases):
     !oku <dosya|klasor>  / !read    watch every text in a file or folder (.json dialogues, .txt .md .tsv; .docx with python-docx,
                                     .pdf with pypdf): sentences of documents as speech of others (imitated)
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
+    !kim <ad>            / !who     who is talking now (perceived at the start of every utterance)
+    !gor <resim>         / !see     show an image with your next utterance (it is seen at its start), e.g.
+                                    !gor ben.jpg  then  "ben buyum"; later  !gor baska.jpg  then  "bu kim"
+    !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
+                                    reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
+    !kendini_tani [n]    / !self    lessons about itself (true things told to it), n times
+    !kendin              / !introspect  what it can say about itself from its own evidence (its self unit)
+    !arastir <konu>      / !research  on your command: search the web (Google Custom Search if GOOGLE_API_KEY and
+                                    GOOGLE_CSE_ID are set, otherwise Wikipedia) and read what is found (pages printed)
+    !kendini_gelistir [n] / !improve  the mind picks n topics it wants to know (high drive) and researches them; it
+                                    measures what each way of reading gave it and chooses its way by that
     !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
                                     the path that led to it is remembered and weighed next time, L5)
 Turn taking (while you speak the mind listens, then it may speak until it falls silent) is set by the session, not
@@ -33,9 +44,9 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from typing import List
+from typing import Dict, List
 
-from . import IMITATED, SENSED, TOLD, Config, Event, Mind, read
+from . import ACTED, IMITATED, SENSED, TOLD, Config, Event, Mind, read
 from .events import PROVENANCE
 from .persist import export_portable, load, save
 from .store import W_NEG, W_POS
@@ -49,7 +60,8 @@ def _log_path() -> str:
 
 
 VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True,
-                                               neg_floor=1.0 / 14, log_path=_log_path()),
+                                               neg_floor=1.0 / 14, backoff=True, resemblance=True, race=True,
+                                               log_path=_log_path()),
             "members": lambda: Config.changed(support="members"), "changed": Config.changed}
 
 
@@ -75,6 +87,8 @@ def dialogues_of(data) -> List[tuple]:
             continue
         keys = {k.lower(): v for k, v in item.items() if isinstance(v, str)}
         ask = next((keys[k] for k in ASK_KEYS if k in keys), None)
+        if "instruction" in keys:                         # instruction datasets: the instruction, then its input
+            ask = (keys["instruction"] + " " + keys.get("input", "")).strip()
         answer = next((keys[k] for k in ANSWER_KEYS if k in keys), None)
         if ask and answer:
             pairs.append((ask, answer))
@@ -130,6 +144,11 @@ def profile(mind: Mind) -> str:
 
 
 FACETS = "parca"
+TURN, TURN_END = "sira", "⏎"
+PERSON, SOMEONE = "kisi", "biri"
+from .gorme import EYE, LOOK
+TONE = "ton"                          # how an utterance ends (? ! .) is perceived with its end, like intonation
+FINAL = (".", "?", "!", "…")     # who is speaking is perceived (like a face or a voice); "biri" = someone unknown          # the end of someone's utterance (Enter) is perceived, like a pause in speech
 VALUE = "deger"
 VALUE_SIGN = {(VALUE, "iyi"): 1.0, (VALUE, "kötü"): -1.0}     # the adapter defines what is good and bad
 
@@ -143,11 +162,28 @@ class Session:
             mind.add_channel(FACETS, "facet")
         mind.add_channel(VALUE, "value")
         mind.value_sign = dict(VALUE_SIGN)
+        known = mind.ch.has(TURN) and mind.ch.symbol_index(mind.ch.id(TURN), TURN_END, create=False) >= 0
+        self.turns = mind.t == 0 or known       # a mind that never lived turn ends keeps the older turn passing
+        mind.add_channel(TURN, "sense")
+        for name in (PERSON, TONE):             # who speaks and how it ends accompany the words as context: they are
+            if mind.ch.has(name) and mind.ch.kind(mind.ch.id(name)) == "facet":   # not what a thing looks like
+                mind.ch.kinds[mind.ch.id(name)] = "context"
+            mind.add_channel(name, "context")
+        mind.add_channel(EYE, "sense")          # a seen thing is present in the episode, its aspects are facets
+        mind.add_channel(LOOK, "facet")
+        self.view = None                        # an image shown for the next utterance: (gist, facets)
+        self.curious = True                     # the curiosity reflex (T4) is on in conversation
+        from .mind import SELF_CHANNEL
+        if not mind.ch.has(SELF_CHANNEL):       # minds born before the self unit existed get it now
+            mind.add_channel(SELF_CHANNEL, "context")
+        self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
         self.open_turn = False                # the mind has just answered; feedback may still come
 
-    def events(self, symbol: str, prov: int) -> List[Event]:
-        """One word as an event on the text channel, with its subword pieces as facets of the same moment."""
+    def events(self, symbol: str, prov: int, speaker: str = None) -> List[Event]:
+        """One word as an event on the text channel, with its subword pieces and its speaker as facets."""
         out = [Event(CHANNEL, symbol, prov)]
+        if speaker:
+            out.append(Event(PERSON, speaker, SENSED))
         if self.pieces is not None and symbol.isalpha():
             parts = [p for p in self.pieces.tokenize(symbol) if p.strip()]
             if len(parts) > 1:
@@ -157,25 +193,74 @@ class Session:
     def live(self, text: str, prov: int) -> None:
         """Hear (told) or sense an utterance while listening: the mind does not speak into it."""
         start = self.mind.t + 1
-        self.listen(text, prov)
+        self.listen(text, prov, speaker=self.partner)
+        self.end_of_turn(prov, tone=self.tone(text))
         self.mind.step([])
         self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
 
-    def listen(self, text: str, prov: int) -> None:
-        """Hear an utterance while not speaking (turn taking set by the session)."""
+    def listen(self, text: str, prov: int, speaker: str = None) -> None:
+        """Hear an utterance while not speaking (turn taking set by the session). ``speaker``: who says it, perceived
+        at its start (kept out when the mind never lived speakers, so older minds are read as before)."""
         theta = self.mind.knob["theta"]
         self.mind.knob["theta"] = 1e9
         try:
-            for symbol in words(text):
-                self.mind.step(self.events(symbol, prov))
+            if self.view is not None:                       # the image shown with this utterance is seen first
+                gist, facets = self.view
+                self.view = None
+                self.mind.step([Event(EYE, gist, SENSED)] + [Event(LOOK, f, SENSED) for f in facets])
+            for symbol in self.body(text):
+                self.mind.step(self.events(symbol, prov, speaker))
         finally:
             self.mind.knob["theta"] = theta
 
-    def watch(self, first: str, answer: str) -> None:
-        """Two others talk: one says ``first``, another answers ``answer``; the mind only watches."""
-        self.listen(first, IMITATED)
-        self.listen(answer, IMITATED)
+    def body(self, text: str) -> List[str]:
+        """The words of an utterance without its closing punctuation (that is perceived with the end, see tone)."""
+        symbols = words(text)
+        if self.turns:
+            while symbols and symbols[-1] in FINAL:
+                symbols = symbols[:-1]
+        return symbols
+
+    @staticmethod
+    def tone(text: str) -> str:
+        symbols = words(text)
+        return "?" if symbols and symbols[-1] == "?" else ("!" if symbols and symbols[-1] == "!" else ".")
+
+    def end_of_turn(self, prov: int, listening: bool = True, tone: str = None) -> List[Event]:
+        """Someone's utterance has ended: a perceived event, with how it ended (? ! .) as a facet. While listening
+        the mind does not speak into it."""
+        if not self.turns:
+            return []
+        theta = self.mind.knob["theta"]
+        if listening:
+            self.mind.knob["theta"] = 1e9
+        try:
+            events = [Event(TURN, TURN_END, prov)]
+            if tone:
+                events.append(Event(TONE, tone, prov))
+            return self.mind.step(events)
+        finally:
+            self.mind.knob["theta"] = theta
+
+    def watch(self, first: str, answer: str, prov: int = IMITATED, asker: str = SOMEONE) -> None:
+        """Two others talk: one says ``first``, another answers ``answer``; the mind only watches. The end of each
+        utterance is perceived, so the mind can learn who speaks when (turn taking is watched, not coded). The one
+        who asks is perceived (someone, unless named); the one who answers is the role the mind takes in a chat."""
+        self.listen(first, prov, speaker=asker)
+        self.end_of_turn(prov, tone=self.tone(first))
+        self.listen(answer, prov)
+        self.end_of_turn(prov, tone=self.tone(answer))
         self.mind.step([])
+
+    def lessons_about_itself(self, times: int = 1) -> int:
+        """L8: true things about the mind, told to it (provenance told). Returns how many utterances were lived."""
+        from .kendilik import LESSONS
+        n = 0
+        for _ in range(times):
+            for question, answer in LESSONS:
+                self.watch(question, answer, prov=TOLD)
+                n += 1
+        return n
         self.history.append((len(self.history) + 1, "[izledi] %s || %s" % (first, answer), []))
 
     def reply(self, text: str, limit: int = 12) -> str:
@@ -189,15 +274,49 @@ class Session:
         symbols = words(text)
         if not symbols:
             return "(sessiz)"
-        self.listen(" ".join(symbols[:-1]), TOLD)
-        acts = self.mind.step(self.events(symbols[-1], TOLD))
+        before = self.known_before(text) if self.curious else {}   # what it knew of these words before hearing them
+        if self.turns:                                   # the turn passes when your utterance has ended
+            self.listen(text, TOLD, speaker=self.partner)
+            acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
+        else:                                            # older minds: the turn passes with your last word
+            self.listen(" ".join(symbols[:-1]), TOLD)
+            acts = self.mind.step(self.events(symbols[-1], TOLD))
         said: List[str] = []
         while acts and len(said) < limit:
             said += [str(e.symbol) for e in acts if e.channel == CHANNEL]
             acts = self.mind.step([])                    # the echo of its own act arrives here
+        if not said and self.curious:
+            said = self.wonder(text, before)
         self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
         self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
         return " ".join(said) if said else "(sessiz)"
+
+    def known_before(self, text: str) -> Dict[str, int]:
+        """How firmly each word of an utterance was known before it was heard (ties held with conviction >= 1/2)."""
+        from .web import firm_knowledge
+        mind = self.mind
+        cid = mind.ch.id(CHANNEL)
+        out = {}
+        for w in self.body(text):
+            index = mind.ch.symbol_index(cid, w, create=False)
+            unit = mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
+            out[w] = firm_knowledge(mind, unit) if unit >= 0 else 0
+        return out
+
+    def wonder(self, text: str, before: Dict[str, int] = None) -> List[str]:
+        """T4, an innate curiosity reflex (LAYERS.md L2): when the mind has nothing to say and its partner used a word it
+        knows nothing about, it says that word back with a question tone, as a child does ("kuantum ?"). What follows
+        (an explanation) is learned like anything else; nothing here is about a language or a topic."""
+        mind = self.mind
+        before = self.known_before(text) if before is None else before
+        unknown = [(0, w) for w in self.body(text) if len(w) >= 4 and w.isalpha() and before.get(w, 0) == 0]
+        if not unknown:
+            return []
+        word = unknown[0][1]                             # the first word it knows nothing about (topics come early)
+        mind.step([Event(CHANNEL, word, ACTED)])
+        mind.step([Event(CHANNEL, "?", ACTED)])
+        mind.step([])
+        return [word, "?"]
 
     def close_turn(self) -> None:
         if self.open_turn:
@@ -213,7 +332,7 @@ class Session:
         self.open_turn = False
         return "  not edildi (%s)" % ("iyi" if good else "kötü")
 
-    def read_path(self, path: str) -> str:
+    def read_path(self, path: str, cap: int = 0) -> str:
         """Watch the texts of a file or of every supported file under a folder; report what was lived."""
         import os
         import time
@@ -247,7 +366,9 @@ class Session:
             if not text:
                 skipped.append(os.path.basename(name))
                 continue
-            for sentence in sentences(text):
+            for i, sentence in enumerate(sentences(text)):
+                if cap and i >= cap:
+                    break
                 self.listen(sentence, IMITATED)
                 self.mind.step([])
                 lived += 1
@@ -313,16 +434,101 @@ class Session:
         return "  böyle bir numara yok"
 
 
+class LifeClock:
+    """The mind lives while nobody types: after a short silence it thinks about the last topic (inner voice, kept as
+    imagined); after a longer silence, if that thought was real enough, it says it (it speaks first), once per
+    silence. It never speaks into someone's turn; a lock keeps the clock and the conversation from living at once."""
+
+    def __init__(self, session, lock, think_after: float = 20.0, speak_after: float = 60.0,
+                 real_enough: float = 0.75) -> None:
+        import threading
+        import time
+        self.session, self.lock = session, lock
+        self.think_after, self.speak_after, self.real_enough = think_after, speak_after, real_enough
+        self.last_input = time.time()
+        self.thought = None                 # (topic, words, reality) of this silence
+        self.spoke = False
+        self.stop = threading.Event()
+        self.thread = threading.Thread(target=self._run, daemon=True)
+
+    def heard(self) -> None:
+        import time
+        self.last_input, self.thought, self.spoke = time.time(), None, False
+
+    def start(self) -> None:
+        self.thread.start()
+
+    def _run(self) -> None:
+        import time
+        from .dusunce import think, topic_of
+        while not self.stop.wait(3.0):
+            quiet = time.time() - self.last_input
+            if self.thought is None and quiet >= self.think_after:
+                with self.lock:
+                    topic = topic_of(self.session)
+                    if topic:
+                        words_, reality = think(self.session, topic)
+                        self.thought = (topic, words_, reality)
+                    else:
+                        self.thought = ("", [], 0.0)
+            if (self.thought and not self.spoke and quiet >= self.speak_after and self.thought[1]
+                    and self.thought[2] >= self.real_enough):
+                with self.lock:
+                    topic, words_, reality = self.thought
+                    for w in [topic] + words_:              # it says aloud what it thought (its own acts)
+                        self.session.mind.step([Event(CHANNEL, w, ACTED)])
+                    self.session.mind.step([])
+                    self.spoke = True
+                print("\n  zihin (kendiliğinden): %s %s\n> " % (topic, " ".join(words_)), end="", flush=True)
+
+
+def home_mind() -> str:
+    """Where the one mind of this computer lives: $CEVAHIR_HOME/zihin/cevahir (default ~/.cevahir)."""
+    import os
+    home = os.environ.get("CEVAHIR_HOME") or os.path.join(os.path.expanduser("~"), ".cevahir")
+    folder = os.path.join(home, "zihin")
+    os.makedirs(folder, exist_ok=True)
+    return os.path.join(folder, "cevahir")
+
+
+def _exists(path: str) -> bool:
+    import os
+    base = path[:-6] if path.endswith(".zihin") else path
+    return os.path.exists(base + ".zihin") or os.path.exists(base + ".zihin.gz")
+
+
+def feelings(mind: Mind) -> str:
+    """The mind's own state as it computed it in the last moment (functional signals, see design section 2.6)."""
+    f = getattr(mind, "felt", None) or {}
+    names = (("surprise", "şaşkınlık"), ("relief", "rahatlama"), ("conflict", "çatışma"), ("load", "yük"))
+    parts = ["%s %.2f" % (tr, float(f.get(en, 0.0))) for en, tr in names]
+    parts.append("dürtü %.1f" % float(f.get("drive", 0.0)))
+    return "  (his: " + ", ".join(parts) + ")"
+
+
 def main(argv=None) -> None:
+    import os
+    import torch
+    torch.set_num_threads(1)                             # the substance's operations are small: one thread is faster
     ap = argparse.ArgumentParser(prog="python -m zihin")
-    ap.add_argument("--load")
+    ap.add_argument("--load", help="a saved mind to live on (otherwise the mind of this computer's home folder)")
+    ap.add_argument("--yeni", action="store_true", help="start a new, empty mind")
+    ap.add_argument("--kayit", help="where the mind is kept (default: the home folder, see home_mind)")
+    ap.add_argument("--kaydetme", action="store_true", help="do not save what was learned in this session")
+    ap.add_argument("--his", action="store_true", help="show the mind's feelings after each answer")
+    ap.add_argument("--kim", help="who is talking to the mind (asked at the start if not given)")
+    ap.add_argument("--yasamsiz", action="store_true", help="no life clock: the mind does not think or speak first "
+                                                            "while you are silent")
     ap.add_argument("--parca", help="subword tokenizer (ByteLevelBPE json): word pieces enter as facets")
     ap.add_argument("--defter-yok", dest="no_ledger", action="store_true",
                     help="no experience ledger: smaller and faster, but !unut cannot retract")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
     args = ap.parse_args(argv)
-    if args.load:
-        mind = load(args.load, ledger=not args.no_ledger)
+    keep_at = args.kayit or home_mind()
+    source = None if args.yeni else (args.load or (keep_at if _exists(keep_at) else None))
+    if source:
+        print("zihin yükleniyor: %s ..." % source, flush=True)
+        mind = load(source, ledger=not args.no_ledger)
         if not args.no_ledger and not mind.S.keep_log:      # a mind saved without a ledger: keep one from now on
             from .store import DiskLog
             mind.cfg.keep_log, mind.cfg.log_path = True, _log_path()
@@ -339,22 +545,78 @@ def main(argv=None) -> None:
         from tokenizer_management.byte_bpe import ByteLevelBPE
         pieces = ByteLevelBPE.load(args.parca)
     session = Session(mind, pieces)
-    chat = False
-    print("Zihin — anlat, sor (?...), !neden, !unut, !kaydet, !cik. %d an yaşanmış." % mind.t)
-    for line in sys.stdin if not sys.stdin.isatty() else iter(lambda: input("> "), None):
+    interactive = sys.stdin.isatty()
+    name = args.kim
+    if not name and interactive:
+        name = input("Seninle konuşan kim? (adını yaz, boş bırakırsan 'biri') > ").strip()
+    if name:
+        session.partner = lower_tr(name).split()[0]
+    chat = interactive                                   # at a terminal you talk to it right away
+    autosave = not args.kaydetme
+    turns_since_save = 0
+
+    saved_at = [mind.t]
+
+    def keep(reason: str) -> None:
+        if not autosave or session.mind.t == saved_at[0]:   # nothing new was lived: nothing to keep
+            return
+        saved_at[0] = session.mind.t
+        started = __import__("time").time()
+        export_portable(session.mind, keep_at)           # the substance as it is now; atomic
+        print("  öğrendiklerim kaydedildi (%s): %s.zihin, %d an, %.0f sn" % (
+            reason, keep_at, session.mind.t, __import__("time").time() - started), flush=True)
+
+    print("Cevahir — %d an yaşamış bir zihin. %s" % (
+        mind.t, "Yaz, konuşalım. Komutlar: !his !yas !dogru !yanlis !unut !cik" if chat else
+        "anlat, sor (?...), !konus, !neden, !unut, !kaydet, !cik"))
+    if autosave:
+        print("  (her sohbetin sonunda öğrendikleri kendiliğinden kaydedilir: %s.zihin)" % keep_at)
+    lines = sys.stdin if not interactive else iter(lambda: input("> "), None)
+    import threading
+    lock = threading.RLock()
+    clock = None
+    if interactive and not args.yasamsiz:
+        clock = LifeClock(session, lock)
+        clock.start()
+        print("  (sessiz kaldığında düşünür; bir süre sonra konuşmayı kendisi başlatabilir. Kapatmak: --yasamsiz)")
+    try:
+        _session_loop(session, lines, chat, args, keep, lock, clock)
+    except (KeyboardInterrupt, EOFError):
+        print()
+    finally:
+        keep("sohbet sonu")
+
+
+def _session_loop(session, lines, chat, args, keep, lock=None, clock=None) -> None:
+    import contextlib
+    turns_since_save = 0
+    for line in lines:
         line = line.strip()
         if not line:
             continue
+        if clock is not None:
+            clock.heard()
+        with (lock if lock is not None else contextlib.nullcontext()):
+            turns_since_save = _one_line(session, line, chat, args, keep, turns_since_save)
+            if turns_since_save is None:
+                break
+            if isinstance(turns_since_save, tuple):         # the chat toggle came back with the new mode
+                chat, turns_since_save = turns_since_save
+
+
+def _one_line(session, line, chat, args, keep, turns_since_save):
+    """One line of the conversation. Returns the updated counter, (chat, counter) after !konus, None to quit."""
+    if True:
         try:
             if not line.lstrip("!").split(" ")[0] in ("dogru", "doğru", "good", "iyi", "yanlis", "yanlış", "bad", "kotu",
-                                                       "kötü") or not line.startswith("!"):
+                                                       "kötü", "his", "feel") or not line.startswith("!"):
                 session.close_turn()                     # any other input ends the answered turn first
             if line.startswith("?") and not chat:
                 print(session.ask(line[1:].strip()))
             elif line.startswith("!"):
                 cmd, _, rest = line[1:].partition(" ")
                 if cmd in ("cik", "quit"):
-                    break
+                    return None
                 elif cmd in ("gordum", "saw"):
                     session.live(rest, SENSED)
                 elif cmd in ("izle", "watch"):
@@ -375,7 +637,11 @@ def main(argv=None) -> None:
                             n += 1
                     print("  %d satır izlendi, %d an" % (n, session.mind.t))
                 elif cmd in ("oku", "read"):
-                    print(session.read_path(rest.strip()))
+                    target, _, cap = rest.strip().rpartition(" ")
+                    if cap.isdigit() and target:
+                        print(session.read_path(target.strip(), int(cap)))
+                    else:
+                        print(session.read_path(rest.strip()))
                 elif cmd in ("dogru", "doğru", "good", "iyi"):
                     print(session.feedback(True))
                 elif cmd in ("yanlis", "yanlış", "bad", "kotu", "kötü"):
@@ -383,6 +649,7 @@ def main(argv=None) -> None:
                 elif cmd in ("konus", "chat"):
                     chat = not chat
                     print("  sohbet modu %s" % ("açık" if chat else "kapalı"))
+                    return (chat, turns_since_save)
                 elif cmd in ("neden", "why"):
                     prefix, _, value = rest.partition("=>")
                     print(session.why(prefix.strip(), value.strip()))
@@ -391,6 +658,47 @@ def main(argv=None) -> None:
                         print("  %3d  %s" % (number, text))
                 elif cmd in ("unut", "forget"):
                     print(session.forget(int(rest)))
+                elif cmd in ("arastir", "araştır", "research"):
+                    from .web import research
+                    report = research(session, rest.strip())
+                    print("  okudum: %s" % report)
+                elif cmd in ("kendini_gelistir", "kendini_geliştir", "improve"):
+                    from .web import research, wanted_topics
+                    topics = wanted_topics(session.mind, CHANNEL, int(rest) if rest.strip().isdigit() else 3)
+                    print("  merak ettiklerim: %s" % ", ".join(topics))
+                    for topic in topics:
+                        report = research(session, topic)
+                        print("  %s: %s yoluyla %s cümle, kazanç %s (yollar: %s)" % (
+                            topic, report.get("way"), report.get("sentences"), report.get("gain_per_100_moments"),
+                            report.get("ways")))
+                elif cmd in ("his", "feel"):
+                    print(feelings(session.mind))
+                elif cmd in ("gor", "gör", "see"):
+                    from .gorme import features
+                    gist, facets = features(rest.strip())
+                    session.view = (gist, facets)
+                    print("  görüyorum (%d yön); bir sonraki sözün bu resimle birlikte algılanacak" % len(facets))
+                elif cmd in ("dusun", "düşün", "think"):
+                    from .dusunce import think, topic_of
+                    topic = rest.strip() or topic_of(session)
+                    if not topic:
+                        print("  düşünecek bir konu yok")
+                    else:
+                        from .dusunce import imagine
+                        thought, construction, reality, other = imagine(session, topic)
+                        print("  (iç ses, %s): %s" % (topic, " ".join(thought) or "…"))
+                        if construction:
+                            print("  (hayal: %s da/de böyle mi?): %s   [gerçeklik %.2f]" % (
+                                other, " ".join(construction), reality))
+                elif cmd in ("kim", "who"):
+                    if rest.strip():
+                        session.partner = lower_tr(rest.strip()).split()[0]
+                    print("  konuşan: %s" % session.partner)
+                elif cmd in ("kendin", "introspect"):
+                    from .kendilik import self_report
+                    print(self_report(session.mind, CHANNEL))
+                elif cmd in ("kendini_tani", "kendini_tanı", "self"):
+                    print("  kendisi hakkında %d söz yaşadı" % session.lessons_about_itself(int(rest) if rest.strip().isdigit() else 1))
                 elif cmd in ("yas", "yaş", "age"):
                     print(profile(session.mind))
                 elif cmd in ("boyut", "size"):
@@ -400,16 +708,24 @@ def main(argv=None) -> None:
                 elif cmd in ("tasinabilir", "portable"):
                     print("  taşınabilir kopya: %s" % export_portable(session.mind, rest.strip()))
                 elif cmd in ("yukle", "load"):
-                    session = Session(load(rest.strip()), session.pieces)
+                    fresh = Session(load(rest.strip()), session.pieces)
+                    session.__dict__.update(fresh.__dict__)     # the same session object: autosave follows it
                     print("  yüklendi: %d an" % session.mind.t)
                 else:
                     print("  bilinmeyen komut")
             elif chat:
                 print("  zihin: %s" % session.reply(line))
+                if args.his:
+                    print(feelings(session.mind))
+                turns_since_save += 1
+                if turns_since_save >= 50:               # a long conversation is kept along the way too
+                    keep("ara kayıt")
+                    turns_since_save = 0
             else:
                 session.live(line, TOLD)
         except Exception as exc:  # keep the session alive
             print("  hata: %s" % exc)
+    return turns_since_save
 
 
 if __name__ == "__main__":

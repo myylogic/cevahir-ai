@@ -74,6 +74,30 @@ def consequence(mind, act_unit: int) -> float:
     return total
 
 
+def _race(mind, candidates, theta: float, T: int) -> List[Event]:
+    """F19: one act per channel per moment, so the candidates of a channel are alternatives that exclude each
+    other. Each scores its expectation plus half its consequences (L5); the leader accumulates its advantage over
+    the strongest rival (over 1/2, "saying nothing", when it has none) and is emitted if that advantage reaches the
+    threshold within T iterations: rate = 2 (score_leader - score_rival). With no rival this is the rule as before
+    (2e - 1); with rivals that are all equally (un)supported nothing leads and the mind stays silent."""
+    S = mind.S
+    by_channel = {}
+    for unit, e in candidates.items():
+        score = e + 0.5 * consequence(mind, unit)
+        by_channel.setdefault(int(S.u_channel[unit]), []).append((score, e, unit))
+    acts: List[Event] = []
+    for channel in sorted(by_channel):
+        ranked = sorted(by_channel[channel], reverse=True)
+        score, e, unit = ranked[0]
+        rival = ranked[1][0] if len(ranked) > 1 else 0.5
+        rate = 2.0 * (score - max(rival, 0.5 if score <= 0.5 else rival))
+        if rate <= 0.0 or math.ceil(theta / rate - 1e-12) > T:
+            continue
+        acts.append(Event(mind.ch.names[channel], mind.ch.symbol(channel, int(S.u_symbol[unit])), ACTED))
+        mind.hoping = (unit, e)
+    return acts
+
+
 def decide(mind) -> List[Event]:
     """Step 4: accumulate to threshold; at most one act per act channel; silence is legal."""
     S, cfg = mind.S, mind.cfg
@@ -85,7 +109,7 @@ def decide(mind) -> List[Event]:
         not_self[ACTED] = 0.0                              # own repetitions are a record, not a reason (section 7)
         for unit, e in members_map(mind, mind.context, not_self).items():
             channel = int(S.u_channel[unit])
-            if channel >= 0 and mind.ch.kind(channel) == "act" and e > 0.5:
+            if channel >= 0 and mind.ch.kind(channel) == "act" and (e > 0.5 or cfg.race):
                 candidates[unit] = e
     elif mind.context is not None:
         only_imitated = torch.zeros(N_PROV, dtype=F64)
@@ -100,6 +124,8 @@ def decide(mind) -> List[Event]:
             unit = S.atom_index.get((channel, index), -1)
             if unit >= 0 and S.find_tie(unit, mind.feel_unit["relief"], EXPECT, 1) >= 0:
                 candidates[unit] = act_expectation(mind, unit, 0.0, 0.0)
+    if cfg.race:
+        return _race(mind, candidates, theta, T)
     best = {}
     for unit, e in candidates.items():
         rate = 2.0 * e - 1.0 + consequence(mind, unit)  # L5 will: the drive plus what this path led to
