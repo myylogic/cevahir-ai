@@ -2,7 +2,10 @@
 
 - Git tag: `research-2026.11.14-v5`
 - GitHub Release: https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.11.14-v5
-- Zenodo DOI: pending (filled in only after the published Zenodo record is verified)
+- Source commit: `c674997e49d32ad1989b171b45484e7646dbf4d4`
+- Zenodo DOI: [10.5281/zenodo.24235648](https://doi.org/10.5281/zenodo.24235648)
+- Zenodo record: https://zenodo.org/records/24235648
+- Archive verification: every one of the 1859 files of the archive is identical to the tagged commit (`../evidence/zenodo_archive_verification_v5.json`)
 - All-versions DOI: [10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660)
 
 This edition adds, since v4:
@@ -28,4 +31,4 @@ This edition adds, since v4:
   never-seen instances than online and converged baselines, no interference, exact millisecond retraction (small-data regime only). Design layers for what comes next: `LAYERS.md`.
 
 No claim of consciousness or novelty is made. Reports are research preprints and are not peer reviewed. The
-DOI will identify this exact archive; it is not scientific or identity certification.
+DOI identifies this exact archive; it is not scientific or identity certification.

@@ -1,0 +1,9 @@
+{
+  "checked_at_utc": "2026-11-15",
+  "doi": "10.5281/zenodo.24235648",
+  "request_url": "https://doi.org/10.5281/zenodo.24235648",
+  "resolved_url": null,
+  "http_status": null,
+  "expected_record_url": "https://zenodo.org/records/24235648",
+  "note": "doi.org was not reachable from the checking session; the Zenodo API reports this DOI for record 24235648 (read from https://zenodo.org/api/records/24235648). Resolution through doi.org remains to be checked."
+}
