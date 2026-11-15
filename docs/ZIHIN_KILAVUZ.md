@@ -14,9 +14,10 @@ Cevahir Zihin bir sohbet botu değil, yaşarken öğrenen bir zihin çekirdeği.
 git clone https://github.com/myylogic/cevahir-ai     # zaten varsa: cd cevahir-ai; git pull
 cd cevahir-ai
 pip install torch numpy python-docx pillow
-.\cevahir.ps1                         # bu bilgisayarın zihniyle konuş (ilk kez: boş bir zihin)
-.\cevahir.ps1 --load cevahir_tam      # size verilen bir zihni getir; sonra hep ev klasöründe yaşar
-.\cevahir.ps1 --his                   # her cevaptan sonra zihnin iç durumunu göster
+.\cevahir.ps1                                        # bu bilgisayarın zihniyle konuş (ilk kez: boş bir zihin)
+.\cevahir.ps1 --load cevahir.zihin.gz --kim muhammed  # size verilen bir zihni getir (yanında cevahir.zihin.json
+                                                     # olsun); sonra hep ev klasöründe yaşar, bir daha --load gerekmez
+.\cevahir.ps1 --his                                  # her cevaptan sonra zihnin iç durumunu göster
 ```
 
 Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. Türkçe karakterler bozuk görünürse önce
