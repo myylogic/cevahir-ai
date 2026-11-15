@@ -27,6 +27,7 @@ from __future__ import annotations
 import hashlib
 import os
 import pickle
+from array import array
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -43,6 +44,17 @@ W_POS, W_NEG, C_POS, C_NEG = 0, 1, 2, 3  # the four additive per-class tables of
 WIDE = 127  # t_cls of a tie whose four tables are kept in a full row (more than one class, or judged amounts)
 
 F64, I64 = torch.float64, torch.int64
+
+IDS = "i"                    # array typecode of tie ids in the adjacency lists: 32-bit signed on every platform
+assert array(IDS).itemsize == 4
+ID_LIMIT = (1 << 31) - 1     # the first tie id that would not fit
+
+
+def tie_key(src: int, dst: int, form: int, lag: int) -> int:
+    """One integer for a tie's identity (src, dst, form, lag): the tie index's key, a fraction of the memory of a
+    4-tuple. Units and ties are below 2^31, a form below 2^3 and a lag below 2^8 - 1 (PART lags are positions), so
+    the fields never overlap and the key is unique."""
+    return (((src << 31) | dst) << 11) | (form << 8) | (lag + 1)
 
 
 class DiskLog:
@@ -246,9 +258,9 @@ class Substance:
 
     # ------------------------------------------------------------------ caches
     def _clear_indices(self) -> None:
-        self.tie_index: Dict[Tuple[int, int, int, int], int] = {}
-        self.out: Dict[Tuple[int, int, int], List[int]] = {}   # (src, form, lag) -> tie ids; PART uses lag -1
-        self.inc: Dict[Tuple[int, int], List[int]] = {}        # (dst, form) -> tie ids
+        self.tie_index: Dict[int, int] = {}                     # tie_key(src, dst, form, lag) -> tie
+        self.out: Dict[Tuple[int, int, int], array] = {}        # (src, form, lag) -> tie ids; PART uses lag -1
+        self.inc: Dict[Tuple[int, int], array] = {}             # (dst, form) -> tie ids
         self.atom_index: Dict[Tuple[int, int], int] = {}       # (channel, symbol index) -> unit
         self.tuple_index: Dict[Tuple[int, ...], int] = {}      # parts -> composed unit
         self.frame_first: Dict[Tuple[int, Tuple[int, ...]], int] = {}  # (pos, parts with -1 at pos) -> instance
@@ -257,9 +269,21 @@ class Substance:
         self._parts: Dict[int, tuple] = {}     # composed unit -> (its PART list, its length, parts), see ``parts``
 
     def _index_tie(self, tie: int, src: int, dst: int, form: int, lag: int) -> None:
-        self.tie_index[(src, dst, form, lag)] = tie
-        self.out.setdefault((src, form, -1 if form == PART else lag), []).append(tie)
-        self.inc.setdefault((dst, form), []).append(tie)
+        # Compact indices (exact: the same ids in the same order). A tie's key is one packed integer instead of a
+        # 4-tuple, and an adjacency list is an array of 32-bit ids (4 bytes each) instead of a list of Python ints
+        # (8 bytes of pointer plus about 32 of int object each): the memory a mind needs per tie falls, and reading a
+        # list into numpy needs no conversion. Iteration, len, truth, slicing, remove and append behave as a list's.
+        self.tie_index[tie_key(src, dst, form, lag)] = tie
+        key = (src, form, -1 if form == PART else lag)
+        ties = self.out.get(key)
+        if ties is None:
+            ties = self.out[key] = array(IDS)
+        ties.append(tie)
+        key = (dst, form)
+        ties = self.inc.get(key)
+        if ties is None:
+            ties = self.inc[key] = array(IDS)
+        ties.append(tie)
 
     def out_ids(self, key: Tuple[int, int, int]) -> Tuple[torch.Tensor, torch.Tensor]:
         """The ties of ``self.out[key]`` and their targets as tensors (the list must not be empty). Kept between
@@ -270,11 +294,11 @@ class Substance:
             return hit[1], hit[2]
         v = self._np()
         if hit is not None and hit[0] < len(ties):
-            new = np.array(ties[hit[0]:], dtype=np.int64)
+            new = np.frombuffer(ties, dtype=np.int32)[hit[0]:].astype(np.int64)
             ids = torch.from_numpy(np.concatenate((hit[1].numpy(), new)))
             dst = torch.from_numpy(np.concatenate((hit[2].numpy(), v.dst[new])))
         else:
-            new = np.array(ties, dtype=np.int64)
+            new = np.frombuffer(ties, dtype=np.int32).astype(np.int64)
             ids, dst = torch.from_numpy(new), torch.from_numpy(v.dst[new])
         self._out_ids[key] = (len(ties), ids, dst)
         return ids, dst
@@ -332,6 +356,19 @@ class Substance:
         self.__dict__.setdefault("version", 0)
         if t_w is not None:                      # saved before the narrow layout: the same values, stored anew
             self._from_tables(t_w)
+        self._compact_indices()
+
+    def _compact_indices(self) -> None:
+        """Indices saved before the compact form (4-tuple tie keys, lists of ids) are converted once on load: the same
+        keys and ids in the same order."""
+        index = self.__dict__.get("tie_index")
+        if index and isinstance(next(iter(index)), tuple):
+            self.tie_index = {tie_key(*k): v for k, v in index.items()}
+        for name in ("out", "inc"):
+            table = self.__dict__.get(name)
+            if table and not isinstance(next(iter(table.values())), array):
+                for k, v in table.items():
+                    table[k] = array(IDS, v)
 
     def _from_tables(self, t_w: torch.Tensor) -> None:
         """Store the four tables ``t_w`` [4, cap, P] in the narrow layout (every value kept, bit for bit)."""
@@ -737,16 +774,18 @@ class Substance:
         return unit
 
     def find_tie(self, src: int, dst: int, form: int, lag: int) -> int:
-        return self.tie_index.get((src, dst, form, lag), -1)
+        return self.tie_index.get(tie_key(src, dst, form, lag), -1)
 
     def tie(self, src: int, dst: int, form: int, lag: int) -> int:
         """The tie (src, dst, form, lag), created with zero evidence if it does not exist."""
-        tie = self.tie_index.get((src, dst, form, lag), -1)
+        tie = self.tie_index.get(tie_key(src, dst, form, lag), -1)
         if tie >= 0:
             return tie
         if self.n_ties == self._ct:
             self._grow_ties()
         tie = self.n_ties
+        if tie >= ID_LIMIT:
+            raise OverflowError("a mind of more than 2^31 - 1 ties needs 64-bit index arrays")
         self.version += 1
         v = self._np()
         v.src[tie], v.dst[tie], v.form[tie], v.lag[tie] = src, dst, form, lag
@@ -1032,7 +1071,7 @@ class Substance:
                 continue
             src, dst = int(v.src[tie]), int(v.dst[tie])
             form, lag = int(v.form[tie]), int(v.lag[tie])
-            self.tie_index.pop((src, dst, form, lag), None)
+            self.tie_index.pop(tie_key(src, dst, form, lag), None)
             self._out_ids.pop((src, form, -1 if form == PART else lag), None)
             if form == PART:
                 self._parts.pop(src, None)

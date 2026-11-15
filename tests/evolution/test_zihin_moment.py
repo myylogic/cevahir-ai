@@ -174,8 +174,8 @@ def test_undo_last_restores_tensors_alphabet_and_working_state(variant):
     kept = (dict(S.tie_index), {k: list(v) for k, v in S.out.items()}, {k: sorted(v) for k, v in S.inc.items()},
             dict(S.atom_index), dict(S.tuple_index), dict(S.frame_first), dict(S.frame_of))
     S.rebuild_indices()                                         # the caches after undo equal a fresh rebuild
-    assert kept == (S.tie_index, S.out, {k: sorted(v) for k, v in S.inc.items()}, S.atom_index, S.tuple_index,
-                    S.frame_first, S.frame_of)
+    assert kept == (S.tie_index, {k: list(v) for k, v in S.out.items()}, {k: sorted(v) for k, v in S.inc.items()},
+                    S.atom_index, S.tuple_index, S.frame_first, S.frame_of)
     twin = new_mind(CONFIGS[variant]())
     for moment in events:
         twin.step(moment)

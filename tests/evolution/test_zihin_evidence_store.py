@@ -203,6 +203,7 @@ def test_caches_are_rebuilt_from_the_tensors_alone():
     kept = (dict(S.tie_index), {k: list(v) for k, v in S.out.items()}, {k: list(v) for k, v in S.inc.items()},
             dict(S.atom_index), dict(S.tuple_index))
     S.rebuild_indices()
-    rebuilt = (S.tie_index, S.out, S.inc, S.atom_index, S.tuple_index)
-    assert kept == tuple(dict(r) for r in rebuilt)
+    rebuilt = (dict(S.tie_index), {k: list(v) for k, v in S.out.items()}, {k: list(v) for k, v in S.inc.items()},
+               dict(S.atom_index), dict(S.tuple_index))
+    assert kept == rebuilt                       # the same keys and the same ids in the same order
     assert S.parts(whole) == (units[0], units[1])
