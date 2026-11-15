@@ -1,0 +1,10 @@
+!oku research/living_mind_2026_11_14/data/imagination_text.txt
+!oku research/living_mind_2026_11_14/data/imagination_text.txt
+!uyu 3
+güneş evi ısıtır .
+güneş dünyayı ısıtır .
+yağmur ateşi söndürür .
+yağmur bitkileri sular .
+!uyu 3
+!yas
+!cik

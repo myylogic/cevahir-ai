@@ -14,9 +14,15 @@ Commands (Turkish, with English aliases):
     !kim <ad>            / !who     who is talking now (perceived at the start of every utterance)
     !gor <resim>         / !see     show an image with your next utterance (it is seen at its start), e.g.
                                     !gor ben.jpg  then  "ben buyum"; later  !gor baska.jpg  then  "bu kim"
+    !dinle <ses.wav>     / !hear    play a sound with your next utterance (it is heard at its start), e.g.
+                                    !dinle ben.wav  then  "bu benim sesim"; later  !dinle baska.wav  then  "bu kim"
     !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
                                     reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
     !kendini_tani [n]    / !self    lessons about itself (true things told to it), n times
+    !uyu [n]             / !sleep   sleep: n dreams (imagination about the last topic and what it is unsure of), then
+                                    sorting: its imaginings weighed against what is real (trust in its imagination
+                                    follows), and which earlier dreams life has since shown true or false
+                                    (it also sleeps by itself after 10 minutes of silence)
     !kendin              / !introspect  what it can say about itself from its own evidence (its self unit)
     !arastir <konu>      / !research  on your command: search the web (Google Custom Search if GOOGLE_API_KEY and
                                     GOOGLE_CSE_ID are set, otherwise Wikipedia) and read what is found (pages printed)
@@ -147,6 +153,7 @@ FACETS = "parca"
 TURN, TURN_END = "sira", "⏎"
 PERSON, SOMEONE = "kisi", "biri"
 from .gorme import EYE, LOOK
+from .isitme import EAR, SOUND
 TONE = "ton"                          # how an utterance ends (? ! .) is perceived with its end, like intonation
 FINAL = (".", "?", "!", "…")     # who is speaking is perceived (like a face or a voice); "biri" = someone unknown          # the end of someone's utterance (Enter) is perceived, like a pause in speech
 VALUE = "deger"
@@ -171,11 +178,14 @@ class Session:
             mind.add_channel(name, "context")
         mind.add_channel(EYE, "sense")          # a seen thing is present in the episode, its aspects are facets
         mind.add_channel(LOOK, "facet")
+        mind.add_channel(EAR, "sense")          # a heard thing likewise
+        mind.add_channel(SOUND, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
         self.curious = True                     # the curiosity reflex (T4) is on in conversation
         from .mind import SELF_CHANNEL
         if not mind.ch.has(SELF_CHANNEL):       # minds born before the self unit existed get it now
             mind.add_channel(SELF_CHANNEL, "context")
+        self.hearing = None                     # a sound heard with the next utterance: (gist, facets)
         self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
         self.open_turn = False                # the mind has just answered; feedback may still come
 
@@ -204,10 +214,16 @@ class Session:
         theta = self.mind.knob["theta"]
         self.mind.knob["theta"] = 1e9
         try:
-            if self.view is not None:                       # the image shown with this utterance is seen first
-                gist, facets = self.view
-                self.view = None
-                self.mind.step([Event(EYE, gist, SENSED)] + [Event(LOOK, f, SENSED) for f in facets])
+            if self.view is not None or self.hearing is not None:   # what is shown and heard with this utterance
+                sensed = []                                         # comes first, both in the same moment
+                if self.view is not None:
+                    gist, facets = self.view
+                    sensed += [Event(EYE, gist, SENSED)] + [Event(LOOK, f, SENSED) for f in facets]
+                if self.hearing is not None:
+                    gist, facets = self.hearing
+                    sensed += [Event(EAR, gist, SENSED)] + [Event(SOUND, f, SENSED) for f in facets]
+                self.view = self.hearing = None
+                self.mind.step(sensed)
             for symbol in self.body(text):
                 self.mind.step(self.events(symbol, prov, speaker))
         finally:
@@ -434,26 +450,49 @@ class Session:
         return "  böyle bir numara yok"
 
 
+def night_report(night) -> List[str]:
+    """What the mind can tell of a night: its dreams, which earlier dreams reality has judged, its trust in its
+    imagination before and after."""
+    lines = []
+    for d in night["dreams"]:
+        new = sum(1 for claim in d["claims"] if claim[3] + claim[4] == 0)
+        note = "   (yeni bir şey kurmadım, bildiğimi hatırladım)" if not new else ""
+        if d["other"]:
+            lines.append("  rüyamda (%s yerine %s): %s   [gerçeklik %.2f]%s" % (d["about"], d["other"],
+                                                                          " ".join(d["words"]), d["reality"], note))
+        else:
+            lines.append("  rüyamda: %s%s" % (" ".join(d["words"]), note))
+    for v, d in night["judged"]:
+        lines.append("  %s: %s" % ("doğru çıktı" if v == "dogru" else "yanlış çıktı", " ".join(d["words"])))
+    srt = night["sorting"]
+    lines.append("  uyandım. hayal ettiklerimden gerçek kanıtla örtüşen %.1f, çelişen %.1f, sınanmamış %d; kendi "
+                 "hayallerime güvenim %.2f -> %.2f" % (srt["true"], srt["false"], int(srt["open"]), srt["trust_before"],
+                                                       srt["trust"]))
+    return lines
+
+
 class LifeClock:
     """The mind lives while nobody types: after a short silence it thinks about the last topic (inner voice, kept as
     imagined); after a longer silence, if that thought was real enough, it says it (it speaks first), once per
     silence. It never speaks into someone's turn; a lock keeps the clock and the conversation from living at once."""
 
     def __init__(self, session, lock, think_after: float = 20.0, speak_after: float = 60.0,
-                 real_enough: float = 0.75) -> None:
+                 real_enough: float = 0.75, sleep_after: float = 600.0) -> None:
         import threading
         import time
         self.session, self.lock = session, lock
         self.think_after, self.speak_after, self.real_enough = think_after, speak_after, real_enough
+        self.sleep_after = sleep_after
         self.last_input = time.time()
         self.thought = None                 # (topic, words, reality) of this silence
         self.spoke = False
+        self.slept = False
         self.stop = threading.Event()
         self.thread = threading.Thread(target=self._run, daemon=True)
 
     def heard(self) -> None:
         import time
-        self.last_input, self.thought, self.spoke = time.time(), None, False
+        self.last_input, self.thought, self.spoke, self.slept = time.time(), None, False, False
 
     def start(self) -> None:
         self.thread.start()
@@ -480,6 +519,12 @@ class LifeClock:
                     self.session.mind.step([])
                     self.spoke = True
                 print("\n  zihin (kendiliğinden): %s %s\n> " % (topic, " ".join(words_)), end="", flush=True)
+            if not self.slept and self.sleep_after and quiet >= self.sleep_after:
+                from .dusunce import sleep as dream_sleep
+                with self.lock:                             # a long silence: it sleeps, dreams and sorts its dreams
+                    night = dream_sleep(self.session)
+                    self.slept = True
+                print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night)), end="", flush=True)
 
 
 def home_mind() -> str:
@@ -678,6 +723,11 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     gist, facets = features(rest.strip())
                     session.view = (gist, facets)
                     print("  görüyorum (%d yön); bir sonraki sözün bu resimle birlikte algılanacak" % len(facets))
+                elif cmd in ("dinle", "hear"):
+                    from .isitme import features as hearing
+                    gist, facets = hearing(rest.strip())
+                    session.hearing = (gist, facets)
+                    print("  duyuyorum (%d yön); bir sonraki sözün bu sesle birlikte algılanacak" % len(facets))
                 elif cmd in ("dusun", "düşün", "think"):
                     from .dusunce import think, topic_of
                     topic = rest.strip() or topic_of(session)
@@ -694,6 +744,9 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     if rest.strip():
                         session.partner = lower_tr(rest.strip()).split()[0]
                     print("  konuşan: %s" % session.partner)
+                elif cmd in ("uyu", "sleep"):
+                    from .dusunce import sleep as dream_sleep
+                    print("\n".join(night_report(dream_sleep(session, int(rest) if rest.strip().isdigit() else 5))))
                 elif cmd in ("kendin", "introspect"):
                     from .kendilik import self_report
                     print(self_report(session.mind, CHANNEL))
