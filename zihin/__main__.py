@@ -455,11 +455,13 @@ def night_report(night) -> List[str]:
     imagination before and after."""
     lines = []
     for d in night["dreams"]:
+        new = sum(1 for claim in d["claims"] if claim[3] + claim[4] == 0)
+        note = "   (yeni bir şey kurmadım, bildiğimi hatırladım)" if not new else ""
         if d["other"]:
-            lines.append("  rüyamda (%s yerine %s): %s   [gerçeklik %.2f]" % (d["about"], d["other"], " ".join(d["words"]),
-                                                                        d["reality"]))
+            lines.append("  rüyamda (%s yerine %s): %s   [gerçeklik %.2f]%s" % (d["about"], d["other"],
+                                                                          " ".join(d["words"]), d["reality"], note))
         else:
-            lines.append("  rüyamda: %s" % " ".join(d["words"]))
+            lines.append("  rüyamda: %s%s" % (" ".join(d["words"]), note))
     for v, d in night["judged"]:
         lines.append("  %s: %s" % ("doğru çıktı" if v == "dogru" else "yanlış çıktı", " ".join(d["words"])))
     srt = night["sorting"]

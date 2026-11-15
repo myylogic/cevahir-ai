@@ -29,6 +29,9 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
   60 saniye sessizlikte, düşüncesi yeterince gerçekse konuşmayı kendisi başlatabilir (`--yasamsiz` ile kapatılır).
 - Bilmediği bir kelimeyle karşılaşıp söyleyecek bir şeyi olmadığında o kelimeyi soru tonuyla geri sorar
   ("kuantum ?"); açıkladığınızı öğrenir ve sonra kullanır.
+- 10 dakika sessizlikte uyur: son konu ve emin olmadığı kelimeler üzerine rüya görür (bir düşünceyi benzediği bir
+  kavrama taşıyarak hayal kurar), sonra hayallerini yaşadıklarıyla tartar. Hangi hayalinin doğru, hangisinin yanlış
+  çıktığını söyler; yanlış çıkan bir hayal silinmez, gerçek kanıt ona ağır basar. `!uyu` ile isteyince de uyur.
 
 ## Komutlar
 
@@ -42,6 +45,8 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
 | `!dusun [konu]` | iç sesini dinlemek: bir konu üzerine düşünür, benzeştirdiği bir kavrama aktararak hayal kurar; her hayalin gerçeklik puanı yazılır |
 | `!kim <ad>` | konuşan kişiyi değiştirmek |
 | `!gor <resim>` | bir resmi bir sonraki sözünüzle birlikte göstermek (örn. `!gor ben.jpg` sonra `ben muhammed`) |
+| `!dinle <ses.wav>` | bir sesi bir sonraki sözünüzle birlikte duyurmak (örn. `!dinle sesim.wav` sonra `bu benim sesim`) |
+| `!uyu [n]` | uyku: n rüya görür, sonra hayallerini ayıklar; daha önceki rüyalarından hangilerinin doğru ya da yanlış çıktığını ve kendi hayallerine güveninin nasıl değiştiğini söyler |
 | `!arastir <konu>` | açık talimatınızla internetten okumak (Google Custom Search anahtarı tanımlıysa Google, değilse Vikipedi); okuduğu sayfalar yazılır |
 | `!kendini_gelistir [n]` | merak ettiği n konuyu kendisi seçip araştırır; okuma yollarından hangisinin daha çok öğrettiğini ölçer ve ona göre seçer |
 | `!oku <dosya/klasör> [en çok cümle]` | belgeleri okumak (.txt .md .docx .pdf, .json/.tsv diyaloglar) |
@@ -57,10 +62,11 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
 - İlk nefesi verilen verilerdir; büyük ölçüde izlediği diyalogları taklit eder, izlemediği sorulara ilişki kurarak
   ve okuduğundan cevap verebilir, bilmediğinde susar ya da sorar. Akıcı bir dil modeli değildir.
 - Kendisi hakkındaki sorulara kendisine anlatılan gerçeklerle cevap verir; benlik birimi kendi yaşamından büyür.
-- Görme ilk sürümdür: benzer resimleri tanır; farklı ışık ve açıdan yüz tanıma zihnin kendi özelliklerini
-  öğrenmesini gerektirir.
+- Görme ve işitme ilk sürümdür: benzer resimleri ve sesleri tanır; farklı ışık ve açıdan yüz tanıma, gürültüde
+  ses tanıma zihnin kendi özelliklerini öğrenmesini gerektirir. Kendi sesi (konuşma çıktısı) henüz yoktur.
+- Rüyalar şimdilik yalnız kelimelerle görülür; bir hayalin doğruluğu kelimeden kelimeye bağlarla tartılır.
 - Bilinç ya da genel zekâ iddiası yoktur; yetenekler testlerle ölçülür, olumsuz sonuçlar da kayıtlıdır
-  (`research/living_mind_2026_11_14/RESULTS.md`, `NOTES.md`).
+  (`research/living_mind_2026_11_14/RESULTS.md`, `NOTES.md`, `research/living_mind_2026_11_15/NOTES.md`).
 
 ## Gizlilik
 

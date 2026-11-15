@@ -1,0 +1,19 @@
+# Dream demonstration (F22): public imagination text read twice, two nights, reality told between them
+# input: research/living_mind_2026_11_15/results/seventh_dreams_input.txt
+
+Cevahir — 0 an yaşamış bir zihin. anlat, sor (?...), !konus, !neden, !unut, !kaydet, !cik
+  1 dosya, 5 cümle/diyalog, 32 an, 0 sn (1.8 ms/an)
+  1 dosya, 5 cümle/diyalog, 64 an, 0 sn (1.3 ms/an)
+  rüyamda (ıslatır yerine söndürür): söndürür ve bitkileri sular   [gerçeklik 0.67]   (yeni bir şey kurmadım, bildiğimi hatırladım)
+  rüyamda (yemek yerine bitkileri): bitkileri pişirir   [gerçeklik 0.50]
+  rüyamda (yağmur yerine su): su toprağı ıslatır ve bitkileri sular   [gerçeklik 0.60]
+  uyandım. hayal ettiklerimden gerçek kanıtla örtüşen 48.4, çelişen 24.4, sınanmamış 58; kendi hayallerime güvenim 0.58 -> 0.61
+  rüyamda (bitkileri yerine ateşi): ateşi sular   [gerçeklik 0.50]
+  rüyamda (güneş yerine yağmur): yağmur dünyayı ısıtır ve bitkileri büyütür   [gerçeklik 0.58]
+  yanlış çıktı: bitkileri pişirir
+  uyandım. hayal ettiklerimden gerçek kanıtla örtüşen 54.9, çelişen 31.2, sınanmamış 97; kendi hayallerime güvenim 0.63 -> 0.63
+  yaşanmış an: 138   gece (uyku döngüsü): 2
+  karşılaştığı kelime: 19   kanaat kazandığı kelime (c >= 0.5): 19
+  kurduğu kavram (kategori): 12   çerçeve: 31   birleşik birim (dizi): 52
+  bağ: 1034   öz: 0.2 MB
+  (insan yaşı karşılığı verilmez: kaynaklı bir gelişim normu olmadan sayı uydurulmaz)

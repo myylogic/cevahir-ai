@@ -22,7 +22,7 @@ from zihin.__main__ import CHANNEL, Session, words
 from zihin.dusunce import remember_dream, sleep, sort_dreams, verdict
 from zihin.store import W_NEG, W_POS
 
-TEXT = "research/living_mind_2026_11_14/data/imagination_text.txt"
+TEXT = "research/living_mind_2026_11_14/data/imagination_text.txt"   # the F20 imagination text
 
 
 def new_session() -> Session:
