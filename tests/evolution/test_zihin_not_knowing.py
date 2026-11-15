@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-"""Zihin L7: not knowing, felt, and how it is said, learned.
+"""Zihin L7: not knowing is felt; how it is said is never given by the core.
 
 What is pinned here
 -------------------
 * When the world calls on the mind (someone's turn ends) and it decides nothing, the amount it does not know is
   measured; if the next moment passes in silence it perceives that state as an inner event, alone in its moment.
   It answers what it knows without feeling it; watching others never makes it feel it.
-* Before it has lived how one says it, the mind does not say "bilmiyorum" (it only asks back the unknown word).
-* After lessons lived at the moment it felt not knowing, it says "bilmiyorum" about something it does not know,
-  asks about the unknown word, and still answers what it knows.
+* The core holds no sentences to say: a mind that has not lived how one says it does not say "bilmiyorum".
+* There are no scripted lessons about the mind or about not knowing in the core (removed at the owner's decision).
 """
 from __future__ import annotations
 
@@ -51,15 +50,15 @@ def test_not_knowing_is_felt_only_when_called_on_and_without_an_answer():
     assert len(felt) == 1 and felt[0].symbol == NOT_KNOWING and 0.0 < felt[0].intensity <= 1.0
 
 
-def test_before_lessons_it_does_not_say_bilmiyorum():
+def test_a_mind_that_never_lived_it_does_not_say_bilmiyorum():
     session = raised()
     answer = session.reply("kuantum nedir ?")
-    assert "bilmiyorum" not in answer and answer.endswith("kuantum ?")
+    assert "bilmiyorum" not in answer
 
 
-def test_after_lessons_it_says_it_does_not_know_asks_and_still_answers_what_it_knows():
-    session = raised()
-    session.lessons_about_itself(2)
-    unknown = session.reply("fotosentez ne demek ?")
-    assert unknown.startswith("bilmiyorum") and unknown.endswith("fotosentez ?")
-    assert session.reply("kahvaltıda ne yedin ?").startswith("simit ve peynir")
+def test_the_core_holds_no_scripted_lessons():
+    import zihin.kendilik as kendilik
+    for name in ("LESSONS", "not_knowing_lessons", "_SYLLABLES", "_ASKING", "_NOT_KNOWING"):
+        assert not hasattr(kendilik, name)
+    for name in ("lessons_about_itself", "not_knowing_lesson"):
+        assert not hasattr(Session, name)

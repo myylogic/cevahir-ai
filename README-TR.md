@@ -17,8 +17,8 @@
 >   (küçük bir zihinde yaklaşık 2 ms, 3 milyon bağda yaklaşık 4 ms).
 > - **Unutma:** defteri tutulduğu sürece tek bir deneyimin kanıtını tam olarak geri alır (**Kesin Unutma**);
 >   programda bu, o oturumda yazdıklarınız için geçerlidir (`!unut`).
-> - **Bilmemek:** bilmediğini ölçülen bir iç his olarak fark eder ve bunu söylemeyi öğrenir: `!kendini_tani`
->   derslerinden sonra "bilmiyorum , öğrenmek isterim" der; yeni bir zihin bilinmeyen kelimeyi geri sorar.
+> - **Bilmemek:** bilmediğini ölçülen bir iç his olarak fark eder. Bunu nasıl söyleyeceğini birlikte yaşadığı
+>   insanlardan ve verilerinden öğrenir; çekirdekte bunun için hazır bir cümle yoktur.
 > - **Rüya:** uykuda günün konuları üzerine rüya görür; sonraki gecelerde hayallerinden hangisinin doğru çıktığını
 >   ayıklar.
 > - **Sonuçtan öğrenme:** bir araştırma testinde (altı küçük fonksiyon, her biri üç aday tamamlama) testten geçen
@@ -59,7 +59,6 @@ programın içinde yazın:
 !oku belgelerim/                  # .txt .md .docx .pdf belgeler, .json/.tsv diyaloglar, kaynak kod
 !ogret diyaloglar.tsv             # her satır: soru<TAB>cevap (UTF-8 olarak kaydedin)
 !izle selam || merhaba            # bir konuşmayı izletmek
-!kendini_tani                     # kendisi hakkında dersler; "bilmiyorum" demeyi de içerir
 !dogru  /  !yanlis                # son cevabını nasıl karşıladığınız
 !uyu    !dusun <konu>    !kendin  # rüya, iç ses, iç gözlem
 !cik                              # çıkış
@@ -71,9 +70,8 @@ kaydedilir (Windows: `%USERPROFILE%\.cevahir\zihin\cevahir.zihin`; klasörü `CE
 kaydetmez).
 
 Şimdiye kadar yetiştirilen zihinler yazarın özel Türkçe verilerini yaşadı ve bu depoda değildir. Sizin kopyanız,
-`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Yerleşik dersleri Türkçedir; başka bir dilde konuşacaksanız
-onların karşılıklarını o dilde öğretin ve programı `--dil diger` ile başlatın, böylece büyük harfler Türkçe kurallar
-olmadan küçültülür. Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
+`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Türkçe dışında bir dilde konuşacaksanız programı `--dil diger` ile
+başlatın, böylece büyük harfler Türkçe kurallar olmadan küçültülür. Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
 için ne kadar veri gerektiği ölçülmedi. Zihin dosyası okuduklarını içinde taşır; özel belgelerle yetiştirdiğiniz bir
 zihni paylaşmayın.
 

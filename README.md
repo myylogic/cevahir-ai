@@ -17,9 +17,8 @@
 >   grows only slowly as the mind grows (about 2 ms on a small mind, about 4 ms at 3 million ties).
 > - **Forgetting:** while its ledger is kept, the evidence of any single experience can be taken back exactly
 >   (**Exact Retraction**); in the program this covers what you typed in the current session (`!unut`).
-> - **Not knowing:** it feels when it does not know (a measured inner state) and learns to say so: after the
->   `!kendini_tani` lessons it answers "bilmiyorum , öğrenmek isterim" ("I don't know, I'd like to learn"); a new mind
->   asks the unknown word back.
+> - **Not knowing:** it feels when it does not know (a measured inner state). How it says so is learned from the
+>   people it lives with and from its data; the core holds no sentence for it.
 > - **Dreams:** in sleep it dreams about the day's topics, and on later nights sorts which of its imaginings came out
 >   true.
 > - **Learning from consequences:** in a research test (six tiny functions, three candidate completions each) it
@@ -61,7 +60,6 @@ alias):
 !oku my_documents/                # !read: .txt .md .docx .pdf documents, .json/.tsv dialogues, source code
 !ogret dialogues.tsv              # !teach: each line question<TAB>answer, saved as UTF-8
 !izle hello || hi                 # !watch: let it watch an exchange
-!kendini_tani                     # !self: lessons about itself, including saying "bilmiyorum" (Turkish)
 !dogru  /  !yanlis                # !good / !bad: how you received its last answer
 !uyu    !dusun <topic>   !kendin  # !sleep, !think, !introspect: dream, inner voice, introspection
 !cik                              # !quit
@@ -73,8 +71,8 @@ While it is open it lives in its own time: it thinks and may speak after a silen
 save).
 
 The minds raised so far lived the author's private Turkish data and are not in this repository. Your copy learns the
-language you teach it with `!ogret` and `!oku`. Its built-in lessons are Turkish, so teach their equivalents in your
-language, and start it with `--dil diger` so that capital letters are lowered without Turkish rules. After a dozen
+language you teach it with `!ogret` and `!oku`. For a language other than Turkish, start it with `--dil diger` so
+that capital letters are lowered without Turkish rules. After a dozen
 pairs it answers the questions it was shown; how much data a new language needs for questions it has not seen has
 not been measured. A mind file carries what it has read, so do not share a mind raised on private documents.
 
@@ -118,7 +116,7 @@ In November 2026 I started a new core, separate from the Transformer: **Zihin** 
 - It sees and hears (first versions): image and sound files are perceived by plain pixel and signal arithmetic, with no trained network, and recognised by resemblance. New images 73% / 83% / 67% right, new sounds 93% / 97% / 93% (chance 33%; 0% with resemblance off).
 - Curiosity and imagination (first forms): with nothing to say it asks back the word it did not know, with a question tone, and learns and uses what it is told (T4). It imagines by carrying a thought over to a structurally similar concept and scores every step for reality against lived evidence (T8).
 - Sleep and dreams: asleep, it dreams about the last topic and the words it is unsure of. A dream is a chain of imaginings linked by association, and an image it saw with a word is "seen" again in the dream. Then it weighs its imaginings against what it has lived, says which earlier dreams came out true or false, and learns from this how far to trust its own imagination. A dream found false is not deleted; real evidence outweighs it.
-- Not knowing, and thinking: when its turn comes with no answer at once, it says the most real of the thoughts the heard words called to mind, with reality measured against lived evidence. With no such thought it perceives its not knowing as an inner state and learns by living to say "bilmiyorum" (I don't know). It asks about the unknown word.
+- Not knowing, and thinking: when its turn comes with no answer at once, it says the most real of the thoughts the heard words called to mind, with reality measured against lived evidence. With no such thought it perceives its not knowing as an inner state; how it says so is learned from the people it lives with and from its data. It asks about the unknown word. Until 15 November 2026 the chat program also held scripted lessons about the mind and about saying "bilmiyorum", written by the developer; they were removed from the core at the owner's decision, and minds raised before lived them.
 - Online life: from the moment a session starts it lives in its own time. Its words come out as it says them. In silence it thinks, speaks first or asks about what it most wants to know, and in a long silence it sleeps.
 - Turkish structure (opt-in): with `--parca cevahir` a mind lives each word with its root, suffix and stem pieces from the repository's own tokenizer infrastructure, so words built alike resemble each other. Raised with pieces from birth, a mind grew about five times as many ties per moment and ran out of memory, so pieces are off by default.
 - Learning code from its consequences (first test): on six tiny functions it first watches mostly wrong completions. Then the code it writes is actually run, and the test result comes back as a good/bad signal; when it hesitates it tries the alternative whose consequences it knows least. By round 4 it writes passing code for all six tasks; without the signal it stays at 0%, and without trying at 11%.

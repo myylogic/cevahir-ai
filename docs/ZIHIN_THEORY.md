@@ -165,9 +165,9 @@ At each moment, roughly each word, the mind lives these steps:
   enough by lived evidence.
 - **Felt Not-Knowing.** Not knowing is a measured inner state, not an output:
   `u = 1 − 2·max(0, best expectation − ½)`. The state is perceived on its own after a silent moment. What one says
-  then, such as "bilmiyorum , öğrenmek isterim ." ("I don't know, I'd like to learn."), is learned by living, and
-  **curiosity** then asks back the unknown word with a question tone. A new mind that has not lived such lessons asks
-  the word back or stays silent. Hesitating between two strong answers is not not-knowing, and it does not raise the
+  then is learned from the people the mind lives with and from its data; the core holds no sentence for it.
+  **Curiosity**, an innate reflex of the chat program, asks back the unknown word with a question tone. A mind that
+  has not lived how one says it asks the word back or stays silent. Hesitating between two strong answers is not not-knowing, and it does not raise the
   feeling.
 
 ## 7. Imagination, dreams and reasoning
@@ -258,7 +258,10 @@ The models were small and the data scarce; with far more data the gap may close.
   - the first attempt at learning to learn was negative;
   - a mind raised with word pieces from birth ran out of memory;
   - the one-shot evidence fix made conversation worse;
-  - the chat configuration does poorly in the generated worlds where the "members" configuration does well.
+  - the chat configuration does poorly in the generated worlds where the "members" configuration does well;
+  - until 15 November 2026 the chat program held scripted lessons about the mind and about saying "bilmiyorum",
+    written by the developer; they were removed from the core at the owner's decision. Minds raised before lived
+    them, and the measurements that used them say so.
 
 ## Names used in this theory
 
@@ -322,7 +325,6 @@ you. Commands are typed at the program's prompt, not in the shell; each has an E
 !oku my_documents/                # !read: .txt .md .docx .pdf documents, .json/.tsv dialogues, source code
 !ogret dialogues.tsv              # !teach: each line question<TAB>answer, saved as UTF-8
 !izle hello || hi                 # !watch: watch an exchange
-!kendini_tani                     # lessons about itself, including saying "bilmiyorum" (Turkish)
 !dogru  /  !yanlis                # !good / !bad: how you received its last answer
 !uyu    !dusun <topic>   !kendin  # !sleep, !think, !introspect: dream, inner voice, introspection
 !cik                              # !quit
@@ -334,8 +336,8 @@ While it is open it lives in its own time: it thinks and may speak after a silen
 save).
 
 The minds raised so far lived the author's private Turkish data and are not in this repository. Your copy learns the
-language you teach it with `!ogret` and `!oku`. Its built-in lessons are Turkish, so teach their equivalents in your
-language, and start it with `--dil diger` so that capital letters are lowered without Turkish rules. After a dozen
+language you teach it with `!ogret` and `!oku`. For a language other than Turkish, start it with `--dil diger` so
+that capital letters are lowered without Turkish rules. After a dozen
 pairs it answers the questions it was shown; how much data a new language needs for questions it has not seen has
 not been measured. A mind file carries what it has read, so do not share a mind raised on private documents. Full
 guide (Turkish): [ZIHIN_KILAVUZ.md](ZIHIN_KILAVUZ.md).

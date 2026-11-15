@@ -18,7 +18,6 @@ Commands (Turkish, with English aliases):
                                     !dinle ben.wav  then  "bu benim sesim"; later  !dinle baska.wav  then  "bu kim"
     !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
                                     reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
-    !kendini_tani [n]    / !self    lessons about itself (true things told to it), n times
     !uyu [n]             / !sleep   sleep: n dreams (imagination about the last topic and what it is unsure of), then
                                     sorting: its imaginings weighed against what is real (trust in its imagination
                                     follows), and which earlier dreams life has since shown true or false
@@ -278,40 +277,6 @@ class Session:
         self.end_of_turn(prov, tone=self.tone(first))
         self.listen(answer, prov)
         self.end_of_turn(prov, tone=self.tone(answer))
-        self.mind.step([])
-
-    def lessons_about_itself(self, times: int = 1) -> int:
-        """L8: true things about the mind, told to it (provenance told), and L7: how one says one does not know, told
-        at the moment it has itself felt that it does not know. Returns how many utterances were lived."""
-        from .kendilik import LESSONS, not_knowing_lessons
-        n = 0
-        for _ in range(times):
-            for question, answer in LESSONS:
-                self.watch(question, answer, prov=TOLD)
-                n += 1
-            for question, answer in not_knowing_lessons():
-                self.not_knowing_lesson(question, answer)
-                n += 1
-        return n
-
-    def not_knowing_lesson(self, question: str, answer: str) -> None:
-        """Someone asks; the turn is the mind's and it finds nothing to say; a moment passes and it feels that it does
-        not know; right then it is told what one says (the answer is heard in the mind's role)."""
-        from .mind import INNER_CHANNEL
-        self.listen(question, TOLD, speaker=SOMEONE)
-        self.end_of_turn(TOLD, listening=False, tone=self.tone(question))
-        self.mind.pending = [e for e in self.mind.pending if e.channel != CHANNEL]   # whatever it began, it lets go
-        self.mind.step([])                                   # the moment passes in silence: not knowing is felt
-        felt = any(e.channel == INNER_CHANNEL for e in self.mind.pending)
-        theta = self.mind.knob["theta"]
-        self.mind.knob["theta"] = 1e9
-        try:
-            self.mind.step([])                               # ... and perceived
-        finally:
-            self.mind.knob["theta"] = theta
-        if felt:
-            self.listen(answer, TOLD)                        # what one says then
-            self.end_of_turn(TOLD, tone=self.tone(answer))
         self.mind.step([])
 
     def reply(self, text: str, limit: int = 80, say=None) -> str:
@@ -984,8 +949,6 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                 elif cmd in ("kendin", "introspect"):
                     from .kendilik import self_report
                     print(self_report(session.mind, CHANNEL))
-                elif cmd in ("kendini_tani", "kendini_tanı", "self"):
-                    print("  kendisi hakkında %d söz yaşadı" % session.lessons_about_itself(int(rest) if rest.strip().isdigit() else 1))
                 elif cmd in ("yas", "yaş", "age"):
                     print(profile(session.mind))
                 elif cmd in ("boyut", "size"):

@@ -34,9 +34,8 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
   dener. `!yanlis` dediğin bir cevabı bir dahaki sefer denemez, başka bir cevap dener; `!dogru` dediğini tutar.
 - Her sohbetin sonunda (Ctrl+C dahil) ve uzun sohbetlerde 50 cevapta bir öğrendikleri kendiliğinden kaydedilir.
 - Bilmemek: sıra kendisine geldiğinde söyleyecek bir şey bulamazsa, bir an geçer ve bilmediğini bir iç his olarak
-  algılar. O anda ne denir, bunu yaşayarak öğrenir (`!kendini_tani` bu dersleri de verir): "bilmiyorum" der ve
-  bilmediği kelimeyi soru tonuyla sorar ("bilmiyorum , öğrenmek isterim kuantum ?"). Açıkladığınızı öğrenir ve
-  sonra kullanır.
+  algılar. O anda ne denir, bunu sizinle ve verileriyle yaşayarak öğrenir; çekirdekte bunun için hazır bir cümle yoktur.
+  Bilmediği kelimeyi soru tonuyla sorar ("kuantum ?"). Açıkladığınızı öğrenir ve sonra kullanır.
 - Önce düşünür, sonra konuşur: duyduğu sözün en az emin olduğu kelimeleri ona bildiklerini çağrıştırır (iç sesi,
   hayal olarak yaşanır ve yaşanmış kanıta göre gerçekliği ölçülür). Hemen bir cevabı yoksa, yeterince gerçek olan
   ilk düşüncesini söyler; yoksa bilmediğini hisseder.
@@ -72,7 +71,6 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
 | `!kendini_gelistir [n]` | merak ettiği n konuyu kendisi seçip araştırır; okuma yollarından hangisinin daha çok öğrettiğini ölçer ve ona göre seçer |
 | `!oku <dosya/klasör> [en çok cümle]` | belgeleri okumak (.txt .md .docx .pdf, .json/.tsv diyaloglar; kaynak kod da satır satır bir dil gibi okunur: .py .js .ps1 …, örn. `!oku zihin` kendi kodunu okur) |
 | `!izle <söz> \|\| <karşılık>` | iki kişinin konuşmasını izlemek (taklitle öğrenme) |
-| `!kendini_tani [n]` | kendisi hakkındaki doğru bilgileri ona anlatmak |
 | `!unut <no>` | bu oturumda söylediğiniz bir şeyi çekirdekten tam olarak geri almak (`!gecmis` numaraları gösterir) |
 | `!kaydet <ad>` / `!tasinabilir <ad>` | elle kaydetmek / deftersiz küçük bir kopya |
 | `!konus` | sohbet modunu açıp kapatmak (kapalıyken `?<metin>` beklentileri gösterir) |
@@ -96,8 +94,10 @@ algılanır.
 
 - İlk nefesi verilen verilerdir; büyük ölçüde izlediği diyalogları taklit eder, izlemediği sorulara ilişki kurarak
   ve okuduğundan cevap verebilir, bilmediğinde susar ya da sorar. Akıcı bir dil modeli değildir.
-- Kendisi hakkındaki sorulara kendisine anlatılan gerçeklerle cevap verir; ama okuduğu diyaloglarda başkalarının aynı
-  soruya verdiği cevaplar daha çoksa onları da söyleyebilir (örneğin "nerede yaşıyorsun ?" sorusuna bir şehir adı).
+- Kendisi hakkındaki sorulara sizin ve verilerinin ona anlattıklarıyla cevap verir; ama okuduğu diyaloglarda
+  başkalarının aynı soruya verdiği cevaplar daha çoksa onları da söyleyebilir (örneğin "nerede yaşıyorsun ?" sorusuna
+  bir şehir adı). 15 Kasım 2026'dan önce yetiştirilen zihinler, geliştiricinin yazdığı ve sonra çekirdekten
+  çıkarılan ezber dersleri de yaşadı.
   Benlik birimi kendi yaşamından büyür, ama söylediklerini henüz yönlendirmiyor.
 - Ölçüm: belgelerinden üretilen ve hiç izlemediği 60 soruda tam doğru cevap %17, kelime örtüşmesi (F1) 0.38,
   "bilmiyorum" %23.

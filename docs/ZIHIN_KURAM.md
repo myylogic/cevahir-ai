@@ -152,8 +152,9 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   ilk düşünce söylenir.
 - **Bilmeme Hissi (Felt Not-Knowing):** bilmemek bir çıktı değil, ölçülen bir iç haldir:
   `u = 1 − 2·max(0, en iyi beklenti − ½)`. Bu hal bir sessiz anın ardından tek başına algılanır. O anda ne
-  denileceği, örneğin "bilmiyorum , öğrenmek isterim .", yaşayarak öğrenilir. Ardından **merak** bilinmeyen kelimeyi
-  soru tonuyla sorar. Böyle dersler yaşamamış yeni bir zihin kelimeyi geri sorar ya da susar. İki güçlü cevap
+  denileceği, zihnin birlikte yaşadığı insanlardan ve verilerinden öğrenilir; çekirdekte bunun için hazır bir cümle
+  yoktur. Sohbet programındaki doğuştan bir refleks olan **merak**, bilinmeyen kelimeyi soru tonuyla geri sorar. Bunu
+  nasıl söyleyeceğini yaşamamış bir zihin kelimeyi geri sorar ya da susar. İki güçlü cevap
   arasında kalmak bilmemek değildir; o durumda bilmeme hissi doğmaz.
 
 ## 7. Hayal, rüya ve akıl
@@ -241,7 +242,10 @@ Bu karşılaştırma küçük modellerle ve az veriyle yapıldı; çok daha fazl
   - öğrenmeyi öğrenmenin ilk denemesi olumsuzdu;
   - doğuştan kelime parçalarıyla büyüyen zihin belleği tüketti;
   - tek duyum kanıtı düzeltmesi sohbeti kötüleştirdi;
-  - sohbet ayarı, "members" ayarının iyi sonuç verdiği üretilmiş dünyalarda kötü sonuç verir.
+  - sohbet ayarı, "members" ayarının iyi sonuç verdiği üretilmiş dünyalarda kötü sonuç verir;
+  - 15 Kasım 2026'ya kadar sohbet programında, geliştiricinin yazdığı, zihin hakkında ve "bilmiyorum" demek üzerine
+    ezber dersler vardı; sahibin kararıyla çekirdekten çıkarıldı. Daha önce yetiştirilen zihinler bunları yaşadı;
+    bunları kullanan ölçümler bunu belirtir.
 
 Hepsi notlarda ölçümleriyle durur.
 
@@ -307,7 +311,6 @@ yazılır:
 !oku belgelerim/                  # .txt .md .docx .pdf belgeler, .json/.tsv diyaloglar, kaynak kod
 !ogret diyaloglar.tsv             # her satır: soru<TAB>cevap (UTF-8 olarak kaydedin)
 !izle selam || merhaba            # bir konuşmayı izlemek
-!kendini_tani                     # kendisi hakkında dersler; "bilmiyorum" demeyi de içerir
 !dogru  /  !yanlis                # son cevabını nasıl karşıladığınız
 !uyu    !dusun <konu>    !kendin  # rüya, iç ses, iç gözlem
 !cik                              # çıkış
@@ -319,8 +322,7 @@ kaydedilir (Windows: `%USERPROFILE%\.cevahir\zihin\cevahir.zihin`; klasörü `CE
 kaydetmez).
 
 Şimdiye kadar yetiştirilen zihinler yazarın özel Türkçe verilerini yaşadı ve bu depoda değildir. Sizin kopyanız,
-`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Yerleşik dersleri Türkçedir; başka bir dilde konuşacaksanız
-onların karşılıklarını o dilde öğretin ve programı `--dil diger` ile başlatın, böylece büyük harfler Türkçe kurallar
-olmadan küçültülür. Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
+`!ogret` ve `!oku` ile ona öğrettiğiniz dili öğrenir. Türkçe dışında bir dilde konuşacaksanız programı `--dil diger` ile
+başlatın, böylece büyük harfler Türkçe kurallar olmadan küçültülür. Bir düzine soru-cevaptan sonra gösterilen soruları cevaplar; yeni bir dilin görmediği sorular
 için ne kadar veri gerektiği ölçülmedi. Zihin dosyası okuduklarını içinde taşır; özel belgelerle yetiştirdiğiniz bir
 zihni paylaşmayın. Ayrıntılı kılavuz: [ZIHIN_KILAVUZ.md](ZIHIN_KILAVUZ.md).

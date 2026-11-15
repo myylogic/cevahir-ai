@@ -1082,3 +1082,41 @@ and the full-state digest are unchanged.
 
 **Also fixed while merging.** The F24 voices channel was named "ses", the same name as the hearing facet channel, so
 `Config(voices=True)` crashed in a session. It is now "sesler", with a session test.
+
+## Scripted lessons removed from the core (2026-11-15)
+
+**What was there.** `zihin/kendilik.py` held 14 question/answer lessons about the mind (its name, what it is, where it
+lives, that it does not eat or sleep, ...) and a generator of "not knowing" lessons (questions about made-up words
+built from a list of syllables and six question templates, answered "bilmiyorum ." or "bilmiyorum , öğrenmek
+isterim ."). `Session.lessons_about_itself` and `Session.not_knowing_lesson` lived them as told experience, the second
+right after the mind had felt that it did not know, and the command `!kendini_tani` called them. They were written by
+the developer, not by the owner and not by the mind's own life.
+
+**Decision.** The owner rejected them: the core must not hold sentences for the mind to say, and his own first data
+already tells the mind about itself. They are removed: `zihin/kendilik.py` keeps only introspection from the mind's
+own evidence (`self_report`, the ties of the self unit); the two Session methods and the command are gone; a test
+pins that none of them comes back. The felt not-knowing state (L7) is a measured inner state and stays; what the mind
+says when it feels it is now learned only from the people it lives with and from its data.
+
+**What this touches.**
+
+- Minds raised before lived these lessons several times in their curricula (`!kendini_tani` in the curricula of
+  cevahir2 and of the morning mind cevahir3b), and the morning mind also watched the five toy dialogues of
+  `research/living_mind_2026_11_14/data/first_dialogues.tsv` (written by the developer for the first chat test,
+  including "adın ne / adım cevahir") three times in each of two curricula. Their self answers and their "bilmiyorum"
+  come largely from these lessons. Without a ledger the lessons cannot be retracted from those minds; a mind raised
+  without them is needed.
+- Measurements that used the lessons keep their numbers as records of that configuration: the morning mind's
+  held-out teacher questions (17% / 18% exact, "bilmiyorum" 23% / 18%), L7's "after lessons" result, and F25's
+  teacher-question protocol (`f25_teacher.py` calls `lessons_about_itself(1)`, so it runs only at the commits before
+  this change).
+- The substance-digest gate used for every bit-identical change so far (`digest_run.py`, 548 moments,
+  d8ba0375…) lived the lessons in 419 of its 548 moments. Its exactness verdicts stand (old and new code lived the
+  same lessons), but the gate is replaced by one without any scripted content: public research texts and dialogues
+  and two byte-protected Turkish reports (`docs/research/living_learning_2026_09_20/REPORT_TR.md`,
+  `docs/research/living_learning_library_2026_09_21/REPORT_TR.md`, 600 sentences each), 6695 moments, digest
+  cb3b9937… on both main 6e15b57 and this change.
+
+**Next.** An audit of the whole chat program and core for any other scripted sentence, template, word list or coded
+reflex (for example the curiosity reflex that asks back an unknown word with "?"), each to be removed or replaced by
+a learned or mathematical mechanism; then a mind raised again on the owner's data only.

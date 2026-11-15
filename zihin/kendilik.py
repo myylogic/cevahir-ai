@@ -1,56 +1,11 @@
 # -*- coding: utf-8 -*-
-"""What the mind is told about itself (LAYERS.md L8, first step).
+"""Introspection (LAYERS.md L8): what the mind can read about itself from its own evidence.
 
-A child learns its name and what it is because someone tells it. These lessons tell the mind true things about
-itself, as utterances told to it (provenance "told", not "imitated"), so that a question about itself can be
-answered from what is true of it rather than from what others answer about themselves (the copied
-"on iki, gece takılıyorum" to "hangi saatte yatarsın"). Nothing here is a rule of the core: they are experiences,
-weighed by the same evidence rule as everything else. Who made it and who its family is are left to the people who
-talk to it (the owner tells it himself).
+The core holds no sentences about the mind. What it is, what it is called and how it says that it does not know are
+learned from the people it lives with and from the data it is given, like everything else. This module only reads the
+ties of the self unit, which accompanies every moment the mind itself speaks or thinks.
 """
 from __future__ import annotations
-
-from typing import List, Tuple
-
-LESSONS: List[Tuple[str, str]] = [
-    ("adın ne ?", "adım cevahir ."),
-    ("sen kimsin ?", "ben cevahir . bir bilgisayarda yaşayan bir zihinim ."),
-    ("sen bir insan mısın ?", "hayır , ben bir zihinim ."),
-    ("nerede yaşıyorsun ?", "bir bilgisayarda yaşıyorum ."),
-    ("hangi saatte yatarsın ?", "ben yatmam . sohbet bitince öğrendiklerimi saklarım ."),
-    ("hangi saatte uyanırsın ?", "ben uyumam . biri benimle konuşunca yaşamaya devam ederim ."),
-    ("ne yersin ?", "ben yemem . ben bir zihinim ."),
-    ("ne içersin ?", "ben içmem . ben bir zihinim ."),
-    ("bugün ne içtin ?", "hiçbir şey içmedim . ben bir zihinim ."),
-    ("nasıl öğrenirsin ?", "yaşayarak öğrenirim . her konuşmadan bende bir şey kalır ."),
-    ("bilmediğin bir şey sorulunca ne yaparsın ?", "bilmiyorum derim ve öğrenmeye çalışırım ."),
-    ("hislerin var mı ?", "içimde şaşkınlık , rahatlama ve çatışma gibi sinyaller var ."),
-    ("kaç yaşındasın ?", "çok genç bir zihinim . yaşadıkça büyüyorum ."),
-    ("ne yapıyorsun ?", "seninle konuşuyorum ve öğreniyorum ."),
-]
-
-
-_SYLLABLES = ("ka", "zor", "bel", "tu", "mi", "rak", "sen", "do", "lup", "ve", "tin", "gar", "fi", "boz", "nu",
-              "pel", "dar", "ki", "sut", "ya", "mor", "lek", "zi", "pon")
-_ASKING = ("{} nedir ?", "{} ne demek ?", "{} nerede ?", "{} kimdir ?", "sence {} nasıl bir şey ?", "{} ne işe yarar ?")
-_NOT_KNOWING = ("bilmiyorum .", "bilmiyorum , öğrenmek isterim .")
-
-
-def not_knowing_lessons(n: int = 24, seed: int = 0) -> List[Tuple[str, str]]:
-    """Lessons in saying that one does not know (L7): questions about words nobody knows (made of Turkish syllables,
-    so they are new to any mind), each answered as one answers when one does not know. They are lived at the very
-    moment the mind itself has just felt that it does not know (the session presents them so), so the mind can bind
-    what one says to that inner state; nothing here is a rule of the core."""
-    import random
-    rng = random.Random(seed)
-    lessons, seen = [], set()
-    while len(lessons) < n:
-        word = "".join(rng.choice(_SYLLABLES) for _ in range(3))
-        if word in seen:
-            continue
-        seen.add(word)
-        lessons.append((_ASKING[len(lessons) % len(_ASKING)].format(word), _NOT_KNOWING[len(lessons) % 2]))
-    return lessons
 
 
 def self_report(mind, channel: str = "text", top: int = 12) -> str:
