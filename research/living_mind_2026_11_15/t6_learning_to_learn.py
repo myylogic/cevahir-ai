@@ -176,6 +176,28 @@ def summary(path: str, protected_off: bool = True) -> None:
         e = mean([curve(r, "experienced").get(m) for m in (30, 60, 90, 120, 180)])
         print("  seed %d %-8s -> %-8s fresh %.3f experienced %.3f  difference %+.3f" % (
             r["seed"], r["first"], r["second"], f, e, e - f))
+    print("\nPaired differences (mean over lives, standard error, lives better / equal / worse)")
+    on = {(r["seed"], r["first"]): r for r in records if r["flag"] == "on"}
+    off = {(r["seed"], r["first"]): r for r in records if r["flag"] == "off"}
+    early, late = (60, 120, 180), (300, 600)
+    for name, pairs in (
+            ("on: experienced - fresh, early", [(curve(r, "experienced"), curve(r, "fresh"), early) for r in on.values()]),
+            ("on: experienced - fresh, late", [(curve(r, "experienced"), curve(r, "fresh"), late) for r in on.values()]),
+            ("off: experienced - fresh, early", [(curve(r, "experienced"), curve(r, "fresh"), early) for r in off.values()]),
+            ("fresh: on - off (single domain), early", [(curve(on[k], "fresh"), curve(off[k], "fresh"), early)
+                                                        for k in on if k in off]),
+            ("fresh: on - off (single domain), late", [(curve(on[k], "fresh"), curve(off[k], "fresh"), late)
+                                                       for k in on if k in off]),
+            ("experienced on - fresh off, early", [(curve(on[k], "experienced"), curve(off[k], "fresh"), early)
+                                                   for k in on if k in off])):
+        diffs = [mean([a.get(m) for m in marks]) - mean([b.get(m) for m in marks]) for a, b, marks in pairs]
+        diffs = [d for d in diffs if d == d]
+        if len(diffs) < 2:
+            continue
+        mu = sum(diffs) / len(diffs)
+        se = (sum((d - mu) ** 2 for d in diffs) / (len(diffs) - 1) / len(diffs)) ** 0.5
+        print("  %-40s %+.3f +- %.3f  (%d / %d / %d of %d)" % (
+            name, mu, se, sum(d > 0 for d in diffs), sum(d == 0 for d in diffs), sum(d < 0 for d in diffs), len(diffs)))
     print("\nSingle-domain check (fresh minds = one domain each), end of life (600) and early (60, 120), mean over seeds")
     keys = ("held_told_rule_ok", "held_induced_ok", "member_ok", "exception_ok", "exception_kept")
     for domain in ("nitelik", "iliski"):

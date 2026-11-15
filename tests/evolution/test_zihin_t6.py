@@ -8,8 +8,8 @@ What is pinned here
 * Credibility is read general -> specific: a kind never relied on is worth what voices in general have been worth;
   with no experience of voices at all it is 1/2.
 * With no experience of voices the choice is exactly F11's: the setting on and off read the same.
-* What comes next judges the voice that spoke: once, the first time the context lives a value, one unit on the kind
-  and one on every voice; the same fact heard again adds nothing.
+* What comes next judges every voice that could have spoken (the one that spoke among them): once, the first time the
+  context lives a value, one unit per claim on its kind and on every voice; the same fact heard again adds nothing.
 * The voice that speaks is the one with the highest F11 score times credibility.
 * An outcome is logged evidence: retracting its moment removes exactly it, nothing else moves.
 * The lesson holds no word: in a new vocabulary the same kind is read with the same credibility, a fresh mind
