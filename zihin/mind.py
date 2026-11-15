@@ -76,6 +76,9 @@ class Config:
     situations: bool = False        # F23: an utterance never lived as a whole is met by the lived ones most like it
     explore: bool = False           # hesitation ends in a try: the acceptable alternative whose consequences are least
                                     # known is chosen (act._explore)
+    voices: bool = False            # F24: how far a kind of voice (how many members speak, how much they agree) can be
+                                    # believed is learned from what then came, and weighs the F11 choice (support
+                                    # "members"); the evidence is on the mind's own channel, so it carries to new domains
     bind_repeats: bool = False      # F12: a unit occurring at several positions of a tuple is one slot (variable)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
     evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
@@ -179,6 +182,8 @@ class Mind:
         self.idle = 0
         self.babbled = 0
         self.unknown = 0.0                           # L7: how much it did not know when the world last called on it
+        self.voice: Dict[int, tuple] = {}            # F24: context -> (voice that spoke, every voice heard), as
+                                                     # (kind, claim, f) each; judged by what comes next
         self.imagined = 0
         self._gained: List[Tuple[torch.Tensor, torch.Tensor]] = []
         self.trust = self._trust()
@@ -251,6 +256,8 @@ class Mind:
             percepts.append((self._atom(channel, SELF_SYMBOL), 1.0, own, channel))
         learn_follow(self, percepts)                       # step 5 for the previous moment
         learn_value(self, percepts)                        # L5: a value signal reaches every step of the episode
+        if getattr(self, "voice", None):
+            self.voice = {}                                # F24: the voices of the last moment have been judged
         surprise = self._surprise(percepts)
         slot = items[0][1] if items else SENSED
         if items:
@@ -658,7 +665,7 @@ class Mind:
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
-                  "unknown")
+                  "unknown", "voice")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}

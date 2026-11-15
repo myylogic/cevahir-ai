@@ -442,3 +442,244 @@ Tests: `tests/evolution/test_zihin_explore.py`, including the code test at 4 rou
 
 **Limit.** The tasks are tiny: three alternatives and a decisive second token. Writing new code means composing
 sequences nobody showed it. That needs imagination and analogy (T8) working with consequences, and it is open.
+
+## F24. Learning to learn: how far a voice can be believed, learned in one domain and carried to the next (2026-11-15)
+
+**The question (T6 again).** The first T6 (`research/living_mind_2026_11_14/RESULTS.md`, section T6) was negative. A
+mind that had lived nitelik learned iliski no faster than a fresh mind, and the same held the other way round. Only
+the learned trust in the teller carried over. The question here: can something the mind learns about learning itself
+carry over? The owner's rule applies: no hand-coded skill, the mind's own measured evidence decides, everything is
+lived as experience and stays retractable.
+
+**Where early learning fails** (diagnosis with the setting off; fresh minds, seeds 0 and 4, both domains; held-out
+probes of `run.py`, white box on a clone):
+
+| experiences | probes | answered right | class frame exists | class frame has the right value on top | class frame chosen |
+|---|---|---|---|---|---|
+| 30 | 12 | 0.25 | 1.00 | 0.33 | 0.25 |
+| 60 | 22 | 0.36 | 1.00 | 0.59 | 0.23 |
+| 90 | 32 | 0.38 | 1.00 | 0.59 | 0.31 |
+| 120 | 42 | 0.57 | 1.00 | 0.79 | 0.43 |
+| 180 | 48 | 0.69 | 1.00 | 0.88 | 0.58 |
+| 300 | 56 | 0.71 | 1.00 | 0.93 | 0.70 |
+
+The knowledge is there early: the frame of the true class exists in every probe. The F11 reading chooses it far less
+often than it is right. In the early probes (up to 180 experiences) where another voice spoke, 53 of 92 times that
+voice was one member speaking alone. Its "agreement" is 1.00 by construction, because one member always agrees with
+itself. F11's score e(i→g) · conviction(members) · max f prefers such a voice to a class whose three members agree two
+to one.
+
+So early learning in a new domain is a problem of meaning: which voice to believe. That kind of knowledge does not
+depend on any word, so it could be learned once and carried.
+
+**Mechanism** (`Config.voices`, default off; acts on support "members"):
+
+1. **The kind of a voice.** When the mind reads a context, every generalisation whose members have lived something in
+   its slot is a voice (F11). The mind perceives two magnitudes of each voice:
+   - n, how many members speak, in doubling bands 1, 2, 3–4, 5–8, 9–16, 17+;
+   - f\*, how much they agree: the frequency of their top value, in quarters. One half, where a prediction starts to
+     hold, is a band edge, and all agreeing is a band of its own.
+
+   kind = (band(n), band(f\*)). A kind names no word, class, dimension or domain (`read.voice_kind`).
+2. **Self-test by what comes next.** For the context read with the full trust, the mind notes the voice that spoke
+   and every voice that could have spoken, each with its claim (top value v\*, frequency f\*). Then the context may
+   live a value v for the first time: its tie to v had no evidence, so the prediction rested on the voices and not on
+   the context's own past. Each claim is then judged by the core's measure of a holding prediction:
+
+   > held ⇔ v\* = v and f\* > 1/2
+
+   Each judged claim is one experience (gain g) on two ties of the mind's own channel `ses`, class sensed:
+   (kind → holds) and (every voice → holds). The evidence goes through the ordinary logged path, so it can be
+   retracted exactly (`learn.judge_voices`).
+3. **Credibility,** read general → specific, the nested form of `expect_map`:
+
+   > e ← e(every voice → holds);  e ← c_kind · f_kind + (1 − c_kind) · e
+
+   A kind never lived is worth what voices in general have been worth. With nothing lived about voices it is 1/2
+   (`read.voice_credibility`).
+4. **Choice.** F11's score of each voice is weighted by its credibility:
+
+   > score = e(i→g) · conviction(members) · max f · credibility(kind)
+
+   With no experience of voices every credibility is 1/2, and the choice is exactly F11's. Only the choice changes;
+   the expectations of the chosen voice are F11's.
+5. **Carrying.** The ties live on the mind's own channel, not on any domain's words. When the mind meets a new
+   vocabulary, its first readings already weigh voices by what the first domain taught, and the new domain's outcomes
+   add to the same ties.
+
+**Two earlier versions, measured and discarded:**
+
+- **v1: only the voice that spoke was judged; a kind never lived counted 1/2; agreement in tenths.** One life per
+  domain (seed 0), mixed to worse: nitelik told-rule held-out 0.50 and 0.83 at 180 and 240 experiences, against 1.00
+  and 1.00 with the setting off. In the learned tables voices failed 80–90% of the time, because most first-time facts
+  are of free dimensions that nothing can predict. A kind never relied on (1/2) therefore beat every kind that had
+  been tried.
+- **v2: v1 with nested credibility and agreement in quarters,** still judging only the voice that spoke. Pilot, seeds
+  0–1, both orders: fresh single-domain lives fell sharply (iliski seed 1: 0.17–0.50 at 60–300 experiences, against
+  0.75–0.90 off; nitelik seed 1: 0.17 at 60 and 120, against 0.83 and 0.67). The remaining cause is selection bias:
+  judging only the voice relied on lets the choice decide what is learned.
+
+The version above (v3) judges every voice. All voices were present when the context was read, so outcomes that
+nothing could have predicted burden every kind alike.
+
+**Runs** (`t6_learning_to_learn.py`, records in `results/t6_learning_to_learn.jsonl`). The protocol of the first T6:
+same worlds, schedules and probes, with checkpoints every 30 experiences instead of 60 (probes run on clones, so the
+lives are the same). 10 seeds × 2 orders, so 20 lives per condition. Seeds 0–4 are the first T6's seeds; seeds 5–9
+were added because a life has only 6–8 held-out probes.
+
+- **Setting on:** own runs, all seeds.
+- **Setting off:** own runs for seeds 5–9. For seeds 0–4 the first T6 records serve, since the off path is the same
+  code. An own off run of seed 0 (nitelik → iliski) reproduces them: every T1, T2 and T3 row and every substance field
+  of T5 is identical. Only the ledger's in-memory size differs, because log compaction was added (2026-11-14 21:10)
+  after those records were made (20:26).
+- At the coordinator's request the runs used at most two worker processes; a curriculum run shared the machine.
+
+**Held-out in B** (mean of told-rule and induced-rule probes), mean over 10 seeds:
+
+| order | setting | mind | 60 | 120 | 180 | 300 | 600 |
+|---|---|---|---|---|---|---|---|
+| nitelik → iliski | off | fresh | 0.40 | 0.65 | 0.68 | 0.74 | 0.86 |
+| nitelik → iliski | off | experienced | 0.38 | 0.65 | 0.68 | 0.74 | 0.86 |
+| nitelik → iliski | on | fresh | 0.33 | 0.69 | 0.70 | 0.76 | 0.82 |
+| nitelik → iliski | on | experienced | 0.42 | 0.73 | 0.74 | 0.71 | 0.86 |
+| iliski → nitelik | off | fresh | 0.53 | 0.72 | 0.80 | 0.89 | 0.97 |
+| iliski → nitelik | off | experienced | 0.53 | 0.73 | 0.81 | 0.89 | 0.97 |
+| iliski → nitelik | on | fresh | 0.51 | 0.73 | 0.72 | 0.89 | 0.93 |
+| iliski → nitelik | on | experienced | 0.46 | 0.73 | 0.73 | 0.89 | 0.93 |
+
+**Per seed**, early (mean of 60, 120, 180) / late (mean of 300, 600):
+
+| order | seed | off fresh | off experienced | on fresh | on experienced | on: experienced − fresh, early |
+|---|---|---|---|---|---|---|
+| nitelik → iliski | 0 | 0.49 / 0.75 | 0.40 / 0.75 | 0.54 / 0.75 | 0.57 / 0.81 | +0.02 |
+| nitelik → iliski | 1 | 0.67 / 0.81 | 0.67 / 0.81 | 0.79 / 0.91 | 0.74 / 0.81 | −0.05 |
+| nitelik → iliski | 2 | 0.77 / 0.87 | 0.77 / 0.87 | 0.71 / 0.90 | 0.77 / 0.87 | +0.07 |
+| nitelik → iliski | 3 | 0.57 / 0.72 | 0.57 / 0.72 | 0.44 / 0.72 | 0.53 / 0.75 | +0.09 |
+| nitelik → iliski | 4 | 0.44 / 0.59 | 0.44 / 0.59 | 0.37 / 0.75 | 0.59 / 0.72 | +0.23 |
+| nitelik → iliski | 5 | 0.54 / 0.88 | 0.54 / 0.88 | 0.62 / 0.72 | 0.62 / 0.56 | +0.00 |
+| nitelik → iliski | 6 | 0.45 / 0.84 | 0.47 / 0.84 | 0.42 / 0.88 | 0.49 / 0.84 | +0.07 |
+| nitelik → iliski | 7 | 0.54 / 0.88 | 0.54 / 0.88 | 0.60 / 0.78 | 0.63 / 0.78 | +0.03 |
+| nitelik → iliski | 8 | 0.69 / 0.84 | 0.69 / 0.84 | 0.63 / 0.66 | 0.76 / 0.88 | +0.13 |
+| nitelik → iliski | 9 | 0.58 / 0.78 | 0.58 / 0.78 | 0.58 / 0.84 | 0.58 / 0.84 | +0.00 |
+| iliski → nitelik | 0 | 0.76 / 1.00 | 0.76 / 1.00 | 0.62 / 0.92 | 0.70 / 0.88 | +0.08 |
+| iliski → nitelik | 1 | 0.75 / 0.86 | 0.75 / 0.86 | 0.69 / 0.90 | 0.75 / 0.90 | +0.06 |
+| iliski → nitelik | 2 | 0.65 / 0.92 | 0.68 / 0.92 | 0.63 / 0.92 | 0.55 / 0.88 | −0.08 |
+| iliski → nitelik | 3 | 0.72 / 0.87 | 0.72 / 0.87 | 0.56 / 0.87 | 0.56 / 0.87 | +0.00 |
+| iliski → nitelik | 4 | 0.40 / 0.88 | 0.40 / 0.88 | 0.48 / 0.92 | 0.41 / 0.92 | −0.07 |
+| iliski → nitelik | 5 | 0.79 / 0.96 | 0.79 / 0.96 | 0.67 / 0.96 | 0.64 / 0.96 | −0.03 |
+| iliski → nitelik | 6 | 1.00 / 1.00 | 1.00 / 1.00 | 1.00 / 1.00 | 1.00 / 1.00 | +0.00 |
+| iliski → nitelik | 7 | 0.81 / 0.96 | 0.81 / 0.96 | 0.75 / 0.96 | 0.74 / 0.96 | −0.01 |
+| iliski → nitelik | 8 | 0.53 / 0.96 | 0.57 / 0.96 | 0.61 / 0.96 | 0.58 / 0.96 | −0.03 |
+| iliski → nitelik | 9 | 0.43 / 0.92 | 0.43 / 0.92 | 0.51 / 0.75 | 0.51 / 0.75 | +0.00 |
+
+**Paired differences:** mean over lives ± standard error, (lives better / equal / worse). Early = checkpoints 60, 120,
+180; late = 300, 600.
+
+| comparison | B = iliski, early | B = nitelik, early | both, early | both, late |
+|---|---|---|---|---|
+| off: experienced − fresh (the first T6) | −0.006 ± 0.009 (1/8/1) | +0.007 ± 0.004 (2/8/0) | +0.000 ± 0.005 (3/16/1) | +0.000 ± 0.000 |
+| on: experienced − fresh | **+0.058 ± 0.025 (7/2/1)** | −0.009 ± 0.016 (2/3/5) | +0.025 ± 0.016 (9/5/6) | −0.006 ± 0.016 (3/10/7) |
+| fresh minds: on − off (one domain) | −0.005 ± 0.025 (4/1/5) | −0.031 ± 0.029 (3/1/6) | −0.018 ± 0.019 (7/2/11) | −0.011 ± 0.019 (7/8/5) |
+| experienced with the setting − fresh without it | **+0.054 ± 0.017 (7/2/1)** | −0.041 ± 0.026 (3/2/5) | +0.006 ± 0.019 (10/4/6) | −0.017 ± 0.021 (7/8/5) |
+
+Reading:
+
+- **With the setting off, experience gives nothing,** as in the first T6.
+- **With it on, the mind that lived nitelik learns iliski faster early:** +0.058 ± 0.025 held-out over a fresh mind
+  with the same setting (7 lives better, 1 worse), and +0.054 ± 0.017 over the fresh mind of the first T6. The largest
+  gains fall in the first 60–90 experiences (at 60: +0.33 in seed 4, +0.29 in seed 6, +0.20 in seed 3). What moved is a
+  lesson about which voices to believe, not content. It is the first transfer beyond trust in the teller measured in
+  these worlds.
+- **The other order shows none.** A mind that lived iliski learns nitelik no faster (−0.009 ± 0.016). The setting also
+  costs fresh nitelik minds a little early (−0.031 ± 0.029), mostly at 180 experiences.
+- **Late in life nothing carries** (−0.006 ± 0.016): by then a fresh mind with the setting has learned the same table
+  from its own outcomes.
+
+**Single-domain check.** The fresh minds are single-domain lives; 10 seeds per domain.
+
+| domain | setting | held-out 60 | 120 | 180 | 300 | 600 | members 600 | exceptions 600 | T1 c (1 hearing) | T1 c (≥ 4) | T2 classes | T5 early facts recalled |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| nitelik | off | 0.53 | 0.72 | 0.80 | 0.89 | 0.97 | 1.00 | 1.00 | 0.401 | 0.757 | 1.00 | 1.00 |
+| nitelik | on | 0.51 | 0.73 | 0.72 | 0.89 | 0.93 | 1.00 | 1.00 | 0.401 | 0.757 | 1.00 | 1.00 |
+| iliski | off | 0.40 | 0.65 | 0.68 | 0.74 | 0.86 | 1.00 | 1.00 | 0.409 | 0.800 | 1.00 | 1.00 |
+| iliski | on | 0.33 | 0.69 | 0.70 | 0.76 | 0.82 | 1.00 | 1.00 | 0.409 | 0.800 | 1.00 | 1.00 |
+
+- T1, T2, members, exceptions and T5 (early facts recalled, their evidence bit-identical, the ledger exact) are the
+  same with and without the setting. It changes only which voice speaks, never what is learned from the world.
+- Held-out, which is the reading, is a little lower with the setting at the end of a life (nitelik 0.97 → 0.93, iliski
+  0.86 → 0.82; paired late −0.011 ± 0.019) and in nitelik around 180 experiences (0.80 → 0.72).
+- These differences are within the noise of 6–8 probes per life, but the sign at 600 is the same in both domains. So
+  the setting does not improve single-domain learning, and it stays off by default; earlier results are unchanged.
+
+**Is A kept?** A's evidence is untouched by B with the setting on, as before: early facts bit-identical 20/20,
+members and exceptions unchanged 20/20. A's held-out answers, however, are no longer fixed: they changed in 7 of 20
+lives (4 up, 3 down; mean 0.876 → 0.887). B's outcomes add to the same kind ties, and that changes which voice speaks
+for A's instances. So learning about learning in B changes how A is read. Nothing in A is lost: retracting B's moments
+would restore the old reading exactly.
+
+**What was learned about voices** (pooled over the 10 A lives of each domain; a selection of the kinds with at least
+100 outcomes in one domain; every kind with agreement below one half, at any numerosity, held 0 times):
+
+| numerosity | agreement | held / judged, A = nitelik | share | held / judged, A = iliski | share |
+|---|---|---|---|---|---|
+| every voice | — | 1076 / 11120 | 0.10 | 484 / 5568 | 0.09 |
+| 1 | all | 151 / 2092 | 0.07 | 154 / 1721 | 0.09 |
+| 2 | 1/2–3/4 | 42 / 1858 | 0.02 | 29 / 713 | 0.04 |
+| 2 | all | 68 / 151 | 0.45 | 35 / 104 | 0.34 |
+| 3–4 | 1/4–1/2 | 0 / 2440 | 0.00 | 0 / 875 | 0.00 |
+| 3–4 | 1/2–3/4 | 133 / 454 | 0.29 | 95 / 323 | 0.29 |
+| 5–8 | 1/2–3/4 | 226 / 537 | 0.42 | 47 / 182 | 0.26 |
+| 5–8 | 3/4–1 | 87 / 158 | 0.55 | 3 / 23 | 0.13 |
+| 9–16 | 1/2–3/4 | 116 / 367 | 0.32 | 58 / 158 | 0.37 |
+| 17+ | 1/2–3/4 | 121 / 229 | 0.53 | — | — |
+
+The lesson holds no word, and much of it is the same in both domains:
+
+- one member speaking alone holds 7–9% of the time;
+- two members who all agree hold 34–45% of the time;
+- a voice whose majority is below one half never holds, by the core's measure.
+
+Where the two domains differ is the voices of many members with a weak majority.
+
+**Diagnosis.**
+
+1. **Why the gain is early and small.** A fresh mind with the setting learns the same table quickly from its own
+   outcomes, because every voice is judged on every first-time fact: 1–2 judged claims per experience over a life
+   (11120 in 6000 nitelik experiences, 5568 in 6000 iliski experiences), more early on, when most facts are new. By
+   60–120 experiences it has caught up. A head start can only show in the first few dozen experiences, where a life has
+   few held-out probes (the held-out entity must already have been told its class).
+2. **Why it is asymmetric.** The kinds are too coarse to tell a class from a voice of the majority of everything. How
+   often such a voice is right depends on the world:
+   - In nitelik (3 classes, 4 values, so classes often share a rule value) the majority of all entities is right about
+     half the time (17+ members, agreement 1/2–3/4: 0.53).
+   - In iliski (4 classes, 5 values) it is right less often (5–8 members: 0.26).
+
+   Credibility learned in nitelik prefers the class's kind of voice in iliski, and that helps. In nitelik the opposite
+   happens around 180 experiences: credibility learned from iliski, and nitelik's own early tables, let a many-member
+   majority voice beat the class voice. What tells a class from the majority is which category it is. That is tied to
+   the domain's own units and cannot be carried.
+3. **What would go further (open).** Domain-free descriptions of a voice that separate a class from the majority:
+   - how much more its members agree than all entities do (agreement beyond the base rate);
+   - whether its category has been homogeneous on other dimensions too (category coherence). This is computed from the
+     category's own members and names no word.
+
+**Verdict: mixed.** The mind learns something about learning from its own outcomes; the lesson holds no word, and it
+carries.
+
+- In one order (nitelik → iliski) it makes the new domain faster early: +0.05 to +0.06 held-out, about two to three
+  standard errors, 7 of 10 lives better and 1 worse.
+- In the other order it does not.
+- It does not improve single-domain learning (slightly lower held-out at the end of a life).
+
+It stays behind `Config.voices`, off by default.
+
+**Tests** (`tests/evolution/test_zihin_t6.py`, 8 tests):
+
+- the kind bands;
+- credibility is read general → specific;
+- with no experience of voices the choice is exactly F11's;
+- every voice that could speak is judged once, on the first lived value only;
+- the voice that speaks maximises the F11 score times credibility;
+- an outcome retracts exactly;
+- the lesson holds no word: it carries into a new vocabulary (a fresh mind reads 1/2) and grows there;
+- off by default.
