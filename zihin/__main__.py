@@ -108,10 +108,14 @@ def sentences(text: str) -> List[str]:
     return [p.strip() for p in parts if len(words(p)) >= 2]
 
 
+CODE = (".py", ".js", ".ts", ".java", ".c", ".h", ".cpp", ".cs", ".go", ".rs", ".ps1", ".sh", ".yml", ".yaml",
+        ".toml", ".ini", ".cfg", ".html", ".css", ".sql")      # source code is read as a language too, line by line
+
+
 def read_document(path: str) -> str:
     """Plain text of a document. .docx needs python-docx, .pdf needs pypdf (only if such files are present)."""
     low = path.lower()
-    if low.endswith((".txt", ".md", ".tsv", ".csv")):
+    if low.endswith((".txt", ".md", ".tsv", ".csv") + CODE):
         with open(path, encoding="utf-8", errors="replace") as f:
             return f.read()
     if low.endswith(".docx"):
@@ -507,7 +511,9 @@ class Session:
             if not text:
                 skipped.append(os.path.basename(name))
                 continue
-            for i, sentence in enumerate(sentences(text)):
+            lines = [ln.strip() for ln in text.splitlines() if len(words(ln)) >= 2] if name.lower().endswith(CODE) \
+                else sentences(text)                     # code: each line is an utterance of that language
+            for i, sentence in enumerate(lines):
                 if cap and i >= cap:
                     break
                 self.listen(sentence, IMITATED)
