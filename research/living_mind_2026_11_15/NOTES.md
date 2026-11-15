@@ -1193,3 +1193,176 @@ configuration. Greetings: "merhaba" 16 a day, "selam" 6, "selamlar" 1–3 in a l
 What is missing: a graded equivalence relation with evidence from substitution and from relational consequences,
 counted by the one rule; a reading that brings an equivalent's own evidence in; and an answer relation for "X ne
 demek ?". The design is the next step.
+
+## Speed race: the core against small neural networks (2026-11-15)
+
+The owner asked that the core compete with neural networks, at least on speed. Before anything is changed for speed,
+this race says where the core stands and what it has to beat. Script: `speed_race.py`. It imports
+`baseline_transformer.py` and `run.py` of 2026_11_14 unchanged. Every row is in `results/speed_race.jsonl`.
+
+- CPU only. The 4-core machine was shared with other agents; the 1-minute load average (0.8-4.2) is stored in each
+  row. Systems are timed back to back in one process, 3 repetitions, medians.
+- The stream is the baseline's: `World.make(seed, domain).schedule(600)`, 600 experiences of three symbols.
+- Zihin lives an experience as 4 moments (3 symbols and a silent moment). A network is given `<s> a b c </s>` and
+  learns its 4 next-token targets. So an item is a moment for Zihin and a predicted token for a network, 4 per
+  experience for both.
+- Zihin is the baseline's variant "members" (F11).
+- The networks: the baseline's TinyGPT (2 layers, width 64, 4 heads, about 106k parameters here), and a GRU and an
+  LSTM of width 64 (29-41k parameters). All use Adam 3e-3 and are untuned.
+- The quality rows reproduce the 2026_11_14 baseline exactly. All 30 final results (10 lives × Zihin, online and
+  offline TinyGPT, and the offline epoch counts) equal `baseline_transformer.jsonl`.
+
+**1. Learning throughput, one pass over the stream** (medians over 3 repetitions × 2 domains):
+
+| learner | items/s, 1 thread | items/s, 4 threads | ms per item, 1 thread | against Zihin |
+|---|---|---|---|---|
+| Zihin, online, one pass | 136 | 135 | 7.34 | 1 |
+| Zihin without its ledger | 137 | | 7.28 | 1.0× |
+| TinyGPT online (one Adam step per utterance) | 1,338 | 572 | 0.75 | 9.8× |
+| GRU online | 2,563 | 2,169 | 0.39 | 19× |
+| LSTM online | 2,712 | 2,209 | 0.37 | 20× |
+| TinyGPT, batches of 32 (one epoch) | 24,804 | 24,601 | 0.040 | 182× |
+| GRU, batches of 32 | 52,687 | 41,417 | 0.019 | 387× |
+| LSTM, batches of 32 | 57,281 | 48,803 | 0.017 | 421× |
+
+- On this stream Zihin learns 136 moments a second.
+- A network that learns as Zihin does, one utterance at a time and once, is 10-20 times faster.
+- Trained the usual way, in batches, a network is 180-420 times faster per pass.
+- Four threads help nobody here. Zihin is one sequential life, and these networks are too small: four threads made
+  the batch-1 TinyGPT slower (and that row is noisy).
+- The ledger that makes retraction exact costs about 1% of the time.
+
+**2. Answer latency.** Zihin was measured with `Session.reply` on 10 everyday questions, loaded without its ledger.
+The answers were identical across repetitions (same hash; their content was never printed). The networks were
+measured on next-token inference at the mind's vocabulary size, with random weights, since latency does not depend
+on the weights.
+
+| | first breath (97k ties, 1,711 words) | cevahir2 (1.33M ties, 10,360 words) |
+|---|---|---|
+| Zihin, per produced word, end to end (hearing, thinking, speaking) | 24.5 ms | 82.7 ms |
+| Zihin, a moment that produces a word | 10.2 ms | 9.4 ms |
+| Zihin, first word after the question is given | 41.6 ms | 151 ms |
+| TinyGPT without a cache (its standard form), 1 thread | 0.46 ms | 1.02 ms |
+| decoder of the same size with a key/value cache, 1 thread | 0.24 ms | 0.57 ms |
+| GRU / LSTM, 1 thread | 0.07 / 0.14 ms | 0.32 / 0.57 ms |
+| GPT-2-small layout (d 768, 12 layers), 1 thread / 4 threads | 40.2 / 15.1 ms | 40.8 / 15.5 ms |
+| the same with GPT-2's 50,257 tokens (163M parameters, untied) | | 52.6 / 18.1 ms |
+
+- Measured per word-producing moment, Zihin (about 10 ms) is 4 times faster than a decoder of GPT-2-small size on one
+  core and 1.5-1.6 times faster than it on four. It is 9-160 times slower than the small networks.
+- End to end it is slower: on cevahir2 a reply took 331 ms for about 4 words. Zihin hears and learns the question
+  and thinks before it speaks: 192 moments for 40 words. Some moments that produce a word are thoughts, not speech.
+- Learning at the minds' vocabulary was also timed: Zihin watching 20 dialogues against one Adam step per 11-token
+  utterance. On first breath Zihin learns 264 moments/s, against 2,202-3,796 items/s for the networks on 1 thread.
+  On cevahir2 Zihin learns 247 moments/s, against 976-1,130 on 1 thread and 1,625-2,429 on 4 threads.
+- The gap narrows as the vocabulary grows: 10-20× on the stream, 4× at 10k words on one core. A network's step
+  grows with its vocabulary (a dense output layer and its Adam update); a Zihin moment barely does.
+
+**3. Memory per learned item.**
+
+- **On the stream:**
+  - Zihin's core is 332-500 B per moment; the whole mind pickled without its ledger is 411-619 B per moment.
+  - The ledger is 3.1-3.9 kB per moment, 6-12 times the core.
+  - The networks' parameters are fixed: 117-432 kB, with 2× that for Adam's state while training. That is 49-180
+    B per item after one pass, and the share falls as more items come; Zihin's memory grows with every moment.
+- **On the saved minds:**
+  - First breath: core 263 B per moment, process 3.3 kB per moment (RSS growth on load).
+  - cevahir2: core 736 B per moment (90 MB), process 6.8 kB per moment (0.83 GB).
+  - Process memory is 9-13 times the core tensors: the Python indices beside the tensors, not the tensors, are the
+    memory to beat.
+  - The small networks at 10,360 words hold 5.4-6.0 MB, whatever they have learned.
+
+**4. Quality at equal learning time** (means over 5 lives per domain; the clock is paused while probing; accuracy =
+the right value on top). "Offline" is the baseline's training: batches of 32, epochs until the loss stops falling.
+"Within TinyGPT's pass" is Zihin's last checkpoint before TinyGPT's one pass ended (about 2 s): 60 experiences lived
+in 9 of 10 lives.
+
+| nitelik | learning s | held-out, told rule | held-out, induced | members | exceptions | early facts |
+|---|---|---|---|---|---|---|
+| Zihin, one pass | 20.5 | 0.90 | 0.97 | 1.00 | 1.00 | 1.00 |
+| Zihin within TinyGPT's pass | 1.3 | 0.60 | 0.60 | 0.71 | 0.41 | 0.86 |
+| TinyGPT / GRU / LSTM online, one pass | 2.1 / 1.2 / 1.1 | 0.67 / 0.77 / 0.80 | 0.57 / 0.60 / 0.53 | 0.82 / 0.91 / 0.85 | 0.66 / 0.44 / 0.44 | 0.44 / 0.34 / 0.38 |
+| TinyGPT offline (41-70 epochs) | 6.2 | 0.77 | 0.67 | 1.00 | 1.00 | 1.00 |
+| GRU offline (48-78 epochs) | 3.2 | 0.90 | 0.67 | 1.00 | 1.00 | 1.00 |
+| LSTM offline (57-100 epochs) | 3.7 | 0.97 | 0.83 | 1.00 | 1.00 | 1.00 |
+
+| iliski | learning s | held-out, told rule | held-out, induced | members | exceptions | early facts |
+|---|---|---|---|---|---|---|
+| Zihin, one pass | 18.4 | 0.75 | 0.95 | 1.00 | 1.00 | 1.00 |
+| Zihin within TinyGPT's pass | 1.2 | 0.50 | 0.45 | 0.73 | 0.81 | 0.56 |
+| TinyGPT / GRU / LSTM online, one pass | 2.0 / 1.1 / 1.0 | 0.60 / 0.45 / 0.50 | 0.50 / 0.47 / 0.57 | 0.78 / 0.87 / 0.85 | 0.80 / 1.00 / 1.00 | 0.46 / 0.40 / 0.34 |
+| TinyGPT offline (40-81 epochs) | 7.2 | 0.53 | 0.53 | 1.00 | 1.00 | 1.00 |
+| GRU offline (43-74 epochs) | 3.0 | 0.70 | 0.60 | 1.00 | 1.00 | 1.00 |
+| LSTM offline (47-89 epochs) | 3.0 | 0.72 | 0.60 | 1.00 | 1.00 | 1.00 |
+
+- Every network had finished learning before Zihin's life was over, in 1-9 s against 17-23 s. Zihin's time is not
+  shorter than any network's time to its best answer.
+- At the same short time Zihin has lived only about 60 experiences and is behind on held-out and members. It is
+  ahead only on early facts.
+- With the full stream, Zihin keeps the clear lead on iliski (held-out mean 0.85 against 0.65-0.66 for the
+  recurrent networks and 0.53 for TinyGPT).
+- **A new and honest result:** on nitelik an LSTM trained offline nearly ties Zihin.
+  - Held-out mean 0.90 ± 0.04 against 0.93 ± 0.03 for Zihin.
+  - The LSTM is better on the told rule (0.97 against 0.90) and worse on the induced rule (0.83 ± 0.09 against
+    0.97 ± 0.03).
+  - It gets there in 3.7 s.
+  - The 2026_11_14 comparison had only Transformers; the recurrent networks are the stronger baseline in this
+    regime.
+- Online, one pass, the condition Zihin lives in, no network comes close. Held-out is 0.45-0.80, and the facts told
+  once early are 0.34-0.46 against Zihin's 1.00 (forgetting).
+- There are only 6-8 held-out probes per life, so standard errors are about 0.03-0.10.
+
+**Where Zihin's time goes.** These are wall-clock shares of `Mind.step` on the stream, without a profiler, at 7.4-7.6
+ms per moment:
+
+- reading predictions every moment (`predictions`, the F11 members reading): 28-34%;
+- learning (`learn_follow`; induction is about half of it under cProfile): 32%;
+- feelings: 10-11%;
+- deciding acts: 7-10%;
+- lag-0 learning: 8%;
+- settling: 7%.
+
+Under cProfile a moment makes about 4,500 Python calls and about 600 small tensor operations: per moment
+`index_select` 209, `sum` 167, `zeros` 100, `where` 81, `tensor` 74. Assembling evidence rows in the store (`w`, `w2`)
+is about a quarter of all time. Each such operation costs microseconds of dispatch whatever its size. The core is
+bound by interpreter and dispatch overhead, not by arithmetic.
+
+**Unfair to Zihin:**
+
+- **Implementation.** Zihin is Python driving many tiny tensor operations. The networks run a few fused, vectorised
+  kernels (MKL, oneDNN). The race measures this implementation, not the floor of the method.
+- **Work per moment.** A moment does more than predict and update. It builds structure (units, categories, frames),
+  reads with F11, feels, decides acts, and keeps an exact ledger. A network step only predicts and updates fixed
+  weights.
+- **Retraction.** Zihin learns each item once, and the item stays exactly retractable (20-77 ms per experience in
+  2026_11_14). The networks reach their best only by seeing everything 40-100 times; their exact retraction is
+  retraining.
+- **Vocabulary.** The networks are given the whole vocabulary in advance. Zihin grows its alphabet as it lives.
+- **Batching.** Networks batch, 32 utterances per step. A life's moments depend on each other and cannot be batched.
+  Separate minds can run side by side: two quality processes ran at once, and their Zihin lives took about 10%
+  longer than alone (confounded with the other agents' load).
+- **Replies.** A Zihin reply also hears and learns the question and its own words, and thinks first. A network's
+  inference learns nothing.
+- **Weights.** Network latency was measured with random weights, Zihin's on real minds.
+
+**Unfair to the networks:**
+
+- **Size and tuning.** They are tiny and untuned. A GPU would make them far faster, batched most of all; this race
+  is CPU only.
+- **Batch 1.** Batch-1 online training is their least efficient regime; it is used only because it is Zihin's.
+- **No cache.** TinyGPT has no cache in its standard form, so the cached decoder row is the fair one.
+- **Cost growth.** Zihin's cost per moment grows with what it has lived (more ties per unit). The networks' cost per
+  token is fixed by their size.
+- **Equal time.** At equal time a network could also have used Zihin's whole 18-20 s, for example several trainings
+  or an ensemble. That was not done.
+
+**What to beat:**
+
+- One pass, online, one core: 0.75 ms per item (TinyGPT) and 0.37-0.39 ms (GRU, LSTM), against Zihin's 7.3 ms.
+  That is a 10-20× gap.
+- The profile places that gap in the number of small operations per moment, not in what they compute.
+- Matching batched training (0.02-0.04 ms per item per pass) needs a different kind of implementation, vectorised
+  over many ties at once or compiled, not tuning.
+- Already won: a word-producing moment (about 10 ms) beats a GPT-2-sized decoder on CPU; quality after one online
+  pass beats every network; generalisation beats them on iliski; and the cost per moment barely grows with
+  vocabulary.
