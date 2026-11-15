@@ -499,6 +499,11 @@ class Mind:
         self.trust = self._trust()
         return report
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state.pop("_facet_cache", None)                   # a cache, rebuilt on demand
+        return state
+
     def clone(self) -> "Mind":
         """A copy of the mind without the experience log (for probing without touching the life)."""
         log, self.S.log = self.S.log, {}

@@ -336,14 +336,21 @@ def learn_value(mind, percepts) -> None:
 
 
 def facet_set(mind, unit: int) -> set:
-    """The facets an item has been perceived with (its lag-0 ties to units of facet channels, positive evidence)."""
+    """The facets an item has been perceived with (its lag-0 ties to units of facet channels, positive evidence).
+    Cached per unit until its number of lag-0 ties changes (evidence on a facet tie only grows)."""
     S = mind.S
+    ties = S.out.get((unit, EXPECT, 0), [])
+    cache = mind.__dict__.setdefault("_facet_cache", {})
+    hit = cache.get(unit)
+    if hit is not None and hit[0] == len(ties):
+        return hit[1]
     out = set()
-    for tie in S.out.get((unit, EXPECT, 0), []):
+    for tie in ties:
         dst = int(S.t_dst[tie])
         channel = int(S.u_channel[dst])
         if channel >= 0 and mind.ch.kind(channel) == "facet" and float(S.t_w[W_POS, tie].sum()) > 0.0:
             out.add(dst)
+    cache[unit] = (len(ties), out)
     return out
 
 
