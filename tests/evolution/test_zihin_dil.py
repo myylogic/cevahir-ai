@@ -54,7 +54,7 @@ def test_the_session_reads_and_hears_by_the_minds_convention(tmp_path, capsys):
         assert mind.unit_of(CHANNEL, i) >= 0 and mind.unit_of(CHANNEL, not_i) < 0
         assert mind.unit_of(CHANNEL, city) >= 0 and session.partner == ("ıan" if dil == "tr" else "ian")
         assert mind.unit_of(PERSON, session.partner) >= 0
-        assert topic_of(session, "Istanbul is big") == city   # what it thinks about is the word it heard
+        assert topic_of(session, "Istanbul") == city      # what it thinks about is the word it heard, as it heard it
 
 
 def test_a_mind_keeps_its_convention_saved_and_loaded(tmp_path):

@@ -7,8 +7,9 @@ learned by the one rule. Every page read is printed (title and address). The sou
 and GOOGLE_CSE_ID are set (the official Custom Search JSON API; result pages are downloaded and reduced to their
 text; google.com result pages are never scraped), otherwise Wikipedia (MediaWiki API, plain-text extracts).
 
-Wanting (design section 5): "improve yourself" picks the topics itself: words the mind uses often but holds with
-little conviction (high drive D = use x (1 - c)).
+Wanting (design section 5): "improve yourself" picks the topics itself, by the one measure every topic the program
+chooses has (dusunce.topic_score): telling (few composed contexts hold the word, tau) and not yet well known (high
+drive D = use x (1 - c)).
 
 Steering its own learning (design section 8, a first version): there are ways of reading (a short summary, a deep
 read). After each reading the mind measures what it gained on that topic per moment spent (new ties to the topic
@@ -27,10 +28,11 @@ import urllib.request
 from html.parser import HTMLParser
 from typing import Callable, Dict, List, Optional, Protocol, Tuple
 
+import torch
+
 from .evidence import conviction, expectation
 from .events import ACTED
 from .learn import add_evidence1
-from .read import drive_of
 from .store import ATOMIC, EXPECT, W_NEG, W_POS
 
 AGENT = "CevahirZihin/0.1 (reader of public encyclopedia pages)"
@@ -223,23 +225,25 @@ def firm_knowledge(mind, unit: int) -> int:
     return n
 
 
-def wanted_topics(mind, channel: str, n: int, skip_frequent: int = 100) -> List[str]:
-    """Words the mind uses but holds with little conviction: the highest drive, the most frequent words left out
-    (they are the function words of the language; frequency decides, no word list)."""
+def wanted_topics(mind, channel: str, n: int) -> List[str]:
+    """What the mind most wants to know, by its own evidence: of every symbol of the channel it holds, the ``n`` best
+    topics by dusunce.topic_score, tau(u) x D(u): telling (few composed contexts hold it) and not yet well known (high
+    drive). Nothing is left out by frequency (frequent words are held by many contexts: their tau is small) or by
+    what a word looks like; symbols nothing ever followed score 0 and are not offered. Units !unut took back are not
+    counted."""
+    from .dusunce import topic_score
     S = mind.S
     if not mind.ch.has(channel):
         return []
     cid = mind.ch.id(channel)
-    atoms = [u for u in range(S.n_units)
-             if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid and S.u_alive[u]]   # not what !unut took back
-    by_use = sorted(atoms, key=lambda u: -float(S.u_use[u]))
-    skip = min(skip_frequent, len(by_use) // 5)            # a young mind knows few words: skip a fifth of them
+    n_units = S.n_units
+    held = ((S.u_kind[:n_units].to(torch.int64) & ATOMIC) != 0) & (S.u_channel[:n_units] == cid) & S.u_alive[:n_units]
     scored = []
-    for u in by_use[skip:skip + 3000]:
-        word = str(mind.ch.symbol(cid, int(S.u_symbol[u])))
-        if len(word) >= 4 and word.isalpha():
-            scored.append((drive_of(mind, u), word))
-    scored.sort(reverse=True)
+    for u in held.nonzero().flatten().tolist():
+        score = topic_score(mind, u)
+        if score > 0.0:
+            scored.append((score, str(mind.ch.symbol(cid, int(S.u_symbol[u])))))
+    scored.sort(key=lambda sw: -sw[0])                     # stable: equal scores keep the order the units were born
     return [w for _, w in scored[:n]]
 
 

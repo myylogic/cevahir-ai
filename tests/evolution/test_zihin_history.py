@@ -9,7 +9,8 @@ What is pinned here
   shown with.
 * What to think about after a silence (topic_of, the online life's thought) is the last utterance the mind heard,
   whatever the entry: a line of the owner that starts with "[" is a line like any other, and after a file was read
-  it is the file's last sentence (no topic at all before).
+  it is the file's last sentence (no topic at all before). Its word is the best topic by the mind's evidence
+  (tau x D: telling and not yet well known), so a word whose followers were never tried is none.
 """
 from __future__ import annotations
 
@@ -65,10 +66,15 @@ def test_every_entry_says_what_it_was_in_a_field_of_its_own(tmp_path, capsys):
     assert capsys.readouterr().out.splitlines()[0] == "    1  [okudu] bu bir satır"
 
 
+LINE = "[not] Penguenler soğuk sularda yüzer."
+
+
 def test_a_line_that_starts_with_a_bracket_is_a_line():
     s = session()
-    s.live("[not] Penguenler soğuk sularda yüzer.", TOLD)
-    assert topic_of(s) in {"penguenler", "soğuk", "sularda", "yüzer"}   # it was "" before: the line was skipped
+    s.live(LINE, TOLD)
+    s.live(LINE, TOLD)                                     # lived twice: what follows its words has been tried once
+    assert topic_of(s) in set(s.words(LINE))             # a word of the line (it was "" before: the line was skipped)
+    assert topic_of(s) == topic_of(s, LINE) != ""
 
 
 def test_after_a_file_was_read_the_thought_is_about_its_last_sentence(tmp_path, capsys):
@@ -76,7 +82,8 @@ def test_after_a_file_was_read_the_thought_is_about_its_last_sentence(tmp_path, 
                                        encoding="utf-8")
     s = session()
     s.read_path(str(tmp_path / "gezi.txt"))
-    assert topic_of(s) in {"fokbalıkları", "kayaların", "üstünde", "uyur"}
+    s.read_path(str(tmp_path / "gezi.txt"))                # read twice: what follows its words has been tried once
+    assert topic_of(s) in {"fokbalıkları", "kayaların", "üstünde"}   # its last sentence ("uyur" ends it: nothing
 
     def handle(line):
         return _one_line(s, line, True, Args(), lambda reason: None, 0) is not None
@@ -86,4 +93,4 @@ def test_after_a_file_was_read_the_thought_is_about_its_last_sentence(tmp_path, 
     while life.thought is None and time.time() < deadline:
         time.sleep(0.02)
     life.stop()
-    assert life.thought is not None and life.thought[0] in {"fokbalıkları", "kayaların", "üstünde", "uyur"}
+    assert life.thought is not None and life.thought[0] in {"fokbalıkları", "kayaların", "üstünde"}   # followed it)
