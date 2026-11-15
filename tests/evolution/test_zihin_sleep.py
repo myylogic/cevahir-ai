@@ -99,3 +99,27 @@ def test_a_night_keeps_dreams_counts_itself_and_reports_a_judged_dream_once(tmp_
     save(mind, str(tmp_path / "uyuyan.zihin"))
     again = load(str(tmp_path / "uyuyan.zihin"), ledger=False)
     assert again.nights == 3 and [d["words"] for d in again.dreams] == [d["words"] for d in mind.dreams]
+
+
+def test_a_dream_is_a_chain_and_sees_what_was_seen_with_its_words(tmp_path):
+    from PIL import Image
+    from zihin.gorme import EYE, features
+    from zihin.dusunce import dream as dream_chain, seen_with
+    session = new_session()
+    picture = tmp_path / "ben.png"
+    img = Image.new("RGB", (64, 64), (240, 240, 240))
+    for x in range(16, 48):
+        for y in range(8, 56):
+            img.putpixel((x, y), (40, 60, 160))
+    img.save(picture)
+    for _ in range(2):
+        session.view = features(str(picture))
+        session.live("güneş evi ısıtır .", TOLD)
+    gist = features(str(picture))[0]
+    assert seen_with(session.mind, "güneş") == [gist]
+    chain = dream_chain(session, "güneş")
+    assert chain and chain[0]["seen"] == [gist]
+    eye = session.mind.ch.id(EYE)
+    unit = session.mind.S.atom_index[(eye, session.mind.ch.symbol_index(eye, gist, create=False))]
+    assert float(session.mind.S.t_w[W_POS, :session.mind.S.n_ties, IMAGINED].sum()) > 0.0
+    assert unit >= 0

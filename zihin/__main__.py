@@ -48,6 +48,7 @@ mind never sees text, only symbols on the "text" channel; meaning is in the ties
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from typing import Dict, List
@@ -184,6 +185,7 @@ class Session:
         mind.add_channel(EAR, "sense")          # a heard thing likewise
         mind.add_channel(SOUND, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
+        self.seen: Dict[str, str] = {}          # the file names of images shown in this session, by gist
         self.curious = True                     # the curiosity reflex (T4) is on in conversation
         self.thinking = True                    # what is heard calls thoughts to mind; one may be said (T8)
         from .mind import INNER_CHANNEL, SELF_CHANNEL
@@ -541,18 +543,22 @@ class Session:
         return "  böyle bir numara yok"
 
 
-def night_report(night) -> List[str]:
+def night_report(night, names: Dict[str, str] = None) -> List[str]:
     """What the mind can tell of a night: its dreams, which earlier dreams reality has judged, its trust in its
     imagination before and after."""
     lines = []
-    for d in night["dreams"]:
-        new = sum(1 for claim in d["claims"] if claim[3] + claim[4] == 0)
-        note = "   (yeni bir şey kurmadım, bildiğimi hatırladım)" if not new else ""
-        if d["other"]:
-            lines.append("  rüyamda (%s yerine %s): %s   [gerçeklik %.2f]%s" % (d["about"], d["other"],
+    for chain in night["dreams"]:
+        lines.append("  rüyamda:")
+        for d in chain:
+            new = sum(1 for claim in d["claims"] if claim[3] + claim[4] == 0)
+            note = "   (yeni bir şey kurmadım, bildiğimi hatırladım)" if not new else ""
+            for gist in d.get("seen", []):
+                lines.append("    %s gördüm" % (names.get(gist, "bir görüntü") if names else "bir görüntü"))
+            if d["other"]:
+                lines.append("    (%s yerine %s): %s   [gerçeklik %.2f]%s" % (d["about"], d["other"],
                                                                           " ".join(d["words"]), d["reality"], note))
-        else:
-            lines.append("  rüyamda: %s%s" % (" ".join(d["words"]), note))
+            else:
+                lines.append("    %s%s" % (" ".join(d["words"]), note))
     for v, d in night["judged"]:
         lines.append("  %s: %s" % ("doğru çıktı" if v == "dogru" else "yanlış çıktı", " ".join(d["words"])))
     srt = night["sorting"]
@@ -661,7 +667,7 @@ class Life:
             with self.lock:
                 night = dream_sleep(self.session)
             self.slept = True
-            print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night)), end="", flush=True)
+            print("\n  (uyudum)\n%s\n> " % "\n".join(night_report(night, self.session.seen)), end="", flush=True)
 
 
 def pieces_for(mind, choice: str = None):
@@ -902,6 +908,7 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     from .gorme import features
                     gist, facets = features(rest.strip())
                     session.view = (gist, facets)
+                    session.seen[gist] = os.path.basename(rest.strip())
                     print("  görüyorum (%d yön); bir sonraki sözün bu resimle birlikte algılanacak" % len(facets))
                 elif cmd in ("dinle", "hear"):
                     from .isitme import features as hearing
@@ -926,7 +933,8 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     print("  konuşan: %s" % session.partner)
                 elif cmd in ("uyu", "sleep"):
                     from .dusunce import sleep as dream_sleep
-                    print("\n".join(night_report(dream_sleep(session, int(rest) if rest.strip().isdigit() else 5))))
+                    print("\n".join(night_report(dream_sleep(session, int(rest) if rest.strip().isdigit() else 3),
+                                                  session.seen)))
                 elif cmd in ("kendin", "introspect"):
                     from .kendilik import self_report
                     print(self_report(session.mind, CHANNEL))
