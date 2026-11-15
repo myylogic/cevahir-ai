@@ -52,9 +52,27 @@ def own_mass(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = None
         return {}
     ids, dst = S.out_ids((unit, EXPECT, lag))
     trust = mind.trust if trust is None else trust
+    if lag == 1 and getattr(mind.cfg, "rivals", False):
+        w_pos, w_neg = rival_mass(mind, dst, (S.t_w[W_POS].index_select(0, ids) * trust).sum(-1),
+                                  (S.t_w[W_NEG].index_select(0, ids) * trust).sum(-1))
+        return {d: (p, n) for d, p, n in zip(dst.tolist(), w_pos.tolist(), w_neg.tolist())}
     w_pos = (S.t_w[W_POS].index_select(0, ids) * trust).sum(-1).tolist()
     w_neg = (S.t_w[W_NEG].index_select(0, ids) * trust).sum(-1).tolist()
     return {d: (p, n) for d, p, n in zip(dst.tolist(), w_pos, w_neg)}
+
+
+def rival_mass(mind, dst: torch.Tensor, w_pos: torch.Tensor, w_neg: torch.Tensor):
+    """F25 (b), the normalised reading: for a target on a sense or act channel the negative mass is the positive mass
+    of the source's other targets on that channel, so f(v | x) = W+(x -> v) / sum over v' of W+(x -> v') and the
+    conviction is that of everything x was followed by there (rivals share one mass instead of each holding its own).
+    Targets on the mind's own channels keep their own negative evidence."""
+    S = mind.S
+    n = len(mind.ch.names)
+    channel = S.u_channel[dst].long()
+    channel = torch.where(channel >= 0, channel, torch.full_like(channel, n))   # no channel: a slot of its own
+    world = torch.tensor([mind.ch.kind(c) in ("sense", "act") for c in range(n)] + [False], dtype=torch.bool)
+    total = torch.zeros(n + 1, dtype=w_pos.dtype).index_add_(0, channel, w_pos)
+    return w_pos, torch.where(world[channel], (total[channel] - w_pos).clamp(min=0.0), w_neg)
 
 
 def effective(mind, unit: int, trust: Optional[torch.Tensor] = None, support: Optional[str] = None,
