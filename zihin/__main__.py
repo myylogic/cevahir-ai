@@ -144,15 +144,16 @@ def speaking(folder: str = None) -> Config:
     # arguments to build the configuration without a ledger file (research/living_mind_2026_11_15/t_meaning.py)
     return Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
                           backoff=True, resemblance=True, race=True, situations=True, explore=True, starts=True,
-                          exclusive=True, log_path=_log_path(folder) if folder else _log_path())
+                          exclusive=True, exact_relations=True,
+                          log_path=_log_path(folder) if folder else _log_path())
 
 
 VARIANTS = {"speaking": speaking,
             "members": lambda folder=None: Config.changed(support="members"),
             "changed": lambda folder=None: Config.changed()}          # folder: where the session ledger is kept
 
-NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "exclusive")   # a loaded mind may lack
-                                                                   # these mechanisms (--ac)
+NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "exclusive",   # a loaded mind may
+         "exact_relations")                                                                  # lack these (--ac)
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 

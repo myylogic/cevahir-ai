@@ -19,9 +19,9 @@ def raised(tmp_path, **flags) -> str:
 
 def test_load_switches_nothing_on(tmp_path):
     path = raised(tmp_path, backoff=False, resemblance=False, race=False, situations=False, explore=False,
-                  starts=False, exclusive=False)
+                  starts=False, exclusive=False, exact_relations=False)
     mind = load(path, ledger=False)
-    for name in ("backoff", "resemblance", "race", "situations", "explore", "starts", "exclusive"):
+    for name in ("backoff", "resemblance", "race", "situations", "explore", "starts", "exclusive", "exact_relations"):
         assert getattr(mind.cfg, name) is False
 
 

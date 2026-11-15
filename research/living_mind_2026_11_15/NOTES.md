@@ -1637,3 +1637,92 @@ perceived it gives 7039 moments, 162de2fe….
 
 **Defaults.** The speaking configuration (new chat minds) now reads both. A mind raised before keeps its own
 configuration, and the program names them among the mechanisms it lives without (`--ac starts,exclusive`).
+
+## Exact Relations (F28), and the chat configuration listening in the worlds (2026-11-15)
+
+The chat configuration did poorly in the generated worlds of the first lives: held-out 0.567 and 0.037 after 600
+experiences, against the "members" configuration's 93% and 81% (RESULTS.md). Two causes were found today, one in the
+protocol and one in the core (`speaking_worlds.py`; 5 seeds × 2 domains; numbers at 600 experiences).
+
+**1. It spoke into the world's stream.** `run.py` lets the mind act in every moment, and the chat configuration does:
+it lives its own words between the world's. In a chat it listens while the partner speaks (`Session.listen`). With
+that one change of protocol, and the same switches as in `f25_born_failures.py`:
+
+| | nitelik, speaking into the stream | nitelik, listening | iliski, speaking into the stream | iliski, listening |
+|---|---|---|---|---|
+| held-out (told rule / induced) | 0.567 (0.567 / 0.567) | 0.633 (0.767 / 0.500) | 0.037 (0.050 / 0.025) | 0.025 (0.050 / 0.000) |
+| members | 0.796 | 0.879 | 0.757 | 0.983 |
+| exceptions right / kept | 0.707 / 0.743 | 0.765 / 0.765 | 1.000 / 1.000 | 1.000 / 1.000 |
+| early facts recalled | 0.520 | 0.720 | 0.240 | 0.960 |
+| hidden classes (Jaccard) | 0.566 | 1.000 | 0.875 | 1.000 |
+| categories / ties | 338 / 25,939 | 61 / 9,832 | 229 / 22,910 | 56 / 6,621 |
+| T1 c1 | 0.208 | 0.400 | 0.106 | 0.409 |
+
+- Speaking into the stream it learned five times as many categories, mostly from its own words, and found the hidden
+  classes worse.
+- Held-out answers in the relational world stayed near zero even when it listened.
+
+**2. F12's NEXT took the members' agreement on a value.** In the relational world an utterance is "<relation> <entity>
+<value>", so the value follows the entity directly. Every member's value is then also one of the words the member goes
+on with. F12 counted such a value as NEXT ("what the member goes on with") and never as the value itself. So the members
+of a category, who had all lived the same rule value, were read as agreeing on NEXT. NEXT resolves to the read entity's
+own strongest continuation: a value of another relation, or its category.
+
+**F28, Exact Relations** (`Config.exact_relations`; `read.member_votes`, reading only). A relation counts for a member
+only where it names the very value the member lived, resolved as it would be for the instance being read:
+
+- SELF names the member itself;
+- START names its strongest beginning (F26);
+- NEXT names its strongest continuation;
+- the fixed words of the frame are never named.
+
+Of the relations that name the same value, only the most specific counts (SELF, then START, then NEXT). The value
+itself always counts. So members that agree on a value now agree on it, and members that agree on a relation still do.
+In the toy of `test_zihin_exact_relations.py`, the members kedi and köpek both lived "siyah" after "renk", but each went
+on most with another word. Off, the frame says NEXT, which points at kuş's own continuation: e("kısa") = 25/42,
+e("siyah") = 1/2. With F28 it is the other way round.
+
+**Measured.**
+
+- **Listening, the three readings of today (F26, F27, F28) off and on.** The learned structure is the same in every
+  life (ties, categories, T1).
+
+  | | nitelik off | nitelik on | iliski off | iliski on |
+  |---|---|---|---|---|
+  | held-out (told rule / induced) | 0.633 (0.767 / 0.500) | **0.783** (0.833 / 0.733) | 0.025 (0.050 / 0.000) | **0.812** (0.725 / 0.900) |
+  | members | 0.879 | 1.000 | 0.983 | 1.000 |
+  | exceptions right / kept | 0.765 / 0.765 | 1.000 / 1.000 | 1.000 / 1.000 | 1.000 / 1.000 |
+  | early facts recalled | 0.720 | 0.920 | 0.960 | 1.000 |
+
+  Held-out in the relational world went from 0.025 to 0.812, where the "members" configuration was (0.81). F28 alone
+  gave 0.700 and 0.812 (scratch run); F26 and F27 add the rest in nitelik.
+- **The lives of the old protocol (speaking into the stream), read both ways at each checkpoint.**
+  - nitelik: told rule 0.567 → 0.533, induced 0.567 → 0.500, members 0.796 → 0.798, exceptions right 0.707 → 0.780
+    and kept 0.743 → 0.835, early facts 0.520 → 0.540.
+  - iliski: told rule 0.050 → 0.325, induced 0.025 → 0.150, members 0.757 → 0.838, early facts 0.240 → 0.340.
+
+  In these lives the held-out probes of nitelik lose a little; the lives are the ones its own words filled.
+- **Separate lives of the old protocol, off against on** (scratch run of `f25_born_failures.py --speaking`):
+  - nitelik: held-out 0.567 → 0.517 (told 0.567 → 0.667, induced 0.567 → 0.367);
+  - iliski: held-out 0.037 → 0.163;
+  - categories 338 → 216 and 229 → 184 (it speaks less into the stream).
+- **Teacher protocol, taught form:** 119 → 120 exact, F1 0.741 → 0.745.
+- **Template-free recall:**
+  - Two words: exact / valid / silent 89 / 150 / 27 → 90 / 145 / 32. Seven items stopped being valid and two became
+    valid. All nine are forks, where several read sentences go on from the same words and the loose NEXT used to break
+    the tie by accident.
+  - One word: 23 / 44 → 23 / 47.
+- **T-meaning** (3 seeds, 2 days): the replies are the same.
+  - hello: best e 0.592 → 0.625.
+  - "hi" told once: answered from its own told meaning in 0 → 1 of 3 seeds.
+  - selamlar: best e 0.700 → 0.645, still leading.
+- **Cost.** Answering moments that read a large category: 31 → 45 ms a moment in the teacher protocol (1358 members;
+  each member's strongest continuation and beginning is found, once per moment).
+
+**Defaults.** The speaking configuration reads F28 too. Minds raised before keep their configuration (`--ac
+exact_relations`).
+
+**What this changes in what was said before.** The README and the theory said that the chat configuration does poorly
+in these worlds. Most of that was its speaking into the stream (a protocol the worlds were not made for) and NEXT taking
+the members' agreement. Listening, with F26–F28, it reaches 0.78 and 0.81, with members, exceptions and the hidden classes
+all at 1.00. The "members" configuration's 0.93 in nitelik is not reached.

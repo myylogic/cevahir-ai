@@ -380,8 +380,15 @@ def resolve(mind, target: int, filler: Optional[int], fixed) -> Optional[int]:
     if target in (NEXT, START):
         if filler is None:
             return None
+        memo = mind.__dict__.get("_read_memo")         # a moment's reading resolves the same member many times
+        key = ("resolve", target, filler, tuple(fixed))
+        if memo is not None and key in memo:
+            return memo[key]
         goes_on = start_continuations(mind, filler, fixed) if target == START else continuations(mind, filler, fixed)
-        return max(goes_on, key=goes_on.get) if goes_on else None
+        found = max(goes_on, key=goes_on.get) if goes_on else None
+        if memo is not None:
+            memo[key] = found
+        return found
     return target
 
 
@@ -431,6 +438,7 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
     fixed = tuple(p for p in parts if p != category)
     relational = getattr(S, "bind_repeats", False)
     starts = relational and getattr(mind.cfg, "starts", False)
+    exact = getattr(mind.cfg, "exact_relations", False)
     shares: Dict[int, float] = {}
     members = voted = 0.0
     voters = 0
@@ -462,6 +470,24 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
         members += e_x
         voted += weight
         voters += 1
+        if exact:                                      # F28: a relation counts for a member only where it names
+            named: Dict[int, int] = {}                 # the very value the member lived, as it would be resolved
+            if relational:                             # for the read instance; of the relations naming the same
+                if x in targets:                       # value only the most specific counts (SELF, START, NEXT);
+                    named[x] = SELF                    # the value itself always counts
+                if starts:
+                    best = resolve(mind, START, x, fixed)
+                    if best is not None and best not in named:
+                        named[best] = START
+                best = resolve(mind, NEXT, x, fixed)
+                if best is not None and best not in named:
+                    named[best] = NEXT
+            for v, p in zip(targets, own):
+                share = weight * p / total
+                shares[v] = shares.get(v, 0.0) + share
+                if v in named:
+                    shares[named[v]] = shares.get(named[v], 0.0) + share
+            continue
         goes_on = _continuing(mind, x, fixed) if relational else ()
         for v, p in zip(targets, own):
             if relational and v == x:

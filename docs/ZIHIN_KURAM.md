@@ -129,6 +129,13 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   örneklerde yaşadıkça iyileşti: 600 deneyimde %93 / %81 (iki alan, 5 tohum), 1500 deneyimde %100 / %90 (3 tohum).
 - **Kendi/Sonraki Yuvaları (Self/Next Slots):** "cevap sorulan kelimeyi tekrarlar" ya da "sonra o kelimenin devamı
   gelir" gibi ilişkiler, kelimeler farklı olsa da aynı ilişki olarak sayılır. Değişkenler kelimelerden doğar.
+- **Kesin İlişkiler (Exact Relations, F28):** bir ilişki bir üye için ancak o üyenin yaşadığı değeri tam olarak
+  adlandırıyorsa sayılır; okunan örnek için nasıl çözülecekse öyle çözülür. Aynı değeri adlandıran ilişkilerden yalnız
+  en özgül olanı sayılır, değerin kendisi de her zaman sayılır. Önceden bir üyenin değeri, yalnızca onun devam ettiği
+  kelimelerden biri olduğu için "sonraki" sayılıyordu, hiçbir zaman değerin kendisi olarak sayılmıyordu. Değerin sorulan
+  şeyin hemen ardından geldiği bir dünyada ("<ilişki> <varlık> <değer>") hepsi aynı değeri yaşamış üyeler "sonraki"de
+  birleşmiş okunuyordu; bu da sorulan şeyin kendi alışkanlıklarını gösteriyordu. O dünyada görülmemiş örneklere doğru
+  cevap %3'ten %81'e çıktı.
 - **Benzerlik Oyu (Resemblance Vote):** iki şey ortak yönleriyle benzer. Bir yön, ne kadar az şeyde bulunuyorsa o
   kadar ayırt edicidir. Yeni bir şeye en çok benzeyen üyeler en yüksek sesle konuşur; ağırlık, sınıflandırmanın
   örnek tabanlı modellerindeki gibidir (genelleştirilmiş bağlam modeli). Görme ve işitme böyle tanır: yeni
@@ -248,10 +255,13 @@ Zihin "members" ayarında, iki küçük üretilmiş dünya, 5 tohum, hayat baş�
   %67 / %57 ve %60 / %50'de, yakınsayana kadar eğitilen %77 / %67 ve %53 / %53'te kaldı.
 - İkinci bir alan, tek geçişli Transformer'ın ilk alandaki doğruluğunu 0.85'ten 0.74'e düşürdü; Zihin'de 1.00
   kaldı. Yakınsayana kadar eğitilen Transformer bunun için sınanmadı.
-- Sohbet programının çalıştırdığı ayar ("speaking") bu karşılaştırmada yoktu. Aynı dünyalarda kötü sonuç verir
-  (600 deneyimde 0.55 ve 0.04). Ayrıca bu dünyaların yapılmadığı biçimde akışın içine konuşur: dünya konuşurken
-  dinleme kipinde değildir, kendi yankılarını yaşar ve ne kadar konuştuğu yaşamını değiştirir (Yaşanmış Dışlama ile
-  orada daha az konuşur ve yaklaşık beşte bir daha az bağ tutar).
+- Sohbet programının çalıştırdığı ayar ("speaking") bu karşılaştırmada yoktu. Aynı dünyalarda kötü sonuç veriyordu
+  (600 deneyimde 0.57 ve 0.04). İki neden bulundu. Birincisi, dünyanın akışının içine konuşuyordu: bu dünyalar zihnin
+  her an davranmasına izin verir, o da kendi sözlerini dünyanınkilerin arasında yaşadı ve çoğu bunlardan olmak üzere
+  beş kat fazla kategori öğrendi. İkincisi, F12'nin "sonraki" ilişkisi üyelerin bir değerde birleşmesini ele
+  geçiriyordu (Kesin İlişkiler). Sohbette olduğu gibi dünya konuşurken dinleyince, Dizi Başları, Yaşanmış Dışlama ve
+  Kesin İlişkiler ile 0.78 ve 0.81'e ulaşıyor; üyeler, istisnalar ve gizli sınıflar 1.00. "Members" ayarının ilk
+  dünyadaki 0.93'üne ulaşılmadı.
 - Bir kez okunanı geri çağırma (F26, F27) düellonun Transformer'larıyla 6. bölümde, Dizi Başları altında
   karşılaştırıldı. Önceki aynı-veri düellosu ayrılmış konuları iki tarafa da çıplak bir kelime olarak sordu; öğretmen
   diyalogları bu biçimi hiç kullanmamıştı, yani iki tarafı da öğrenmedikleri bir soruyla ölçtü. Onun yerini şablonsuz
@@ -269,7 +279,9 @@ Bu karşılaştırma küçük modellerle ve az veriyle yapıldı; çok daha fazl
   - öğrenmeyi öğrenmenin ilk denemesi olumsuzdu;
   - doğuştan kelime parçalarıyla büyüyen zihin belleği tüketti;
   - tek duyum kanıtı düzeltmesi sohbeti kötüleştirdi;
-  - sohbet ayarı, "members" ayarının iyi sonuç verdiği üretilmiş dünyalarda kötü sonuç verir;
+  - sohbet ayarı, "members" ayarının iyi sonuç verdiği üretilmiş dünyalarda kötü sonuç veriyordu (çoğunlukla
+    dünyanın akışına konuştuğu ve F12'nin "sonraki" ilişkisi üyelerin birleşmesini ele geçirdiği için; ikisi
+    giderilince 0.93 ve 0.81'e karşı 0.78 ve 0.81);
   - 15 Kasım 2026'ya kadar sohbet programında, geliştiricinin yazdığı, zihin hakkında ve "bilmiyorum" demek üzerine
     ezber dersler vardı; sahibin kararıyla çekirdekten çıkarıldı. Daha önce yetiştirilen zihinler bunları yaşadı;
     bunları kullanan ölçümler bunu belirtir.
@@ -300,6 +312,7 @@ Hepsi notlarda ölçümleriyle durur.
 | Durum Benzeşimi | Situation Resemblance | F23 | |
 | Dizi Başları | Sequence Starts | F26 | |
 | Yaşanmış Dışlama | Lived Exclusion | F27 | |
+| Kesin İlişkiler | Exact Relations | F28 | |
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |

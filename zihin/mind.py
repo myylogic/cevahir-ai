@@ -86,6 +86,8 @@ class Config:
                                     # channel, per class (learn.learn_follow); off keeps every earlier result
     substitution: bool = False      # Substitution Evidence (zihin/anlam.py): y standing where x was expected, with x's
                                     # consequences after it, is inferred evidence that y belongs to x's categories
+    exact_relations: bool = False   # F28 (Exact Relations): a frame's relation (SELF, NEXT, START) counts for a member
+                                    # only where it names the very value the member lived; the value itself always counts
     exclusive: bool = False         # F27 (Lived Exclusion): what an instance was lived to be followed by on a channel
                                     # counts against what a generalisation proposes there that it never went on with
     starts: bool = False            # F26 (Sequence Starts): how sequences that began with a word went on (read from the

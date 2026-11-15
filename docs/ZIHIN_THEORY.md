@@ -142,6 +142,12 @@ At each moment, roughly each word, the mind lives these steps:
   (3 seeds).
 - **Self/Next Slots.** Relations such as "the answer repeats the asked word" or "then comes that word's
   continuation" count as the same relation even when the words differ. Variables arise from words.
+- **Exact Relations (F28).** A relation counts for a member only where it names the very value the member lived,
+  resolved as it would be for the instance being read. Of the relations that name the same value only the most
+  specific counts, and the value itself always counts. Before, a member's value that was merely one of the words it
+  goes on with counted as "next" and never as the value. In a world where the value follows the asked thing directly
+  ("<relation> <entity> <value>"), members that had all lived the same value were read as agreeing on "next", which
+  pointed at the asked thing's own habits. Held-out answers in that world went from 3% to 81%.
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -262,10 +268,13 @@ Zihin in its "members" configuration, two small generated worlds, 5 seeds, 6–8
   one pass reached 67% / 57% and 60% / 50%; one trained to convergence reached 77% / 67% and 53% / 53%.
 - A second domain lowered the one-pass Transformer's accuracy on the first domain from 0.85 to 0.74; in Zihin it
   stayed at 1.00. The converged Transformer was not tested for this.
-- The configuration the chat program runs ("speaking") was not in that comparison. In the same worlds it does poorly
-  (held-out 0.55 and 0.04 after 600 experiences). It also speaks into the stream, which these worlds were not made
-  for: it is not listening while the world speaks, so it lives its own echoes, and how much it talks changes its life
-  (with Lived Exclusion it talks less there and holds about a fifth fewer ties).
+- The configuration the chat program runs ("speaking") was not in that comparison. In the same worlds it did poorly
+  (held-out 0.57 and 0.04 after 600 experiences). Two causes were found. First, it spoke into the world's stream:
+  these worlds let the mind act in every moment, so it lived its own words between the world's, and learned five
+  times as many categories, mostly from them. Second, F12's "next" took the members' agreement on a value (Exact
+  Relations). Listening while the world speaks, as in a chat, and with Sequence Starts, Lived Exclusion and Exact
+  Relations, it reaches 0.78 and 0.81, with members, exceptions and the hidden classes all at 1.00. The "members"
+  configuration's 0.93 in the first world is not reached.
 - Recall of what was read once (F26, F27) is compared with the duel's Transformers in section 6, under Sequence
   Starts. The earlier same-data duel asked both sides the held-out subjects as a bare word, a form the teacher
   dialogues never used, so it measured both on a question neither had learned; the template-free test replaces it
@@ -285,7 +294,9 @@ The models were small and the data scarce; with far more data the gap may close.
   - the first attempt at learning to learn was negative;
   - a mind raised with word pieces from birth ran out of memory;
   - the one-shot evidence fix made conversation worse;
-  - the chat configuration does poorly in the generated worlds where the "members" configuration does well;
+  - the chat configuration did poorly in the generated worlds where the "members" configuration does well (mostly
+    because it spoke into the world's stream and F12's "next" took the members' agreement; with both addressed it
+    reaches 0.78 and 0.81 against 0.93 and 0.81);
   - until 15 November 2026 the chat program held scripted lessons about the mind and about saying "bilmiyorum",
     written by the developer; they were removed from the core at the owner's decision. Minds raised before lived
     them, and the measurements that used them say so.
@@ -314,6 +325,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Situation Resemblance | Durum Benzeşimi | F23 | |
 | Sequence Starts | Dizi Başları | F26 | |
 | Lived Exclusion | Yaşanmış Dışlama | F27 | |
+| Exact Relations | Kesin İlişkiler | F28 | |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |
