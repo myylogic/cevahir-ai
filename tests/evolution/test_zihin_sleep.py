@@ -159,7 +159,10 @@ def test_a_dream_is_the_minds_own_inner_voice_and_ends_when_its_race_falls_silen
     chain, seen = moments(session, lambda: dream_chain(session, "güneş"))
     assert 1 <= len(chain) < DREAM_CAP                   # ended by the mind, not by a count
     imagined = [str(e.symbol) for events in seen for e in events if e.channel == CHANNEL and e.prov == IMAGINED]
-    assert imagined == [w for d in chain for w in d["words"]]   # the topic brought to mind, then what it decided
+    kept = [w for d in chain for w in d["words"]]        # each imagining kept: the topic brought to mind, then what
+    assert imagined[:len(kept)] == kept                  # it decided; the chain ends when its race falls silent: the
+    silent = imagined[len(kept):]                        # last topic was brought to mind and nothing came after it
+    assert len(silent) <= 1 and (not silent or not think(session, silent[0])[0])
     assert not [e for events in seen for e in events if e.channel == CHANNEL and e.prov != IMAGINED]
     assert all(len([e for e in events if e.channel == CHANNEL]) <= 1 for events in seen)
     dreamt = {d["about"] for d in chain}

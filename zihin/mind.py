@@ -86,6 +86,11 @@ class Config:
                                     # channel, per class (learn.learn_follow); off keeps every earlier result
     substitution: bool = False      # Substitution Evidence (zihin/anlam.py): y standing where x was expected, with x's
                                     # consequences after it, is inferred evidence that y belongs to x's categories
+    exclusive: bool = False         # F27 (Lived Exclusion): what an instance was lived to be followed by on a channel
+                                    # counts against what a generalisation proposes there that it never went on with
+    starts: bool = False            # F26 (Sequence Starts): how sequences that began with a word went on (read from the
+                                    # composed units of two items) is a relation of frames (START) and the reading of a
+                                    # one-item utterance (F16), apart from what followed the word anywhere
     rivals: bool = False            # F25 (b): the frequency of a lag-1 tie is read as its share of the positive mass of
                                     # its source's ties on the same channel (read.own_mass); off as before
     bind_repeats: bool = False      # F12: a unit occurring at several positions of a tuple is one slot (variable)

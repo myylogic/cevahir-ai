@@ -136,6 +136,12 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
 - **Durum Benzeşimi (Situation Resemblance):** hiç bütün olarak yaşanmamış bir söze, en çok benzeyen yaşanmış
   durumlarda ne geldiyse onunla karşılık verilir. Benzerlik zayıfsa, örneğin sözde hiç bilinmeyen bir kelime
   varsa, uydurulmaz.
+- **Yaşanmış Dışlama (Lived Exclusion, F27):** bir kanalda her an tek bir öğe olur. Bu yüzden bir durumun kendisinden
+  sonra yaşanan, bir genellemenin orada önerdiği ama o durumdan sonra hiç yaşanmamış seçeneğin aleyhine kanıttır.
+  Böyle bir öneri lehinde kanıtı olmadan, aleyhinde de durumun o kanaldaki kendi yaşanmış miktarıyla okunur ve kendi
+  kanıt gibi en son işlenir. Özgül olan, genel olanı yaşadıklarında zaten geçiyordu; artık yaşamadıklarında da onun
+  aleyhine sayılır. Üretilmiş dünyalarda aynı yaşamlar böyle okunduğunda istisnalar daha sık korunur (nitelik
+  0.74 → 0.84).
 
 ## 6. Konuşmak, düşünmek, bilmemek
 
@@ -143,6 +149,16 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   algılanan olaydan sonraki öğeleri okur; bunların yaşanmış devamı olan en uzun kuyruğu, düşürülmüş bir kanaatle
   konuşur. Bu kural bir söz başlatmaz ve şu anki bağlamın içinde kalan karşı taraf sözlerini dışarıda bırakır;
   böylece karşısındakinin az önce söylediğini tekrarlamaz.
+- **Dizi Başları (Sequence Starts, F26):** bir kelimenin, onunla başlayan bir dizide (okunan bir cümle, sessizlikten
+  sonraki bir söz) nasıl sürdüğü, her yerde nasıl sürdüğünden ayrı tutulur. Yeni bir şey saklanmaz: x, v diye başlayan
+  her bölüm iki öğeli (x, v) birimini bir kez tanır; bu tanımalar sayılır, öbür başlangıçlar aleyhine sayılır. Bir
+  çerçevenin üyeleri "cevap, sorulan kelimeyle başlayan dizi gibi sürer" ilişkisinde (BAŞ) birleşebilir; şimdiye dek
+  tek kelimelik bir söz de, sessizlikten sonra akla gelen bir kelime de öyle sürer. Şablonsuz bir sınavda (belgeleri
+  bir kez okumuş bir zihin, rastgele 200 cümle, ilk iki kelimeleri akla getirildi) 150'sinde o kelimelerle başlayan
+  okunmuş bir cümleyi, ilk iki kelimesi yalnız tek bir cümleyi başlatan 61 cümlenin 60'ında o cümlenin kendisini
+  eksiksiz söyledi. Aynı belgelerle eğitilen en güçlü küçük Transformer (7,4 milyon parametre, 50 dakika) 41'inde
+  geçerli bir cümle söyledi. İpucu tek kelime olunca Transformer daha sık geçerli cümle söyledi (51'e karşı 44): bir
+  kelime birkaç cümleyi başlatıyorsa zihin susar.
 - **Avantaj Yarışı (Advantage Race):** aynı kanaldaki seçenekler birbirini dışlar. Önde olan, en güçlü rakibine
   karşı avantajı eşiği geçerse söylenir; bütün seçenekler eşitse susulur.
 - **Kararsızlıkta Deneme (Trying in Hesitation):** iyi desteklenen seçenekler arasında kalındığında susmak yerine,
@@ -233,8 +249,13 @@ Zihin "members" ayarında, iki küçük üretilmiş dünya, 5 tohum, hayat baş�
 - İkinci bir alan, tek geçişli Transformer'ın ilk alandaki doğruluğunu 0.85'ten 0.74'e düşürdü; Zihin'de 1.00
   kaldı. Yakınsayana kadar eğitilen Transformer bunun için sınanmadı.
 - Sohbet programının çalıştırdığı ayar ("speaking") bu karşılaştırmada yoktu. Aynı dünyalarda kötü sonuç verir
-  (600 deneyimde 0.55 ve 0.04); ayrıca bu dünyaların yapılmadığı biçimde akışın içine konuşur; bu ayrıca
-  incelenmedi.
+  (600 deneyimde 0.55 ve 0.04). Ayrıca bu dünyaların yapılmadığı biçimde akışın içine konuşur: dünya konuşurken
+  dinleme kipinde değildir, kendi yankılarını yaşar ve ne kadar konuştuğu yaşamını değiştirir (Yaşanmış Dışlama ile
+  orada daha az konuşur ve yaklaşık beşte bir daha az bağ tutar).
+- Bir kez okunanı geri çağırma (F26, F27) düellonun Transformer'larıyla 6. bölümde, Dizi Başları altında
+  karşılaştırıldı. Önceki aynı-veri düellosu ayrılmış konuları iki tarafa da çıplak bir kelime olarak sordu; öğretmen
+  diyalogları bu biçimi hiç kullanmamıştı, yani iki tarafı da öğrenmedikleri bir soruyla ölçtü. Onun yerini şablonsuz
+  sınav aldı (research/living_mind_2026_11_15/NOTES.md).
 
 Bu karşılaştırma küçük modellerle ve az veriyle yapıldı; çok daha fazla veriyle fark kapanabilir.
 
@@ -277,6 +298,8 @@ Hepsi notlarda ölçümleriyle durur.
 | Benlik Birimi | Self Unit | F21, bir gösterim | |
 | Rüya Ayıklama | Dream Sorting | F22 | |
 | Durum Benzeşimi | Situation Resemblance | F23 | |
+| Dizi Başları | Sequence Starts | F26 | |
+| Yaşanmış Dışlama | Lived Exclusion | F27 | |
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |

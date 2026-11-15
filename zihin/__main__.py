@@ -143,15 +143,16 @@ def speaking(folder: str = None) -> Config:
     # _log_path() without an argument when no folder is given: research scripts replace it with a function of no
     # arguments to build the configuration without a ledger file (research/living_mind_2026_11_15/t_meaning.py)
     return Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
-                          backoff=True, resemblance=True, race=True, situations=True, explore=True,
-                          log_path=_log_path(folder) if folder else _log_path())
+                          backoff=True, resemblance=True, race=True, situations=True, explore=True, starts=True,
+                          exclusive=True, log_path=_log_path(folder) if folder else _log_path())
 
 
 VARIANTS = {"speaking": speaking,
             "members": lambda folder=None: Config.changed(support="members"),
             "changed": lambda folder=None: Config.changed()}          # folder: where the session ledger is kept
 
-NEWER = ("backoff", "resemblance", "race", "situations", "explore")   # mechanisms a loaded mind may lack (--ac)
+NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "exclusive")   # a loaded mind may lack
+                                                                   # these mechanisms (--ac)
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -757,6 +758,9 @@ class Session:
                             break
                         self.check()
                         self.listen(sentence, IMITATED)
+                        # the writer's sentence has ended: its end is perceived, with how it ended, as the end of any
+                        # utterance heard (live, watch, !ogret lines); then a pause before the next one
+                        self.end_of_turn(IMITATED, tone=self.tone(sentence))
                         self.mind.step([])
                         said.append(sentence)
                         lived += 1

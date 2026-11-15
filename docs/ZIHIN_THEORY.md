@@ -149,6 +149,11 @@ At each moment, roughly each word, the mind lives these steps:
 - **Situation Resemblance.** An utterance never lived as a whole is answered with what followed the most similar
   lived situations. If the resemblance is weak, for example because the utterance has a word nothing lived, nothing
   is made up.
+- **Lived Exclusion (F27).** A channel carries one item per moment, so what a situation was itself lived to be
+  followed by is evidence against what a generalisation proposes there that the situation never went on with: such a
+  proposal is read with no evidence for it and the situation's own lived amount on that channel against it, nested
+  last as own evidence. The specific already overrode the general for what it lived; now it also counts against what
+  it did not. Read on the same lives of the generated worlds, exceptions are kept more often (nitelik 0.74 → 0.84).
 
 ## 6. Speaking, thinking, not knowing
 
@@ -156,6 +161,16 @@ At each moment, roughly each word, the mind lives these steps:
   after the last perceived event, and the longest tail of them that has lived continuations speaks, with reduced
   conviction. This rule never starts an utterance, and it leaves out the partner's words still inside the present
   context, so it does not repeat what the partner just said.
+- **Sequence Starts (F26).** What followed a word where a sequence began with it (a sentence read, an utterance after
+  silence) is kept apart from what followed it anywhere. Nothing new is stored: every episode that began x, v
+  recognised the two-item unit (x, v) once, and those recognitions are counted, the other beginnings counting against.
+  A frame's members can agree that the answer goes on as the sequence that began with the asked word (START), an
+  utterance of one word so far goes on that way, and so does a word brought to mind after silence. In a template-free
+  test (a mind that read the documents once, 200 random sentences, their first two words brought to mind) it said a
+  read sentence beginning with those words in 150, and the rest of that very sentence in 60 of the 61 whose first two
+  words begin only one sentence. The strongest small Transformer trained on the same documents (7.4 million
+  parameters, 50 minutes) said a valid one in 41. With one word as the cue the Transformer said a valid sentence more
+  often (51 against 44), because the mind stays silent when a word begins several sentences.
 - **Advantage Race.** Options on one channel exclude each other. The leader is said if its advantage over the
   strongest rival reaches the threshold; if all options are equal, the mind stays silent.
 - **Trying in Hesitation.** When the mind hesitates between well-supported options, it tries the one whose
@@ -248,8 +263,13 @@ Zihin in its "members" configuration, two small generated worlds, 5 seeds, 6–8
 - A second domain lowered the one-pass Transformer's accuracy on the first domain from 0.85 to 0.74; in Zihin it
   stayed at 1.00. The converged Transformer was not tested for this.
 - The configuration the chat program runs ("speaking") was not in that comparison. In the same worlds it does poorly
-  (held-out 0.55 and 0.04 after 600 experiences); it also speaks into the stream, which these worlds were not made
-  for, and this was not analysed further.
+  (held-out 0.55 and 0.04 after 600 experiences). It also speaks into the stream, which these worlds were not made
+  for: it is not listening while the world speaks, so it lives its own echoes, and how much it talks changes its life
+  (with Lived Exclusion it talks less there and holds about a fifth fewer ties).
+- Recall of what was read once (F26, F27) is compared with the duel's Transformers in section 6, under Sequence
+  Starts. The earlier same-data duel asked both sides the held-out subjects as a bare word, a form the teacher
+  dialogues never used, so it measured both on a question neither had learned; the template-free test replaces it
+  (research/living_mind_2026_11_15/NOTES.md).
 
 The models were small and the data scarce; with far more data the gap may close.
 
@@ -292,6 +312,8 @@ The models were small and the data scarce; with far more data the gap may close.
 | Self Unit | Benlik Birimi | F21, a demonstration | |
 | Dream Sorting | Rüya Ayıklama | F22 | |
 | Situation Resemblance | Durum Benzeşimi | F23 | |
+| Sequence Starts | Dizi Başları | F26 | |
+| Lived Exclusion | Yaşanmış Dışlama | F27 | |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

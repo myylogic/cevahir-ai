@@ -83,7 +83,8 @@ def test_after_a_file_was_read_the_thought_is_about_its_last_sentence(tmp_path, 
     s = session()
     s.read_path(str(tmp_path / "gezi.txt"))
     s.read_path(str(tmp_path / "gezi.txt"))                # read twice: what follows its words has been tried once
-    assert topic_of(s) in {"fokbalıkları", "kayaların", "üstünde"}   # its last sentence ("uyur" ends it: nothing
+    last = {"fokbalıkları", "kayaların", "üstünde", "uyur"}  # its last sentence; "uyur" too: the end of the sentence
+    assert topic_of(s) in last                             # is perceived after it (what follows it was tried once)
 
     def handle(line):
         return _one_line(s, line, True, Args(), lambda reason: None, 0) is not None
@@ -93,4 +94,4 @@ def test_after_a_file_was_read_the_thought_is_about_its_last_sentence(tmp_path, 
     while life.thought is None and time.time() < deadline:
         time.sleep(0.02)
     life.stop()
-    assert life.thought is not None and life.thought[0] in {"fokbalıkları", "kayaların", "üstünde"}   # followed it)
+    assert life.thought is not None and life.thought[0] in last

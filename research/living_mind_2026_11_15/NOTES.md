@@ -1498,3 +1498,142 @@ On the T-meaning world (3 seeds, 2 days, speaking configuration):
 - Lowering the speaking line would make the mind speak on weak evidence everywhere, so it was not done. The flag stays
   off; what would carry a substitution over the line is stronger evidence of equivalence (more lived substitutions,
   consequences across the turn), not a smaller threshold.
+
+## Recall of what was read once: Sequence Starts (F26), Lived Exclusion (F27) and the end of a read sentence (2026-11-15)
+
+**First, a mistake in the earlier evaluations.** The teacher protocol (`research/living_mind_2026_11_14/teacher_qa.py`)
+taught "<X> nedir ?" answered by the first document sentence that starts with X. But `ogretmen.tsv.heldout` holds the
+held-out subject alone, and every evaluation that read it asked that bare word: `f25_teacher.py`, `same_data_duel.py`
+and a white-box probe of this afternoon. A mind that never lived a one-word question has no frame for it. On a mind
+raised today on the 1358 pairs and the documents (no lessons), 0 of 200 answers began with the asked word, and 138 were
+silent; the asked word's expectation at the turn end was exactly 1/2 in all 200. Asked in the taught form, the same
+mind began 200 of 200 answers with the asked word and said 59 exactly. The duel's Transformers were prompted with the
+bare word too ("<soru> X <cevap>"). So the duel measured both sides on a question neither had learned. It is not rerun
+in the taught form here; the template-free test below replaces it.
+
+**Where the answers failed, decision by decision** (a white box at every moment of every answer):
+
+- **Most failures were at the second word.** The frame (C, nedir, ⏎, C) carries NEXT: "the answer goes on with what
+  the asked word goes on with". NEXT resolved to the asked word's strongest continuation anywhere, often a word that
+  followed it inside other sentences.
+- **The memory already held what was needed.** For all 200 held-out subjects the composed unit (X, w2) exists, because
+  reading the sentence began an episode X, w2. For 176 the right w2 is the most frequent of those beginnings, and 137
+  subjects begin only one sentence.
+- **Many answers said the whole sentence and went on** (21 of 200 with the switches off, 34 with Sequence Starts).
+  Reading never perceived the end of a sentence. `Session.body` strips the closing punctuation so that it is
+  perceived with the end of an utterance. But `read_path`, unlike `live`, `watch` and the lines of `!ogret`, never
+  perceived that end, so a recalled sentence had no lived end.
+- **Many answers stopped in the middle.** A generalisation proposed another word just under the speaking line and raced
+  the lived continuation. In the template-free test, a context lived once with "," had a frame proposing ":" at 0.657
+  against 0.667, and the mind was silent.
+
+**Three changes.**
+
+1. **F26, Sequence Starts** (`Config.starts`; `read.start_mass`, reading only).
+   - **What it counts.** An episode begins after a pause, and its context after two items is the composed unit
+     (x, v). That unit is recognised once in every episode that began x, v, and each recognition is evidence on its
+     PART ties. Their trust-weighted mass B(v) counts those beginnings. What began with x and went on otherwise counts
+     against v: W+(v) = B(v), W−(v) = Σ_{v'≠v} B(v').
+   - **Nothing new is stored.** The atom's own lag-1 ties keep what followed x anywhere.
+   - **Frames.** A frame's members agree on START when the value each lived is how a sequence that began with it went
+     on. The priority is SELF, then START, then NEXT, then the value itself. START resolves to the strongest beginning
+     of the filler, never to a fixed word of the frame.
+   - **F16.** An utterance of one item so far is read as a sequence that began with it, before the item anywhere. A
+     composed suffix shorter than F is already such a beginning.
+   - **A word brought to mind.** A moment that is one item after a pause reads its beginnings last, as own evidence.
+     What never went on a sequence that began so counts against.
+2. **F27, Lived Exclusion** (`Config.exclusive`; `read.excluded`, reading only).
+   - **The principle.** A channel carries one item per moment. So what an instance was itself lived to be followed by
+     on a channel is evidence against every target there that it was never followed by.
+   - **The reading.** Some targets are proposed by a generalisation but were never lived after the instance, on a world
+     channel where the instance went on with something. Each is read with W+ = 0 and W− = the instance's own positive
+     mass on that channel, nested last as own evidence: e ← (1 − c) e, c = conviction(W−).
+   - **What is untouched.** Targets with the instance's own evidence keep it (F14 records their failures), and feelings
+     are never touched.
+   - **Relation to F25.** This is the full-record reading F25 described for ties not yet born, applied where a
+     generalisation proposes them. It is a reading only, whereas F25 (a) changed learning.
+3. **The end of a read sentence is perceived** (`Session.read_path`, program behaviour). The mind hears the sentence,
+   then perceives the end of the utterance with its tone (imitated), then a pause, as for every other utterance it hears.
+
+**Teacher protocol, taught form** (`recall_once.py teacher`; 200 held-out subjects; minds raised on the 1358 pairs and
+then the 11 documents, no lessons; F1 and prefix against the answer without its closing punctuation):
+
+| mind / reading | exact | starts with the subject | silent | F1 | prefix | went on past the end |
+|---|---|---|---|---|---|---|
+| bare word, as the earlier evaluations asked | 0 | 0 | 138 | 0.000 | 0.000 | 0 |
+| sentence ends not perceived, switches off | 59 | 200 | 0 | 0.534 | 0.492 | 21 |
+| sentence ends not perceived, starts | 89 | 200 | 0 | 0.722 | 0.695 | 34 |
+| sentence ends perceived, switches off | 78 | 200 | 0 | 0.547 | 0.492 | 2 |
+| sentence ends perceived, starts | 117 | 200 | 0 | 0.737 | 0.695 | 6 |
+| sentence ends perceived, starts + exclusive | 119 | 200 | 0 | 0.741 | 0.700 | 6 |
+
+The lookup that learns nothing (the first sentence that starts with the subject) answers 186 by the construction of the
+protocol. Of the 83 left with starts and sentence ends (white box), 62 are cases where reading order would be needed:
+
+- 23 begin with a subject that begins several sentences. The mind says the most frequent beginning and goes on with
+  that sentence; the reference is the first such sentence in the documents.
+- 31 stop where the sentence's first words begin several sentences and the lived continuations fork.
+- 8 stop where the members predict the end: bibliographic answers such as "X , r ." end there in the pairs.
+
+The other 21 are small classes.
+
+**Template-free recall** (`recall_once.py mind` and `transformer`).
+
+- **The mind.** It lived only the documents: 186,457 moments, 2.30 million ties, about five minutes on one core.
+- **The sample.** 200 sentences of the same documents, sampled with `random.Random(0)`.
+- **The cue.** The first one or two words of each sentence are brought to mind with the inner voice.
+- **Scores.** Exact means the rest of that very sentence. Valid means the rest of some read sentence that begins with
+  the same words. Unique start means the cue words begin only that sentence.
+
+| | exposure | 2 words: exact / valid / silent | unique start | 1 word: exact / valid / silent | unique start |
+|---|---|---|---|---|---|
+| Zihin, switches off | one reading | 59 / 90 / 57 | 40/61 | 11 / 30 / 63 | 8/21 |
+| Zihin, starts | one reading | 66 / 116 / 51 | 42/61 | 22 / 42 / 109 | 19/21 |
+| Zihin, starts + exclusive | one reading | **89 / 150 / 27** | **60/61** | 23 / 44 / 109 | 19/21 |
+| Transformer, repository model, 1.0M parameters, one pass | 58 s | 0 / 0 / 1 | 0/61 | 0 / 0 / 5 | 0/21 |
+| same, best of 18 epochs | 34 min | 0 / 10 / 3 | 0/61 | 0 / 4 / 10 | 0/21 |
+| GPT, the duel verifier's recipe, 7.35M parameters, best epoch 16 of 27 | 50 min | 17 / 41 / 1 | 11/61 | 16 / 51 / 0 | 6/21 |
+
+- **Two words that begin only one read sentence:** the mind says the rest of it exactly in 60 of 61.
+- **What the Transformers saw.** They were trained for the duel, on the pairs and the documents, with the mind's units.
+  The mind they are compared with here lived only the documents.
+- **A mind raised on the duel's stream** (pairs, then documents) gives the same 89 / 150 with two words, but 13 / 32 with
+  one. The subjects of the pairs also began a question ("X nedir"), so their beginnings are split.
+- **One word, valid sentences:** the GPT says one more often (51 against 44). When the word begins several sentences it
+  always says one of them, while the mind stays silent (109 silences) unless one beginning leads.
+- **Limits.** One data set and one sample of 200, with no variation of the sampling seed. The Transformers are the
+  duel's: small, trained for its protocol, one seed each. A larger or longer-trained model may do better.
+
+**Worlds** (the `f25_born_failures.py --speaking` protocol, 5 seeds × 2 domains, 600 experiences; scratch runners
+that import it unchanged):
+
+- **Starts alone.** The lives are identical, except that one nitelik seed differs at 300 experiences (−0.08).
+- **Starts + exclusive, separate lives.** In these worlds the mind is not listening while the world speaks, so it
+  speaks into the stream and lives its own echoes. With exclusive it speaks less there, and the lives differ:
+  - ties 25,939 → 20,366 and categories 338 → 220 (nitelik);
+  - T1 c1 0.208 → 0.092, because the white-box conviction counts the mind's own echoes with trust 1;
+  - T3 exception_ok 0.707 → 0.635 and held_induced_ok 0.567 → 0.533.
+- **The same lives, read both ways** (switches off while living; probes read off and on at each checkpoint):
+  - nitelik exception_ok 0.707 → 0.780, exception_kept 0.743 → 0.835, held_induced_ok 0.567 → 0.533, member_ok
+    0.796 → 0.791;
+  - iliski member_ok 0.757 → 0.820, early_recall 0.24 → 0.28;
+  - the rest equal.
+
+  What the readings do is right. What changes the separate lives is how much the mind talks over the world, which
+  this protocol was not made for.
+- **T-meaning** (3 seeds, 2 days): identical tables with and without.
+
+**Exactness.** With the switches off and the old `read_path`, the code gives the committed code's digests in all 17
+configurations, and the lesson-free gate is unchanged (6626 moments, 314bdd47…). With the end of a read sentence
+perceived it gives 7039 moments, 162de2fe….
+
+**Tests.**
+
+- `test_zihin_starts.py` (6) and `test_zihin_exclusion.py` (4). The exclusion tests are hand-checkable: the frame's
+  ":" goes from 25/42 to 25/63, and "," stays at 2/3.
+- Two tests changed:
+  - a sentence's last word now has the perceived end after it, so it can be a topic;
+  - a dream may end with a topic brought to mind after which its race was silent.
+
+**Defaults.** The speaking configuration (new chat minds) now reads both. A mind raised before keeps its own
+configuration, and the program names them among the mechanisms it lives without (`--ac starts,exclusive`).

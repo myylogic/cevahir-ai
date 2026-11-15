@@ -144,6 +144,88 @@ def _continuing(mind, unit: int, exclude=()) -> set:
     return {v for v in targets if v != unit and v not in exclude}
 
 
+def start_mass(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, Tuple[float, float]]:
+    """F26 (Sequence Starts): (W+, W-) of "a sequence that starts with ``unit`` goes on with v", by world target v.
+
+    An episode begins after a pause, and its context after two items is the composed unit (unit, v): that unit is
+    recognised once in every episode that began with ``unit`` and then v, and each recognition is evidence on its PART
+    ties (form.confirm_parts). Their trust-weighted mass B(v) counts those beginnings. What began with ``unit`` and
+    went on otherwise counts against v, as its rivals' share (the reading F25 b gives lag-1 ties):
+        W+(v) = B(v),   W-(v) = sum over v' != v of B(v')
+    The atom's own lag-1 ties hold what followed ``unit`` anywhere; this holds what followed it where a sequence began
+    with it (a sentence read, an utterance after silence). Nothing new is stored for it; reads only."""
+    memo, key = _memo_key(mind, "start", unit, 0, trust)
+    if memo is not None:
+        hit = memo.get(key)
+        if hit is not None:
+            return dict(hit)
+    S = mind.S
+    kinds, arity = mv_view(mind, "u_kind"), mv_view(mind, "u_arity")
+    src, lag = mv_view(mind, "t_src"), mv_view(mind, "t_lag")
+    world, channel = kind_masks(mind)[3], mv_view(mind, "u_channel")
+    began: Dict[int, float] = {}
+    for tie in S.inc.get((unit, PART), ()):
+        c = src[tie]
+        if lag[tie] != 0 or arity[c] != 2 or kinds[c] & SLOTTED or not kinds[c] & COMPOSED:
+            continue
+        v = parts_of(mind, c)[1]
+        if v == unit or not world[channel[v]]:
+            continue
+        w_pos, _ = mass1(mind, tie, trust)
+        if w_pos > 0.0:
+            began[v] = began.get(v, 0.0) + w_pos
+    total = sum(began.values())
+    out = {v: (b, max(0.0, total - b)) for v, b in began.items()}
+    if memo is not None:
+        memo[key] = tuple(out.items())
+    return out
+
+
+def excluded(mind, out: Dict[int, float], own: Dict[int, Tuple[float, float]]) -> None:
+    """F27 (Lived Exclusion): one item per channel per moment, so what the instance itself was lived to be followed by
+    on a channel is evidence against every target there that it was never followed by. A target that a generalisation
+    proposes (it is in ``out``) and that the instance never went on with, on a world channel where the instance went
+    on with something, is read with W+ = 0 and W- = the instance's own positive mass on that channel (the full record:
+    each of those moments was a moment it was not followed by the target), nested last as own evidence is:
+        e <- c * 0 + (1 - c) e,   c = conviction(W-)
+    Targets the instance has its own evidence on keep that evidence (F14 records their failures); nothing is written."""
+    k = mind.cfg.k
+    channel = mv_view(mind, "u_channel")
+    totals: Dict[int, float] = {}
+    for target, (w_pos, _) in own.items():
+        if w_pos > 0.0 and _world(mind, target):
+            totals[channel[target]] = totals.get(channel[target], 0.0) + w_pos
+    if not totals:
+        return
+    for target in list(out):
+        if target in own or not _world(mind, target):
+            continue
+        total = totals.get(channel[target], 0.0)
+        if total > 0.0:
+            out[target] = (1.0 - conviction(total, k)) * out[target]
+
+
+def _begins(mind, unit: int) -> bool:
+    """F26: ``unit`` is the present context and the whole present episode, one item after a pause: the moment is the
+    beginning of a sequence."""
+    episode = getattr(mind, "episode", None)
+    return (unit == getattr(mind, "context", None) and episode is not None and len(episode) == 1
+            and episode[0] == unit and bool(mv_view(mind, "u_kind")[unit] & ATOMIC))
+
+
+def begins_with(mind, unit: int, v: int) -> bool:
+    """F26: a sequence was lived that began with ``unit`` and then ``v`` (the composed unit of the two exists)."""
+    found = mind.S.tuple_index.get((unit, v))
+    return found is not None and not mv_view(mind, "u_kind")[found] & SLOTTED
+
+
+def start_continuations(mind, unit: int, exclude=()) -> Dict[int, float]:
+    """F26: expectations of what a sequence that starts with ``unit`` goes on with (``start_mass`` by the one rule),
+    without ``exclude`` (the fixed words of a frame)."""
+    k = mind.cfg.k
+    return {v: expectation(p, n, k) for v, (p, n) in start_mass(mind, unit).items() if v not in exclude}
+
+
 def rival_mass(mind, dst: torch.Tensor, w_pos: torch.Tensor, w_neg: torch.Tensor):
     """F25 (b), the normalised reading: for a target on a sense or act channel the negative mass is the positive mass
     of the source's other targets on that channel, so f(v | x) = W+(x -> v) / sum over v' of W+(x -> v') and the
@@ -286,6 +368,21 @@ def _world(mind, unit: int) -> bool:
 
 
 SELF, NEXT = -1, -2   # F12 relational targets of a frame: "the filler of my slot", "what the filler goes on with"
+START = -3            # F26: "what a sequence that starts with the filler goes on with" (more specific than NEXT)
+
+
+def resolve(mind, target: int, filler: Optional[int], fixed) -> Optional[int]:
+    """A frame's relational target read for one instance: SELF is the filler itself, START the strongest continuation
+    of sequences that began with the filler (F26), NEXT the filler's own strongest continuation (F12); the fixed words
+    of the frame are never what the relation names. Any other target is itself."""
+    if target == SELF:
+        return filler
+    if target in (NEXT, START):
+        if filler is None:
+            return None
+        goes_on = start_continuations(mind, filler, fixed) if target == START else continuations(mind, filler, fixed)
+        return max(goes_on, key=goes_on.get) if goes_on else None
+    return target
 
 
 def continuations(mind, unit: int, exclude=()) -> Dict[int, float]:
@@ -333,6 +430,7 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
     where = tuple(j for j, p in enumerate(parts) if p == category)
     fixed = tuple(p for p in parts if p != category)
     relational = getattr(S, "bind_repeats", False)
+    starts = relational and getattr(mind.cfg, "starts", False)
     shares: Dict[int, float] = {}
     members = voted = 0.0
     voters = 0
@@ -366,7 +464,14 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
         voters += 1
         goes_on = _continuing(mind, x, fixed) if relational else ()
         for v, p in zip(targets, own):
-            key = SELF if relational and v == x else NEXT if v in goes_on else v
+            if relational and v == x:
+                key = SELF
+            elif starts and v not in fixed and begins_with(mind, x, v):
+                key = START                            # F26: v is how a sequence that began with x went on
+            elif v in goes_on:
+                key = NEXT
+            else:
+                key = v
             shares[key] = shares.get(key, 0.0) + weight * p / total
     if voted <= 0.0:
         return {}, 0.0, where, fixed, 0
@@ -414,16 +519,12 @@ def voice_credibility(mind, kind: Tuple[int, int]) -> float:
 
 
 def _claim(mind, unit: int, mass, where, fixed) -> Tuple[Optional[int], float]:
-    """F24: what a voice claims for ``unit``: its top value (SELF and NEXT resolved as in ``members_map``) and its
+    """F24: what a voice claims for ``unit``: its top value (SELF, NEXT and START resolved as in ``members_map``) and its
     frequency f."""
     filler = parts_of(mind, unit)[where[0]] if where and mv_view(mind, "u_kind")[unit] & COMPOSED else None
     claim, claim_f = None, -1.0
     for target, (w_pos, w_neg) in mass.items():
-        if target == SELF:
-            target = filler
-        elif target == NEXT:
-            goes_on = continuations(mind, filler, fixed) if filler is not None else {}
-            target = max(goes_on, key=goes_on.get) if goes_on else None
+        target = resolve(mind, target, filler, fixed)
         f = frequency(w_pos, w_neg)
         if target is not None and f > claim_f:
             claim, claim_f = target, f
@@ -436,7 +537,9 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     Among the frames of the instance, the one whose members agree most on a value speaks
     (score = e(i -> g) conviction(members) max_v f(v)); its expectations are e <- c f + (1 - c) 1/2 with
     c = lam e(i -> g) conviction(members); SELF resolves to the word in the instance's slot and NEXT to that word's
-    own strongest continuation (F12); the instance's own evidence comes last, as everywhere.
+    own strongest continuation (F12), START to the strongest continuation of sequences that began with that word (F26,
+    ``starts``: the members agree that the value is how a sequence beginning with them went on); the instance's own
+    evidence comes last, as everywhere.
     F24 (voices): each score is weighted by the credibility the mind has learned for voices of that kind (how many
     members speak, how much they agree; with no such experience every kind reads 1/2 and the choice is exactly
     F11's). For the context read with the full trust, the voice that spoke and every voice that could have spoken
@@ -466,20 +569,29 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
         c = cfg.lam * e_abs * c_members
         filler = parts_of(mind, unit)[where[0]] if where and mv_view(mind, "u_kind")[unit] & COMPOSED else None
         for target, (w_pos, w_neg) in mass.items():
-            if target == SELF:
-                target = filler
-            elif target == NEXT:
-                goes_on = continuations(mind, filler, fixed) if filler is not None else {}
-                target = max(goes_on, key=goes_on.get) if goes_on else None
+            target = resolve(mind, target, filler, fixed)
             if target is None:
                 continue
             e = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
             out[target] = max(out.get(target, 0.0), e)
         if voices and trust is None:
             mind.__dict__.setdefault("voice", {})[unit] = (heard[spoke], heard)
-    for target, (w_pos, w_neg) in own_mass(mind, unit, 1, trust).items():
+    own = own_mass(mind, unit, 1, trust)
+    for target, (w_pos, w_neg) in own.items():
         c = conviction(w_pos + w_neg, cfg.k)
         out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
+    if getattr(cfg, "exclusive", False) and own:
+        excluded(mind, out, own)
+    if getattr(cfg, "starts", False) and _begins(mind, unit):
+        began = start_mass(mind, unit, trust)            # F26: the present moment is a sequence that began with this
+        total = sum(p for p, _ in began.values())        # item, more specific than the item anywhere: its lived
+        if total > 0.0:                                  # evidence comes last; what never went on a sequence that
+            for target in set(out) | set(began):         # began so counts against (its rivals' share)
+                if not _world(mind, target):
+                    continue
+                w_pos, w_neg = began.get(target, (0.0, total))
+                c = conviction(w_pos + w_neg, cfg.k)
+                out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
     if cfg.backoff and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
         for target, e in continuation_backoff(mind, unit, trust).items():
             out[target] = max(out.get(target, 0.0), e)
@@ -638,7 +750,10 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
     expects a next symbol, the end of the sequence that is going on now (the items after the last perceived event,
     e.g. the mind's own utterance after its partner's ended) is read instead: its longest suffix that has lived
     continuations speaks, with its own evidence scaled by lam. It never reaches back across a perceived event, so
-    it cannot start an utterance, only carry one on."""
+    it cannot start an utterance, only carry one on.
+    F26 (``starts``): a composed suffix of fewer than F items is a sequence that began with those items (only an
+    episode's beginning makes such a unit); an utterance of one item so far is read the same way, as how sequences
+    that began with it went on (``start_mass``), before what followed that item anywhere."""
     S, cfg = mind.S, mind.cfg
     if not mv_view(mind, "u_kind")[unit] & COMPOSED:
         return {}
@@ -651,20 +766,28 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
     tail = parts[start:]
     heard = set(parts[:start])                          # what the partner just said is an echo, not knowledge
     first = 1 if len(tail) == len(parts) else 0         # the whole tuple is the unit itself, read already
+    starts = getattr(cfg, "starts", False)
     for i in range(first, len(tail)):
         suffix = tail[i:]
         if not suffix:
             continue
-        piece = suffix[0] if len(suffix) == 1 else S.tuple_index.get(suffix)
-        if piece is None:
-            continue
-        out = {}
-        for target, (w_pos, w_neg) in own_mass(mind, piece, 1, trust).items():
-            if _world(mind, target) and w_pos > 0.0 and target not in heard:
-                c = cfg.lam * conviction(w_pos + w_neg, cfg.k)
-                out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
-        if any(e > 0.5 for e in out.values()):
-            return out
+        if len(suffix) == 1:
+            readings = [own_mass(mind, suffix[0], 1, trust)]
+            if starts and i == 0:                       # the whole utterance so far is this one item
+                readings.insert(0, start_mass(mind, suffix[0], trust))
+        else:
+            piece = S.tuple_index.get(suffix)
+            if piece is None:
+                continue
+            readings = [own_mass(mind, piece, 1, trust)]
+        for mass in readings:
+            out = {}
+            for target, (w_pos, w_neg) in mass.items():
+                if _world(mind, target) and w_pos > 0.0 and target not in heard:
+                    c = cfg.lam * conviction(w_pos + w_neg, cfg.k)
+                    out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
+            if any(e > 0.5 for e in out.values()):
+                return out
     return {}
 
 
