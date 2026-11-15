@@ -238,6 +238,7 @@ class Substance:
         self.log: Dict[int, MomentLog] = {}
         self.cur: Optional[MomentLog] = None
         self.now = 0
+        self.version = 0                        # counts writes: a reading memoised under one value is still exact
         self._touch: list = []                  # W-table writes of the moment: id arrays (numpy int64) and single ids
         self._touch1: list = []
         self._npv = None
@@ -290,6 +291,13 @@ class Substance:
         Growth replaces the tie arrays together and ``ex`` alone: take the views again after any write."""
         return self._np().five
 
+    def arrays(self) -> _Arrays:
+        """numpy views (same memory) of the unit and tie columns for reading single values: ``kind``, ``channel``,
+        ``symbol``, ``arity``, ``ubirth``, ``uuse``, ``ualive`` (units) and ``src``, ``dst``, ``form``, ``lag``,
+        ``use``, ``last``, ``birth``, ``alive`` (ties); ``int(S.arrays().kind[u])`` is ``int(S.u_kind[u])`` at a
+        twentieth of the cost. Take them again after a write that can add units or ties (growth replaces arrays)."""
+        return self._np()
+
     _UNIT_ARRAYS = ("u_kind", "u_channel", "u_symbol", "u_arity", "u_birth", "u_use", "u_alive")
     _TIE_ARRAYS = ("t_src", "t_dst", "t_form", "t_lag", "t_cls", "t_row", "t_use", "t_last", "t_birth", "t_alive")
     _ROW_ARRAYS = ("r_tie", "r_was")
@@ -319,6 +327,7 @@ class Substance:
         state.pop("_views", None)
         self.__dict__.update(state)
         self._out_ids, self._npv, self._parts, self._touch, self._touch1 = {}, None, {}, [], []
+        self.__dict__.setdefault("version", 0)
         if t_w is not None:                      # saved before the narrow layout: the same values, stored anew
             self._from_tables(t_w)
 
@@ -489,6 +498,27 @@ class Substance:
         """expectation((w2[0] * trust).sum(-1), (w2[1] * trust).sum(-1), k)."""
         w_pos, w_neg = self.mass2(ids, trust)
         return expectation(w_pos, w_neg, k)
+
+    def open_classes(self, ids: torch.Tensor) -> Tuple[List[bool], bool]:
+        """What ``learn.judge`` derives from w4(ids): per class, whether any tie holds evidence not yet judged,
+        ((W+ != C+) | (W- != C-)).any(0).tolist(), and whether every value of the four tables is finite. A one-class
+        tie has nothing judged (C = 0), so its class is open where w+ or w- is not zero; full rows are compared."""
+        i = ids.numpy()
+        v = self._np()
+        P = self.P
+        cm = v.cls[i] - 1
+        r = (cm.view(np.uint8) < P).nonzero()[0]
+        ev = v.ev[:, i[r]]
+        found = np.zeros(P, dtype=bool)
+        found[cm[r][(ev[0] != 0) | (ev[1] != 0)]] = True
+        finite = bool(np.isfinite(ev).all())
+        if self.n_rows > 1:
+            wide = (cm == WIDE - 1).nonzero()[0]
+            if wide.shape[0]:
+                ex = v.ex[:, v.row[i[wide]]]
+                found |= ((ex[W_POS] != ex[C_POS]) | (ex[W_NEG] != ex[C_NEG])).any(0)
+                finite = finite and bool(np.isfinite(ex).all())
+        return found.tolist(), finite
 
     def w1(self, table: int, tie: int) -> torch.Tensor:
         """[P]: the per-class values of one table for one tie (a new tensor)."""
@@ -683,6 +713,7 @@ class Substance:
         if self.n_units == self._cu:
             self._grow_units()
         unit = self.n_units
+        self.version += 1
         v = self._np()
         v.kind[unit], v.channel[unit], v.symbol[unit] = kind, channel, symbol
         v.arity[unit], v.ubirth[unit], v.ualive[unit] = arity, self.now, True
@@ -703,6 +734,7 @@ class Substance:
         if self.n_ties == self._ct:
             self._grow_ties()
         tie = self.n_ties
+        self.version += 1
         v = self._np()
         v.src[tie], v.dst[tie], v.form[tie], v.lag[tie] = src, dst, form, lag
         v.birth[tie], v.alive[tie], v.last[tie] = self.now, True, 0
@@ -723,6 +755,7 @@ class Substance:
         kept = np.count_nonzero(snapped)         # -0.0 counts as zero, like amounts != 0
         if not kept:
             return out
+        self.version += 1
         i = ids.numpy()
         if kept == snapped.shape[0]:
             live_i, live = i.copy(), snapped.copy()
@@ -741,6 +774,7 @@ class Substance:
         log entry is kept as two numbers until the moment ends, see ``_compact``)."""
         amount = q(amount)
         if amount != 0.0:
+            self.version += 1
             v = self._np()
             c = v.cls[tie]
             if table <= W_NEG and (c == 0 or c == slot + 1):
@@ -792,6 +826,7 @@ class Substance:
         if ids.numel() == 0:
             return
         a = q(amount)
+        self.version += 1
         np.add.at(self._np().use, ids.numpy(), a)
         if self.cur is not None and self.keep_log:
             self.cur.tie_use.append((ids.clone(), torch.full((ids.numel(),), a, dtype=F64)))
@@ -800,6 +835,7 @@ class Substance:
         if ids.numel() == 0:
             return
         a = q(amount)
+        self.version += 1
         np.add.at(self._np().uuse, ids.numpy(), a)
         if self.cur is not None and self.keep_log:
             self.cur.unit_use.append((ids.clone(), torch.full((ids.numel(),), a, dtype=F64)))
@@ -825,6 +861,7 @@ class Substance:
             else:
                 self._np().last[touched] = cur.m
         self._touch, self._touch1 = [], []
+        self.version += 1
         if self.keep_log:
             self._compact(cur)
             self.log[cur.m] = cur
@@ -869,6 +906,7 @@ class Substance:
         return torch.cat(ids), torch.cat(amounts)
 
     def _subtract(self, entry: MomentLog) -> None:
+        self.version += 1
         for table, slot, ids, amounts in entry.ev:
             self._put(table, slot, ids, -amounts)
         for ids, amounts in entry.tie_use:
