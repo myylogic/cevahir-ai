@@ -1120,3 +1120,76 @@ says when it feels it is now learned only from the people it lives with and from
 **Next.** An audit of the whole chat program and core for any other scripted sentence, template, word list or coded
 reflex (for example the curiosity reflex that asks back an unknown word with "?"), each to be removed or replaced by
 a learned or mathematical mechanism; then a mind raised again on the owner's data only.
+
+## Memory map and locality of a living mind (2026-11-15)
+
+Measured without changing `zihin/` (`locality_profile.py`, `results/locality_profile.jsonl`; the memory map's scripts
+stayed in a scratch area). A recorder wrapped the store's accessors; a plain run gives the same per-moment hash of
+acts, focus and predictions and the same final digest on all three minds.
+
+**Where the RAM goes.** On cevahir2 (1.33M ties) a loaded mind adds 756 MB: 570 B per tie. Python index objects are
+87% of it (tie_index 259 MB, frame_first 195 MB, out 105 MB, inc 60 MB, tuple_index 32 MB); the core tensors are
+90 MB (65 B per tie). On cevahir3b the indices are about 1.2–1.6 GB of about 2 GB. Importing torch alone costs
+484 MB, more than a small mind. All seven saved indices are fully determined by the tensors (a rebuild reproduces
+them exactly), and every out/inc list equals its segment of a numpy CSR in ascending tie-id order (0 mismatches over
+251k lists; built in 0.27 s). **Correction:** the estimate above that two million examples would need about 37 GB
+counted the core tensors only; at today's 570–650 B per tie in RAM it is about 300 GB.
+
+**How much of the mind a moment uses** (60 watched dialogues, then 10 weather and 10 food questions):
+
+| | cevahir_ilk_nefes (97k ties) | cevahir2 (1.33M) | cevahir3b (3.25M) |
+|---|---|---|---|
+| adjacency keys touched / lists read per moment | 28 / 11 | 29 / 11 | 29 / 11 |
+| ties in the working set of a moment | 0.84% | 0.094% | 0.17% |
+| of a dialogue | 3.8% | 1.0% | 1.1% |
+| of the whole run (1276–1383 moments) | 23% | 5.0% | 5.5% |
+| share of tie touches on the 1000 largest out lists | | 97.4% | 98.0% |
+
+- A moment works in a small, fixed region whatever the size of the mind: the adjacency of its focus and context.
+- The volume is in a few hub lists: the 1000 largest out lists hold 9–12% of the ties and receive 97–98% of tie
+  touches.
+- **Evidence predicts need, age does not.** 70% of ties carry one experience or less (W ≤ 1) and only 0.1–1.1% of
+  them were touched in a run; ties with W > 10 were touched in about 30%. ln W predicts which ties a stretch of life
+  needs (AUC 0.87–0.94); age does not (0.57–0.71), and beyond about 1000 moments recency is flat, so no single
+  Anderson–Schooler power law holds here.
+- In today's creation-order layout a moment's ties fall on 870 of 2,594 pages of cevahir2 and a session on 99.9% of
+  the pages, so memory-mapping the present arrays would gain nothing. Grouped by source unit (CSR order, logical ids
+  unchanged) it would be 11.3 pages per moment and 14.5% of the pages over a session. Static graph communities did
+  not beat creation order; a sleep-time relayout by the day's first use gained 8–19% fewer page misses out of sample.
+- With the 100 largest out lists and the 10 largest in lists pinned (about 19% of entries), an LRU cache of 1% of the
+  rest misses 0.4% (cevahir2) and 1.7% (cevahir3b) of the bytes read.
+- `learn_together`'s scan of lag-0 lists is about 90% of all adjacency reads, and 74–88% of the reads of a moment
+  cannot change anything: for a one-class tie with frequency f below the failure floor θ = 1/14, the expectation stays
+  below θ exactly while the trust in its class exceeds κ / ((1 − κ) W) with κ = (½ − θ) / (½ − f), and such a tie
+  receives nothing unless its partner is present. This threshold, read from the one rule, is the exact counterpart of
+  "only the part of the mind that can matter works". Not built yet.
+- The reply path scans the whole unit table for the most frequent words (`dusunce.frequent_words`, 22–27% of reply
+  time); sleep touches 47% of the mind. Both can be made local.
+
+## T-meaning: no relation of meaning equivalence yet (2026-11-15)
+
+A public, seeded world (`t_meaning.py`, `results/t_meaning_baseline.jsonl`; 6 seeds, 2 and 4 days, with and without
+word pieces) lives greetings, paraphrased questions and content synonyms through the chat's Session in the speaking
+configuration. Greetings: "merhaba" 16 a day, "selam" 6, "selamlar" 1–3 in a life, "selamün aleyküm" with its own reply
+"aleyküm selam", "hello" in one bilingual exchange, "hi" only told once ("hi , merhaba demektir ."), "merhabalar" never.
+
+- Every variant lived at least once is answered from its own lived context (merhaba, selam, selamlar, selamün aleyküm
+  with "aleyküm selam", hello: 1.00). The variant only told as equivalent ("hi") gets 0/24; the never-met variant 0/12
+  (1/1 only through spelling pieces).
+- "selam / hello / merhaba ne demek ?": 0/24 each. "hi ne demek ?" is answered only by recalling the told sentence.
+- Never-watched wordings of watched questions are answered 20% of the time (19% after twice the experience; 49–51%
+  with word pieces). In 51% of the probes the right first word led at the end of the turn but stayed below the line
+  at which it would be said (0.564–0.590 against 7/12 = 0.583), while the watched wording gives it 0.83–0.96.
+- The slot machinery sees some synonymy (adın / ismin share 5.4–8.8 categories) but as one two-member category per
+  sentence frame, and the members' reading counts members, so a one-member voice stays near 0.58–0.63.
+- No mechanism reads what follows two expressions across a turn. Read relationally (a reply that repeats the item or
+  an equivalent of it counts as the same reply), that signal separates greetings from other one-word utterances
+  (merhaba / selam 0.80, merhaba / evet 0.00), where next-word overlap cannot (0.99 and 0.98).
+- In the private minds greetings are barely lived (cevahir2: merhaba 6, selam 3; hello, hi, selamlar and selamün
+  aleyküm never), and opposites look at least as alike as synonyms by every distributional measure (cevahir3b büyük /
+  küçük: 22 shared categories, 36 shared slots, across-turn overlap 0.76; the synonym pairs 0 and 0). Substitutability
+  alone cannot mean sameness; only consequences that differ can separate same from opposite.
+
+What is missing: a graded equivalence relation with evidence from substitution and from relational consequences,
+counted by the one rule; a reading that brings an equivalent's own evidence in; and an answer relation for "X ne
+demek ?". The design is the next step.
