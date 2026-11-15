@@ -69,10 +69,12 @@ reads it from evidence kept per origin and weighted by learned trust. With no ev
 means "I don't know". Conviction grows with evidence. Every reading rests on this rule: what to say, what to expect,
 what to be surprised by.
 
-**Trust Judgment.** Sensed evidence and the mind's own acts are direct experience; their trust is 1 by definition,
-because they are the judges. The trust in the four indirect origins (told, imitated, inferred, imagined) starts at ½,
-the rule's value with no evidence, and is learned: indirect evidence is compared with the direct experience that comes
-later on the same tie; what holds raises the trust in that origin, and what fails lowers it. So the mind learns by
+**Trust Judgment.** Sensed evidence and the mind's own acts are direct experience; their trust is 1 by definition.
+Only sensed evidence, experience of the world, judges: the echo of the mind's own act is certain but says nothing
+about whether a claim about the world holds. The trust in the four indirect origins (told, imitated, inferred,
+imagined) starts at ½, the rule's value with no evidence, and is learned: indirect evidence is compared with the
+sensed evidence that comes later on the same tie; what holds raises the trust in that origin, and what fails lowers
+it. So the mind learns by
 itself how far to believe whom.
 
 ## 3. Attention: the Seven-Place Focus

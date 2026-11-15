@@ -33,7 +33,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 import torch
 
-from .events import ACTED, INFERRED, REFERENCE, SENSED
+from .events import ACTED, INFERRED, JUDGES, REFERENCE, SENSED
 from .evidence import conviction, expectation
 from .store import ABSTRACT, ATOMIC, C_NEG, C_POS, CATEGORY, COMPOSED, EXPECT, F64, I64, RELY, SLOTTED, W_NEG, W_POS, WIDE
 
@@ -73,7 +73,7 @@ def _add_many(mind, table: int, slot: int, ids: torch.Tensor, amounts: torch.Ten
                 claims, claimed = ids[mask], amounts[mask]
         if relief:
             mind._gained.append((claims, claimed * mind.trust.tolist()[slot]))  # for relief (section 5)
-        if slot in REFERENCE and mind.cfg.learn_trust:
+        if slot in JUDGES and mind.cfg.learn_trust:
             judge(mind, table, claims, claimed)  # only expectations are claims about the world
     return amounts
 
@@ -101,7 +101,7 @@ def add_evidence1(mind, table: int, slot: int, tie: int, amount: float, relief: 
     if table <= W_NEG and S.views()[0][tie] == EXPECT:
         if relief:
             mind._gained.append((tie, got * mind.trust.tolist()[slot]))   # one tie: (id, gain), see Mind._feel
-        if slot in REFERENCE and mind.cfg.learn_trust:
+        if slot in JUDGES and mind.cfg.learn_trust:
             judge1(mind, table, tie, got)
     return got
 

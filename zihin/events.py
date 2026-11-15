@@ -22,8 +22,14 @@ from typing import Dict, Hashable, List, Tuple
 SENSED, TOLD, IMITATED, ACTED, INFERRED, IMAGINED = range(6)
 PROVENANCE: Tuple[str, ...] = ("sensed", "told", "imitated", "acted", "inferred", "imagined")
 N_PROV = len(PROVENANCE)
-# Classes that are direct experience: their trust is 1 by definition and they judge the other classes.
+# Classes that are direct experience: their trust is 1 by definition (what was sensed was sensed; what the mind did,
+# it did), so they are never judged themselves.
 REFERENCE: Tuple[int, ...] = (SENSED, ACTED)
+# The classes whose evidence judges the indirect ones (told, imitated, inferred, imagined): only experience of the
+# world. The mind's own acts are certain, but the echo of an act says nothing about whether a told or imagined claim
+# about the world holds (decide and dream sorting already set own acts aside as not real), so acted evidence judges
+# nothing (audit of 2026-11-15, item 7).
+JUDGES: Tuple[int, ...] = (SENSED,)
 
 CHANNEL_KINDS = ("sense", "act", "feel", "knob", "source", "facet", "value", "context")
 

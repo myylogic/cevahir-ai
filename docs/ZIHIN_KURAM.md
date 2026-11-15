@@ -65,10 +65,11 @@ onu kökene göre ayrı tutulan ve öğrenilmiş güvenle tartılan kanıttan ok
 "bilmiyorum". Kanıt arttıkça kanaat büyür. Bütün okumalar bu kurala dayanır: ne söyleyeceği, neyi bekleyeceği, neye
 şaşıracağı.
 
-**Güven Yargısı (Trust Judgment).** Algılanan kanıt ve zihnin kendi eylemleri doğrudan deneyimdir; hakem onlar
-olduğu için güvenleri tanım gereği 1'dir. Dört dolaylı kökene (söylenen, taklit edilen, çıkarılan, hayal edilen)
-güven ½'den, yani kuralın kanıtsız değerinden başlar ve öğrenilir: dolaylı kanıt, aynı bağda sonradan gelen doğrudan
-deneyimle karşılaştırılır; tutanlar o kökene güveni artırır, tutmayanlar azaltır. Böylece zihin kime ne kadar
+**Güven Yargısı (Trust Judgment).** Algılanan kanıt ve zihnin kendi eylemleri doğrudan deneyimdir; güvenleri tanım
+gereği 1'dir. Yalnız algılanan kanıt, yani dünyanın deneyimi, hakemdir: zihnin kendi eyleminin yankısı kesindir ama
+dünyaya dair bir iddianın tutup tutmadığı hakkında bir şey söylemez. Dört dolaylı kökene (söylenen, taklit edilen,
+çıkarılan, hayal edilen) güven ½'den, yani kuralın kanıtsız değerinden başlar ve öğrenilir: dolaylı kanıt, aynı bağda
+sonradan gelen algılanmış kanıtla karşılaştırılır; tutanlar o kökene güveni artırır, tutmayanlar azaltır. Böylece zihin kime ne kadar
 inanacağını kendisi öğrenir.
 
 ## 3. Dikkat: Yedili Odak
