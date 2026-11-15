@@ -26,6 +26,7 @@ import torch
 
 from .events import ACTED, IMAGINED, IMITATED, N_PROV, Event
 from .evidence import expectation
+from .form import kind_masks, mass1, mass1_total, mv_view
 from .learn import add_evidence1
 from .read import drive_of, effective, generalisations, own_mass
 from .store import CATEGORY, EXPECT, F64, SLOTTED, W_NEG, W_POS
@@ -41,8 +42,9 @@ def act_expectation(mind, act_unit: int, imitated_pos: float, imitated_neg: floa
     if outcome is not None:
         tie = S.find_tie(outcome, mind.feel_unit["relief"], EXPECT, 1)
         if tie >= 0:
-            imitated_pos += float((S.w1(W_POS, tie) * mind.trust).sum())
-            imitated_neg += float((S.w1(W_NEG, tie) * mind.trust).sum())
+            w_pos, w_neg = mass1(mind, tie)
+            imitated_pos += w_pos
+            imitated_neg += w_neg
     return expectation(imitated_pos, imitated_neg, mind.cfg.k)
 
 
@@ -68,8 +70,7 @@ def consequence(mind, act_unit: int) -> float:
             continue
         tie = S.find_tie(path, value_unit, EXPECT, 2)
         if tie >= 0:
-            w_pos = float((S.w1(W_POS, tie) * mind.trust).sum())
-            w_neg = float((S.w1(W_NEG, tie) * mind.trust).sum())
+            w_pos, w_neg = mass1(mind, tie)
             total += sign * (2.0 * expectation(w_pos, w_neg, mind.cfg.k) - 1.0)
     return total
 
@@ -92,7 +93,7 @@ def _explore(mind, ranked, theta: float, T: int):
     at_stake = any(k > 0.0 for k in known.values()) or (           # good or bad was met on these paths, or in
         mind.context is not None and _value_evidence(mind, mind.context) > 0.0)   # this very situation before
     last = mind.episode[-1] if mind.episode else -1
-    called_on = last >= 0 and int(S.u_channel[last]) >= 0 and mind.ch.kind(int(S.u_channel[last])) == "sense"
+    called_on = last >= 0 and kind_masks(mind)[4][mv_view(mind, "u_channel")[last]]
     if not (called_on or at_stake):
         return None
     value = {r[2]: consequence(mind, r[2]) for r in ranked}
@@ -127,7 +128,7 @@ def _value_evidence(mind, unit: int) -> float:
         value_unit = S.atom_index.get((cid, index), -1) if index >= 0 else -1
         tie = S.find_tie(unit, value_unit, EXPECT, 2) if value_unit >= 0 else -1
         if tie >= 0:
-            known += float(((S.w1(W_POS, tie) + S.w1(W_NEG, tie)) * mind.trust).sum())
+            known += mass1_total(mind, tie)
     return known
 
 
@@ -138,10 +139,11 @@ def _race(mind, candidates, theta: float, T: int) -> List[Event]:
     threshold within T iterations: rate = 2 (score_leader - score_rival). With no rival this is the rule as before
     (2e - 1); with rivals that are all equally (un)supported nothing leads and the mind stays silent."""
     S = mind.S
+    channels = mv_view(mind, "u_channel")
     by_channel = {}
     for unit, e in candidates.items():
         score = e + 0.5 * consequence(mind, unit)
-        by_channel.setdefault(int(S.u_channel[unit]), []).append((score, e, unit))
+        by_channel.setdefault(channels[unit], []).append((score, e, unit))
     acts: List[Event] = []
     for channel in sorted(by_channel):
         ranked = sorted(by_channel[channel], reverse=True)
@@ -167,16 +169,16 @@ def decide(mind) -> List[Event]:
         from .read import members_map                      # F12: speak with what the frame's members lived
         not_self = mind.trust.clone()
         not_self[ACTED] = 0.0                              # own repetitions are a record, not a reason (section 7)
+        channels, act = mv_view(mind, "u_channel"), kind_masks(mind)[5]
         for unit, e in members_map(mind, mind.context, not_self).items():
-            channel = int(S.u_channel[unit])
-            if channel >= 0 and mind.ch.kind(channel) == "act" and (e > 0.5 or cfg.race):
+            if act[channels[unit]] and (e > 0.5 or cfg.race):
                 candidates[unit] = e
     elif mind.context is not None:
         only_imitated = torch.zeros(N_PROV, dtype=F64)
         only_imitated[IMITATED] = mind.trust[IMITATED]
+        channels, act = mv_view(mind, "u_channel"), kind_masks(mind)[5]
         for unit, (w_pos, w_neg) in effective(mind, mind.context, trust=only_imitated).items():
-            channel = int(S.u_channel[unit])
-            if channel >= 0 and mind.ch.kind(channel) == "act" and w_pos > 0.0:
+            if act[channels[unit]] and w_pos > 0.0:
                 candidates[unit] = act_expectation(mind, unit, w_pos, w_neg)
     elif cfg.knobs and mind.ch.has("knob"):               # knob acts: only their own outcomes speak
         channel = mind.ch.id("knob")
