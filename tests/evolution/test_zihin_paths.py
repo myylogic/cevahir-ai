@@ -170,6 +170,7 @@ def test_a_byte_order_mark_names_the_encoding(tmp_path, capsys, command):
 
 @pytest.mark.parametrize("command", ["!oku", "!ogret"])
 def test_a_stray_byte_is_one_replaced_character_not_a_file_in_cp1254(tmp_path, capsys, command):
+    import codecs
     clean, stray = session(), session()
     (tmp_path / "temiz.tsv").write_text(DIALOGUES, encoding="utf-8")
     (tmp_path / "bozuk.tsv").write_bytes(DIALOGUES.encode("utf-8").replace(b"Merhaba!", b"Merhaba\xfe!", 1))
@@ -180,6 +181,9 @@ def test_a_stray_byte_is_one_replaced_character_not_a_file_in_cp1254(tmp_path, c
     (tmp_path / "karisik.tsv").write_bytes(DIALOGUES.encode("cp1254") + b"\x81\n")   # not clean cp1254 either
     out = run(session(), "%s %s" % (command, tmp_path / "karisik.tsv"), capsys)
     assert "cp1254" not in out and "geçersiz UTF-8" in out
+    (tmp_path / "kesik.tsv").write_bytes(codecs.BOM_UTF16_LE + DIALOGUES.encode("utf-16-le") + b"A")   # cut short
+    out = run(session(), "%s %s" % (command, tmp_path / "kesik.tsv"), capsys)
+    assert "geçersiz UTF-16" in out and "kesik.tsv (1)" in out and "hata" not in out and "okunamayan" not in out
 
 
 def test_a_file_that_is_not_text_is_refused_and_nothing_of_it_is_lived(tmp_path, capsys):

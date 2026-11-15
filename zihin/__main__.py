@@ -219,24 +219,28 @@ def text_encoding(path: str) -> TextFile:
         marked = next((codec for bom, codec in BOMS if head.startswith(bom)), None)
         codec = marked or "utf-8"
         f.seek(0)
-        kept = codecs.getincrementaldecoder(codec)("surrogateescape")    # each undecoded byte kept as one mark
-        replacing = codecs.getincrementaldecoder(codec)("replace")       # ... and as errors="replace" reads them
-        ansi = None if marked else codecs.getincrementaldecoder("cp1254")()
+        replacing = codecs.getincrementaldecoder(codec)("replace")       # how it is read
+        ignoring = codecs.getincrementaldecoder(codec)("ignore")         # ... and without what could not be decoded
+        escaping = ansi = None
+        if not marked:                       # UTF-8: each byte that is not UTF-8 kept as one mark (all are >= 0x80)
+            escaping = codecs.getincrementaldecoder(codec)("surrogateescape")
+            ansi = codecs.getincrementaldecoder("cp1254")()
         chars = controls = undecoded = replaced = non_ascii = 0
         for block, final in _with_final(iter(lambda: f.read(1 << 20), b"")):
-            text = kept.decode(block, final)
+            text = replacing.decode(block, final)
             if "\0" in text:
                 raise NotText("NUL baytları var" + ("" if marked else "; UTF-16 ise bayt sırası işaretiyle kaydedin"))
             chars += len(text)
             controls += len(CONTROLS.findall(text))
-            undecoded += len(UNDECODED.findall(text))
-            replaced += replacing.decode(block, final).count("�") - text.count("�")
-            if ansi is not None:
+            replaced += text.count("\ufffd") - ignoring.decode(block, final).count("\ufffd")
+            if escaping is not None:
+                undecoded += len(UNDECODED.findall(escaping.decode(block, final)))
                 non_ascii += len(block.translate(None, ASCII))
-                try:
-                    ansi.decode(block, final)
-                except UnicodeDecodeError:
-                    ansi = None
+                if ansi is not None:
+                    try:
+                        ansi.decode(block, final)
+                    except UnicodeDecodeError:
+                        ansi = None
     if controls * CONTROL_SHARE > chars:
         raise NotText("%d denetim karakteri var (%d karakterde birden çok)" % (controls, CONTROL_SHARE))
     if undecoded and ansi is not None and 2 * undecoded > non_ascii:
@@ -260,17 +264,18 @@ def open_text(path: str):
 
 def encoding_notes(found: Dict[str, TextFile]) -> List[str]:
     """What the program says about how the text files it read were decoded (file name -> TextFile): files that were
-    not UTF-8, and the invalid UTF-8 sequences it replaced."""
+    not UTF-8, and the invalid byte sequences it replaced (U+FFFD), with how many, by encoding."""
     notes = []
     ansi = [name for name, f in found.items() if f.encoding == "cp1254"]
     wide = ["%s (%s)" % (name, f.encoding.upper()) for name, f in found.items() if f.encoding in ("utf-16", "utf-32")]
-    repaired = ["%s (%d)" % (name, f.replaced) for name, f in found.items() if f.replaced]
     if ansi:
         notes.append("UTF-8 değil, cp1254 (Türkçe ANSI) olarak okundu: " + ", ".join(ansi[:10]))
     if wide:
         notes.append("bayt sırası işaretine göre okundu: " + ", ".join(wide[:10]))
-    if repaired:
-        notes.append("geçersiz UTF-8 dizileri � ile değiştirildi (kaç tane): " + ", ".join(repaired[:10]))
+    for label, codecs_ in (("UTF-8", ("utf-8", "utf-8-sig")), ("UTF-16", ("utf-16",)), ("UTF-32", ("utf-32",))):
+        repaired = ["%s (%d)" % (name, f.replaced) for name, f in found.items() if f.replaced and f.encoding in codecs_]
+        if repaired:
+            notes.append("geçersiz %s dizileri \ufffd ile değiştirildi (kaç tane): %s" % (label, ", ".join(repaired[:10])))
     return notes
 
 
