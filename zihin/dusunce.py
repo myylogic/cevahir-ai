@@ -201,7 +201,7 @@ def root_mates(session, word: str) -> List[str]:
                 for tie in S.inc.get((f, EXPECT), ()):
                     src = int(S.t_src[tie])
                     if src != unit and int(S.u_channel[src]) == cid and int(S.t_lag[tie]) == 0 \
-                            and float(S.t_w[W_POS, tie].sum()) > 0.0:
+                            and float(S.w1(W_POS, tie).sum()) > 0.0:
                         mates.add(str(mind.symbol_of(src)[1]))
             return sorted(mates)
     index = getattr(session, "_roots", None)
@@ -278,16 +278,16 @@ def sort_dreams(mind) -> Dict[str, float]:
     n = S.n_ties
     if n == 0 or mind.source_tie[IMAGINED] < 0:
         return {"true": 0.0, "false": 0.0, "open": 0.0, "trust": float(mind.trust[IMAGINED])}
-    open_pos = S.t_w[W_POS, :n, IMAGINED] - S.t_w[C_POS, :n, IMAGINED]
-    open_neg = S.t_w[W_NEG, :n, IMAGINED] - S.t_w[C_NEG, :n, IMAGINED]
+    open_pos = S.column(W_POS, IMAGINED) - S.column(C_POS, IMAGINED)
+    open_neg = S.column(W_NEG, IMAGINED) - S.column(C_NEG, IMAGINED)
     pending = ((open_pos > 0) | (open_neg > 0)).nonzero().flatten()
     if pending.numel() == 0:
         return {"true": 0.0, "false": 0.0, "open": 0.0, "trust": float(mind.trust[IMAGINED])}
     real = mind.trust.clone()
     real[IMAGINED] = 0.0
     real[ACTED] = 0.0
-    w_pos = (S.t_w[W_POS, pending] * real).sum(-1)
-    w_neg = (S.t_w[W_NEG, pending] * real).sum(-1)
+    w_pos = (S.w(W_POS, pending) * real).sum(-1)
+    w_neg = (S.w(W_NEG, pending) * real).sum(-1)
     w = w_pos + w_neg
     has_real = w > 0
     ids = pending[has_real]
@@ -343,7 +343,7 @@ def _real_on(mind, claims) -> List[Tuple[float, float]]:
         if tie < 0:
             out.append((0.0, 0.0))
         else:
-            out.append((float((S.t_w[W_POS, tie] * real).sum()), float((S.t_w[W_NEG, tie] * real).sum())))
+            out.append((float((S.w1(W_POS, tie) * real).sum()), float((S.w1(W_NEG, tie) * real).sum())))
     return out
 
 
@@ -402,7 +402,7 @@ def seen_with(mind, word: str, limit: int = 1) -> List[str]:
     for tie in S.inc.get((unit, EXPECT), ()):
         src = int(S.t_src[tie])
         if int(S.u_channel[src]) == eye:
-            found[src] = found.get(src, 0.0) + float((S.t_w[W_POS, tie] * mind.trust).sum())
+            found[src] = found.get(src, 0.0) + float((S.w1(W_POS, tie) * mind.trust).sum())
     best = sorted(found, key=lambda u: -found[u])[:limit]
     return [str(mind.symbol_of(u)[1]) for u in best if found[u] > 0.0]
 

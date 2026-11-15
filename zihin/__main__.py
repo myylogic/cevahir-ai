@@ -142,7 +142,7 @@ def profile(mind: Mind) -> str:
         words_seen += 1
         ties = S.out.get((unit, EXPECT, 1), [])
         if ties:
-            mass = float(max((S.t_w[0, t] * mind.trust).sum() + (S.t_w[1, t] * mind.trust).sum() for t in ties))
+            mass = float(max((S.w1(0, t) * mind.trust).sum() + (S.w1(1, t) * mind.trust).sum() for t in ties))
             known += conviction(mass, mind.cfg.k) >= 0.5
     phrases = int(((kinds & COMPOSED).bool() & ~(kinds & SLOTTED).bool()).sum())
     lines = ["  yaşanmış an: %d   gece (uyku döngüsü): %d" % (mind.t, getattr(mind, "nights", 0)),
@@ -563,7 +563,7 @@ class Session:
                (b["own_f"], b["own_c"], b["own_e"], b["eff_e"])]
         tie = twin.S.find_tie(twin.context, target, 0, 1)
         if tie >= 0:
-            pos, neg = twin.S.t_w[W_POS, tie].tolist(), twin.S.t_w[W_NEG, tie].tolist()
+            pos, neg = twin.S.w1(W_POS, tie).tolist(), twin.S.w1(W_NEG, tie).tolist()
             out.append("  kaynaklara göre (w+ / w-): " + ", ".join(
                 "%s %.2f/%.2f" % (name, p, n) for name, p, n in zip(PROVENANCE, pos, neg) if p or n))
             out.append("  kaynak güveni: " + ", ".join("%s %.2f" % (n, float(t)) for n, t in zip(PROVENANCE, twin.trust)))

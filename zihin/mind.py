@@ -223,7 +223,7 @@ class Mind:
                 trust[p] = self.cfg.trust_fixed[p]
                 continue
             tie = self.source_tie[p]
-            trust[p] = expectation(float(self.S.t_w[W_POS, tie, SENSED]), float(self.S.t_w[W_NEG, tie, SENSED]),
+            trust[p] = expectation(self.S.cell(W_POS, tie, SENSED), self.S.cell(W_NEG, tie, SENSED),
                                    self.cfg.k)
         return trust
 
@@ -629,7 +629,8 @@ class Mind:
                                  dtype=torch.bool)                  # by channel id; index -1 (no channel) -> False
             channels = S.u_channel[S.t_dst[unique]].long()
             expect = (S.t_form[unique] == EXPECT) & world[channels]
-            after = ((S.t_w[W_POS].index_select(0, unique) + S.t_w[W_NEG].index_select(0, unique)) * self.trust).sum(-1)
+            pos, neg = S.w2(unique)
+            after = ((pos + neg) * self.trust).sum(-1)
             before = torch.clamp(after - gained, min=0.0)
             relief = float((S.t_use[unique] * (conviction(after, k) - conviction(before, k)))[expect].sum())
             relief = max(0.0, relief)

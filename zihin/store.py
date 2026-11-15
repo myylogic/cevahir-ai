@@ -10,6 +10,13 @@ Tie table (COO): src, dst, form, lag, w+[P], w-[P], checked+[P], checked-[P], us
 For PART ties ``lag`` holds the position of the part. ``checked`` is the part of the evidence of a class that
 direct experience has already judged (see ``Mind`` on learned trust); it is additive like the evidence.
 
+How the four per-class tables are stored (memory, not meaning). Almost every tie holds evidence of one
+provenance class only and nothing judged, so a tie keeps its class (``t_cls``: 0 none yet, 1 + p for class p)
+and its two values (``t_ev``: w+, w- of that class). A tie that receives evidence of a second class or a judged
+amount is moved, once, to a full row of the four tables (``t_cls`` = WIDE, ``t_row`` = its row in ``ex``). Every
+reading assembles exactly the values the four tables hold (``w``, ``w1``, ``cell``; ``t_w`` gives them all in tie
+order), so what is stored and what is read do not depend on this layout; the digest is computed over these values.
+
 Experience log. Every change of a persistent tensor made during a moment is recorded as an increment
 (table, slot, tie ids, amounts) under the moment id. Increments live on the dyadic grid of ``evidence`` so the
 tensors are exact sums of the log. ``retract(m)`` subtracts the increments of moment m; structure created in m
@@ -32,6 +39,7 @@ FORMS = ("EXPECT", "PART", "ABSTRACT")
 # Kind flags are consequences of how a unit came to be, not types chosen by hand.
 ATOMIC, COMPOSED, SLOTTED, CATEGORY, INDUCED = 1, 2, 4, 8, 16
 W_POS, W_NEG, C_POS, C_NEG = 0, 1, 2, 3  # the four additive per-class tables of a tie
+WIDE = 127  # t_cls of a tie whose four tables are kept in a full row (more than one class, or judged amounts)
 
 F64, I64 = torch.float64, torch.int64
 
@@ -87,7 +95,7 @@ class DiskLog:
         return (e.m, e.units0, e.ties0, e.units1, e.ties1, e.alpha0,
                 [(table, slot, arr(i), arr(a)) for table, slot, i, a in e.ev],
                 [(arr(i), arr(a)) for i, a in e.tie_use], [(arr(i), arr(a)) for i, a in e.unit_use],
-                None if e.last is None else (arr(e.last[0]), arr(e.last[1])))
+                None if e.last is None else (arr(e.last[0]), arr(e.last[1])), getattr(e, "rows0", None))
 
     @staticmethod
     def _unpack(p) -> "MomentLog":
@@ -100,8 +108,8 @@ class DiskLog:
             raw, dtype, shape = x
             npt, _ = types[dtype]
             return torch.from_numpy(np.frombuffer(raw, dtype=npt).copy().reshape(shape))
-        m, u0, t0, u1, t1, alpha, ev, tu, uu, last = p
-        e = MomentLog(m, u0, t0, alpha)
+        m, u0, t0, u1, t1, alpha, ev, tu, uu, last = p[:10]
+        e = MomentLog(m, u0, t0, alpha, p[10] if len(p) > 10 else None)
         e.units1, e.ties1 = u1, t1
         e.ev = [(table, slot, ten(i), ten(a)) for table, slot, i, a in ev]
         e.tie_use = [(ten(i), ten(a)) for i, a in tu]
@@ -146,10 +154,11 @@ class MomentLog:
     """What one moment changed: the increments, the structure it created, and the last-use times it replaced."""
 
     __slots__ = ("m", "units0", "ties0", "units1", "ties1", "alpha0", "ev", "tie_use", "unit_use", "last",
-                 "undo", "retracted")
+                 "undo", "retracted", "rows0")
 
-    def __init__(self, m: int, n_units: int, n_ties: int, alpha: List[int]) -> None:
+    def __init__(self, m: int, n_units: int, n_ties: int, alpha: List[int], rows0: Optional[int] = None) -> None:
         self.m, self.units0, self.ties0, self.alpha0 = m, n_units, n_ties, alpha
+        self.rows0 = rows0                      # full evidence rows before the moment (None: logged before rows)
         self.units1, self.ties1 = n_units, n_ties
         self.ev: List[Tuple[int, int, torch.Tensor, torch.Tensor]] = []
         self.tie_use: List[Tuple[torch.Tensor, torch.Tensor]] = []
@@ -172,7 +181,9 @@ class MomentLog:
 class Substance:
     """Growing unit and tie tables with an exact additive experience log."""
 
-    def __init__(self, n_slots: int = 6, keep_log: bool = True, cap_units: int = 256, cap_ties: int = 1024):
+    def __init__(self, n_slots: int = 6, keep_log: bool = True, cap_units: int = 256, cap_ties: int = 1024,
+                 cap_rows: int = 64):
+        assert n_slots < WIDE
         self.P = n_slots
         self.keep_log = keep_log
         self.n_units = 0
@@ -189,7 +200,14 @@ class Substance:
         self.t_dst = torch.zeros(cap_ties, dtype=I64)
         self.t_form = torch.zeros(cap_ties, dtype=torch.int8)
         self.t_lag = torch.zeros(cap_ties, dtype=torch.int16)
-        self.t_w = torch.zeros(4, cap_ties, n_slots, dtype=F64)  # W_POS, W_NEG, C_POS, C_NEG
+        self.t_cls = torch.zeros(cap_ties, dtype=torch.int8)    # 0 no evidence, 1 + p one class p, WIDE a full row
+        self.t_ev = torch.zeros(2, cap_ties, dtype=F64)         # w+, w- of the one class
+        self.t_row = torch.zeros(cap_ties, dtype=torch.int32)   # the full row of a WIDE tie
+        self._cr = cap_rows
+        self.n_rows = 1                                         # row 0 is never used
+        self.ex = torch.zeros(4, cap_rows, n_slots, dtype=F64)  # full rows: W_POS, W_NEG, C_POS, C_NEG
+        self.r_tie = torch.zeros(cap_rows, dtype=torch.int32)   # the tie of each full row
+        self.r_was = torch.zeros(cap_rows, dtype=torch.int8)    # the t_cls the tie had before its row (for undo)
         self.t_use = torch.zeros(cap_ties, dtype=F64)
         self.t_last = torch.zeros(cap_ties, dtype=I64)
         self.t_birth = torch.zeros(cap_ties, dtype=I64)
@@ -234,34 +252,139 @@ class Substance:
         return ids, dst
 
     def views(self):
-        """numpy views of t_w and t_form (same memory) for reading and adding single values."""
+        """numpy views (same memory) of t_form, t_cls, t_ev, t_row and ex, for reading and adding single values.
+        Growth replaces the tie arrays together and ``ex`` alone: take the views again after any write."""
         v = self._views
-        if v is None or v[0] is not self.t_w or v[1] is not self.t_form:
-            v = self._views = (self.t_w, self.t_form, self.t_w.numpy(), self.t_form.numpy())
-        return v[2], v[3]
+        if v is None or v[5] is not self.t_form or v[6] is not self.ex:
+            v = self._views = (self.t_form.numpy(), self.t_cls.numpy(), self.t_ev.numpy(), self.t_row.numpy(),
+                               self.ex.numpy(), self.t_form, self.ex)
+        return v[:5]
 
     _UNIT_ARRAYS = ("u_kind", "u_channel", "u_symbol", "u_arity", "u_birth", "u_use", "u_alive")
-    _TIE_ARRAYS = ("t_src", "t_dst", "t_form", "t_lag", "t_use", "t_last", "t_birth", "t_alive")
-    _CACHES = ("_out_ids", "_views")
+    _TIE_ARRAYS = ("t_src", "t_dst", "t_form", "t_lag", "t_cls", "t_row", "t_use", "t_last", "t_birth", "t_alive")
+    _ROW_ARRAYS = ("r_tie", "r_was")
+    _CACHES = ("_out_ids", "_views", "_class_ids")
 
     def __getstate__(self):
-        """Saved and copied without the spare capacity (the rows beyond n_units / n_ties are zeros); the arrays
-        grow again on demand exactly as they do while living. Caches of tensors are not saved."""
+        """Saved and copied without the spare capacity (the rows beyond n_units / n_ties / n_rows are zeros); the
+        arrays grow again on demand exactly as they do while living. Caches of tensors are not saved."""
         state = self.__dict__.copy()
-        n, t = self.n_units, self.n_ties
+        n, t, r = self.n_units, self.n_ties, self.n_rows
         for name in self._UNIT_ARRAYS:
             state[name] = getattr(self, name)[:max(n, 1)].clone()
         for name in self._TIE_ARRAYS:
             state[name] = getattr(self, name)[:max(t, 1)].clone()
-        state["t_w"] = self.t_w[:, :max(t, 1)].clone()
-        state["_cu"], state["_ct"] = max(n, 1), max(t, 1)
+        state["t_ev"] = self.t_ev[:, :max(t, 1)].clone()
+        for name in self._ROW_ARRAYS:
+            state[name] = getattr(self, name)[:r].clone()
+        state["ex"] = self.ex[:, :r].clone()
+        state["_cu"], state["_ct"], state["_cr"] = max(n, 1), max(t, 1), r
         for name in self._CACHES:
             state.pop(name, None)
         return state
 
     def __setstate__(self, state) -> None:
+        t_w = state.pop("t_w", None)
         self.__dict__.update(state)
         self._out_ids, self._views = {}, None
+        if t_w is not None:                      # saved before the narrow layout: the same values, stored anew
+            self._from_tables(t_w)
+
+    def _from_tables(self, t_w: torch.Tensor) -> None:
+        """Store the four tables ``t_w`` [4, cap, P] in the narrow layout (every value kept, bit for bit)."""
+        cap, P = t_w.shape[1], self.P
+        bits = t_w.view(I64) != 0                                # -0.0 counts as a value
+        classes = bits[:2].any(dim=0)                            # [cap, P]: classes with w+ or w-
+        n_cls = classes.sum(-1)
+        wide = (n_cls > 1) | bits[2:].any(dim=(0, 2))
+        cls = torch.where(n_cls == 1, classes.to(torch.int8).argmax(-1).to(torch.int8) + 1,
+                          torch.zeros(cap, dtype=torch.int8))
+        narrow = (~wide) & (n_cls == 1)
+        idx = narrow.nonzero().flatten()
+        self.t_ev = torch.zeros(2, cap, dtype=F64)
+        col = (cls[idx].long() - 1)
+        self.t_ev[0, idx] = t_w[0, idx, col]
+        self.t_ev[1, idx] = t_w[1, idx, col]
+        rows = wide.nonzero().flatten()
+        k = rows.numel()
+        self._cr = k + 1
+        self.n_rows = k + 1
+        self.ex = torch.zeros(4, k + 1, P, dtype=F64)
+        self.ex[:, 1:] = t_w[:, rows]
+        self.r_tie = torch.zeros(k + 1, dtype=torch.int32)
+        self.r_tie[1:] = rows.to(torch.int32)
+        self.r_was = torch.zeros(k + 1, dtype=torch.int8)
+        cls[rows] = WIDE
+        self.t_cls = cls
+        self.t_row = torch.zeros(cap, dtype=torch.int32)
+        self.t_row[rows] = torch.arange(1, k + 1, dtype=torch.int32)
+        self._views = None
+
+    # ------------------------------------------------------------------ evidence: reading
+    def w(self, table: int, ids: torch.Tensor, tables: int = 1) -> torch.Tensor:
+        """[n, P]: the per-class values of one table for the ties ``ids`` (a new tensor). With ``tables`` > 1, the
+        tables table .. table + tables - 1 as [tables, n, P]."""
+        cls = self.t_cls.index_select(0, ids)
+        n = ids.numel()
+        out = torch.zeros(tables, n, self.P, dtype=F64)
+        if table <= W_NEG:                       # the one class of a tie: its column, by selection (no arithmetic)
+            one = cls.unsqueeze(1) == self._classes()
+            narrow = min(tables, 2 - table)
+            out[:narrow] = torch.where(one, self.t_ev[table:table + narrow].index_select(1, ids).unsqueeze(2), 0.0)
+        if self.n_rows > 1 and n and int(cls.max()) == WIDE:
+            wide = (cls == WIDE).nonzero().flatten()
+            out[:, wide] = self.ex[table:table + tables].index_select(
+                1, self.t_row.index_select(0, ids.index_select(0, wide)))
+        return out if tables > 1 else out[0]
+
+    def _classes(self) -> torch.Tensor:
+        c = self.__dict__.get("_class_ids")
+        if c is None:
+            c = self._class_ids = torch.arange(1, self.P + 1, dtype=torch.int8)
+        return c
+
+    def w2(self, ids: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """W+ and W- rows ([n, P] each) of the ties ``ids``."""
+        both = self.w(W_POS, ids, 2)
+        return both[0], both[1]
+
+    def w4(self, ids: torch.Tensor) -> torch.Tensor:
+        """[4, n, P]: all four tables for the ties ``ids``."""
+        return self.w(W_POS, ids, 4)
+
+    def w1(self, table: int, tie: int) -> torch.Tensor:
+        """[P]: the per-class values of one table for one tie (a new tensor)."""
+        c = int(self.t_cls[tie])
+        if c == WIDE:
+            return self.ex[table, int(self.t_row[tie])].clone()
+        out = torch.zeros(self.P, dtype=F64)
+        if c and table <= W_NEG:
+            out[c - 1] = self.t_ev[table, tie]
+        return out
+
+    def cell(self, table: int, tie: int, slot: int) -> float:
+        """The value of one table, one class, one tie."""
+        _, cls, ev, row, ex = self.views()
+        c = int(cls[tie])
+        if c == WIDE:
+            return float(ex[table, row[tie], slot])
+        return float(ev[table, tie]) if c == slot + 1 and table <= W_NEG else 0.0
+
+    def column(self, table: int, slot: int) -> torch.Tensor:
+        """[n_ties]: one table, one class, for every tie in tie order."""
+        t = self.n_ties
+        if table <= W_NEG:
+            out = torch.where(self.t_cls[:t] == slot + 1, self.t_ev[table, :t], torch.zeros((), dtype=F64))
+        else:
+            out = torch.zeros(t, dtype=F64)
+        if self.n_rows > 1:
+            out[self.r_tie[1:self.n_rows].long()] = self.ex[table, 1:self.n_rows, slot]
+        return out
+
+    @property
+    def t_w(self) -> torch.Tensor:
+        """The four tables of every tie in tie order, [4, n_ties, P] (assembled: a copy for reading)."""
+        return self.w4(torch.arange(self.n_ties))
 
     def slot_keys(self, parts: Tuple[int, ...]):
         """Slot keys of a tuple: (key, positions). Without ``bind_repeats`` one key per position (as written);
@@ -334,11 +457,34 @@ class Substance:
 
     def _grow_ties(self) -> None:
         extra = self._ct
-        for name in ("t_src", "t_dst", "t_form", "t_lag", "t_use", "t_last", "t_birth", "t_alive"):
+        for name in self._TIE_ARRAYS:
             setattr(self, name, self._grown(getattr(self, name), extra))
-        self.t_w = self._grown(self.t_w, extra, dim=1)
+        self.t_ev = self._grown(self.t_ev, extra, dim=1)
         self._ct += extra
         self._views = None
+
+    def _grow_rows(self) -> None:
+        extra = self._cr
+        for name in self._ROW_ARRAYS:
+            setattr(self, name, self._grown(getattr(self, name), extra))
+        self.ex = self._grown(self.ex, extra, dim=1)
+        self._cr += extra
+        self._views = None
+
+    def _widen(self, tie: int) -> int:
+        """Give a tie its full row of the four tables (its one class moves there, value for value); the row."""
+        if self.n_rows == self._cr:
+            self._grow_rows()
+        row = self.n_rows
+        c = int(self.t_cls[tie])
+        if 0 < c < WIDE:
+            self.ex[W_POS, row, c - 1] = self.t_ev[W_POS, tie]
+            self.ex[W_NEG, row, c - 1] = self.t_ev[W_NEG, tie]
+            self.t_ev[:, tie] = 0.0
+        self.r_tie[row], self.r_was[row] = tie, c
+        self.t_cls[tie], self.t_row[tie] = WIDE, row
+        self.n_rows += 1
+        return row
 
     def new_unit(self, kind: int, channel: int = -1, symbol: int = -1, arity: int = 0) -> int:
         if self.n_units == self._cu:
@@ -377,7 +523,7 @@ class Substance:
         if not bool(keep.any()):
             return amounts
         live_ids, live = (ids, amounts) if bool(keep.all()) else (ids[keep], amounts[keep])
-        self.t_w[table, :, slot].index_add_(0, live_ids, live)
+        self._put(table, slot, live_ids, live)
         if table <= W_NEG:
             self._touched.update(live_ids.tolist())
         if self.cur is not None and self.keep_log:
@@ -388,12 +534,48 @@ class Substance:
         """``add`` for one tie: the same snapped increment (q rounds like torch.round), added and logged alike."""
         amount = q(amount)
         if amount != 0.0:
-            self.views()[0][table, tie, slot] += amount
+            _, cls, ev, row, _ = self.views()
+            c = cls[tie]
+            if table <= W_NEG and (c == 0 or c == slot + 1):
+                cls[tie] = slot + 1
+                ev[table, tie] += amount
+            else:
+                r = row[tie] if c == WIDE else self._widen(tie)
+                self.views()[4][table, r, slot] += amount
             if table <= W_NEG:
                 self._touched.add(tie)
             if self.cur is not None and self.keep_log:
                 self.cur.ev.append((table, slot, torch.tensor([tie], dtype=I64), torch.tensor([amount], dtype=F64)))
         return amount
+
+    def _put(self, table: int, slot: int, ids: torch.Tensor, amounts: torch.Tensor) -> None:
+        """Add ``amounts`` to one table and class of the ties ``ids``: in the one class a tie holds (or takes now),
+        else in its full row (a tie that cannot hold the value in one class is widened first)."""
+        cls = self.t_cls.index_select(0, ids)
+        if table <= W_NEG:
+            mine = cls == slot + 1
+            if bool(mine.all()):
+                self.t_ev[table].index_add_(0, ids, amounts)
+                return
+            fits = mine | (cls == 0)
+            if bool(fits.all()):
+                self.t_cls[ids] = slot + 1
+                self.t_ev[table].index_add_(0, ids, amounts)
+                return
+        else:
+            fits = torch.zeros(ids.numel(), dtype=torch.bool)
+        grow = ~fits & (cls != WIDE)
+        if bool(grow.any()):
+            for tie in torch.unique(ids[grow]).tolist():
+                self._widen(tie)
+            cls = self.t_cls.index_select(0, ids)
+        wide = cls == WIDE
+        if not bool(wide.all()):
+            narrow = ~wide
+            self.t_cls[ids[narrow]] = slot + 1
+            self.t_ev[table].index_add_(0, ids[narrow], amounts[narrow])
+        if bool(wide.any()):
+            self.ex[table, :, slot].index_add_(0, self.t_row.index_select(0, ids[wide]), amounts[wide])
 
     def use_ties(self, ids: torch.Tensor, amount: float = 1.0) -> None:
         if ids.numel() == 0:
@@ -415,7 +597,7 @@ class Substance:
     def begin(self, m: int, alpha: List[int]) -> None:
         self.now = m
         self._touched = set()
-        self.cur = MomentLog(m, self.n_units, self.n_ties, alpha)
+        self.cur = MomentLog(m, self.n_units, self.n_ties, alpha, self.n_rows)
 
     def end(self) -> MomentLog:
         cur = self.cur
@@ -449,7 +631,7 @@ class Substance:
 
     def _subtract(self, entry: MomentLog) -> None:
         for table, slot, ids, amounts in entry.ev:
-            self.t_w[table, :, slot].index_add_(0, ids, -amounts)
+            self._put(table, slot, ids, -amounts)
         for ids, amounts in entry.tie_use:
             self.t_use.index_add_(0, ids, -amounts)
         for ids, amounts in entry.unit_use:
@@ -474,8 +656,8 @@ class Substance:
         t0, t1, u0, u1 = entry.ties0, entry.ties1, entry.units0, entry.units1
         if t1 > t0:
             born = torch.arange(t0, t1)
-            dead = self.t_alive[born] & (self.t_w[:2, t0:t1].abs().sum(dim=(0, 2)) == 0) & \
-                (self.t_use[born] == 0)
+            held = torch.stack([self.w(W_POS, born), self.w(W_NEG, born)])
+            dead = self.t_alive[born] & (held.abs().sum(dim=(0, 2)) == 0) & (self.t_use[born] == 0)
             self.t_alive[born[dead]] = False
             killed_ties = int(dead.sum())
         if u1 > u0:
@@ -501,17 +683,38 @@ class Substance:
             raise KeyError("the last moment was already retracted")
         self._subtract(entry)
         self._forget_rows(entry.units0, entry.ties0)
+        self._give_back_rows(entry)
         for name in ("u_kind", "u_arity", "u_birth", "u_use", "u_alive"):
             getattr(self, name)[entry.units0:self.n_units] = 0
         self.u_channel[entry.units0:self.n_units] = -1
         self.u_symbol[entry.units0:self.n_units] = -1
-        for name in ("t_src", "t_dst", "t_form", "t_lag", "t_use", "t_last", "t_birth", "t_alive"):
+        for name in self._TIE_ARRAYS:
             getattr(self, name)[entry.ties0:self.n_ties] = 0
-        self.t_w[:, entry.ties0:self.n_ties] = 0
+        self.t_ev[:, entry.ties0:self.n_ties] = 0
         self.n_units, self.n_ties = entry.units0, entry.ties0
         del self.log[m]
         self.now = m - 1
         return entry
+
+    def _give_back_rows(self, entry: MomentLog) -> None:
+        """The full rows given in the moment of ``entry`` go back (after its increments were subtracted): an older
+        tie that was widened then holds its one class again, value for value; a younger tie goes with its row."""
+        rows0 = getattr(entry, "rows0", None)
+        if rows0 is None:                        # logged before full rows: the last rows that belong to its ties
+            rows0 = self.n_rows
+            while rows0 > 1 and int(self.r_tie[rows0 - 1]) >= entry.ties0:
+                rows0 -= 1
+        for row in range(rows0, self.n_rows):
+            tie, was = int(self.r_tie[row]), int(self.r_was[row])
+            if tie < entry.ties0:
+                self.t_cls[tie], self.t_row[tie] = was, 0
+                if 0 < was < WIDE:
+                    self.t_ev[W_POS, tie] = self.ex[W_POS, row, was - 1]
+                    self.t_ev[W_NEG, tie] = self.ex[W_NEG, row, was - 1]
+        self.ex[:, rows0:self.n_rows] = 0
+        self.r_tie[rows0:self.n_rows] = 0
+        self.r_was[rows0:self.n_rows] = 0
+        self.n_rows = rows0
 
     def _forget_rows(self, units0: int, ties0: int) -> None:
         """Take the units >= units0 and the ties >= ties0 (the newest rows) out of every cache."""
@@ -546,7 +749,8 @@ class Substance:
 
     # ------------------------------------------------------------------ inspection
     def tensors(self) -> Dict[str, torch.Tensor]:
-        """The live part of every persistent tensor (views)."""
+        """The live part of every persistent tensor (views), with the four evidence tables of every tie in tie
+        order as ``t_w`` (assembled: the same values in any storage layout)."""
         n, t = self.n_units, self.n_ties
         return {"u_kind": self.u_kind[:n], "u_channel": self.u_channel[:n], "u_symbol": self.u_symbol[:n],
                 "u_arity": self.u_arity[:n], "u_birth": self.u_birth[:n], "u_use": self.u_use[:n],
@@ -556,21 +760,43 @@ class Substance:
                 "t_alive": self.t_alive[:t]}
 
     def digest(self) -> str:
+        """sha256 over the live part of every persistent tensor, the evidence as the four tables [4, n_ties, P] in
+        tie order (streamed, never assembled whole): it does not depend on how the evidence is stored."""
         h = hashlib.sha256()
-        for name, tensor in self.tensors().items():
+        n, t = self.n_units, self.n_ties
+        for name in self._UNIT_ARRAYS + ("t_src", "t_dst", "t_form", "t_lag", "t_w", "t_use", "t_last", "t_birth",
+                                          "t_alive"):
             h.update(name.encode())
-            h.update(tensor.contiguous().numpy().tobytes())
+            if name == "t_w":
+                for table in range(4):
+                    for start in range(0, t, 1 << 18):
+                        ids = torch.arange(start, min(t, start + (1 << 18)))
+                        h.update(self.w(table, ids).numpy().tobytes())
+            else:
+                h.update(getattr(self, name)[:n if name.startswith("u_") else t].contiguous().numpy().tobytes())
         return h.hexdigest()
 
+    def physical(self) -> Dict[str, torch.Tensor]:
+        """The live part of every persistent tensor as it is stored."""
+        n, t, r = self.n_units, self.n_ties, self.n_rows
+        out = {name: getattr(self, name)[:n] for name in self._UNIT_ARRAYS}
+        out.update({name: getattr(self, name)[:t] for name in self._TIE_ARRAYS})
+        out["t_ev"] = self.t_ev[:, :t]
+        out.update({name: getattr(self, name)[:r] for name in self._ROW_ARRAYS})
+        out["ex"] = self.ex[:, :r]
+        return out
+
     def nbytes(self) -> Dict[str, int]:
-        core = sum(t.numel() * t.element_size() for t in self.tensors().values())
+        core = sum(t.numel() * t.element_size() for t in self.physical().values())
         if isinstance(self.log, DiskLog):
             return {"core_tensors": core, "log": sum(e.nbytes() for e in self.log.ram.values()),
                     "log_on_disk": self.log.disk_bytes()}
         return {"core_tensors": core, "log": sum(e.nbytes() for e in self.log.values())}
 
     def max_evidence(self) -> float:
-        return float(self.t_w[:, :self.n_ties].abs().max()) if self.n_ties else 0.0
+        if not self.n_ties:
+            return 0.0
+        return float(torch.maximum(self.t_ev[:, :self.n_ties].abs().max(), self.ex[:, :self.n_rows].abs().max()))
 
     def exact(self) -> bool:
         """True while every stored evidence value is inside the range where grid sums are exact."""
