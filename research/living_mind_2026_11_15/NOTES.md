@@ -1366,3 +1366,35 @@ bound by interpreter and dispatch overhead, not by arithmetic.
 - Already won: a word-producing moment (about 10 ms) beats a GPT-2-sized decoder on CPU; quality after one online
   pass beats every network; generalisation beats them on iliski; and the cost per moment barely grows with
   vocabulary.
+
+## Low-end machines: Zihin against Transformers on one core (2026-11-15)
+
+The owner believes that Cevahir runs on low-end machines where Transformers could not. Measured on one core with no
+GPU (`lowend_profile.py`, `results/lowend_profile.jsonl`; an independent verifier re-measured RAM to within about
+2 MB and corrected the points below). Every figure includes the same baseline of about 515 MB for Python and torch.
+
+| | RAM to answer | RAM to train | answer time on one core |
+|---|---|---|---|
+| Zihin, cevahir_ilk_nefes (98k ties) | 0.64 GB | (it lives; no training) | 42 ms per reply |
+| Zihin, cevahir2 (1.33M ties, today's layout) | 1.36 GB | | 114 ms |
+| Zihin, cevahir3b (3.25M ties, today's layout) | 2.58 GB | | 223 ms |
+| Transformer 1M / 4M / 20M / 100M parameters | 0.53 / 0.54 / 0.61 / 0.92 GB | about 0.9 / 1.0 / 1.2–1.7 / 2.4–3.3 GB, by batch size | 15 words: 21 ms / 43 ms / 0.2 s / 1.1 s |
+
+- **Belief (2) is not supported at these sizes.** Transformers of 1–100M parameters answer on a 2 GB machine in less
+  RAM than the larger Zihin minds; with small batches a 20M model even trains in 2 GB and a 100M model in 4 GB (the
+  first summary said otherwise because it fixed the batch size). It holds only against billion-parameter models.
+- **What holds is that Zihin needs no training run.** It learns while living at about 3–5 ms of CPU per moment; a
+  Transformer must first be trained: 20 epochs over 260k tokens take 9 minutes (1M) to 7 hours (100M) on one core
+  (the first summary's 13 minutes to 9.8 hours were measured on a busier machine).
+- **Zihin's RAM grows with what it lived:** about 650 B per tie (504 B of Python index objects, 138 B of tensors),
+  about 7 kB per lived moment; the file is 116.5 B per tie. The Python indices are 78% of the RAM of cevahir3b.
+- **Projection** (linear in lived moments at cevahir3b's density, 11 ties per moment): two million teacher examples
+  (16 moments each, 32M moments) would need about 190–260 GB of RAM and a 38 GB file in today's design, and 47–79
+  hours on one core to live once, about as much as 20 epochs of a 4M Transformer over the same data. Time is not the
+  barrier; memory is. The time-per-moment exponent (ties^0.13) is not robust (its confidence interval includes 0),
+  so only "grows slowly" holds.
+- **The three changes that would change this most:** compact integer tables instead of Python objects (about 500 B
+  to 30–50 B per tie); memory-mapped tie arrays on disk so that RAM holds the working set (see "Memory map and
+  locality"); consolidating rarely used ties in sleep (this changes learning and must be measured).
+- `lowend_profile.py` builds its fresh teacher mind with the lessons that were removed later the same day
+  (`lessons_about_itself`), so that step runs only at the commits before d628100.
