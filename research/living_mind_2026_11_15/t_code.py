@@ -50,11 +50,11 @@ def passes(name: str, args: str, written: str, test) -> bool:
         return False
 
 
-def run(seed: int, rounds: int, consequences: bool) -> dict:
+def run(seed: int, rounds: int, consequences: bool, explore: bool = True) -> dict:
     torch.manual_seed(seed)
     rng = random.Random(seed)
     mind = Mind(Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
-                               backoff=True, resemblance=True, race=True, situations=True))
+                               backoff=True, resemblance=True, race=True, situations=True, explore=explore))
     mind.add_channel(CHANNEL, "act")
     session = Session(mind)
     session.curious = False                              # this test is about writing code, not asking
@@ -82,7 +82,7 @@ def run(seed: int, rounds: int, consequences: bool) -> dict:
             else:
                 session.close_turn()
         per_round.append(ok / len(TASKS))
-    return {"seed": seed, "consequences": consequences, "per_round": per_round}
+    return {"seed": seed, "consequences": consequences, "explore": explore, "per_round": per_round}
 
 
 def main() -> None:
@@ -94,8 +94,8 @@ def main() -> None:
     torch.set_num_threads(1)
     rows = []
     for seed in range(args.seeds):
-        for consequences in (True, False):
-            row = run(seed, args.rounds, consequences)
+        for consequences, explore in ((True, True), (False, True), (True, False)):
+            row = run(seed, args.rounds, consequences, explore)
             rows.append(row)
             print(json.dumps(row), flush=True)
     os.makedirs(os.path.dirname(args.out), exist_ok=True)

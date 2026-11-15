@@ -112,6 +112,7 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
         mind.cfg.resemblance = True
         mind.cfg.race = True
         mind.cfg.situations = True
+        mind.cfg.explore = True
     if not ledger:
         mind.S.log, mind.S.keep_log = {}, False
         mind.cfg.keep_log, mind.cfg.log_path = False, None

@@ -398,3 +398,47 @@ a completion. The function is actually run against a test, and the result comes 
 **Next, designed but not built.** Hesitation should end in a try, preferring the alternative whose consequences are
 least known (information-seeking), with the tie broken deterministically. The same mechanism would let hesitation in
 conversation end in an answer.
+
+## Exploration: hesitation ends in a try, and code is learned from its tests (2026-11-15)
+
+`act._explore`, `Config.explore` (on for speaking minds).
+
+**When the silence is hesitation.** It is hesitation when the F19 race lets nothing lead but some alternative is well
+supported, meaning it would have been chosen alone: 2(e − 1/2)T ≥ θ. Nothing well supported is not hesitation; it is
+not knowing (L7).
+
+**When a try is made.** Only where it can teach something:
+
+- the mind has just been called on (the last thing in the episode is a perceived event, the turn end); or
+- good or bad was already met on these paths, or in this very situation.
+
+In the middle of its own utterance with nothing at stake it does not wander. An ungated first version did wander:
+it babbled on in conversation, and held-out exact answers fell from 10 to 5 of 60.
+
+**What is tried.**
+
+- Among the well supported alternatives whose known consequences are not bad, the one whose consequences it knows
+  least: the evidence on its path's value ties, where a path never taken knows nothing.
+- If every well supported alternative has led to bad, and only then, anything else it has lived after this (e > 1/10).
+- The try is lived like any act, so its consequence teaches.
+
+**T-code with exploration** (`results/t_code.jsonl`; passing completions per round, mean of 3 seeds):
+
+| condition | r1 | r2 | r3 | r4-r8 |
+|---|---|---|---|---|
+| consequences + exploration | 0 | 0.39 | 0.72 | **1.0** |
+| exploration, no consequences | 0 | 0 | 0 | 0 |
+| consequences, no exploration | 0 | 0.11 | 0.11 | 0.11 |
+
+From imitating wrong code, the mind reaches passing code for all six tasks by round 4, learning only from the
+result of running its own code. Each task follows the same course: wrong, the other wrong, correct, kept. Neither
+the consequences nor the exploration does this alone.
+
+**In conversation.** A self question that met hesitation at the start of the turn ("nerede yaşıyorsun ?") is now
+answered from what it was told ("bir bilgisayarda yaşıyorum ."). Held-out teacher questions are unchanged: 17% exact,
+F1 0.38, 23% not knowing.
+
+Tests: `tests/evolution/test_zihin_explore.py`, including the code test at 4 rounds.
+
+**Limit.** The tasks are tiny: three alternatives and a decisive second token. Writing new code means composing
+sequences nobody showed it. That needs imagination and analogy (T8) working with consequences, and it is open.

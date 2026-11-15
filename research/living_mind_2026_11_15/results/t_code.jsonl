@@ -1,6 +1,9 @@
-{"seed": 0, "consequences": true, "per_round": [0.0, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333]}
-{"seed": 0, "consequences": false, "per_round": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
-{"seed": 1, "consequences": true, "per_round": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
-{"seed": 1, "consequences": false, "per_round": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
-{"seed": 2, "consequences": true, "per_round": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
-{"seed": 2, "consequences": false, "per_round": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+{"seed": 0, "consequences": true, "explore": true, "per_round": [0.0, 0.5, 0.8333333333333334, 1.0, 1.0, 1.0, 1.0, 1.0]}
+{"seed": 0, "consequences": false, "explore": true, "per_round": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+{"seed": 0, "consequences": true, "explore": false, "per_round": [0.0, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333]}
+{"seed": 1, "consequences": true, "explore": true, "per_round": [0.0, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0]}
+{"seed": 1, "consequences": false, "explore": true, "per_round": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+{"seed": 1, "consequences": true, "explore": false, "per_round": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+{"seed": 2, "consequences": true, "explore": true, "per_round": [0.0, 0.16666666666666666, 0.8333333333333334, 1.0, 1.0, 1.0, 1.0, 1.0]}
+{"seed": 2, "consequences": false, "explore": true, "per_round": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+{"seed": 2, "consequences": true, "explore": false, "per_round": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}

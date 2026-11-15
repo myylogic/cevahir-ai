@@ -74,6 +74,63 @@ def consequence(mind, act_unit: int) -> float:
     return total
 
 
+def _explore(mind, ranked, theta: float, T: int):
+    """Hesitation ends in a try (L5 with curiosity), where a try can teach something.
+
+    Only when some alternative is well supported (it would have been chosen alone: 2 (e - 1/2) T >= theta) is the
+    silence hesitation rather than not knowing. A try is made when the mind has just been called on (its turn begins:
+    the last thing in the episode is a perceived event) or when some alternative's consequences are already known
+    here (it has met good or bad on these paths); in the middle of its own utterance with nothing at stake it does
+    not wander. It tries, among the well supported alternatives whose known consequences are not bad, the one whose
+    consequences it knows least (the evidence on its path's value ties; a path never taken knows nothing). If every
+    well supported alternative has led to bad, and only then, it tries among everything else it has lived after this
+    (e > 1/10). Ties: better known consequence, then the race order. Returns the chosen (score, e, unit) or None."""
+    if not any(2.0 * (r[1] - 0.5) * T >= theta for r in ranked):
+        return None                                        # nothing well supported: not knowing, not hesitation
+    S = mind.S
+    known = {r[2]: _known_consequence(mind, r[2]) for r in ranked}
+    at_stake = any(k > 0.0 for k in known.values()) or (           # good or bad was met on these paths, or in
+        mind.context is not None and _value_evidence(mind, mind.context) > 0.0)   # this very situation before
+    last = mind.episode[-1] if mind.episode else -1
+    called_on = last >= 0 and int(S.u_channel[last]) >= 0 and mind.ch.kind(int(S.u_channel[last])) == "sense"
+    if not (called_on or at_stake):
+        return None
+    value = {r[2]: consequence(mind, r[2]) for r in ranked}
+    supported = [r for r in ranked if 2.0 * (r[1] - 0.5) * T >= theta and value[r[2]] >= 0.0]
+    pool = supported or ([r for r in ranked if r[1] > 0.1] if at_stake else [])
+    if not pool:
+        return None
+    return min(pool, key=lambda r: (known[r[2]], -value[r[2]], -r[0], r[2]))
+
+
+def _known_consequence(mind, act_unit: int) -> float:
+    """How much the mind knows of what this path led to: the evidence on the value ties of "this episode, then
+    this act" (0 when the path was never taken)."""
+    if not getattr(mind, "value_sign", None) or not mind.episode:
+        return 0.0
+    path = mind.S.tuple_index.get(tuple(mind.episode) + (act_unit,))
+    return 0.0 if path is None else _value_evidence(mind, path)
+
+
+def _value_evidence(mind, unit: int) -> float:
+    """The evidence on a unit's EXPECT lag-2 ties to the value signals (what it was later followed by: good, bad)."""
+    signs = getattr(mind, "value_sign", None)
+    if not signs:
+        return 0.0
+    S = mind.S
+    known = 0.0
+    for (channel, symbol) in signs:
+        if not mind.ch.has(channel):
+            continue
+        cid = mind.ch.id(channel)
+        index = mind.ch.symbol_index(cid, symbol, create=False)
+        value_unit = S.atom_index.get((cid, index), -1) if index >= 0 else -1
+        tie = S.find_tie(unit, value_unit, EXPECT, 2) if value_unit >= 0 else -1
+        if tie >= 0:
+            known += float(((S.t_w[W_POS, tie] + S.t_w[W_NEG, tie]) * mind.trust).sum())
+    return known
+
+
 def _race(mind, candidates, theta: float, T: int) -> List[Event]:
     """F19: one act per channel per moment, so the candidates of a channel are alternatives that exclude each
     other. Each scores its expectation plus half its consequences (L5); the leader accumulates its advantage over
@@ -92,7 +149,10 @@ def _race(mind, candidates, theta: float, T: int) -> List[Event]:
         rival = ranked[1][0] if len(ranked) > 1 else 0.5
         rate = 2.0 * (score - max(rival, 0.5 if score <= 0.5 else rival))
         if rate <= 0.0 or math.ceil(theta / rate - 1e-12) > T:
-            continue
+            tried = _explore(mind, ranked, theta, T) if getattr(mind.cfg, "explore", False) else None
+            if tried is None:
+                continue
+            score, e, unit = tried
         acts.append(Event(mind.ch.names[channel], mind.ch.symbol(channel, int(S.u_symbol[unit])), ACTED))
         mind.hoping = (unit, e)
     return acts
