@@ -462,6 +462,7 @@ class Mind:
                                    (1, frame_parts) if frame is None else (0, frame),
                                    frame_parts if frame is None else frame))
         order: Dict[object, tuple] = {}
+        rounds: Dict[Tuple[int, int], list] = {}           # (tier, round) -> keys in the order of their group
         if cfg.select == "specific":                       # the most specific generalisation of each place first
             for tier, candidates in ((0, framed), (1, bare)):
                 seen: Dict[int, int] = {}
@@ -469,12 +470,20 @@ class Mind:
                 # so the whole tuples sort the same way
                 for group, _, _, _, key in sorted(candidates):
                     seen[group] = seen.get(group, 0) + 1
-                    order.setdefault(key, (tier, seen[group], group))
+                    if key not in order:
+                        order[key] = (tier, seen[group], group)
+                        rounds.setdefault((tier, seen[group]), []).append(key)
         grounded = dict(base)
         grounded.update(derived)
         first = cfg.evoke == "grounded_first"
-        present = self._present(grounded, virtual, fresh, order) if first else None
-        ranked = self._winners(grounded, {}, virtual, F, first, fresh, order, present)
+        if first and cfg.select == "specific":
+            present, whole = self._present_in_order(base, grounded, virtual, fresh, order, rounds, F)
+            ranked = [(key, -neg) for _, neg, _, _, _, key in present[:F]]
+            if not whole:                              # F or more are present: nothing called to mind gets a place
+                return ranked, gens, virtual, grounded
+        else:
+            present = self._present(grounded, virtual, fresh, order) if first else None
+            ranked = self._winners(grounded, {}, virtual, F, first, fresh, order, present)
         spread: Dict[int, Optional[tuple]] = {}
         in_play = None
         for _ in range(cfg.T if cfg.lag0 else 0):
@@ -517,6 +526,33 @@ class Mind:
         summed = torch.zeros(unique.numel(), dtype=F64).index_add_(0, inverse, val_all)
         keep = (summed > 0.0) | torch.isin(unique, in_play)    # a negative sum matters only for a unit in play
         return dict(zip(unique[keep].tolist(), summed[keep].tolist()))
+
+    @staticmethod
+    def _present_in_order(base, grounded, virtual, fresh, order, rounds, F) -> Tuple[List[tuple], bool]:
+        """The entries of ``_present`` in ranking order, as far as the first F (select = "specific"): every
+        generalisation and frame has an order rank (tier, round, group) of its own, and units without one (what
+        is present) rank before them. Returns (entries, whole): whole when these are all the entries."""
+        scored = sorted(((0, 0, 0, 0), -grounded[u], 0 if u in fresh else 1, 0, (u,), u)
+                        for u in base if u not in order and grounded[u] > 0.0)
+        if len(scored) >= F:
+            return scored, False
+        top: Dict[int, int] = {}
+        for tier, number in rounds:
+            top[tier] = max(top.get(tier, 0), number)
+        for tier in (0, 1):
+            for number in range(1, top.get(tier, 0) + 1):
+                for key in rounds.get((tier, number), ()):
+                    if isinstance(key, tuple):
+                        a = virtual[key][0]
+                        if a > 0.0:
+                            scored.append(((1,) + order[key], -a, 1, 1, key, key))
+                    else:
+                        a = grounded[key]
+                        if a > 0.0:
+                            scored.append(((1,) + order[key], -a, 0 if key in fresh else 1, 0, (key,), key))
+                    if len(scored) >= F:
+                        return scored, False
+        return scored, True
 
     @staticmethod
     def _present(grounded, virtual, fresh, order) -> List[tuple]:
