@@ -441,14 +441,14 @@ class Session:
         import time
         files = [path] if os.path.isfile(path) else sorted(
             os.path.join(root, name) for root, _, names in os.walk(path) for name in names)
-        start, lived, skipped = time.time(), 0, []
+        start, lived, skipped, t0 = time.time(), 0, [], self.mind.t
         for name in files:
             try:
                 if name.lower().endswith(".json"):
                     import json
                     with open(name, encoding="utf-8") as f:
                         pairs = dialogues_of(json.load(f))
-                    for first, answer in pairs:
+                    for first, answer in pairs[:cap] if cap else pairs:
                         self.watch(first, answer)
                         lived += 1
                     if not pairs:
@@ -456,11 +456,15 @@ class Session:
                     continue
                 if name.lower().endswith(".tsv"):
                     with open(name, encoding="utf-8", errors="replace") as f:
+                        watched = 0
                         for raw in f:
+                            if cap and watched >= cap:
+                                break
                             if "\t" in raw:
                                 first, answer = raw.rstrip("\n").split("\t", 1)
                                 self.watch(first, answer)
                                 lived += 1
+                                watched += 1
                     continue
                 text = read_document(name)
             except Exception as exc:
@@ -478,7 +482,7 @@ class Session:
             self.history.append((len(self.history) + 1, "[okudu] %s" % os.path.basename(name), []))
         took = time.time() - start
         out = "  %d dosya, %d cümle/diyalog, %d an, %.0f sn (%.1f ms/an)" % (
-            len(files) - len(skipped), lived, self.mind.t, took, 1000 * took / max(1, self.mind.t))
+            len(files) - len(skipped), lived, self.mind.t, took, 1000 * took / max(1, self.mind.t - t0))
         if skipped:
             out += "\n  okunamayan: " + ", ".join(skipped[:10])
         return out
