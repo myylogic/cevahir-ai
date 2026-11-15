@@ -577,9 +577,10 @@ class Substance:
         cache = self.__dict__.get("_slot_keys")
         if cache is None or len(cache) > 1 << 16:
             cache = self._slot_keys = {}
-        hit = cache.get((parts, bind))
+        key = (parts if type(parts) is tuple else tuple(parts), bind)
+        hit = cache.get(key)
         if hit is None:
-            hit = cache[(parts, bind)] = tuple(self._slot_keys_of(parts, bind))
+            hit = cache[key] = tuple(self._slot_keys_of(parts, bind))
         return list(hit)
 
     @staticmethod
