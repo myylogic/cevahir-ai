@@ -12,6 +12,7 @@ What is pinned here
   once (a second sorting with nothing newly imagined changes nothing), and deletes nothing.
 * A night keeps its dreams in the mind, counts itself, and reports an earlier dream once when life has judged it;
   the dreams survive saving and loading.
+* No word is related to another by a shared root: the inference by hand-made Turkish morphology is gone from dreams.
 """
 from __future__ import annotations
 
@@ -126,8 +127,13 @@ def test_a_dream_is_a_chain_and_sees_what_was_seen_with_its_words(tmp_path):
     assert unit >= 0
 
 
-def test_imagination_reasons_by_a_shared_stem_and_life_judges_the_inference():
-    from zihin.dusunce import dream as dream_chain, infer
+def test_no_word_is_related_to_another_by_a_shared_root():
+    """The inference by a shared Turkish root (hand-made morphology facets or the tokenizer's morphology run over the
+    vocabulary: 'hayvandır' and 'hayvanlar' made mates, and what followed one carried over to the topic) is gone."""
+    import zihin.dusunce as dusunce
+    from zihin.dusunce import dream as dream_chain
+    for name in ("root_mates", "_stems", "infer"):
+        assert not hasattr(dusunce, name)
     mind = Mind(Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
                                backoff=True, resemblance=True, race=True))
     mind.add_channel(CHANNEL, "act")
@@ -136,12 +142,6 @@ def test_imagination_reasons_by_a_shared_stem_and_life_judges_the_inference():
         session.live("kedi bir hayvandır .", TOLD)
         session.live("hayvanlar nefes alır ve büyür .", TOLD)
     mind.step([])
-    thought, construction, reality, mate = infer(session, "kedi")
-    assert mate == "hayvanlar" and construction[:3] == ["kedi", "nefes", "alır"]
-    assert 0.5 <= reality < 0.75                      # supported only by generalisation: a hypothesis
     chain = dream_chain(session, "kedi")
-    record = next(d for d in chain if d.get("kind") == "çıkarım")
-    assert verdict(mind, record)[0] == "acik"
-    session.live("kedi nefes alır .", TOLD)
-    assert verdict(mind, record)[0] in ("dogru", "acik")
-    assert verdict(mind, record)[0] != "yanlis"
+    assert chain and all(d.get("kind") != "çıkarım" for d in chain)
+    assert not any(d["about"] == "kedi" and "nefes" in d["words"] for d in chain)   # nothing carried over by a root

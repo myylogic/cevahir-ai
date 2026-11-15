@@ -250,95 +250,6 @@ def imagine(session, topic: str, limit: int = 12) -> Tuple[List[str], List[str],
     return thought, construction, reality, other
 
 
-def root_mates(session, word: str) -> List[str]:
-    """Other words the mind has lived that share this word's root. A mind raised with word pieces has the root as a
-    facet ("kök:x") and the words that share it are read from the facet's ties; for a mind raised without pieces
-    the roots are computed by the repository's own morphology (the same tokenizer infrastructure) and indexed once."""
-    from .__main__ import CHANNEL, FACETS
-    from .store import ATOMIC, EXPECT, W_POS
-    mind = session.mind
-    S = mind.S
-    cid = mind.ch.id(CHANNEL)
-    unit = _unit(mind, CHANNEL, word)
-    if unit < 0:
-        return []
-    if mind.ch.has(FACETS):
-        fid = mind.ch.id(FACETS)
-        from .learn import facet_set
-        roots = [f for f in facet_set(mind, unit) if int(S.u_channel[f]) == fid
-                 and str(mind.symbol_of(f)[1]).startswith(("gövde:", "kök:"))]
-        if roots:
-            mates = set()
-            for f in roots:
-                for tie in S.inc.get((f, EXPECT), ()):
-                    src = int(S.t_src[tie])
-                    if src != unit and int(S.u_channel[src]) == cid and int(S.t_lag[tie]) == 0 \
-                            and float(S.w1(W_POS, tie).sum()) > 0.0:
-                        mates.add(str(mind.symbol_of(src)[1]))
-            return sorted(mates)
-    index = getattr(session, "_roots", None)
-    if index is None or index[0] != S.n_units:            # built once per growth of the vocabulary
-        from .parca import own_pieces
-        pieces = own_pieces()
-        if pieces is None:
-            return []
-        by_root: Dict[str, List[str]] = {}
-        for u in range(S.n_units):
-            if int(S.u_kind[u]) & ATOMIC and int(S.u_channel[u]) == cid and S.u_alive[u]:
-                w = str(mind.ch.symbol(cid, int(S.u_symbol[u])))
-                if w.isalpha() and len(w) > 2:
-                    for root in _stems(pieces, w):
-                        by_root.setdefault(root, []).append(w)
-        index = session._roots = (S.n_units, by_root, pieces)
-    _, by_root, pieces = index
-    mates = []
-    for root in _stems(pieces, word):
-        mates += [w for w in by_root.get(root, []) if w != word and w not in mates]
-    return mates
-
-
-def _stems(pieces, word: str) -> List[str]:
-    """The stems a word is known by: its first two syllables when it has more, and its morphological root."""
-    out = [p for p in pieces.tokenize(word) if p.startswith(("gövde:", "kök:"))]
-    return out or [word]
-
-
-def infer(session, topic: str, limit: int = 12, frequent: set = None) -> Tuple[List[str], List[str], float, str]:
-    """T8, inference by a shared root (imagination that reasons): think about X; for a word of that thought whose
-    root other lived words share (X ... "hayvandır" -> "hayvanlar"), think about such a word W and carry what follows
-    W over to X ("hayvanlar nefes alır" -> "X nefes alır"). The construction is scored for reality step by step from
-    all evidence except imagined (a claim nothing lived supports stays near one half: a hypothesis) and lived as
-    imagined, so later life judges it (F22). Returns (thought about X, construction, reality, W)."""
-    from .__main__ import CHANNEL
-    mind = session.mind
-    check = getattr(session, "check", None)              # long thinking stops between thoughts when asked (Ctrl+C)
-    thought, _ = think(session, topic, limit)
-    for w in thought:
-        if len(w) < 4 or not w.isalpha() or (frequent and w in frequent) or w == topic:
-            continue
-        for mate in root_mates(session, w)[:5]:
-            if mate == topic or mate in thought:
-                continue
-            if check is not None:
-                check()
-            mind.step([])
-            carried, _ = think(session, mate, limit)
-            carried = [c for c in carried if c != topic]
-            if len(carried) < 2 or carried[:len(thought)] == thought[:len(carried)]:
-                continue
-            mind.step([])
-            construction, scores = [topic], []
-            mind.step([Event(CHANNEL, topic, IMAGINED)])
-            for c in carried:                              # what follows W, said of X, step by step
-                u = _unit(mind, CHANNEL, c)
-                scores.append(_reality(mind, u) if u >= 0 else 0.5)
-                mind.step([Event(CHANNEL, c, IMAGINED)])
-                construction.append(c)
-            mind.step([])
-            return thought, construction, sum(scores) / len(scores), mate
-    return thought, [], 0.0, ""
-
-
 def sort_dreams(mind) -> Dict[str, float]:
     """Sorting what was imagined (in sleep): every tie that holds imagined evidence not yet judged is compared with
     the evidence on it that is not imagined (lived, read, told; own acts excluded), weighted by that evidence's own
@@ -500,11 +411,8 @@ def dream(session, topic: str, links: int = 3, frequent: set = None) -> List[dic
         seen = seen_with(mind, topic)
         for gist in seen:                                  # it sees in its dream what it saw with this word, as it
             mind.step([Event(EYE, gist, IMAGINED)])        # saw it: the image first, then the word comes to mind
-        kind = "çıkarım"                                   # reasoning first: what a shared root carries over
-        thought, construction, reality, other = infer(session, topic, frequent=frequent)
-        if not construction:
-            kind = "benzetme"                              # else analogy: a thought carried to a counterpart
-            thought, construction, reality, other = imagine(session, topic)
+        kind = "benzetme"                                  # analogy: a thought carried to a counterpart
+        thought, construction, reality, other = imagine(session, topic)
         if construction:
             record = remember_dream(mind, topic, other, construction, round(reality, 2))
         elif thought:
