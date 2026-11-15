@@ -100,15 +100,21 @@ _TEMPORARY: List[str] = []              # the temporary ledger folder of this pr
 
 def temporary_folder() -> str:
     """The ledger folder of minds built in code (tests, research scripts): a temporary folder of this process,
-    removed with what is in it when the process exits. Nothing is written into the user's home for them."""
+    removed with what is in it when the process exits (by the process that made it, not by a forked child that
+    exits before it). Nothing is written into the user's home for them."""
     if not _TEMPORARY:
         import atexit
-        import shutil
         import tempfile
         folder = tempfile.mkdtemp(prefix="zihin-defter-")
-        atexit.register(shutil.rmtree, folder, True)
+        atexit.register(_remove_temporary, folder, os.getpid())
         _TEMPORARY.append(folder)
     return _TEMPORARY[0]
+
+
+def _remove_temporary(folder: str, maker: int) -> None:
+    import shutil
+    if os.getpid() == maker:
+        shutil.rmtree(folder, ignore_errors=True)
 
 
 def _log_path(folder: str = None) -> str:

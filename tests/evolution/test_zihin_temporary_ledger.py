@@ -6,6 +6,7 @@ What is pinned here
 * A mind built with the chat's configuration outside the program (``VARIANTS["speaking"]()``) keeps its ledger in a
   temporary folder of its process, removed with the ledger when the process exits: nothing is written into the
   user's home ($CEVAHIR_HOME or ~). The program passes its own folder (the folder of the kept mind) explicitly.
+  The folder is removed by the process that made it, not by a forked child that exits before it.
 * A research script that builds the configuration with ``_log_path`` replaced by a function of no arguments (as
   research/living_mind_2026_11_15/t_meaning.py does, to make no ledger file) still gets it.
 * git ignores the session ledgers (defter-*.log) and the live copies a load makes of a saved ledger
@@ -19,6 +20,8 @@ import subprocess
 import sys
 import textwrap
 from pathlib import Path
+
+import pytest
 
 import zihin.__main__ as program
 
@@ -49,6 +52,30 @@ def test_a_mind_built_in_code_keeps_its_ledger_in_a_temporary_folder_removed_at_
     assert os.path.basename(os.path.dirname(ledger)).startswith("zihin-defter-")
     assert not os.path.exists(ledger) and not os.path.exists(os.path.dirname(ledger))   # ... and is gone with it
     assert sorted(os.listdir(tmp_path)) == []               # nothing in the home folders or the working folder
+
+
+FORKS = textwrap.dedent("""
+    import os, sys
+    from zihin import Mind
+    from zihin.__main__ import VARIANTS
+    mind = Mind(VARIANTS["speaking"]())
+    folder = os.path.dirname(mind.cfg.log_path)
+    child = os.fork()
+    if child == 0:
+        sys.exit(0)                                         # a forked child runs the exit handlers it inherited
+    os.waitpid(child, 0)
+    print(folder, os.path.isdir(folder))
+""")
+
+
+@pytest.mark.skipif(not hasattr(os, "fork"), reason="fork is POSIX only")
+def test_the_temporary_folder_is_removed_by_the_process_that_made_it(tmp_path):
+    env = dict(os.environ, CEVAHIR_HOME=str(tmp_path / "ev"), PYTHONPATH=str(REPO))
+    done = subprocess.run([sys.executable, "-c", FORKS], cwd=str(tmp_path), env=env, capture_output=True, text=True,
+                          timeout=300)
+    assert done.returncode == 0, done.stderr
+    folder, there = done.stdout.split()
+    assert there == "True" and not os.path.exists(folder)  # kept while its maker lived, removed when it exited
 
 
 def test_the_program_passes_its_own_folder(tmp_path):
