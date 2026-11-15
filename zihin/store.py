@@ -574,26 +574,32 @@ class Substance:
     def rebuild_indices(self) -> None:
         """Reconstruct every cache from the tensors alone (knowledge lives in the tensors)."""
         self._clear_indices()
-        for tie in range(self.n_ties):
-            if self.t_alive[tie]:
-                self._index_tie(tie, int(self.t_src[tie]), int(self.t_dst[tie]), int(self.t_form[tie]),
-                                int(self.t_lag[tie]))
+        v = self._np()
+        for start in range(0, self.n_ties, 1 << 18):       # in tie order, read through numpy in blocks
+            stop = min(self.n_ties, start + (1 << 18))
+            src, dst = v.src[start:stop].tolist(), v.dst[start:stop].tolist()
+            form, lag = v.form[start:stop].tolist(), v.lag[start:stop].tolist()
+            for j in np.flatnonzero(v.alive[start:stop]).tolist():
+                self._index_tie(start + j, src[j], dst[j], form[j], lag[j])
+        alive, kinds = v.ualive[:self.n_units].tolist(), v.kind[:self.n_units].tolist()
+        channel, symbol, birth = (v.channel[:self.n_units].tolist(), v.symbol[:self.n_units].tolist(),
+                                  v.ubirth[:self.n_units].tolist())
         for unit in range(self.n_units):
-            if not self.u_alive[unit]:
+            if not alive[unit]:
                 continue
-            kind = int(self.u_kind[unit])
+            kind = kinds[unit]
             if kind & ATOMIC:
-                self.atom_index[(int(self.u_channel[unit]), int(self.u_symbol[unit]))] = unit
+                self.atom_index[(channel[unit], symbol[unit])] = unit
             if kind & COMPOSED:
                 self.tuple_index[self.parts(unit)] = unit
         for unit in range(self.n_units):  # frame keys, in unit order (first instance = lowest id)
-            if not self.u_alive[unit] or not int(self.u_kind[unit]) & COMPOSED:
+            if not alive[unit] or not kinds[unit] & COMPOSED:
                 continue
-            parts, kind = self.parts(unit), int(self.u_kind[unit])
+            parts, kind = self.parts(unit), kinds[unit]
             for key, where in self.slot_keys(parts):
                 pos = where[0]
-                if kind & INDUCED and int(self.u_kind[parts[pos]]) & CATEGORY and \
-                        int(self.u_birth[parts[pos]]) == int(self.u_birth[unit]) and parts[pos] == unit - 1:
+                if kind & INDUCED and kinds[parts[pos]] & CATEGORY and \
+                        birth[parts[pos]] == birth[unit] and parts[pos] == unit - 1:
                     self.frame_of[key] = unit
                 elif not kind & SLOTTED:
                     self.frame_first.setdefault(key, unit)
@@ -651,6 +657,27 @@ class Substance:
         v.cls[tie], v.row[tie] = WIDE, row
         self.n_rows += 1
         return row
+
+    def _widen_many(self, ties: np.ndarray) -> None:
+        """``_widen`` for distinct ties in ascending order at once: the same rows in the same order, the same values
+        moved, the same growth (rows grow while the next one needed does not fit, as one by one)."""
+        k = ties.shape[0]
+        while self.n_rows + k > self._cr:
+            self._grow_rows()
+        v = self._np()
+        rows = np.arange(self.n_rows, self.n_rows + k)
+        c = v.cls[ties]
+        one = ((c > 0) & (c < WIDE)).nonzero()[0]
+        if one.shape[0]:
+            r1, t1, c1 = rows[one], ties[one], c[one].astype(np.intp) - 1
+            v.ex[W_POS, r1, c1] = v.ev[W_POS, t1]
+            v.ex[W_NEG, r1, c1] = v.ev[W_NEG, t1]
+            v.ev[:, t1] = 0.0
+        v.r_tie[rows] = ties
+        v.r_was[rows] = c
+        v.cls[ties] = WIDE
+        v.row[ties] = rows
+        self.n_rows += k
 
     def new_unit(self, kind: int, channel: int = -1, symbol: int = -1, arity: int = 0) -> int:
         if self.n_units == self._cu:
@@ -750,8 +777,7 @@ class Substance:
             fits = np.zeros(i.shape[0], dtype=bool)
         grow = ~fits & (c != WIDE)
         if grow.any():
-            for tie in np.unique(i[grow]).tolist():   # ascending, as torch.unique: the same rows in the same order
-                self._widen(tie)
+            self._widen_many(np.unique(i[grow]))      # ascending, as torch.unique: the same rows in the same order
             v = self._np()
             c = v.cls[i]
         wide = c == WIDE
@@ -917,13 +943,14 @@ class Substance:
             rows0 = self.n_rows
             while rows0 > 1 and int(self.r_tie[rows0 - 1]) >= entry.ties0:
                 rows0 -= 1
+        v = self._np()
         for row in range(rows0, self.n_rows):
-            tie, was = int(self.r_tie[row]), int(self.r_was[row])
+            tie, was = int(v.r_tie[row]), int(v.r_was[row])
             if tie < entry.ties0:
-                self.t_cls[tie], self.t_row[tie] = was, 0
+                v.cls[tie], v.row[tie] = was, 0
                 if 0 < was < WIDE:
-                    self.t_ev[W_POS, tie] = self.ex[W_POS, row, was - 1]
-                    self.t_ev[W_NEG, tie] = self.ex[W_NEG, row, was - 1]
+                    v.ev[W_POS, tie] = v.ex[W_POS, row, was - 1]
+                    v.ev[W_NEG, tie] = v.ex[W_NEG, row, was - 1]
         self.ex[:, rows0:self.n_rows] = 0
         self.r_tie[rows0:self.n_rows] = 0
         self.r_was[rows0:self.n_rows] = 0
@@ -931,12 +958,13 @@ class Substance:
 
     def _forget_rows(self, units0: int, ties0: int) -> None:
         """Take the units >= units0 and the ties >= ties0 (the newest rows) out of every cache."""
+        v = self._np()
         for unit in range(units0, self.n_units):
-            if not self.u_alive[unit]:
+            if not v.ualive[unit]:
                 continue
-            kind = int(self.u_kind[unit])
+            kind = int(v.kind[unit])
             if kind & ATOMIC:
-                self.atom_index.pop((int(self.u_channel[unit]), int(self.u_symbol[unit])), None)
+                self.atom_index.pop((int(v.channel[unit]), int(v.symbol[unit])), None)
             if kind & COMPOSED:
                 parts = self.parts(unit)
                 self._parts.pop(unit, None)
@@ -949,10 +977,10 @@ class Substance:
                     if kind & INDUCED and parts[pos] == unit - 1 and self.frame_of.get(key) == unit:
                         del self.frame_of[key]
         for tie in range(self.n_ties - 1, ties0 - 1, -1):
-            if not self.t_alive[tie]:
+            if not v.alive[tie]:
                 continue
-            src, dst = int(self.t_src[tie]), int(self.t_dst[tie])
-            form, lag = int(self.t_form[tie]), int(self.t_lag[tie])
+            src, dst = int(v.src[tie]), int(v.dst[tie])
+            form, lag = int(v.form[tie]), int(v.lag[tie])
             self.tie_index.pop((src, dst, form, lag), None)
             self._out_ids.pop((src, form, -1 if form == PART else lag), None)
             if form == PART:
