@@ -368,3 +368,33 @@ with reality between 1/2 and 3/4, and a later "kedi nefes alır" does not refute
 "bilgi-ner"), and the carried thought is then nonsense ("kuantum , öğrenmek isterim ."). So inference is used only
 in imagination (dreams and `!dusun`), where life judges it, and never in what the mind says as an answer.
 A better stem relation (shared contexts as well as shared form) is open.
+
+## T-code, first test: learning to write code by its consequences (2026-11-15)
+
+The owner wants the mind to learn to write code. The first measurable step is `t_code.py`, with results in
+`results/t_code.jsonl`.
+
+**Setup.** There are six tiny function heads ("topla a b", "kare x", ...), each with three completions, one correct.
+The mind first watches others write completions. The most common one it sees is wrong (3×), the correct one once and
+the other wrong one once, so imitation alone writes wrong code. Then, in rounds, the head is said to it and it writes
+a completion. The function is actually run against a test, and the result comes back as the value signal "iyi" or
+"kötü" (F15/L5). Nothing about code is in the core.
+
+**Results** (share of passing completions per round, mean of 3 seeds, 8 rounds):
+
+| condition | round 1 | rounds 2-8 |
+|---|---|---|
+| with consequences | 0 | 0.11 |
+| without (control) | 0 | 0 |
+
+**Diagnosis.**
+
+- Where the wrong completion's punishment leaves one alternative leading, the mind switches to the correct
+  completion and keeps it (2 of 6 tasks in a seed).
+- Where the remaining alternatives are equally supported, the F19 race lets nothing lead. The mind writes only the
+  shared first token and then stays silent.
+- Silence is punished as well, so it never tries the other completions: there is no exploration.
+
+**Next, designed but not built.** Hesitation should end in a try, preferring the alternative whose consequences are
+least known (information-seeking), with the tie broken deterministically. The same mechanism would let hesitation in
+conversation end in an answer.
