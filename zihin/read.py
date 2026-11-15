@@ -24,7 +24,7 @@ import torch
 
 from .evidence import conviction, expectation, frequency
 from .form import categories_of
-from .store import ABSTRACT, CATEGORY, COMPOSED, EXPECT, I64, RELY, SLOTTED, W_NEG, W_POS
+from .store import ABSTRACT, CATEGORY, COMPOSED, EXPECT, I64, PART, RELY, SLOTTED, W_NEG, W_POS
 
 
 def generalisations(mind, unit: int) -> List[Tuple[int, float]]:
@@ -326,19 +326,39 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
     out: Dict[int, float] = {}
     if n >= 2 and event >= 1:
         d_event = n - 1 - event
-        lived = [(t, u) for t, u in S.tuple_index.items()
-                 if len(t) > d_event and t[-1] == heard[-1] and t[len(t) - 1 - d_event] == heard[event] and u != unit]
-        held: Dict[int, int] = {}
-        for t, _ in lived:
-            for p in set(t):
-                held[p] = held.get(p, 0) + 1
+
+        def held(p):                                     # how many lived contexts hold the part
+            return len(S.inc.get((p, PART), ()))
 
         def weight(p):
-            return 1.0 / (1 + held.get(p, 0))
+            return 1.0 / (1 + held(p))
 
         def word(p):
             c = int(S.u_channel[p])
             return c >= 0 and mind.ch.kind(c) == "act" and str(mind.symbol_of(p)[1]).isalpha()
+
+        # the lived situations are called up through the rarest of the parts they must share at the same place from
+        # the end (the last part, or a word of the utterance): the contexts holding it there, ending with the same part
+        # and holding the event at its place. The cost grows with how often that part was lived, not with the size of
+        # the whole memory.
+        anchors = sorted(((n - 1 - j, heard[j]) for j in range(event) if word(heard[j])), key=lambda x: held(x[1]))
+        lived, seen, budget = [], {unit}, 20000
+        for d_anchor, anchor in anchors:                 # each word of the utterance calls up its situations, the
+            for tie in S.inc.get((anchor, PART), ()):     # rarest word first, within a bounded effort
+                budget -= 1
+                c = int(S.t_src[tie])
+                if c in seen:
+                    continue
+                t = S.parts(c)
+                L = len(t)
+                if L > max(d_anchor, d_event) and int(S.t_lag[tie]) == L - 1 - d_anchor and t[-1] == heard[-1] \
+                        and t[L - 1 - d_event] == heard[event]:
+                    seen.add(c)
+                    lived.append((t, c))
+                if budget <= 0:
+                    break
+            if budget <= 0:
+                break
 
         heard_set = set(heard)
         heard_weight = sum(weight(p) for p in heard_set)
