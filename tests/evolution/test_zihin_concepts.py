@@ -28,7 +28,7 @@ import torch
 from zihin import SENSED, TOLD, Config, Event, Mind
 from zihin import read
 from zihin.evidence import conviction, expectation, frequency, q
-from zihin.store import ABSTRACT, CATEGORY, COMPOSED, EXPECT, INDUCED, PART, SLOTTED, W_NEG, W_POS
+from zihin.store import ABSTRACT, CATEGORY, COMPOSED, EXPECT, INDUCED, PART, SLOTTED, W_NEG, W_POS, frame_key
 
 
 @pytest.fixture(autouse=True)
@@ -218,7 +218,7 @@ def test_induction_as_written_counts_confirming_instances_only(general_miss):
     for who, value in (("m1", "v"), ("m2", "v"), ("m3", "w"), ("m4", "w"), ("m5", "v"), ("m6", "w")):
         say(mind, [who, "d", value])
     S = mind.S
-    frame = S.frame_of[(0, (-1, unit(mind, "d")))]
+    frame = S.frame_of[frame_key(0, (-1, unit(mind, "d")))]
     masses = read.own_mass(mind, frame)
     v, w = unit(mind, "v"), unit(mind, "w")
     assert masses[v][0] > 0 and masses[w][0] > 0

@@ -50,3 +50,16 @@ def test_a_mind_saved_with_the_old_indices_is_converted_to_the_same_ones():
     assert {k: list(x) for k, x in T.out.items()} == {k: list(x) for k, x in S.out.items()}
     assert all(isinstance(x, array) for x in T.out.values()) and all(isinstance(x, array) for x in T.inc.values())
     assert T.digest() == S.digest()
+
+
+def test_frame_keys_are_packed_and_old_ones_convert():
+    from zihin.store import frame_key
+    assert frame_key(0, (-1, 5)) == frame_key((0,), (-1, 5))          # one position, as an int or a 1-tuple
+    assert frame_key((0, 2), (-1, 5, -1)) != frame_key(0, (-1, 5, -1))  # several positions are kept apart
+    S = small()
+    S.frame_first[frame_key(1, (7, -1))] = 3
+    state = S.__getstate__()
+    state["frame_first"] = {(1, (7, -1)): 3}                          # as saved before
+    T = Substance.__new__(Substance)
+    T.__setstate__(pickle.loads(pickle.dumps(state)))
+    assert T.frame_first == {frame_key(1, (7, -1)): 3}

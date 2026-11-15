@@ -50,6 +50,16 @@ assert array(IDS).itemsize == 4
 ID_LIMIT = (1 << 31) - 1     # the first tie id that would not fit
 
 
+def frame_key(where, masked: Tuple[int, ...]) -> bytes:
+    """One bytes object for a slot key (the slot's positions, the tuple with -1 there): the key of frame_first and
+    frame_of, a fraction of the memory of a nested tuple of Python ints. The positions become a bit mask (a single
+    position j and the tuple of several are both kept exactly), followed by the masked parts as 32-bit ints."""
+    bits = 0
+    for j in (where if type(where) is tuple else (where,)):
+        bits |= 1 << j
+    return array(IDS, (bits,) + masked).tobytes()
+
+
 def tie_key(src: int, dst: int, form: int, lag: int) -> int:
     """One integer for a tie's identity (src, dst, form, lag): the tie index's key, a fraction of the memory of a
     4-tuple. Units and ties are below 2^31, a form below 2^3 and a lag below 2^8 - 1 (PART lags are positions), so
@@ -369,6 +379,10 @@ class Substance:
             if table and not isinstance(next(iter(table.values())), array):
                 for k, v in table.items():
                     table[k] = array(IDS, v)
+        for name in ("frame_first", "frame_of"):
+            table = self.__dict__.get(name)
+            if table and isinstance(next(iter(table)), tuple):
+                setattr(self, name, {frame_key(where, masked): v for (where, masked), v in table.items()})
 
     def _from_tables(self, t_w: torch.Tensor) -> None:
         """Store the four tables ``t_w`` [4, cap, P] in the narrow layout (every value kept, bit for bit)."""
@@ -630,7 +644,7 @@ class Substance:
             else:
                 where = (pos,)
             masked = tuple(-1 if j in where else q for j, q in enumerate(parts))
-            out.append(((where[0] if len(where) == 1 else where, masked), where))
+            out.append((frame_key(where, masked), where))
         return out
 
     def parts(self, unit: int) -> Tuple[int, ...]:

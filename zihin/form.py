@@ -24,7 +24,7 @@ import torch
 
 from .evidence import expectation
 from .learn import add_evidence, add_evidence1, tie_mass
-from .store import ABSTRACT, ATOMIC, CATEGORY, COMPOSED, EXPECT, F64, I64, INDUCED, PART, SLOTTED, W_NEG, W_POS, WIDE
+from .store import ABSTRACT, ATOMIC, CATEGORY, COMPOSED, EXPECT, F64, I64, INDUCED, PART, SLOTTED, W_NEG, W_POS, WIDE, frame_key
 
 # ---------------------------------------------------------------------- reading helpers (speed only, exact)
 # Shared by form, read, act and mind. They give bit for bit what the assembled store rows give, with fewer and
@@ -261,7 +261,7 @@ def recognise(mind, slot: int) -> Optional[int]:
 def slot_keys(S, parts: Tuple[int, ...]):
     """``S.slot_keys(parts)``, the same list in the same order, built in one pass over the tuple."""
     if not getattr(S, "bind_repeats", False):
-        return [((j, parts[:j] + (-1,) + parts[j + 1:]), (j,)) for j in range(len(parts))]
+        return [(frame_key(j, parts[:j] + (-1,) + parts[j + 1:]), (j,)) for j in range(len(parts))]
     positions = {}
     for j, q in enumerate(parts):                          # the values in order of their first position
         positions.setdefault(q, []).append(j)
@@ -269,10 +269,10 @@ def slot_keys(S, parts: Tuple[int, ...]):
     for q, where in positions.items():
         if len(where) == 1:
             j = where[0]
-            out.append(((j, parts[:j] + (-1,) + parts[j + 1:]), (j,)))
+            out.append((frame_key(j, parts[:j] + (-1,) + parts[j + 1:]), (j,)))
         else:
             where = tuple(where)
-            out.append(((where, tuple(-1 if x == q else x for x in parts)), where))
+            out.append((frame_key(where, tuple(-1 if x == q else x for x in parts)), where))
     return out
 
 
