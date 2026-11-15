@@ -70,11 +70,29 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
 | `!konus` | sohbet modunu açıp kapatmak (kapalıyken `?<metin>` beklentileri gösterir) |
 | `!cik` | çıkmak (öğrendikleri kaydedilir) |
 
+## Ona öğretmek
+
+Zihin konuşmadan öğrenir, ama bir soruya nasıl karşılık verildiğini en iyi bir konuşmayı izleyerek öğrenir:
+
+```
+!izle seni kim yaptı ? || beni babam muhammed yaptı .
+!izle baban kim ? || babam muhammed .
+!dogru            (son cevabı beğendiysen)    !yanlis   (beğenmediysen; o kopya cevap bir daha söylenmez)
+```
+
+Bir şeyi anlattığında (`kuantum çok küçük parçacıkların bilimidir`) bunu yaşar; bir dahaki sefer o kelime üzerine
+düşünürken bu bilgiyi kullanır. Kim olduğunu ona kendin anlat: başlarken adını yazdığında her sözün seninle birlikte
+algılanır.
+
 ## Ne beklemeli (dürüst sınırlar)
 
 - İlk nefesi verilen verilerdir; büyük ölçüde izlediği diyalogları taklit eder, izlemediği sorulara ilişki kurarak
   ve okuduğundan cevap verebilir, bilmediğinde susar ya da sorar. Akıcı bir dil modeli değildir.
-- Kendisi hakkındaki sorulara kendisine anlatılan gerçeklerle cevap verir; benlik birimi kendi yaşamından büyür.
+- Kendisi hakkındaki sorulara kendisine anlatılan gerçeklerle cevap verir; ama okuduğu diyaloglarda başkalarının aynı
+  soruya verdiği cevaplar daha çoksa onları da söyleyebilir (örneğin "nerede yaşıyorsun ?" sorusuna bir şehir adı).
+  Benlik birimi kendi yaşamından büyür, ama söylediklerini henüz yönlendirmiyor.
+- Ölçüm: belgelerinden üretilen ve hiç izlemediği 60 soruda tam doğru cevap %17, kelime örtüşmesi (F1) 0.38,
+  "bilmiyorum" %23.
 - Görme ve işitme ilk sürümdür: benzer resimleri ve sesleri tanır; farklı ışık ve açıdan yüz tanıma, gürültüde
   ses tanıma zihnin kendi özelliklerini öğrenmesini gerektirir. Kendi sesi (konuşma çıktısı) henüz yoktur.
 - Rüyalar şimdilik yalnız kelimelerle görülür; bir hayalin doğruluğu kelimeden kelimeye bağlarla tartılır.
