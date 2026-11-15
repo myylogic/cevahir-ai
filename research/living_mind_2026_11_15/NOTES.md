@@ -731,3 +731,67 @@ the scaling bottleneck above is largely solved. The memory side (bytes per tie, 
 
 What remains per moment on the large mind: `learn_follow` (~0.8 ms) and `learn_together` (~0.7 ms), mostly gathers
 over long lag-0 lists that are bound by memory speed; `_feel` (~0.25 ms).
+
+## Memory: a tie's evidence in two numbers, bit-identical (2026-11-15)
+
+The memory side of the scaling bottleneck above, done exactly. Counts only, measured on cevahir3b (295k moments,
+3.25M ties).
+
+**A correction first.** The plan said PART ties carry no evidence. They do: every recognition of a composed unit
+gives its PART ties evidence (form.py), and all 1.45M PART ties of cevahir3b hold some. So plan (a), no rows for
+structure-only ties, would save nothing here. What the measurement shows instead:
+
+- 99.6% of ties hold W evidence of exactly one provenance class (3,239,447 of 3,251,213; 11,762 hold two, one
+  holds three).
+- Judged amounts (the C tables) are on 10 ties.
+
+**What changed** (`zihin/store.py`; every reader goes through it):
+
+- A tie keeps its class (`t_cls`, one byte) and two values (`t_ev`: w+, w- of that class).
+- A tie that receives a second class or a judged amount moves, once, to a full row of the four tables (`ex`,
+  through `t_row`).
+- Readings assemble exactly the values the four tables hold: `w`, `w2`, `w4`, `w1`, `cell` and `column`, plus
+  `t_w`, which is now an assembled read-only copy for old scripts and tests. Assembly selects values and does no
+  arithmetic, so every downstream operation sees the same bits.
+- The digest is computed over the same values in tie order, streamed, so it is the old digest exactly.
+- `undo_last` gives the moment's rows back: every stored array, not only the values, is as before.
+- A mind saved with the full tables is converted on load, and the manifest's digest still matches.
+
+**Exactness.**
+
+| check | old | new |
+|---|---|---|
+| small run (548 moments) | d8ba0375… | d8ba0375… |
+| 17 configurations with mid-run undo and retraction | 17 digests | the same 17 |
+| fixed run, 999 moments with dreams, sorting, undo, retraction: per-moment acts, predictions, focus, feelings | file | identical file |
+| cevahir3b, 60 watched dialogues + 3 replies: per-moment outputs, answers, digest | 1570adbc…, 5f34bbdc…, f29fea1a… | the same |
+
+Persistence was also checked:
+
+- A mind saved by the old code loads with the new code, passes the manifest check and lives on identically,
+  including undo and the retraction of moments it had logged before the save.
+- A mind saved by the new code loads again with the same digest.
+
+**Memory** (cevahir3b, core tensors):
+
+| | before | after |
+|---|---|---|
+| core | 776.7 MB | 223.1 MB |
+| bytes per tie | 238.9 | 68.6 |
+| process peak, 60 dialogues | 4.91 GB | 4.01 GB |
+
+The two million examples of the owner's question would be about 37 GB of core at this density, where they were
+about 130 GB.
+
+**Speed.** Watching cevahir3b took 4.39 ms per moment, against 4.09 ms for the old code in the same session (+7%,
+single runs on a shared machine). The small run takes 1.0 s, against 0.8-0.9 s. Reading a tie now assembles its
+row instead of indexing it.
+
+**What remains, by size per tie (68.6 B):**
+
+- The other tie columns, 44 B: t_src and t_dst are int64, as are t_last and t_birth. int32 would save 16 B, with
+  a guard at 2^31.
+- Python caches beside the tensors: `tie_index` (a dict of 4-tuples) and the `out`/`inc` lists. These are
+  probably the next memory problem, but their size was not measured. The 4.0 GB process peak also includes
+  converting the old file on load.
+- A disk-backed store and consolidation in sleep, (c) and (d) above. Not started.
