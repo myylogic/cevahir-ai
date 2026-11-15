@@ -79,6 +79,11 @@ class Config:
     voices: bool = False            # F24: how far a kind of voice (how many members speak, how much they agree) can be
                                     # believed is learned from what then came, and weighs the F11 choice (support
                                     # "members"); the evidence is on the mind's own channel, so it carries to new domains
+    born_failures: bool = False     # F25: a lag-1 tie born now starts with the failures a full record would hold: the
+                                    # earlier moments its source was followed by something else on the target's
+                                    # channel, per class (learn.learn_follow); off keeps every earlier result
+    rivals: bool = False            # F25 (b): the frequency of a lag-1 tie is read as its share of the positive mass of
+                                    # its source's ties on the same channel (read.own_mass); off as before
     bind_repeats: bool = False      # F12: a unit occurring at several positions of a tuple is one slot (variable)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
     evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
@@ -223,7 +228,7 @@ class Mind:
                 trust[p] = self.cfg.trust_fixed[p]
                 continue
             tie = self.source_tie[p]
-            trust[p] = expectation(float(self.S.t_w[W_POS, tie, SENSED]), float(self.S.t_w[W_NEG, tie, SENSED]),
+            trust[p] = expectation(self.S.cell(W_POS, tie, SENSED), self.S.cell(W_NEG, tie, SENSED),
                                    self.cfg.k)
         return trust
 
@@ -629,7 +634,8 @@ class Mind:
                                  dtype=torch.bool)                  # by channel id; index -1 (no channel) -> False
             channels = S.u_channel[S.t_dst[unique]].long()
             expect = (S.t_form[unique] == EXPECT) & world[channels]
-            after = ((S.t_w[W_POS].index_select(0, unique) + S.t_w[W_NEG].index_select(0, unique)) * self.trust).sum(-1)
+            pos, neg = S.w2(unique)
+            after = ((pos + neg) * self.trust).sum(-1)
             before = torch.clamp(after - gained, min=0.0)
             relief = float((S.t_use[unique] * (conviction(after, k) - conviction(before, k)))[expect].sum())
             relief = max(0.0, relief)

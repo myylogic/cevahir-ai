@@ -75,7 +75,7 @@ def self_report(mind, channel: str = "text", top: int = 12) -> str:
     bound, spoke, thought = [], 0.0, 0.0
     for tie in S.out.get((me, EXPECT, 0), []):
         dst = int(S.t_dst[tie])
-        w = S.t_w[W_POS, tie]
+        w = S.w1(W_POS, tie)
         spoke += float(w[ACTED])
         thought += float(w[IMAGINED])
         if int(S.u_channel[dst]) == cid:

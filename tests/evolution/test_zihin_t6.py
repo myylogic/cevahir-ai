@@ -226,3 +226,19 @@ def test_off_by_default_no_voice_is_noted():
     say(mind, ["a_x", "a_d", "a_r"])
     assert not mind.ch.has(VOICE_CHANNEL)
     assert mind.voice == {}
+
+
+def test_voices_live_in_a_session_beside_hearing():
+    """The voices channel does not collide with the hearing facet channel ("ses") in a session."""
+    from zihin import TOLD
+    from zihin.__main__ import CHANNEL, Session
+    from zihin.isitme import SOUND
+    mind = Mind(Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
+                               backoff=True, resemblance=True, race=True, voices=True))
+    mind.add_channel(CHANNEL, "act")
+    session = Session(mind)
+    for _ in range(3):
+        session.watch("kedi ne yapar ?", "kedi miyavlar .", prov=TOLD)
+        session.watch("köpek ne yapar ?", "köpek havlar .", prov=TOLD)
+    session.reply("kuş ne yapar ?")
+    assert VOICE_CHANNEL != SOUND

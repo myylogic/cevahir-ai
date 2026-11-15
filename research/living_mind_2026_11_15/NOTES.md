@@ -748,3 +748,337 @@ tones, and the repository tokenizer's pieces as facets from birth.
 a mind raised without them keeps living without them. Where the ties come from (facet binding for every item, joining
 categories by resemblance through very common pieces such as a frequent suffix or last syllable, or both) is open.
 Pieces become a default again only once their tie cost is measured and bounded.
+
+## F25. One-shot evidence: a tie born with the failures a full record would hold (2026-11-15)
+
+**The finding** (section "A finding on one-shot evidence" above). F14 records a failure only on a tie that exists, so
+a tie X→Y that is new has no negative evidence from the earlier moments when X was lived without Y. One hearing of
+"X Y" gives e(X→Y) = 0.67 (trust 1/2), as strong as a continuation of X lived three times with one failure. Thinking
+about X then echoes what was heard last.
+
+**Mechanism (a)** (`Config.born_failures`, default off; `learn.born_failure`, called from `learn_follow` where
+`S.tie(unit, v, EXPECT, 1)` creates the tie):
+
+- **The count.** Before this moment v never followed X while X learned what comes next, or the tie would exist. Every
+  earlier moment in which X learned and v's channel reported something else gave that something positive evidence on
+  X's tie to it, g · a_X · intensity, in the class of that moment. So X's other lag-1 ties to targets on v's channel
+  hold, in their positive evidence, exactly those moments, per class. They are read before this moment's positive
+  evidence is added (a second target on the same channel in the same moment does not count).
+  - Not `u_use`: it counts the moments X was in the focus, and a word stays in the focus for several moments (the
+    carry decays by 1 − 1/F) while with F13 only what was the present learns. Test: in "a x y", "b x y", "c x z"
+    with F13 the new x→z holds exactly 2 failures while u_use(x) > 3.
+  - Not `t_birth`: the birth is now; what is needed is how often X learned before it, which the rivals hold.
+  - Not the rivals' `t_use`: a tie is used only while it is expected (e ≥ the F14 floor, 1/14 in the speaking
+    configuration), so the count would stop for a word with many successors.
+- **The amount and the class.** Per class p: W−[p](X→v) = Σ over X's lag-1 ties on v's channel of W+[p]. This is the
+  full record with each failure of weight g · a_X, which is the design's "trust-weighted n·g": the reading weighs
+  each class by its trust, and the frequency of the new tie is the frequency v has had after X. F14 still governs
+  every later failure (weighted by e, from the floor).
+- **Marked as judged** in the classes whose trust is learned (C−[p] += the same amount; sensed and acted are direct
+  experience and never judged). They claim nothing new: each such moment is already an open claim of its source on
+  the rival's tie and is judged there. Unmarked, the next direct experience on the new tie (an own act's echo, a
+  sensed event) would judge the whole mass a second time as a disagreement with the teller. That mass grows with how
+  often X was lived, so one act on a frequent word could cost the trust in told or imitated thousands of units. Test:
+  a later sensed "x z" leaves the told source tie and the trust bit-identical to the setting off.
+- **Only targets on sense and act channels** (the world, one event per moment); feelings and context channels keep
+  F14 alone.
+- **The induce record** of the newborn is [0, gained, 0, failures, class, class holding most failures]. Nothing
+  before the moment, so F9 and F24 still see a first time; with `general_miss` off (as written) the generalisation
+  receives the capped failures like any other.
+- **Exactly retractable.** The amounts go through `S.add1`, logged with the moment. Retracting the birth moment removes
+  the positive evidence, the failures and their marks, and the tie is removed when nothing else supports it; every
+  tensor then equals the sum of the other moments' increments. Undo restores the digest (tests).
+- **Off is the old code path.** The small run's digest is unchanged (548 moments, d8ba0375…). All 10 archived
+  members lives of `run.py` are reproduced row for row (65/65 rows each; the ledger's byte size is left out, since
+  the speed work writes fewer ledger records). T-code reproduces `results/t_code.jsonl` 9/9.
+
+**Variant (b)** (`Config.rivals`, default off; `read.rival_mass`, reading only). For a target on a sense or act channel
+the negative mass is the positive mass of the source's other targets on that channel, so f(v | X) = W+(X→v) / Σ_v'
+W+(X→v') and the conviction is that of everything X was followed by there. Learning is unchanged; every reading of
+lag-1 own evidence changes.
+
+Tests: `tests/evolution/test_zihin_born_failures.py` (10).
+
+**1. The echo toy** (`f25_echo.py`, `results/f25_echo.jsonl`). A fresh mind lives "kedi uyur" three times, then
+"kedi koşar" once; then it thinks about "kedi" (`dusunce.think`). In the question toy it lives "kedi süt içer ." three
+times, then hears "kedi ne yer ?" once. Expectations are read from the atom's own ties (trust 1/2 in told and
+imitated):
+
+| toy | configuration | setting | e(kedi→Y) | e(kedi→Z) | the inner voice after "kedi" |
+|---|---|---|---|---|---|
+| told: uyur ×3, koşar ×1 | speaking | off | 0.690 | 0.667 | nothing (hesitation) |
+| | speaking | a | 0.690 | **0.333** | **uyur** (reality 0.69) |
+| | speaking | b | 0.667 | 0.333 | uyur (0.67) |
+| question: süt ×3, "ne" ×1 | speaking | off | 0.690 | 0.667 | nothing |
+| | speaking | a | 0.690 | **0.333** | **süt içer** (0.76) |
+| | speaking | b | 0.667 | 0.333 | süt içer (0.75) |
+| read: uyur ×3, koşar ×1 | members | off | 0.690 | 0.667 | **koşar**: the echo (0.67) |
+| | members | a | 0.690 | **0.333** | **uyur** (0.69) |
+| | members | b | 0.667 | 0.333 | uyur (0.67) |
+
+The old tie is untouched by (a); only the one-shot tie falls, to the frequency 1/4 it has had. In the members
+configuration acts speak only from imitated evidence, so the told toys give no thought there in any setting (and the
+question toy reads 0.52 against 0.56, off, without F13). (a)+(b) gives the same rows as (b).
+
+**2. The worlds of the first lives** (`f25_born_failures.py`, `results/f25_worlds.jsonl`; `run.py` imported
+unchanged, variant members, 600 experiences, seeds 0–4, both domains, T9 included). Held-out (mean of told-rule and
+induced-rule probes):
+
+| domain | setting | 60 | 120 | 180 | 300 | 600 |
+|---|---|---|---|---|---|---|
+| nitelik | off | 0.533 | 0.653 | 0.780 | 0.873 | 0.933 |
+| nitelik | a | 0.533 | 0.653 | 0.780 | 0.873 | 0.933 |
+| iliski | off | 0.413 | 0.676 | 0.680 | 0.684 | 0.812 |
+| iliski | a | 0.413 | 0.676 | 0.680 | 0.684 | 0.812 |
+
+Paired a − off: 0.000 at every checkpoint in 10 of 10 lives (identical, not just equal on average). Also unchanged
+at 600: members and exceptions 1.00, early facts 1.00 (their evidence bit-identical), categories 1.00, exact, T9 exact
+retraction in 10/10 lives (own evidence 0, untouched ties identical, state = ledger of the other moments, own e =
+the counterfactual life's). T1 by hearings: c at one hearing 0.399 in both settings (nitelik), 0.410 → 0.407
+(iliski); trust in told 0.665 → 0.664 (nitelik), 0.695 → 0.687 (iliski).
+
+Why the worlds barely see it: F11 reads the members' positive evidence only, the held-out instance has no own tie,
+and a fact's context ("entity dimension") is new at its first hearing, so it has no rivals. What does change is a
+context lived again with another value, which is a lie and its corrections:
+
+| correction (40 per row, 5 seeds × 2 domains) | off: true e | off: false e | a: true e | a: false e | a: true > false |
+|---|---|---|---|---|---|
+| sensed, first | 0.750 | 0.491 | 0.565 | 0.490 | 1.00 |
+| sensed, second | 0.833 | 0.409 | 0.682 | 0.408 | 1.00 |
+| told, first | 0.697 | 0.547 | **0.500** | 0.547 | **0.00** |
+| told, second | 0.787 | 0.467 | 0.611 | 0.467 | 1.00 |
+
+With (a) one told correction against one told lie leaves the truth at exactly 1/2: the context was lived twice, once
+with each value. The lie stays at 0.547, because F14 weights its later failure by its expectation while the
+correction was born with the full count. So the first-born value is favoured, where the old rule favoured the
+newest. The positive evidence of the lie stays bit-identical in every case (refinement without deletion, 160/160).
+
+**2b. The same worlds with the speaking configuration** (`--speaking`: F13, the F14 floor, F16, F18, F19, F23 and
+exploration; off/a only, since these lives differ from the archived ones). The speaking mind does poorly in these
+worlds in both settings. It also speaks into the stream, which these lives were not made for; that was not analysed
+further. Held-out:
+
+| domain | setting | 60 | 120 | 180 | 300 | 600 |
+|---|---|---|---|---|---|---|
+| nitelik | off | 0.500 | 0.458 | 0.525 | 0.480 | 0.550 |
+| nitelik | a | 0.433 | 0.533 | 0.595 | 0.577 | 0.583 |
+| iliski | off | 0.058 | 0.065 | 0.056 | 0.037 | 0.037 |
+| iliski | a | 0.033 | 0.033 | 0.043 | 0.037 | 0.037 |
+
+Paired a − off: nitelik −0.067 ± 0.163 at 60, then +0.075 ± 0.050, +0.070 ± 0.066, +0.097 ± 0.086 and +0.033 ± 0.020
+(2 lives better, the others equal or one worse). iliski −0.025 to −0.033 up to 180, then 0.
+
+At 600, a against off:
+
+- members 0.83 vs 0.78 (nitelik) and 0.86 vs 0.79 (iliski);
+- early facts recalled 0.58 vs 0.48 and 0.38 vs 0.30;
+- exceptions kept 0.62 vs 0.66 and 0.87 vs 1.00;
+- categories 284 vs 342 and 194 vs 231;
+- T9 exact in 10/10 lives.
+
+Mixed and small against the variation between seeds.
+
+**3. T-code** (`f25_t_code.py`, `results/f25_t_code.jsonl`, `t_code.run` with its configuration plus the setting;
+3 seeds, 8 rounds; off reproduces `results/t_code.jsonl` 9/9). Share of passing completions:
+
+| condition | setting | round 1 | rounds 2–8 | per round |
+|---|---|---|---|---|
+| consequences, exploration | off | 0 | 0.873 | 0 .39 .72 1 1 1 1 1 |
+| consequences, exploration | a | 0 | **0.952** | 0 .67 1 1 1 1 1 1 |
+| no consequences (control) | off / a | 0 | 0 / 0 | |
+| consequences, no exploration | off | 0 | 0.111 | 0 .11 .11 … |
+| consequences, no exploration | a | 0 | **0** | 0 0 0 … |
+
+Better with exploration: round 2 rises from 0.39 to 0.67, and from round 3 on every task is solved in every seed.
+Worse without exploration: the two tasks one seed had solved (where the punished wrong completion left one
+alternative leading) are lost. The likely reason, not traced here, is that the completions seen once now start low,
+so none leads after the punishment and the mind stays silent.
+
+**4. Held-out teacher questions, fresh mind** (`f25_teacher.py`, `results/f25_teacher.jsonl`; aggregates only). A
+fresh mind with the speaking configuration watches the 1358 pairs of `ogretmen.tsv` and the lessons about itself
+(22165 moments), then answers 200 questions of `ogretmen.tsv.heldout` (fixed random order, seed 0) with
+`Session.reply`:
+
+| setting | exact | token F1 | "bilmiyorum" | silent | asks a word back | other answers |
+|---|---|---|---|---|---|---|
+| off | 0.005 (1) | 0.229 | 0.150 | 0.120 | 0.670 | 12 |
+| a | 0.000 | 0.151 | **0.995** | 0 | 0 | 1 |
+| b | 0.000 | 0.151 | 1.000 | 0 | 0 | 0 |
+| a+b | 0.000 | 0.151 | 1.000 | 0 | 0 | 0 |
+
+Paired over the questions (a − off): F1 −0.077 ± 0.008 (lower in 142 of 200), "bilmiyorum" +0.845 ± 0.026. A fresh
+mind knows almost none of these answers, and the settings change how it says so. A white-box look at the end of each
+question's turn (read only, recorded in the same runs as `turn_end`) shows why:
+
+- **Off: hesitation.** The best act has e 0.609 on average. In 83% of the questions it is above the line at which it
+  would be said alone (1/2 + θ/2T = 0.583), but a rival close behind keeps its advantage too small for the race
+  (1.9 candidates on average, never two above the line). L7 calls that hesitation, not not knowing: not knowing is
+  kept in only 17% of the questions. The curiosity reflex then asks a word of the question back (2 words).
+- **(a): not knowing.** The first answer words lived after the same question endings carry their true frequency
+  (the best act is at 0.572), so no act reaches the line in any of the 200 questions. Not knowing is felt in 200 of
+  200, and the mind says "bilmiyorum , öğrenmek isterim ." and then asks the word back.
+- **F1.** Most of off's F1 is the asked-back word (85% of its F1 mass; those answers score 0.29). The same word at the
+  end of the longer "bilmiyorum …" answer scores 0.15, so the F1 drop is largely the length of the non-answer.
+- **Lost attempts.** What is really lost is the 12 attempted answers (1 exact, F1 0.20), which fall to 1.
+
+**4b. The same, after also reading the documents the questions were made from** (`--documents`, the owner's 11 private
+documents, 13290 sentences; 195332 moments lived before answering, 2.34M ties; the order of the morning mind: teacher
+pairs, lessons, documents):
+
+| setting | exact | token F1 | "bilmiyorum" | silent | attempted answers (F1, words) |
+|---|---|---|---|---|---|
+| off | 0.130 (26) | 0.300 | 0.170 | 0.010 | 164 (0.366, 14.8) |
+| a | 0.140 (28) | 0.257 | 0.025 | **0.210** | 153 (0.336, **5.6**) |
+| b | 0.120 (24) | 0.232 | 0.015 | 0.245 | 148 (0.314, 5.9) |
+
+Paired (a − off): exact +0.010 ± 0.019 (better in 8 questions, worse in 6), F1 −0.043 ± 0.021, "bilmiyorum" −0.145 ±
+0.028, silent +0.200 ± 0.029, length −8.4 ± 0.7 words. With the documents the mind attempts most questions in both
+settings. Off it talks on along one-shot continuations (14.8 words; F1 rewards the extra words with recall). With (a)
+it stops where a continuation was lived only once against a common rival, so answers are shorter, about as often
+exact, and lower in F1. One question in five gets silence instead of "bilmiyorum" or an attempt. (b): exact −0.010 ±
+0.016, F1 −0.068 ± 0.018, silent +0.235.
+
+**5. Variant (b) in short.**
+
+- Echo toy: the same inner voice as (a).
+- Fresh teacher mind: the same as (a) (all "bilmiyorum").
+- With the documents: exact 0.12 against off 0.13 and (a) 0.14; F1 0.232, lower than (a); silent 24.5%.
+- Worlds (members, 5 seeds × 2 domains): held-out identical to off at every checkpoint in 10 of 10 lives, and T1, T2,
+  T3, T5 and T9 unchanged. After corrections the truth reads like (a) (0.591 and 0.588; one told correction leaves it
+  at 1/2), while the lie reads lower than with (a) (0.409 and 0.412 against 0.477 and 0.479), because its rivals'
+  evidence counts against it at once.
+
+(b) changes every reading and costs time on every read (41–45 s per nitelik life against 30–33 s). Where it matters
+for speaking (the teacher questions after the documents) it is below (a).
+
+**Reading.**
+
+- (a) does what it was built to do. A continuation seen once after a source lived many times starts at the frequency
+  it has had. The old ties are untouched, and retraction stays exact in the ledger sense.
+- The worlds' held-out generalisation is identical life for life, but the lives are not unchanged. The independent
+  verifier found differences in:
+  - tie counts;
+  - trust in told, lower in 6 of 6 lives;
+  - T1 c1;
+  - the T9 increments;
+  - the told first correction, which now loses (true > false 1.00 → 0.75).
+- The trust claim holds only for the born amounts themselves. In lived minds trust moves through the changed
+  behaviour (told 0.823 → 0.771 in the fresh teacher run), so the teacher comparison measures a changed trust as well.
+- The echo is gone. Thinking about X now says what followed X three times, not what followed it last. In the members
+  configuration the old rule said the echo outright.
+- In conversation the effect depends on what the mind has lived.
+  - A mind that knows little turns hesitation into "I do not know". That is honest, but it ends its few attempts.
+  - A mind that has read the sources answers exactly about as often, in shorter answers, with lower F1, and is
+    silent in one question in five.
+- Two costs are structural:
+  - **Two laws.** The born failures count every earlier moment fully, while F14 weights every later failure by the
+    tie's expectation. So the value born first is favoured: a lie told once beats one told correction.
+  - **A reading tuned on inflated ties.** The speaking reading's margins were set while one-shot ties stood at
+    0.6–0.7: the race's lead, L7's line at which an answer would be said alone, and F16's e > 1/2 gate for going on.
+
+**Recommendation: not the speaking default yet.** Keep the setting.
+
+The echo fix is real and the worlds lose nothing. But in conversation it trades long answers for silence, and it
+reverses which value wins after a single correction. Before it can be the default:
+
+1. **One law for born and later failures.** Either the born count is weighted the way F14 weights failures (each
+   earlier moment by the expectation the tie would have had then, from 1/2, down to the floor), or later failures
+   count fully. An estimate, not measured: with F14's weighting
+   - the born failures are bounded near 1/(2·floor) − 1 ≈ 6 (trust-weighted) at the speaking floor;
+   - the toy's e(kedi→koşar) would be about 0.47 instead of 0.33, still below uyur's 0.69;
+   - one told correction would end slightly above the lie (about 0.58 against 0.55) instead of at 1/2.
+2. **Re-tune the speaking reading with the setting on** (the race margin, L7's alone line, F16's gate), then repeat 4
+   and 4b.
+3. **Measure on a mind raised with it.** The setting changes learning, so the morning mind cannot simply be switched
+   over.
+4. **A cheaper partial path, not built:** use (b), which is a reading only, for the inner voice alone (thinking and
+   dreams). It gives (a)'s inner voice in every toy without changing learning or what the mind says aloud.
+
+## Memory: a tie's evidence in two numbers, bit-identical (2026-11-15)
+
+The memory side of the scaling bottleneck above, done exactly. Counts only, measured on cevahir3b (295k moments,
+3.25M ties).
+
+**A correction first.** The plan said PART ties carry no evidence. They do: every recognition of a composed unit
+gives its PART ties evidence (form.py), and all 1.45M PART ties of cevahir3b hold some. So plan (a), no rows for
+structure-only ties, would save nothing here. What the measurement shows instead:
+
+- 99.6% of ties hold W evidence of exactly one provenance class (3,239,447 of 3,251,213; 11,762 hold two, one
+  holds three).
+- Judged amounts (the C tables) are on 10 ties.
+
+**What changed** (`zihin/store.py`; every reader goes through it):
+
+- A tie keeps its class (`t_cls`, one byte) and two values (`t_ev`: w+, w- of that class).
+- A tie that receives a second class or a judged amount moves, once, to a full row of the four tables (`ex`,
+  through `t_row`).
+- Readings assemble exactly the values the four tables hold: `w`, `w2`, `w4`, `w1`, `cell` and `column`, plus
+  `t_w`, which is now an assembled read-only copy for old scripts and tests. Assembly selects values and does no
+  arithmetic, so every downstream operation sees the same bits.
+- The digest is computed over the same values in tie order, streamed, so it is the old digest exactly.
+- `undo_last` gives the moment's rows back and restores every value. Correction by the independent verifier: one
+  stored array is not always as before. A tie born earlier with no evidence that gets its first class in the undone
+  moment keeps that class byte (`t_cls`) after the undo, and retracting all of a tie's evidence also leaves its class
+  set. Values, rows and the digest are restored. The effect is memory only: later evidence of another class gives
+  such a tie a full row (197 B) it did not need.
+- A mind saved with the full tables is converted on load, and the manifest's digest still matches.
+
+**Exactness.**
+
+| check | old | new |
+|---|---|---|
+| small run (548 moments) | d8ba0375… | d8ba0375… |
+| 17 configurations with mid-run undo and retraction | 17 digests | the same 17 |
+| fixed run, 999 moments with dreams, sorting, undo, retraction: per-moment acts, predictions, focus, feelings | file | identical file |
+| cevahir3b, 60 watched dialogues + 3 replies: per-moment outputs, answers, digest | 1570adbc…, 5f34bbdc…, f29fea1a… | the same |
+
+Persistence was also checked:
+
+- A mind saved by the old code loads with the new code, passes the manifest check and lives on identically,
+  including undo and the retraction of moments it had logged before the save.
+- A mind saved by the new code loads again with the same digest.
+
+**Memory** (cevahir3b, core tensors):
+
+| | before | after |
+|---|---|---|
+| core | 776.7 MB | 223.1 MB |
+| bytes per tie | 238.9 | 68.6 |
+| process peak, 60 dialogues | 4.91 GB | 4.01 GB |
+
+The two million examples of the owner's question would be about 37 GB of core at this density, where they were
+about 130 GB.
+
+**Speed.** Watching cevahir3b took 4.39 ms per moment, against 4.09 ms for the old code in the same session (+7%,
+single runs on a shared machine). The independent verifier measured more: watching 2.94 → 3.87 ms per moment
+(+32%) in sequential runs and +13% when run side by side; replies +16% to +28%. Take 13-32% slower as the cost. The small run takes 1.0 s, against 0.8-0.9 s. Reading a tie now assembles its
+row instead of indexing it.
+
+**What remains, by size per tie (68.6 B):**
+
+- The other tie columns, 44 B: t_src and t_dst are int64, as are t_last and t_birth. int32 would save 16 B, with
+  a guard at 2^31.
+- Python caches beside the tensors: `tie_index` (a dict of 4-tuples) and the `out`/`inc` lists. These are
+  probably the next memory problem, but their size was not measured. The 4.0 GB process peak also includes
+  converting the old file on load.
+- A disk-backed store and consolidation in sleep, (c) and (d) above. Not started.
+
+**Verification notes on F25** (independent verifier; every re-run measurement reproduced exactly):
+
+- **Speaking worlds.** The sentence on them is wrong. At 120, 180 and 300 the standard error is smaller than the
+  difference (+0.075±0.050, +0.070±0.066, +0.097±0.086), and 600 (+0.033±0.020) is 1.6 SE, not an exception. No
+  checkpoint reaches 2 SE, so the conclusion stands.
+- **A cross-tie path that T9 does not see.** Born failures are computed from a rival's W+ and logged in the later
+  birth moment. Retracting the moment that taught the rival therefore leaves its mass on ties born after it (e 0.500
+  against 0.667 counterfactual in the toy). In the members worlds the gap is small.
+- **Own speech.** In conversation about 80% of born-failure mass comes from the mind's own speech (class acted,
+  trust 1), yet the core treats its own echo as saying nothing about the world when computing relief. This may lock
+  in a first habit. Before (a) is tried again as a default: leave own acts out of born failures (or weigh them down),
+  use one law for born and later failures, and repeat the teacher tests over more than one life or data order. The
+  ± values there are over questions within one deterministic life, not over lives.
+
+**Merged** into feat/zihin with both settings off, as recommended. Off is bit-identical: the digest, the run.py rows
+and the full-state digest are unchanged.
+
+**Also fixed while merging.** The F24 voices channel was named "ses", the same name as the hearing facet channel, so
+`Config(voices=True)` crashed in a session. It is now "sesler", with a session test.

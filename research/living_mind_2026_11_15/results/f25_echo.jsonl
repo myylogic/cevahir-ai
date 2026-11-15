@@ -1,0 +1,24 @@
+{"toy": "plain", "config": "speaking", "setting": "off", "y": "uyur", "y_pos": 1.5, "y_neg": 0.4, "y_e": 0.6897, "z": "koşar", "z_pos": 0.5, "z_neg": 0.0, "z_e": 0.6667, "thought": "", "reality": 0.0}
+{"toy": "plain", "config": "speaking", "setting": "a", "y": "uyur", "y_pos": 1.5, "y_neg": 0.4, "y_e": 0.6897, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "uyur", "reality": 0.69}
+{"toy": "plain", "config": "speaking", "setting": "b", "y": "uyur", "y_pos": 1.5, "y_neg": 0.5, "y_e": 0.6667, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "uyur", "reality": 0.667}
+{"toy": "plain", "config": "speaking", "setting": "ab", "y": "uyur", "y_pos": 1.5, "y_neg": 0.5, "y_e": 0.6667, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "uyur", "reality": 0.667}
+{"toy": "plain", "config": "members", "setting": "off", "y": "uyur", "y_pos": 1.5, "y_neg": 0.4, "y_e": 0.6897, "z": "koşar", "z_pos": 0.5, "z_neg": 0.0, "z_e": 0.6667, "thought": "", "reality": 0.0}
+{"toy": "plain", "config": "members", "setting": "a", "y": "uyur", "y_pos": 1.5, "y_neg": 0.4, "y_e": 0.6897, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "", "reality": 0.0}
+{"toy": "plain", "config": "members", "setting": "b", "y": "uyur", "y_pos": 1.5, "y_neg": 0.5, "y_e": 0.6667, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "", "reality": 0.0}
+{"toy": "plain", "config": "members", "setting": "ab", "y": "uyur", "y_pos": 1.5, "y_neg": 0.5, "y_e": 0.6667, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "", "reality": 0.0}
+{"toy": "question", "config": "speaking", "setting": "off", "y": "süt", "y_pos": 1.5, "y_neg": 0.4, "y_e": 0.6897, "z": "ne", "z_pos": 0.5, "z_neg": 0.0, "z_e": 0.6667, "thought": "", "reality": 0.0}
+{"toy": "question", "config": "speaking", "setting": "a", "y": "süt", "y_pos": 1.5, "y_neg": 0.4, "y_e": 0.6897, "z": "ne", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "süt içer", "reality": 0.76}
+{"toy": "question", "config": "speaking", "setting": "b", "y": "süt", "y_pos": 1.5, "y_neg": 0.5, "y_e": 0.6667, "z": "ne", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "süt içer", "reality": 0.748}
+{"toy": "question", "config": "speaking", "setting": "ab", "y": "süt", "y_pos": 1.5, "y_neg": 0.5, "y_e": 0.6667, "z": "ne", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "süt içer", "reality": 0.748}
+{"toy": "question", "config": "members", "setting": "off", "y": "süt", "y_pos": 1.5, "y_neg": 1.3804, "y_e": 0.5154, "z": "ne", "z_pos": 0.5, "z_neg": 0.2857, "z_e": 0.56, "thought": "", "reality": 0.0}
+{"toy": "question", "config": "members", "setting": "a", "y": "süt", "y_pos": 1.5, "y_neg": 1.3804, "y_e": 0.5154, "z": "ne", "z_pos": 0.5, "z_neg": 2.8857, "z_e": 0.228, "thought": "", "reality": 0.0}
+{"toy": "question", "config": "members", "setting": "b", "y": "süt", "y_pos": 1.5, "y_neg": 2.2143, "y_e": 0.4242, "z": "ne", "z_pos": 0.5, "z_neg": 3.2143, "z_e": 0.2121, "thought": "", "reality": 0.0}
+{"toy": "question", "config": "members", "setting": "ab", "y": "süt", "y_pos": 1.5, "y_neg": 2.2143, "y_e": 0.4242, "z": "ne", "z_pos": 0.5, "z_neg": 3.2143, "z_e": 0.2121, "thought": "", "reality": 0.0}
+{"toy": "read", "config": "speaking", "setting": "off", "y": "uyur", "y_pos": 1.5, "y_neg": 0.4, "y_e": 0.6897, "z": "koşar", "z_pos": 0.5, "z_neg": 0.0, "z_e": 0.6667, "thought": "", "reality": 0.0}
+{"toy": "read", "config": "speaking", "setting": "a", "y": "uyur", "y_pos": 1.5, "y_neg": 0.4, "y_e": 0.6897, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "uyur", "reality": 0.69}
+{"toy": "read", "config": "speaking", "setting": "b", "y": "uyur", "y_pos": 1.5, "y_neg": 0.5, "y_e": 0.6667, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "uyur", "reality": 0.667}
+{"toy": "read", "config": "speaking", "setting": "ab", "y": "uyur", "y_pos": 1.5, "y_neg": 0.5, "y_e": 0.6667, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "uyur", "reality": 0.667}
+{"toy": "read", "config": "members", "setting": "off", "y": "uyur", "y_pos": 1.5, "y_neg": 0.4, "y_e": 0.6897, "z": "koşar", "z_pos": 0.5, "z_neg": 0.0, "z_e": 0.6667, "thought": "koşar", "reality": 0.667}
+{"toy": "read", "config": "members", "setting": "a", "y": "uyur", "y_pos": 1.5, "y_neg": 0.4, "y_e": 0.6897, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "uyur", "reality": 0.69}
+{"toy": "read", "config": "members", "setting": "b", "y": "uyur", "y_pos": 1.5, "y_neg": 0.5, "y_e": 0.6667, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "uyur", "reality": 0.667}
+{"toy": "read", "config": "members", "setting": "ab", "y": "uyur", "y_pos": 1.5, "y_neg": 0.5, "y_e": 0.6667, "z": "koşar", "z_pos": 0.5, "z_neg": 1.5, "z_e": 0.3333, "thought": "uyur", "reality": 0.667}

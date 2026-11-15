@@ -23,7 +23,7 @@ import torch
 
 from .events import ACTED, INFERRED, REFERENCE, SENSED
 from .evidence import conviction, expectation
-from .store import ABSTRACT, ATOMIC, C_NEG, C_POS, CATEGORY, COMPOSED, EXPECT, F64, I64, RELY, SLOTTED, W_NEG, W_POS
+from .store import ABSTRACT, ATOMIC, C_NEG, C_POS, CATEGORY, COMPOSED, EXPECT, F64, I64, RELY, SLOTTED, W_NEG, W_POS, WIDE
 
 
 def add_evidence(mind, table: int, slot: int, ids: torch.Tensor, amounts: torch.Tensor,
@@ -60,7 +60,7 @@ def add_evidence1(mind, table: int, slot: int, tie: int, amount: float, relief: 
     the same order. Returns the snapped amount."""
     S = mind.S
     got = S.add1(table, slot, tie, amount)
-    if table <= W_NEG and S.views()[1][tie] == EXPECT:
+    if table <= W_NEG and S.views()[0][tie] == EXPECT:
         if relief:
             mind._gained.append((tie, got * float(mind.trust[slot])))   # one tie: (id, gain), see Mind._feel
         if slot in REFERENCE and mind.cfg.learn_trust:
@@ -72,12 +72,20 @@ def judge1(mind, table: int, tie: int, amount: float) -> None:
     """``judge`` for one tie in plain numbers (a one-element sum is that element)."""
     S = mind.S
     share = min(amount, 1.0)                                # torch.clamp(amount, max=1.0)
-    w = S.views()[0]
     for slot in range(S.P):
         if slot in REFERENCE or mind.source_tie[slot] < 0:
             continue
-        open_pos = (float(w[W_POS, tie, slot]) - float(w[C_POS, tie, slot])) * share
-        open_neg = (float(w[W_NEG, tie, slot]) - float(w[C_NEG, tie, slot])) * share
+        _, cls, ev, row, ex = S.views()                     # taken again: a write below can widen the tie
+        c = cls[tie]
+        if c == WIDE:
+            r = row[tie]
+            w_pos, w_neg, c_pos, c_neg = ex[W_POS, r, slot], ex[W_NEG, r, slot], ex[C_POS, r, slot], ex[C_NEG, r, slot]
+        elif c == slot + 1:                                 # its one class: nothing judged yet
+            w_pos, w_neg, c_pos, c_neg = ev[W_POS, tie], ev[W_NEG, tie], 0.0, 0.0
+        else:
+            w_pos = w_neg = c_pos = c_neg = 0.0
+        open_pos = (float(w_pos) - float(c_pos)) * share
+        open_neg = (float(w_neg) - float(c_neg)) * share
         if open_pos == 0.0 and open_neg == 0.0:
             continue
         open_pos = S.add1(C_POS, slot, tie, open_pos)
@@ -96,7 +104,7 @@ def judge(mind, table: int, ids: torch.Tensor, amounts: torch.Tensor) -> None:
     (its open amounts are all zero) unless a share or a held value is not finite."""
     S = mind.S
     share = torch.clamp(amounts, max=1.0)  # one full direct experience judges everything outstanding
-    held = S.t_w.index_select(1, ids)
+    held = S.w4(ids)
     open_any = ((held[W_POS] != held[C_POS]) | (held[W_NEG] != held[C_NEG])).any(0).tolist()
     finite = bool(torch.isfinite(share).all()) and bool(torch.isfinite(held).all())
     for slot in range(S.P):
@@ -116,13 +124,13 @@ def judge(mind, table: int, ids: torch.Tensor, amounts: torch.Tensor) -> None:
 
 def rows(S, table: int, ids: torch.Tensor) -> torch.Tensor:
     """The per-class values of one table for the ties ``ids`` ([n, P], the same values as S.t_w[table, ids])."""
-    return S.t_w[table].index_select(0, ids)
+    return S.w(table, ids)
 
 
 def tie_mass(mind, ids: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
     """Trust-weighted (W+, W-) of ties."""
-    S = mind.S
-    return (rows(S, W_POS, ids) * mind.trust).sum(-1), (rows(S, W_NEG, ids) * mind.trust).sum(-1)
+    w_pos, w_neg = mind.S.w2(ids)
+    return (w_pos * mind.trust).sum(-1), (w_neg * mind.trust).sum(-1)
 
 
 def _present_of(dst: torch.Tensor, occurred: Dict[int, Tuple[float, int]]) -> torch.Tensor:
@@ -158,15 +166,17 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
     acquired = None
     if cfg.general_miss and not cfg.reliability:
         acquired = torch.tensor([v for v, (intensity, _) in occurred.items() if intensity > 0.0], dtype=I64)
+    born_failures = getattr(cfg, "born_failures", False)
     for unit, a_u, grounded in mind.last_focus:
         if not grounded or a_u <= 0.0 or int(S.u_kind[unit]) & (CATEGORY | SLOTTED):
             continue
         if was_present is not None and unit not in was_present:
             continue
         record: Dict[int, list] = {}
+        rivals = None                          # F25: (targets' channels, positive rows) of the ties held before now
         if S.out.get((unit, EXPECT, 1)):
             ids, dst = S.out_ids((unit, EXPECT, 1))
-            pos_rows, neg_rows = rows(S, W_POS, ids), rows(S, W_NEG, ids)
+            pos_rows, neg_rows = S.w2(ids)
             e = expectation((pos_rows * mind.trust).sum(-1), (neg_rows * mind.trust).sum(-1), cfg.k)
             hope = mind.act_hope.get(unit)
             if hope is not None:  # an own act is an expectation of relief (changed rule, see NOTES.md)
@@ -192,18 +202,62 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
                     for d, rp, rn, m in zip(d_on.tolist(), rp_on.tolist(), rn_on.tolist(), got.tolist()):
                         record[d] = [rp, rp, rn, rn + m, slot, slot]
             S.use_ties(ids[reporting])
+            if born_failures:
+                rivals = (channel, pos_rows)   # positive evidence is not changed by the misses above
         for v, (intensity, slot) in occurred.items():
             if intensity <= 0.0:
                 continue
+            born = born_failures and S.find_tie(unit, v, EXPECT, 1) < 0
             tie = S.tie(unit, v, EXPECT, 1)
             if v not in record:
-                rp, rn = float(S.t_w[W_POS, tie].sum()), float(S.t_w[W_NEG, tie].sum())
+                rp, rn = float(S.w1(W_POS, tie).sum()), float(S.w1(W_NEG, tie).sum())
                 record[v] = [rp, rp, rn, rn, slot, slot]
             got = add_evidence1(mind, W_POS, slot, tie, g * a_u * intensity, relief=int(S.u_channel[v]) not in echo)
             record[v][1] += got
             record[v][4] = slot
+            if born and rivals is not None:
+                born_failure(mind, tie, v, rivals, record[v])
         changes[unit] = record
     induce(mind, changes, occurred, slot_of_channel)
+
+
+def born_failure(mind, tie: int, v: int, rivals, entry: list) -> None:
+    """F25: the failures a lag-1 tie X -> v born now would hold had it existed all along.
+
+    Before this moment v never followed X, or the tie would exist. Every earlier moment in which X learned what
+    comes next and v's channel reported something else gave that something positive evidence on X's tie to it, in
+    the class and with the weight (g a_X) of that moment; ``rivals`` holds those rows, read before this moment's
+    positive evidence. The full record (each such moment one failure of weight g a_X, as F14 records it, without
+    its floor and its weighting by the expectation) would hold the same amount as negative evidence on X -> v, per
+    class; the new tie starts with it, so its frequency is the frequency v has had after X and F14 governs what comes
+    later. Only targets on sense and act channels (the world, one event per moment). The amounts are marked as
+    judged in the classes that learned trust judges: they claim nothing new (each such moment is already a claim on
+    the rival's tie, open to judging there) and would otherwise be judged a second time, with a mass that grows with
+    how often X was lived. Logged like every increment, so retracting this moment removes them exactly.
+    ``entry`` is the induce record of v: the negative evidence after the moment includes them, in the class that holds
+    most of them."""
+    S = mind.S
+    ch = int(S.u_channel[v])
+    if ch < 0 or mind.ch.kind(ch) not in ("sense", "act"):
+        return
+    channel, pos_rows = rivals
+    same = channel == ch
+    if not bool(same.any()):
+        return
+    held = pos_rows[same].sum(0).tolist()          # per class: what X's other successors on this channel received
+    best, most, total = -1, 0.0, 0.0
+    for slot, amount in enumerate(held):
+        if amount <= 0.0:
+            continue
+        got = S.add1(W_NEG, slot, tie, amount)
+        if slot not in REFERENCE:
+            S.add1(C_NEG, slot, tie, got)
+        total += got
+        if got > most:
+            best, most = slot, got
+    if total > 0.0:
+        entry[3] += total
+        entry[5] = best
 
 
 def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel) -> None:
@@ -345,7 +399,7 @@ def _verdict(mind, general: int, v: int, leave_out: float = 0.0):
         return None
     best = f = total = mine = 0.0
     for t in ties:
-        w_pos, w_neg = float(S.t_w[W_POS, t].sum()), float(S.t_w[W_NEG, t].sum())
+        w_pos, w_neg = float(S.w1(W_POS, t).sum()), float(S.w1(W_NEG, t).sum())
         if int(S.t_dst[t]) == v:
             w_pos = max(0.0, w_pos - leave_out)
             f = w_pos / (w_pos + w_neg) if w_pos + w_neg > 0.0 else 0.0
@@ -399,7 +453,7 @@ def reflect(mind, budget: int = 1) -> None:
             channel = int(S.u_channel[v])
             if channel < 0 or mind.ch.kind(channel) not in ("sense", "act"):
                 continue
-            raw = float(S.t_w[W_POS, tie].sum())
+            raw = float(S.w1(W_POS, tie).sum())
             if raw > 0.0:
                 lived[v] = raw
         if not lived:
@@ -450,7 +504,7 @@ def facet_set(mind, unit: int) -> set:
     for tie in ties:
         dst = int(S.t_dst[tie])
         channel = int(S.u_channel[dst])
-        if channel >= 0 and mind.ch.kind(channel) == "facet" and float(S.t_w[W_POS, tie].sum()) > 0.0:
+        if channel >= 0 and mind.ch.kind(channel) == "facet" and float(S.w1(W_POS, tie).sum()) > 0.0:
             out.add(dst)
     cache[unit] = (len(ties), out)
     return out

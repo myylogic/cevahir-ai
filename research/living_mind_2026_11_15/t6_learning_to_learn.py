@@ -53,8 +53,8 @@ def kinds(mind) -> list:
     S, cid, out = mind.S, mind.ch.id(VOICE_CHANNEL), []
     for kind in mind.ch.symbols[cid]:
         tie = S.find_tie(mind.unit_of(VOICE_CHANNEL, kind), mind.holds, EXPECT, 0)
-        held = float(S.t_w[W_POS, tie].sum()) if tie >= 0 else 0.0
-        failed = float(S.t_w[W_NEG, tie].sum()) if tie >= 0 else 0.0
+        held = float(S.w1(W_POS, tie).sum()) if tie >= 0 else 0.0
+        failed = float(S.w1(W_NEG, tie).sum()) if tie >= 0 else 0.0
         if kind == VOICE_ALL:
             out.append([0, 0, held, failed, (held + 0.5) / (held + failed + 1.0)])
         else:
