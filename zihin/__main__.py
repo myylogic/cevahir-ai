@@ -909,12 +909,12 @@ def night_report(night, names: Dict[str, str] = None) -> List[str]:
     imagination before and after."""
     lines = []
     for chain in night["dreams"]:
-        lines.append("  rüyamda:")
+        lines.append("  rüya:")
         for d in chain:
             new = sum(1 for claim in d["claims"] if claim[3] + claim[4] == 0)
-            note = "   (yeni bir şey kurmadım, bildiğimi hatırladım)" if not new else ""
+            note = "   (yeni iddia yok: bilinen hatırlandı)" if not new else ""
             for gist in d.get("seen", []):
-                lines.append("    %s gördüm" % (names.get(gist, "bir görüntü") if names else "bir görüntü"))
+                lines.append("    görüntü yeniden yaşandı: %s" % (names.get(gist, "bir görüntü") if names else "bir görüntü"))
             if d["other"]:
                 lines.append("    (%s yerine %s): %s   [gerçeklik %.2f]%s" % (d["about"], d["other"],
                                                                           " ".join(d["words"]), d["reality"], note))
@@ -923,8 +923,8 @@ def night_report(night, names: Dict[str, str] = None) -> List[str]:
     for v, d in night["judged"]:
         lines.append("  %s: %s" % ("doğru çıktı" if v == "dogru" else "yanlış çıktı", " ".join(d["words"])))
     srt = night["sorting"]
-    lines.append("  uyandım. hayal ettiklerimden gerçek kanıtla örtüşen %.1f, çelişen %.1f, sınanmamış %d; kendi "
-                 "hayallerime güvenim %.2f -> %.2f" % (srt["true"], srt["false"], int(srt["open"]), srt["trust_before"],
+    lines.append("  uyku raporu: hayal kanıtından gerçek kanıtla örtüşen %.1f, çelişen %.1f, sınanmamış %d; hayale "
+                 "güven %.2f -> %.2f" % (srt["true"], srt["false"], int(srt["open"]), srt["trust_before"],
                                                        srt["trust"]))
     return lines
 
@@ -1195,7 +1195,7 @@ def main(argv=None) -> None:
                 reason, str(exc) or type(exc).__name__), flush=True)
             return False
         saved_at[0] = session.mind.t
-        print("  öğrendiklerim kaydedildi (%s): %s.zihin, %d an, %.0f sn" % (
+        print("  zihin kaydedildi (%s): %s.zihin, %d an, %.0f sn" % (
             reason, keep_at, session.mind.t, time.time() - started), flush=True)
         return True
 
@@ -1387,7 +1387,7 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                 elif cmd in ("kendini_gelistir", "kendini_geliştir", "improve"):
                     from .web import research, wanted_topics
                     topics = wanted_topics(session.mind, CHANNEL, int(rest) if rest.strip().isdigit() else 3)
-                    print("  merak ettiklerim: %s" % ", ".join(topics))
+                    print("  en yüksek konu puanı (ayırt edici ve az bilinen): %s" % ", ".join(topics))
                     for topic in topics:
                         report = research(session, topic)
                         print("  %s: %s yoluyla %s cümle, kazanç %s (yollar: %s)" % (
