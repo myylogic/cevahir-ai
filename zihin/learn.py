@@ -93,12 +93,12 @@ def judge(mind, table: int, ids: torch.Tensor, amounts: torch.Tensor) -> None:
 
     The four tables of the ties are read once: judging a class writes only its own checked column, after reading
     it, and the source ties (which are never judged). A class with nothing open on any of the ties is passed over
-    (its open amounts are all zero) unless a share is not finite."""
+    (its open amounts are all zero) unless a share or a held value is not finite."""
     S = mind.S
     share = torch.clamp(amounts, max=1.0)  # one full direct experience judges everything outstanding
     held = S.t_w.index_select(1, ids)
     open_any = ((held[W_POS] != held[C_POS]) | (held[W_NEG] != held[C_NEG])).any(0).tolist()
-    finite = bool(torch.isfinite(share).all())
+    finite = bool(torch.isfinite(share).all()) and bool(torch.isfinite(held).all())
     for slot in range(S.P):
         if slot in REFERENCE or mind.source_tie[slot] < 0 or (finite and not open_any[slot]):
             continue
