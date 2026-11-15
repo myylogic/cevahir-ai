@@ -954,8 +954,16 @@ for speaking (the teacher questions after the documents) it is below (a).
 **Reading.**
 
 - (a) does what it was built to do. A continuation seen once after a source lived many times starts at the frequency
-  it has had. The old ties are untouched, the worlds' generalisation is identical life for life, and retraction stays
-  exact.
+  it has had. The old ties are untouched, and retraction stays exact in the ledger sense.
+- The worlds' held-out generalisation is identical life for life, but the lives are not unchanged. The independent
+  verifier found differences in:
+  - tie counts;
+  - trust in told, lower in 6 of 6 lives;
+  - T1 c1;
+  - the T9 increments;
+  - the told first correction, which now loses (true > false 1.00 → 0.75).
+- The trust claim holds only for the born amounts themselves. In lived minds trust moves through the changed
+  behaviour (told 0.823 → 0.771 in the fresh teacher run), so the teacher comparison measures a changed trust as well.
 - The echo is gone. Thinking about X now says what followed X three times, not what followed it last. In the members
   configuration the old rule said the echo outright.
 - In conversation the effect depends on what the mind has lived.
@@ -1008,7 +1016,11 @@ structure-only ties, would save nothing here. What the measurement shows instead
   `t_w`, which is now an assembled read-only copy for old scripts and tests. Assembly selects values and does no
   arithmetic, so every downstream operation sees the same bits.
 - The digest is computed over the same values in tie order, streamed, so it is the old digest exactly.
-- `undo_last` gives the moment's rows back: every stored array, not only the values, is as before.
+- `undo_last` gives the moment's rows back and restores every value. Correction by the independent verifier: one
+  stored array is not always as before. A tie born earlier with no evidence that gets its first class in the undone
+  moment keeps that class byte (`t_cls`) after the undo, and retracting all of a tie's evidence also leaves its class
+  set. Values, rows and the digest are restored. The effect is memory only: later evidence of another class gives
+  such a tie a full row (197 B) it did not need.
 - A mind saved with the full tables is converted on load, and the manifest's digest still matches.
 
 **Exactness.**
@@ -1038,7 +1050,8 @@ The two million examples of the owner's question would be about 37 GB of core at
 about 130 GB.
 
 **Speed.** Watching cevahir3b took 4.39 ms per moment, against 4.09 ms for the old code in the same session (+7%,
-single runs on a shared machine). The small run takes 1.0 s, against 0.8-0.9 s. Reading a tie now assembles its
+single runs on a shared machine). The independent verifier measured more: watching 2.94 → 3.87 ms per moment
+(+32%) in sequential runs and +13% when run side by side; replies +16% to +28%. Take 13-32% slower as the cost. The small run takes 1.0 s, against 0.8-0.9 s. Reading a tie now assembles its
 row instead of indexing it.
 
 **What remains, by size per tie (68.6 B):**
@@ -1049,3 +1062,23 @@ row instead of indexing it.
   probably the next memory problem, but their size was not measured. The 4.0 GB process peak also includes
   converting the old file on load.
 - A disk-backed store and consolidation in sleep, (c) and (d) above. Not started.
+
+**Verification notes on F25** (independent verifier; every re-run measurement reproduced exactly):
+
+- **Speaking worlds.** The sentence on them is wrong. At 120, 180 and 300 the standard error is smaller than the
+  difference (+0.075±0.050, +0.070±0.066, +0.097±0.086), and 600 (+0.033±0.020) is 1.6 SE, not an exception. No
+  checkpoint reaches 2 SE, so the conclusion stands.
+- **A cross-tie path that T9 does not see.** Born failures are computed from a rival's W+ and logged in the later
+  birth moment. Retracting the moment that taught the rival therefore leaves its mass on ties born after it (e 0.500
+  against 0.667 counterfactual in the toy). In the members worlds the gap is small.
+- **Own speech.** In conversation about 80% of born-failure mass comes from the mind's own speech (class acted,
+  trust 1), yet the core treats its own echo as saying nothing about the world when computing relief. This may lock
+  in a first habit. Before (a) is tried again as a default: leave own acts out of born failures (or weigh them down),
+  use one law for born and later failures, and repeat the teacher tests over more than one life or data order. The
+  ± values there are over questions within one deterministic life, not over lives.
+
+**Merged** into feat/zihin with both settings off, as recommended. Off is bit-identical: the digest, the run.py rows
+and the full-state digest are unchanged.
+
+**Also fixed while merging.** The F24 voices channel was named "ses", the same name as the hearing facet channel, so
+`Config(voices=True)` crashed in a session. It is now "sesler", with a session test.
