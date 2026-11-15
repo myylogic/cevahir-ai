@@ -215,6 +215,13 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
     relational = getattr(S, "bind_repeats", False)
     shares: Dict[int, float] = {}
     members = 0.0
+    looks = None                                       # F18: the read instance's filler and its facets
+    if getattr(mind.cfg, "resemblance", False) and exclude is not None and int(S.u_kind[exclude]) & COMPOSED:
+        from .learn import facet_set, facet_similarity
+        filler = S.parts(exclude)[where[0]] if where and len(S.parts(exclude)) > where[0] else None
+        looks = (filler, facet_set(mind, filler)) if filler is not None else None
+        if looks is not None and not looks[1]:
+            looks = None
     for tie in S.inc.get((category, ABSTRACT), ()):
         x = int(S.t_src[tie])
         instance = S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts)))
@@ -225,6 +232,10 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
         if total <= 0.0:
             continue
         e_x = expectation(float((S.t_w[W_POS, tie] * mind.trust).sum()), float((S.t_w[W_NEG, tie] * mind.trust).sum()), k)
+        if looks is not None:                          # members that look like the item speak louder
+            e_x *= facet_similarity(mind, looks[0], x, looks[1])
+            if e_x <= 0.0:
+                continue
         members += e_x
         goes_on = continuations(mind, x, fixed) if relational else {}
         for v, p in own.items():

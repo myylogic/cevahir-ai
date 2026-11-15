@@ -66,6 +66,8 @@ class Config:
     proven_only: bool = False       # F10b: only generalisations with reliability > 1/2 speak (measured worse)
     next_only_present: bool = False # F13: EXPECT lag 1 is learned only by the previous context and the previous
                                     # item, not by older units still carried in the focus (no skip-gram smear)
+    resemblance: bool = False       # F18: a new item joins the categories of what it resembles (shared facets), and
+                                    # members that resemble the item read speak louder
     backoff: bool = False           # F16: an utterance under way continues along the lived sequences of its end
     bind_repeats: bool = False      # F12: a unit occurring at several positions of a tuple is one slot (variable)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units

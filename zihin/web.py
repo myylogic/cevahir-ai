@@ -290,7 +290,14 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
     mind = session.mind
     chooser = WayChooser(mind)
     way = way or chooser.choose()
-    titles = source.search(topic)
+    try:
+        titles = source.search(topic)
+    except Exception as exc:                           # a search service that refuses (key, quota, closed API)
+        if isinstance(source, Wikipedia):
+            raise
+        say("  arama servisi yanıt vermedi (%s); Vikipedi'ye bakıyorum" % type(exc).__name__)
+        source = Wikipedia()
+        titles = source.search(topic)
     if not titles:
         return {"topic": topic, "read": [], "note": "bulunamadı"}
     words_topic = words(topic)
@@ -303,9 +310,12 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
     budget = WAYS[way]
     for title in titles:
         text = source.extract(title)
-        say("  okunuyor: %s  (%s)" % (title, source.address(title)))
+        label = getattr(source, "found", {}).get(title, (title,))[0] if hasattr(source, "found") else title
+        say("  okunuyor: %s  (%s)" % (label, source.address(title)))
         read_titles.append(title)
-        for sentence in sentences(re.sub(r"=+[^=]+=+", " ", text)):
+        if isinstance(source, Wikipedia):              # Wikipedia section headings (== ... ==), one line each
+            text = re.sub(r"(?m)^=+[^=\n]+=+\s*$", " ", text)
+        for sentence in sentences(text):
             if lived >= budget:
                 break
             session.listen(sentence, IMITATED)

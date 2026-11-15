@@ -23,7 +23,7 @@ import torch
 
 from .events import ACTED, INFERRED, REFERENCE, SENSED
 from .evidence import conviction, expectation
-from .store import ABSTRACT, C_NEG, C_POS, CATEGORY, COMPOSED, EXPECT, F64, I64, RELY, SLOTTED, W_NEG, W_POS
+from .store import ABSTRACT, ATOMIC, C_NEG, C_POS, CATEGORY, COMPOSED, EXPECT, F64, I64, RELY, SLOTTED, W_NEG, W_POS
 
 
 def add_evidence(mind, table: int, slot: int, ids: torch.Tensor, amounts: torch.Tensor,
@@ -335,6 +335,56 @@ def learn_value(mind, percepts) -> None:
             add_evidence1(mind, W_POS, slot, S.tie(step_unit, unit, EXPECT, 2), g * intensity)
 
 
+def facet_set(mind, unit: int) -> set:
+    """The facets an item has been perceived with (its lag-0 ties to units of facet channels, positive evidence)."""
+    S = mind.S
+    out = set()
+    for tie in S.out.get((unit, EXPECT, 0), []):
+        dst = int(S.t_dst[tie])
+        channel = int(S.u_channel[dst])
+        if channel >= 0 and mind.ch.kind(channel) == "facet" and float(S.t_w[W_POS, tie].sum()) > 0.0:
+            out.add(dst)
+    return out
+
+
+def facet_similarity(mind, a: int, b: int, fa: set = None) -> float:
+    """Jaccard overlap of the facet sets of two items (0 when either has none)."""
+    fa = facet_set(mind, a) if fa is None else fa
+    fb = facet_set(mind, b)
+    if not fa or not fb:
+        return 0.0
+    return len(fa & fb) / float(len(fa | fb))
+
+
+def join_by_resemblance(mind, unit: int, slot: int, neighbours: int = 20) -> None:
+    """F18: a newly perceived item joins the categories of the items it resembles. Candidates are the items that
+    share facets with it; for each category of those items the similarity of the nearest member is the evidence
+    (provenance inferred) that the new item is an instance of it. Nothing is said about what the facets mean."""
+    from .form import categories_of
+    S = mind.S
+    mine = facet_set(mind, unit)
+    if not mine:
+        return
+    shared = {}
+    for f in mine:
+        for tie in S.out.get((f, EXPECT, 0), []):
+            x = int(S.t_dst[tie])
+            if x != unit and int(S.u_kind[x]) & ATOMIC:
+                shared[x] = shared.get(x, 0) + 1
+    best = {}
+    for x, _ in sorted(shared.items(), key=lambda kv: -kv[1])[:neighbours]:
+        sim = facet_similarity(mind, unit, x, mine)
+        if sim <= 0.0:
+            continue
+        for category, e in categories_of(mind, x):
+            if e > 0.5 and sim > best.get(category, 0.0):
+                best[category] = sim
+    from .events import INFERRED
+    for category, sim in best.items():
+        if S.find_tie(unit, category, ABSTRACT, 0) < 0:
+            add_evidence1(mind, W_POS, INFERRED, S.tie(unit, category, ABSTRACT, 0), sim)
+
+
 def learn_facets(mind, items: List[int], facets: List[Tuple[int, float, int]], slot: int) -> None:
     """Facets (parts or features of an item on a channel of kind "facet", e.g. subword pieces of a word, later
     features of a seen object) hold together with the items of the same moment: EXPECT lag 0 in both directions,
@@ -342,9 +392,12 @@ def learn_facets(mind, items: List[int], facets: List[Tuple[int, float, int]], s
     in the next moment like any percept (learn_follow), so a context can expect a suffix of a word it never met."""
     g = mind.knob["gain"]
     for item in items:
+        new = float(mind.S.u_use[item]) <= 1.0              # met for the first time (use counts this moment)
         for facet, intensity, _ in facets:
             add_evidence1(mind, W_POS, slot, mind.S.tie(item, facet, EXPECT, 0), g * intensity)
             add_evidence1(mind, W_POS, slot, mind.S.tie(facet, item, EXPECT, 0), g * intensity)
+        if new and mind.cfg.resemblance:
+            join_by_resemblance(mind, item, slot)
 
 
 def learn_together(mind, focus: List[Tuple[int, float, bool]], slot: int) -> None:

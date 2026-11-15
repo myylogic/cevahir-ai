@@ -12,10 +12,13 @@ Commands (Turkish, with English aliases):
                                     .pdf with pypdf): sentences of documents as speech of others (imitated)
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
     !kim <ad>            / !who     who is talking now (perceived at the start of every utterance)
+    !gor <resim>         / !see     show an image with your next utterance (it is seen at its start), e.g.
+                                    !gor ben.jpg  then  "ben buyum"; later  !gor baska.jpg  then  "bu kim"
     !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
                                     reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
     !kendini_tani [n]    / !self    lessons about itself (true things told to it), n times
-    !arastir <konu>      / !research  on your command: look the topic up in Wikipedia and read it (pages are printed)
+    !arastir <konu>      / !research  on your command: search the web (Google Custom Search if GOOGLE_API_KEY and
+                                    GOOGLE_CSE_ID are set, otherwise Wikipedia) and read what is found (pages printed)
     !kendini_gelistir [n] / !improve  the mind picks n topics it wants to know (high drive) and researches them; it
                                     measures what each way of reading gave it and chooses its way by that
     !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
@@ -56,7 +59,8 @@ def _log_path() -> str:
 
 
 VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True,
-                                               neg_floor=1.0 / 14, backoff=True, log_path=_log_path()),
+                                               neg_floor=1.0 / 14, backoff=True, resemblance=True,
+                                               log_path=_log_path()),
             "members": lambda: Config.changed(support="members"), "changed": Config.changed}
 
 
@@ -141,6 +145,7 @@ def profile(mind: Mind) -> str:
 FACETS = "parca"
 TURN, TURN_END = "sira", "⏎"
 PERSON, SOMEONE = "kisi", "biri"
+from .gorme import EYE, LOOK
 TONE = "ton"                          # how an utterance ends (? ! .) is perceived with its end, like intonation
 FINAL = (".", "?", "!", "…")     # who is speaking is perceived (like a face or a voice); "biri" = someone unknown          # the end of someone's utterance (Enter) is perceived, like a pause in speech
 VALUE = "deger"
@@ -161,6 +166,9 @@ class Session:
         mind.add_channel(TURN, "sense")
         mind.add_channel(PERSON, "facet")       # who speaks accompanies the words; it is not part of the sentence
         mind.add_channel(TONE, "facet")
+        mind.add_channel(EYE, "sense")          # a seen thing is present in the episode, its aspects are facets
+        mind.add_channel(LOOK, "facet")
+        self.view = None                        # an image shown for the next utterance: (gist, facets)
         self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
         self.open_turn = False                # the mind has just answered; feedback may still come
 
@@ -189,6 +197,10 @@ class Session:
         theta = self.mind.knob["theta"]
         self.mind.knob["theta"] = 1e9
         try:
+            if self.view is not None:                       # the image shown with this utterance is seen first
+                gist, facets = self.view
+                self.view = None
+                self.mind.step([Event(EYE, gist, SENSED)] + [Event(LOOK, f, SENSED) for f in facets])
             for symbol in self.body(text):
                 self.mind.step(self.events(symbol, prov, speaker))
         finally:
@@ -622,6 +634,11 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                             report.get("ways")))
                 elif cmd in ("his", "feel"):
                     print(feelings(session.mind))
+                elif cmd in ("gor", "gör", "see"):
+                    from .gorme import features
+                    gist, facets = features(rest.strip())
+                    session.view = (gist, facets)
+                    print("  görüyorum (%d yön); bir sonraki sözün bu resimle birlikte algılanacak" % len(facets))
                 elif cmd in ("dusun", "düşün", "think"):
                     from .dusunce import think, topic_of
                     topic = rest.strip() or topic_of(session)
