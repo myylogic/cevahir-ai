@@ -185,9 +185,11 @@ class Session:
         mind.add_channel(SOUND, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
         self.curious = True                     # the curiosity reflex (T4) is on in conversation
-        from .mind import SELF_CHANNEL
+        from .mind import INNER_CHANNEL, SELF_CHANNEL
         if not mind.ch.has(SELF_CHANNEL):       # minds born before the self unit existed get it now
             mind.add_channel(SELF_CHANNEL, "context")
+        if not mind.ch.has(INNER_CHANNEL):      # and the inner sense of not knowing
+            mind.add_channel(INNER_CHANNEL, "sense")
         self.hearing = None                     # a sound heard with the next utterance: (gist, facets)
         self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
         self.open_turn = False                # the mind has just answered; feedback may still come
@@ -272,17 +274,40 @@ class Session:
         self.mind.step([])
 
     def lessons_about_itself(self, times: int = 1) -> int:
-        """L8: true things about the mind, told to it (provenance told). Returns how many utterances were lived."""
-        from .kendilik import LESSONS
+        """L8: true things about the mind, told to it (provenance told), and L7: how one says one does not know, told
+        at the moment it has itself felt that it does not know. Returns how many utterances were lived."""
+        from .kendilik import LESSONS, not_knowing_lessons
         n = 0
         for _ in range(times):
             for question, answer in LESSONS:
                 self.watch(question, answer, prov=TOLD)
                 n += 1
+            for question, answer in not_knowing_lessons():
+                self.not_knowing_lesson(question, answer)
+                n += 1
         return n
-        self.history.append((len(self.history) + 1, "[izledi] %s || %s" % (first, answer), []))
 
-    def reply(self, text: str, limit: int = 30) -> str:
+    def not_knowing_lesson(self, question: str, answer: str) -> None:
+        """Someone asks; the turn is the mind's and it finds nothing to say; a moment passes and it feels that it does
+        not know; right then it is told what one says (the answer is heard in the mind's role)."""
+        from .mind import INNER_CHANNEL
+        self.listen(question, TOLD, speaker=SOMEONE)
+        self.end_of_turn(TOLD, listening=False, tone=self.tone(question))
+        self.mind.pending = [e for e in self.mind.pending if e.channel != CHANNEL]   # whatever it began, it lets go
+        self.mind.step([])                                   # the moment passes in silence: not knowing is felt
+        felt = any(e.channel == INNER_CHANNEL for e in self.mind.pending)
+        theta = self.mind.knob["theta"]
+        self.mind.knob["theta"] = 1e9
+        try:
+            self.mind.step([])                               # ... and perceived
+        finally:
+            self.mind.knob["theta"] = theta
+        if felt:
+            self.listen(answer, TOLD)                        # what one says then
+            self.end_of_turn(TOLD, tone=self.tone(answer))
+        self.mind.step([])
+
+    def reply(self, text: str, limit: int = 80) -> str:
         """You speak (told), then the mind may speak: its own acts, one symbol per moment, until silence.
 
         The turn passes to the mind with your last word: it decides in that very moment (the context of your
@@ -300,12 +325,17 @@ class Session:
         else:                                            # older minds: the turn passes with your last word
             self.listen(" ".join(symbols[:-1]), TOLD)
             acts = self.mind.step(self.events(symbols[-1], TOLD))
+        knew = bool(acts)
+        if not acts and self.turns:                      # it does not know at once: a moment passes, then it feels
+            acts = self.mind.step([])                    # its not knowing (L7); what it says then is its own
+            if not acts:
+                acts = self.mind.step([])
         said: List[str] = []
         while acts and len(said) < limit:
             said += [str(e.symbol) for e in acts if e.channel == CHANNEL]
             acts = self.mind.step([])                    # the echo of its own act arrives here
-        if not said and self.curious:
-            said = self.wonder(text, before)
+        if not knew and self.curious:                    # what it did not know it asks about (T4)
+            said += self.wonder(text, before)
         self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
         self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
         return " ".join(said) if said else "(sessiz)"
