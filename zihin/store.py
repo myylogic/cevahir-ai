@@ -32,7 +32,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import torch
 
-from .evidence import EXACT_LIMIT, GRID, quantize, q
+from .evidence import EXACT_LIMIT, GRID, expectation, quantize, q
 
 EXPECT, PART, ABSTRACT = 0, 1, 2
 RELY = 3  # self-tie g -> g: how well generalisation g has predicted what its instances lived (F9)
@@ -404,6 +404,91 @@ class Substance:
     def w4(self, ids: torch.Tensor) -> torch.Tensor:
         """[4, n, P]: all four tables for the ties ``ids``."""
         return self.w(W_POS, ids, 4)
+
+    # Fused reads: what callers compute from ``w2`` / ``w1`` rows, bit for bit, without assembling the rows. A one-class
+    # tie's row is zero outside its class, so (row * trust).sum(-1) is ev * trust[class] plus zeros; adding 0.0 gives
+    # exactly that sum (it turns -0.0 into +0.0, as the zeros do). Full rows keep the row reduction. Valid for a trust
+    # vector of finite values without a sign bit (every trust the mind uses); any other trust takes the rows.
+    def _fusable(self, trust: torch.Tensor):
+        tr = trust.numpy() if isinstance(trust, torch.Tensor) else np.asarray(trust, dtype=np.float64)
+        if tr.shape != (self.P,) or tr.dtype != np.float64 or np.signbit(tr).any() or not np.isfinite(tr).all():
+            return None
+        lut = np.zeros(WIDE + 1)
+        lut[1:self.P + 1] = tr
+        return lut
+
+    def _fused(self, ids: torch.Tensor, trust, total: bool):
+        i = ids.numpy()
+        lut = self._fusable(trust)
+        if lut is None:
+            return None
+        v = self._np()
+        c = v.cls[i]
+        tr = lut[c]
+        ev = v.ev[:, i]
+        if total:
+            out = [(ev[0] + ev[1]) * tr + 0.0]
+        else:
+            out = [ev[0] * tr + 0.0, ev[1] * tr + 0.0]
+        if self.n_rows > 1:
+            wide = (c == WIDE).nonzero()[0]
+            if wide.shape[0]:
+                rows = v.row[i[wide]]
+                t = trust if isinstance(trust, torch.Tensor) else torch.as_tensor(trust, dtype=F64)
+                pos, neg = torch.from_numpy(v.ex[W_POS, rows]), torch.from_numpy(v.ex[W_NEG, rows])
+                if total:
+                    out[0][wide] = ((pos + neg) * t).sum(-1).numpy()
+                else:
+                    out[0][wide] = (pos * t).sum(-1).numpy()
+                    out[1][wide] = (neg * t).sum(-1).numpy()
+        return [torch.from_numpy(x) for x in out]
+
+    def mass2(self, ids: torch.Tensor, trust: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Trust-weighted (W+, W-) of the ties ``ids``: (w2[0] * trust).sum(-1), (w2[1] * trust).sum(-1)."""
+        out = self._fused(ids, trust, False)
+        if out is None:
+            pos, neg = self.w2(ids)
+            return (pos * trust).sum(-1), (neg * trust).sum(-1)
+        return out[0], out[1]
+
+    def mass_total(self, ids: torch.Tensor, trust: torch.Tensor) -> torch.Tensor:
+        """Trust-weighted W of the ties ``ids``: ((w2[0] + w2[1]) * trust).sum(-1)."""
+        out = self._fused(ids, trust, True)
+        if out is None:
+            pos, neg = self.w2(ids)
+            return ((pos + neg) * trust).sum(-1)
+        return out[0]
+
+    def raw2(self, ids: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Raw (not trust-weighted) W+ and W- of the ties ``ids``: w2[0].sum(-1), w2[1].sum(-1)."""
+        i = ids.numpy()
+        v = self._np()
+        c = v.cls[i]
+        ev = v.ev[:, i] + 0.0                    # a one-class row sums to its value (+0.0 for -0.0)
+        if self.n_rows > 1:
+            wide = (c == WIDE).nonzero()[0]
+            if wide.shape[0]:
+                rows = v.row[i[wide]]
+                ev[0][wide] = torch.from_numpy(v.ex[W_POS, rows]).sum(-1).numpy()
+                ev[1][wide] = torch.from_numpy(v.ex[W_NEG, rows]).sum(-1).numpy()
+        return torch.from_numpy(ev[0]), torch.from_numpy(ev[1])
+
+    def mass1(self, tie: int, trust: torch.Tensor) -> Tuple[float, float]:
+        """float((w1(W_POS, tie) * trust).sum()), float((w1(W_NEG, tie) * trust).sum())."""
+        v = self._np()
+        c = int(v.cls[tie])
+        lut = self._fusable(trust) if c != WIDE else None
+        if lut is not None:
+            if c == 0:                           # a row of zeros
+                return 0.0, 0.0
+            t = float(lut[c])
+            return float(v.ev[W_POS, tie]) * t + 0.0, float(v.ev[W_NEG, tie]) * t + 0.0
+        return float((self.w1(W_POS, tie) * trust).sum()), float((self.w1(W_NEG, tie) * trust).sum())
+
+    def expect(self, ids: torch.Tensor, trust: torch.Tensor, k: float = 1.0) -> torch.Tensor:
+        """expectation((w2[0] * trust).sum(-1), (w2[1] * trust).sum(-1), k)."""
+        w_pos, w_neg = self.mass2(ids, trust)
+        return expectation(w_pos, w_neg, k)
 
     def w1(self, table: int, tie: int) -> torch.Tensor:
         """[P]: the per-class values of one table for one tie (a new tensor)."""
