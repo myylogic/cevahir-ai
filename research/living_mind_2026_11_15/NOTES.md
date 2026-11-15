@@ -1442,3 +1442,39 @@ numbers only; an independent verifier re-scored every answer and retrained two m
   epoch cap was lowered from 24 to 20 after a restart.
 - Memory and time on the same machine: Zihin peaked at 1.85 GB living and 1.91 GB answering (753 ms per answer on a
   loaded machine); the Transformers at 0.94–1.83 GB training and 0.54–0.57 GB answering (39–255 ms).
+
+## Memory: compact indices and a day store merged in sleep (2026-11-15)
+
+The memory map above found that 78–87% of a loaded mind's RAM was Python index objects. Four changes to the store
+replace them with compact forms. Every one is exact: the same lookups return the same ids in the same order, so
+every result is bit-identical (17 configurations of the lesson-free harness, and cevahir_ilk_nefes, cevahir2 and
+cevahir3b compared moment by moment over 60 watched dialogues and 3 replies; tests for each step).
+
+1. **A tie's key is one packed integer** (`tie_key`) instead of a 4-tuple, and **an adjacency list is an array of
+   32-bit ids** instead of a list of Python ints (4 bytes per id against about 40).
+2. **Frame keys are one bytes object** (`frame_key`: the slot's positions as a bit mask, the masked parts as 32-bit
+   ints) instead of nested tuples of Python ints.
+3. **Arrays grow by an eighth** of their capacity instead of doubling, so up to half of every array is no longer left
+   empty, and a loaded mind's tie arrays no longer double at its first new tie.
+4. **The tie lookup is a long-term store and a day store.** Per form and lag, the long-term store keeps the keys
+   src·2^31 + dst sorted, with their ids, in two numpy arrays (12 bytes a tie, against about 100 for a dict entry);
+   the ties made since the last merge are in a small dict. A lookup asks the day store, then bisects the long-term
+   keys. The day is merged in sleep, when the mind is saved, or when it grows past an eighth of the long-term store.
+   This is the counterpart, in memory, of consolidating the day in sleep: what was learned today is found at once, and
+   sleep sorts it into the long-term store.
+
+Minds saved before are converted on load. RAM of a loaded mind over the Python and torch base (about 514 MB), after a
+fresh load of a file saved in each form:
+
+| | this morning | 1 | + 2 | + 3, 4 |
+|---|---|---|---|---|
+| cevahir2 (1.33M ties) | 717 MB | 554 MB | 441 MB | 319 MB |
+| cevahir3b (3.25M ties) | 1784 MB | 1391 MB | 1127 MB | 762 MB |
+| loading cevahir3b | 6.7 s | 4.8 s | 4.2 s | 2.3 s |
+
+- cevahir3b now needs about 234 bytes of RAM per tie, against 549 this morning. A whole 60-dialogue session with it
+  peaks at about 1.5 GB of process memory with a file saved in the new form (4.0 GB this morning).
+- What remains: the tensors (about 220 MB of evidence and columns in cevahir3b, plus growth room), the frame table's
+  bytes keys and values, the composed units' tuple index, the per-list array headers, and torch's own 484 MB on import.
+- Not yet built: the dormancy certificate (reading only the ties that can still change, from the one rule), and a
+  memory-mapped file in which the long-term store stays on disk and only the region a moment reads comes into RAM.

@@ -220,9 +220,12 @@ At each moment, roughly each word, the mind lives these steps:
   million ties. The One-Origin Row then cost 13–32%: about 3.9–4.4 ms per moment on the mind with 3.25 million ties
   (times are indicative; the machine was shared). Both changes were checked by comparing the substance digest on the
   small public run, in 17 configurations and on the large minds.
-- **Open problem.** Memory grows linearly with lived data, at about 11 ties per moment, and the process of the
-  3.25-million-tie mind holds about 4 GB, most of it outside the tie evidence. The road to millions of examples, a
-  disk-backed store and consolidation in sleep, is planned in the notes.
+- **Compact indices and a day store.** The indices beside the evidence were Python objects, 78–87% of a loaded
+  mind's RAM. They are now packed keys, 32-bit id arrays, and a tie lookup kept as a long-term store with a day store
+  of the ties made since, merged in sleep (exact; the same results bit for bit). A loaded mind with 3.25 million ties
+  went from 1784 MB to 762 MB beyond Python and torch, about 234 bytes per tie.
+- **Open problem.** Memory still grows linearly with lived data, at about 11 ties per moment. The next steps, reading
+  only the ties that can still change and a memory-mapped long-term store on disk, are planned in the notes.
 
 ## 10. Compared with a Transformer
 

@@ -206,9 +206,12 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   zihinde 3.2–3.5 ms. Tek Köken Satırı bunun ardından %13–32 maliyet getirdi: 3.25 milyon bağlı zihinde an başına
   yaklaşık 3.9–4.4 ms (süreler yol göstericidir; makine paylaşımlıydı). İki değişiklik de küçük açık koşuda, 17
   ayarda ve büyük zihinlerde öz özetleri karşılaştırılarak denetlendi.
-- **Açık sorun:** bellek yaşanmış veriyle doğrusal büyür; an başına yaklaşık 11 bağ oluşur. 3.25 milyon bağlı
-  zihnin süreci yaklaşık 4 GB tutar ve bunun çoğu bağ kanıtının dışındadır. Milyonlarca örneğe giden yol (diske
-  dayalı depo, uykuda pekiştirme) notlarda planlıdır.
+- **Sıkı indeksler ve gün deposu:** kanıtın yanındaki indeksler Python nesneleriydi, yüklenmiş bir zihnin RAM'inin
+  %78–87'si. Artık paketlenmiş anahtarlar, 32 bitlik kimlik dizileri ve uzun süreli depo ile o günden beri kurulan
+  bağların gün deposu olarak tutulan, uykuda birleştirilen bir bağ araması (kesin; sonuçlar bit bit aynı). 3.25 milyon
+  bağlı yüklenmiş bir zihin Python ve torch dışında 1784 MB'tan 762 MB'a indi, bağ başına yaklaşık 234 bayt.
+- **Açık sorun:** bellek hâlâ yaşanmış veriyle doğrusal büyür; an başına yaklaşık 11 bağ oluşur. Sonraki adımlar,
+  yalnız hâlâ değişebilecek bağları okumak ve diske eşlenmiş bir uzun süreli depo, notlarda planlıdır.
 
 ## 10. Transformer ile karşılaştırma
 

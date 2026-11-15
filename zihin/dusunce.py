@@ -417,4 +417,7 @@ def sleep(session, cycles: int = 3) -> Dict[str, object]:
             record["said"] = v
             judged.append((v, record))
     mind.nights = getattr(mind, "nights", 0) + 1
+    index = getattr(mind.S, "tie_index", None)
+    if hasattr(index, "merge"):
+        index.merge()                                  # the day's ties are consolidated into the long-term store
     return {"dreams": dreams, "judged": judged, "sorting": sorting}
