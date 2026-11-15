@@ -347,3 +347,98 @@ older convention, kept by the session). It is a private mind and is not in the r
 - A self question can be answered with the answer others gave in the dialogues it read (a city), and in a long
   session the same question can meet hesitation.
 - Dreams are still shallow constructions.
+
+## T8, second form: imagination that reasons by a shared stem (2026-11-15)
+
+`dusunce.infer`. The mind thinks about X. For a word of that thought whose stem other lived words share, it thinks
+about such a word W and carries what follows W over to X.
+
+- Example: "kedi bir hayvandır" and "hayvanlar nefes alır ve büyür" give "kedi nefes alır ve büyür".
+- Stems come from the repository's tokenizer infrastructure: the morphological root ("kök:") and the first two
+  syllables of a longer word ("gövde:", added to the word pieces). The morphology alone over-stems or does not split
+  ("kedi" → "ke"; "hayvandır" unsplit). Hay-van-dır and hay-van-lar share "hayvan" by syllables.
+- The construction is scored for reality from lived evidence only. A claim nothing lived supports stays near one
+  half, so it is a hypothesis. It is lived as imagined and kept as a dream, so life later judges it (F22).
+- Dreams now reason first and fall back to analogy; `!dusun` shows the inference too.
+
+Test (`tests/evolution/test_zihin_sleep.py`): on the toy above, the inference carries "nefes alır" over to "kedi"
+with reality between 1/2 and 3/4, and a later "kedi nefes alır" does not refute it.
+
+**Limit, seen on the large private mind.** A two-syllable stem shared by chance makes a false mate ("bilgi-sayar" and
+"bilgi-ner"), and the carried thought is then nonsense ("kuantum , öğrenmek isterim ."). So inference is used only
+in imagination (dreams and `!dusun`), where life judges it, and never in what the mind says as an answer.
+A better stem relation (shared contexts as well as shared form) is open.
+
+## T-code, first test: learning to write code by its consequences (2026-11-15)
+
+The owner wants the mind to learn to write code. The first measurable step is `t_code.py`, with results in
+`results/t_code.jsonl`.
+
+**Setup.** There are six tiny function heads ("topla a b", "kare x", ...), each with three completions, one correct.
+The mind first watches others write completions. The most common one it sees is wrong (3×), the correct one once and
+the other wrong one once, so imitation alone writes wrong code. Then, in rounds, the head is said to it and it writes
+a completion. The function is actually run against a test, and the result comes back as the value signal "iyi" or
+"kötü" (F15/L5). Nothing about code is in the core.
+
+**Results** (share of passing completions per round, mean of 3 seeds, 8 rounds):
+
+| condition | round 1 | rounds 2-8 |
+|---|---|---|
+| with consequences | 0 | 0.11 |
+| without (control) | 0 | 0 |
+
+**Diagnosis.**
+
+- Where the wrong completion's punishment leaves one alternative leading, the mind switches to the correct
+  completion and keeps it (2 of 6 tasks in a seed).
+- Where the remaining alternatives are equally supported, the F19 race lets nothing lead. The mind writes only the
+  shared first token and then stays silent.
+- Silence is punished as well, so it never tries the other completions: there is no exploration.
+
+**Next, designed but not built.** Hesitation should end in a try, preferring the alternative whose consequences are
+least known (information-seeking), with the tie broken deterministically. The same mechanism would let hesitation in
+conversation end in an answer.
+
+## Exploration: hesitation ends in a try, and code is learned from its tests (2026-11-15)
+
+`act._explore`, `Config.explore` (on for speaking minds).
+
+**When the silence is hesitation.** It is hesitation when the F19 race lets nothing lead but some alternative is well
+supported, meaning it would have been chosen alone: 2(e − 1/2)T ≥ θ. Nothing well supported is not hesitation; it is
+not knowing (L7).
+
+**When a try is made.** Only where it can teach something:
+
+- the mind has just been called on (the last thing in the episode is a perceived event, the turn end); or
+- good or bad was already met on these paths, or in this very situation.
+
+In the middle of its own utterance with nothing at stake it does not wander. An ungated first version did wander:
+it babbled on in conversation, and held-out exact answers fell from 10 to 5 of 60.
+
+**What is tried.**
+
+- Among the well supported alternatives whose known consequences are not bad, the one whose consequences it knows
+  least: the evidence on its path's value ties, where a path never taken knows nothing.
+- If every well supported alternative has led to bad, and only then, anything else it has lived after this (e > 1/10).
+- The try is lived like any act, so its consequence teaches.
+
+**T-code with exploration** (`results/t_code.jsonl`; passing completions per round, mean of 3 seeds):
+
+| condition | r1 | r2 | r3 | r4-r8 |
+|---|---|---|---|---|
+| consequences + exploration | 0 | 0.39 | 0.72 | **1.0** |
+| exploration, no consequences | 0 | 0 | 0 | 0 |
+| consequences, no exploration | 0 | 0.11 | 0.11 | 0.11 |
+
+From imitating wrong code, the mind reaches passing code for all six tasks by round 4, learning only from the
+result of running its own code. Each task follows the same course: wrong, the other wrong, correct, kept. Neither
+the consequences nor the exploration does this alone.
+
+**In conversation.** A self question that met hesitation at the start of the turn ("nerede yaşıyorsun ?") is now
+answered from what it was told ("bir bilgisayarda yaşıyorum ."). Held-out teacher questions are unchanged: 17% exact,
+F1 0.38, 23% not knowing.
+
+Tests: `tests/evolution/test_zihin_explore.py`, including the code test at 4 rounds.
+
+**Limit.** The tasks are tiny: three alternatives and a decisive second token. Writing new code means composing
+sequences nobody showed it. That needs imagination and analogy (T8) working with consequences, and it is open.

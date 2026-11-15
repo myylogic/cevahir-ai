@@ -62,7 +62,7 @@ Betik engellenirse: `powershell -ExecutionPolicy Bypass -File .\cevahir.ps1`. T�
 | `!uyu [n]` | uyku: n rüya görür, sonra hayallerini ayıklar; daha önceki rüyalarından hangilerinin doğru ya da yanlış çıktığını ve kendi hayallerine güveninin nasıl değiştiğini söyler |
 | `!arastir <konu>` | açık talimatınızla internetten okumak (Google Custom Search anahtarı tanımlıysa Google, değilse Vikipedi); okuduğu sayfalar yazılır |
 | `!kendini_gelistir [n]` | merak ettiği n konuyu kendisi seçip araştırır; okuma yollarından hangisinin daha çok öğrettiğini ölçer ve ona göre seçer |
-| `!oku <dosya/klasör> [en çok cümle]` | belgeleri okumak (.txt .md .docx .pdf, .json/.tsv diyaloglar) |
+| `!oku <dosya/klasör> [en çok cümle]` | belgeleri okumak (.txt .md .docx .pdf, .json/.tsv diyaloglar; kaynak kod da satır satır bir dil gibi okunur: .py .js .ps1 …, örn. `!oku zihin` kendi kodunu okur) |
 | `!izle <söz> \|\| <karşılık>` | iki kişinin konuşmasını izlemek (taklitle öğrenme) |
 | `!kendini_tani [n]` | kendisi hakkındaki doğru bilgileri ona anlatmak |
 | `!unut <no>` | bu oturumda söylediğiniz bir şeyi çekirdekten tam olarak geri almak (`!gecmis` numaraları gösterir) |

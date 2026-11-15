@@ -68,7 +68,7 @@ def _log_path() -> str:
 
 VARIANTS = {"speaking": lambda: Config.changed(support="members", bind_repeats=True, next_only_present=True,
                                                neg_floor=1.0 / 14, backoff=True, resemblance=True, race=True,
-                                               situations=True, log_path=_log_path()),
+                                               situations=True, explore=True, log_path=_log_path()),
             "members": lambda: Config.changed(support="members"), "changed": Config.changed}
 
 
@@ -108,10 +108,14 @@ def sentences(text: str) -> List[str]:
     return [p.strip() for p in parts if len(words(p)) >= 2]
 
 
+CODE = (".py", ".js", ".ts", ".java", ".c", ".h", ".cpp", ".cs", ".go", ".rs", ".ps1", ".sh", ".yml", ".yaml",
+        ".toml", ".ini", ".cfg", ".html", ".css", ".sql")      # source code is read as a language too, line by line
+
+
 def read_document(path: str) -> str:
     """Plain text of a document. .docx needs python-docx, .pdf needs pypdf (only if such files are present)."""
     low = path.lower()
-    if low.endswith((".txt", ".md", ".tsv", ".csv")):
+    if low.endswith((".txt", ".md", ".tsv", ".csv") + CODE):
         with open(path, encoding="utf-8", errors="replace") as f:
             return f.read()
     if low.endswith(".docx"):
@@ -507,7 +511,9 @@ class Session:
             if not text:
                 skipped.append(os.path.basename(name))
                 continue
-            for i, sentence in enumerate(sentences(text)):
+            lines = [ln.strip() for ln in text.splitlines() if len(words(ln)) >= 2] if name.lower().endswith(CODE) \
+                else sentences(text)                     # code: each line is an utterance of that language
+            for i, sentence in enumerate(lines):
                 if cap and i >= cap:
                     break
                 self.listen(sentence, IMITATED)
@@ -586,7 +592,10 @@ def night_report(night, names: Dict[str, str] = None) -> List[str]:
             note = "   (yeni bir şey kurmadım, bildiğimi hatırladım)" if not new else ""
             for gist in d.get("seen", []):
                 lines.append("    %s gördüm" % (names.get(gist, "bir görüntü") if names else "bir görüntü"))
-            if d["other"]:
+            if d["other"] and d.get("kind") == "çıkarım":
+                lines.append("    (%s üzerinden çıkarım): %s   [gerçeklik %.2f]%s" % (d["other"], " ".join(d["words"]),
+                                                                              d["reality"], note))
+            elif d["other"]:
                 lines.append("    (%s yerine %s): %s   [gerçeklik %.2f]%s" % (d["about"], d["other"],
                                                                           " ".join(d["words"]), d["reality"], note))
             else:
@@ -953,12 +962,16 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     if not topic:
                         print("  düşünecek bir konu yok")
                     else:
-                        from .dusunce import imagine
+                        from .dusunce import frequent_words, imagine, infer
                         thought, construction, reality, other = imagine(session, topic)
                         print("  (iç ses, %s): %s" % (topic, " ".join(thought) or "…"))
                         if construction:
                             print("  (hayal: %s da/de böyle mi?): %s   [gerçeklik %.2f]" % (
                                 other, " ".join(construction), reality))
+                        _, inferred, certainty, mate = infer(session, topic, frequent=frequent_words(session.mind))
+                        if inferred:
+                            print("  (çıkarım, %s üzerinden): %s   [gerçeklik %.2f]" % (
+                                mate, " ".join(inferred), certainty))
                 elif cmd in ("kim", "who"):
                     if rest.strip():
                         session.partner = lower_tr(rest.strip()).split()[0]

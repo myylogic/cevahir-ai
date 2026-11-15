@@ -48,14 +48,13 @@ def generalisations(mind, unit: int) -> List[Tuple[int, float]]:
 def own_mass(mind, unit: int, lag: int = 1, trust: Optional[torch.Tensor] = None) -> Dict[int, Tuple[float, float]]:
     """Trust-weighted (W+, W-) of the EXPECT ties leaving ``unit``, by target."""
     S = mind.S
-    ties = S.out.get((unit, EXPECT, lag), [])
-    if not ties:
+    if not S.out.get((unit, EXPECT, lag)):
         return {}
-    ids = torch.tensor(ties, dtype=I64)
+    ids, dst = S.out_ids((unit, EXPECT, lag))
     trust = mind.trust if trust is None else trust
-    w_pos = (S.t_w[W_POS, ids] * trust).sum(-1).tolist()
-    w_neg = (S.t_w[W_NEG, ids] * trust).sum(-1).tolist()
-    return {d: (p, n) for d, p, n in zip(S.t_dst[ids].tolist(), w_pos, w_neg)}
+    w_pos = (S.t_w[W_POS].index_select(0, ids) * trust).sum(-1).tolist()
+    w_neg = (S.t_w[W_NEG].index_select(0, ids) * trust).sum(-1).tolist()
+    return {d: (p, n) for d, p, n in zip(dst.tolist(), w_pos, w_neg)}
 
 
 def effective(mind, unit: int, trust: Optional[torch.Tensor] = None, support: Optional[str] = None,

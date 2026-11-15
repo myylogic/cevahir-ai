@@ -16,7 +16,8 @@ from typing import Dict, List
 
 class OwnPieces:
     """The word's pieces: "kök:<root>" when the root differs from the word, "ek:<suffix>" for each suffix the
-    morphology splits off, "son:<last syllable>" when the word has more than one syllable."""
+    morphology splits off, "gövde:<first two syllables>" when the word has more than two syllables (a stem that
+    inflected forms share: hay-van-dır / hay-van-lar), "son:<last syllable>" when it has more than one."""
 
     def __init__(self) -> None:
         level = logging.getLogger().level
@@ -47,6 +48,8 @@ class OwnPieces:
                 syllables = self.syllabifier.split([word])
             except Exception:
                 syllables = []
+            if len(syllables) > 2:
+                out.append("gövde:" + "".join(syllables[:2]))
             if len(syllables) > 1:
                 out.append("son:" + syllables[-1])
         self.cache[word] = out

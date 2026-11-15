@@ -20,6 +20,7 @@ Nothing in this file knows a domain: it sees events, units, ties and evidence on
 from __future__ import annotations
 
 import copy
+import heapq
 from dataclasses import dataclass, field
 from typing import Dict, Hashable, Iterable, List, Optional, Tuple
 
@@ -29,9 +30,9 @@ from . import act as act_mod
 from .events import ACTED, IMAGINED, IMITATED, N_PROV, PROVENANCE, REFERENCE, SENSED, Channels, Event
 from .evidence import conviction, expectation
 from .form import categories_of, compose, confirm_parts, maybe_chunk, recognise
-from .learn import learn_facets, learn_follow, learn_together, learn_value, reflect
+from .learn import learn_facets, learn_follow, learn_together, learn_value, reflect, tie_mass
 from .read import conflict_of, predictions, total_drive
-from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, SLOTTED, W_NEG, W_POS, Substance
+from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, PART, SLOTTED, W_NEG, W_POS, Substance
 
 FEELINGS = ("surprise", "relief", "load", "conflict")
 SELF_CHANNEL, SELF_SYMBOL = "benlik", "ben"
@@ -73,6 +74,8 @@ class Config:
                                     # members that resemble the item read speak louder
     backoff: bool = False           # F16: an utterance under way continues along the lived sequences of its end
     situations: bool = False        # F23: an utterance never lived as a whole is met by the lived ones most like it
+    explore: bool = False           # hesitation ends in a try: the acceptable alternative whose consequences are least
+                                    # known is chosen (act._explore)
     bind_repeats: bool = False      # F12: a unit occurring at several positions of a tuple is one slot (variable)
     lag0: bool = True               # EXPECT(lag 0) learning and spreading among atomic units
     evoke: str = "activation"       # focus ranking: by activation alone (as written) or "grounded_first"
@@ -361,82 +364,17 @@ class Mind:
                 if cfg.act_expect_relief:
                     S.tie(self.context, self.feel_unit["relief"], EXPECT, 1)
             self.hoping = None
-        # derived activation: categories of what is present, frames in which a category stands in
-        derived: Dict[int, float] = {}
-        gens: Dict[int, Tuple[int, float]] = {}
-        virtual: Dict[Tuple[int, ...], Tuple[float, int, float]] = {}
-        cats = {u: [(c, e) for c, e in categories_of(self, u) if e > 0.5] for u in base}
-        bare: List[tuple] = []                             # (instance, extension size, -activation, key)
-        framed: List[tuple] = []                           # (position, extension size, -activation, key)
-        for unit, a_u in base.items():
-            for category, e in cats[unit]:
-                derived[category] = min(1.0, derived.get(category, 0.0) + a_u * (2.0 * e - 1.0))
-                if category not in gens or e > gens[category][1]:
-                    gens[category] = (unit, e)
-                bare.append((unit, len(S.inc.get((category, ABSTRACT), ())), -derived[category], (0, category),
-                             category))
-        if context is not None:
-            for pos, part in enumerate(parts):
-                others = sum(base.get(p, 0.0) for j, p in enumerate(parts) if j != pos) if cats.get(part) else 0.0
-                for category, e in cats.get(part, []):
-                    a_frame = (others + base.get(part, 0.0) * (2.0 * e - 1.0)) / len(parts)
-                    if cfg.bind_repeats:
-                        if part in parts[:pos]:
-                            continue                       # the slot of this unit was built at its first position
-                        frame_parts = tuple(category if q == part else q for q in parts)
-                    else:
-                        frame_parts = parts[:pos] + (category,) + parts[pos + 1:]
-                    frame = S.tuple_index.get(frame_parts)
-                    if frame is None:
-                        if not cfg.typed_frames:
-                            continue
-                        virtual[frame_parts] = (a_frame, context, e)
-                    else:
-                        derived[frame] = max(derived.get(frame, 0.0), a_frame)
-                        gens[frame] = (context, e)
-                    framed.append((pos, len(S.inc.get((category, ABSTRACT), ())), -a_frame,
-                                   (1, frame_parts) if frame is None else (0, frame),
-                                   frame_parts if frame is None else frame))
-        order: Dict[object, tuple] = {}
-        if cfg.select == "specific":                       # the most specific generalisation of each place first
-            for tier, candidates in ((0, framed), (1, bare)):
-                seen: Dict[int, int] = {}
-                for group, size, neg_a, tie_break, key in sorted(candidates, key=lambda c: c[:4]):
-                    seen[group] = seen.get(group, 0) + 1
-                    order.setdefault(key, (tier, seen[group], group))
-        grounded = dict(base)
-        grounded.update(derived)
         first = cfg.evoke == "grounded_first"
         fresh = {u for u, a, _, _ in percepts if a > 0}
         if context is not None:
             fresh.add(context)
-        ranked = self._winners(grounded, {}, virtual, F, first, fresh, order)
-        for _ in range(cfg.T if cfg.lag0 else 0):
-            evoked: Dict[int, float] = {}
-            dsts, vals = [], []
-            for key, a_u in ranked:
-                if isinstance(key, tuple) or not int(S.u_kind[key]) & ATOMIC:
-                    continue
-                ties = S.out.get((key, EXPECT, 0), [])
-                if not ties:
-                    continue
-                ids = torch.tensor(ties, dtype=I64)
-                e = expectation((S.t_w[W_POS, ids] * self.trust).sum(-1), (S.t_w[W_NEG, ids] * self.trust).sum(-1),
-                                cfg.k)
-                dsts.append(S.t_dst[ids])
-                vals.append(a_u * (2.0 * e - 1.0))
-            if dsts:                                   # summed per target in one pass (same sums as the loop)
-                dst_all, val_all = torch.cat(dsts), torch.cat(vals)
-                unique, inverse = torch.unique(dst_all, return_inverse=True)
-                summed = torch.zeros(unique.numel(), dtype=F64).index_add_(0, inverse, val_all)
-                for v, x in zip(unique.tolist(), summed.tolist()):
-                    if x > 0.0 or v in grounded:       # a negative sum matters only for a unit already in play
-                        evoked[v] = x
-            again = self._winners(grounded, evoked, virtual, F, first, fresh, order)
-            if [k for k, _ in again] == [k for k, _ in ranked]:
-                ranked = again
-                break
-            ranked = again
+        ranked = self._present_fills(base, fresh, F) if first and cfg.select == "specific" else None
+        if ranked is not None:                             # nothing derived can win a place (see _present_fills)
+            gens: Dict[int, Tuple[int, float]] = {}
+            virtual: Dict[Tuple[int, ...], Tuple[float, int, float]] = {}
+            grounded = dict(base)
+        else:
+            ranked, gens, virtual, grounded = self._rank(base, parts, context, fresh, F)
         focus: List[Tuple[int, float, bool]] = []
         self.gens = []
         for key, a in ranked:
@@ -456,8 +394,189 @@ class Mind:
         self.prov_of = {u: p for u, p in self.prov_of.items() if u in self.carry}
         S.use_units(torch.tensor([u for u, _, _ in focus], dtype=I64))
 
+    def _present_fills(self, base, fresh, F):
+        """With grounded_first and select = "specific", what is present ranks before every generalisation and
+        every unit called to mind. When no unit of ``base`` can be a generalisation of this moment (none is the
+        target of an ABSTRACT tie, i.e. a category, and none is composed with such a target among its parts, i.e. a
+        frame) and at least F of them are active, the focus is the F first of them and the generalisations need
+        not be read: returns that ranking (as ``_rank`` would give it), else None."""
+        S = self.S
+        inc, out = S.inc, S.out
+        scored = []
+        for unit, a in base.items():
+            if (unit, ABSTRACT) in inc:
+                return None
+            if (unit, PART, -1) in out and any((p, ABSTRACT) in inc for p in S.out_ids((unit, PART, -1))[1].tolist()):
+                return None
+            if a > 0.0:
+                scored.append(((0, 0, 0, 0), -a, 0 if unit in fresh else 1, 0, (unit,), unit))
+        if len(scored) < F:
+            return None
+        return [(key, -neg) for _, neg, _, _, _, key in heapq.nsmallest(F, scored)]
+
+    def _rank(self, base, parts, context, fresh, F):
+        """Generalisations of what is present (categories, frames), their order, and the F winners after the
+        EXPECT(lag 0) spreading. Returns (ranked, gens, virtual, grounded)."""
+        S, cfg = self.S, self.cfg
+        # derived activation: categories of what is present, frames in which a category stands in
+        derived: Dict[int, float] = {}
+        gens: Dict[int, Tuple[int, float]] = {}
+        virtual: Dict[Tuple[int, ...], Tuple[float, int, float]] = {}
+        cats = {u: [(c, e) for c, e in categories_of(self, u) if e > 0.5] for u in base}
+        bare: List[tuple] = []                             # (instance, extension size, -activation, key)
+        framed: List[tuple] = []                           # (position, extension size, -activation, key)
+        size: Dict[int, int] = {}                          # extension size of each category met here
+        for unit, a_u in base.items():
+            for category, e in cats[unit]:
+                derived[category] = min(1.0, derived.get(category, 0.0) + a_u * (2.0 * e - 1.0))
+                if category not in gens or e > gens[category][1]:
+                    gens[category] = (unit, e)
+                if category not in size:
+                    size[category] = len(S.inc.get((category, ABSTRACT), ()))
+                bare.append((unit, size[category], -derived[category], (0, category), category))
+        if context is not None:
+            for pos, part in enumerate(parts):
+                part_cats = cats.get(part)
+                if not part_cats:
+                    continue
+                if cfg.bind_repeats:
+                    if part in parts[:pos]:
+                        continue                           # the slot of this unit was built at its first position
+                    where = [j for j, q in enumerate(parts) if q == part]
+                others = sum(base.get(p, 0.0) for j, p in enumerate(parts) if j != pos)
+                a_part = base.get(part, 0.0)
+                for category, e in part_cats:
+                    a_frame = (others + a_part * (2.0 * e - 1.0)) / len(parts)
+                    if cfg.bind_repeats:
+                        filled = list(parts)
+                        for j in where:
+                            filled[j] = category
+                        frame_parts = tuple(filled)
+                    else:
+                        frame_parts = parts[:pos] + (category,) + parts[pos + 1:]
+                    frame = S.tuple_index.get(frame_parts)
+                    if frame is None:
+                        if not cfg.typed_frames:
+                            continue
+                        virtual[frame_parts] = (a_frame, context, e)
+                    else:
+                        derived[frame] = max(derived.get(frame, 0.0), a_frame)
+                        gens[frame] = (context, e)
+                    if category not in size:
+                        size[category] = len(S.inc.get((category, ABSTRACT), ()))
+                    framed.append((pos, size[category], -a_frame,
+                                   (1, frame_parts) if frame is None else (0, frame),
+                                   frame_parts if frame is None else frame))
+        order: Dict[object, tuple] = {}
+        rounds: Dict[Tuple[int, int], list] = {}           # (tier, round) -> keys in the order of their group
+        if cfg.select == "specific":                       # the most specific generalisation of each place first
+            for tier, candidates in ((0, framed), (1, bare)):
+                seen: Dict[int, int] = {}
+                # sorted on the first four fields: they differ for any two candidates (the fourth names the unit),
+                # so the whole tuples sort the same way
+                for group, _, _, _, key in sorted(candidates):
+                    seen[group] = seen.get(group, 0) + 1
+                    if key not in order:
+                        order[key] = (tier, seen[group], group)
+                        rounds.setdefault((tier, seen[group]), []).append(key)
+        grounded = dict(base)
+        grounded.update(derived)
+        first = cfg.evoke == "grounded_first"
+        if first and cfg.select == "specific":
+            present, whole = self._present_in_order(base, grounded, virtual, fresh, order, rounds, F)
+            ranked = [(key, -neg) for _, neg, _, _, _, key in present[:F]]
+            if not whole:                              # F or more are present: nothing called to mind gets a place
+                return ranked, gens, virtual, grounded
+        else:
+            present = self._present(grounded, virtual, fresh, order) if first else None
+            ranked = self._winners(grounded, {}, virtual, F, first, fresh, order, present)
+        spread: Dict[int, Optional[tuple]] = {}
+        in_play = None
+        for _ in range(cfg.T if cfg.lag0 else 0):
+            if first and len(present) >= F:
+                break                                  # what is only called to mind ranks after all that is present
+            if in_play is None:
+                in_play = torch.tensor(list(grounded), dtype=I64)
+            evoked = self._evoked(ranked, in_play, spread)
+            again = self._winners(grounded, evoked, virtual, F, first, fresh, order, present)
+            if [k for k, _ in again] == [k for k, _ in ranked]:
+                ranked = again
+                break
+            ranked = again
+        return ranked, gens, virtual, grounded
+
+    def _evoked(self, ranked, in_play: torch.Tensor, spread) -> Dict[int, float]:
+        """EXPECT(lag 0) activation from the atomic units of the focus, summed per target (``in_play``: the units
+        already grounded). ``spread`` keeps, per unit, its targets and 2e - 1 for the rest of this settling
+        (nothing is written while settling)."""
+        S = self.S
+        dsts, vals = [], []
+        for key, a_u in ranked:
+            if isinstance(key, tuple) or not int(S.u_kind[key]) & ATOMIC:
+                continue
+            if key not in spread:
+                if S.out.get((key, EXPECT, 0)):
+                    ids, dst = S.out_ids((key, EXPECT, 0))
+                    w_pos, w_neg = tie_mass(self, ids)
+                    spread[key] = (dst, 2.0 * expectation(w_pos, w_neg, self.cfg.k) - 1.0)
+                else:
+                    spread[key] = None
+            if spread[key] is None:
+                continue
+            dsts.append(spread[key][0])
+            vals.append(a_u * spread[key][1])
+        if not dsts:
+            return {}
+        dst_all, val_all = torch.cat(dsts), torch.cat(vals)    # summed per target in one pass (same sums)
+        unique, inverse = torch.unique(dst_all, return_inverse=True)
+        summed = torch.zeros(unique.numel(), dtype=F64).index_add_(0, inverse, val_all)
+        keep = (summed > 0.0) | torch.isin(unique, in_play)    # a negative sum matters only for a unit in play
+        return dict(zip(unique[keep].tolist(), summed[keep].tolist()))
+
     @staticmethod
-    def _winners(grounded, evoked, virtual, F, grounded_first=False, fresh=(), order=None):
+    def _present_in_order(base, grounded, virtual, fresh, order, rounds, F) -> Tuple[List[tuple], bool]:
+        """The entries of ``_present`` in ranking order, as far as the first F (select = "specific"): every
+        generalisation and frame has an order rank (tier, round, group) of its own, and units without one (what
+        is present) rank before them. Returns (entries, whole): whole when these are all the entries."""
+        scored = sorted(((0, 0, 0, 0), -grounded[u], 0 if u in fresh else 1, 0, (u,), u)
+                        for u in base if u not in order and grounded[u] > 0.0)
+        if len(scored) >= F:
+            return scored, False
+        top: Dict[int, int] = {}
+        for tier, number in rounds:
+            top[tier] = max(top.get(tier, 0), number)
+        for tier in (0, 1):
+            for number in range(1, top.get(tier, 0) + 1):
+                for key in rounds.get((tier, number), ()):
+                    if isinstance(key, tuple):
+                        a = virtual[key][0]
+                        if a > 0.0:
+                            scored.append(((1,) + order[key], -a, 1, 1, key, key))
+                    else:
+                        a = grounded[key]
+                        if a > 0.0:
+                            scored.append(((1,) + order[key], -a, 0 if key in fresh else 1, 0, (key,), key))
+                    if len(scored) >= F:
+                        return scored, False
+        return scored, True
+
+    @staticmethod
+    def _present(grounded, virtual, fresh, order) -> List[tuple]:
+        """Ranking entries of what is present and of the frames to be recruited (with ``grounded_first`` they do
+        not depend on what is called to mind): (rank, -activation, not fresh, frame, (unit,) or parts, key)."""
+        scored = []
+        for unit, a in grounded.items():
+            if a > 0.0:
+                rank = (1,) + order[unit] if unit in order else (0, 0, 0, 0)
+                scored.append((rank, -a, 0 if unit in fresh else 1, 0, (unit,), unit))
+        for parts, (a, _, _) in virtual.items():
+            if a > 0.0:
+                rank = (1,) + order[parts] if parts in order else (0, 0, 0, 0)
+                scored.append((rank, -a, 1, 1, parts, parts))
+        return scored
+
+    @staticmethod
+    def _winners(grounded, evoked, virtual, F, grounded_first=False, fresh=(), order=None, present=None):
         """k-winners: the F candidates that win a place in the focus.
 
         As written: by activation alone, EXPECT(lag 0) activation added to every unit; equal activations are
@@ -465,32 +584,37 @@ class Mind:
         recruited. Changed (see NOTES.md): with ``grounded_first`` what is present keeps the activation of its
         presence and is ranked before what is only called to mind; with ``order`` (select = "specific") what is
         present comes first and generalisations follow in rounds, the most specific one of each place first.
+        Every entry ends in its own (unit,) or parts tuple, so the ranking is a total order: the F smallest entries
+        are the first F of the sorted list. ``present``: the entries of ``_present`` (with ``grounded_first``).
         """
         order = order or {}
-        scored = []
-        for unit, a in grounded.items():
-            if not grounded_first:
+        if grounded_first:
+            scored = list(present) if present is not None else Mind._present(grounded, virtual, fresh, order)
+            if len(scored) < F:                        # what is only called to mind ranks after all that is present
+                scored += [((2, 0, 0, 0), -min(1.0, a), 1, 0, (unit,), unit) for unit, a in evoked.items()
+                           if unit not in grounded and a > 0.0]
+        else:
+            scored = []
+            for unit, a in grounded.items():
                 a = min(1.0, a + evoked.get(unit, 0.0))
-            if a > 0.0:
-                rank = (1,) + order[unit] if unit in order else (0, 0, 0, 0)
-                scored.append((rank, -a, 0 if unit in fresh else 1, 0, (unit,), unit))
-        for unit, a in evoked.items():
-            if unit not in grounded and a > 0.0:
-                scored.append(((2, 0, 0, 0) if grounded_first else (0, 0, 0, 0), -min(1.0, a), 1, 0, (unit,), unit))
-        for parts, (a, _, _) in virtual.items():
-            if a > 0.0:
-                rank = (1,) + order[parts] if parts in order else (0, 0, 0, 0)
-                scored.append((rank, -a, 1, 1, parts, parts))
-        scored.sort(key=lambda s: s[:5])
-        return [(key, -neg) for _, neg, _, _, _, key in scored[:F]]
+                if a > 0.0:
+                    rank = (1,) + order[unit] if unit in order else (0, 0, 0, 0)
+                    scored.append((rank, -a, 0 if unit in fresh else 1, 0, (unit,), unit))
+            for unit, a in evoked.items():
+                if unit not in grounded and a > 0.0:
+                    scored.append(((0, 0, 0, 0), -min(1.0, a), 1, 0, (unit,), unit))
+            for parts, (a, _, _) in virtual.items():
+                if a > 0.0:
+                    rank = (1,) + order[parts] if parts in order else (0, 0, 0, 0)
+                    scored.append((rank, -a, 1, 1, parts, parts))
+        return [(key, -neg) for _, neg, _, _, _, key in heapq.nsmallest(F, scored)]
 
     def _feel(self, surprise: float) -> None:
         """Step 6: the mind's own state as events of the next moment (intensity carries the amount)."""
         S, k = self.S, self.cfg.k
         relief, touched = 0.0, 0
         if self._gained:
-            ids = torch.cat([i for i, _ in self._gained])
-            gain = torch.cat([a for _, a in self._gained])
+            ids, gain = self._gains()
             unique, inverse = torch.unique(ids, return_inverse=True)
             gained = torch.zeros(unique.numel(), dtype=F64).index_add_(0, inverse, gain)
             touched = int(unique.numel())
@@ -498,7 +622,7 @@ class Mind:
                                  dtype=torch.bool)                  # by channel id; index -1 (no channel) -> False
             channels = S.u_channel[S.t_dst[unique]].long()
             expect = (S.t_form[unique] == EXPECT) & world[channels]
-            after = ((S.t_w[W_POS, unique] + S.t_w[W_NEG, unique]) * self.trust).sum(-1)
+            after = ((S.t_w[W_POS].index_select(0, unique) + S.t_w[W_NEG].index_select(0, unique)) * self.trust).sum(-1)
             before = torch.clamp(after - gained, min=0.0)
             relief = float((S.t_use[unique] * (conviction(after, k) - conviction(before, k)))[expect].sum())
             relief = max(0.0, relief)
@@ -510,6 +634,26 @@ class Mind:
         prov = ACTED if self.act_hope or self.hoping is not None else SENSED
         for name in FEELINGS:
             self.pending.append(Event("feel", name, prov, self.felt[name]))
+
+    def _gains(self) -> Tuple[torch.Tensor, torch.Tensor]:
+        """The gains of this moment in the order they were made: entries are (ids, gains) tensors or, for one tie,
+        (id, gain) numbers (``learn.add_evidence1``)."""
+        ids, gains, run_i, run_g = [], [], [], []
+        for i, a in self._gained:
+            if isinstance(i, torch.Tensor):
+                if run_i:
+                    ids.append(torch.tensor(run_i, dtype=I64))
+                    gains.append(torch.tensor(run_g, dtype=F64))
+                    run_i, run_g = [], []
+                ids.append(i)
+                gains.append(a)
+            else:
+                run_i.append(i)
+                run_g.append(a)
+        if run_i:
+            ids.append(torch.tensor(run_i, dtype=I64))
+            gains.append(torch.tensor(run_g, dtype=F64))
+        return torch.cat(ids), torch.cat(gains)
 
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
