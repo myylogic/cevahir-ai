@@ -173,10 +173,12 @@ At each moment, roughly each word, the mind lives these steps:
   A frame's members can agree that the answer goes on as the sequence that began with the asked word (START), an
   utterance of one word so far goes on that way, and so does a word brought to mind after silence. In a template-free
   test (a mind that read the documents once, 200 random sentences, their first two words brought to mind) it said a
-  read sentence beginning with those words in 150, and the rest of that very sentence in 60 of the 61 whose first two
+  read sentence beginning with those words in 150 (145 with Exact Relations, below), and the rest of that very
+  sentence in 60 of the 61 whose first two
   words begin only one sentence. The strongest small Transformer trained on the same documents (7.4 million
   parameters, 50 minutes) said a valid one in 41. With one word as the cue the Transformer said a valid sentence more
-  often (51 against 44), because the mind stays silent when a word begins several sentences.
+  often (51 against 44; 47 with Exact Relations), because the mind stays silent when a word begins several
+  sentences.
 - **Advantage Race.** Options on one channel exclude each other. The leader is said if its advantage over the
   strongest rival reaches the threshold; if all options are equal, the mind stays silent.
 - **Trying in Hesitation.** When the mind hesitates between well-supported options, it tries the one whose

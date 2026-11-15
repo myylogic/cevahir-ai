@@ -161,10 +161,10 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   her bölüm iki öğeli (x, v) birimini bir kez tanır; bu tanımalar sayılır, öbür başlangıçlar aleyhine sayılır. Bir
   çerçevenin üyeleri "cevap, sorulan kelimeyle başlayan dizi gibi sürer" ilişkisinde (BAŞ) birleşebilir; şimdiye dek
   tek kelimelik bir söz de, sessizlikten sonra akla gelen bir kelime de öyle sürer. Şablonsuz bir sınavda (belgeleri
-  bir kez okumuş bir zihin, rastgele 200 cümle, ilk iki kelimeleri akla getirildi) 150'sinde o kelimelerle başlayan
+  bir kez okumuş bir zihin, rastgele 200 cümle, ilk iki kelimeleri akla getirildi) 150'sinde (Kesin İlişkiler ile 145'inde) o kelimelerle başlayan
   okunmuş bir cümleyi, ilk iki kelimesi yalnız tek bir cümleyi başlatan 61 cümlenin 60'ında o cümlenin kendisini
   eksiksiz söyledi. Aynı belgelerle eğitilen en güçlü küçük Transformer (7,4 milyon parametre, 50 dakika) 41'inde
-  geçerli bir cümle söyledi. İpucu tek kelime olunca Transformer daha sık geçerli cümle söyledi (51'e karşı 44): bir
+  geçerli bir cümle söyledi. İpucu tek kelime olunca Transformer daha sık geçerli cümle söyledi (51'e karşı 44; Kesin İlişkiler ile 47): bir
   kelime birkaç cümleyi başlatıyorsa zihin susar.
 - **Avantaj Yarışı (Advantage Race):** aynı kanaldaki seçenekler birbirini dışlar. Önde olan, en güçlü rakibine
   karşı avantajı eşiği geçerse söylenir; bütün seçenekler eşitse susulur.
