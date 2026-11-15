@@ -12,6 +12,8 @@ Commands (Turkish, with English aliases):
                                     .pdf with pypdf): sentences of documents as speech of others (imitated)
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
     !kim <ad>            / !who     who is talking now (perceived at the start of every utterance)
+    !dusun [konu]        / !think   let the mind think about a topic inwardly; you hear its inner voice and its
+                                    reality score (nothing leaves the mind otherwise; thoughts are kept as imagined)
     !kendini_tani [n]    / !self    lessons about itself (true things told to it), n times
     !arastir <konu>      / !research  on your command: look the topic up in Wikipedia and read it (pages are printed)
     !kendini_gelistir [n] / !improve  the mind picks n topics it wants to know (high drive) and researches them; it
@@ -40,7 +42,7 @@ import re
 import sys
 from typing import List
 
-from . import IMITATED, SENSED, TOLD, Config, Event, Mind, read
+from . import ACTED, IMITATED, SENSED, TOLD, Config, Event, Mind, read
 from .events import PROVENANCE
 from .persist import export_portable, load, save
 from .store import W_NEG, W_POS
@@ -383,6 +385,54 @@ class Session:
         return "  böyle bir numara yok"
 
 
+class LifeClock:
+    """The mind lives while nobody types: after a short silence it thinks about the last topic (inner voice, kept as
+    imagined); after a longer silence, if that thought was real enough, it says it (it speaks first), once per
+    silence. It never speaks into someone's turn; a lock keeps the clock and the conversation from living at once."""
+
+    def __init__(self, session, lock, think_after: float = 20.0, speak_after: float = 60.0,
+                 real_enough: float = 0.75) -> None:
+        import threading
+        import time
+        self.session, self.lock = session, lock
+        self.think_after, self.speak_after, self.real_enough = think_after, speak_after, real_enough
+        self.last_input = time.time()
+        self.thought = None                 # (topic, words, reality) of this silence
+        self.spoke = False
+        self.stop = threading.Event()
+        self.thread = threading.Thread(target=self._run, daemon=True)
+
+    def heard(self) -> None:
+        import time
+        self.last_input, self.thought, self.spoke = time.time(), None, False
+
+    def start(self) -> None:
+        self.thread.start()
+
+    def _run(self) -> None:
+        import time
+        from .dusunce import think, topic_of
+        while not self.stop.wait(3.0):
+            quiet = time.time() - self.last_input
+            if self.thought is None and quiet >= self.think_after:
+                with self.lock:
+                    topic = topic_of(self.session)
+                    if topic:
+                        words_, reality = think(self.session, topic)
+                        self.thought = (topic, words_, reality)
+                    else:
+                        self.thought = ("", [], 0.0)
+            if (self.thought and not self.spoke and quiet >= self.speak_after and self.thought[1]
+                    and self.thought[2] >= self.real_enough):
+                with self.lock:
+                    topic, words_, reality = self.thought
+                    for w in [topic] + words_:              # it says aloud what it thought (its own acts)
+                        self.session.mind.step([Event(CHANNEL, w, ACTED)])
+                    self.session.mind.step([])
+                    self.spoke = True
+                print("\n  zihin (kendiliğinden): %s %s\n> " % (topic, " ".join(words_)), end="", flush=True)
+
+
 def home_mind() -> str:
     """Where the one mind of this computer lives: $CEVAHIR_HOME/zihin/cevahir (default ~/.cevahir)."""
     import os
@@ -416,6 +466,8 @@ def main(argv=None) -> None:
     ap.add_argument("--kaydetme", action="store_true", help="do not save what was learned in this session")
     ap.add_argument("--his", action="store_true", help="show the mind's feelings after each answer")
     ap.add_argument("--kim", help="who is talking to the mind (asked at the start if not given)")
+    ap.add_argument("--yasamsiz", action="store_true", help="no life clock: the mind does not think or speak first "
+                                                            "while you are silent")
     ap.add_argument("--parca", help="subword tokenizer (ByteLevelBPE json): word pieces enter as facets")
     ap.add_argument("--defter-yok", dest="no_ledger", action="store_true",
                     help="no experience ledger: smaller and faster, but !unut cannot retract")
@@ -469,20 +521,41 @@ def main(argv=None) -> None:
     if autosave:
         print("  (her sohbetin sonunda öğrendikleri kendiliğinden kaydedilir: %s.zihin)" % keep_at)
     lines = sys.stdin if not interactive else iter(lambda: input("> "), None)
+    import threading
+    lock = threading.RLock()
+    clock = None
+    if interactive and not args.yasamsiz:
+        clock = LifeClock(session, lock)
+        clock.start()
+        print("  (sessiz kaldığında düşünür; bir süre sonra konuşmayı kendisi başlatabilir. Kapatmak: --yasamsiz)")
     try:
-        _session_loop(session, lines, chat, args, keep)
+        _session_loop(session, lines, chat, args, keep, lock, clock)
     except (KeyboardInterrupt, EOFError):
         print()
     finally:
         keep("sohbet sonu")
 
 
-def _session_loop(session, lines, chat, args, keep) -> None:
+def _session_loop(session, lines, chat, args, keep, lock=None, clock=None) -> None:
+    import contextlib
     turns_since_save = 0
     for line in lines:
         line = line.strip()
         if not line:
             continue
+        if clock is not None:
+            clock.heard()
+        with (lock if lock is not None else contextlib.nullcontext()):
+            turns_since_save = _one_line(session, line, chat, args, keep, turns_since_save)
+            if turns_since_save is None:
+                break
+            if isinstance(turns_since_save, tuple):         # the chat toggle came back with the new mode
+                chat, turns_since_save = turns_since_save
+
+
+def _one_line(session, line, chat, args, keep, turns_since_save):
+    """One line of the conversation. Returns the updated counter, (chat, counter) after !konus, None to quit."""
+    if True:
         try:
             if not line.lstrip("!").split(" ")[0] in ("dogru", "doğru", "good", "iyi", "yanlis", "yanlış", "bad", "kotu",
                                                        "kötü", "his", "feel") or not line.startswith("!"):
@@ -492,7 +565,7 @@ def _session_loop(session, lines, chat, args, keep) -> None:
             elif line.startswith("!"):
                 cmd, _, rest = line[1:].partition(" ")
                 if cmd in ("cik", "quit"):
-                    break
+                    return None
                 elif cmd in ("gordum", "saw"):
                     session.live(rest, SENSED)
                 elif cmd in ("izle", "watch"):
@@ -525,6 +598,7 @@ def _session_loop(session, lines, chat, args, keep) -> None:
                 elif cmd in ("konus", "chat"):
                     chat = not chat
                     print("  sohbet modu %s" % ("açık" if chat else "kapalı"))
+                    return (chat, turns_since_save)
                 elif cmd in ("neden", "why"):
                     prefix, _, value = rest.partition("=>")
                     print(session.why(prefix.strip(), value.strip()))
@@ -548,6 +622,14 @@ def _session_loop(session, lines, chat, args, keep) -> None:
                             report.get("ways")))
                 elif cmd in ("his", "feel"):
                     print(feelings(session.mind))
+                elif cmd in ("dusun", "düşün", "think"):
+                    from .dusunce import think, topic_of
+                    topic = rest.strip() or topic_of(session)
+                    if not topic:
+                        print("  düşünecek bir konu yok")
+                    else:
+                        thought, reality = think(session, topic)
+                        print("  (iç ses, %s): %s   [gerçeklik %.2f]" % (topic, " ".join(thought) or "…", reality))
                 elif cmd in ("kim", "who"):
                     if rest.strip():
                         session.partner = lower_tr(rest.strip()).split()[0]
@@ -580,6 +662,7 @@ def _session_loop(session, lines, chat, args, keep) -> None:
                 session.live(line, TOLD)
         except Exception as exc:  # keep the session alive
             print("  hata: %s" % exc)
+    return turns_since_save
 
 
 if __name__ == "__main__":

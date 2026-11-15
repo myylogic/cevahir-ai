@@ -257,6 +257,17 @@ F17. (2026-11-14) A life that continues across sessions, the internet as a chann
    computer. Weakness stated: the gain scale is absolute (a repetition that taught little still counts as mostly good);
    the outcome should be judged relative to what the mind expected from that way.
 
+F18-pre. (2026-11-15) Thinking and a life clock. The inner voice (zihin/dusunce.py): the mind brings a topic to mind
+   and speaks inwardly with the same machinery and the same word units, nothing leaves it, each inner word returns as
+   its own echo in the class "imagined"; every step is scored for reality before it is taken (the expectation of that
+   word from all evidence except imagined and own acts). Example after reading five sentences: "ateş" -> "evi ısıtır ve
+   yemek pişirir" (reality 0.80); "zürafa" -> nothing (0.00). The life clock (session): after 20 s of silence the mind
+   thinks about the least known content word of the last utterance; after 60 s, if that thought was real enough
+   (>= 0.75), it says it, once per silence, never into someone's turn; a lock keeps the clock and the conversation from
+   living at the same moment. Tested programmatically (it spoke "ateş evi ısıtır ve yemek pişirir" after the owner's
+   "ateş çok güzel" and a silence). Limit, stated: thinking twice about the same topic gives the same thought; real
+   thinking should connect (ateş ısıtır, güneş de ısıtır), the next step of imagination.
+
 ## 4. Constants
 
 F = 7, T = 6, k = 1, lam = 0.5: design defaults. g = 1 (one event = one unit of evidence). theta = 1 (one unit
