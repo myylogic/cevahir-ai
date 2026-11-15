@@ -80,12 +80,16 @@ def test_every_path_is_cleaned_the_same_way(monkeypatch, tmp_path, capsys):
     import wave
 
     import numpy as np
-    from PIL import Image
+    try:
+        from PIL import Image                                 # seeing needs Pillow (an optional dependency)
+    except ImportError:
+        Image = None
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("USERPROFILE", str(tmp_path))
     folder = tmp_path / "zihin kayıtları"
     folder.mkdir()
-    Image.new("RGB", (32, 32), (200, 30, 30)).save(str(folder / "kırmızı top.png"))
+    if Image is not None:
+        Image.new("RGB", (32, 32), (200, 30, 30)).save(str(folder / "kırmızı top.png"))
     rate = 16000
     tone = (0.5 * np.sin(2 * np.pi * 220 * np.arange(int(0.4 * rate)) / rate) * 32767).astype("<i2")
     with wave.open(str(folder / "ses kaydı.wav"), "wb") as w:
@@ -99,8 +103,9 @@ def test_every_path_is_cleaned_the_same_way(monkeypatch, tmp_path, capsys):
     assert (folder / "tam.zihin").exists() and (folder / "tam.zihin.json").exists()
     assert "taşınabilir" in run(s, "!tasinabilir '%s'" % (folder / "küçük"), capsys)
     assert (folder / "küçük.zihin").exists()
-    assert "yön" in run(s, '!gor "~/zihin kayıtları/kırmızı top.png"', capsys) and s.view is not None
-    assert s.seen[s.view[0]] == "kırmızı top.png"
+    if Image is not None:                                     # without Pillow !gor is not reached here
+        assert "yön" in run(s, '!gor "~/zihin kayıtları/kırmızı top.png"', capsys) and s.view is not None
+        assert s.seen[s.view[0]] == "kırmızı top.png"
     assert "yön" in run(s, "!dinle ~/zihin kayıtları/ses kaydı.wav", capsys) and s.hearing is not None
     age = s.mind.t
     assert "yüklendi: %d an" % age in run(s, '!yukle "~/zihin kayıtları/küçük"', capsys)
