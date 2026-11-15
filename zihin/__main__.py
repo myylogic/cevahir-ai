@@ -1304,9 +1304,9 @@ def main(argv=None) -> None:
                 if not line:
                     continue
                 life.put(line)
-                while not life.handled.wait(0.2):        # its answer comes out before the next prompt; Ctrl+C is
-                    pass                                 # heard while it waits (on every system)
-                if life.done.is_set():
+                while not life.handled.wait(0.2) and life.thread.is_alive():   # its answer comes out before the
+                    pass                                 # next prompt; Ctrl+C is heard while it waits (on every system)
+                if life.done.is_set() or not life.thread.is_alive():
                     break
         except (KeyboardInterrupt, EOFError):
             if life.handled.is_set():                    # a running command's report begins on a new line itself
