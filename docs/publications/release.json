@@ -1,16 +1,14 @@
 {
-  "version": "2026.11.14",
-  "tag": "research-2026.11.14-v5",
+  "version": "2026.11.15",
+  "tag": "research-2026.11.15-v6",
   "author": "Muhammed Yasin Yılmaz",
-  "github_url": "https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.11.14-v5",
-  "status": "published",
-  "doi": "10.5281/zenodo.24235648",
+  "github_url": "https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.11.15-v6",
+  "status": "pending",
+  "doi": "",
   "concept_doi": "10.5281/zenodo.22864660",
-  "previous_release": "releases/research-2026.10.13-v4.json",
-  "scope": "CEV-11 confirmatory study, concept-address study, forward-learning and absorbing-walk studies, cevahir_ai roof package and console, and the first Zihin living-mind prototype with its first life measurements. Not separate paper DOIs.",
-  "zenodo_url": "https://zenodo.org/records/24235648",
-  "source_commit": "c674997e49d32ad1989b171b45484e7646dbf4d4",
-  "date": "2026-11-15",
-  "archive_verification": "evidence/zenodo_archive_verification_v5.json",
-  "doi_resolution": "evidence/doi_resolution_v5.json"
+  "previous_release": "releases/research-2026.11.14-v5.json",
+  "scope": "The Cevahir Zihin theory (a Living Evidence Mind; docs/ZIHIN_KURAM.md, docs/ZIHIN_THEORY.md) with its architecture and named findings, and the work since v5: sleep and dream sorting, hearing, felt not-knowing, think-then-speak, situation resemblance, online life, exploration and code learned from its tests, shared-stem inference, learning to learn (mixed), the one-shot evidence study (off), a 2.0-3.8x faster bit-identical core and a 3.5x smaller memory layout. Not separate paper DOIs.",
+  "zenodo_url": "",
+  "source_commit": "",
+  "date": "2026-11-15"
 }

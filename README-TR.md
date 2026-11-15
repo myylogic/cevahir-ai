@@ -4,7 +4,53 @@
 
 [Araştırma arşivi DOI: 10.5281/zenodo.24235648](https://doi.org/10.5281/zenodo.24235648) · [Araştırma yayınları](docs/publications/README.md)
 
-**Türkçeye özel geliştirilmiş tokenizer altyapısı, eğitilebilir dil modeli çekirdeği ve bilişsel sistemleri birleştiren yapay zekâ motoru.**
+> **Son güncelleme — Kasım 2026: Cevahir Zihin, yaşayarak öğrenen bir zihin. Transformer değil.**
+>
+> Depoda yaşayan model bir sinir ağı değil, bir **Yaşayan Kanıt Zihni**. Ağırlık matrisi, gömme vektörü, geri
+> yayılım ve softmax dikkati yok. Her ilişkiyi bir bağ olarak tutar ve her bağın kanıtını **nereden geldiğine göre**
+> sayar: kendisi mi gördü, biri mi söyledi, taklit mi etti, kendisi mi yaptı, çıkarım mı yaptı, hayal mi etti. Ne
+> bekleyeceğini tek bir kuraldan okur: `e = c·(f − ½) + ½`.
+>
+> - **Dikkat:** her an yalnız yedi birim odağa girer (**Yedili Odak**). Dikkat yerel ve okunabilirdir; maliyeti
+>   geçmişin uzunluğuyla büyümez.
+> - **Unutma:** öğrendiği tek bir deneyimi tam olarak geri alabilir (**Kesin Unutma**).
+> - **Bilmemek:** bilmediğini bir iç his olarak fark eder ve "bilmiyorum" der.
+> - **Rüya:** uykuda rüya görür ve hayallerinden hangisinin doğru çıktığını ayıklar.
+> - **Sonuçtan öğrenme:** yazdığı kodun testten geçip geçmediğine bakarak doğru kodu bulur.
+>
+> **Ayrı bir eğitim aşaması yoktur; model her konuşmada öğrenir. Ona kibar konuşun.**
+>
+> Kuram ve mimari: [docs/ZIHIN_KURAM.md](docs/ZIHIN_KURAM.md) · kılavuz:
+> [docs/ZIHIN_KILAVUZ.md](docs/ZIHIN_KILAVUZ.md) · ölçümler ve olumsuz sonuçlar:
+> [research/living_mind_2026_11_15/NOTES.md](research/living_mind_2026_11_15/NOTES.md)
+
+### Cevahir Zihin'i bilgisayarınızda çalıştırın
+
+```
+git clone https://github.com/myylogic/cevahir-ai
+cd cevahir-ai
+pip install torch numpy           # isteğe bağlı: python-docx (Word), pillow (resim)
+python -m zihin                   # Linux / macOS
+.\cevahir.ps1                     # Windows PowerShell
+```
+
+İlk açılışta zihin boştur ve sizinle yaşayarak öğrenir. Öğretmek istediğiniz dosyalar varsa:
+
+```
+!oku belgelerim/                  # .txt .md .docx .pdf belgeler, .json/.tsv diyaloglar, kaynak kod
+!ogret diyaloglar.tsv             # her satır: soru<TAB>cevap
+!izle selam || merhaba            # bir konuşmayı izletmek
+!dogru  /  !yanlis                # son cevabını nasıl karşıladığınız
+!uyu    !dusun <konu>    !kendin  # rüya, iç ses, iç gözlem
+```
+
+Cevahir Türkçe verilerle büyütüldü. Başka bir dilde konuşmak istiyorsanız o dilde küçük bir veri setini (birkaç yüz
+soru-cevap ya da metin) `!ogret` veya `!oku` ile ona yaşatın. Zihin dosyası okuduklarını içinde taşır; özel
+belgelerle yetiştirdiğiniz bir zihni paylaşmayın.
+
+---
+
+**Yaşayarak öğrenen yeni bir zihin çekirdeği (Cevahir Zihin) ile birlikte, Türkçeye özel tokenizer altyapısı, Transformer dil modeli çekirdeği ve bilişsel sistemleri içeren açık kaynak yapay zekâ araştırma motoru.**
 
 Ben Muhammed Yasin Yılmaz. Cevahir'i, verinin hazırlanmasından modelin öğrenmesine ve konuşma içinde kullanılmasına kadar bütün sürecini geliştirebildiğim bir yapay zekâ altyapısı olarak kurdum. Kendi BPE hattını, yapılandırılabilir PyTorch Transformer decoder çekirdeğini, eğitim ve checkpoint yönetimini, metin üretimini, bilişsel iş akışlarını, konuşma belleğini ve uygulama servislerini aynı kod tabanında bir araya getirdim.
 

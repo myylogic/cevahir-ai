@@ -4,7 +4,53 @@
 
 [Research archive DOI: 10.5281/zenodo.24235648](https://doi.org/10.5281/zenodo.24235648) · [Research reports](docs/publications/README.md)
 
-**An AI engine combining tokenizer infrastructure developed specifically for Turkish, a trainable language-model core and cognitive systems.**
+> **Latest update — November 2026: Cevahir Zihin, a mind that learns by living. Not a Transformer.**
+>
+> The model living in this repository is not a neural network but a **Living Evidence Mind**. It has no weight
+> matrices, embedding vectors, backpropagation or softmax attention. It keeps every relation as a tie and counts each
+> tie's evidence **by where it came from**: seen with its own eyes, told, imitated, its own act, inferred or imagined.
+> It reads what to expect from a single rule: `e = c·(f − ½) + ½`.
+>
+> - **Attention:** at each moment only seven units enter the focus (the **Seven-Place Focus**). Attention is local
+>   and readable, and its cost does not grow with the length of the past.
+> - **Forgetting:** any single experience can be retracted exactly (**Exact Retraction**).
+> - **Not knowing:** it feels when it does not know and says so.
+> - **Dreams:** in sleep it dreams, then sorts which of its imaginings came out true.
+> - **Learning from consequences:** it finds correct code from whether the code it writes passes a test.
+>
+> **There is no separate training phase; the model learns in every conversation. Please speak to it kindly.**
+>
+> Theory and architecture: [docs/ZIHIN_THEORY.md](docs/ZIHIN_THEORY.md) · guide (Turkish):
+> [docs/ZIHIN_KILAVUZ.md](docs/ZIHIN_KILAVUZ.md) · measurements and negative results:
+> [research/living_mind_2026_11_15/NOTES.md](research/living_mind_2026_11_15/NOTES.md)
+
+### Run Cevahir Zihin on your computer
+
+```
+git clone https://github.com/myylogic/cevahir-ai
+cd cevahir-ai
+pip install torch numpy           # optional: python-docx (Word), pillow (images)
+python -m zihin                   # Linux / macOS
+.\cevahir.ps1                     # Windows PowerShell
+```
+
+On first start the mind is empty and learns by living with you. If you have files to teach it:
+
+```
+!oku my_documents/                # .txt .md .docx .pdf documents, .json/.tsv dialogues, source code
+!ogret dialogues.tsv              # each line: question<TAB>answer
+!izle hello || hi                 # let it watch an exchange
+!dogru  /  !yanlis                # how you received its last answer (good / bad)
+!uyu    !dusun <topic>   !kendin  # sleep and dream, inner voice, introspection
+```
+
+Cevahir was raised on Turkish data. To speak another language with it, let it live a small dataset in that language
+(a few hundred question-answer pairs or texts) with `!ogret` or `!oku`. A mind file carries what it has read, so do
+not share a mind raised on private documents.
+
+---
+
+**An open-source AI research engine: a new mind core that learns by living (Cevahir Zihin), alongside Turkish-specific tokenizer infrastructure, a Transformer language-model core and cognitive systems.**
 
 I'm Muhammed Yasin Yılmaz. I built Cevahir to bring data preparation, model learning and the use of a trained model in conversation into one codebase. It includes its own BPE pipeline, a configurable PyTorch Transformer decoder, training and checkpoint management, generation, cognitive workflows, conversational memory, and application services.
 
