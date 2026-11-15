@@ -429,7 +429,9 @@ def learn_together(mind, focus: List[Tuple[int, float, bool]], slot: int) -> Non
         if ties:
             ids = torch.tensor(ties, dtype=I64)
             dst = S.t_dst[ids]
-            here = torch.tensor([present.get(d, 0.0) for d in dst.tolist()], dtype=F64)
+            here = torch.zeros(len(ties), dtype=F64)       # activation of each partner if present (few are)
+            for d, a_d in present.items():
+                here[dst == d] = a_d
             w_pos, w_neg = tie_mass(mind, ids)
             e = expectation(w_pos, w_neg, cfg.k)
             weight = e if cfg.neg_weight == "e" else torch.ones_like(e)

@@ -61,14 +61,16 @@ def think(session, topic: str, limit: int = 15) -> Tuple[List[str], float]:
     return thought, reality
 
 
-def topic_of(session) -> str:
-    """What to think about: the last utterance's least known content word (the highest drive), else its last word."""
+def topic_of(session, text: str = None) -> str:
+    """What to think about: the utterance's (by default the last one's) least known content word (the highest
+    drive), among the words the mind has met."""
     from .__main__ import CHANNEL, words
     from .read import drive_of
     mind = session.mind
-    if not session.history:
-        return ""
-    text = session.history[-1][1]
+    if text is None:
+        if not session.history:
+            return ""
+        text = session.history[-1][1]
     if text.startswith("["):
         return ""
     cid = mind.ch.id(CHANNEL)

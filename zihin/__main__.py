@@ -185,6 +185,7 @@ class Session:
         mind.add_channel(SOUND, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
         self.curious = True                     # the curiosity reflex (T4) is on in conversation
+        self.thinking = True                    # what is heard calls thoughts to mind; one may be said (T8)
         from .mind import INNER_CHANNEL, SELF_CHANNEL
         if not mind.ch.has(SELF_CHANNEL):       # minds born before the self unit existed get it now
             mind.add_channel(SELF_CHANNEL, "context")
@@ -319,6 +320,7 @@ class Session:
         if not symbols:
             return "(sessiz)"
         before = self.known_before(text) if self.curious else {}   # what it knew of these words before hearing them
+        thoughts = self.associations(text) if self.turns and self.thinking else []
         if self.turns:                                   # the turn passes when your utterance has ended
             self.listen(text, TOLD, speaker=self.partner)
             acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
@@ -326,11 +328,17 @@ class Session:
             self.listen(" ".join(symbols[:-1]), TOLD)
             acts = self.mind.step(self.events(symbols[-1], TOLD))
         knew = bool(acts)
-        if not acts and self.turns:                      # it does not know at once: a moment passes, then it feels
-            acts = self.mind.step([])                    # its not knowing (L7); what it says then is its own
-            if not acts:
-                acts = self.mind.step([])
+        thought = False
         said: List[str] = []
+        if not acts and self.turns:                      # nothing at once: it thinks about what was asked first
+            unknown = getattr(self.mind, "unknown", 0.0)
+            said = self.think_aloud(thoughts, say)
+            thought = bool(said)
+            if not said:                                 # its thought was not real enough: a moment passes and it
+                self.mind.unknown = unknown              # feels its not knowing (L7); what it says then is its own
+                acts = self.mind.step([])
+                if not acts:
+                    acts = self.mind.step([])
         while acts and len(said) < limit:
             words_now = [str(e.symbol) for e in acts if e.channel == CHANNEL]
             said += words_now
@@ -338,7 +346,7 @@ class Session:
                 if say is not None:
                     say(w)                               # out as it is said (online life)
             acts = self.mind.step([])                    # the echo of its own act arrives here
-        if not knew and self.curious:                    # what it did not know it asks about (T4)
+        if not knew and not thought and self.curious:    # what it did not know it asks about (T4)
             asked = self.wonder(text, before)
             said += asked
             for w in asked:
@@ -347,6 +355,44 @@ class Session:
         self.history.append((len(self.history) + 1, text, list(range(start, self.mind.t + 1))))
         self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
         return " ".join(said) if said else "(sessiz)"
+
+    def associations(self, text: str, tries: int = 2) -> List[tuple]:
+        """What the words of an utterance call to mind as they are heard (T8): for the words the mind is least sure of
+        (the highest drive first, up to ``tries``), a thought of its inner voice, kept as imagined and scored for
+        reality from lived evidence only. Thought before the utterance is taken in, so a thought is what the mind
+        knew, not an echo of what it is being told. Returns (word, thought, reality) triples."""
+        from .dusunce import think
+        from .read import drive_of
+        mind = self.mind
+        cid = mind.ch.id(CHANNEL)
+        topics = []
+        for w in dict.fromkeys(self.body(text)):
+            index = mind.ch.symbol_index(cid, w, create=False) if len(w) >= 4 and w.isalpha() else -1
+            unit = mind.S.atom_index.get((cid, index), -1) if index >= 0 else -1
+            if unit >= 0:
+                topics.append((drive_of(mind, unit), w))
+        topics.sort(reverse=True)
+        out = []
+        for _, topic in topics[:tries]:
+            mind.step([])                                # a fresh inner episode for each thought
+            thought, reality = think(self, topic)
+            out.append((topic, thought, reality))
+        return out
+
+    def think_aloud(self, thoughts: List[tuple], say=None, least: int = 3) -> List[str]:
+        """Think, then speak: of the thoughts its words called to mind, the first that says something (``least``
+        words) and is real enough by the same measure as an act (reality >= 1/2 + theta / 2T) is said aloud."""
+        mind = self.mind
+        real_enough = 0.5 + mind.knob["theta"] / (2.0 * mind.cfg.T)
+        for topic, thought, reality in thoughts:
+            if len(thought) >= least and reality >= real_enough:
+                for w in [topic] + thought:              # what it thought, said aloud (its own acts)
+                    mind.step([Event(CHANNEL, w, ACTED)])
+                    if say is not None:
+                        say(w)
+                mind.step([])
+                return [topic] + thought
+        return []
 
     def known_before(self, text: str) -> Dict[str, int]:
         """How firmly each word of an utterance was known before it was heard (ties held with conviction >= 1/2)."""
@@ -395,14 +441,14 @@ class Session:
         import time
         files = [path] if os.path.isfile(path) else sorted(
             os.path.join(root, name) for root, _, names in os.walk(path) for name in names)
-        start, lived, skipped = time.time(), 0, []
+        start, lived, skipped, t0 = time.time(), 0, [], self.mind.t
         for name in files:
             try:
                 if name.lower().endswith(".json"):
                     import json
                     with open(name, encoding="utf-8") as f:
                         pairs = dialogues_of(json.load(f))
-                    for first, answer in pairs:
+                    for first, answer in pairs[:cap] if cap else pairs:
                         self.watch(first, answer)
                         lived += 1
                     if not pairs:
@@ -410,11 +456,15 @@ class Session:
                     continue
                 if name.lower().endswith(".tsv"):
                     with open(name, encoding="utf-8", errors="replace") as f:
+                        watched = 0
                         for raw in f:
+                            if cap and watched >= cap:
+                                break
                             if "\t" in raw:
                                 first, answer = raw.rstrip("\n").split("\t", 1)
                                 self.watch(first, answer)
                                 lived += 1
+                                watched += 1
                     continue
                 text = read_document(name)
             except Exception as exc:
@@ -432,7 +482,7 @@ class Session:
             self.history.append((len(self.history) + 1, "[okudu] %s" % os.path.basename(name), []))
         took = time.time() - start
         out = "  %d dosya, %d cümle/diyalog, %d an, %.0f sn (%.1f ms/an)" % (
-            len(files) - len(skipped), lived, self.mind.t, took, 1000 * took / max(1, self.mind.t))
+            len(files) - len(skipped), lived, self.mind.t, took, 1000 * took / max(1, self.mind.t - t0))
         if skipped:
             out += "\n  okunamayan: " + ", ".join(skipped[:10])
         return out
