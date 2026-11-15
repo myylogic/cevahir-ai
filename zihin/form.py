@@ -40,9 +40,10 @@ def compose(mind, parts: Tuple[int, ...], extra_kind: int = 0) -> Tuple[int, boo
 
 def confirm_parts(mind, unit: int, slot: int) -> None:
     """One more encounter of a composed unit: evidence on its PART ties."""
-    ties = mind.S.out.get((unit, PART, -1), [])
-    ids = torch.tensor(ties, dtype=I64)
-    add_evidence(mind, W_POS, slot, ids, torch.full((len(ties),), mind.knob["gain"], dtype=F64))
+    if not mind.S.out.get((unit, PART, -1)):
+        return
+    ids, _ = mind.S.out_ids((unit, PART, -1))
+    add_evidence(mind, W_POS, slot, ids, torch.full((ids.numel(),), mind.knob["gain"], dtype=F64))
 
 
 def recognise(mind, slot: int) -> Optional[int]:
@@ -88,13 +89,12 @@ def induce_slots(mind, unit: int, parts: Tuple[int, ...], slot: int) -> None:
 def categories_of(mind, unit: int):
     """(category, expectation of the ABSTRACT tie) for every category the unit is an instance of."""
     S = mind.S
-    ties = S.out.get((unit, ABSTRACT, 0), [])
-    if not ties:
+    if not S.out.get((unit, ABSTRACT, 0)):
         return []
-    ids = torch.tensor(ties, dtype=I64)
+    ids, dst = S.out_ids((unit, ABSTRACT, 0))
     w_pos, w_neg = tie_mass(mind, ids)
     e = expectation(w_pos, w_neg, mind.cfg.k)
-    return list(zip(S.t_dst[ids].tolist(), e.tolist()))
+    return list(zip(dst.tolist(), e.tolist()))
 
 
 def maybe_chunk(mind, slot: int) -> None:

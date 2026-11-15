@@ -27,38 +27,83 @@ from .store import ABSTRACT, ATOMIC, C_NEG, C_POS, CATEGORY, COMPOSED, EXPECT, F
 
 
 def add_evidence(mind, table: int, slot: int, ids: torch.Tensor, amounts: torch.Tensor,
-                 relief: bool = True) -> torch.Tensor:
+                 relief: bool = True, all_expect: bool = False) -> torch.Tensor:
     """Add evidence through the store; keep the relief bookkeeping; let direct experience judge the rest.
 
     ``relief`` False: the evidence is the echo of the mind's own act and says nothing about the world, so it
     does not count as a decrease of the drive (see NOTES.md, finding on self-made relief).
+    ``all_expect``: the caller took ``ids`` from an EXPECT key of ``S.out`` (every one is an expectation).
     """
     S = mind.S
     if ids.numel() == 0:
         return amounts
+    if ids.numel() == 1:                        # one tie: the same steps in plain numbers
+        return torch.tensor([add_evidence1(mind, table, slot, int(ids[0]), float(amounts[0]), relief)], dtype=F64)
     amounts = S.add(table, slot, ids, amounts)  # snapped to the grid, aligned with ids
     if table in (W_POS, W_NEG):
-        expect = S.t_form[ids] == EXPECT
-        if relief and bool(expect.any()):
-            mind._gained.append((ids[expect], amounts[expect] * float(mind.trust[slot])))  # for relief (section 5)
-        if slot in REFERENCE and mind.cfg.learn_trust and bool(expect.any()):
-            judge(mind, table, ids[expect], amounts[expect])  # only expectations are claims about the world
+        if all_expect:
+            claims, claimed = ids, amounts
+        else:
+            expect = S.t_form[ids] == EXPECT
+            if not bool(expect.any()):
+                return amounts
+            claims, claimed = ids[expect], amounts[expect]
+        if relief:
+            mind._gained.append((claims, claimed * float(mind.trust[slot])))  # for relief (section 5)
+        if slot in REFERENCE and mind.cfg.learn_trust:
+            judge(mind, table, claims, claimed)  # only expectations are claims about the world
     return amounts
 
 
-def add_evidence1(mind, table: int, slot: int, tie: int, amount: float) -> None:
-    add_evidence(mind, table, slot, torch.tensor([tie], dtype=I64), torch.tensor([amount], dtype=F64))
-
-
-def judge(mind, table: int, ids: torch.Tensor, amounts: torch.Tensor) -> None:
-    """Direct experience on ties ``ids`` judges the not yet judged evidence of the learned-trust classes."""
+def add_evidence1(mind, table: int, slot: int, tie: int, amount: float, relief: bool = True) -> float:
+    """``add_evidence`` for one tie in plain numbers: the same snapped increment, relief entry and judging, in
+    the same order. Returns the snapped amount."""
     S = mind.S
-    share = torch.clamp(amounts, max=1.0)  # one full direct experience judges everything outstanding
+    got = S.add1(table, slot, tie, amount)
+    if table <= W_NEG and S.views()[1][tie] == EXPECT:
+        if relief:
+            mind._gained.append((tie, got * float(mind.trust[slot])))   # one tie: (id, gain), see Mind._feel
+        if slot in REFERENCE and mind.cfg.learn_trust:
+            judge1(mind, table, tie, got)
+    return got
+
+
+def judge1(mind, table: int, tie: int, amount: float) -> None:
+    """``judge`` for one tie in plain numbers (a one-element sum is that element)."""
+    S = mind.S
+    share = min(amount, 1.0)                                # torch.clamp(amount, max=1.0)
+    w = S.views()[0]
     for slot in range(S.P):
         if slot in REFERENCE or mind.source_tie[slot] < 0:
             continue
-        open_pos = (S.t_w[W_POS, ids, slot] - S.t_w[C_POS, ids, slot]) * share
-        open_neg = (S.t_w[W_NEG, ids, slot] - S.t_w[C_NEG, ids, slot]) * share
+        open_pos = (float(w[W_POS, tie, slot]) - float(w[C_POS, tie, slot])) * share
+        open_neg = (float(w[W_NEG, tie, slot]) - float(w[C_NEG, tie, slot])) * share
+        if open_pos == 0.0 and open_neg == 0.0:
+            continue
+        open_pos = S.add1(C_POS, slot, tie, open_pos)
+        open_neg = S.add1(C_NEG, slot, tie, open_neg)
+        agree = open_pos if table == W_POS else open_neg
+        differ = open_neg if table == W_POS else open_pos
+        S.add1(W_POS, SENSED, mind.source_tie[slot], agree)
+        S.add1(W_NEG, SENSED, mind.source_tie[slot], differ)
+
+
+def judge(mind, table: int, ids: torch.Tensor, amounts: torch.Tensor) -> None:
+    """Direct experience on ties ``ids`` judges the not yet judged evidence of the learned-trust classes.
+
+    The four tables of the ties are read once: judging a class writes only its own checked column, after reading
+    it, and the source ties (which are never judged). A class with nothing open on any of the ties is passed over
+    (its open amounts are all zero) unless a share or a held value is not finite."""
+    S = mind.S
+    share = torch.clamp(amounts, max=1.0)  # one full direct experience judges everything outstanding
+    held = S.t_w.index_select(1, ids)
+    open_any = ((held[W_POS] != held[C_POS]) | (held[W_NEG] != held[C_NEG])).any(0).tolist()
+    finite = bool(torch.isfinite(share).all()) and bool(torch.isfinite(held).all())
+    for slot in range(S.P):
+        if slot in REFERENCE or mind.source_tie[slot] < 0 or (finite and not open_any[slot]):
+            continue
+        open_pos = (held[W_POS, :, slot] - held[C_POS, :, slot]) * share
+        open_neg = (held[W_NEG, :, slot] - held[C_NEG, :, slot]) * share
         if float(open_pos.sum()) == 0.0 and float(open_neg.sum()) == 0.0:
             continue
         open_pos = S.add(C_POS, slot, ids, open_pos)
@@ -69,10 +114,25 @@ def judge(mind, table: int, ids: torch.Tensor, amounts: torch.Tensor) -> None:
         S.add1(W_NEG, SENSED, mind.source_tie[slot], differ)
 
 
+def rows(S, table: int, ids: torch.Tensor) -> torch.Tensor:
+    """The per-class values of one table for the ties ``ids`` ([n, P], the same values as S.t_w[table, ids])."""
+    return S.t_w[table].index_select(0, ids)
+
+
 def tie_mass(mind, ids: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
     """Trust-weighted (W+, W-) of ties."""
     S = mind.S
-    return (S.t_w[W_POS, ids] * mind.trust).sum(-1), (S.t_w[W_NEG, ids] * mind.trust).sum(-1)
+    return (rows(S, W_POS, ids) * mind.trust).sum(-1), (rows(S, W_NEG, ids) * mind.trust).sum(-1)
+
+
+def _present_of(dst: torch.Tensor, occurred: Dict[int, Tuple[float, int]]) -> torch.Tensor:
+    """The intensity with which each target occurred now (0 for those that did not)."""
+    if dst.numel() <= 64:
+        return torch.tensor([occurred[d][0] if d in occurred else 0.0 for d in dst.tolist()], dtype=F64)
+    present = torch.zeros(dst.numel(), dtype=F64)
+    for unit, (intensity, _) in occurred.items():
+        present[dst == unit] = intensity
+    return present
 
 
 def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
@@ -93,24 +153,27 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
     was_present = None
     if cfg.next_only_present:               # F13: "comes next" is learned by what WAS the present a moment ago
         was_present = {u for u in (mind.context, mind.episode[-1] if mind.episode else None) if u is not None}
+    # With general_miss and without reliability, induce reads only the records of targets that occurred with
+    # intensity > 0 (only their positive evidence grows); the other records are not written.
+    acquired = None
+    if cfg.general_miss and not cfg.reliability:
+        acquired = torch.tensor([v for v, (intensity, _) in occurred.items() if intensity > 0.0], dtype=I64)
     for unit, a_u, grounded in mind.last_focus:
         if not grounded or a_u <= 0.0 or int(S.u_kind[unit]) & (CATEGORY | SLOTTED):
             continue
         if was_present is not None and unit not in was_present:
             continue
         record: Dict[int, list] = {}
-        ties = S.out.get((unit, EXPECT, 1), [])
-        if ties:
-            ids = torch.tensor(ties, dtype=I64)
-            dst = S.t_dst[ids]
-            w_pos, w_neg = tie_mass(mind, ids)
-            e = expectation(w_pos, w_neg, cfg.k)
+        if S.out.get((unit, EXPECT, 1)):
+            ids, dst = S.out_ids((unit, EXPECT, 1))
+            pos_rows, neg_rows = rows(S, W_POS, ids), rows(S, W_NEG, ids)
+            e = expectation((pos_rows * mind.trust).sum(-1), (neg_rows * mind.trust).sum(-1), cfg.k)
             hope = mind.act_hope.get(unit)
             if hope is not None:  # an own act is an expectation of relief (changed rule, see NOTES.md)
                 e = torch.where(dst == mind.feel_unit["relief"], torch.clamp(e, min=hope), e)
-            raw_pos, raw_neg = S.t_w[W_POS, ids].sum(-1), S.t_w[W_NEG, ids].sum(-1)
+            raw_pos, raw_neg = pos_rows.sum(-1), neg_rows.sum(-1)
             channel = S.u_channel[dst]
-            present = torch.tensor([occurred[d][0] if d in occurred else 0.0 for d in dst.tolist()], dtype=F64)
+            present = _present_of(dst, occurred)
             weight = e if cfg.neg_weight == "e" else torch.ones_like(e)
             miss = g * a_u * weight * (1.0 - present)
             expected = (e >= cfg.neg_floor) if cfg.neg_floor > 0.0 else torch.ones_like(present, dtype=torch.bool)
@@ -119,9 +182,14 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
                 on = (channel == ch) & expected
                 if bool(on.any()):
                     reporting |= on
-                    got = add_evidence(mind, W_NEG, slot, ids[on], miss[on], relief=ch not in echo)
-                    for d, rp, rn, m in zip(dst[on].tolist(), raw_pos[on].tolist(), raw_neg[on].tolist(),
-                                            got.tolist()):
+                    got = add_evidence(mind, W_NEG, slot, ids[on], miss[on], relief=ch not in echo, all_expect=True)
+                    d_on, rp_on, rn_on = dst[on], raw_pos[on], raw_neg[on]
+                    if acquired is not None:
+                        mine = torch.isin(d_on, acquired)
+                        if not bool(mine.any()):
+                            continue
+                        d_on, rp_on, rn_on, got = d_on[mine], rp_on[mine], rn_on[mine], got[mine]
+                    for d, rp, rn, m in zip(d_on.tolist(), rp_on.tolist(), rn_on.tolist(), got.tolist()):
                         record[d] = [rp, rp, rn, rn + m, slot, slot]
             S.use_ties(ids[reporting])
         for v, (intensity, slot) in occurred.items():
@@ -131,10 +199,8 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
             if v not in record:
                 rp, rn = float(S.t_w[W_POS, tie].sum()), float(S.t_w[W_NEG, tie].sum())
                 record[v] = [rp, rp, rn, rn, slot, slot]
-            got = add_evidence(mind, W_POS, slot, torch.tensor([tie], dtype=I64),
-                               torch.tensor([g * a_u * intensity], dtype=F64),
-                               relief=int(S.u_channel[v]) not in echo)
-            record[v][1] += float(got[0])
+            got = add_evidence1(mind, W_POS, slot, tie, g * a_u * intensity, relief=int(S.u_channel[v]) not in echo)
+            record[v][1] += got
             record[v][4] = slot
         changes[unit] = record
     induce(mind, changes, occurred, slot_of_channel)
@@ -176,21 +242,19 @@ def induce(mind, changes: Dict[int, Dict[int, list]], occurred, slot_of_channel)
         if cfg.general_miss and general not in missed and (general in activation or cfg.miss_scope == "gens"):
             missed.add(general)
             strength = activation[general] if general in activation else e_abs
-            ties = S.out.get((general, EXPECT, 1), [])
-            if not ties:
+            if not S.out.get((general, EXPECT, 1)):
                 continue
-            ids = torch.tensor(ties, dtype=I64)
-            dst = S.t_dst[ids]
+            ids, dst = S.out_ids((general, EXPECT, 1))
             w_pos, w_neg = tie_mass(mind, ids)
             e = expectation(w_pos, w_neg, cfg.k)
             channel = S.u_channel[dst]
-            present = torch.tensor([occurred[d][0] if d in occurred else 0.0 for d in dst.tolist()], dtype=F64)
+            present = _present_of(dst, occurred)
             miss = mind.knob["gain"] * strength * e * (1.0 - present)
             expected = (e >= cfg.neg_floor) if cfg.neg_floor > 0.0 else torch.ones_like(present, dtype=torch.bool)
             for ch, slot in slot_of_channel.items():
                 on = (channel == ch) & expected
                 if bool(on.any()):
-                    add_evidence(mind, W_NEG, slot, ids[on], miss[on])
+                    add_evidence(mind, W_NEG, slot, ids[on], miss[on], all_expect=True)
                     S.use_ties(ids[on])
 
 
@@ -425,18 +489,16 @@ def learn_together(mind, focus: List[Tuple[int, float, bool]], slot: int) -> Non
     g = mind.knob["gain"]
     present = {unit: a for unit, a, grounded in focus if grounded and a > 0.0}
     for unit, a_u in present.items():
-        ties = S.out.get((unit, EXPECT, 0), [])
-        if ties:
-            ids = torch.tensor(ties, dtype=I64)
-            dst = S.t_dst[ids]
-            here = torch.zeros(len(ties), dtype=F64)       # activation of each partner if present (few are)
+        if S.out.get((unit, EXPECT, 0)):
+            ids, dst = S.out_ids((unit, EXPECT, 0))
+            here = torch.zeros(ids.numel(), dtype=F64)     # activation of each partner if present (few are)
             for d, a_d in present.items():
                 here[dst == d] = a_d
             w_pos, w_neg = tie_mass(mind, ids)
             e = expectation(w_pos, w_neg, cfg.k)
             weight = e if cfg.neg_weight == "e" else torch.ones_like(e)
             keep = ((e >= cfg.neg_floor) | (here > 0.0)) if cfg.neg_floor > 0.0 else torch.ones_like(here, dtype=torch.bool)
-            add_evidence(mind, W_NEG, slot, ids[keep], (g * a_u * weight * (1.0 - here))[keep])
+            add_evidence(mind, W_NEG, slot, ids[keep], (g * a_u * weight * (1.0 - here))[keep], all_expect=True)
             S.use_ties(ids[keep])
         for other, a_v in present.items():
             if other != unit:

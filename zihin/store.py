@@ -198,6 +198,7 @@ class Substance:
         self.cur: Optional[MomentLog] = None
         self.now = 0
         self._touched: set = set()
+        self._views = None
         self._clear_indices()
 
     # ------------------------------------------------------------------ caches
@@ -209,18 +210,43 @@ class Substance:
         self.tuple_index: Dict[Tuple[int, ...], int] = {}      # parts -> composed unit
         self.frame_first: Dict[Tuple[int, Tuple[int, ...]], int] = {}  # (pos, parts with -1 at pos) -> instance
         self.frame_of: Dict[Tuple[int, Tuple[int, ...]], int] = {}     # same key -> induced frame unit
+        self._out_ids: Dict[Tuple[int, int, int], tuple] = {}  # out key -> (count, ids, dst) as tensors
 
     def _index_tie(self, tie: int, src: int, dst: int, form: int, lag: int) -> None:
         self.tie_index[(src, dst, form, lag)] = tie
         self.out.setdefault((src, form, -1 if form == PART else lag), []).append(tie)
         self.inc.setdefault((dst, form), []).append(tie)
 
+    def out_ids(self, key: Tuple[int, int, int]) -> Tuple[torch.Tensor, torch.Tensor]:
+        """The ties of ``self.out[key]`` and their targets as tensors (the list must not be empty). Kept between
+        moments: a list only grows at its end (a longer list extends the tensors); a removal drops the entry."""
+        ties = self.out[key]
+        hit = self._out_ids.get(key)
+        if hit is not None and hit[0] == len(ties):
+            return hit[1], hit[2]
+        if hit is not None and hit[0] < len(ties):
+            new = torch.tensor(ties[hit[0]:], dtype=I64)
+            ids, dst = torch.cat([hit[1], new]), torch.cat([hit[2], self.t_dst[new]])
+        else:
+            ids = torch.tensor(ties, dtype=I64)
+            dst = self.t_dst[ids]
+        self._out_ids[key] = (len(ties), ids, dst)
+        return ids, dst
+
+    def views(self):
+        """numpy views of t_w and t_form (same memory) for reading and adding single values."""
+        v = self._views
+        if v is None or v[0] is not self.t_w or v[1] is not self.t_form:
+            v = self._views = (self.t_w, self.t_form, self.t_w.numpy(), self.t_form.numpy())
+        return v[2], v[3]
+
     _UNIT_ARRAYS = ("u_kind", "u_channel", "u_symbol", "u_arity", "u_birth", "u_use", "u_alive")
     _TIE_ARRAYS = ("t_src", "t_dst", "t_form", "t_lag", "t_use", "t_last", "t_birth", "t_alive")
+    _CACHES = ("_out_ids", "_views")
 
     def __getstate__(self):
         """Saved and copied without the spare capacity (the rows beyond n_units / n_ties are zeros); the arrays
-        grow again on demand exactly as they do while living."""
+        grow again on demand exactly as they do while living. Caches of tensors are not saved."""
         state = self.__dict__.copy()
         n, t = self.n_units, self.n_ties
         for name in self._UNIT_ARRAYS:
@@ -229,7 +255,13 @@ class Substance:
             state[name] = getattr(self, name)[:max(t, 1)].clone()
         state["t_w"] = self.t_w[:, :max(t, 1)].clone()
         state["_cu"], state["_ct"] = max(n, 1), max(t, 1)
+        for name in self._CACHES:
+            state.pop(name, None)
         return state
+
+    def __setstate__(self, state) -> None:
+        self.__dict__.update(state)
+        self._out_ids, self._views = {}, None
 
     def slot_keys(self, parts: Tuple[int, ...]):
         """Slot keys of a tuple: (key, positions). Without ``bind_repeats`` one key per position (as written);
@@ -280,22 +312,33 @@ class Substance:
                     self.frame_first.setdefault(key, unit)
 
     # ------------------------------------------------------------------ growth
+    @staticmethod
+    def _grown(col: torch.Tensor, extra: int, fill=0, dim: int = 0) -> torch.Tensor:
+        """``col`` followed by ``extra`` rows of ``fill`` along ``dim`` (what torch.cat with a filled block gives,
+        written once into new memory)."""
+        n = col.shape[dim]
+        shape = list(col.shape)
+        shape[dim] = n + extra
+        out = torch.empty(shape, dtype=col.dtype)
+        out.narrow(dim, 0, n).copy_(col)
+        out.narrow(dim, n, extra).fill_(fill)
+        return out
+
     def _grow_units(self) -> None:
         extra = self._cu
         for name in ("u_kind", "u_arity", "u_birth", "u_use", "u_alive"):
-            col = getattr(self, name)
-            setattr(self, name, torch.cat([col, torch.zeros(extra, dtype=col.dtype)]))
-        self.u_channel = torch.cat([self.u_channel, torch.full((extra,), -1, dtype=torch.int32)])
-        self.u_symbol = torch.cat([self.u_symbol, torch.full((extra,), -1, dtype=I64)])
+            setattr(self, name, self._grown(getattr(self, name), extra))
+        self.u_channel = self._grown(self.u_channel, extra, -1)
+        self.u_symbol = self._grown(self.u_symbol, extra, -1)
         self._cu += extra
 
     def _grow_ties(self) -> None:
         extra = self._ct
         for name in ("t_src", "t_dst", "t_form", "t_lag", "t_use", "t_last", "t_birth", "t_alive"):
-            col = getattr(self, name)
-            setattr(self, name, torch.cat([col, torch.zeros(extra, dtype=col.dtype)]))
-        self.t_w = torch.cat([self.t_w, torch.zeros(4, extra, self.P, dtype=F64)], dim=1)
+            setattr(self, name, self._grown(getattr(self, name), extra))
+        self.t_w = self._grown(self.t_w, extra, dim=1)
         self._ct += extra
+        self._views = None
 
     def new_unit(self, kind: int, channel: int = -1, symbol: int = -1, arity: int = 0) -> int:
         if self.n_units == self._cu:
@@ -342,9 +385,14 @@ class Substance:
         return amounts  # aligned with ``ids``
 
     def add1(self, table: int, slot: int, tie: int, amount: float) -> float:
+        """``add`` for one tie: the same snapped increment (q rounds like torch.round), added and logged alike."""
         amount = q(amount)
         if amount != 0.0:
-            self.add(table, slot, torch.tensor([tie], dtype=I64), torch.tensor([amount], dtype=F64))
+            self.views()[0][table, tie, slot] += amount
+            if table <= W_NEG:
+                self._touched.add(tie)
+            if self.cur is not None and self.keep_log:
+                self.cur.ev.append((table, slot, torch.tensor([tie], dtype=I64), torch.tensor([amount], dtype=F64)))
         return amount
 
     def use_ties(self, ids: torch.Tensor, amount: float = 1.0) -> None:
@@ -489,6 +537,7 @@ class Substance:
             src, dst = int(self.t_src[tie]), int(self.t_dst[tie])
             form, lag = int(self.t_form[tie]), int(self.t_lag[tie])
             self.tie_index.pop((src, dst, form, lag), None)
+            self._out_ids.pop((src, form, -1 if form == PART else lag), None)
             for table, key in ((self.out, (src, form, -1 if form == PART else lag)), (self.inc, (dst, form))):
                 ties = table[key]
                 ties.remove(tie)
