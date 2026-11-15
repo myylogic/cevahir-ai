@@ -381,20 +381,45 @@ class Session:
             out.append((topic, thought, reality))
         return out
 
-    def think_aloud(self, thoughts: List[tuple], say=None, least: int = 3) -> List[str]:
+    def think_aloud(self, thoughts: List[tuple], say=None, least: int = 3, more: int = 2) -> List[str]:
         """Think, then speak: of the thoughts its words called to mind, the first that says something (``least``
-        words) and is real enough by the same measure as an act (reality >= 1/2 + theta / 2T) is said aloud."""
+        words) and is real enough by the same measure as an act (reality >= 1/2 + theta / 2T) is said aloud. Then it
+        may go on (speaking at length when it has more to say): up to ``more`` further thoughts, each about the word of
+        the last one it is least sure of, said while they stay real enough and new. Returns what it said."""
+        from .dusunce import think, topic_of
         mind = self.mind
         real_enough = 0.5 + mind.knob["theta"] / (2.0 * mind.cfg.T)
+        said: List[str] = []
+
+        def aloud(words_):
+            for w in words_:                             # what it thought, said aloud (its own acts)
+                mind.step([Event(CHANNEL, w, ACTED)])
+                if say is not None:
+                    say(w)
+            mind.step([])
+            said.extend(words_)
+
         for topic, thought, reality in thoughts:
             if len(thought) >= least and reality >= real_enough:
-                for w in [topic] + thought:              # what it thought, said aloud (its own acts)
-                    mind.step([Event(CHANNEL, w, ACTED)])
-                    if say is not None:
-                        say(w)
-                mind.step([])
-                return [topic] + thought
-        return []
+                aloud([topic] + thought)
+                break
+        if not said:
+            return []
+        spoken = {tuple(said)}
+        for _ in range(more):
+            topic = topic_of(self, " ".join(said[-len(thought):]))
+            if not topic:
+                break
+            mind.unknown, held = 0.0, mind.unknown
+            mind.step([])
+            mind.unknown = held
+            thought, reality = think(self, topic)
+            line = tuple([topic] + thought)
+            if len(thought) < least or reality < real_enough or line in spoken:
+                break
+            spoken.add(line)
+            aloud(list(line))
+        return said
 
     def known_before(self, text: str) -> Dict[str, int]:
         """How firmly each word of an utterance was known before it was heard (ties held with conviction >= 1/2)."""
