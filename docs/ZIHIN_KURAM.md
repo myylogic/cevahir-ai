@@ -169,7 +169,7 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   ilk sorulduğunda her kalıpta kullanılıyor ("jump twice", "walk and jump", "jump left twice"): 75 komutun 75'i;
   aynı veriyle sıfırdan eğitilmiş, tüm eğitim komutlarını doğru cevaplayan bir Transformer 4'ünü cevaplıyor. SCAN'in
   kendi dilbilgisinde, pencere 11'de, her önekin bağlı çerçeveleri okunarak: 844 komutun 789'u (Transformer 0);
-  pencereye bütünüyle sığan her komut doğru.
+  pencereye bütünüyle sığan her komut doğru; 12'lik pencereyle 844'ün hepsi.
 - **Genelleşmiş Sonuçlar (Generalised Consequences, F35):** bir eylemin neye yol açacağı (iyi, kötü), yolun
   çerçeveleri üzerinden benzer yolların neye yol açtığından okunur; yolun kendi kaydı en son gelir. Cevaplarının nasıl
   karşılandığından birkaç durumda öğrenen bir zihin, hiç karşılaşmadığı durumlarda da aynı biçimde davranır (hiç
@@ -198,6 +198,18 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   "look thrice", "jump thrice and look thrice" için tanık değildir. Bir okumanın dışarıda bıraktığı bağlam parçası
   için, zihnin kendi yaşadığı bağlamlarla ölçülen kaynak güvenilirliği. Varsayılan olarak kapalı: onunla cevap vermek
   bir şey kaybettirmiyor, ama onunla yaşanan bir SCAN hayatı başka türlü öğrendi (789 → 767).
+- **Değişiklik Tanığı (Replacement Witness, F39, varsayılan olarak kapalı):** Mill'in fark yöntemi, zihnin kendi
+  yaşamından okunur: hiçbir şey söylenmeyecekken, şimdiki durumdan tek bir değişiklikle ayrılan yaşanmış bir durum,
+  aynı değişiklikle ayrılan yaşanmış çiftler aynı biçimde sürdükçe onun tanığıdır (değişiklik yaşandığı yerde fark
+  yaratmadı). Bulut hem "şemsiye al" sözünün hem yağmurun ortak nedeniyken, sözler tek başına zihni güneşli günde
+  yağmura yaslıyor (0.556); F39 ile güzel hava önde (0.577), çünkü bulutlu günlerde iki öğüt aynı biçimde sürdü, aynı
+  öğütle bulutlu ve güneşli günler sürmedi. Zihin ona yaslanıyor, henüz ileri sürmüyor. Onunla yaşanınca SCAN (11
+  içinde) 789 cevabını, aynılarını koruyor.
+- **Sürdürme İsteği (Urge to Go On, F40, varsayılan olarak kapalı):** beklenen iki kelime ya birbirinin alternatifidir
+  (yalnız biri doğru olabilir) ya da aynı öğe hakkında bilinen iki şeydir (ikisi de doğru; yalnız sıra için yarışırlar).
+  Bir öğenin yaşanmış devamlarındaki payları bunun ne ölçüde olduğunu söyler: öndeki aday rakibine değil sessizliğe
+  karşı yarışır. Uzun cevaplara ilk adım: hiç sorulmamış şeyler hakkında daha çok olgu, uydurma artmadan (T-long 54'te
+  20 → 22: yarıda kalan iki cümle tamamlandı; uydurma 4 ve 4).
 - **Benzerlik Oyu (Resemblance Vote):** iki şey ortak yönleriyle benzer. Bir yön, ne kadar az şeyde bulunuyorsa o
   kadar ayırt edicidir. Yeni bir şeye en çok benzeyen üyeler en yüksek sesle konuşur; ağırlık, sınıflandırmanın
   örnek tabanlı modellerindeki gibidir (genelleştirilmiş bağlam modeli). Görme ve işitme böyle tanır: yeni
@@ -384,7 +396,9 @@ Hepsi notlarda ölçümleriyle durur.
 | Genelleşmiş Sonuçlar | Generalised Consequences | F35 | modele dayalı seçim: sonuçların beklenen değeri |
 | Kelime Biçimleri | Word Forms | F36 | ardıl çeşitliliğiyle biçimbirim sınırları (Harris) |
 | Kalıtım | Inheritance | F37, varsayılan olarak kapalı | NARS tümdengelimi; istisnalı varsayılan kalıtım |
-| Tanığın Güvenilirliği | Witness Reliability | F38 | kaynak güvenilirliği; NARS tümdengelimi; değişken dereceli modellerde geri çekilme |
+| Tanığın Güvenilirliği | Witness Reliability | F38, varsayılan olarak kapalı | kaynak güvenilirliği; NARS tümdengelimi; değişken dereceli modellerde geri çekilme |
+| Değişiklik Tanığı | Replacement Witness | F39, varsayılan olarak kapalı | Mill'in fark yöntemi |
+| Sürdürme İsteği | Urge to Go On | F40, varsayılan olarak kapalı | dürtü ve alışkanlık (Hull): ne söyleneceğinden ayrı olarak konuşup konuşmamak |
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |

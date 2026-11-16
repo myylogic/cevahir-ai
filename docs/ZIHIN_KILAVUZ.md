@@ -70,7 +70,7 @@ Adı boş bırakırsanız konuşan "biri" olur ve söyledikleri kimseye özel sa
 | `!yas` | gelişim profili: yaşanmış an, bildiği kelime, kurduğu kavram |
 | `!kendin` | iç gözlem: kendi sesiyle ne kadar konuştuğu, kendi içinde ne kadar düşündüğü, kendini en çok neyle bağladığı |
 | `!dusun [konu]` | iç sesini dinlemek: bir konu üzerine düşünür, benzeştirdiği bir kavrama aktararak hayal kurar; her hayalin gerçeklik puanı yazılır |
-| `!neden` | son cevabın her kelimesi nereden geldi: yaşanmış kanıt (hatırlama), bir çerçeve (kaç üye, hangi ilişkiyle), dizinin başı, devam, hiç görülmemiş bir kelimenin kökü, benzer durumlar; beklenen sonuç da tartıldıysa o da yazılır |
+| `!neden` | son cevabın her kelimesi nereden geldi: yaşanmış kanıt (hatırlama), bir çerçeve (kaç üye, hangi ilişkiyle), dizinin başı, devam, hiç görülmemiş bir kelimenin kökü, benzer durumlar; beklenen sonuç da tartıldıysa o da yazılır; başka bir okuma konuşma çizgisinin üstünde başka bir kelime bekliyorduysa bu da "çelişki" olarak yazılır (örneğin kendi belleği genellemeyi ezdiğinde) |
 | `!neden <söz> => <kelime>` | beyaz kutu: bu sözden sonra bu kelimenin kendi kanıtı ve genellemelerle etkin kanıtı, kaynaklara göre |
 | `!kim <ad>` | konuşan kişiyi değiştirmek |
 | `!gor <resim>` | bir resmi bir sonraki sözünüzle birlikte göstermek (örn. `!gor ben.jpg` sonra `ben muhammed`) |

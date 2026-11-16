@@ -10,6 +10,9 @@ What is pinned here
 * Attribution only reads: the same question answered with and without it gives the same answer and the same core.
 * ``!neden`` alone prints the record of the last answer; ``!neden <metin> => <kelime>`` still prints the white-box
   belief (the record does not shadow it).
+* A contradiction is reported: when another reading expected another word over the speaking line. "aslan ne yer ?",
+  lived as "aslan et yer .", among animals that eat grass: "et" is recalled, and the generalisation's "ot" is the
+  contradiction it overrode; "inek ne yer ?" has none.
 """
 from __future__ import annotations
 
@@ -109,3 +112,17 @@ def test_the_command_prints_the_record_and_keeps_the_belief(capsys):
     _one_line(s, "!neden adın ne ? => adım", False, Args(), lambda reason: None, 0)
     out = capsys.readouterr().out
     assert "kendi kanıtı" in out and "hata" not in out
+
+
+def test_a_contradiction_is_reported():
+    s = fresh()
+    for _ in range(3):
+        for x in ("inek", "koyun", "keçi", "at", "deve"):
+            s.watch("%s ne yer ?" % x, "%s ot yer ." % x)
+        s.watch("aslan ne yer ?", "aslan et yer .")
+    said, twin = explained(s, "aslan ne yer ?")
+    assert said == "aslan et yer"
+    meat = [r for r in twin.sources if r["word"] == "et"][0]
+    assert meat["source"] == "yaşanmış" and "genelleme 'ot'" in meat.get("conflict", "")
+    said, twin = explained(s, "inek ne yer ?")
+    assert said == "inek ot yer" and not any(r.get("conflict") for r in twin.sources)

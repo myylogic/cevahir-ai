@@ -2573,3 +2573,131 @@ what merely came before it, and do its own interventions teach it that?
 - Answering took **1463 s** (171 s without): 7.3 s an answer against 0.85 s, about 8.6 times as long.
 - What it shows: on real reading the deduction neither helps nor harms the taught answers (its classes and properties
   are not what those questions ask), and its cost is the one measured in the profiles. It stays off by default.
+
+## A correction to T-cause, and Replacement Witness (F39): Mill's method of difference (2026-11-16)
+
+**The correction first.**
+- The T-cause probe read the mind's stored predictions of its last step (`mind.expected()`). They are empty after a
+  turn the mind only listened to, so the 0.500 values in the first rows of `results/cause.jsonl` meant "nothing
+  stored".
+- The statement above that the mind "is not misled by the words" was wrong. Read from the present context
+  (`read.predictions`), the mind leans to rain on the sunny day with the umbrella advice (0.556). It still leans so
+  after four interventions of its own (rain 0.548 against fine weather 0.529).
+- The corrected probe is a new script, `t_cause_context.py` (rows in `results/cause_context.jsonl`); `t_cause.py` and
+  its rows in `results/cause.jsonl` are kept as they were.
+
+**F39** (`read.replacement_reading`, `read._replacement_pairs`, `Config.difference`, off by default).
+- **When.** Only when nothing would be said at the mind's own threshold (not the one raised while it listens).
+- **The witnesses.** The lived situations that differ from the present one by one replacement: a run of items, the same
+  length, everything else the same, the perceived end included.
+- **Their reliability.** A replacement is reliable as far as the lived pairs that differ by the same replacement at the
+  same place went on alike (the overlap of their lived continuations; f2 = the agreeing share, c2 = the conviction of
+  their number). Neither the present context nor the witness is counted.
+- **What a witness says** is carried as F38's third form carries it: f = f1, c = f1 f2 c1 c2. It says nothing of a value
+  it never went on with and counts against nothing; witnesses add up.
+- In T-cause: "güneşli … iyi eğlenceler ⏎" witnesses "güneşli … şemsiye al ⏎", because on cloudy days the two advices
+  went on alike. "bulutlu … şemsiye al ⏎" does not, because with the same advice cloudy and sunny days went on
+  otherwise.
+
+**T-cause, the corrected probe** (2 seeds; the expectations of the first word of the next utterance):
+
+| probe (sky / advice) | without F39: rain, fine | with F39: rain, fine |
+|---|---|---|
+| sunny / şemsiye al (never lived) | 0.556, 0.500 | 0.556, **0.577** |
+| the same, after 4 own umbrellas on sunny days | 0.548, 0.529 | 0.548, **0.580** |
+| cloudy / iyi eğlenceler, after the interventions | 0.543, 0.541 | **0.568**, 0.541 |
+
+- **What it shows.** With F39 the causal expectation leads where the words alone led to rain. It stays under the
+  speaking line (0.583): the mind leans to it, it does not assert it.
+- **What bounds it.** The witness's own lived evidence (the sunny episodes' continuation held W+ 0.45 in trust-weighted
+  units, c1 = 0.31) and a single lived pair for the replacement (c2 = 0.5).
+
+**Measured with F39 on** (the speaking configuration, official runs):
+- Meaning world: a greeting in front 0.67 → 0.89 (lenient). "selamlar , adın ne ?" is answered in one seed more;
+  "hello , nasılsın ?" is answered in every seed, once stopping after "iyiyim , teşekkür".
+- Teacher protocol 120 exact, F1 0.7444 (answering 187 s against 171 s); recall 90 of 146; listening worlds
+  0.783 / 0.812; relations world, T-purpose, T-compose 75/75 and T-deduce unchanged.
+- SCAN within 11, lived and answered with it: 789 / 844, the same answers template by template as without it
+  (answering 823 s against 727 s).
+- **Off by default.** It lost nothing measured, but it was not measured on the owner's documents, where it would speak
+  where the mind is now silent, and it costs about a tenth more time an answer.
+- **Limits.** One replacement, the same length and place; the pairs must have been lived.
+
+## Contradictions reported by `!neden` (2026-11-16)
+
+- For every word of the last answer, `!neden` now also says when another reading expected another word over the
+  speaking line: the context's own record, the frame that would speak, the lived continuation of the last words, or
+  the most similar lived situations.
+- Example (a test): animals that eat grass, and "aslan ne yer ?" lived as "aslan et yer .". Asked "aslan ne yer ?", the
+  mind recalls "et" and reports "çelişki: genelleme 'ot' bekliyordu (e=0.67)": its own record overrode the
+  generalisation (an exception). "inek ne yer ?" has no contradiction.
+- It only reads; it is the explicit report of a contradiction, not yet a decision to resolve one.
+
+## Urge to Go On (F40): long answers, a first step (2026-11-16)
+
+**The owner's direction.** The mind should give long answers when that is asked for, and the urge to speak should be
+modelled mathematically.
+
+**The world, T-long** (`t_long.py`, public, seeded).
+- Twelve animals, three facts each, read in documents one sentence at a time: the class ("kartal bir kuştur ."), what it
+  does ("kartal uçar ."), what it eats ("kartal et yer .").
+- Six are asked about, and the answer watched is the three facts in that order. The other six are never asked.
+- Scored on the six never asked: the facts said whole (of 3), sentences begun as one of its facts and left unfinished
+  ("baykuş bir kuştur . baykuş"), sentences that are not the animal's facts (confabulated), the number of sentences.
+
+**Where answers stopped** (a white box at each word).
+- The mind says the first fact, starts the second sentence with the animal ("baykuş bir kuştur . baykuş") and stops.
+- There two words are expected, "uçar" 0.669 and "fare" 0.669. Both are true; they compete only for the order. The race
+  (F19) weighs the leader against its strongest rival and is silent when they tie.
+
+**F40** (`act._urge`, `Config.urge`, off by default).
+- When the leading word's rival is itself over the speaking line, u = how far the two are things known about the same
+  item: over the items of the present context, the largest share of an item's lived continuations on the words'
+  channel (W+) that the two hold together.
+- The rival is weighed as (1 − u) rival + u ½. With u = 1 the race is against silence (two things to say); with u = 0 it
+  is F19's race (two alternatives).
+- "uçar" and "fare" after "… baykuş" hold 57% of what "baykuş" went on with: the leader is said. "hamsi" and "levrek"
+  after "… balıktır ." hold nothing of what any item there went on with: they stay alternatives.
+
+**Measured** (3 seeds):
+
+| | without F40 | with F40 |
+|---|---|---|
+| T-long: facts said whole | 20 / 54 | **22 / 54** |
+| T-long: sentences left unfinished | 7 | **5** |
+| T-long: confabulated sentences | 4 | 4 |
+| T-long: sentences per answer | 1.72 | 1.72 |
+| T-purpose: polite answers to things never handed | 8 / 9 | **9 / 9** |
+| T-compose, meaning world, relations world | | unchanged |
+
+- **What failed, and what it shows.**
+  - The first form let any expected rival race against silence: more facts (13 → 17 of 36 on 2 seeds), but more
+    confabulation (4 → 9: "hamsi bir balıktır . levrek yüzer"). Hence the share of a common item.
+  - The first share counted every continuation, feelings included ("baykuş" went on with surprise, relief, conflict):
+    u = 0.13 and nothing changed. Only the words' channel counts.
+- **What still stops long answers.**
+  - A read fact ends a document: after "baykuş fare yer" the mind expects the end of the turn (0.65), because in the
+    documents that sentence ended there. The end of a read sentence is not the end of an answer.
+  - The order chosen at a tie decides whether the watched answers' order can go on ("yer ." never went on in them).
+  - With the facts told in any order (`--varied`), the mind says the animal's name and stops: 0 of 54 with or without
+    F40. After the name no word is expected over the speaking line, because each of the three facts began the watched
+    answers a third of the time; three right continuations divide the evidence that one would have.
+  - Scoring corrected before these rows were kept: a sentence left unfinished was first counted as a confabulation
+    (11 and 9 above were 7 + 4 and 5 + 4).
+  - A wider window does not help (a window of 11: the same; of 15: fewer facts).
+- **Next.** The urge proper: the unsaid share of what the topic was lived to go on with, held for the topic over the
+  answer and spent as it is said, so that the mind goes on while something it knows about the topic is unsaid. For the
+  facts told in any order this means weighing the evidence that the answer goes on with one of the things known about
+  the topic (their frequencies add up) against silence, and choosing among them by order.
+
+## The window and working memory (2026-11-16)
+
+- SCAN within 11, lived and answered with a window of 12 instead of 11: **844 / 844** (the same 58,803 moments lived;
+  answering 990 s against 727 s). The 55 errors at 11 were the window's: commands whose last word is decided after the
+  first word has left the window. With one more item nothing is left wrong.
+- What it says: on what fits, the reply relation and the bound frames answer every command of the add-jump split; what
+  bounds SCAN here is the window. Of the split's 7,706 test commands, 844 fit 11 items (11%), 1,188 fit 12 (15%), 2,246
+  fit 15 (29%), 6,002 fit 30 (78%).
+- Working memory (the question held as one item while it is answered) is not built. A first design: at the end of a
+  turn, the utterance's composed unit is kept as one item of the context, and frames may take it as their filler, so
+  that a long answer is read against the question and the answer's last words. It needs frames over composed items.

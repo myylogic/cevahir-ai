@@ -178,7 +178,7 @@ At each moment, roughly each word, the mind lives these steps:
   asked ("jump twice", "walk and jump", "jump left twice"): 75 of 75 commands, where a Transformer trained from
   scratch on the same data, exact on all its training commands, answers 4. On SCAN's own grammar within a window of
   11, with the bound frames of every prefix read: 789 of 844 (the Transformer 0), every command that fits the window
-  whole answered exactly.
+  whole answered exactly; with a window of 12, all 844.
 - **Generalised Consequences (F35).** What an act would lead to (good, bad) is read from what similar paths led to,
   through the frames of the path, and the path's own record comes last. A mind that learned from how its answers were
   received in a few situations acts the same way in situations it never met (polite to things never handed to it: 0
@@ -207,6 +207,18 @@ At each moment, roughly each word, the mind lives these steps:
   thrice". The reliability of a source, measured on the mind's own lived contexts, for the part of a context a
   reading leaves out. Off by default: answering with it loses nothing, but a SCAN life lived with it learned
   otherwise (789 → 767).
+- **Replacement Witness (F39, off by default).** Mill's method of difference, read from the mind's own life: when
+  nothing would be said, a lived situation that differs from the present one by one replacement is a witness of it as
+  far as the lived pairs that differ by the same replacement went on alike (the replacement made no difference where
+  it was lived). With clouds the common cause of the umbrella advice and the rain, the words alone lead the mind to
+  rain on a sunny day with the advice (0.556); with F39 the fine weather leads (0.577), because the two advices went
+  on alike on cloudy days while the two skies with the same advice did not. It leans, it does not yet assert. Lived
+  with it, SCAN within 11 keeps its 789 answers, the same ones.
+- **Urge to Go On (F40, off by default).** Two expected words are either alternatives (only one can be right) or two
+  things known about the same item (both are right; they compete only for the order). Their share of an item's lived
+  continuations says how far: the leader then races against silence instead of against its rival. A first step to
+  long answers: more facts said about things never asked, no more confabulated (T-long 20 → 22 of 54: two sentences
+  that stopped half way finished; confabulated 4 and 4).
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -396,7 +408,9 @@ The models were small and the data scarce; with far more data the gap may close.
 | Generalised Consequences | Genelleşmiş Sonuçlar | F35 | model-based choice: expected value of consequences |
 | Word Forms | Kelime Biçimleri | F36 | morpheme boundaries by successor variety (Harris) |
 | Inheritance | Kalıtım | F37, off by default | NARS deduction; default inheritance with exceptions |
-| Witness Reliability | Tanığın Güvenilirliği | F38 | source reliability; NARS deduction; backoff in variable-order models |
+| Witness Reliability | Tanığın Güvenilirliği | F38, off by default | source reliability; NARS deduction; backoff in variable-order models |
+| Replacement Witness | Değişiklik Tanığı | F39, off by default | Mill's method of difference |
+| Urge to Go On | Sürdürme İsteği | F40, off by default | drive and habit (Hull): whether to speak apart from what to say |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

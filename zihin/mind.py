@@ -101,6 +101,13 @@ class Config:
                                     # two steps), its own record last
     forms: bool = False             # F36 (Word Forms): a word never met is read as the lived word it is a form of (a
                                     # shared stem where the lived words branch), when nothing else expects anything
+    urge: bool = False              # F40 (Urge to Go On): when the leading word's rival is itself expected, it races
+                                    # against silence as far as the two are things known about the same item (their
+                                    # share of that item's lived continuations): another thing to say, not a rival
+    difference: bool = False        # F39 (Replacement Witness, Mill's method of difference): when nothing would be
+                                    # said, a lived situation that differs from the present one by one replacement is a
+                                    # witness of it as far as the lived pairs differing by the same replacement went on
+                                    # alike (the replacement made no difference)
     purpose: bool = False           # F35 (Generalised Consequences): what a path never taken would lead to (good, bad)
                                     # is read from the paths its frames' members lived; its own record comes last
     replies: bool = False           # F34 (Reply Relation): a frame's value may be what its filler, said on its own,

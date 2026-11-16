@@ -1406,6 +1406,10 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     if getattr(cfg, "forms", False) and not any(e > line for t, e in out.items() if _world(mind, t)):
         for target, e in form_reading(mind, unit, trust).items():   # word never met is read as the form it is of
             out[target] = max(out.get(target, 0.0), e)
+    own_line = 0.5 + cfg.theta / (2.0 * cfg.T)          # F39 only when nothing would be said at the mind's own
+    if getattr(cfg, "difference", False) and not any(e > own_line for t, e in out.items() if _world(mind, t)):
+        for target, e in replacement_reading(mind, unit, trust).items():   # line (not the one raised to listen)
+            out[target] = max(out.get(target, 0.0), e)
     if getattr(cfg, "situations", False) and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
         for target, e in situation_backoff(mind, unit, trust).items():
             out[target] = max(out.get(target, 0.0), e)
@@ -1469,6 +1473,108 @@ def form_base(mind, w: int, since: int):
             if "" in follow or len(follow) >= 2:
                 f = n / max(len(word), len(text))
                 found = (base, f, conviction(float(len(forms)), mind.cfg.k))
+    memo[key] = found
+    return found
+
+
+def replacement_reading(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F39 (Replacement Witness, Mill's method of difference): when nothing would be said (no world target over the
+    speaking line), the lived situations that differ from the present one by one replacement (a run of items A of the
+    present context, B in the situation, the same length and everything else the same, the perceived end of the turn
+    included) are witnesses of it, as far as the replacement made no difference where it was lived: the lived pairs
+    of contexts that differ by the same replacement at the same place went on alike (the overlap of their lived
+    continuations; f2 = the agreeing share, c2 = the conviction of their number). "güneşli … iyi eğlenceler ⏎"
+    witnesses "güneşli … şemsiye al ⏎" when the two advices went on alike on cloudy days; "bulutlu … şemsiye al ⏎"
+    does not, for cloudy and sunny days with the same advice went on otherwise.
+    What a witness says is carried as F38's third form carries it: its own frequency, its reliability scaling only how
+    firmly it holds (f = f1, c = f1 f2 c1 c2), so it says nothing of a value it never went on with and counts against
+    nothing; witnesses add up (revision). {value: e} over 1/2 only. The present context is never its own evidence."""
+    S, cfg, k = mind.S, mind.cfg, mind.cfg.k
+    if not mv_view(mind, "u_kind")[unit] & COMPOSED:
+        return {}
+    memo = _moment_memo(mind)
+    key = ("difference", unit)
+    if key in memo:
+        return memo[key]
+    heard = parts_of(mind, unit)
+    n = len(heard)
+    kinds, src, lag = mv_view(mind, "u_kind"), mv_view(mind, "t_src"), mv_view(mind, "t_lag")
+    witnesses: Dict[int, tuple] = {}
+    budget = 20000
+    for j in sorted(range(n), key=lambda i: len(S.inc.get((heard[i], PART), ()))):   # the rarer items first
+        for tie in S.inc.get((heard[j], PART), ()):
+            budget -= 1
+            if budget < 0:
+                break
+            u = src[tie]
+            if u == unit or u in witnesses or kinds[u] & SLOTTED or lag[tie] != j:
+                continue
+            t = parts_of(mind, u)
+            if len(t) != n or t[-1] != heard[-1]:
+                continue
+            diff = [i for i in range(n) if t[i] != heard[i]]
+            if not diff or max(diff) - min(diff) + 1 != len(diff) or len(diff) > n - 2:
+                continue
+            witnesses[u] = (min(diff), max(diff) + 1)
+        if budget < 0:
+            break
+    evidence: Dict[int, List[float]] = {}
+    for u, (lo, hi) in witnesses.items():
+        targets, own = _world_pos(mind, u, trust)
+        total = sum(own)
+        if total <= 0.0:
+            continue
+        agree, pairs = _replacement_pairs(mind, heard[lo:hi], parts_of(mind, u)[lo:hi], lo, n, unit, u, trust)
+        if agree <= 0.0:
+            continue
+        f2, c2, c1 = agree / pairs, conviction(pairs, k), conviction(total, k)
+        for v, p in zip(targets, own):
+            f1 = p / total
+            c = min(f1 * f2 * c1 * c2, 1.0 - 1e-9)
+            w = k * c / (1.0 - c)
+            rec = evidence.setdefault(v, [0.0, 0.0])
+            rec[0] += f1 * w
+            rec[1] += (1.0 - f1) * w
+    found = {v: expectation(p, q, k) for v, (p, q) in evidence.items()}
+    found = {v: e for v, e in found.items() if e > 0.5}
+    memo[key] = found
+    return found
+
+
+def _replacement_pairs(mind, A: tuple, B: tuple, lo: int, n: int, unit: int, witness: int, trust=None):
+    """F39: (W+, W) of "replacing A by B at this place makes no difference": the lived contexts of length ``n`` that
+    hold A at ``lo`` and whose copy with B there was lived too; each pair agrees by the overlap of the two lived
+    continuations. Neither the present context nor the witness is counted."""
+    memo = _moment_memo(mind)
+    key = ("replacement", A, B, lo, n, unit, witness)
+    if key in memo:
+        return memo[key]
+    S = mind.S
+    kinds, src, lag = mv_view(mind, "u_kind"), mv_view(mind, "t_src"), mv_view(mind, "t_lag")
+    agree = pairs = 0.0
+    budget = 20000
+    for tie in S.inc.get((A[0], PART), ()):
+        budget -= 1
+        if budget < 0:
+            break
+        c1 = src[tie]
+        if lag[tie] != lo or c1 == unit or c1 == witness or kinds[c1] & SLOTTED:
+            continue
+        p1 = parts_of(mind, c1)
+        if len(p1) != n or p1[lo:lo + len(A)] != A:
+            continue
+        c2 = S.tuple_index.get(p1[:lo] + B + p1[lo + len(A):])
+        if c2 is None or c2 == unit or c2 == witness or kinds[c2] & SLOTTED:
+            continue
+        t1, w1 = _world_pos(mind, c1, trust)
+        t2, w2 = _world_pos(mind, c2, trust)
+        s1, s2 = sum(w1), sum(w2)
+        if s1 <= 0.0 or s2 <= 0.0:
+            continue
+        share2 = {v: w / s2 for v, w in zip(t2, w2)}
+        pairs += 1.0
+        agree += sum(min(w / s1, share2.get(v, 0.0)) for v, w in zip(t1, w1))
+    found = (agree, pairs)
     memo[key] = found
     return found
 

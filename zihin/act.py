@@ -254,6 +254,9 @@ def _race(mind, candidates, theta: float, T: int) -> List[Event]:
         ranked = sorted(by_channel[channel], reverse=True)
         score, e, unit = ranked[0]
         rival = ranked[1][0] if len(ranked) > 1 else 0.5
+        if getattr(mind.cfg, "urge", False) and len(ranked) > 1 and rival > 0.5 + theta / (2.0 * T):
+            u = _urge(mind, unit, ranked[1][2])        # F40: how far the two are things known about the same item
+            rival = (1.0 - u) * rival + u * 0.5        # (another thing to say, not an alternative): against silence
         rate = 2.0 * (score - max(rival, 0.5 if score <= 0.5 else rival))
         if rate <= 0.0 or math.ceil(theta / rate - 1e-12) > T:
             tried = _explore(mind, ranked, theta, T) if getattr(mind.cfg, "explore", False) else None
@@ -266,6 +269,47 @@ def _race(mind, candidates, theta: float, T: int) -> List[Event]:
             from .neden import attribute
             mind.__dict__.setdefault("_why", []).append(attribute(mind, unit, consequence(mind, unit)))
     return acts
+
+
+def _urge(mind, a: int, b: int) -> float:
+    """F40 (Urge to Go On): how far two expected words are two things known about the same item rather than two
+    alternatives, u in [0, 1]: over the items of the present context, the largest share of an item's lived
+    continuations on the words' channel (W+) that the two hold together. "uçar" and "fare" after "… baykuş" are most of
+    what "baykuş" was lived to go on with (two facts of baykuş: saying either is right, they compete only for the
+    order); "hamsi" and "levrek" after "… balıktır ." are almost nothing of what any item there went on with (only one
+    can be right). The rival is then weighed as (1 - u) rival + u 1/2: the race of F19 for alternatives, a race against
+    silence for things to say. A rival that is not itself over the speaking line is never weighed so (the mind would
+    not have said it)."""
+    from .form import parts_of
+    from .read import _unit_arrays
+    from .store import COMPOSED
+    if mind.context is None:
+        return 0.0
+    channels = mv_view(mind, "u_channel")
+    channel = channels[a]
+    items = parts_of(mind, mind.context) if mv_view(mind, "u_kind")[mind.context] & COMPOSED else (mind.context,)
+    best = 0.0
+    for x in set(items):
+        found = _unit_arrays(mind, x, 1)
+        if found is None:
+            continue
+        dst, pos, _ = found
+        total = both = 0.0
+        hit_a = hit_b = False
+        for v, p in zip(dst, pos):
+            p = float(p)
+            if p <= 0.0 or channels[v] != channel:      # what x went on with on the words' channel
+                continue
+            total += p
+            if v == a:
+                both += p
+                hit_a = True
+            elif v == b:
+                both += p
+                hit_b = True
+        if hit_a and hit_b and total > 0.0:
+            best = max(best, both / total)
+    return best
 
 
 def decide(mind) -> List[Event]:
