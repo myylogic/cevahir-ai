@@ -104,6 +104,10 @@ class Config:
                                     # is read from the paths its frames' members lived; its own record comes last
     replies: bool = False           # F34 (Reply Relation): a frame's value may be what its filler, said on its own,
                                     # was answered with; with it several places after a prefix may be bound (F32)
+    witness: bool = False           # F38 (Witness Reliability): a lived suffix that leaves out a fixed item of a
+                                    # frame's claim is a witness of it, by NARS deduction through how far the lived
+                                    # contexts that end with that item and the suffix went on as the suffix did
+                                    # (off: such a suffix never counts, F34)
     paradigmatic: bool = False      # F31 (Paradigmatic Relation): a frame's value may be what stands where the filler
                                     # stands (ALIKE: the item most interchangeable with it, not a rival filler of the
                                     # frame's place), as SELF, NEXT and START are other relations to the filler

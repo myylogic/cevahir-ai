@@ -195,6 +195,14 @@ At each moment, roughly each word, the mind lives these steps:
   with, comes last. Facts read apart ("kartal bir kuştur .", "kuşlar uçar .") give a conclusion never taught
   ("kartal uçar"), and an exception stated of itself ("penguen yüzer") wins over its class: 48 of 48 in T-deduce
   against 2, no wrong generalisation. Off until it is cheap on a large mind; one step, no chains yet.
+- **Witness Reliability (F38, off by default).** A shorter lived context that leaves out a fixed word of a frame's claim is a witness
+  of the claim as far as the mind has seen it agree: the lived contexts that end with the left-out word and the
+  shorter one went on as the shorter one did. What the witness says is carried by the deduction of NARS (f = f1 f2,
+  c = f1 f2 c1 c2), so it says nothing of a value it never went on with. "adın ne ?" witnesses "selamlar , adın ne ?"
+  (what ended with ", adın ne ?" went on as "adın ne ?" did); "look thrice" does not witness "jump thrice and look
+  thrice". The reliability of a source, measured on the mind's own lived contexts, for the part of a context a
+  reading leaves out. Off by default: answering with it loses nothing, but a SCAN life lived with it learned
+  otherwise (789 → 767).
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -384,6 +392,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Generalised Consequences | Genelleşmiş Sonuçlar | F35 | model-based choice: expected value of consequences |
 | Word Forms | Kelime Biçimleri | F36 | morpheme boundaries by successor variety (Harris) |
 | Inheritance | Kalıtım | F37, off by default | NARS deduction; default inheritance with exceptions |
+| Witness Reliability | Tanığın Güvenilirliği | F38 | source reliability; NARS deduction; backoff in variable-order models |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

@@ -186,6 +186,14 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   gelir. Ayrı ayrı okunmuş olgular ("kartal bir kuştur .", "kuşlar uçar .") öğretilmemiş bir sonuç veriyor ("kartal
   uçar"); kendisi için söylenmiş bir istisna ("penguen yüzer") sınıfını geçiyor: T-deduce'da 48'de 48 (önce 2),
   yanlış genelleme yok. Büyük bir zihinde ucuzlayana kadar kapalı; tek adım, henüz zincir yok.
+- **Tanığın Güvenilirliği (Witness Reliability, F38, varsayılan olarak kapalı):** bir çerçevenin iddiasının sabit bir kelimesini dışarıda
+  bırakan daha kısa bir yaşanmış bağlam, zihnin onu ne kadar uyuşurken gördüyse o kadar iddianın tanığıdır: dışarıda
+  kalan kelimeyle ve kısa bağlamla biten yaşanmış bağlamlar, kısa bağlamın sürdüğü gibi sürmüştür. Tanığın söylediği
+  NARS tümdengelimiyle taşınır (f = f1 f2, c = f1 f2 c1 c2); bu yüzden hiç sürmediği bir değer hakkında hiçbir şey
+  söylemez. "adın ne ?", "selamlar , adın ne ?" için tanıktır (", adın ne ?" ile bitenler "adın ne ?" gibi sürdü);
+  "look thrice", "jump thrice and look thrice" için tanık değildir. Bir okumanın dışarıda bıraktığı bağlam parçası
+  için, zihnin kendi yaşadığı bağlamlarla ölçülen kaynak güvenilirliği. Varsayılan olarak kapalı: onunla cevap vermek
+  bir şey kaybettirmiyor, ama onunla yaşanan bir SCAN hayatı başka türlü öğrendi (789 → 767).
 - **Benzerlik Oyu (Resemblance Vote):** iki şey ortak yönleriyle benzer. Bir yön, ne kadar az şeyde bulunuyorsa o
   kadar ayırt edicidir. Yeni bir şeye en çok benzeyen üyeler en yüksek sesle konuşur; ağırlık, sınıflandırmanın
   örnek tabanlı modellerindeki gibidir (genelleştirilmiş bağlam modeli). Görme ve işitme böyle tanır: yeni
@@ -372,6 +380,7 @@ Hepsi notlarda ölçümleriyle durur.
 | Genelleşmiş Sonuçlar | Generalised Consequences | F35 | modele dayalı seçim: sonuçların beklenen değeri |
 | Kelime Biçimleri | Word Forms | F36 | ardıl çeşitliliğiyle biçimbirim sınırları (Harris) |
 | Kalıtım | Inheritance | F37, varsayılan olarak kapalı | NARS tümdengelimi; istisnalı varsayılan kalıtım |
+| Tanığın Güvenilirliği | Witness Reliability | F38 | kaynak güvenilirliği; NARS tümdengelimi; değişken dereceli modellerde geri çekilme |
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |

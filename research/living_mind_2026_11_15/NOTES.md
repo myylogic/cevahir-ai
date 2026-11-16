@@ -2363,3 +2363,68 @@ sources:
 
 The audit traced the owner's minds' answers with an earlier form of the same attribution. For "Yağmur nasıl yağar sence ?", cevahir3b's
 "bilmiyorum , öğrenmek isterim ." is lived evidence, word by word.
+
+## Witness Reliability (F38): a shorter context as a witness, as far as the mind has seen it agree (2026-11-16)
+
+**The gap.** The strict suffix rule (above) made the SCAN answers finish. It also silenced two questions of the
+meaning world in all three seeds, "selamlar , adın ne ?" and "hello , nasılsın ?" (a greeting in front 1.00 → 0.67).
+- The lived "adın ne ?" leaves out the frame's fixed comma, so it no longer counted.
+- Leaving out the comma does not change what follows; leaving out "left and" in SCAN does. The rule could not tell
+  the two apart.
+
+**F38** (`read.witness_reliability`, `read.witnessed`, `Config.witness`, off by default; see "Why it is off"). A lived
+suffix that leaves out a fixed item of a frame's claim is a *witness* of the claim. How far it can be believed is
+measured on the mind's own life: it is the reliability of a source, applied to the part of a context a reading leaves
+out.
+- **The evidence about the witness.** The lived contexts that end with the left-out item and the suffix (", adın ne ?
+  ⏎" for "adın ne ? ⏎"), never the context being read. Each agrees as far as it went on as the suffix did: the overlap
+  of the two lived continuations, sum over v of min(P_u(v), P_t(v)). f2 = the agreeing share, c2 = the conviction of
+  their number.
+- **What the witness says, by the deduction of NARS.** From "t goes on with v" (f1 = v's share of t's lived
+  continuations, c1 = their conviction) and "the longer context goes on as t does" (f2, c2): f = f1 f2, c = f1 f2 c1
+  c2, w = k c / (1 − c). This evidence joins the revision of the frame's claim (F30), value by value.
+- **A witness says nothing about a value it never went on with** (f1 = 0 gives c = 0). It cannot silence a claim it
+  knows nothing of.
+- With no such lived context the suffix is another context, as F34's rule says.
+
+**What failed first: the reliability as a weight on the similarity.**
+- The first form multiplied the suffix's similarity (F23, F30) by the lower frequency W+ / (W + k).
+- Meaning world: a greeting in front 0.67 → 1.00, everything else unchanged.
+- SCAN within 11 (the saved life): 789 → 783. Six commands, all "jump left and X opposite left" (and right), stopped
+  after their first word.
+- Why: for "walk opposite left ⏎ i_lturn" the contexts ending with "and walk opposite left ⏎ i_lturn" include "turn
+  left and walk opposite left", whose answer goes on with i_lturn by coincidence. The reliability came out near 0.25,
+  not 0. The weak witness, voting with its whole distribution, still counted against the frame's claim (i_jump), which
+  was just over the speaking line.
+- The hypothesis this eliminates: that a discounted vote is enough. A source of low reliability must not count against
+  a value it never reported, which is what the deduction says.
+
+**Measured** (official runs with the switch on in the speaking configuration; the second form):
+
+| | strict rule (F34) | F38 |
+|---|---|---|
+| meaning world: a greeting in front (3 seeds) | 0.67 | **1.00** (best e of "selamlar , adın ne ?" 0.567 → 0.737) |
+| meaning world: everything else | | unchanged |
+| SCAN within 11, answering on the life saved without it | 789 / 844 | 789 / 844, the same 55 errors |
+| SCAN within 11, lived and answered with it (the official run) | 789 / 844 | **767 / 844** |
+| T-compose | 75 / 75 | 75 / 75 |
+| teacher protocol (exact, F1; answering) | 120, 0.7444; 176 s | 120, 0.7444; 171 s |
+| recall (answering) | 90 / 146; 57 s | 90 / 146; 54 s |
+| listening worlds | 0.783 / 0.812 | 0.783 / 0.812 |
+| relations world, T-purpose (8/9), T-deduce (48/48) | | identical |
+
+**Why it is off.**
+- Lived with, F38 changed what the SCAN life learned. The official run lives the training dialogues with the switch
+  on, then answers: 767 / 844, 22 fewer. All 22 are of one family: "X left and X opposite left" (and right), and the
+  "turn" commands joined to them.
+- Answering with it on the life lived without it loses nothing (789, the same errors). The difference is in living.
+- Why, as far as it is understood: what the mind reads while it listens is what it predicts, and a prediction that
+  fails is learned from (F14). By the deduction, a witness of low reliability (f2 near 0.25, from the coincidental
+  agreement of the "turn" commands) says that even its own value mostly does not follow (f = f1 f2 < ½). While
+  listening, such witnesses weakened predictions the frames had right, and the life learned otherwise.
+- The hypothesis this eliminates: that a witness that cannot silence a value it never saw is harmless. Through its own
+  value it still can, and its effect reaches learning, not only answers.
+- The next form keeps the witness's own frequency and lets its reliability scale only its confidence (as F29 and F36
+  carry a reading: f = f1, c = f1 f2 c1 c2), so a weak witness counts against nothing.
+
+- **Exactness.** With the switch off, the lesson-free gate and the 17 configurations are bit-identical.

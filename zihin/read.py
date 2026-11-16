@@ -231,7 +231,9 @@ def corroborated(mind, unit: int, trust, frame: int, claims: Dict[int, Tuple[flo
     reading did not count (its members' instances and every frame are left out, so no lived context is counted twice):
         w = k c / (1 - c) for each reading;  W+ = f1 w1 + f2 w2,  W- = (1 - f1) w1 + (1 - f2) w2
     f2 is the value's share of the situations' votes: situations that went on otherwise count against it. Values only
-    the situations claim are left to F23's own reading (it speaks when nothing else does). Writes into ``out``."""
+    the situations claim are left to F23's own reading (it speaks when nothing else does). Writes into ``out``.
+    F38 (``witness``): the lived suffixes that leave out a fixed item of the claim add, value by value, what they
+    witness of it (``witnessed``: NARS deduction), as a third reading in the same revision."""
     k = mind.cfg.k
     focus = None
     if getattr(mind.cfg, "replies", False):              # F34: about the claim's own context
@@ -242,15 +244,21 @@ def corroborated(mind, unit: int, trust, frame: int, claims: Dict[int, Tuple[flo
             if entry >= 0:
                 focus.add(n - 1 - (len(frame_parts) + i))
         focus = frozenset(d for d in focus if d >= 0)
-    c_sit, shares = situation_evidence(mind, unit, trust, frozenset(_member_instances(mind, frame, unit, tail)),
-                                       lived_only=True, focus=focus)
-    if c_sit <= 0.0:
+    counted = frozenset(_member_instances(mind, frame, unit, tail))
+    c_sit, shares = situation_evidence(mind, unit, trust, counted, lived_only=True, focus=focus)
+    witnessed_by = witnessed(mind, unit, trust, counted, focus) if focus and getattr(mind.cfg, "witness", False) \
+        else {}
+    if c_sit <= 0.0 and not witnessed_by:
         return
-    w2 = k * c_sit / (1.0 - c_sit)
+    w2 = k * c_sit / (1.0 - c_sit) if c_sit > 0.0 else 0.0
     for target, (_, held, f) in claims.items():
         w1 = k * held / (1.0 - held)
         f2 = shares.get(target, 0.0)
-        out[target] = expectation(f * w1 + f2 * w2, (1.0 - f) * w1 + (1.0 - f2) * w2, k)
+        w_pos, w_neg = f * w1 + f2 * w2, (1.0 - f) * w1 + (1.0 - f2) * w2
+        for v_pos, v_neg in witnessed_by.get(target, ()):
+            w_pos, w_neg = w_pos + v_pos, w_neg + v_neg
+        if c_sit > 0.0 or target in witnessed_by:
+            out[target] = expectation(w_pos, w_neg, k)
 
 
 def _begins(mind, unit: int) -> bool:
@@ -1440,7 +1448,8 @@ def situation_evidence(mind, unit: int, trust: Optional[torch.Tensor] = None, le
     ``focus`` (F34): the places (distances from the end) of a frame's fixed items. The lived situations are then the
     lived suffixes of the present context that reach every fixed item of the frame: the claim's own context, whatever
     filled the frame's place at the front, or nothing. A suffix that leaves out a fixed word is another context ("walk
-    twice ⏎" of "jump left and walk twice ⏎": what follows it is the answer to another command)."""
+    twice ⏎" of "jump left and walk twice ⏎": what follows it is the answer to another command); F38 reads such a
+    suffix as a witness (``witnessed``)."""
     S, cfg = mind.S, mind.cfg
     if not mv_view(mind, "u_kind")[unit] & COMPOSED:
         return 0.0, {}
@@ -1534,6 +1543,100 @@ def situation_evidence(mind, unit: int, trust: Optional[torch.Tensor] = None, le
             c = cfg.lam * (similar / voted) * conviction(float(voters), cfg.k)
             return c, {v: w / voted for v, w in shares.items()}
     return 0.0, {}
+
+
+def witness_reliability(mind, q: int, t: tuple, suffix: int, unit: int, trust=None) -> Tuple[float, float]:
+    """F38 (Witness Reliability): the evidence (W+, W) that a lived suffix ``t`` of the present context, which leaves
+    out a fixed item of a frame's claim (``q`` is the item just before it), goes on as the longer context does. The
+    evidence is the lived contexts that end with (q, t): each agrees as far as it went on as t went on, by the
+    overlap of the two lived continuations, sum over v of min(P_u(v), P_t(v)); W is their number. None lived: (0, 0),
+    the suffix is another context (F34's rule). It is a source's reliability (the trust of a provenance, F24's
+    voices) for the part of a context a reading leaves out, measured on the mind's own lived contexts, never on the
+    claim being read (the present context is not among them)."""
+    memo = _moment_memo(mind)
+    key = ("witness", q, suffix, unit)
+    if key in memo:
+        return memo[key]
+    S, k = mind.S, mind.cfg.k
+    kinds = mv_view(mind, "u_kind")
+    targets, own = _world_pos(mind, suffix, trust)
+    total = sum(own)
+    agree = pairs = 0.0
+    if total > 0.0:
+        p_t = {v: p / total for v, p in zip(targets, own)}
+        L = len(t)
+        src, lag = mv_view(mind, "t_src"), mv_view(mind, "t_lag")
+        by_q, by_t = S.inc.get((q, PART), ()), S.inc.get((t[0], PART), ())
+        through_q = len(by_q) <= len(by_t)               # call the contexts up through the rarer of the two items
+        budget = 20000
+        for tie in (by_q if through_q else by_t):
+            budget -= 1
+            if budget < 0:
+                break
+            u = src[tie]
+            if u == unit or u == suffix or kinds[u] & SLOTTED:
+                continue
+            parts = parts_of(mind, u)
+            m = len(parts)
+            if m < L + 1 or lag[tie] != (m - L - 1 if through_q else m - L) or parts[m - L - 1] != q \
+                    or parts[m - L:] != t:
+                continue
+            u_targets, u_own = _world_pos(mind, u, trust)
+            u_total = sum(u_own)
+            if u_total <= 0.0:
+                continue
+            pairs += 1.0
+            agree += sum(min(p / u_total, p_t.get(v, 0.0)) for v, p in zip(u_targets, u_own))
+    found = (agree, pairs)
+    memo[key] = found
+    return found
+
+
+def witnessed(mind, unit: int, trust, counted, focus) -> Dict[int, List[Tuple[float, float]]]:
+    """F38: what the lived suffixes of ``unit`` that leave out a fixed item of a frame's claim witness of it, value by
+    value: {value: [(W+, W-) of each witness]}. By the deduction of NARS, from "t goes on with v" (f1 = v's share of
+    t's lived continuations, c1 = their conviction) and "the longer context goes on as t does" (f2 = the agreeing
+    share of the lived contexts that end with the left-out item and t, c2 = the conviction of their number):
+    f = f1 f2, c = f1 f2 c1 c2, w = k c / (1 - c). A witness says nothing of a value it never went on with (f1 = 0
+    gives c = 0): it cannot silence a claim it knows nothing of. The suffix must hold a word of the utterance and the
+    perceived event; the frame's member instances (``counted``) are not witnesses (no lived context counts twice)."""
+    S, k = mind.S, mind.cfg.k
+    heard = parts_of(mind, unit)
+    n = len(heard)
+    channels, symbols = mv_view(mind, "u_channel"), mv_view(mind, "u_symbol")
+    sense, act = kind_masks(mind)[4:6]
+    event = -1
+    for j, p in enumerate(heard):
+        if sense[channels[p]]:
+            event = j
+    if event < 1:
+        return {}
+    d_event = n - 1 - event
+    reach = max(focus) + 1
+    kinds = mv_view(mind, "u_kind")
+    out: Dict[int, List[Tuple[float, float]]] = {}
+    for L in range(min(reach, n) - 1, d_event + 1, -1):
+        suffix = S.tuple_index.get(heard[n - L:])
+        if suffix is None or suffix in counted or kinds[suffix] & SLOTTED:
+            continue
+        if not any(act[channels[p]] and str(mind.ch.symbol(channels[p], symbols[p])).isalpha()
+                   for p in heard[n - L:event]):
+            continue
+        agree, pairs = witness_reliability(mind, heard[n - L - 1], heard[n - L:], suffix, unit, trust)
+        if agree <= 0.0:
+            continue
+        targets, own = _world_pos(mind, suffix, trust)
+        total = sum(own)
+        if total <= 0.0:
+            continue
+        f2, c2, c1 = agree / pairs, conviction(pairs, k), conviction(total, k)
+        for v, p in zip(targets, own):
+            f1 = p / total
+            f = f1 * f2
+            c = min(f1 * f2 * c1 * c2, 1.0 - 1e-9)
+            w = k * c / (1.0 - c)
+            out.setdefault(v, []).append((f * w, (1.0 - f) * w))
+    return out
 
 
 def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
