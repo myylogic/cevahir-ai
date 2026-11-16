@@ -46,8 +46,34 @@ PRIMITIVES = {"walk": "i_walk", "run": "i_run", "look": "i_look", "jump": "i_jum
 TURN = {"left": "i_lturn", "right": "i_rturn"}
 
 
+def scan_commands() -> List[Tuple[List[str], List[str]]]:
+    """SCAN's grammar (Lake & Baroni 2018), all 20,910 commands with their meanings (actions as this file writes them):
+    C -> S and S | S after S | S;  S -> V twice | V thrice | V;  V -> U | D | U opposite D | U around D | turn opposite D
+    | turn around D;  D -> U left | U right | turn left | turn right;  U -> walk | look | run | jump."""
+    turn = {"left": "i_lturn", "right": "i_rturn"}
+    v = [([u], [a]) for u, a in PRIMITIVES.items()]
+    for d, t in turn.items():
+        v.append((["turn", d], [t]))
+        v.append((["turn", "opposite", d], [t, t]))
+        v.append((["turn", "around", d], [t] * 4))
+        for u, a in PRIMITIVES.items():
+            v += [([u, d], [t, a]), ([u, "opposite", d], [t, t, a]), ([u, "around", d], [t, a] * 4)]
+    sentences = []
+    for c, a in v:
+        sentences += [(c, a), (c + ["twice"], a * 2), (c + ["thrice"], a * 3)]
+    out = list(sentences)
+    for (c1, a1), (c2, a2) in itertools.product(sentences, sentences):
+        out += [(c1 + ["and"] + c2, a1 + a2), (c1 + ["after"] + c2, a2 + a1)]
+    return out
+
+
+SCAN = 0                                                # --scan F: SCAN's commands that fit a window of F items
+
+
 def answer(words: List[str]) -> List[str]:
     """The meaning of a command (the answer key; the mind is never given it)."""
+    if SCAN:
+        return SCAN_MEANING[tuple(words)]
     if "and" in words or "after" in words:
         j = words.index("and") if "and" in words else words.index("after")
         a, b = answer(words[:j]), answer(words[j + 1:])
@@ -64,9 +90,15 @@ def answer(words: List[str]) -> List[str]:
         return [TURN[rest[0]], act]
     if rest[0] == "opposite":
         return [TURN[rest[1]], TURN[rest[1]], act]
+    if rest[0] == "around":
+        return [TURN[rest[1]], act] * 4
     if rest[1:] == ["twice"]:
         return [TURN[rest[0]], act] * 2
     raise ValueError(words)
+
+
+AROUND = False                                          # --around: the templates "X around left / right" too
+WINDOW = 0                                              # --window: the mind's window F (0: as configured)
 
 
 def commands() -> List[List[str]]:
@@ -74,13 +106,25 @@ def commands() -> List[List[str]]:
     for x in PRIMITIVES:
         out += [[x], [x, "twice"], [x, "thrice"], [x, "left"], [x, "right"], [x, "opposite", "left"],
                 [x, "opposite", "right"], [x, "left", "twice"]]
+        if AROUND:
+            out += [[x, "around", "left"], [x, "around", "right"]]
         for y in PRIMITIVES:
             if y != x:
                 out += [[x, "and", y], [x, "after", y], [x, "twice", "and", y]]
     return out
 
 
+SCAN_MEANING: Dict[tuple, List[str]] = {}
+
+
 def split() -> Tuple[List[List[str]], List[List[str]]]:
+    if SCAN:
+        if not SCAN_MEANING:
+            for c, a in scan_commands():
+                if len(c) + 1 + len(a) <= SCAN + 1:      # the command, its end and the answer fit the window
+                    SCAN_MEANING[tuple(c)] = a
+        every = [list(c) for c in SCAN_MEANING]
+        return [c for c in every if "jump" not in c] + [["jump"]], [c for c in every if "jump" in c and c != ["jump"]]
     train = [c for c in commands() if "jump" not in c] + [["jump"]]
     test = [c for c in commands() if "jump" in c and c != ["jump"]]
     return train, test
@@ -104,6 +148,8 @@ def run_mind(seed: int, switches: Dict[str, bool]) -> dict:
     torch.manual_seed(seed)
     mind = Mind(R.speaking_config(switches))
     mind.add_channel(CHANNEL, "act")
+    if WINDOW:
+        mind.knob["F"] = WINDOW                         # the mind's window (a knob it can turn itself, 3..15)
     s = Session(mind)
     t0 = time.time()
     for c in life(seed):
@@ -169,7 +215,7 @@ def run_transformer(seed: int, steps: int = 6000) -> dict:
     def decode(c):
         seq = [ix[w] for w in c + ["⏎"]]
         out = []
-        for _ in range(8):
+        for _ in range(16):
             nxt = int(net(torch.tensor([seq]))[0, -1].argmax())
             if vocab[nxt] in (".", "<pad>"):
                 break
@@ -201,7 +247,14 @@ def main() -> None:
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--set", default="")
     ap.add_argument("--out", default=OUT)
+    ap.add_argument("--around", action="store_true")
+    ap.add_argument("--window", type=int, default=0)
+    ap.add_argument("--scan", type=int, default=0, help="SCAN's commands that fit a window of this many items")
     args = ap.parse_args()
+    global AROUND, WINDOW, SCAN
+    AROUND, WINDOW, SCAN = args.around, args.window, args.scan
+    if SCAN and not WINDOW:
+        WINDOW = SCAN
     torch.set_num_threads(1)
     switches = {k: bool(int(v)) for k, v in (kv.split("=") for kv in filter(None, args.set.split(",")))}
     rows = [run_mind(s, switches) if args.who == "mind" else run_transformer(s) for s in range(args.seeds)]
@@ -223,7 +276,8 @@ def main() -> None:
         print("  training commands answered exactly: %s" % [(r["train_exact"], r["train_n"]) for r in rows])
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "a", encoding="utf-8") as f:
-        f.write(json.dumps({"who": args.who, "seeds": args.seeds, "switches": switches, "exact": total, "n": n,
+        f.write(json.dumps({"who": args.who, "seeds": args.seeds, "switches": switches, "around": AROUND,
+                            "window": WINDOW, "scan": SCAN, "exact": total, "n": n,
                             "templates": templates, "rows": rows}, ensure_ascii=False) + "\n")
 
 

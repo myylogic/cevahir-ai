@@ -145,7 +145,7 @@ def speaking(folder: str = None) -> Config:
     return Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
                           backoff=True, resemblance=True, race=True, situations=True, explore=True, starts=True,
                           exclusive=True, exact_relations=True, analogy=True, corroborate=True, paradigmatic=True,
-                          bind_relations=True, company=True, replies=True, purpose=True,
+                          bind_relations=True, company=True, replies=True, purpose=True, forms=True,
                           log_path=_log_path(folder) if folder else _log_path())
 
 
@@ -155,7 +155,7 @@ VARIANTS = {"speaking": speaking,
 
 NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "exclusive",   # a loaded mind may
          "exact_relations", "analogy", "corroborate", "paradigmatic", "bind_relations",      # lack these (--ac)
-         "company", "replies", "purpose")
+         "company", "replies", "purpose", "forms")
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 

@@ -2159,3 +2159,69 @@ with the habit (0/9).
 - **Nothing else moves.** No other protocol gives value feedback, so the meaning world, T-compose (75/75), the
   teacher protocol, recall and the generated worlds read exactly as before.
 - **Exactness.** With the switch off, the lesson-free gate and the 17 configurations are bit-identical.
+
+## F34 at larger windows: SCAN's own grammar (2026-11-16)
+
+**What fits a window.** `t_compose.py --scan F` generates SCAN's grammar, all 20,910 commands with their meanings, and
+keeps the commands whose words, end and answer fit a window of F items:
+- F = 11: 1573 training commands, and 844 test commands with jump;
+- F = 15: 4133 training and 2246 test commands.
+
+Training is every command without jump and "jump" alone; the test is every command with jump. The mind's window is a
+knob it can turn itself (3..15). `--around --window 11` adds "X around left / right" (eight actions) to T-compose.
+
+| | the mind (F34) | Transformer (same dialogues, exact on its training commands) |
+|---|---|---|
+| T-compose with "around", window 11 (3 seeds) | **81 / 81** | 7 / 81 (training 49/49) |
+| SCAN's grammar within a window of 11 (seed 0) | **609 / 844 (72%)** | **0 / 844** (training 1570/1574) |
+
+- **Most of the mind's failures are one error: it does not stop.** "walk after jump" → "i_jump i_walk i_walk i_walk
+  …". The prefix is right; then a weaker reading (what followed i_walk anywhere) proposes another action, while the
+  members' instances ended there. Of 304 command shapes, 199 are all right.
+- **Living the 4720 training dialogues took 11 minutes** (58,803 moments). Answering the 844 tests, each on a fresh
+  copy of the mind, took about 20.
+- **Commands longer than the window remain out of reach:** 70% of SCAN at a window of 15. They need the question held
+  as one item while the answer is said (a working memory).
+
+## Word Forms (F36): a word never met read as the form it is of (2026-11-16)
+
+**The gap.** A word never met had no place, no category and no frame. The mind could not relate "nasılsınız" to the
+lived "nasılsın", or "merhabalar" to "merhaba", and stayed silent: the meaning world's form variant and unseen
+greeting stood at 0.
+
+**F36** (`read.form_base`, `read.form_reading`, `Config.forms`, on in the speaking configuration). The layer below
+words.
+- **The words the mind lived are read as letters.** The base of a word never met is the lived word sharing its
+  longest stem.
+- **The stem must be a boundary of the lived words themselves** (Harris's successor variety): a lived word, or a
+  beginning that lived words go on from in two ways. A beginning only one lived word has, cut where the new word
+  happens to differ ("mas" of "masa" for "maske"), is not a stem.
+- **How far the base stands for the word.** f = the share of the longer word the stem covers. c = conviction(the lived
+  words beginning with the stem).
+- **The reading.** A context holding a word never met is read, when nothing would be said otherwise (no world target
+  over the speaking line), as the lived context with the base in its place. Its reading is carried over with
+  e ← c f (e' − ½) + ½, the analogy of NARS.
+
+**Measured** (`meaning_switches.py --set forms=0|1`, 3 seeds):
+
+| | without F36 | with F36 |
+|---|---|---|
+| "merhabalar" (never met) greeted as a greeting | 0.00 | **1.00** ("merhaba , hoş geldin") |
+| "nasılsınız ?" (never met) | 0.00 | **1.00** ("iyiyim , teşekkür ederim") |
+| every other probe of the meaning world | | unchanged |
+
+- **What failed first.** The reading was first used only when no world target exceeded ½. Then "nasılsınız" was cut
+  after "iyiyim ,": another reading held something just over ½ but under the speaking line. It is now used when
+  nothing would be said.
+- **Nothing else moves.** Teacher protocol 120 exact, listening worlds 0.783 / 0.812, T-compose 75/75, relations world
+  unchanged. Recall cues are lived words, and the reading needs a word never met.
+- **Limits.** Only beginnings are stems: an ending shared with lived words ("-lar") is not yet evidence of its own,
+  and a stem that changes ("keyif" / "keyfin") is not found.
+- **Exactness.** With the switch off, the lesson-free gate and the 17 configurations are bit-identical.
+
+**An audit of what the mind can and cannot do** (relational and causal inference, composition, analogy, exploration,
+new categories, autonomous goals, chains of inference, contradictions, sources, verification) is in
+[DENETIM_2026_11_16.md](DENETIM_2026_11_16.md), in Turkish. It includes the controlled experiment on "Yağmur nasıl
+yağar sence ?": none of the owner's three minds here produces a causal account of rain (cevahir5 and cevahir are
+silent; cevahir3b says "bilmiyorum , öğrenmek isterim .", all five words from lived evidence), and the private
+documents hold no text on how rain forms.

@@ -181,6 +181,10 @@ At each moment, roughly each word, the mind lives these steps:
   received in a few situations acts the same way in situations it never met (polite to things never handed to it: 0
   -> 8 of 9, against the habit it watched); with F33 what pleased one person is an expectation of that relationship
   (each of two people with opposite tastes answered their way, 9 of 9).
+- **Word Forms (F36).** The layer below words: a word never met is read as the lived word it shares its longest
+  stem with, the stem being a boundary of the lived words themselves (Harris's successor variety), carried over by
+  how much of the word the stem covers. "merhabalar" is greeted as "merhaba", "nasılsınız ?" answered as "nasılsın ?";
+  a beginning one lived word has by chance is not a stem.
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -368,6 +372,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Relational Memory | İlişkisel Bellek | F33 | context-dependent memory; source monitoring |
 | Reply Relation | Cevap İlişkisi | F34 | compositional generalisation (SCAN); backoff to lived suffixes |
 | Generalised Consequences | Genelleşmiş Sonuçlar | F35 | model-based choice: expected value of consequences |
+| Word Forms | Kelime Biçimleri | F36 | morpheme boundaries by successor variety (Harris) |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

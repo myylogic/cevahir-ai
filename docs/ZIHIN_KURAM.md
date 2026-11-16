@@ -171,6 +171,10 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   karşılandığından birkaç durumda öğrenen bir zihin, hiç karşılaşmadığı durumlarda da aynı biçimde davranır (hiç
   kendisine verilmemiş şeylere kibar cevap: 9'da 0'dan 8'e, izlediği alışkanlığa karşın); F33 ile bir kişiyi memnun eden
   şey o ilişkinin beklentisidir (zıt zevkleri olan iki kişinin her birine kendi istediği biçimde cevap: 9'da 9).
+- **Kelime Biçimleri (Word Forms, F36):** kelimelerin altındaki katman: hiç görülmemiş bir kelime, en uzun kökünü
+  paylaştığı yaşanmış kelime olarak okunur; kök, yaşanmış kelimelerin kendi sınırıdır (Harris'in ardıl çeşitliliği) ve
+  okuma, kökün kelimeyi ne kadar kapladığıyla taşınır. "merhabalar" "merhaba" gibi selamlanıyor, "nasılsınız ?"
+  "nasılsın ?" gibi cevaplanıyor; tek bir yaşanmış kelimenin rastlantıyla sahip olduğu bir başlangıç kök değildir.
 - **Benzerlik Oyu (Resemblance Vote):** iki şey ortak yönleriyle benzer. Bir yön, ne kadar az şeyde bulunuyorsa o
   kadar ayırt edicidir. Yeni bir şeye en çok benzeyen üyeler en yüksek sesle konuşur; ağırlık, sınıflandırmanın
   örnek tabanlı modellerindeki gibidir (genelleştirilmiş bağlam modeli). Görme ve işitme böyle tanır: yeni
@@ -355,6 +359,7 @@ Hepsi notlarda ölçümleriyle durur.
 | İlişkisel Bellek | Relational Memory | F33 | bağlama bağlı bellek; kaynak izleme |
 | Cevap İlişkisi | Reply Relation | F34 | bileşimsel genelleme (SCAN); yaşanmış soneklere geri çekilme |
 | Genelleşmiş Sonuçlar | Generalised Consequences | F35 | modele dayalı seçim: sonuçların beklenen değeri |
+| Kelime Biçimleri | Word Forms | F36 | ardıl çeşitliliğiyle biçimbirim sınırları (Harris) |
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |

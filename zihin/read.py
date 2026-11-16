@@ -1036,9 +1036,109 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     if getattr(cfg, "substitution", False) and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
         for target, e in substitute_backoff(mind, unit, trust).items():
             out[target] = max(out.get(target, 0.0), e)
+    line = 0.5 + mind.knob["theta"] / (2.0 * cfg.T)     # F36: when nothing would be said (the speaking line), a
+    if getattr(cfg, "forms", False) and not any(e > line for t, e in out.items() if _world(mind, t)):
+        for target, e in form_reading(mind, unit, trust).items():   # word never met is read as the form it is of
+            out[target] = max(out.get(target, 0.0), e)
     if getattr(cfg, "situations", False) and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
         for target, e in situation_backoff(mind, unit, trust).items():
             out[target] = max(out.get(target, 0.0), e)
+    return out
+
+
+def form_base(mind, w: int, since: int):
+    """F36 (Word Forms): the lived word a word never met is a form of, and how far: (base, f, c) or None.
+
+    The words are read as letters. Among the words lived before ``since`` on the same channel, the base shares the
+    longest beginning (stem) with w, and the stem is a boundary of the lived words themselves (Harris's successor
+    variety): it is a lived word, or the lived words that begin with it go on with at least two different letters.
+    A beginning only one lived word has, cut where w happens to differ ("mas" of "masa" for "maske"), is not a stem.
+    Ties of length go to the most lived.
+    f = the share of w the stem covers (its letters over the longer word's); c = conviction(the lived words that begin
+    with the stem): a stem many forms begin with is a stem."""
+    memo = _moment_memo(mind)
+    key = ("form", w, since)
+    if key in memo:
+        return memo[key]
+    found = None
+    channels, symbols = mv_view(mind, "u_channel"), mv_view(mind, "u_symbol")
+    channel = channels[w]
+    word = str(mind.ch.symbol(channel, symbols[w]))
+    if word.isalpha() and len(word) >= 3:
+        S = mind.S
+        cid = channel
+        lexicon = mind.__dict__.get("_lexicon")
+        size = len(mind.ch.symbols[cid])
+        if lexicon is None or lexicon[0] != (cid, size, since):
+            words = []
+            for index, sym in enumerate(mind.ch.symbols[cid]):
+                u = S.atom_index.get((cid, index), -1)
+                text = str(sym)
+                if u >= 0 and text.isalpha() and int(S.u_birth[u]) < since and float(S.u_use[u]) > 0.0:
+                    words.append((text, u, float(S.u_use[u])))
+            lexicon = mind.__dict__["_lexicon"] = ((cid, size, since), words)
+        words = lexicon[1]
+        best = None
+        for text, u, use in words:
+            if u == w:
+                continue
+            n = 0
+            for a, b in zip(word, text):
+                if a != b:
+                    break
+                n += 1
+            if n < 2 or n == len(word):
+                continue
+            if best is None or n > best[0] or (n == best[0] and use > best[2]):
+                best = (n, u, use, text)
+        if best is not None:
+            n, base, _, text = best
+            stem = word[:n]
+            forms = [t for t, _, _ in words if t.startswith(stem)]
+            follow = {t[n] if len(t) > n else "" for t in forms}
+            if "" in follow or len(follow) >= 2:
+                f = n / max(len(word), len(text))
+                found = (base, f, conviction(float(len(forms)), mind.cfg.k))
+    memo[key] = found
+    return found
+
+
+def form_reading(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F36: a context holding words never met (before the present run) is read as the lived context with each of
+    them replaced by the lived word it is a form of (``form_base``), when that context was lived: its members' reading
+    carried over with conviction c f (the analogy of NARS), e <- c f (e' - 1/2) + 1/2."""
+    kinds = mv_view(mind, "u_kind")
+    if not kinds[unit] & COMPOSED or kinds[unit] & SLOTTED:
+        return {}
+    since = getattr(mind, "episode_start", mind.t)
+    born = mv_view(mind, "u_birth")
+    parts = parts_of(mind, unit)
+    act = kind_masks(mind)[5]
+    channels = mv_view(mind, "u_channel")
+    held, weight = [], 1.0
+    for p in parts:
+        if kinds[p] & ATOMIC and act[channels[p]] and born[p] >= since:
+            found = form_base(mind, p, since)
+            if found is None:
+                return {}
+            base, f, c = found
+            held.append(base)
+            weight *= c * f
+        else:
+            held.append(p)
+    if weight >= 1.0:
+        return {}
+    lived = mind.S.tuple_index.get(tuple(held))
+    if lived is None or lived == unit:
+        return {}
+    memo = _moment_memo(mind)
+    key = ("form_read", lived, id(trust) if trust is not None else None)
+    if key in memo:
+        return memo[key]
+    memo[key] = {}                                       # no recursion through itself
+    read = members_map(mind, lived, trust)
+    out = {t: weight * (e - 0.5) + 0.5 for t, e in read.items() if _world(mind, t)}
+    memo[key] = out
     return out
 
 
