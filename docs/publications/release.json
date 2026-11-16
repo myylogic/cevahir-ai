@@ -1,14 +1,14 @@
 {
-  "version": "2026.11.15",
-  "tag": "research-2026.11.15-v6",
+  "version": "2026.11.16",
+  "tag": "research-2026.11.16-v6",
   "author": "Muhammed Yasin Yılmaz",
-  "github_url": "https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.11.15-v6",
+  "github_url": "https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.11.16-v6",
   "status": "pending",
   "doi": "",
   "concept_doi": "10.5281/zenodo.22864660",
   "previous_release": "releases/research-2026.11.14-v5.json",
-  "scope": "The Cevahir Zihin theory (a Living Evidence Mind; docs/ZIHIN_KURAM.md, docs/ZIHIN_THEORY.md) with its architecture and named findings, and the work since v5: sleep and dream sorting, hearing, felt not-knowing, think-then-speak, situation resemblance, online life, exploration and code learned from its tests, shared-stem inference, learning to learn (mixed), the one-shot evidence study (off), a 2.0-3.8x faster bit-identical core and a 3.5x smaller memory layout. Not separate paper DOIs.",
+  "scope": "The Cevahir Zihin theory (a Living Evidence Mind) and the work since v5: sleep and dream sorting, hearing, felt not-knowing, think-then-speak, situation resemblance, online life, exploration, learning to learn (mixed), one-shot evidence (off), a faster bit-identical core and a smaller tie layout; recall of what was read once; exact relations; analogy and corroboration; paradigmatic relation and binding; relational memory; the reply relation (compositional generalisation: SCAN 789/844 within a window of 11 and 844/844 with a window of 12, against a Transformer's 0/844); generalised consequences; word forms; deduction with exceptions in one and two steps (off by default); witness reliability (off); replacement witness (Mill's method of difference, off); urge to go on (off); attribution with contradictions (!neden); a Turkish audit with negative results. Not separate paper DOIs.",
   "zenodo_url": "",
   "source_commit": "",
-  "date": "2026-11-15"
+  "date": "2026-11-16"
 }
