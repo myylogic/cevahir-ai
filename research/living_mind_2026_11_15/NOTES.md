@@ -2493,3 +2493,83 @@ together. It also cost too much on a large mind to be on (4 answers took 323 s o
   is not a member of a place, so it inherits nothing.
 - Two steps at most; a third deduction is not read.
 - The class must be named by a word sharing a stem with the word naming it as a member; a property is one word.
+
+## Witness Reliability (F38), the third form: the reliability scales only how firmly a witness holds (2026-11-16)
+
+**The form.** A witness keeps its own frequency; its reliability only says how firmly it holds, as F29 and F36 carry a
+reading: f = f1, c = f1 f2 c1 c2 (the second form had f = f1 f2). A witness still says nothing of a value it never went
+on with (f1 = 0 gives c = 0), and now it cannot count against its own value either, however unreliable it is.
+
+**Measured** (the switch on in the speaking configuration):
+
+| | strict rule (F34) | second form | third form |
+|---|---|---|---|
+| meaning world: a greeting in front | 0.67 | 1.00 | **1.00** |
+| SCAN within 11, lived and answered with it | 789 / 844 | 767 / 844 | **783 / 844** |
+| T-compose | 75 / 75 | 75 / 75 | 75 / 75 |
+
+- **What is left.** The six lost are all "X left and X opposite left" (and right): 3 of 7 each. No witness can count
+  against anything now, so it is the support itself: a witness of low reliability (the coincidental agreement of the
+  "turn" commands) still supports its own value (i_lturn) where the frame's members claim another (i_jump).
+- **The hypothesis this eliminates:** that keeping a witness from counting against values is enough. Partial agreement
+  that is coincidence still lends a wrong value support. What is missing is to tell coincidental agreement from
+  agreement because the left-out part makes no difference: the lived contexts that end with the left-out part should
+  agree among themselves (whatever filled the front, they went on alike), not only with the witness. That is the
+  method of difference again (the causal exploration below), so F38 stays off until it is measured.
+
+## T-cause: rain from the clouds, or from the umbrella words? An exploration (2026-11-16)
+
+**The question** (the owner's: causal relations, verified by experiment). Does the mind tell what made a difference from
+what merely came before it, and do its own interventions teach it that?
+
+**The world** (`t_cause.py`, public, seeded; an exploration, no mechanism tuned to it).
+- The sky is seen with the first utterance of an episode (the chat's `!gor`: a sensed item).
+- Clouds bring rain. People say "şemsiye al ." mostly when it is cloudy, so the advice and the rain have a common
+  cause, and the advice is always followed by rain.
+- A day: cloudy, "şemsiye al .", "yağmur yağdı ." (4); cloudy, "iyi eğlenceler .", "yağmur yağdı ." (1); sunny,
+  "iyi eğlenceler .", "hava güzeldi ." (5). Four days, shuffled.
+- The probe: what the mind expects as the first word of the next utterance after [sky] "dışarı çıkıyorum ." ⏎ [advice]
+  ⏎. The probe of interest is sunny with the umbrella advice, never lived.
+- Then the mind intervenes: on four sunny days it is the one who says "şemsiye al ." (its own act), and no rain comes.
+
+| probe (sky / advice) | observed only: e(yağmur), e(hava) | after 4 own umbrellas on sunny days |
+|---|---|---|
+| cloudy / şemsiye al (lived) | 0.633, 0.500 | 0.636, 0.500 |
+| sunny / iyi eğlenceler (lived) | 0.500, 0.654 | 0.500, 0.659 |
+| cloudy / iyi eğlenceler (lived, less often) | 0.541, 0.500 | 0.543, 0.500 |
+| **sunny / şemsiye al (never lived)** | **0.500, 0.500** | 0.500, 0.529 |
+
+- **What it shows.** The mind is not misled by the words (it does not expect rain after the umbrella on a sunny day),
+  but it does not infer from the sky either. Its interventions teach it only the context it intervened in.
+- **What would infer it: Mill's method of difference.** On cloudy days the two advices went on alike (the advice makes
+  no difference to the weather); with the same advice, cloudy and sunny days went on differently (the sky does). So
+  the lived "sunny / iyi eğlenceler" differs from the probe only by a replacement that made no difference elsewhere, and
+  is a witness of it; "cloudy / şemsiye al" differs by one that did, and is not.
+
+**Two prototypes, not kept.**
+- **Weighting the most similar lived situations (F23) by the replacement they differ by.** A lived situation differing
+  from the present one by one replacement was weighted by how far the lived pairs that differ by the same replacement
+  went on alike. The situations' vote for the probe turned from a draw to the fine weather (shares 0.30 / 0.70), but
+  F23 speaks only when nothing else does, and a frame did.
+- **A place's relevance learned across its frames.** The frame that spoke ("[sky] dışarı çıkıyorum ⏎ şemsiye al ⏎",
+  born of the probe itself) had one lived member, a cloudy day, and carried its rain to the sunny day (0.556). Its
+  claim was discounted by the place's transparency: across the frames whose places share its fillers, the share of
+  member pairs that agree (unbiased: (n Σp² − 1)/(n − 1)), as a lower frequency.
+  - Over all such frames the discount stayed weak (0.62–0.67): they mostly agree on things the sky does not decide
+    (the next word of "dışarı ...").
+  - Over the frames that claim what follows the same item (the end of a turn), the transparency of the sky came out
+    0.008: the sky decides what follows there. The frame's rain claim, and the rain F29 carried to the sunny day
+    through the interchangeability of the two sky words, both fell to 0.5.
+  - What was left, the lived situations weighted by the replacement they differ by, leaned to the fine weather (0.521),
+    too weakly to show in the expectation.
+- **The hypothesis this eliminates:** that a place is relevant or not as such. The sky is relevant to the weather and
+  irrelevant to the next word; relevance must be learned for the kind of outcome a frame claims. With that, the
+  correlational claim is withdrawn; the causal one still has to be made to speak.
+
+## F37 on the owner's mind: the teacher protocol with inheritance on (2026-11-16)
+
+- The teacher protocol (the private mind of 210,686 moments; 200 held-out answers), F37 on with two steps: **120
+  exact** as without it, F1 0.7440 (0.7444 without), the same 6 overruns.
+- Answering took **1463 s** (171 s without): 7.3 s an answer against 0.85 s, about 8.6 times as long.
+- What it shows: on real reading the deduction neither helps nor harms the taught answers (its classes and properties
+  are not what those questions ask), and its cost is the one measured in the profiles. It stays off by default.

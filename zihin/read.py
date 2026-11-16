@@ -1799,10 +1799,13 @@ def witnessed(mind, unit: int, trust, counted, focus) -> Dict[int, List[Tuple[fl
     """F38: what the lived suffixes of ``unit`` that leave out a fixed item of a frame's claim witness of it, value by
     value: {value: [(W+, W-) of each witness]}. By the deduction of NARS, from "t goes on with v" (f1 = v's share of
     t's lived continuations, c1 = their conviction) and "the longer context goes on as t does" (f2 = the agreeing
-    share of the lived contexts that end with the left-out item and t, c2 = the conviction of their number):
-    f = f1 f2, c = f1 f2 c1 c2, w = k c / (1 - c). A witness says nothing of a value it never went on with (f1 = 0
-    gives c = 0): it cannot silence a claim it knows nothing of. The suffix must hold a word of the utterance and the
-    perceived event; the frame's member instances (``counted``) are not witnesses (no lived context counts twice)."""
+    share of the lived contexts that end with the left-out item and t, c2 = the conviction of their number): the
+    witness keeps its own frequency and its reliability says only how firmly it holds (as F29 and F36 carry a
+    reading), f = f1, c = f1 f2 c1 c2, w = k c / (1 - c). A witness says nothing of a value it never went on with
+    (f1 = 0 gives c = 0) and cannot count against its own value: it cannot silence a claim. (The deduction's own
+    frequency, f = f1 f2, let an unreliable witness count against its own value; lived with, that cost SCAN 22.) The
+    suffix must hold a word of the utterance and the perceived event; the frame's member instances (``counted``) are
+    not witnesses (no lived context counts twice)."""
     S, k = mind.S, mind.cfg.k
     heard = parts_of(mind, unit)
     n = len(heard)
@@ -1835,8 +1838,8 @@ def witnessed(mind, unit: int, trust, counted, focus) -> Dict[int, List[Tuple[fl
         f2, c2, c1 = agree / pairs, conviction(pairs, k), conviction(total, k)
         for v, p in zip(targets, own):
             f1 = p / total
-            f = f1 * f2
-            c = min(f1 * f2 * c1 * c2, 1.0 - 1e-9)
+            f = f1                                       # the witness's own frequency; its reliability only says
+            c = min(f1 * f2 * c1 * c2, 1.0 - 1e-9)       # how firmly it holds (F29, F36)
             w = k * c / (1.0 - c)
             out.setdefault(v, []).append((f * w, (1.0 - f) * w))
     return out
