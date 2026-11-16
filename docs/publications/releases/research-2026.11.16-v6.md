@@ -2,7 +2,13 @@
 
 - Git tag: `research-2026.11.16-v6` (a GitHub Release from main; it supersedes the v6 prepared on 2026-11-15, which was
   never published: [research-2026.11.15-v6.md](research-2026.11.15-v6.md) is kept as it was written)
-- Zenodo DOI: recorded here once the archive is published and verified
+- GitHub Release: https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.11.16-v6
+- Source commit: `b5b591ed438d24e2e4bcc83a02c1b8a5204ab804` (it also records SCAN within 12 answered 1,188 / 1,188
+  with a window of 13, measured after this note was written: NOTES.md, audit section 10)
+- Zenodo DOI: [10.5281/zenodo.24279940](https://doi.org/10.5281/zenodo.24279940)
+- Zenodo record: https://zenodo.org/records/24279940
+- Archive verification: every one of the 1987 files of the archive is identical to the tagged commit
+  (`../evidence/zenodo_archive_verification_v6.json`)
 - All-versions DOI: [10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660)
 
 ## The Cevahir Zihin theory: a Living Evidence Mind
