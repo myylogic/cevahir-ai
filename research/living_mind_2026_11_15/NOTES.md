@@ -2701,3 +2701,12 @@ modelled mathematically.
 - Working memory (the question held as one item while it is answered) is not built. A first design: at the end of a
   turn, the utterance's composed unit is kept as one item of the context, and frames may take it as their filler, so
   that a long answer is read against the question and the answer's last words. It needs frames over composed items.
+
+## SCAN within 12 with a window of 13 (2026-11-16)
+
+- Does the window-12 result hold one size up? SCAN's add-jump split, the 1,188 test commands that fit 12 items, lived
+  (2,176 training commands, "jump" alone among them, 3 epochs) and answered with a window of 13: **1,188 / 1,188**
+  (85,893 moments lived; answering 2,393 s).
+- Every test command that fits is answered exactly: with one item of window to spare, nothing that fits is left wrong at
+  either size (844 of 844 at 11, 1,188 of 1,188 at 12).
+- The Transformer was not run at this size (0 / 844 at 11).

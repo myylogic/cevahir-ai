@@ -178,7 +178,7 @@ At each moment, roughly each word, the mind lives these steps:
   asked ("jump twice", "walk and jump", "jump left twice"): 75 of 75 commands, where a Transformer trained from
   scratch on the same data, exact on all its training commands, answers 4. On SCAN's own grammar within a window of
   11, with the bound frames of every prefix read: 789 of 844 (the Transformer 0), every command that fits the window
-  whole answered exactly; with a window of 12, all 844.
+  whole answered exactly; with a window of 12, all 844 (with a window of 13, all 1,188 that fit 12 items).
 - **Generalised Consequences (F35).** What an act would lead to (good, bad) is read from what similar paths led to,
   through the frames of the path, and the path's own record comes last. A mind that learned from how its answers were
   received in a few situations acts the same way in situations it never met (polite to things never handed to it: 0

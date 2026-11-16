@@ -169,7 +169,8 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   ilk sorulduğunda her kalıpta kullanılıyor ("jump twice", "walk and jump", "jump left twice"): 75 komutun 75'i;
   aynı veriyle sıfırdan eğitilmiş, tüm eğitim komutlarını doğru cevaplayan bir Transformer 4'ünü cevaplıyor. SCAN'in
   kendi dilbilgisinde, pencere 11'de, her önekin bağlı çerçeveleri okunarak: 844 komutun 789'u (Transformer 0);
-  pencereye bütünüyle sığan her komut doğru; 12'lik pencereyle 844'ün hepsi.
+  pencereye bütünüyle sığan her komut doğru; 12'lik pencereyle 844'ün hepsi (13'lük pencereyle 12 öğeye sığan
+  1.188 komutun hepsi).
 - **Genelleşmiş Sonuçlar (Generalised Consequences, F35):** bir eylemin neye yol açacağı (iyi, kötü), yolun
   çerçeveleri üzerinden benzer yolların neye yol açtığından okunur; yolun kendi kaydı en son gelir. Cevaplarının nasıl
   karşılandığından birkaç durumda öğrenen bir zihin, hiç karşılaşmadığı durumlarda da aynı biçimde davranır (hiç
