@@ -56,10 +56,16 @@ def note(mind, table: int, slot: int, ties, amounts) -> None:
     a = mind.S.arrays()
     P = mind.S.P
     moment = mind.__dict__.setdefault("_personal_moment", [])
-    if slot == SENSED:                                   # the world perceived directly is no one's in particular
-        return
+    valued = None
+    if slot == SENSED:                                   # the world perceived directly is no one's in particular;
+        kinds = mind.ch.kinds                            # how the person received the mind's acts (a value) is theirs
+        valued = {c for c, kind in enumerate(kinds) if kind == "value"}
+        if not valued:
+            return
     for tie, amount in zip(ties, amounts):
         if amount == 0.0 or not _noted(a, tie):
+            continue
+        if valued is not None and a.channel[a.dst[tie]] not in valued:
             continue
         rows = by_tie.setdefault(tie, {})
         row = rows.get(person)

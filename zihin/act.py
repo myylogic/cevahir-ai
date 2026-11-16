@@ -25,11 +25,11 @@ from typing import Hashable, List
 import torch
 
 from .events import ACTED, IMAGINED, IMITATED, N_PROV, Event
-from .evidence import expectation
+from .evidence import conviction, expectation
 from .form import kind_masks, mass1, mass1_total, mv_view
 from .learn import add_evidence1
 from .read import drive_of, effective, generalisations, own_mass
-from .store import CATEGORY, EXPECT, F64, SLOTTED, W_NEG, W_POS
+from .store import ABSTRACT, CATEGORY, EXPECT, F64, SLOTTED, W_NEG, W_POS
 
 KNOB_ACTS = (("F", 1), ("F", -1), ("theta", 1), ("theta", -1), ("gain", 1), ("gain", -1))
 KNOB_RANGE = {"F": (3, 15)}
@@ -51,28 +51,133 @@ def act_expectation(mind, act_unit: int, imitated_pos: float, imitated_neg: floa
 def consequence(mind, act_unit: int) -> float:
     """L5: sum over value signals of sign x (2 e - 1) for the path "this episode, then this act", read from the
     EXPECT lag-2 ties that the episode trace collected when such a path was taken before (0 when never taken
-    or no value signal is defined). Signs come from the adapter (mind.value_sign)."""
+    or no value signal is defined). Signs come from the adapter (mind.value_sign). F35 (``purpose``): what a path
+    never taken would lead to is read from the paths its frames hold (``general_consequences``), and the path's own
+    record comes last."""
     signs = getattr(mind, "value_sign", None)
     if not signs or not mind.episode:
         return 0.0
     S = mind.S
-    path = S.tuple_index.get(tuple(mind.episode) + (act_unit,))
-    if path is None:
-        return 0.0
-    total = 0.0
+    parts = tuple(mind.episode) + (act_unit,)
+    path = S.tuple_index.get(parts)
+    values = []
     for (channel, symbol), sign in signs.items():
         if not mind.ch.has(channel):
             continue
         cid = mind.ch.id(channel)
         index = mind.ch.symbol_index(cid, symbol, create=False)
         value_unit = S.atom_index.get((cid, index), -1) if index >= 0 else -1
-        if value_unit < 0:
-            continue
-        tie = S.find_tie(path, value_unit, EXPECT, 2)
+        if value_unit >= 0:
+            values.append((value_unit, sign))
+    if not values:
+        return 0.0
+    general = general_consequences(mind, parts, values) if getattr(mind.cfg, "purpose", False) else {}
+    if path is None and not general:
+        return 0.0
+    total = 0.0
+    for value_unit, sign in values:
+        e = general.get(value_unit, 0.5)
+        tie = S.find_tie(path, value_unit, EXPECT, 2) if path is not None else -1
         if tie >= 0:
-            w_pos, w_neg = mass1(mind, tie)
-            total += sign * (2.0 * expectation(w_pos, w_neg, mind.cfg.k) - 1.0)
+            w_pos, w_neg = _in_company(mind, tie, *mass1(mind, tie))
+            if general:                                    # the path's own record comes last
+                c = w_pos + w_neg
+                c = c / (c + mind.cfg.k)
+                e = c * (w_pos / (w_pos + w_neg) if w_pos + w_neg > 0.0 else 0.5) + (1.0 - c) * e
+            else:
+                e = expectation(w_pos, w_neg, mind.cfg.k)
+        elif not general:
+            continue
+        total += sign * (2.0 * e - 1.0)
     return total
+
+
+def general_consequences(mind, parts, values) -> dict:
+    """F35 (Generalised Consequences): what a path leads to, read as its frames' members lived it. For each frame of
+    the path (an item of the path replaced by a category it is a member of, as the frames of a context are found),
+    each member whose path was lived votes the share of its value evidence (lag-2 ties to the value signals) that each
+    value received (F11):  W+(v) = sum_x e_x s_x(v),  W-(v) = sum_x e_x (1 - s_x(v)). The frame whose members agree
+    most speaks: e(v) = c f + (1 - c) 1/2, c = lam e(path -> frame) conviction(members). {value unit: e}."""
+    from .form import categories_of, parts_of
+    S, k = mind.S, mind.cfg.k
+    value_units = [v for v, _ in values]
+    valued = _valued_paths(mind, value_units)           # the paths that led to good or bad: few
+    if not valued:
+        return {}
+    kinds = mv_view(mind, "u_kind")
+    best = None
+    for j, part in enumerate(parts):
+        if kinds[part] & (CATEGORY | SLOTTED):
+            continue
+        for category, e_abs in categories_of(mind, part):
+            if e_abs <= 0.5:
+                continue
+            where = [i for i, q in enumerate(parts) if q == part] if getattr(S, "bind_repeats", False) else [j]
+            if S.tuple_index.get(tuple(category if i in where else q for i, q in enumerate(parts))) is None:
+                continue
+            shares = {v: 0.0 for v in value_units}
+            members = 0.0
+            for instance, masses in valued.items():     # the valued paths that are this frame's instances
+                held = parts_of(mind, instance)
+                if len(held) != len(parts) or any(held[i] != q for i, q in enumerate(parts) if i not in where):
+                    continue
+                x = held[where[0]]
+                if x == part or any(held[i] != x for i in where):
+                    continue
+                tie = S.find_tie(x, category, ABSTRACT, 0)
+                if tie < 0:
+                    continue
+                total = sum(masses.get(v, 0.0) for v in value_units)
+                if total <= 0.0:
+                    continue
+                e_x = expectation(*mass1(mind, tie), k)
+                members += e_x
+                for v in value_units:
+                    shares[v] += e_x * masses.get(v, 0.0) / total
+            if members <= 0.0:
+                continue
+            top = max(shares.values()) / members
+            score = e_abs * conviction(members, k) * top
+            if best is None or score > best[0]:
+                best = (score, e_abs, members, shares)
+    if best is None:
+        return {}
+    _, e_abs, members, shares = best
+    c = mind.cfg.lam * e_abs * conviction(members, k)
+    return {v: c * (w / members) + (1.0 - c) * 0.5 for v, w in shares.items()}
+
+
+def _in_company(mind, tie: int, w_pos: float, w_neg: float):
+    """F33 with F35: what a path led to with other people is theirs (what pleased one person is an expectation of that
+    relationship); read in present company when the mind keeps its ledger, else as it is."""
+    if getattr(mind.cfg, "company", False) and "personal" in mind.__dict__ and getattr(mind.cfg, "purpose", False):
+        from .iliski import company_mass1
+        return company_mass1(mind, tie, w_pos, w_neg, None)
+    return w_pos, w_neg
+
+
+def _valued_paths(mind, value_units) -> dict:
+    """F35: the composed paths that were later followed by a value signal (EXPECT lag 2), with their positive mass
+    toward each value: {path: {value unit: W+}}. Read once a moment."""
+    from .read import _moment_memo
+    memo = _moment_memo(mind)
+    key = ("valued", tuple(value_units))
+    if key in memo:
+        return memo[key]
+    S = mind.S
+    kinds, src, lag = mv_view(mind, "u_kind"), mv_view(mind, "t_src"), mv_view(mind, "t_lag")
+    from .store import COMPOSED
+    found: dict = {}
+    for v in value_units:
+        for tie in S.inc.get((v, EXPECT), ()):
+            u = src[tie]
+            if lag[tie] != 2 or not kinds[u] & COMPOSED or kinds[u] & SLOTTED:
+                continue
+            w_pos = _in_company(mind, tie, *mass1(mind, tie))[0]
+            if w_pos > 0.0:
+                found.setdefault(u, {})[v] = w_pos
+    memo[key] = found
+    return found
 
 
 def _explore(mind, ranked, theta: float, T: int):

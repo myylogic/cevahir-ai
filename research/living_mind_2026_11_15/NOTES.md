@@ -2109,3 +2109,53 @@ enough for the mind's window of seven items.
 - **Limits.** The mind's window is seven items, so SCAN's longer commands ("jump around left twice", up to 48
   actions) are out of reach. The hierarchy that would carry them (chunks of chunks) is a next layer.
 - **Exactness.** With the switch off, the lesson-free gate and the 17 configurations are bit-identical.
+
+## Generalised Consequences (F35): acting for what acts lead to, in situations never met, and per relationship (2026-11-16)
+
+**What existed (L5).** Before acting, the mind weighs what the path "this episode, then this act" led to: the value
+signals (good, bad) its lag-2 ties hold, collected when that exact path was taken and received (`!dogru`,
+`!yanlis`). A path never taken had no consequence at all. So what the mind learned from how its acts were received
+stayed with the exact situations in which it was received.
+
+**The world, T-purpose** (`t_purpose.py`, public, 3 seeds).
+- The mind watches people being handed things ("al bu elma"), answered "ver bakayım ." twice as often as
+  "teşekkür ederim .": imitation alone answers rudely.
+- Then it is handed three things itself over six rounds, and its answers are received: "teşekkür" well, anything
+  else badly.
+- Then it is handed three things it was never handed itself, with no feedback.
+
+**Without F35** it learned the three things it was handed (9/9 polite after the rounds) and answered every new thing
+with the habit (0/9).
+
+**F35** (`act.general_consequences`, `Config.purpose`, on in the speaking configuration).
+- **What a path would lead to is read from the paths its frames hold,** as the frames of a context are found: an
+  item of the path replaced by a category it is a member of. Every member whose path was taken and received votes
+  the share of its value evidence each value received (F11).
+- **The frame whose members agree most speaks,** with c = lam · e(path → frame) · conviction(members). The path's
+  own record comes last, as own evidence always does.
+- **It is read only from the paths that were ever followed by a value,** so a mind never received has no cost from it.
+
+**With F33: expectations per relationship.**
+- How a person received the mind's act is noted with that person, the one sensed signal that is (the world sensed
+  directly stays no one's in particular).
+- What a path led to is read in present company, so what pleased one person is an expectation of that relationship.
+- **The world `--people`.** Two people hand it things in the rounds: ayşe receives the polite answer well and the
+  banter badly; mehmet, who jokes with it, the other way round. Habits are watched equally.
+
+**Measured**:
+
+| | without F35 | F35 | F35 + F33 |
+|---|---|---|---|
+| polite to the things it was handed / to new things | 9/9 / 0/9 | 9/9 / **8/9** | |
+| new things answered the way ayşe / mehmet receives well | 6/9 / 3/9 | 3/9 / 3/9 | **9/9 / 9/9** |
+
+- **It also learns faster.** With F35 one bad reception was enough: the first round already went "ver bakayım",
+  "teşekkür ederim", "teşekkür ederim", because the other things' paths share the frame.
+- **One new thing in one seed was met with silence:** habit and consequence were balanced there.
+- **The two relationships.**
+  - Without F33 their consequences cancel (3/9 each).
+  - With F33 the mind answers ayşe "teşekkür ederim" and mehmet "ver bakayım" for things neither ever handed it.
+  - No role, rule or person is coded: the difference is only what was lived with each, as the owner asked.
+- **Nothing else moves.** No other protocol gives value feedback, so the meaning world, T-compose (75/75), the
+  teacher protocol, recall and the generated worlds read exactly as before.
+- **Exactness.** With the switch off, the lesson-free gate and the 17 configurations are bit-identical.

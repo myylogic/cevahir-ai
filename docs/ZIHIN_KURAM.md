@@ -166,6 +166,11 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   primitive" bölünmesinde (zihnin penceresine göre küçültülmüş) yalnız tek başına görülen bir komut ("jump" -> "i_jump")
   ilk sorulduğunda her kalıpta kullanılıyor ("jump twice", "walk and jump", "jump left twice"): 75 komutun 75'i;
   aynı veriyle sıfırdan eğitilmiş, tüm eğitim komutlarını doğru cevaplayan bir Transformer 4'ünü cevaplıyor.
+- **Genelleşmiş Sonuçlar (Generalised Consequences, F35):** bir eylemin neye yol açacağı (iyi, kötü), yolun
+  çerçeveleri üzerinden benzer yolların neye yol açtığından okunur; yolun kendi kaydı en son gelir. Cevaplarının nasıl
+  karşılandığından birkaç durumda öğrenen bir zihin, hiç karşılaşmadığı durumlarda da aynı biçimde davranır (hiç
+  kendisine verilmemiş şeylere kibar cevap: 9'da 0'dan 8'e, izlediği alışkanlığa karşın); F33 ile bir kişiyi memnun eden
+  şey o ilişkinin beklentisidir (zıt zevkleri olan iki kişinin her birine kendi istediği biçimde cevap: 9'da 9).
 - **Benzerlik Oyu (Resemblance Vote):** iki şey ortak yönleriyle benzer. Bir yön, ne kadar az şeyde bulunuyorsa o
   kadar ayırt edicidir. Yeni bir şeye en çok benzeyen üyeler en yüksek sesle konuşur; ağırlık, sınıflandırmanın
   örnek tabanlı modellerindeki gibidir (genelleştirilmiş bağlam modeli). Görme ve işitme böyle tanır: yeni
@@ -349,6 +354,7 @@ Hepsi notlarda ölçümleriyle durur.
 | İlişkisel Bağlama | Relational Binding | F32 | bir çerçeve yerinin değişken bağlaması |
 | İlişkisel Bellek | Relational Memory | F33 | bağlama bağlı bellek; kaynak izleme |
 | Cevap İlişkisi | Reply Relation | F34 | bileşimsel genelleme (SCAN); yaşanmış soneklere geri çekilme |
+| Genelleşmiş Sonuçlar | Generalised Consequences | F35 | modele dayalı seçim: sonuçların beklenen değeri |
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |
