@@ -13,7 +13,9 @@ What is pinned here
 * Where other "... ne ?" questions were answered otherwise ("bugün ne yedin ?", "en sevdiğin renk ne ?", "ne
   yapıyorsun ?"), "keyfin ne ?" (a word never met) is not answered: the situations disagree, so nothing is corroborated.
   In a narrower life, where every "... ne ?" it ever heard was the name question, the same question is answered with
-  the name: that is the induction from what it lived, not a slip of the reading.
+  the name when the situations are the lived contexts most like the question (F30): that is the induction from what
+  it lived, not a slip of the reading. With F34 the evidence about a frame's claim is what followed the lived suffixes
+  of the context: "keyfin ne ?" has none, and it stays silent.
 * The switch is off by default.
 """
 from __future__ import annotations
@@ -35,14 +37,14 @@ def _single_thread():
     torch.set_num_threads(threads)
 
 
-def fresh(corroborate: bool, others: bool = True) -> Session:
+def fresh(corroborate: bool, others: bool = True, replies: bool = False) -> Session:
     made = chat._log_path
     chat._log_path = lambda: None
     try:
         cfg = VARIANTS["speaking"]()
     finally:
         chat._log_path = made
-    cfg.keep_log, cfg.log_path, cfg.corroborate = False, None, corroborate
+    cfg.keep_log, cfg.log_path, cfg.corroborate, cfg.replies = False, None, corroborate, replies
     mind = Mind(cfg)
     mind.add_channel(CHANNEL, "act")
     s = Session(mind)
@@ -74,6 +76,8 @@ def test_a_word_never_met_is_not_answered(corroborate):
 def test_a_narrow_life_generalises_what_it_lived():
     assert fresh(True, others=False).reply("keyfin ne ?") == "adım cevahir"
     assert fresh(False, others=False).reply("keyfin ne ?") == "(sessiz)"
+    assert fresh(True, others=False, replies=True).reply("keyfin ne ?") == "(sessiz)"   # no lived suffix
+    assert fresh(True, replies=True).reply("peki adın ne ?") == "adım cevahir"           # "adın ne ?" is one
 
 
 def test_the_situations_leave_out_what_the_frame_counted():

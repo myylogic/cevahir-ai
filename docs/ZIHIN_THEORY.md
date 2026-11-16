@@ -170,6 +170,12 @@ At each moment, roughly each word, the mind lives these steps:
   last, and what was lived with others is recalled only as far as other people corroborate it (one person's alone is
   theirs). Each person is answered from their own history, a secret lived with one person is told to no one else, and
   what everyone taught is known with a stranger; no role or relation is coded.
+- **Reply Relation (F34).** A frame's value may be what its filler, said on its own, was answered with, and several
+  places after a prefix may be bound to the filler (its stand-in, its reply, or an item every member has there); a
+  frame's claim is corroborated by the lived suffixes of its context. On SCAN's "add primitive" split, made small for
+  the mind's window, a primitive seen only alone ("jump" -> "i_jump") is used in every template the first time it is
+  asked ("jump twice", "walk and jump", "jump left twice"): 75 of 75 commands, where a Transformer trained from
+  scratch on the same data, exact on all its training commands, answers 4.
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -355,6 +361,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Paradigmatic Relation | Dizisel İlişki | F31 | the paradigmatic axis (Saussure, Jakobson) |
 | Relational Binding | İlişkisel Bağlama | F32 | variable binding of a frame's place |
 | Relational Memory | İlişkisel Bellek | F33 | context-dependent memory; source monitoring |
+| Reply Relation | Cevap İlişkisi | F34 | compositional generalisation (SCAN); backoff to lived suffixes |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

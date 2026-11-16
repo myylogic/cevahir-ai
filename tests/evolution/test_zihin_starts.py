@@ -63,8 +63,9 @@ def test_the_switch_is_off_by_default_and_on_for_a_chat_mind():
     assert speaking.starts is True and speaking.exclusive is True and speaking.exact_relations is True
     assert speaking.analogy is True and speaking.corroborate is True
     assert speaking.paradigmatic is True and speaking.bind_relations is True and speaking.company is True
+    assert speaking.replies is True
     assert {"starts", "exclusive", "exact_relations", "analogy", "corroborate", "paradigmatic",
-            "bind_relations", "company"} <= set(chat.NEWER)                            # a mind raised
+            "bind_relations", "company", "replies"} <= set(chat.NEWER)                 # a mind raised
                                                                                      # before them lives without them
 
 

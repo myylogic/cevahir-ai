@@ -96,6 +96,8 @@ class Config:
                                     # members' evidence as literal values) does not vote as a situation of its own
     company: bool = False           # F33 (Relational Memory): evidence is noted with the known person present, and what
                                     # is recalled depends on who is present (zihin/iliski.py)
+    replies: bool = False           # F34 (Reply Relation): a frame's value may be what its filler, said on its own,
+                                    # was answered with; with it several places after a prefix may be bound (F32)
     paradigmatic: bool = False      # F31 (Paradigmatic Relation): a frame's value may be what stands where the filler
                                     # stands (ALIKE: the item most interchangeable with it, not a rival filler of the
                                     # frame's place), as SELF, NEXT and START are other relations to the filler

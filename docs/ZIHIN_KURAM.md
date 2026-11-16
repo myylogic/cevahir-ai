@@ -160,6 +160,12 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   yaşanan ise yalnız başka insanlar da aynısını yaşadıkça hatırlanır (tek bir kişinin yaşadığı onundur). Herkese kendi
   geçmişinden cevap verilir, bir kişiyle yaşanan sır başka kimseye söylenmez, herkesin öğrettiği bir yabancıyla da
   bilinir; hiçbir rol ya da ilişki kodlanmaz.
+- **Cevap İlişkisi (Reply Relation, F34):** bir çerçevenin değeri, dolgunun tek başına söylendiğinde aldığı cevap
+  olabilir ve bir önekten sonraki birkaç konum dolguya bağlanabilir (yerine geçeni, cevabı ya da her üyenin orada
+  sahip olduğu bir öğe); bir çerçevenin iddiası, bağlamının yaşanmış sonekleriyle birleştirilir. SCAN'in "add
+  primitive" bölünmesinde (zihnin penceresine göre küçültülmüş) yalnız tek başına görülen bir komut ("jump" -> "i_jump")
+  ilk sorulduğunda her kalıpta kullanılıyor ("jump twice", "walk and jump", "jump left twice"): 75 komutun 75'i;
+  aynı veriyle sıfırdan eğitilmiş, tüm eğitim komutlarını doğru cevaplayan bir Transformer 4'ünü cevaplıyor.
 - **Benzerlik Oyu (Resemblance Vote):** iki şey ortak yönleriyle benzer. Bir yön, ne kadar az şeyde bulunuyorsa o
   kadar ayırt edicidir. Yeni bir şeye en çok benzeyen üyeler en yüksek sesle konuşur; ağırlık, sınıflandırmanın
   örnek tabanlı modellerindeki gibidir (genelleştirilmiş bağlam modeli). Görme ve işitme böyle tanır: yeni
@@ -342,6 +348,7 @@ Hepsi notlarda ölçümleriyle durur.
 | Dizisel İlişki | Paradigmatic Relation | F31 | dizisel eksen (Saussure, Jakobson) |
 | İlişkisel Bağlama | Relational Binding | F32 | bir çerçeve yerinin değişken bağlaması |
 | İlişkisel Bellek | Relational Memory | F33 | bağlama bağlı bellek; kaynak izleme |
+| Cevap İlişkisi | Reply Relation | F34 | bileşimsel genelleme (SCAN); yaşanmış soneklere geri çekilme |
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |

@@ -233,8 +233,17 @@ def corroborated(mind, unit: int, trust, frame: int, claims: Dict[int, Tuple[flo
     f2 is the value's share of the situations' votes: situations that went on otherwise count against it. Values only
     the situations claim are left to F23's own reading (it speaks when nothing else does). Writes into ``out``."""
     k = mind.cfg.k
+    focus = None
+    if getattr(mind.cfg, "replies", False):              # F34: about the claim's own context
+        n, frame_parts = len(parts_of(mind, unit)), parts_of(mind, frame)
+        category = frame_category(mind, frame)
+        focus = {n - 1 - j for j, p in enumerate(frame_parts) if p != category}
+        for i, entry in enumerate(tail or ()):
+            if entry >= 0:
+                focus.add(n - 1 - (len(frame_parts) + i))
+        focus = frozenset(d for d in focus if d >= 0)
     c_sit, shares = situation_evidence(mind, unit, trust, frozenset(_member_instances(mind, frame, unit, tail)),
-                                       lived_only=True)
+                                       lived_only=True, focus=focus)
     if c_sit <= 0.0:
         return
     w2 = k * c_sit / (1.0 - c_sit)
@@ -409,6 +418,7 @@ def _world(mind, unit: int) -> bool:
 SELF, NEXT = -1, -2   # F12 relational targets of a frame: "the filler of my slot", "what the filler goes on with"
 START = -3            # F26: "what a sequence that starts with the filler goes on with" (more specific than NEXT)
 ALIKE = -4            # F31: "what stands where the filler stands" (the paradigmatic axis; NEXT and START are syntagmatic)
+REPLY = -5            # F34: "what the filler, said on its own, was answered with" (the continuation of filler + event)
 
 
 def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[int] = None) -> Optional[int]:
@@ -420,6 +430,8 @@ def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[
         return filler
     if target == ALIKE:
         return stand_in(mind, filler, fixed, category) if filler is not None else None
+    if target == REPLY:
+        return reply_of(mind, filler, fixed) if filler is not None else None
     if target in (NEXT, START):
         if filler is None:
             return None
@@ -477,6 +489,7 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
     place): last, ALIKE, where the value is the item that stands most where x stands (``inline``; the members' reading
     adds it afterwards, where it can hold, see ``member_votes``)."""
     alike = inline and relational and category is not None and getattr(mind.cfg, "paradigmatic", False)
+    replies = relational and getattr(mind.cfg, "replies", False)
     if exact:
         named: Dict[int, int] = {}
         if relational:
@@ -493,9 +506,14 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
                 best = resolve(mind, ALIKE, x, fixed, category)
                 if best is not None and best not in named:
                     named[best] = ALIKE
+            if replies:
+                best = resolve(mind, REPLY, x, fixed)
+                if best is not None and best not in named:
+                    named[best] = REPLY
         return [[v, named[v]] if v in named else [v] for v in targets]
     goes_on = _continuing(mind, x, fixed) if relational else ()
     stands = resolve(mind, ALIKE, x, fixed, category) if alike and _may_stand_in(mind, x, targets, fixed, {}) else None
+    answered = resolve(mind, REPLY, x, fixed) if replies else None
     keys = []
     for v in targets:
         if relational and v == x:
@@ -506,9 +524,34 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
             keys.append([NEXT])
         elif v == stands:
             keys.append([ALIKE])                   # F31: v stands where x stands
+        elif v == answered:
+            keys.append([REPLY])                   # F34: v is what x on its own was answered with
         else:
             keys.append([v])
     return keys
+
+
+def reply_of(mind, x: int, fixed=()) -> Optional[int]:
+    """F34 (Reply Relation): what x, said on its own, was answered with: the strongest world continuation of the
+    composed unit (x, E), E the perceived event among the frame's fixed items (the end of a turn), without the frame's
+    fixed words. NEXT is what x goes on with; this is what x as a whole utterance was followed by."""
+    memo = _moment_memo(mind)
+    key = ("reply", x, tuple(fixed))
+    if key in memo:
+        return memo[key]
+    found = None
+    sense, channels = kind_masks(mind)[4], mv_view(mind, "u_channel")
+    event = next((p for p in fixed if sense[channels[p]]), None)
+    if event is not None:
+        unit = mind.S.tuple_index.get((x, event))
+        if unit is not None:
+            goes_on = continuations(mind, unit, fixed)
+            if goes_on:
+                found = max(goes_on, key=goes_on.get)
+                if goes_on[found] <= 0.5:
+                    found = None
+    memo[key] = found
+    return found
 
 
 def _may_stand_in(mind, x: int, targets, fixed, named) -> bool:
@@ -699,53 +742,74 @@ def _member_instances(mind, frame: int, exclude: int, tail: Optional[int] = None
     return found
 
 
-def _instance(mind, parts, where, x: int, tail: Optional[int], fixed, category: int) -> Optional[int]:
-    """The lived instance of a frame with x in its place; with ``tail`` (F32), followed by the item the relation names
-    for x (None when it names nothing or that instance was never lived)."""
+def _instance(mind, parts, where, x: int, tail, fixed, category: int) -> Optional[int]:
+    """The lived instance of a frame with x in its place; with ``tail`` (F32, F34), followed by what each tail entry
+    names for x: a relation (ALIKE, REPLY) resolved for x, or an item every member has there (None when a relation
+    names nothing or that instance was never lived)."""
     held = tuple(x if j in where else p for j, p in enumerate(parts))
     if tail is not None:
-        related = resolve(mind, tail, x, fixed, category)
-        if related is None:
-            return None
-        held += (related,)
+        for entry in (tail if isinstance(tail, tuple) else (tail,)):
+            if entry < 0:
+                related = resolve(mind, entry, x, fixed, category)
+                if related is None:
+                    return None
+                held += (related,)
+            else:
+                held += (entry,)
     return mind.S.tuple_index.get(held)
 
 
-def bound_frames(mind, unit: int) -> List[Tuple[int, float, int]]:
-    """F32 (Relational Binding): the frames of the unit's prefix (all its items but the last) whose filler's stand-in
-    (F31, ALIKE) the last item is, with the expectation that the prefix is their instance and the relation: (frame, e,
-    ALIKE). A place binds its repeats (bind_repeats: the filler itself, SELF); it binds what stands for its filler the
-    same way, so "X , Y" read with Y the stand-in of X is read through what each member lived with its own stand-in
-    after it. A continuation of the filler (NEXT, START) is not bound: it is what follows the filler, read by the
+def bound_frames(mind, unit: int) -> List[Tuple[int, float, tuple]]:
+    """F32 (Relational Binding), F34 (several places): the frames of a prefix of the unit whose filler the items after
+    the prefix are bound to: each of them the filler's stand-in (F31, ALIKE), what the filler on its own was answered
+    with (F34, REPLY), or an item every member has there; at least one a relation. Returns (frame, e, tail) for the
+    longest prefix that has such frames, tail the entries in order (relations as their keys, items as themselves).
+    A place binds its repeats (bind_repeats: the filler itself, SELF); it binds what stands for its filler, and what
+    its filler was answered with, the same way: "jump twice ⏎ i_jump" is read through each member's "walk twice ⏎
+    i_walk". A continuation of the filler (NEXT, START) is not bound: it is what follows the filler, read by the
     context's own evidence (bound too, it lowered the teacher protocol, NOTES)."""
     kinds = mv_view(mind, "u_kind")
+    paradigmatic = getattr(mind.cfg, "paradigmatic", False)
+    replies = getattr(mind.cfg, "replies", False)
     if not kinds[unit] & COMPOSED or kinds[unit] & SLOTTED or not getattr(mind.S, "bind_repeats", False) \
-            or not getattr(mind.cfg, "paradigmatic", False):
+            or not (paradigmatic or replies):
         return []
+    relations = ([ALIKE] if paradigmatic else []) + ([REPLY] if replies else [])
     parts = parts_of(mind, unit)
-    if len(parts) < 3:
-        return []
-    prefix = mind.S.tuple_index.get(parts[:-1])
-    if prefix is None:
-        return []
-    last = parts[-1]
-
-    found = []
-    for frame, e in generalisations(mind, prefix):
-        if not kinds[frame] & COMPOSED:
+    shortest = 2 if replies else len(parts) - 1          # F31 alone binds the last item only
+    for k in range(len(parts) - 1, max(shortest, 2) - 1, -1):
+        prefix = mind.S.tuple_index.get(parts[:k])
+        if prefix is None:
             continue
-        category = frame_category(mind, frame)
-        if category is None:
-            continue
-        frame_parts = parts_of(mind, frame)
-        where = [j for j, p in enumerate(frame_parts) if p == category]
-        fixed = tuple(p for p in frame_parts if p != category)
-        filler = parts[where[0]]
-        if last == filler or last in fixed:
-            continue
-        if resolve(mind, ALIKE, filler, fixed, category) == last:
-            found.append((frame, e, ALIKE))
-    return found
+        found = []
+        for frame, e in generalisations(mind, prefix):
+            if not kinds[frame] & COMPOSED:
+                continue
+            category = frame_category(mind, frame)
+            if category is None:
+                continue
+            frame_parts = parts_of(mind, frame)
+            where = [j for j, p in enumerate(frame_parts) if p == category]
+            fixed = tuple(p for p in frame_parts if p != category)
+            filler = parts[where[0]]
+            tail, bound = [], False
+            for item in parts[k:]:
+                named = None
+                if item != filler and item not in fixed:
+                    named = next((r for r in relations if resolve(mind, r, filler, fixed, category) == item), None)
+                if named is not None:
+                    tail.append(named)
+                    bound = True
+                elif item == filler or not replies:
+                    tail = None                          # the filler again is bound by bind_repeats already
+                    break
+                else:
+                    tail.append(item)                    # an item every member has there
+            if tail is not None and bound:
+                found.append((frame, e, tuple(tail)))
+        if found:
+            return found
+    return []
 
 
 def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None, tail: Optional[int] = None):
@@ -1099,7 +1163,7 @@ def situation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> 
 
 
 def situation_evidence(mind, unit: int, trust: Optional[torch.Tensor] = None, leave_out=frozenset(),
-                       lived_only: bool = False):
+                       lived_only: bool = False, focus=None):
     """F23: a situation never lived as a whole is met with what followed the lived situations most like it.
 
     The situation is the present context: someone's utterance up to its perceived end (the turn end), and what the
@@ -1113,7 +1177,11 @@ def situation_evidence(mind, unit: int, trust: Optional[torch.Tensor] = None, le
     in the utterance) cannot make the mind speak and leaves room for its curiosity.
     Returns (c, {value: its share f of the votes}); (0, {}) when no lived situation votes. ``leave_out``: lived
     contexts not to count (F30: those another reading has already counted). ``lived_only``: frames are left out too
-    (a frame is a generalisation, not a lived situation: its own evidence is its members', literal values only)."""
+    (a frame is a generalisation, not a lived situation: its own evidence is its members', literal values only).
+    ``focus`` (F34): the places (distances from the end) of a frame's fixed items. The lived situations are then the
+    lived suffixes of the present context (the context without its front: what followed the claim's own context when
+    less of it was there), and the similarity is how much of the frame's fixed items a suffix holds, by the same
+    weights (evidence about a frame's claim is what followed its own context, however much of it was lived)."""
     S, cfg = mind.S, mind.cfg
     if not mv_view(mind, "u_kind")[unit] & COMPOSED:
         return 0.0, {}
@@ -1144,7 +1212,15 @@ def situation_evidence(mind, unit: int, trust: Optional[torch.Tensor] = None, le
         # and holding the event at its place. The cost grows with how often that part was lived, not with the size of
         # the whole memory.
         anchors = sorted(((n - 1 - j, heard[j]) for j in range(event) if word(heard[j])), key=lambda x: held(x[1]))
+        if focus:                                        # F34: the lived suffixes of the present context
+            anchors = []
         lived, seen, budget = [], {unit}, 20000
+        if focus:
+            for L in range(n - 1, 1, -1):
+                suffix = S.tuple_index.get(heard[n - L:])
+                if suffix is not None and suffix not in seen and L > d_event:
+                    seen.add(suffix)
+                    lived.append((heard[n - L:], suffix))
         src, lag = mv_view(mind, "t_src"), mv_view(mind, "t_lag")
         for d_anchor, anchor in anchors:                 # each word of the utterance calls up its situations, the
             for tie in S.inc.get((anchor, PART), ()):     # rarest word first, within a bounded effort
@@ -1169,20 +1245,26 @@ def situation_evidence(mind, unit: int, trust: Optional[torch.Tensor] = None, le
         voted = similar = 0.0
         voters = 0
         kinds = mv_view(mind, "u_kind")
+        focus_weight = sum(weight(heard[n - 1 - d]) for d in focus) if focus else 0.0
         for t, u in lived:
             if u in leave_out or (lived_only and kinds[u] & SLOTTED):
                 continue
             L = len(t)
             same = [d for d in range(min(n, L)) if t[L - 1 - d] == heard[n - 1 - d]]
+            if focus:
+                same = [d for d in same if d in focus]
             if not any(word(heard[n - 1 - d]) for d in same if d > d_event):   # a word of the utterance itself
                 continue
             targets, own = _world_pos(mind, u, trust)
             total = sum(own)
             if total <= 0.0:
                 continue
-            shared = {heard[n - 1 - d] for d in same}
-            union = heard_weight + sum(weight(p) for p in set(t) - heard_set)
-            s = sum(weight(p) for p in shared) / union
+            if focus:
+                s = sum(weight(heard[n - 1 - d]) for d in same) / focus_weight
+            else:
+                shared = {heard[n - 1 - d] for d in same}
+                union = heard_weight + sum(weight(p) for p in set(t) - heard_set)
+                s = sum(weight(p) for p in shared) / union
             g = math.exp(-mind.knob["F"] * (1.0 - s))
             voted += g
             similar += g * s

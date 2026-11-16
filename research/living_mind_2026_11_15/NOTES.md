@@ -2050,3 +2050,62 @@ days and then "merhaba canım ." (two greetings a day, among two of someone unkn
   the 8 that made the old one. Each new encounter is also a failure of the old expectation, recorded as such.
 - **No recency weighting was added.** How much faster a recent relationship should outweigh an old one is open.
 - **Without F33** the habits of everyone mix and the reply stops after "merhaba".
+
+## Reply Relation (F34): compositional generalisation, a primitive seen alone used in every template (2026-11-16)
+
+**The test, T-compose** (`t_compose.py`, public). It is SCAN's "add primitive" split (Lake & Baroni 2018), made small
+enough for the mind's window of seven items.
+- **Commands.** Four primitives (walk, run, look, jump → i_walk, i_run, i_look, i_jump) and two directions (left,
+  right → i_lturn, i_rturn) in eleven templates, with answers of at most four actions: X, X twice, X thrice, X left,
+  X right, X opposite left / right, X and Y, X after Y, X left twice, X twice and Y.
+- **Training.** Every command of walk, run and look, and "jump" only alone, watched as dialogues three times in a
+  shuffled order.
+- **Test.** Every command where jump stands in a template: 25 per seed.
+
+**Without F34 the mind answered none** (0/75). "walk and jump" came out "i_jump", and "jump twice" silence.
+- The frame "[X] twice ⏎" took jump in as a member while the question was heard, but its members' answers (i_walk,
+  i_run, i_look) agree on nothing the mind could name.
+- Corroboration (F30) found "jump ⏎" the lived situation most like "walk and jump ⏎", because "jump" is rare, and
+  pulled the frame's right claim down.
+
+**F34** (`read.reply_of`, `read.bound_frames`, `Config.replies`, on in the speaking configuration):
+- **REPLY.** What the filler, said on its own, was answered with: the strongest world continuation of the lived
+  context (filler, the frame's perceived event), the end of a turn. NEXT is what a word goes on with; REPLY is what
+  it as a whole utterance was followed by. A member's value counts under REPLY when it is exactly that (F28). The
+  members of "[X] twice ⏎" agree on it (f = 1), and for jump it resolves to i_jump.
+- **Several places bound** (F32 generalised). The items after a prefix of the context may each be the filler's
+  stand-in (ALIKE), its reply (REPLY), or an item every member has there. The context is then read through each
+  member's instance with its own related items. So "jump twice ⏎ i_jump" is read through "walk twice ⏎ i_walk", and
+  "jump left twice ⏎ i_lturn i_jump i_lturn" through "walk left twice ⏎ i_lturn i_walk i_lturn".
+- **Corroboration reads the lived suffixes of the context.** Evidence about a frame's claim is what followed the
+  claim's own context however much of it was lived: the context without its front ("adın ne ⏎" for "peki adın ne
+  ⏎"). A suffix counts by how much of the frame's fixed items it holds. A situation that holds another item where
+  the claim holds one is evidence about that item, not about this claim. Two attempts failed before this:
+  - comparing only the frame's fixed items let "walk left twice ⏎" vote against "jump twice ⏎" (5/25);
+  - leaving out a different filler only, but not a different fixed item, let "run and walk ⏎" vote against "jump
+    twice and walk ⏎" (20/25).
+
+**Measured**:
+
+| T-compose, add-primitive split (3 seeds, 75 commands) | exact |
+|---|---|
+| the mind without F34 | 0 / 75 |
+| **the mind with F34** | **75 / 75** (every template 100%) |
+| a decoder-only Transformer trained from scratch on the same dialogues (3 layers, d = 64, 6000 steps; its own 43 training commands all exact) | 4 / 75 |
+
+- **The Transformer** learns its training set completely and answers almost nothing new: "walk and jump" → "i_walk
+  i_walk", "run twice and jump" → "i_run i_run ⏎ i_run". This is the result Lake & Baroni report for sequence models
+  on this split.
+- **The mind** learns what "jump" means from "jump" alone, and the templates from the other three primitives. It
+  composes the two the first time it is asked.
+- **Nothing else moves.** Teacher protocol 120 exact (149 s), template-free recall 90/146/31 and 23/47/109, listening
+  worlds 0.783 / 0.812, relations and trust worlds unchanged.
+  - The meaning world: the greeting told once ("hi , merhaba demektir .") is now answered as a greeting in 3 of 3
+    seeds (was 1).
+  - One synonym wording ("ismin ne ?") was lost in one seed: the old corroboration found "adın ne ⏎" by resemblance,
+    and the suffix rule does not.
+- **A narrow life no longer over-generalises.** One where every "... ne ?" was the name question answered "keyfin ne
+  ?" with the name; with F34 it stays silent (a word never met, and no lived suffix).
+- **Limits.** The mind's window is seven items, so SCAN's longer commands ("jump around left twice", up to 48
+  actions) are out of reach. The hierarchy that would carry them (chunks of chunks) is a next layer.
+- **Exactness.** With the switch off, the lesson-free gate and the 17 configurations are bit-identical.
