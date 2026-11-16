@@ -511,8 +511,8 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
                 best = resolve(mind, START, x, fixed)
                 if best is not None and best not in named:
                     named[best] = START
-            if inherits:                               # F37: x's property (its own record last) before whatever
-                best = resolve(mind, INHERIT, x, fixed)   # followed x anywhere
+            if inherits and _may_inherit(mind, x, targets):   # F37: x's property (its own record last) before
+                best = resolve(mind, INHERIT, x, fixed)         # whatever followed x anywhere
                 if best is not None and best not in named:
                     named[best] = INHERIT
             best = resolve(mind, NEXT, x, fixed)
@@ -530,7 +530,7 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
     goes_on = _continuing(mind, x, fixed) if relational else ()
     stands = resolve(mind, ALIKE, x, fixed, category) if alike and _may_stand_in(mind, x, targets, fixed, {}) else None
     answered = resolve(mind, REPLY, x, fixed) if replies else None
-    deduced = resolve(mind, INHERIT, x, fixed) if inherits else None
+    deduced = resolve(mind, INHERIT, x, fixed) if inherits and _may_inherit(mind, x, targets) else None
     keys = []
     for v in targets:
         if relational and v == x:
@@ -551,9 +551,11 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
 
 
 def stem_mates(mind, p: int, since: int) -> List[Tuple[int, float]]:
-    """F37: the lived words that share a stem with ``p`` (a common beginning of at least three letters; two lived words
-    part there, so it is a boundary of the lived words, F36), with the share of the longer word the stem covers."""
-    memo = _moment_memo(mind)
+    """F37: the lived words that share the longest stem with ``p`` (a common beginning of at least three letters; two
+    lived words part there, so it is a boundary of the lived words, F36), with the share of the longer word the stem
+    covers. Only the longest: "hayvanlar" for "hayvandır", not "hayır" (a shorter beginning is another stem, as F36's
+    base is the word sharing the longest one)."""
+    memo = _episode_memo(mind)
     key = ("mates", p, since)
     if key in memo:
         return memo[key]
@@ -570,6 +572,7 @@ def stem_mates(mind, p: int, since: int) -> List[Tuple[int, float]]:
                 for entry in lexicon[1]:
                     by_head.setdefault(entry[0][:3], []).append(entry)
                 index = mind.__dict__["_lexicon_index"] = (lexicon[0], by_head)
+            shared = []
             for text, u, _ in index[1].get(word[:3], ()):
                 if u == p:
                     continue
@@ -578,7 +581,9 @@ def stem_mates(mind, p: int, since: int) -> List[Tuple[int, float]]:
                     if a != b:
                         break
                     n += 1
-                found.append((u, n / max(len(word), len(text))))
+                shared.append((n, u, n / max(len(word), len(text))))
+            longest = max((n for n, _, _ in shared), default=0)
+            found = [(u, cover) for n, u, cover in shared if n == longest]
     memo[key] = found
     return found
 
@@ -586,11 +591,13 @@ def stem_mates(mind, p: int, since: int) -> List[Tuple[int, float]]:
 def inherited(mind, x: int, fixed=()) -> Optional[int]:
     """F37 (Inheritance): what x's classes go on with, x's own record last: deduction with exceptions.
 
-    x is a member of the places it filled (before the present run). The fixed words of each place's frame name it; the
-    most telling of them (1 / (1 + the contexts that hold it), shares over the frame's words) names it most. A lived
-    word sharing a stem with such a word (``stem_mates``: "kuşlar" for "kuştur") is the class spoken of on its own,
-    and what it goes on with is a property of the class. By the deduction of NARS, from "x is a member" (f1, c1)
-    and "the class goes on with v" (f2 = v's share of its continuations, c2 = their conviction): f = f1 f2,
+    x is a member of the places it filled (before the present run). The most telling fixed word of each place's frame
+    (1 / (1 + the contexts that hold it), its share over the frame's words) names it. A lived word sharing the longest
+    stem with that word (``stem_mates``: "kuşlar" for "kuştur") is the class spoken of on its own, and what it goes on
+    with is a property of the class, except the form of being of a class (``_forms_of``: "bir" of "kuşlar bir hayvandır
+    ."); what it inherits from the classes it is said to be of counts too, one step more (``_inheritance``, depth 2:
+    member, class, kind). By the deduction of NARS, from "x is a member" (f1, c1) and "the class goes on with v" (f2 =
+    v's share of its continuations, or the frequency of what it inherits; c2 = their conviction): f = f1 f2,
     c = f1 f2 c1 c2 f_n, the naming of the place by the word (f_n = its share x the stem's cover) weighing how sure the
     derivation is, not whether the property holds; w = k c / (1 - c), and the derivations add (revision). x's own
     record comes last: what x itself was lived to go on with that its class-mates (the members of the same places)
@@ -603,39 +610,65 @@ def inherited(mind, x: int, fixed=()) -> Optional[int]:
     if key in memo:
         return memo[key]
     since = getattr(mind, "episode_start", mind.t)
-    evidence, lived, k = _inheritance(mind, x, since)
+    order, values, e_deduced, lived, k = _inheritance(mind, x, since)[:5]
     fixed_set = set(fixed)
     lived_mass = sum(p for v, (p, _) in lived.items() if v not in fixed_set)
+    factor = 1.0 - conviction(lived_mass, k) if lived_mass > 0.0 else 1.0
     best, best_e = None, 0.5
-    for v in set(evidence) | set(lived):
+    for i in order:                                    # the deduced values by expectation, the best not fixed nor own
+        v = values[i]
+        if v in fixed_set or v in lived:
+            continue
+        if factor * e_deduced[i] > best_e:             # an exception: x went on with another thing of its own
+            best, best_e = v, factor * e_deduced[i]
+        break
+    position = {v: i for i, v in enumerate(values)} if lived else {}
+    for v, (p, n) in lived.items():                    # x's own record comes last
         if v in fixed_set:
             continue
-        w_pos, w_neg = evidence.get(v, (0.0, 0.0))
-        e = expectation(w_pos, w_neg, k)
-        if v in lived:
-            p, n = lived[v]
-            c = conviction(p + n, k)
-            e = c * frequency(p, n) + (1.0 - c) * e
-        elif lived_mass > 0.0:                         # an exception: x went on with another thing of its own
-            c = conviction(lived_mass, k)
-            e = (1.0 - c) * e
+        c = conviction(p + n, k)
+        i = position.get(v)
+        e = c * frequency(p, n) + (1.0 - c) * (e_deduced[i] if i is not None else 0.5)
         if e > best_e:
             best, best_e = v, e
     memo[key] = best
     return best
 
 
-def _inheritance(mind, x: int, since: int):
-    """F37: (deduced evidence {v: [W+, W-]}, x's own record {v: (W+, W-)}, k) for ``inherited``; once a moment."""
-    memo = _moment_memo(mind)
-    key = ("inheritance", x, since)
+def _may_inherit(mind, x: int, targets) -> bool:
+    """F37: whether a value x lived at a place can be its inherited property at all: one of the classes of the places
+    x filled goes on with it, or x itself went on with it (its own record). When not, the deduction is not read (it
+    would name a value the member never lived there, which counts for nothing)."""
+    since = getattr(mind, "episode_start", mind.t)
+    channel = mv_view(mind, "u_channel")[x]
+    own = None
+    for category, e_m in memberships_before(mind, x, since).items():
+        if e_m <= 0.5:
+            continue
+        profile = _class_profile(mind, category, channel, since, 2)
+        if profile is None:
+            continue
+        if own is None:
+            own = _continuation_set(mind, x)
+        named = profile[3]
+        if any(v in named or v in own for v in targets):
+            return True
+    return False
+
+
+def _inheritance(mind, x: int, since: int, depth: int = 2):
+    """F37: (the deduced values in order of expectation, the values, their expectations, x's own record
+    {v: (W+, W-)}, k, the values' W+, their W-) for ``inherited``; read once a run. The deduced evidence of each class
+    word is read as arrays and the derivations are added value by value (revision). depth 2: a class word's own
+    classes count too (what it inherits, one step), so a conclusion two steps away is reached (member, class, kind)."""
+    memo = _episode_memo(mind)
+    key = ("inheritance", x, since, depth)
     if key in memo:
         return memo[key]
     S, k = mind.S, mind.cfg.k
     kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
     world, act = kind_masks(mind)[3], kind_masks(mind)[5]
-    fixed_set = set()
-    evidence: Dict[int, List[float]] = {}
+    pieces = []
     mates = set()
     src = mv_view(mind, "t_src")
     for category, e_m in memberships_before(mind, x, since).items():
@@ -644,51 +677,210 @@ def _inheritance(mind, x: int, since: int):
         tie = S.find_tie(x, category, ABSTRACT, 0)
         w_pos, w_neg = mass1(mind, tie) if tie >= 0 else (0.0, 0.0)
         f1, c1 = frequency(w_pos, w_neg), conviction(w_pos + w_neg, k)
-        frame = category + 1                             # a place's frame is born right after it (induce_slots)
-        if frame >= S.n_units or not kinds[frame] & SLOTTED:
+        profile = _class_profile(mind, category, channels[x], since, depth)
+        if profile is None:
             continue
-        words = [q for q in parts_of(mind, frame) if q != category and kinds[q] & ATOMIC and act[channels[q]]
-                 and q not in fixed_set]
-        if not words:
+        v_arr, f2_arr, g_arr, named = profile
+        if x not in named:                               # what the class words go on with, carried to x at once
+            mates.add(category)
+            f = f1 * f2_arr
+            c = np.minimum(f * c1 * g_arr, 1.0 - 1e-9)
+            w = k * c / (1.0 - c)
+            pieces.append((v_arr, f * w, (1.0 - f) * w))
             continue
+        frame = category + 1                             # x is itself a class word or a property here: one by one
+        words = [q for q in parts_of(mind, frame) if q != category and kinds[q] & ATOMIC and act[channels[q]]]
         telling = [1.0 / (1 + len(S.inc.get((q, PART), ()))) for q in words]
         total = sum(telling)
-        for q, t in zip(words, telling):
+        most = max(range(len(words)), key=lambda i: telling[i])
+        for q, t in [(words[most], telling[most])]:
             for mate, cover in stem_mates(mind, q, since):
-                if mate in fixed_set or mate == x:
+                if mate == x:
                     continue
-                found = _unit_arrays(mind, mate, 1)
-                if found is None:
+                goes, mass_all = _class_goes(mind, mate, channels[x])
+                if goes is None:
                     continue
-                dst, pos, _ = found
-                goes = [(v, float(p)) for v, p in zip(dst, pos) if p > 0.0 and world[channels[v]]
-                        and channels[v] == channels[x] and v not in fixed_set and v != x and v != mate]
-                mass = sum(p for _, p in goes)
+                v_arr, p_arr, present = goes
+                own = p_arr[v_arr == x].sum() if x in present else 0.0
+                mass = mass_all - float(own)
                 if mass <= 0.0:
                     continue
+                if own:
+                    keep = v_arr != x
+                    v_arr, p_arr = v_arr[keep], p_arr[keep]
                 c2, f_n = conviction(mass, k), (t / total) * cover
                 mates.add(category)
-                for v, p in goes:
-                    f = f1 * (p / mass)
-                    c = min(f * c1 * c2 * f_n, 1.0 - 1e-9)
-                    w = k * c / (1.0 - c)
-                    rec = evidence.setdefault(v, [0.0, 0.0])
-                    rec[0] += f * w
-                    rec[1] += (1.0 - f) * w
+                f = f1 * (p_arr / mass)
+                c = np.minimum(f * c1 * c2 * f_n, 1.0 - 1e-9)
+                w = k * c / (1.0 - c)
+                pieces.append((v_arr, f * w, (1.0 - f) * w))
     lived = {}
-    if evidence:
+    values, e_deduced, order, pos_list, neg_list = [], [], [], [], []
+    if pieces:
+        v_all = np.concatenate([pc[0] for pc in pieces])
+        uniq, inverse = np.unique(v_all, return_inverse=True)
+        w_pos = np.bincount(inverse, weights=np.concatenate([pc[1] for pc in pieces]), minlength=uniq.size)
+        w_neg = np.bincount(inverse, weights=np.concatenate([pc[2] for pc in pieces]), minlength=uniq.size)
+        e = (w_pos + 0.5 * k) / (w_pos + w_neg + k)      # the expectation of each deduced value
+        values, e_deduced, pos_list, neg_list = uniq.tolist(), e.tolist(), w_pos.tolist(), w_neg.tolist()
+        order = np.argsort(-e, kind="stable").tolist()
         members = {src[t] for g in mates for t in list(S.inc.get((g, ABSTRACT), ()))[:MEMBERS]} - {x}
         own = _unit_arrays(mind, x, 1)                  # x's own record: what it went on with that its class-mates
         if own is not None:                             # mostly did not
+            sets = [_continuation_set(mind, y) for y in members]
             for v, p, n in zip(own[0], own[1], own[2]):
                 if not world[channels[v]] or channels[v] != channels[x] or p <= 0.0:
                     continue
-                shared = sum(1 for y in members if S.find_tie(y, v, EXPECT, 1) >= 0)
+                shared = sum(1 for went in sets if v in went)
                 if shared * 2 < max(1, len(members)):
                     lived[v] = (float(p), float(n))
-    found = (evidence, lived, k)
+    found = (order, values, e_deduced, lived, k, pos_list, neg_list)
     memo[key] = found
     return found
+
+
+def _class_profile(mind, category: int, channel: int, since: int, depth: int = 1):
+    """F37: what the class words of a place go on with, for any member: (items, f2 = the item's share of its class
+    word's continuations, g = c2 f_n, every class word and item named), one entry per class word and item (a member's
+    deduction is then f = f1 f2, c = f c1 g); None when the place names no class. Read once a run."""
+    memo = _episode_memo(mind)
+    key = ("class_profile", category, channel, since, depth)
+    if key in memo:
+        return memo[key]
+    S, k = mind.S, mind.cfg.k
+    kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+    act = kind_masks(mind)[5]
+    found = None
+    frame = category + 1                                 # a place's frame is born right after it (induce_slots)
+    if frame < S.n_units and kinds[frame] & SLOTTED:
+        words = [q for q in parts_of(mind, frame) if q != category and kinds[q] & ATOMIC and act[channels[q]]]
+        if words:
+            telling = [1.0 / (1 + len(S.inc.get((q, PART), ()))) for q in words]
+            total = sum(telling)
+            vs, f2s, gs, named = [], [], [], set()
+            most = max(range(len(words)), key=lambda i: telling[i])      # the class is named by the most telling
+            for q, t in [(words[most], telling[most])]:                  # fixed word of the place's frame
+                for mate, cover in stem_mates(mind, q, since):
+                    goes, mass = _class_goes(mind, mate, channel)
+                    if goes is not None and mass > 0.0:
+                        v_arr, p_arr, present = goes
+                        named.add(mate)
+                        named.update(present)
+                        vs.append(v_arr)
+                        f2s.append(p_arr / mass)
+                        gs.append(np.full(v_arr.size, conviction(mass, k) * (t / total) * cover))
+                    if depth >= 2 and _said_of_a_class(mind, mate, since):   # what the class word inherits
+                        inh = _inheritance(mind, mate, since, depth - 1)        # from the classes it is said to be of
+                        values, pos, neg = inh[1], inh[5], inh[6]
+                        if values:
+                            w = np.array(pos) + np.array(neg)
+                            named.add(mate)
+                            named.update(values)
+                            vs.append(np.array(values, dtype=np.int64))
+                            f2s.append(np.array(pos) / w)
+                            gs.append(w / (w + k) * ((t / total) * cover))
+            if vs:
+                found = (np.concatenate(vs), np.concatenate(f2s), np.concatenate(gs), frozenset(named))
+    memo[key] = found
+    return found
+
+
+def _class_goes(mind, mate: int, channel: int):
+    """F37: what a class word went on with on ``channel`` (world items, W+ > 0, not itself, not the form of being of
+    a class): ((items, W+) as arrays, their set), with the total W+; (None, 0) when nothing. Read once a run, for every
+    member it is a class of."""
+    memo = _episode_memo(mind)
+    key = ("class_goes", mate, channel)
+    hit = memo.get(key)
+    if hit is None:
+        hit = (None, 0.0)
+        found = _unit_arrays(mind, mate, 1)
+        if found is not None:
+            world, channels = kind_masks(mind)[3], mv_view(mind, "u_channel")
+            dst, pos, _ = found
+            forms = _forms_of(mind, mate)
+            kept = [(int(v), float(p)) for v, p in zip(dst, pos)
+                    if p > 0.0 and world[channels[v]] and channels[v] == channel and v != mate and v not in forms]
+            if kept:
+                v_arr = np.array([v for v, _ in kept], dtype=np.int64)
+                p_arr = np.array([p for _, p in kept], dtype=np.float64)
+                hit = ((v_arr, p_arr, frozenset(v_arr.tolist())), float(p_arr.sum()))
+        memo[key] = hit
+    return hit
+
+
+def _said_of_a_class(mind, m: int, since: int) -> bool:
+    """F37: whether a word filled a place whose most telling fixed word shares a stem with a lived word that went on
+    with something (a place that can name a class): without one, nothing can be inherited by it. Read once a run."""
+    memo = _episode_memo(mind)
+    key = ("said_of", m, since)
+    if key in memo:
+        return memo[key]
+    S = mind.S
+    kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+    act = kind_masks(mind)[5]
+    found = False
+    for place, e_m in memberships_before(mind, m, since).items():
+        if e_m <= 0.5:
+            continue
+        frame = place + 1
+        if frame >= S.n_units or not kinds[frame] & SLOTTED:
+            continue
+        words = [q for q in parts_of(mind, frame) if q != place and kinds[q] & ATOMIC and act[channels[q]]]
+        if not words:
+            continue
+        telling = [1.0 / (1 + len(S.inc.get((q, PART), ()))) for q in words]
+        q = words[max(range(len(words)), key=lambda i: telling[i])]
+        if any(S.out.get((mate, EXPECT, 1)) for mate, _ in stem_mates(mind, q, since)):
+            found = True
+            break
+    memo[key] = found
+    return found
+
+
+def _forms_of(mind, m: int) -> frozenset:
+    """F37: the fixed words of the places a class word filled that say it is of a class ("bir", "hayvandır" of "kuşlar
+    bir hayvandır ."): what the class word went on with there is the form of being of a class, not a property of its
+    own. A place says so when its most telling fixed word shares a stem with a lived word that went on with something
+    (a class spoken of on its own). Read once a run."""
+    memo = _episode_memo(mind)
+    key = ("forms", m)
+    if key in memo:
+        return memo[key]
+    S = mind.S
+    since = getattr(mind, "episode_start", mind.t)
+    kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+    act = kind_masks(mind)[5]
+    found = set()
+    for place, e_m in memberships_before(mind, m, since).items():
+        if e_m <= 0.5:
+            continue
+        frame = place + 1                                # a place's frame is born right after it (induce_slots)
+        if frame >= S.n_units or not kinds[frame] & SLOTTED:
+            continue
+        words = [q for q in parts_of(mind, frame) if q != place and kinds[q] & ATOMIC and act[channels[q]]]
+        if not words:
+            continue
+        telling = [1.0 / (1 + len(S.inc.get((q, PART), ()))) for q in words]
+        q = words[max(range(len(words)), key=lambda i: telling[i])]
+        if any(S.out.get((mate, EXPECT, 1)) for mate, _ in stem_mates(mind, q, since) if mate != m):
+            found.update(words)
+    found = frozenset(found)
+    memo[key] = found
+    return found
+
+
+def _continuation_set(mind, y: int) -> frozenset:
+    """F37: the items y has a lag-1 EXPECT tie to (what it went on with, whatever the evidence); once a run."""
+    memo = _episode_memo(mind)
+    key = ("goes_to", y)
+    hit = memo.get(key)
+    if hit is None:
+        ties = mind.S.out.get((y, EXPECT, 1))
+        dst = mv_view(mind, "t_dst")
+        hit = frozenset(dst[t] for t in ties) if ties else frozenset()
+        memo[key] = hit
+    return hit
 
 
 def reply_of(mind, x: int, fixed=()) -> Optional[int]:
@@ -745,6 +937,17 @@ def _moment_memo(mind) -> dict:
     held = mind.__dict__.get("_between_memo")
     if held is None or held[0] != mind.t:
         held = mind.__dict__["_between_memo"] = (mind.t, {})
+    return held[1]
+
+
+def _episode_memo(mind) -> dict:
+    """F37: a memo kept while the present run of items lasts (from ``episode_start``): what the classes of the places
+    a word filled go on with is read once a run, as it was known when it was first read in the run. Dropped when a
+    new run begins, and with the between-moments memo (undo, retraction)."""
+    since = getattr(mind, "episode_start", mind.t)
+    held = mind.__dict__.get("_episode_memo")
+    if held is None or held[0] != since:
+        held = mind.__dict__["_episode_memo"] = (since, {})
     return held[1]
 
 

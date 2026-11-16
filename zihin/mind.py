@@ -97,7 +97,8 @@ class Config:
     company: bool = False           # F33 (Relational Memory): evidence is noted with the known person present, and what
                                     # is recalled depends on who is present (zihin/iliski.py)
     inherit: bool = False           # F37 (Inheritance): a frame's value may be what the filler's classes go on with
-                                    # (deduction through the stems that name its places), its own record last
+                                    # (deduction through the stems that name its places; a class's own classes count,
+                                    # two steps), its own record last
     forms: bool = False             # F36 (Word Forms): a word never met is read as the lived word it is a form of (a
                                     # shared stem where the lived words branch), when nothing else expects anything
     purpose: bool = False           # F35 (Generalised Consequences): what a path never taken would lead to (good, bad)
@@ -774,12 +775,14 @@ class Mind:
             setattr(self, name, value)
         self.trust = self._trust()
         self.__dict__.pop("_between_memo", None)
+        self.__dict__.pop("_episode_memo", None)
 
     def retract(self, m: int) -> Dict[str, int]:
         """Retract moment m at the level of the ledger: exactly its increments are removed."""
         report = self.S.retract(m)
         self.trust = self._trust()
         self.__dict__.pop("_between_memo", None)
+        self.__dict__.pop("_episode_memo", None)
         if "personal_log" in self.__dict__:
             from .iliski import forget_moment
             forget_moment(self, m)
@@ -790,6 +793,7 @@ class Mind:
         state.pop("_facet_cache", None)                   # caches, rebuilt on demand
         state.pop("_situation_cache", None)
         state.pop("_between_memo", None)
+        state.pop("_episode_memo", None)
         state.pop("_lexicon", None)
         state.pop("_lexicon_index", None)
         state.pop("_why", None)

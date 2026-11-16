@@ -194,7 +194,11 @@ At each moment, roughly each word, the mind lives these steps:
   of NARS (f = f1 f2, c = f1 f2 c1 c2 f_n), and the member's own record, what its class-mates mostly did not go on
   with, comes last. Facts read apart ("kartal bir kuştur .", "kuşlar uçar .") give a conclusion never taught
   ("kartal uçar"), and an exception stated of itself ("penguen yüzer") wins over its class: 48 of 48 in T-deduce
-  against 2, no wrong generalisation. Off until it is cheap on a large mind; one step, no chains yet.
+  against 2, no wrong generalisation. A class word inherits in turn from the classes it is said to be of (what it goes
+  on with where it is said to be of a class, "bir" of "balıklar bir hayvandır .", is the form of the saying, not a
+  property), so a conclusion two steps away is reached: T-chain 27 of 27 ("levrek solur" from "levrek bir balıktır .",
+  "balıklar bir hayvandır .", "hayvanlar solur ."), none without F37 or with one step; the nearer property 9 of 9, the
+  exception 3 of 3. Off by default: on the largest mind an answer takes about eleven times as long.
 - **Witness Reliability (F38, off by default).** A shorter lived context that leaves out a fixed word of a frame's claim is a witness
   of the claim as far as the mind has seen it agree: the lived contexts that end with the left-out word and the
   shorter one went on as the shorter one did. What the witness says is carried by the deduction of NARS (f = f1 f2,

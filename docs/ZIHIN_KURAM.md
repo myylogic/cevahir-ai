@@ -185,7 +185,11 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   (f = f1 f2, c = f1 f2 c1 c2 f_n); üyenin kendi kaydı, yani sınıf arkadaşlarının çoğunun sürmediği devamı, en son
   gelir. Ayrı ayrı okunmuş olgular ("kartal bir kuştur .", "kuşlar uçar .") öğretilmemiş bir sonuç veriyor ("kartal
   uçar"); kendisi için söylenmiş bir istisna ("penguen yüzer") sınıfını geçiyor: T-deduce'da 48'de 48 (önce 2),
-  yanlış genelleme yok. Büyük bir zihinde ucuzlayana kadar kapalı; tek adım, henüz zincir yok.
+  yanlış genelleme yok. Bir sınıf kelimesi de bir sınıfına ait olduğu söylenen sınıflardan miras alır (bir sınıfa ait
+  olduğunun söylendiği yerde sürdüğü, "balıklar bir hayvandır ." içindeki "bir", söyleyişin biçimidir, özellik değil);
+  böylece iki adım ötedeki sonuca ulaşılıyor: T-chain'de 27'de 27 ("levrek bir balıktır .", "balıklar bir hayvandır .",
+  "hayvanlar solur ." okunmuşken "levrek solur"), F37'siz ya da tek adımla hiçbiri; yakın özellik 9'da 9, istisna 3'te
+  3. Varsayılan olarak kapalı: en büyük zihinde bir cevap yaklaşık on bir kat uzun sürüyor.
 - **Tanığın Güvenilirliği (Witness Reliability, F38, varsayılan olarak kapalı):** bir çerçevenin iddiasının sabit bir kelimesini dışarıda
   bırakan daha kısa bir yaşanmış bağlam, zihnin onu ne kadar uyuşurken gördüyse o kadar iddianın tanığıdır: dışarıda
   kalan kelimeyle ve kısa bağlamla biten yaşanmış bağlamlar, kısa bağlamın sürdüğü gibi sürmüştür. Tanığın söylediği

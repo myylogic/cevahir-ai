@@ -2428,3 +2428,68 @@ out.
   carry a reading: f = f1, c = f1 f2 c1 c2), so a weak witness counts against nothing.
 
 - **Exactness.** With the switch off, the lesson-free gate and the 17 configurations are bit-identical.
+
+## Inheritance two steps away, and cheaper (F37) (2026-11-16)
+
+**The gap.** F37 reached a conclusion one step away (member, class). It did not follow a chain: read "levrek bir
+balıktır .", "balıklar bir hayvandır ." and "hayvanlar solur ." apart, asked "levrek ne yapar ?", nothing put the three
+together. It also cost too much on a large mind to be on (4 answers took 323 s on the teacher protocol's mind).
+
+**Two steps** (`read._inheritance` with a depth, `read._class_profile`, `read._forms_of`, `read._said_of_a_class`).
+- **A class word inherits from the classes it is said to be of.** The properties a member's class word carries to it
+  are what it goes on with (as before) and what it inherits from its own classes, one step. The second step's evidence
+  is the class word's deduced W+ and W-, carried by the same deduction (f2 = their frequency, c2 = their conviction).
+  So a conclusion two steps away is reached (member, class, kind); a nearer class's property is stronger (one deduction
+  less) and wins.
+- **The form of being of a class is not a property.** What a class word goes on with in a place that says it is of a
+  class ("bir", "hayvandır" of "balıklar bir hayvandır .") is the form of the saying. A place says so when its most
+  telling fixed word shares a stem with a lived word that went on with something (a class spoken of on its own).
+- **Stems: only the longest.** A class word is a lived word sharing the *longest* stem with the place's most telling
+  word ("hayvanlar" for "hayvandır", not "hayır"), as F36's base is the word sharing the longest stem. The class is
+  named by the most telling word alone.
+
+**T-chain** (`t_chain.py`, public, seeded).
+- Two kinds with a property stated only of the kind ("hayvanlar solur .", "bitkiler filizlenir .").
+- Four classes, each stated to be of a kind by its plural ("balıklar bir hayvandır ."), two per kind.
+- Six members per class, stated only to be of their class ("levrek bir balıktır .").
+- One class has a nearer property of its own ("kuşlar uçar ."), and one member an exception ("penguen yüzer .").
+- All read as documents, shuffled, never two facts of a chain together. Three members of each class are asked and the
+  conclusion watched; the other three are never asked.
+
+| 3 seeds | without F37 | F37 one step | one step, forms | **two steps, forms** |
+|---|---|---|---|---|
+| two steps away (27: "levrek solur") | 0 | 0 | 0 | **27** |
+| the nearer property (9: "kartal uçar") | 0 | 0 | 0 | **9** |
+| the exception (3: "penguen yüzer") | 0 | 3 | 0 | **3** |
+| wrong generalisations | 0 | 0 | 0 | **0** |
+
+- T-deduce (one step, 5 classes): 48 / 48 with every form below, the same replies.
+
+**What failed first, and the hypotheses eliminated.**
+- **One step reads the copula as a property.** With "balıklar bir hayvandır ." lived, "bir" is a continuation of
+  "balıklar", and F37 deduced "levrek bir" (0 / 27, and 0 / 9: "kuşlar bir" competed with "kuşlar uçar").
+- **"What the place-mates share is a form" eliminated a property.** The first rule for forms was F37's rule for a
+  member's own record: what most other members of the class word's places went on with. In T-deduce "balıklar yüzer ."
+  and "penguen yüzer ." make the place "X yüzer .", so "yüzer" counted as its form, and every fish was answered "X bir
+  balıktır" (48 → 39). The form is that of being of a class, not of any shared place.
+- **One step with the forms is not enough.** With the forms but no second step, all 39 were wrong: the members asked
+  needed two steps for three classes in four, so their frame's relation was "what followed the member" (NEXT), and the
+  unasked were answered "X bir ...". The members' reading needs the chain to name their values.
+
+**Cheaper.** On the teacher protocol's mind (210,687 moments, 2.47 M ties), 2 answers with F37 (profiled, one step):
+- **124 s** as committed (cb67f44) → **51 s**: class-mates' shared continuations read as sets, not 15.6 M tie lookups;
+  a class word's continuations read once a moment.
+- → **37 s**: the deductions of a class word as arrays, added value by value.
+- → **28 s**: one profile per place (what its class words go on with), carried to each member at once.
+- → **17 s**: the profiles and each word's deduction kept while the run lasts (from the run's start: the classes as
+  they were known when first read in it); the deduction skipped for a member none of whose values can be a property.
+- → **13.5 s**: the class named by the place's most telling word alone.
+- Two steps: 53 s at first, **19.7 s** with only the longest stems (and the class words never said to be of a class
+  not read).
+- Without F37 an answer takes about 0.85 s there. F37 stays off by default.
+
+**Limits.**
+- A place needs two fillers: a class that is alone in its kind ("çiçekler bir bitkidir ." with no other plant class)
+  is not a member of a place, so it inherits nothing.
+- Two steps at most; a third deduction is not read.
+- The class must be named by a word sharing a stem with the word naming it as a member; a property is one word.
