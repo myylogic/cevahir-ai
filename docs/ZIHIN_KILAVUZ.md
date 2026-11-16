@@ -56,8 +56,7 @@ Adı boş bırakırsanız konuşan "biri" olur ve söyledikleri kimseye özel sa
   beş kat bağ kurdu ve 219 bin anda belleği tüketti; bu yüzden varsayılan kapalı. Parçalarla büyümüş bir zihin
   parçalarını korur.
 - 10 dakika sessizlikte uyur: günün konuları ve emin olmadığı kelimeler üzerine rüya görür. Rüya çağrışımla bağlanan
-  hayallerden oluşur: ortak kökten çıkarım ("kedi bir hayvandır" + "hayvanlar nefes alır" → "kedi nefes alır") ya da
-  bir düşünceyi benzediği bir kavrama taşımak. Bir kelimeyle birlikte gösterdiğin resmi rüyasında yeniden "görür".
+  hayallerden oluşur: bir düşünceyi benzediği bir kavrama taşımak. Bir kelimeyle birlikte gösterdiğin resmi rüyasında yeniden "görür".
   Sonra hayallerini yaşadıklarıyla tartar; hangi hayalinin doğru, hangisinin yanlış çıktığını söyler. Yanlış çıkan
   hayal silinmez, gerçek kanıt ona ağır basar. `!uyu` ile isteyince de uyur.
 
@@ -70,7 +69,9 @@ Adı boş bırakırsanız konuşan "biri" olur ve söyledikleri kimseye özel sa
 | `!his` | iç sinyaller: şaşkınlık, rahatlama, çatışma, yük, dürtü |
 | `!yas` | gelişim profili: yaşanmış an, bildiği kelime, kurduğu kavram |
 | `!kendin` | iç gözlem: kendi sesiyle ne kadar konuştuğu, kendi içinde ne kadar düşündüğü, kendini en çok neyle bağladığı |
-| `!dusun [konu]` | iç sesini dinlemek: bir konu üzerine düşünür, benzeştirdiği bir kavrama aktararak hayal kurar ve ortak kökten çıkarım yapar; her hayalin gerçeklik puanı yazılır |
+| `!dusun [konu]` | iç sesini dinlemek: bir konu üzerine düşünür, benzeştirdiği bir kavrama aktararak hayal kurar; her hayalin gerçeklik puanı yazılır |
+| `!neden` | son cevabın her kelimesi nereden geldi: yaşanmış kanıt (hatırlama), bir çerçeve (kaç üye, hangi ilişkiyle), dizinin başı, devam, hiç görülmemiş bir kelimenin kökü, benzer durumlar; beklenen sonuç da tartıldıysa o da yazılır |
+| `!neden <söz> => <kelime>` | beyaz kutu: bu sözden sonra bu kelimenin kendi kanıtı ve genellemelerle etkin kanıtı, kaynaklara göre |
 | `!kim <ad>` | konuşan kişiyi değiştirmek |
 | `!gor <resim>` | bir resmi bir sonraki sözünüzle birlikte göstermek (örn. `!gor ben.jpg` sonra `ben muhammed`) |
 | `!dinle <ses.wav>` | bir sesi bir sonraki sözünüzle birlikte duyurmak (örn. `!dinle sesim.wav` sonra `bu benim sesim`) |

@@ -262,6 +262,9 @@ def _race(mind, candidates, theta: float, T: int) -> List[Event]:
             score, e, unit = tried
         acts.append(Event(mind.ch.names[channel], mind.ch.symbol(channel, int(S.u_symbol[unit])), ACTED))
         mind.hoping = (unit, e)
+        if mind.__dict__.get("_explain_on"):           # the chat's !neden: where this word came from
+            from .neden import attribute
+            mind.__dict__.setdefault("_why", []).append(attribute(mind, unit, consequence(mind, unit)))
     return acts
 
 

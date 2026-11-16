@@ -96,6 +96,8 @@ class Config:
                                     # members' evidence as literal values) does not vote as a situation of its own
     company: bool = False           # F33 (Relational Memory): evidence is noted with the known person present, and what
                                     # is recalled depends on who is present (zihin/iliski.py)
+    inherit: bool = False           # F37 (Inheritance): a frame's value may be what the filler's classes go on with
+                                    # (deduction through the stems that name its places), its own record last
     forms: bool = False             # F36 (Word Forms): a word never met is read as the lived word it is a form of (a
                                     # shared stem where the lived words branch), when nothing else expects anything
     purpose: bool = False           # F35 (Generalised Consequences): what a path never taken would lead to (good, bad)
@@ -785,6 +787,9 @@ class Mind:
         state.pop("_situation_cache", None)
         state.pop("_between_memo", None)
         state.pop("_lexicon", None)
+        state.pop("_lexicon_index", None)
+        state.pop("_why", None)
+        state.pop("_explain_on", None)
         for name in READ_CACHES:
             state.pop(name, None)
         return state

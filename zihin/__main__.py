@@ -24,6 +24,8 @@ Commands (Turkish, with English aliases):
                                     or many control characters is not text and is not read
     !konus               / !chat    chat mode on/off: after each line you write, the mind may answer
     !kim <ad>            / !who     who is talking now (perceived at the start of every utterance)
+    !neden               / !why     where each word of the last answer came from (memory, a frame and its relation,
+                                    a continuation, a form, similar situations; what the act was expected to lead to)
     !gor <resim>         / !see     show an image with your next utterance (it is seen at its start), e.g.
                                     !gor ben.jpg  then  "ben buyum"; later  !gor baska.jpg  then  "bu kim"
     !dinle <ses.wav>     / !hear    play a sound with your next utterance (it is heard at its start), e.g.
@@ -485,6 +487,8 @@ class Session:
             mind.add_channel(INNER_CHANNEL, "sense")
         self.hearing = None                     # a sound heard with the next utterance: (gist, facets)
         self.partner = SOMEONE                  # who the mind is talking with now (set by --kim or !kim)
+        self.explain = False                    # the chat records where each word of an answer came from (!neden)
+        self.sources: List[dict] = []           # ... the record of the last answer, word by word
         self.open_turn = False                # the mind has just answered; feedback may still come
 
     def words(self, text: str) -> List[str]:
@@ -620,6 +624,9 @@ class Session:
         if not symbols:
             return "(sessiz)"
         self.company(self.partner)
+        if self.explain:                                 # !neden: each decided word is attributed as it is decided
+            self.mind.__dict__["_why"] = []
+            self.mind.__dict__["_explain_on"] = True
         if self.turns:                                   # the turn passes when your utterance has ended
             self.listen(text, TOLD, speaker=self.partner)
             acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
@@ -631,6 +638,9 @@ class Session:
             if not acts:
                 acts = self.mind.step([])
         said = self.speak(acts, say, limit)
+        if self.explain:
+            self.sources = self.mind.__dict__.pop("_why", [])
+            self.mind.__dict__.pop("_explain_on", None)
         self.remember(CHAT, text, list(range(start, self.mind.t + 1)), [text], said)
         self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
         self.answered = list(self.mind.trace)            # ... and the path that led to the answer is kept for them
@@ -1188,6 +1198,7 @@ def main(argv=None) -> None:
             mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path = {}, False, False, None
         mind.add_channel(CHANNEL, "act")
     session = Session(mind, pieces_for(mind, args.parca))
+    session.explain = True                               # !neden explains the last answer word by word
     interactive = sys.stdin.isatty()
     name = args.kim
     if not name and interactive:
@@ -1387,8 +1398,12 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     print("  sohbet modu %s" % ("açık" if chat else "kapalı"))
                     return (chat, turns_since_save)
                 elif cmd in ("neden", "why"):
-                    prefix, _, value = rest.partition("=>")
-                    print(session.why(prefix.strip(), value.strip()))
+                    if rest.strip():                     # !neden <metin> => <kelime>: the white-box belief
+                        prefix, _, value = rest.partition("=>")
+                        print(session.why(prefix.strip(), value.strip()))
+                    else:                                # !neden: where each word of the last answer came from
+                        from .neden import report
+                        print(report(session.sources))
                 elif cmd in ("gecmis", "history"):
                     for entry in session.history:
                         print("  %3d  %s" % (entry.number, entry.text))

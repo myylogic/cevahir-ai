@@ -1,0 +1,112 @@
+# -*- coding: utf-8 -*-
+"""Why a word was said: which reading of the mind supplied it (the chat's ``!neden``).
+
+When the session asks for it, every word the mind decides is attributed at the moment it is decided, from the same
+readings the decision used (``read.members_map``), in their order of precedence:
+
+* the context's own lived evidence (the exact situation was lived and went on with this word: memory);
+* a frame: what the members of a category lived in the same place, and by which relation (the same word, the asked
+  word itself, its continuation, what stands where it stands, what it was answered with alone), with how many
+  members;
+* the beginning of a sequence (F26), the lived continuation of the last words (F16), a word never met read as the form
+  it is of (F36), the lived situations most like the present one (F23);
+* what the act was expected to lead to (good or bad, L5 and F35), when that weighed in the choice.
+
+It reads only, and nothing in it decides anything: it says where the decision came from.
+"""
+from __future__ import annotations
+
+from typing import Dict, Optional
+
+from .evidence import conviction, expectation, frequency
+
+RELATION = {-1: "sorulan kelimenin kendisi", -2: "kelimenin devamı", -3: "dizinin başı", -4: "yerine geçen kelime",
+            -5: "tek başına aldığı cevap"}
+
+
+def attribute(mind, unit: int, consequence: float = 0.0) -> Dict[str, object]:
+    """The source of the decided word ``unit`` in the present context, as a small record."""
+    from . import read as R
+    from .events import ACTED
+    from .form import parts_of
+    ch, symbol = mind.symbol_of(unit)
+    record: Dict[str, object] = {"word": str(symbol), "source": "bilinmiyor", "detail": ""}
+    context = mind.context
+    if context is None:
+        record.update(source="bağlamsız", detail="")
+        return record
+    trust = mind.trust.clone()
+    trust[ACTED] = 0.0
+    own = R.own_mass(mind, context, 1, trust).get(unit)
+    if own is not None and expectation(own[0], own[1], mind.cfg.k) > 0.5 and conviction(sum(own), mind.cfg.k) >= 0.5:
+        record.update(source="yaşanmış", detail="bu bağlamdan sonra bu kelime yaşandı (hatırlama, kanıt %.1f)"
+                      % sum(own))
+    else:
+        claim = _frame_claim(mind, context, unit, trust)
+        if claim is not None:
+            voters, key, e = claim
+            relation = RELATION.get(key, "aynı kelime") if isinstance(key, int) else "aynı kelime"
+            record.update(source="genelleme", detail="%d üyenin aynı yerde yaşadığı (%s), e=%.2f" % (voters, relation, e))
+        else:
+            for name, reading, label in (
+                    ("dizi başı", lambda: R.start_continuations(mind, context) if R._begins(mind, context) else {},
+                     "bu kelimeyle başlayan dizilerin devamı"),
+                    ("devam", lambda: R.continuation_backoff(mind, context, trust), "son kelimelerin yaşanmış devamı"),
+                    ("biçim", lambda: R.form_reading(mind, context, trust), "hiç görülmemiş kelime, kökü olarak okundu"),
+                    ("benzer durum", lambda: R.situation_backoff(mind, context, trust),
+                     "en benzer yaşanmış durumların devamı")):
+                e = reading().get(unit)
+                if e is not None and e > 0.5:
+                    record.update(source=name, detail="%s, e=%.2f" % (label, e))
+                    break
+    if consequence:
+        record["detail"] = str(record["detail"]) + "; sonuç beklentisi %+.2f" % consequence
+    return record
+
+
+def _frame_claim(mind, context: int, unit: int, trust) -> Optional[tuple]:
+    """(voters, key, e) of the frame that would speak for ``unit`` in the members' reading, or None."""
+    from . import read as R
+    from .form import mv_view, parts_of
+    from .store import COMPOSED
+    cfg = mind.cfg
+    frames = [(g, e, None) for g, e in R.generalisations(mind, context)]
+    if getattr(cfg, "bind_relations", False):
+        frames += R.bound_frames(mind, context)
+    best = None
+    for general, e_abs, tail in frames:
+        mass, members, where, fixed, voters = R.member_votes(mind, general, context, trust, tail)
+        if not mass:
+            continue
+        c_members = conviction(members, cfg.k)
+        score = e_abs * c_members * max(frequency(p, n) for p, n in mass.values())
+        if best is None or score > best[0]:
+            best = (score, e_abs, c_members, mass, where, fixed, voters, general)
+    if best is None:
+        return None
+    _, e_abs, c_members, mass, where, fixed, voters, frame = best
+    c = cfg.lam * e_abs * c_members
+    filler = parts_of(mind, context)[where[0]] if where and mv_view(mind, "u_kind")[context] & COMPOSED else None
+    category = R.frame_category(mind, frame)
+    found = None
+    for key, (w_pos, w_neg) in mass.items():
+        if R.resolve(mind, key, filler, fixed, category) != unit:
+            continue
+        e = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
+        if found is None or e > found[2]:
+            found = (voters, key, e)
+    return found if found is not None and found[2] > 0.5 else None
+
+
+def report(why) -> str:
+    """The lines ``!neden`` prints for the last answer."""
+    if not why:
+        return "  son cevapta açıklanacak bir kelime yok (sessiz kaldı ya da açıklama kapalıydı)"
+    lines = []
+    for r in why:
+        lines.append("  %-14s %-13s %s" % (r["word"], r["source"], r["detail"]))
+    counts: Dict[str, int] = {}
+    for r in why:
+        counts[str(r["source"])] = counts.get(str(r["source"]), 0) + 1
+    lines.append("  özet: " + ", ".join("%s %d" % (k, v) for k, v in sorted(counts.items(), key=lambda x: -x[1])))
+    return "\n".join(lines)

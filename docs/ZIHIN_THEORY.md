@@ -172,10 +172,13 @@ At each moment, roughly each word, the mind lives these steps:
   what everyone taught is known with a stranger; no role or relation is coded.
 - **Reply Relation (F34).** A frame's value may be what its filler, said on its own, was answered with, and several
   places after a prefix may be bound to the filler (its stand-in, its reply, or an item every member has there); a
-  frame's claim is corroborated by the lived suffixes of its context. On SCAN's "add primitive" split, made small for
+  frame's claim is corroborated by the lived suffixes of its context that keep every fixed word of the frame (a
+  suffix that leaves one out is another context: "walk ⏎" of "jump left and walk ⏎"). On SCAN's "add primitive" split, made small for
   the mind's window, a primitive seen only alone ("jump" -> "i_jump") is used in every template the first time it is
   asked ("jump twice", "walk and jump", "jump left twice"): 75 of 75 commands, where a Transformer trained from
-  scratch on the same data, exact on all its training commands, answers 4.
+  scratch on the same data, exact on all its training commands, answers 4. On SCAN's own grammar within a window of
+  11, with the bound frames of every prefix read: 789 of 844 (the Transformer 0), every command that fits the window
+  whole answered exactly.
 - **Generalised Consequences (F35).** What an act would lead to (good, bad) is read from what similar paths led to,
   through the frames of the path, and the path's own record comes last. A mind that learned from how its answers were
   received in a few situations acts the same way in situations it never met (polite to things never handed to it: 0
@@ -185,6 +188,13 @@ At each moment, roughly each word, the mind lives these steps:
   stem with, the stem being a boundary of the lived words themselves (Harris's successor variety), carried over by
   how much of the word the stem covers. "merhabalar" is greeted as "merhaba", "nasılsınız ?" answered as "nasılsın ?";
   a beginning one lived word has by chance is not a stem.
+- **Inheritance (F37, off by default).** Deduction with exceptions, read from the places a word filled: the class of
+  a place is named by its frame's most telling fixed word, and the class spoken of on its own is a lived word sharing
+  a stem with it ("kuşlar" for "kuştur"); what that word goes on with is carried over to the member by the deduction
+  of NARS (f = f1 f2, c = f1 f2 c1 c2 f_n), and the member's own record, what its class-mates mostly did not go on
+  with, comes last. Facts read apart ("kartal bir kuştur .", "kuşlar uçar .") give a conclusion never taught
+  ("kartal uçar"), and an exception stated of itself ("penguen yüzer") wins over its class: 48 of 48 in T-deduce
+  against 2, no wrong generalisation. Off until it is cheap on a large mind; one step, no chains yet.
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -373,6 +383,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Reply Relation | Cevap İlişkisi | F34 | compositional generalisation (SCAN); backoff to lived suffixes |
 | Generalised Consequences | Genelleşmiş Sonuçlar | F35 | model-based choice: expected value of consequences |
 | Word Forms | Kelime Biçimleri | F36 | morpheme boundaries by successor variety (Harris) |
+| Inheritance | Kalıtım | F37, off by default | NARS deduction; default inheritance with exceptions |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

@@ -419,6 +419,7 @@ SELF, NEXT = -1, -2   # F12 relational targets of a frame: "the filler of my slo
 START = -3            # F26: "what a sequence that starts with the filler goes on with" (more specific than NEXT)
 ALIKE = -4            # F31: "what stands where the filler stands" (the paradigmatic axis; NEXT and START are syntagmatic)
 REPLY = -5            # F34: "what the filler, said on its own, was answered with" (the continuation of filler + event)
+INHERIT = -6          # F37: "what the filler's classes go on with, its own record last" (deduction with exceptions)
 
 
 def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[int] = None) -> Optional[int]:
@@ -432,6 +433,8 @@ def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[
         return stand_in(mind, filler, fixed, category) if filler is not None else None
     if target == REPLY:
         return reply_of(mind, filler, fixed) if filler is not None else None
+    if target == INHERIT:
+        return inherited(mind, filler, fixed) if filler is not None else None
     if target in (NEXT, START):
         if filler is None:
             return None
@@ -490,6 +493,7 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
     adds it afterwards, where it can hold, see ``member_votes``)."""
     alike = inline and relational and category is not None and getattr(mind.cfg, "paradigmatic", False)
     replies = relational and getattr(mind.cfg, "replies", False)
+    inherits = relational and getattr(mind.cfg, "inherit", False)
     if exact:
         named: Dict[int, int] = {}
         if relational:
@@ -499,6 +503,10 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
                 best = resolve(mind, START, x, fixed)
                 if best is not None and best not in named:
                     named[best] = START
+            if inherits:                               # F37: x's property (its own record last) before whatever
+                best = resolve(mind, INHERIT, x, fixed)   # followed x anywhere
+                if best is not None and best not in named:
+                    named[best] = INHERIT
             best = resolve(mind, NEXT, x, fixed)
             if best is not None and best not in named:
                 named[best] = NEXT
@@ -514,12 +522,15 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
     goes_on = _continuing(mind, x, fixed) if relational else ()
     stands = resolve(mind, ALIKE, x, fixed, category) if alike and _may_stand_in(mind, x, targets, fixed, {}) else None
     answered = resolve(mind, REPLY, x, fixed) if replies else None
+    deduced = resolve(mind, INHERIT, x, fixed) if inherits else None
     keys = []
     for v in targets:
         if relational and v == x:
             keys.append([SELF])
         elif starts and v not in fixed and begins_with(mind, x, v):
             keys.append([START])                   # F26: v is how a sequence that began with x went on
+        elif v == deduced:
+            keys.append([INHERIT])                 # F37: v is x's property (what x's classes go on with)
         elif v in goes_on:
             keys.append([NEXT])
         elif v == stands:
@@ -529,6 +540,147 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
         else:
             keys.append([v])
     return keys
+
+
+def stem_mates(mind, p: int, since: int) -> List[Tuple[int, float]]:
+    """F37: the lived words that share a stem with ``p`` (a common beginning of at least three letters; two lived words
+    part there, so it is a boundary of the lived words, F36), with the share of the longer word the stem covers."""
+    memo = _moment_memo(mind)
+    key = ("mates", p, since)
+    if key in memo:
+        return memo[key]
+    found: List[Tuple[int, float]] = []
+    channels, symbols = mv_view(mind, "u_channel"), mv_view(mind, "u_symbol")
+    word = str(mind.ch.symbol(channels[p], symbols[p]))
+    if word.isalpha() and len(word) >= 3:
+        _lexicon(mind, channels[p], since)
+        lexicon = mind.__dict__.get("_lexicon")
+        if lexicon is not None and lexicon[0][0] == channels[p]:
+            index = mind.__dict__.get("_lexicon_index")
+            if index is None or index[0] != lexicon[0]:   # the words by their first three letters, once
+                by_head: Dict[str, list] = {}
+                for entry in lexicon[1]:
+                    by_head.setdefault(entry[0][:3], []).append(entry)
+                index = mind.__dict__["_lexicon_index"] = (lexicon[0], by_head)
+            for text, u, _ in index[1].get(word[:3], ()):
+                if u == p:
+                    continue
+                n = 0
+                for a, b in zip(word, text):
+                    if a != b:
+                        break
+                    n += 1
+                found.append((u, n / max(len(word), len(text))))
+    memo[key] = found
+    return found
+
+
+def inherited(mind, x: int, fixed=()) -> Optional[int]:
+    """F37 (Inheritance): what x's classes go on with, x's own record last: deduction with exceptions.
+
+    x is a member of the places it filled (before the present run). The fixed words of each place's frame name it; the
+    most telling of them (1 / (1 + the contexts that hold it), shares over the frame's words) names it most. A lived
+    word sharing a stem with such a word (``stem_mates``: "kuşlar" for "kuştur") is the class spoken of on its own,
+    and what it goes on with is a property of the class. By the deduction of NARS, from "x is a member" (f1, c1)
+    and "the class goes on with v" (f2 = v's share of its continuations, c2 = their conviction): f = f1 f2,
+    c = f1 f2 c1 c2 f_n, the naming of the place by the word (f_n = its share x the stem's cover) weighing how sure the
+    derivation is, not whether the property holds; w = k c / (1 - c), and the derivations add (revision). x's own
+    record comes last: what x itself was lived to go on with that its class-mates (the members of the same places)
+    mostly did not (what every member goes on with, "bir" of "X bir kuştur", is the class's form, not x's own) nests
+    over the deduced evidence, and a deduced property x never went on with while it went on with such a thing of its
+    own counts against: an exception ("penguen yüzer" over "kuşlar uçar"). The value with the highest expectation
+    over 1/2, never a fixed word of the frame."""
+    memo = _moment_memo(mind)
+    key = ("inherit", x, tuple(fixed))
+    if key in memo:
+        return memo[key]
+    since = getattr(mind, "episode_start", mind.t)
+    evidence, lived, k = _inheritance(mind, x, since)
+    fixed_set = set(fixed)
+    lived_mass = sum(p for v, (p, _) in lived.items() if v not in fixed_set)
+    best, best_e = None, 0.5
+    for v in set(evidence) | set(lived):
+        if v in fixed_set:
+            continue
+        w_pos, w_neg = evidence.get(v, (0.0, 0.0))
+        e = expectation(w_pos, w_neg, k)
+        if v in lived:
+            p, n = lived[v]
+            c = conviction(p + n, k)
+            e = c * frequency(p, n) + (1.0 - c) * e
+        elif lived_mass > 0.0:                         # an exception: x went on with another thing of its own
+            c = conviction(lived_mass, k)
+            e = (1.0 - c) * e
+        if e > best_e:
+            best, best_e = v, e
+    memo[key] = best
+    return best
+
+
+def _inheritance(mind, x: int, since: int):
+    """F37: (deduced evidence {v: [W+, W-]}, x's own record {v: (W+, W-)}, k) for ``inherited``; once a moment."""
+    memo = _moment_memo(mind)
+    key = ("inheritance", x, since)
+    if key in memo:
+        return memo[key]
+    S, k = mind.S, mind.cfg.k
+    kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+    world, act = kind_masks(mind)[3], kind_masks(mind)[5]
+    fixed_set = set()
+    evidence: Dict[int, List[float]] = {}
+    mates = set()
+    src = mv_view(mind, "t_src")
+    for category, e_m in memberships_before(mind, x, since).items():
+        if e_m <= 0.5:
+            continue
+        tie = S.find_tie(x, category, ABSTRACT, 0)
+        w_pos, w_neg = mass1(mind, tie) if tie >= 0 else (0.0, 0.0)
+        f1, c1 = frequency(w_pos, w_neg), conviction(w_pos + w_neg, k)
+        frame = category + 1                             # a place's frame is born right after it (induce_slots)
+        if frame >= S.n_units or not kinds[frame] & SLOTTED:
+            continue
+        words = [q for q in parts_of(mind, frame) if q != category and kinds[q] & ATOMIC and act[channels[q]]
+                 and q not in fixed_set]
+        if not words:
+            continue
+        telling = [1.0 / (1 + len(S.inc.get((q, PART), ()))) for q in words]
+        total = sum(telling)
+        for q, t in zip(words, telling):
+            for mate, cover in stem_mates(mind, q, since):
+                if mate in fixed_set or mate == x:
+                    continue
+                found = _unit_arrays(mind, mate, 1)
+                if found is None:
+                    continue
+                dst, pos, _ = found
+                goes = [(v, float(p)) for v, p in zip(dst, pos) if p > 0.0 and world[channels[v]]
+                        and channels[v] == channels[x] and v not in fixed_set and v != x and v != mate]
+                mass = sum(p for _, p in goes)
+                if mass <= 0.0:
+                    continue
+                c2, f_n = conviction(mass, k), (t / total) * cover
+                mates.add(category)
+                for v, p in goes:
+                    f = f1 * (p / mass)
+                    c = min(f * c1 * c2 * f_n, 1.0 - 1e-9)
+                    w = k * c / (1.0 - c)
+                    rec = evidence.setdefault(v, [0.0, 0.0])
+                    rec[0] += f * w
+                    rec[1] += (1.0 - f) * w
+    lived = {}
+    if evidence:
+        members = {src[t] for g in mates for t in list(S.inc.get((g, ABSTRACT), ()))[:MEMBERS]} - {x}
+        own = _unit_arrays(mind, x, 1)                  # x's own record: what it went on with that its class-mates
+        if own is not None:                             # mostly did not
+            for v, p, n in zip(own[0], own[1], own[2]):
+                if not world[channels[v]] or channels[v] != channels[x] or p <= 0.0:
+                    continue
+                shared = sum(1 for y in members if S.find_tie(y, v, EXPECT, 1) >= 0)
+                if shared * 2 < max(1, len(members)):
+                    lived[v] = (float(p), float(n))
+    found = (evidence, lived, k)
+    memo[key] = found
+    return found
 
 
 def reply_of(mind, x: int, fixed=()) -> Optional[int]:
@@ -762,8 +914,10 @@ def _instance(mind, parts, where, x: int, tail, fixed, category: int) -> Optiona
 def bound_frames(mind, unit: int) -> List[Tuple[int, float, tuple]]:
     """F32 (Relational Binding), F34 (several places): the frames of a prefix of the unit whose filler the items after
     the prefix are bound to: each of them the filler's stand-in (F31, ALIKE), what the filler on its own was answered
-    with (F34, REPLY), or an item every member has there; at least one a relation. Returns (frame, e, tail) for the
-    longest prefix that has such frames, tail the entries in order (relations as their keys, items as themselves).
+    with (F34, REPLY), or an item every member has there; at least one a relation. Returns (frame, e, tail) for every
+    prefix that has such frames, longest first, tail the entries in order (relations as their keys, items as
+    themselves): which of them speaks is the members' to say (a longer prefix whose members never lived on says
+    nothing, and must not hide a shorter one whose members did).
     A place binds its repeats (bind_repeats: the filler itself, SELF); it binds what stands for its filler, and what
     its filler was answered with, the same way: "jump twice ⏎ i_jump" is read through each member's "walk twice ⏎
     i_walk". A continuation of the filler (NEXT, START) is not bound: it is what follows the filler, read by the
@@ -774,9 +928,11 @@ def bound_frames(mind, unit: int) -> List[Tuple[int, float, tuple]]:
     if not kinds[unit] & COMPOSED or kinds[unit] & SLOTTED or not getattr(mind.S, "bind_repeats", False) \
             or not (paradigmatic or replies):
         return []
-    relations = ([ALIKE] if paradigmatic else []) + ([REPLY] if replies else [])
+    relations = ([ALIKE] if paradigmatic else []) + ([REPLY] if replies else []) + \
+        ([INHERIT] if getattr(mind.cfg, "inherit", False) else [])
     parts = parts_of(mind, unit)
     shortest = 2 if replies else len(parts) - 1          # F31 alone binds the last item only
+    every = []
     for k in range(len(parts) - 1, max(shortest, 2) - 1, -1):
         prefix = mind.S.tuple_index.get(parts[:k])
         if prefix is None:
@@ -807,9 +963,8 @@ def bound_frames(mind, unit: int) -> List[Tuple[int, float, tuple]]:
                     tail.append(item)                    # an item every member has there
             if tail is not None and bound:
                 found.append((frame, e, tuple(tail)))
-        if found:
-            return found
-    return []
+        every += found
+    return every
 
 
 def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None, tail: Optional[int] = None):
@@ -1046,6 +1201,22 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     return out
 
 
+def _lexicon(mind, cid: int, since: int) -> list:
+    """F36/F37: the words lived on channel ``cid`` before ``since``: (text, unit, use), kept while neither changes."""
+    lexicon = mind.__dict__.get("_lexicon")
+    size = len(mind.ch.symbols[cid])
+    if lexicon is None or lexicon[0] != (cid, size, since):
+        S = mind.S
+        words = []
+        for index, sym in enumerate(mind.ch.symbols[cid]):
+            u = S.atom_index.get((cid, index), -1)
+            text = str(sym)
+            if u >= 0 and text.isalpha() and int(S.u_birth[u]) < since and float(S.u_use[u]) > 0.0:
+                words.append((text, u, float(S.u_use[u])))
+        lexicon = mind.__dict__["_lexicon"] = ((cid, size, since), words)
+    return lexicon[1]
+
+
 def form_base(mind, w: int, since: int):
     """F36 (Word Forms): the lived word a word never met is a form of, and how far: (base, f, c) or None.
 
@@ -1065,19 +1236,7 @@ def form_base(mind, w: int, since: int):
     channel = channels[w]
     word = str(mind.ch.symbol(channel, symbols[w]))
     if word.isalpha() and len(word) >= 3:
-        S = mind.S
-        cid = channel
-        lexicon = mind.__dict__.get("_lexicon")
-        size = len(mind.ch.symbols[cid])
-        if lexicon is None or lexicon[0] != (cid, size, since):
-            words = []
-            for index, sym in enumerate(mind.ch.symbols[cid]):
-                u = S.atom_index.get((cid, index), -1)
-                text = str(sym)
-                if u >= 0 and text.isalpha() and int(S.u_birth[u]) < since and float(S.u_use[u]) > 0.0:
-                    words.append((text, u, float(S.u_use[u])))
-            lexicon = mind.__dict__["_lexicon"] = ((cid, size, since), words)
-        words = lexicon[1]
+        words = _lexicon(mind, channel, since)
         best = None
         for text, u, use in words:
             if u == w:
@@ -1279,9 +1438,9 @@ def situation_evidence(mind, unit: int, trust: Optional[torch.Tensor] = None, le
     contexts not to count (F30: those another reading has already counted). ``lived_only``: frames are left out too
     (a frame is a generalisation, not a lived situation: its own evidence is its members', literal values only).
     ``focus`` (F34): the places (distances from the end) of a frame's fixed items. The lived situations are then the
-    lived suffixes of the present context (the context without its front: what followed the claim's own context when
-    less of it was there), and the similarity is how much of the frame's fixed items a suffix holds, by the same
-    weights (evidence about a frame's claim is what followed its own context, however much of it was lived)."""
+    lived suffixes of the present context that reach every fixed item of the frame: the claim's own context, whatever
+    filled the frame's place at the front, or nothing. A suffix that leaves out a fixed word is another context ("walk
+    twice ⏎" of "jump left and walk twice ⏎": what follows it is the answer to another command)."""
     S, cfg = mind.S, mind.cfg
     if not mv_view(mind, "u_kind")[unit] & COMPOSED:
         return 0.0, {}
@@ -1315,8 +1474,8 @@ def situation_evidence(mind, unit: int, trust: Optional[torch.Tensor] = None, le
         if focus:                                        # F34: the lived suffixes of the present context
             anchors = []
         lived, seen, budget = [], {unit}, 20000
-        if focus:
-            for L in range(n - 1, 1, -1):
+        if focus:                                        # a suffix that reaches every fixed item of the claim
+            for L in range(n - 1, max(max(focus) + 1, 2) - 1, -1):
                 suffix = S.tuple_index.get(heard[n - L:])
                 if suffix is not None and suffix not in seen and L > d_event:
                     seen.add(suffix)

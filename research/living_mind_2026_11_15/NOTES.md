@@ -2225,3 +2225,141 @@ new categories, autonomous goals, chains of inference, contradictions, sources, 
 yağar sence ?": none of the owner's three minds here produces a causal account of rain (cevahir5 and cevahir are
 silent; cevahir3b says "bilmiyorum , öğrenmek isterim .", all five words from lived evidence), and the private
 documents hold no text on how rain forms.
+
+## Finishing the answer: the frames of every prefix, and suffixes that keep the frame's words (2026-11-16)
+
+**The gap.** In SCAN's grammar within a window of 11 (above) the mind was right on 609 of 844 test commands, and most
+of its errors were one: it did not stop.
+
+**Two changes to the reading (F34), measured one after the other** on one life: the 4720 training dialogues of SCAN
+within 11 (seed 0), lived once and saved, each test command answered on a fresh copy.
+
+| reading | right | went on too long | silent |
+|---|---|---|---|
+| F36 (commit 5730396) | 609 / 844 | most of the 235 errors | (not counted) |
+| + the bound frames of every prefix | 616 / 844 | 55 | 173 |
+| + only the suffixes that reach every fixed word | **789 / 844** | 55 | **0** |
+
+- **The bound frames of every prefix** (`read.bound_frames`).
+  - Before, the bound frames (F32, F34) were read only from the longest prefix of the context that had any.
+  - A longer prefix whose members never went on past this point says nothing. It hid a shorter prefix whose members did
+    go on, among them the members that ended there.
+  - Now the bound frames of every prefix are read, longest first. Which of them speaks is the members' to say (their
+    conviction, as always).
+  - The answers that went on too long fell to 55, but 173 commands went silent.
+- **Only the suffixes that reach every fixed word** (`read.situation_evidence` with a focus).
+  - Corroboration (F30, F34) reads the lived suffixes of the present context as evidence about the frame's claim.
+  - A suffix that leaves out a fixed word of the frame is another context. In "jump thrice and look thrice ⏎" the lived
+    "look thrice ⏎" was answered "i_look i_look i_look", the answer to another command. It pulled the frame's first word
+    (i_jump) under the speaking line: those were the 173 silences.
+  - Now a suffix counts only if it reaches every fixed item of the frame: the claim's own context, whatever filled the
+    frame's place. All 173 are answered.
+- **What remains is the window.**
+  - All 55 errors go on too long, and all are of one kind: the answer's last word is decided after the command's first
+    word has left the window of 11.
+  - Every command whose words, end and answer fit in the window is answered exactly: 596 of 596.
+  - Of the 248 commands whose last word is decided after the first word has left, 193 are right.
+  - An example: "walk twice after jump opposite left" → "i_lturn i_lturn i_jump i_walk i_walk", then i_walk again.
+    Once "walk twice" has left the window, nothing in it says how many walks were asked.
+  - This needs the question held as one item while it is answered (a working memory), not more evidence.
+- **The official run** lived the training dialogues again and answered with this code (`t_compose.py mind --scan 11
+  --window 11 --seeds 1`, in `results/compose.jsonl`): **789 / 844** as well (living 58,803 moments; 727 s).
+
+**What the strict rule costs.**
+- In the meaning world (3 seeds), two questions went silent in all three seeds: "selamlar , adın ne ?" and "hello ,
+  nasılsın ?". Their greetings were lived rarely or never (a greeting in front: 1.00 → 0.67).
+- Their frame's fixed words include the comma. The lived "adın ne ?" leaves it out and no longer counts. With the
+  earlier rule both are answered (checked on seed 0, in a full copy with only this rule reverted).
+- Here the left-out word does not change what follows; in SCAN "left and" does. The rule cannot yet tell the two apart.
+- What would tell them apart: whether the lived contexts one item longer than a suffix went on as the suffix did. A
+  suffix is as good a witness as its extensions agree with it.
+- Everything else in the meaning world is unchanged: an extra word 0.67, synonyms 0.56, a form never met 1.00, meaning
+  questions 0.67.
+
+**Elsewhere** (each official run is appended to its results file):
+- T-compose: 75/75.
+- The teacher protocol: 120 exact (F1 0.7444; answers 176 s, 170 s before the two changes).
+- Recall: 90 of 146 (57 s, 59.5 s before).
+- The listening worlds: 0.783 / 0.812.
+- The relations world and T-purpose (8/9): unchanged.
+- With the switches off, the lesson-free gate (7039 moments) and the 17 configurations are bit-identical.
+
+## Inheritance (F37): conclusions never taught, from facts read apart (2026-11-16)
+
+**The gap** (the audit, DENETIM_2026_11_16.md). The mind did not put two facts read apart together. Read "kartal bir
+kuştur ." and "kuşlar uçar ." on different days, then asked "kartal ne yapar ?", it repeated what it lived after
+"kartal": "kartal bir kuştur".
+
+**F37** is deduction with exceptions, read from the places a word filled (`read.inherited`, `read._inheritance`,
+`read.stem_mates`; relation INHERIT; `Config.inherit`, off by default).
+- **x is a member of the places it filled.** These are its categories before the present run; f1 and c1 come from the
+  membership tie (F11).
+- **The class is named by the fixed words of each place's frame.** The most telling word names it most: its weight is
+  1 / (1 + the contexts that hold it), as a share over the frame's words. So "kuştur" counts over "bir".
+- **The class spoken of on its own** is a lived word that shares a stem with such a word. The stem is a common beginning
+  of at least three letters where two lived words part (F36's boundary): "kuşlar" for "kuştur". What that word goes on
+  with is a property of the class: f2 = v's share of its continuations, c2 = their conviction.
+- **Deduction, as in NARS.**
+  - f = f1 f2 and c = f1 f2 c1 c2 f_n.
+  - f_n is how far the word names the class (its share × the stem's cover). It weighs how sure the derivation is, not
+    whether the property holds.
+  - w = k c / (1 − c), and the derivations add up (revision).
+- **The own record comes last.**
+  - It is what x itself was lived to go on with that its class-mates mostly did not. What every member goes on with
+    ("bir" of "X bir kuştur") is the class's form, not x's own.
+  - It nests over the deduced evidence.
+  - A deduced property counts against x when x never went on with it but went on with such a thing of its own. This is
+    an exception: "penguen yüzer" over "kuşlar uçar".
+- **Where it enters.** INHERIT is a relation of a frame's value (F12, F28). It is named before NEXT: x's property comes
+  before whatever followed x anywhere.
+
+**T-deduce** (`t_deduce.py`, public, seeded).
+- Five classes, each with a property stated only of the class ("kuşlar uçar .").
+- Six members per class, each stated only to be a member ("kartal bir kuştur .").
+- One exception: "penguen bir kuştur ." and "penguen yüzer .".
+- All are read as documents in a shuffled order, never two facts of one chain together.
+- Three members of each class are asked what they do, and the class's property is watched as the answer.
+- The other three are never asked and never stated with the property.
+
+| 3 seeds | without F37 | with F37 |
+|---|---|---|
+| right (the whole answer): the 15 members never asked, and the exception | 2 / 48 | **48 / 48** |
+| wrong generalisations (another class's property; "uçar" for penguen) | 0 | **0** |
+| the exception right | 2 of 3 | **3 of 3** |
+
+Without F37 the mind says "kartal bir kuştur": what it lived after "kartal".
+
+- **What failed first.**
+  - The stem's cover was multiplied into the frequency. Then e fell under ½ and nothing was concluded. The cover now
+    weighs only how sure the derivation is.
+  - INHERIT came after NEXT, so the members' lived continuation ("bir") was named first. INHERIT now comes before NEXT.
+  - The exception failed. The whole of x's lived record was nested last, and "penguen bir" (the class's form) counted as
+    its own. The own record is now only what the class-mates mostly do not share.
+  - The cost was huge: building the lexicon read every word of the channel for each word asked. The lexicon is now built
+    once a moment and indexed by its first three letters, and a mate is checked through the tie index.
+- **Why it is off.**
+  - It still costs too much on a large mind. On the teacher protocol's mind (210,687 moments, 2.47 M ties), 4 answers
+    took 323 s; without F37 an answer takes about 0.9 s.
+  - Every word of every member's places is a candidate name of a class, and each is read in full.
+  - A cheaper form, a class-property index kept while living, comes before it can be on.
+- **Limits.**
+  - The class must be named by a word that shares a stem with the word naming it as a member (a copula form and a
+    plural). A class with another name ("hayvanlar", "canlılar") is not found.
+  - One step only: chains (a member of a member) are not followed.
+  - A property is one word.
+- **Exactness.** With the switch off, the lesson-free gate and the 17 configurations are bit-identical.
+
+## Why a word was said: `!neden` (2026-11-16)
+
+The chat command `!neden` (`!why`) says, for every word of the last answer, which reading supplied it. It is read at
+the moment the word is decided, from the same readings the decision used (`neden.attribute`; it only reads). The
+sources:
+- **yaşanmış**: the context's own lived evidence. The exact situation was lived and went on with this word (recall).
+- **genelleme**: a frame. It says how many members lived the same place, and by which relation: the asked word itself,
+  its continuation, what stands where it stands, or what it was answered with alone.
+- **dizi başı / devam / biçim / benzer durum**: the beginning of a sequence (F26), the lived continuation of the last
+  words (F16), a word never met read as its form (F36), or the most similar lived situations (F23).
+- **sonuç beklentisi**: added when what the act was expected to lead to weighed in (L5, F35).
+
+The audit traced the owner's minds' answers with an earlier form of the same attribution. For "Yağmur nasıl yağar sence ?", cevahir3b's
+"bilmiyorum , öğrenmek isterim ." is lived evidence, word by word.

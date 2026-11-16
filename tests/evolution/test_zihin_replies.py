@@ -10,8 +10,10 @@ What is pinned here
   i_jump", "walk and jump" "i_walk i_jump", "jump and run" "i_jump i_run". The members of each template's frame agree
   that each action is what their primitive alone was answered with, and every action already said is bound to the
   primitive. Without the switch none of them is answered so.
-* Corroboration reads the lived suffixes of the context: "peki adın ne ?" is still answered (the lived "adın ne ?" is
-  its suffix), and a word's reply in another construction ("jump" alone) does not override a frame's claim.
+* Corroboration reads the lived suffixes of the context that reach every fixed word of the frame: "peki adın ne ?" is
+  still answered (the lived "adın ne ?" is such a suffix), while "walk ⏎", a suffix of "jump left and walk ⏎" that
+  leaves out "left" and "and", is another command and does not override the frame ("jump left and walk" is answered
+  "i_lturn i_jump i_walk").
 * Reading writes nothing, and the switch is off by default.
 """
 from __future__ import annotations
@@ -54,7 +56,10 @@ ACT = {"walk": "i_walk", "run": "i_run", "look": "i_look", "jump": "i_jump"}
 def answer(command: str) -> str:
     w = command.split()
     if "and" in w:
-        return answer(w[0]) + " " + answer(w[2])
+        j = w.index("and")
+        return answer(" ".join(w[:j])) + " " + answer(" ".join(w[j + 1:]))
+    if w[1:] == ["left"]:
+        return "i_lturn " + ACT[w[0]]
     return " ".join([ACT[w[0]]] * (2 if w[1:] == ["twice"] else 1))
 
 
@@ -62,6 +67,7 @@ def commanded(replies: bool) -> Session:
     s = fresh(replies)
     known = ["walk", "run", "look"]
     train = known + ["%s twice" % x for x in known] + ["%s and %s" % (x, y) for x in known for y in known if x != y]
+    train += ["%s left" % x for x in known] + ["%s left and %s" % (x, y) for x in known for y in known]
     rng = random.Random(0)
     for _ in range(3):
         block = train + ["jump"] * 3
@@ -88,7 +94,7 @@ def test_the_reply_of_a_word_is_what_it_alone_was_answered_with():
     assert reply_of(mind, mind.unit_of(CHANNEL, "jump"), (end,)) == mind.unit_of(CHANNEL, "i_jump")
 
 
-@pytest.mark.parametrize("command", ["jump twice", "walk and jump", "jump and run"])
+@pytest.mark.parametrize("command", ["jump twice", "walk and jump", "jump and run", "jump left and walk"])
 def test_a_primitive_seen_alone_is_used_in_every_template(command):
     assert ask(commanded(True), command) == answer(command)
     assert ask(commanded(False), command) != answer(command)

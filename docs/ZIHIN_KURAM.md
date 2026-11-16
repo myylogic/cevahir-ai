@@ -162,10 +162,14 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   bilinir; hiçbir rol ya da ilişki kodlanmaz.
 - **Cevap İlişkisi (Reply Relation, F34):** bir çerçevenin değeri, dolgunun tek başına söylendiğinde aldığı cevap
   olabilir ve bir önekten sonraki birkaç konum dolguya bağlanabilir (yerine geçeni, cevabı ya da her üyenin orada
-  sahip olduğu bir öğe); bir çerçevenin iddiası, bağlamının yaşanmış sonekleriyle birleştirilir. SCAN'in "add
+  sahip olduğu bir öğe); bir çerçevenin iddiası, bağlamının çerçevenin her sabit kelimesini koruyan yaşanmış
+  sonekleriyle birleştirilir (birini dışarıda bırakan sonek başka bir bağlamdır: "jump left and walk ⏎" için
+  "walk ⏎"). SCAN'in "add
   primitive" bölünmesinde (zihnin penceresine göre küçültülmüş) yalnız tek başına görülen bir komut ("jump" -> "i_jump")
   ilk sorulduğunda her kalıpta kullanılıyor ("jump twice", "walk and jump", "jump left twice"): 75 komutun 75'i;
-  aynı veriyle sıfırdan eğitilmiş, tüm eğitim komutlarını doğru cevaplayan bir Transformer 4'ünü cevaplıyor.
+  aynı veriyle sıfırdan eğitilmiş, tüm eğitim komutlarını doğru cevaplayan bir Transformer 4'ünü cevaplıyor. SCAN'in
+  kendi dilbilgisinde, pencere 11'de, her önekin bağlı çerçeveleri okunarak: 844 komutun 789'u (Transformer 0);
+  pencereye bütünüyle sığan her komut doğru.
 - **Genelleşmiş Sonuçlar (Generalised Consequences, F35):** bir eylemin neye yol açacağı (iyi, kötü), yolun
   çerçeveleri üzerinden benzer yolların neye yol açtığından okunur; yolun kendi kaydı en son gelir. Cevaplarının nasıl
   karşılandığından birkaç durumda öğrenen bir zihin, hiç karşılaşmadığı durumlarda da aynı biçimde davranır (hiç
@@ -175,6 +179,13 @@ Zihin her an (yaklaşık her kelime) şu adımları yaşar:
   paylaştığı yaşanmış kelime olarak okunur; kök, yaşanmış kelimelerin kendi sınırıdır (Harris'in ardıl çeşitliliği) ve
   okuma, kökün kelimeyi ne kadar kapladığıyla taşınır. "merhabalar" "merhaba" gibi selamlanıyor, "nasılsınız ?"
   "nasılsın ?" gibi cevaplanıyor; tek bir yaşanmış kelimenin rastlantıyla sahip olduğu bir başlangıç kök değildir.
+- **Kalıtım (Inheritance, F37, varsayılan olarak kapalı):** istisnalı tümdengelim, bir kelimenin doldurduğu yerlerden
+  okunur: bir yerin sınıfı, çerçevesinin en ayırt edici sabit kelimesiyle adlandırılır; tek başına anılan sınıf, onunla
+  kök paylaşan yaşanmış bir kelimedir ("kuştur" için "kuşlar"). O kelimenin devamı üyeye NARS tümdengelimiyle taşınır
+  (f = f1 f2, c = f1 f2 c1 c2 f_n); üyenin kendi kaydı, yani sınıf arkadaşlarının çoğunun sürmediği devamı, en son
+  gelir. Ayrı ayrı okunmuş olgular ("kartal bir kuştur .", "kuşlar uçar .") öğretilmemiş bir sonuç veriyor ("kartal
+  uçar"); kendisi için söylenmiş bir istisna ("penguen yüzer") sınıfını geçiyor: T-deduce'da 48'de 48 (önce 2),
+  yanlış genelleme yok. Büyük bir zihinde ucuzlayana kadar kapalı; tek adım, henüz zincir yok.
 - **Benzerlik Oyu (Resemblance Vote):** iki şey ortak yönleriyle benzer. Bir yön, ne kadar az şeyde bulunuyorsa o
   kadar ayırt edicidir. Yeni bir şeye en çok benzeyen üyeler en yüksek sesle konuşur; ağırlık, sınıflandırmanın
   örnek tabanlı modellerindeki gibidir (genelleştirilmiş bağlam modeli). Görme ve işitme böyle tanır: yeni
@@ -360,6 +371,7 @@ Hepsi notlarda ölçümleriyle durur.
 | Cevap İlişkisi | Reply Relation | F34 | bileşimsel genelleme (SCAN); yaşanmış soneklere geri çekilme |
 | Genelleşmiş Sonuçlar | Generalised Consequences | F35 | modele dayalı seçim: sonuçların beklenen değeri |
 | Kelime Biçimleri | Word Forms | F36 | ardıl çeşitliliğiyle biçimbirim sınırları (Harris) |
+| Kalıtım | Inheritance | F37, varsayılan olarak kapalı | NARS tümdengelimi; istisnalı varsayılan kalıtım |
 | Ses Güvenilirliği | Voice Credibility | F24, varsayılan kapalı | |
 | Doğuş Başarısızlıkları | Born Failures | F25, incelendi, varsayılan kapalı | |
 | Bilmeme Hissi | Felt Not-Knowing | L7 | bilme hissi (üstbiliş) |
