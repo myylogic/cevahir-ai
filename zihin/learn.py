@@ -145,6 +145,9 @@ def judge1(mind, table: int, tie: int, amount: float) -> None:
         differ = open_neg if table == W_POS else open_pos
         S.add1(W_POS, SENSED, mind.source_tie[slot], agree)
         S.add1(W_NEG, SENSED, mind.source_tie[slot], differ)
+        if "personal" in mind.__dict__:                 # F33: whose word it was
+            from .iliski import attribute
+            attribute(mind, slot, ((tie, agree, differ, float(w_pos) + float(w_neg)),))
         v = S.views()
 
 
@@ -202,6 +205,14 @@ def judge(mind, table: int, ids: torch.Tensor, amounts: torch.Tensor) -> None:
         differ = float(open_neg.sum()) if table == W_POS else float(open_pos.sum())
         S.add1(W_POS, SENSED, mind.source_tie[slot], agree)
         S.add1(W_NEG, SENSED, mind.source_tie[slot], differ)
+        if "personal" in mind.__dict__:                 # F33: whose word it was
+            by_tie = mind.personal[0]
+            noted_at = [j for j, tie in enumerate(idn.tolist()) if tie in by_tie]
+            if noted_at:
+                from .iliski import attribute
+                a, d = (open_pos, open_neg) if table == W_POS else (open_neg, open_pos)
+                attribute(mind, slot, [(int(idn[j]), float(a[j]), float(d[j]), float(h_pos[j] + h_neg[j]))
+                                       for j in noted_at])
 
 
 _JUDGED: Dict[tuple, tuple] = {}

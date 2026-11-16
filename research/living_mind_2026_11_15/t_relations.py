@@ -32,6 +32,10 @@ Scored by key words (the answer key is this world's, for scoring only; the mind 
 
 Prints the summary and appends it, with the switches, to ``results/relations.jsonl`` (a public world: only this
 world's words and scores).
+
+``--change``: a relationship that changes. One person greets the mind "merhaba hocam ." for four days and then
+"merhaba canım ." (two greetings a day, among two of someone unknown); her greeting is probed at the end of every day
+from the fourth.
 """
 from __future__ import annotations
 
@@ -199,15 +203,41 @@ def summary(rows: List[dict]) -> List[str]:
     return lines
 
 
+def change(seed: int, switches: Dict[str, bool], days: int = 8, turn: int = 4) -> List[str]:
+    """The reply to "merhaba" from the person whose greeting changed, at the end of each day from ``turn``."""
+    torch.manual_seed(seed)
+    mind = Mind(speaking_config(switches))
+    mind.add_channel(CHANNEL, "act")
+    s = Session(mind)
+    replies = []
+    for day in range(days):
+        style = "merhaba hocam ." if day < turn else "merhaba canım ."
+        for _ in range(2):
+            s.watch("merhaba", "merhaba , hoş geldin .")
+            s.watch("merhaba", style, asker="zeynep")
+        if day >= turn - 1:
+            replies.append("day %d: %s" % (day + 1, probe(s, "zeynep", "merhaba")))
+    return replies
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--days", type=int, default=3)
     ap.add_argument("--set", default="", help="switches for the whole life, e.g. company=1")
     ap.add_argument("--out", default=OUT)
+    ap.add_argument("--change", action="store_true")
     args = ap.parse_args()
     torch.set_num_threads(1)
     switches = {k: bool(int(v)) for k, v in (kv.split("=") for kv in filter(None, args.set.split(",")))}
+    if args.change:
+        lines = ["== a greeting that changed after four days: switches %s ==" % (switches or "-")]
+        lines += ["seed %d: %s" % (seed, " | ".join(change(seed, switches))) for seed in range(args.seeds)]
+        for line in lines:
+            print(line)
+        with open(args.out, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"seeds": args.seeds, "switches": switches, "change": lines}, ensure_ascii=False) + "\n")
+        return
     rows = []
     for seed in range(args.seeds):
         rows += run(seed, args.days, switches)

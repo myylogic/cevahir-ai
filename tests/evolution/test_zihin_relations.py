@@ -157,3 +157,22 @@ def test_forgetting_moments_forgets_their_notes():
     for m in range(start, mind.t + 1):                   # as "!unut" takes an entry back
         mind.retract(m)
     assert all(abs(row).sum() < 1e-12 for rows in mind.personal[0].values() for row in rows.values())
+
+
+def test_whose_word_held_is_learned_per_person():
+    from zihin import SENSED, TOLD
+    from zihin.iliski import person_trust
+    s = fresh()
+    for _ in range(3):
+        s.partner = "zeynep"
+        s.live("kuşlar uçar .", TOLD)                    # what turns out true
+        s.partner = "mehmet"
+        s.live("balıklar uçar .", TOLD)                  # what turns out false
+        s.partner = chat.SOMEONE
+        s.live("kuşlar uçar .", SENSED)                  # its own experience, with no one in particular
+        s.live("balıklar yüzer .", SENSED)
+    mind = s.mind
+    zeynep, mehmet = person_trust(mind, "zeynep", None)[TOLD], person_trust(mind, "mehmet", None)[TOLD]
+    assert zeynep > float(mind.trust[TOLD]) > mehmet or zeynep > mehmet > 0.0
+    assert zeynep - mehmet > 0.2
+    assert person_trust(mind, "deniz", None)[TOLD] == pytest.approx(float(mind.trust[TOLD]))   # no record

@@ -2008,3 +2008,45 @@ configuration).
 - relationships changing over time (recent experience against old);
 - recognising a person from what is perceived of them (face, voice, way of speaking) rather than from the name the
   session is given.
+
+### F33, second step: whose word holds, and a relationship that changes (2026-11-16)
+
+**Trust learned per person** (`iliski.attribute`, `iliski.person_trust`).
+- **How the record is kept.** Direct experience judges the evidence of the other classes on the same tie, as
+  before, and that verdict also feeds the class's trust. With F33, each person's noted share of the judged evidence
+  is how much of the verdict is theirs: a record per person and class of what held and what did not.
+- **How it is read.** The person's record nests over the class's trust (their own record comes last). Their word is
+  weighed by it wherever their evidence is recalled.
+- **The world seen directly** (sensed) is no one's in particular: only what was said, watched or done with someone
+  is noted with them.
+
+**T-trust** (`t_trust.py`, public, 3 seeds × 3 days). zeynep tells facts about animals that the mind's own
+experience later confirms ("kuşlar uçar ."); mehmet tells facts it contradicts ("balıklar uçar ." against a sensed
+"balıklar yüzer ."). At the end each tells one fact it never checks.
+
+| | without F33 | with F33 |
+|---|---|---|
+| trust in told speech as a whole | 0.569 | 0.569 |
+| trust in zeynep's word / mehmet's word | (none: one trust for all) | 0.956 / 0.638 |
+| zeynep's unchecked fact, held with her / with mehmet / with a stranger | 0.681 / 0.681 / 0.681 | 0.744 / 0.5 / 0.5 |
+| mehmet's unchecked fact, held with him / with zeynep / with a stranger | 0.681 / 0.681 / 0.681 | 0.695 / 0.5 / 0.5 |
+
+- **The records separate the two people,** while the person-blind mind holds one trust for everyone. Each
+  unchecked fact is that person's: it is not held with anyone else.
+- **mehmet keeps 0.64, not near 0.** Every transition of an utterance is a claim, and his verbs end sentences as
+  they do in what the mind sees (the sensed "köpekler havlar ." confirms "havlar" then the end, which he also said
+  in "kediler havlar ."). Only his subject–verb pairs are false. A finer notion of what an utterance claims (the
+  informative part, not what everyone's sentences share) is open.
+
+**A relationship that changes** (`t_relations.py --change`). One person greets the mind "merhaba hocam ." for four
+days and then "merhaba canım ." (two greetings a day, among two of someone unknown).
+
+| | day 4 | day 5 | day 6 | day 7 | day 8 |
+|---|---|---|---|---|---|
+| without F33 | "merhaba" | "merhaba" | "merhaba" | "merhaba" | "merhaba" |
+| with F33 (all 3 seeds) | "merhaba hocam hoş geldin" | "merhaba" | "merhaba" | "merhaba canım" | "merhaba canım" |
+
+- **Change comes from evidence, not from a forgetting rule.** The new habit takes over after 6 encounters, against
+  the 8 that made the old one. Each new encounter is also a failure of the old expectation, recorded as such.
+- **No recency weighting was added.** How much faster a recent relationship should outweigh an old one is open.
+- **Without F33** the habits of everyone mix and the reply stops after "merhaba".

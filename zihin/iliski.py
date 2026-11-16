@@ -28,6 +28,7 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
+from .events import REFERENCE, SENSED
 from .evidence import conviction, expectation, frequency
 from .store import EXPECT, PART, W_NEG, W_POS
 
@@ -55,6 +56,8 @@ def note(mind, table: int, slot: int, ties, amounts) -> None:
     a = mind.S.arrays()
     P = mind.S.P
     moment = mind.__dict__.setdefault("_personal_moment", [])
+    if slot == SENSED:                                   # the world perceived directly is no one's in particular
+        return
     for tie, amount in zip(ties, amounts):
         if amount == 0.0 or not _noted(a, tie):
             continue
@@ -80,15 +83,68 @@ def end_moment(mind) -> None:
 
 
 def forget_moment(mind, m: int) -> None:
-    """Remove what moment m noted (its increments were removed from the store)."""
+    """Remove what moment m noted (its increments were removed from the store), and what it judged of each person."""
     log = mind.__dict__.get("personal_log")
     if not log or m not in log:
         return
     by_tie, _ = _ledger(mind)
-    for tie, person, table, slot, amount in log.pop(m):
+    records = mind.__dict__.get("person_trust", {})
+    for entry in log.pop(m):
+        if entry[0] == "trust":
+            _, person, slot, agree, differ = entry
+            rec = records.get(person)
+            if rec is not None:
+                rec[0, slot] = max(0.0, rec[0, slot] - agree)
+                rec[1, slot] = max(0.0, rec[1, slot] - differ)
+            continue
+        tie, person, table, slot, amount = entry
         row = by_tie.get(tie, {}).get(person)
         if row is not None:
             row[table, slot] = max(0.0, row[table, slot] - amount)
+
+
+def attribute(mind, slot: int, judged) -> None:
+    """Trust learned per person: direct experience judged evidence of a learned class on some ties (``judged``:
+    (tie, agree, differ, the class's whole evidence on the tie)); each person's share of that evidence, as noted,
+    is how much of the verdict is theirs. A person's record (agree, differ per class) is read by ``person_trust``."""
+    by_tie, _ = _ledger(mind)
+    records = mind.__dict__.setdefault("person_trust", {})
+    moment = mind.__dict__.setdefault("_personal_moment", [])
+    P = mind.S.P
+    for tie, agree, differ, held in judged:
+        rows = by_tie.get(tie)
+        if not rows or held <= 0.0 or (agree == 0.0 and differ == 0.0):
+            continue
+        for person, row in rows.items():
+            mine = row[W_POS, slot] + row[W_NEG, slot]
+            if mine <= 0.0:
+                continue
+            part = min(1.0, mine / held)
+            rec = records.get(person)
+            if rec is None:
+                rec = records[person] = np.zeros((2, P))
+            rec[0, slot] += agree * part
+            rec[1, slot] += differ * part
+            moment.append(("trust", person, slot, agree * part, differ * part))
+
+
+def person_trust(mind, person, trust) -> np.ndarray:
+    """The trust in what was lived with ``person``, per class: for a learned class, the person's own record of what
+    held nests over the trust in the class (as own evidence comes last: e <- c_p f_p + (1 - c_p) e_class); direct
+    experience stays 1. With no record it is the class trust."""
+    t = (mind.trust if trust is None else trust).numpy().copy()
+    rec = mind.__dict__.get("person_trust", {}).get(person)
+    if rec is None:
+        return t
+    k = mind.cfg.k
+    for c in range(len(t)):
+        if c in REFERENCE:
+            continue
+        a, d = float(rec[0, c]), float(rec[1, c])
+        if a + d > 0.0:
+            c_p = conviction(a + d, k)
+            t[c] = c_p * frequency(a, d) + (1.0 - c_p) * t[c]
+    return t
 
 
 def _trusted(row: np.ndarray, trust: np.ndarray) -> Tuple[float, float]:
@@ -113,6 +169,7 @@ def company_view(mind, unit: int, kind: int, lag: int, ties, w_pos, w_neg, trust
     present = mind.company
     k = mind.cfg.k
     t = (mind.trust if trust is None else trust).numpy()
+    held = {}                                            # each person's word, weighed by their own record
     w_pos, w_neg = [float(x) for x in w_pos], [float(x) for x in w_neg]
     own: Dict[int, Tuple[float, float]] = {}
     voices: Dict[object, Dict[int, float]] = {}
@@ -124,6 +181,9 @@ def company_view(mind, unit: int, kind: int, lag: int, ties, w_pos, w_neg, trust
             p, n = _trusted(row, t)
             w_pos[i] = max(0.0, w_pos[i] - p)            # 1. no one's in particular
             w_neg[i] = max(0.0, w_neg[i] - n)
+            if person not in held:
+                held[person] = person_trust(mind, person, trust)
+            p, n = _trusted(row, held[person])
             if person == present:
                 own[i] = (p, n)
             elif p > 0.0:
