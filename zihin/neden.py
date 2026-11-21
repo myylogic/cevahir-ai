@@ -44,6 +44,8 @@ def attribute(mind, unit: int, consequence: float = 0.0) -> Dict[str, object]:
     if own is not None and expectation(own[0], own[1], mind.cfg.k) > 0.5 and conviction(sum(own), mind.cfg.k) >= 0.5:
         record.update(source="yaşanmış", detail="bu bağlamdan sonra bu kelime yaşandı (hatırlama, kanıt %.1f)"
                       % sum(own))
+    elif _known_claim(mind, context, unit, trust, record):
+        pass                                             # F41: a thing known of the topic, not said yet
     else:
         claim = _frame_claim(mind, context, unit, trust)
         if claim is not None:
@@ -69,6 +71,27 @@ def attribute(mind, unit: int, consequence: float = 0.0) -> Dict[str, object]:
         source, other, e = clash
         record["conflict"] = "%s '%s' bekliyordu (e=%.2f)" % (source, other, e)
     return record
+
+
+def _known_claim(mind, context: int, unit: int, trust, record) -> bool:
+    """F41: the word was said as what is known of the filler (the frame's members said things known of themselves
+    there), or as how the members went on where their own known sequence stood as the topic's does; fills ``record``."""
+    from . import read as R
+    if not getattr(mind.cfg, "known", False):
+        return False
+    claim = R._moment_memo(mind).get(("known_claim", context))
+    if claim is not None and claim[2] == unit:
+        record.update(source="bilinen", detail="'%s' hakkında bilinen ve bu cevapta henüz söylenmemiş (üyeler de kendi "
+                      "bildiklerini söyledi)" % str(mind.symbol_of(claim[0])[1]))
+        return True
+    topic = getattr(mind, "topic", None)
+    e = R.sequence_reading(mind, context, trust).get(unit) if topic is not None else None
+    if e is not None and e > 0.5:
+        record.update(source="bilinen dizi", detail="'%s' hakkında bildiklerini anlatan cevap: üyeler kendi bildikleri "
+                      "dizi böyle durduğunda böyle sürdürdü (söylenmemiş pay %.2f), e=%.2f"
+                      % (str(mind.symbol_of(topic[0])[1]), R.unsaid_share(mind, topic[0], trust), e))
+        return True
+    return False
 
 
 def _contradiction(mind, context: int, unit: int, trust) -> Optional[tuple]:

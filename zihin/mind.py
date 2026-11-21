@@ -101,6 +101,10 @@ class Config:
                                     # two steps), its own record last
     forms: bool = False             # F36 (Word Forms): a word never met is read as the lived word it is a form of (a
                                     # shared stem where the lived words branch), when nothing else expects anything
+    known: bool = False             # F41 (Unsaid Known): a frame's value may be how its filler's own lived sequence
+                                    # goes on (a thing known of it and not said yet in this answer), the one most like
+                                    # what the members said of themselves; the answer goes on while something known
+                                    # of its topic is unsaid and ends when nothing is
     urge: bool = False              # F40 (Urge to Go On): when the leading word's rival is itself expected, it races
                                     # against silence as far as the two are things known about the same item (their
                                     # share of that item's lived continuations): another thing to say, not a rival
@@ -236,6 +240,8 @@ class Mind:
         self.witnesses = []                          # Substitution Evidence: (expected, occurred) pairs to be judged
         self.episode_start = 0                       # the moment the present run of items began (after a pause)
         self.company = None                          # F33: the known person present (set by the session)
+        self.topic = None                            # F41: (item, its place, episode) the present answer tells what
+                                                     # it knows of (set when such a claim is acted on)
         self.voice: Dict[int, tuple] = {}            # F24: context -> (voice that spoke, every voice heard), as
                                                      # (kind, claim, f) each; judged by what comes next
         self.imagined = 0
@@ -761,7 +767,7 @@ class Mind:
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
-                  "unknown", "voice", "witnesses", "episode_start", "company")
+                  "unknown", "voice", "witnesses", "episode_start", "company", "topic")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}

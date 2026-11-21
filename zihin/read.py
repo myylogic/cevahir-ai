@@ -428,6 +428,7 @@ START = -3            # F26: "what a sequence that starts with the filler goes o
 ALIKE = -4            # F31: "what stands where the filler stands" (the paradigmatic axis; NEXT and START are syntagmatic)
 REPLY = -5            # F34: "what the filler, said on its own, was answered with" (the continuation of filler + event)
 INHERIT = -6          # F37: "what the filler's classes go on with, its own record last" (deduction with exceptions)
+KNOWN = -7            # F41: "how the filler's own lived sequences go on from here, not said yet" (a set of things)
 
 
 def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[int] = None) -> Optional[int]:
@@ -443,6 +444,8 @@ def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[
         return reply_of(mind, filler, fixed) if filler is not None else None
     if target == INHERIT:
         return inherited(mind, filler, fixed) if filler is not None else None
+    if target == KNOWN:
+        return None                                    # a set: read where the frame's votes are (known_claim)
     if target in (NEXT, START):
         if filler is None:
             return None
@@ -452,6 +455,10 @@ def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[
             return memo[key]
         goes_on = start_continuations(mind, filler, fixed) if target == START else continuations(mind, filler, fixed)
         found = max(goes_on, key=goes_on.get) if goes_on else None
+        if found is not None and getattr(mind.cfg, "known", False):
+            top = goes_on[found]                       # F41: of several equally strong continuations none is "the
+            if sum(1 for e in goes_on.values() if e >= top - 1e-12) > 1:   # strongest" (they are the things known:
+                found = None                           # KNOWN reads them as a set)
         if memo is not None:
             memo[key] = found
         return found
@@ -1205,6 +1212,13 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
         if looks is not None and not looks[1]:
             looks = None
     src = mv_view(mind, "t_src")
+    known = relational and tail is None and bool(where) and getattr(mind.cfg, "known", False)   # F41: the filler's
+    if known:                                          # last place is in the turn that is going on (what a filler in
+        channels, sense = mv_view(mind, "u_channel"), kind_masks(mind)[4]   # the other's turn was answered with is
+        known = not any(sense[channels[p]] for p in parts[where[-1] + 1:])  # REPLY's to say, F34)
+    known_of: Dict[int, float] = {}
+    not_known: Dict[int, float] = {}
+    own_name: Dict[int, float] = {}
     alike = relational and getattr(mind.cfg, "paradigmatic", False)
     if alike:                                          # F31: values that may stand where their member stands
         since = getattr(mind, "episode_start", mind.t)
@@ -1232,6 +1246,9 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
         members += e_x
         voted += weight
         voters += 1
+        known_x: Dict[int, float] = {}
+        if known:                                      # F41: how x's own lived sequence goes on from its last
+            known_x = known_unsaid(mind, x, instance, where[-1], trust)              # place in the instance
         places = memberships_before(mind, x, since) if alike else None
         loose = []
         for v, p, keys in zip(targets, own, _value_keys(mind, x, targets, fixed, relational, starts, exact, category,
@@ -1239,6 +1256,15 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
             share = weight * p / total
             for key in keys:
                 shares[key] = shares.get(key, 0.0) + share
+            if known:                                  # F41: said by a member of which it was known (with the lived
+                if v == x:                             # sequence of the member that it carried on), or not; a
+                    own_name[v] = own_name.get(v, 0.0) + share   # member that said itself
+                if v in known_x:
+                    key = (v, S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts))
+                                                [where[-1]:] + (v,), -1))
+                    known_of[key] = known_of.get(key, 0.0) + share
+                else:
+                    not_known[v] = not_known.get(v, 0.0) + share
             if places and keys == [v] and v != x and v not in fixed and v not in rivals \
                     and places.keys() & memberships_before(mind, v, since).keys():
                 loose.append((v, share))               # named by no other relation, and it has filled a place with x
@@ -1247,6 +1273,13 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
             may_share += sum(share for _, share in loose)
     if voted <= 0.0:
         return {}, 0.0, where, fixed, 0
+    if known:                                          # F41: how far the frame went on with things known of its
+        if known_of:                                   # members, each word's share of it, the words that only members
+            shares[KNOWN] = sum(known_of.values())     # that knew them said, and the members that said only themselves
+        _moment_memo(mind)[("known_of", frame, exclude)] = (
+            {key: w / voted for key, w in known_of.items()},
+            frozenset(v for v, _ in known_of if not_known.get(v, 0.0) <= 0.0),
+            frozenset(v for v, w in own_name.items() if shares.get(v, 0.0) <= w + 1e-12))
     if alike and may and may_share * members / voted > 0.5 * members:
         for x, loose in may:                           # F31: the relation is sought where it can hold for the members
             named = stand_in(mind, x, fixed, category)  # (above 1/2: at most this much of their evidence can name it)
@@ -1326,6 +1359,10 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     own strongest continuation (F12), START to the strongest continuation of sequences that began with that word (F26,
     ``starts``: the members agree that the value is how a sequence beginning with them went on); the instance's own
     evidence comes last, as everywhere.
+    F41 (``known``): a frame's value may be how its filler's own lived sequences go on from here, a thing known of
+    the filler and not said yet in the episode (KNOWN: ``known_unsaid``, ``known_claim``); a word the members said of
+    themselves is not claimed for another filler (``explained``); and in an answer that tells what is known of its
+    topic, where no word would be said, the members' own known sequences say how to go on (``sequence_reading``).
     F24 (voices): each score is weighted by the credibility the mind has learned for voices of that kind (how many
     members speak, how much they agree; with no such experience every kind reads 1/2 and the choice is exactly
     F11's). For the context read with the full trust, the voice that spoke and every voice that could have spoken
@@ -1344,7 +1381,9 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
             continue
         c_members = conviction(members, cfg.k)
         top = max(frequency(p, n) for p, n in mass.values())
-        score = e_abs * c_members * top
+        if KNOWN in mass and len(mass) > 1:            # F41: a frame is chosen by the values it names (that its
+            top = max(frequency(p, n) for key, (p, n) in mass.items() if key != KNOWN)   # members said things known
+        score = e_abs * c_members * top                # of them is true of many frames)
         kind = None
         if voices:
             kind = voice_kind(voters, top)
@@ -1361,13 +1400,62 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
         category = frame_category(mind, frame)
         corroborate = getattr(cfg, "corroborate", False) and getattr(cfg, "situations", False)
         claims: Dict[int, Tuple[float, float, float]] = {}
+        known_on = getattr(cfg, "known", False) and filler is not None and tail is None
+        known_here: Dict[int, float] = {}
+        said_known, only_known, own_names = {}, frozenset(), frozenset()
+        topic = getattr(mind, "topic", None)
+        telling = where and (where[-1] < len(parts_of(mind, unit)) - 1 or (
+            topic is not None and topic[0] == filler and topic[2] == getattr(mind, "episode_start", None)))
+        if known_on:                               # F41: how the filler's own lived sequence goes on from here
+            if KNOWN in mass:
+                known_here = known_unsaid(mind, filler, unit, where[-1], trust, episode=unit == mind.context)
+            said_known, only_known, own_names = _moment_memo(mind).get(("known_of", frame, unit),
+                                                                       ({}, frozenset(), frozenset()))
+
+        def explained(t: int) -> bool:
+            """F41: a word the members said because of what they are or of what was known of them is that
+            relation's evidence, not the word's, and is not claimed for another filler:
+            * a member's own name, said by no one but itself (SELF);
+            * a word that only members of which it was known said, where the filler's own knowledge stands against
+              it: inside the filler's own lived sequence, when that sequence goes on otherwise; just after the
+              filler's name in an answer that tells what is known of it (it is the topic), when another thing of
+              the word's kind is known of it (``goes_alike`` over 1/2). Elsewhere what the members agree on is the
+              frame's to say (a property a thing has from its kind, never told of it)."""
+            if t in own_names:
+                return True
+            if not telling or not known_here or t in known_here or t not in only_known:
+                return False
+            if where[-1] < len(parts_of(mind, unit)) - 1:
+                return True                        # its own lived sequence goes on otherwise here
+            lived = [seq for word, seq in said_known if word == t and seq >= 0]
+            here = parts_of(mind, unit)[where[-1]:]
+            for v in known_here:
+                alike = goes_alike(mind, v, t, trust)
+                carried = S.tuple_index.get(here + (v,), -1) if alike <= 0.5 and lived else -1
+                if alike > 0.5 or (carried >= 0 and any(goes_alike(mind, carried, seq, trust) > 0.5 for seq in lived)):
+                    return True
+            return False
         for target, (w_pos, w_neg) in mass.items():
             held = c                               # F29: what the members agree on is theirs (the frequency, all
             if target in carried:                  # members); how firmly it holds for this instance is the stronger
                 held = max(c, conviction(sum(carried[target]), cfg.k))   # of breadth and interchangeable depth
             f = frequency(w_pos, w_neg)
             e = held * f + (1.0 - held) * 0.5
-            target = resolve(mind, target, filler, fixed, category)
+            if target == KNOWN:                    # F41: the thing known of the filler most like what the members
+                target, f = known_claim(mind, known_here, said_known, mass, trust,   # said of themselves here
+                                        parts_of(mind, unit)[where[-1]:])
+                if target is not None:
+                    e = held * f + (1.0 - held) * 0.5
+                    out[target] = max(out.get(target, 0.0), e)
+                    _moment_memo(mind)[("known_claim", unit)] = (filler, category, target)
+                continue
+            if known_on and target >= 0 and target != filler and explained(target):
+                continue                           # F41: what a member said of itself is not said of another filler
+            if known_on and target in (NEXT, START) and unit == mind.context:
+                target = resolve(mind, target, filler, tuple(fixed) + tuple(sorted(episode_said(mind, filler))),
+                                 category)         # F41: what followed the filler in this episode is an echo
+            else:
+                target = resolve(mind, target, filler, fixed, category)
             if target is None:
                 continue
             out[target] = max(out.get(target, 0.0), e)
@@ -1396,6 +1484,12 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 w_pos, w_neg = began.get(target, (0.0, total))
                 c = conviction(w_pos + w_neg, cfg.k)
                 out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
+    if getattr(cfg, "known", False) and unit == mind.context and getattr(mind, "topic", None) is not None:
+        said_line = 0.5 + cfg.theta / (2.0 * cfg.T)     # F41: when no word would be said, how the members went on
+        words = mv_view(mind, "u_channel")              # where their own known sequences stood as the topic's does
+        if not any(e > said_line and words[t] == words[mind.topic[0]] for t, e in out.items()):
+            for target, e in sequence_reading(mind, unit, trust).items():
+                out[target] = max(out.get(target, 0.0), e)
     if cfg.backoff and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
         for target, e in continuation_backoff(mind, unit, trust).items():
             out[target] = max(out.get(target, 0.0), e)
@@ -1414,6 +1508,343 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
         for target, e in situation_backoff(mind, unit, trust).items():
             out[target] = max(out.get(target, 0.0), e)
     return out
+
+
+def said_after(x: int, sequence) -> set:
+    """F41: the items that follow ``x`` in a sequence of items (what has been said of x there)."""
+    return {sequence[i + 1] for i in range(len(sequence) - 1) if sequence[i] == x}
+
+
+def episode_said(mind, x: int) -> set:
+    """F41: what has followed ``x`` in the present episode (heard or said), read from the episode's trace: every
+    lived context of the episode holds its last items in order."""
+    said = set()
+    kinds = mv_view(mind, "u_kind")
+    for context in list(getattr(mind, "trace", ())) + ([mind.context] if mind.context is not None else []):
+        if kinds[context] & COMPOSED:
+            said |= said_after(x, parts_of(mind, context))
+    return said
+
+
+def known_unsaid(mind, x: int, context: int, last: int, trust: Optional[torch.Tensor] = None,
+                 episode: bool = False) -> Dict[int, float]:
+    """F41 (Unsaid Known): how the own lived sequence of ``x`` goes on from its last place in a context (position
+    ``last``), as shares {v: q} of the words that may come next.
+    * x is the context's last item: how the lived sequences that began with x went on (``start_mass``, F26: a
+      sentence read, an utterance after silence; not what followed x in the middle of other sequences), without what
+      follows x in the context (with ``episode``, the present moment: in the whole episode, heard or said) and
+      without what was only ever asked of it (``only_asked``).
+    * words follow x: what the lived sequence that began with x and went on with those words went on with (the
+      composed unit of that suffix, lived as a sequence of its own; the context itself is not its own knowledge).
+    Empty when nothing is known to come next (the known sequence ended there, or it was never lived)."""
+    kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+    channel = channels[x]
+    parts = parts_of(mind, context) if kinds[context] & COMPOSED else (context,)
+    suffix = parts[last:]
+    found = {}
+    if len(suffix) == 1:
+        said = episode_said(mind, x) if episode else said_after(x, parts)
+        for v, (began, _) in start_mass(mind, x, trust).items():
+            if channels[v] == channel and v not in said and not only_asked(mind, x, v):
+                found[v] = began
+    else:
+        sequence = mind.S.tuple_index.get(suffix)
+        if sequence is None or sequence == context or kinds[sequence] & SLOTTED:
+            return {}
+        for v, p in zip(*_world_pos(mind, sequence, trust)):
+            if channels[v] == channel:
+                found[v] = p
+    total = sum(found.values())
+    return {v: p / total for v, p in found.items()} if total > 0.0 else {}
+
+
+def only_asked(mind, x: int, v: int) -> bool:
+    """F41: ``v`` is what was asked of ``x``, not what is known of it: every lived sequence that began with x and
+    went on with v was answered (its turn ended and the words of another turn followed). A sequence that was read or
+    told and left at that (nothing followed its end), or one too long to follow, makes v known; so does v never having
+    begun a sequence with x (nothing says it was asked)."""
+    memo = _moment_memo(mind)
+    key = ("asked", x, v)
+    if key in memo:
+        return memo[key]
+    S, F = mind.S, mind.knob["F"]
+    kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+    sense, act = kind_masks(mind)[4:6]
+    first = S.tuple_index.get((x, v))
+    asked = told = False
+    stack = [first] if first is not None and not kinds[first] & SLOTTED else []
+    steps = 0
+    while stack and steps < 64 and not told:
+        steps += 1
+        u = stack.pop()
+        parts = parts_of(mind, u)
+        went_on = False
+        for t in _world_pos(mind, u)[0]:
+            longer = S.tuple_index.get(parts + (t,)) if len(parts) < F else None
+            if sense[channels[t]]:                      # the turn ended here: was it answered?
+                went_on = True
+                if longer is not None and any(act[channels[w]] for w in _world_pos(mind, longer)[0]):
+                    asked = True
+                else:
+                    told = True
+            elif longer is not None and not kinds[longer] & SLOTTED:
+                went_on = True
+                stack.append(longer)
+            elif len(parts) >= F:
+                told = True                             # too long to follow
+        if not went_on:
+            told = True
+    memo[key] = asked and not told
+    return memo[key]
+
+
+def unsaid_share(mind, y: int, trust: Optional[torch.Tensor] = None) -> float:
+    """F41 (the urge to go on): the unsaid share of what is known of ``y``, in [0, 1]: of the evidence of how the
+    lived sequences that began with y went on (on its channel, not what was only asked of it), the share of what has
+    not followed it in the present episode."""
+    channels = mv_view(mind, "u_channel")
+    said = episode_said(mind, y)
+    total = unsaid = 0.0
+    for v, (p, _) in start_mass(mind, y, trust).items():
+        if channels[v] != channels[y] or only_asked(mind, y, v):
+            continue
+        total += p
+        if v not in said:
+            unsaid += p
+    return unsaid / total if total > 0.0 else 0.0
+
+
+def lived_sequence(mind, parts, j: int) -> Tuple[int, int]:
+    """F41: the longest lived sequence that begins at place ``j`` of ``parts``: (its length, its unit); the item
+    itself, (1, parts[j]), when no sequence that began with it went on so (a sequence lived from its beginning left a
+    unit for each of its beginnings)."""
+    S, kinds, channels = mind.S, mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+    found = (1, parts[j])
+    for length in range(2, len(parts) - j + 1):
+        u = S.tuple_index.get(parts[j:j + length])
+        if u is None or kinds[u] & SLOTTED or channels[parts[j + length - 1]] != channels[parts[j]]:
+            break                                      # (a sequence of the item's own channel: it does not reach
+        found = (length, u)                            # across a perceived event, the end of a turn)
+    return found
+
+
+def sequence_ended(mind, sequence: int, channel: int, trust: Optional[torch.Tensor] = None) -> bool:
+    """F41: a lived sequence that was never followed by a word of its channel and was followed by something else
+    (its turn ended there)."""
+    channels = mv_view(mind, "u_channel")
+    targets, _ = _world_pos(mind, sequence, trust)
+    return bool(targets) and not any(channels[v] == channel for v in targets)
+
+
+def topic_state(mind, unit: int, trust: Optional[torch.Tensor] = None):
+    """F41: where the present answer stands with what is known of its topic: None when there is no topic in the
+    context, else (y, place j of its last mention, state, the items after its known sequence), state one of
+    "start" (y is the last item), "inside" (the lived sequence from y goes on with a word), "ended" (it ended)."""
+    topic = getattr(mind, "topic", None)
+    kinds = mv_view(mind, "u_kind")
+    if topic is None or topic[2] != getattr(mind, "episode_start", None) or not kinds[unit] & COMPOSED:
+        return None
+    y = topic[0]
+    parts = parts_of(mind, unit)
+    if y not in parts:
+        return None
+    j = len(parts) - 1 - parts[::-1].index(y)
+    length, sequence = lived_sequence(mind, parts, j)
+    extra = parts[j + length:]
+    if length == 1:
+        return (y, j, "start", extra) if not extra else None
+    if sequence_ended(mind, sequence, mv_view(mind, "u_channel")[y], trust):
+        return (y, j, "ended", extra)
+    return (y, j, "inside", extra) if not extra else None
+
+
+def told_so_far(mind, parts, x: int, channel: int, trust: Optional[torch.Tensor] = None) -> tuple:
+    """F41: a context as an answer that tells what is known of ``x``, its places from the last backwards. What was
+    said before the last perceived event (the other's turn: the question) is itself, x there a place of its own; in
+    the turn that follows, every lived sequence of x (x and the words of its own lived sequence that follow it) is one
+    place, marked by how it stands ("ended", or "open": cut short or going on), and the other items are
+    themselves."""
+    channels, sense = mv_view(mind, "u_channel"), kind_masks(mind)[4]
+    turn = 0
+    for i, p in enumerate(parts):
+        if sense[channels[p]]:
+            turn = i + 1
+    out = [("filler",) if p == x else p for p in parts[:turn]]
+    i = turn
+    while i < len(parts):
+        if parts[i] == x:
+            length, sequence = lived_sequence(mind, parts, i)
+            ended = length > 1 and sequence_ended(mind, sequence, channel, trust)
+            out.append(("known", "ended" if ended else "open"))
+            i += length
+        else:
+            out.append(parts[i])
+            i += 1
+    return tuple(out[::-1])
+
+
+def _same_share(a, b) -> float:
+    """F41: the share of two runs of places that are the same, place by place (the filler's own place counted: 1 for
+    two empty runs)."""
+    return (1.0 + sum(1 for p, q in zip(a, b) if p == q)) / (1.0 + max(len(a), len(b)))
+
+
+def sequence_reading(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F41 (Known Sequences): the answer tells what is known of its topic y (``mind.topic``: the filler of the place
+    where such a claim was acted on). The lived contexts of the place's other members are read in which their own
+    lived sequence stood as y's does in the present context: just named, going on, or ended with the same items after
+    it; the item before the member the same. Each votes what it went on with, the member read as y; a thing known of
+    the member, as the thing known of y most like it (``known_claim``). They are weighed as lived situations are
+    (exp(-F (1 - s))): s is the share of the places before the filler that are the same when each context is read as
+    an answer about its own filler (``told_so_far``: what was told of the member stands where what was told of y
+    does), and they are held with lam * s * conviction(members).
+    The urge decides between going on and ending: an answer that tells what is known of its topic ends when nothing
+    known of it is left unsaid. What a member had left to say cannot be read from a lived context (it keeps only its
+    last items), but an answer that ends for having nothing left has gone on at least once for every end. So while
+    something known of y is unsaid (urge > 0), as many of the members' ends of turn as their goings-on are taken to be
+    ends of that kind and are not counted; the ends beyond that count, as an expected end of the turn (members that
+    stopped with things left unsaid: the answer to a question about one thing). When nothing is unsaid (urge 0),
+    nothing is claimed."""
+    state = topic_state(mind, unit, trust)
+    if state is None:
+        return {}
+    memo = _moment_memo(mind)
+    key = ("sequence", unit, id(trust) if trust is not None else None)
+    if key in memo:
+        return memo[key]
+    S, cfg = mind.S, mind.cfg
+    y, j, where, extra = state
+    wish = unsaid_share(mind, y, trust) if where != "inside" else 1.0
+    found: Dict[int, float] = {}
+    if wish > 0.0:
+        category = mind.topic[1]
+        parts = parts_of(mind, unit)
+        kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+        channel = channels[y]
+        before = told_so_far(mind, parts[:j], y, channel, trust)
+        here = lived_sequence(mind, parts, j)[0]
+        src = mv_view(mind, "t_src")
+        mates = {src[t] for t in S.inc.get((category, ABSTRACT), ())}
+        votes: Dict[int, float] = {}
+        ended: Dict[int, float] = {}
+        said_known: Dict[Tuple[int, int], float] = {}
+        voted = similar = ends = 0.0
+        voters, seen, budget = set(), {unit}, 20000
+        for x in mates:
+            if x == y:
+                continue
+            for tie in S.inc.get((x, PART), ()):
+                budget -= 1
+                c = src[tie]
+                if budget < 0 or c in seen or kinds[c] & SLOTTED:
+                    continue
+                seen.add(c)
+                t = parts_of(mind, c)
+                jx = len(t) - 1 - t[::-1].index(x)
+                length, sequence = lived_sequence(mind, t, jx)
+                if t[jx + length:] != extra:
+                    continue
+                if where == "start":
+                    if length != 1:
+                        continue
+                elif where == "inside":                 # as far into a lived sequence of its own that goes on
+                    if length != here or sequence_ended(mind, sequence, channel, trust):
+                        continue
+                elif length < 2 or not sequence_ended(mind, sequence, channel, trust):
+                    continue
+                held = told_so_far(mind, t[:jx], x, channel, trust)
+                if before and held and before[0] != held[0]:
+                    continue                            # the place before the filler is the same
+                targets, masses_ = _world_pos(mind, c, trust)
+                total = sum(masses_)
+                if total <= 0.0:
+                    continue
+                s = _same_share(before, held)
+                g = math.exp(-mind.knob["F"] * (1.0 - s))
+                voted += g
+                similar += g * s
+                voters.add(x)
+                known_x = known_unsaid(mind, x, c, jx, trust) if where != "ended" else {}
+                for v, p in zip(targets, masses_):
+                    share = g * p / total
+                    if channels[v] != channel:
+                        ends += share                   # the turn ended there (or another channel went on)
+                        ended[v] = ended.get(v, 0.0) + share
+                    elif v in known_x:
+                        said = (v, S.tuple_index.get(t[jx:] + (v,), -1))
+                        said_known[said] = said_known.get(said, 0.0) + share
+                    elif v == x:
+                        votes[y] = votes.get(y, 0.0) + share
+                    elif v not in mates:
+                        votes[v] = votes.get(v, 0.0) + share
+        if voted > 0.0:
+            spared = min(ends, voted - ends)            # ends for having nothing left: at most as many as goings-on
+            counted = voted - spared
+            if counted > 1e-12:
+                c = cfg.lam * (similar / voted) * conviction(float(len(voters)), cfg.k)
+                for v, w in votes.items():
+                    found[v] = c * min(1.0, w / counted) + (1.0 - c) * 0.5
+                for v, w in ended.items():              # the ends that count: the turn is expected to end here
+                    found[v] = c * (w / ends) * (ends - spared) / counted + (1.0 - c) * 0.5
+                if said_known:
+                    known_here = known_unsaid(mind, y, unit, j, trust, episode=True)
+                    target, f = known_claim(mind, known_here, {k: w / counted for k, w in said_known.items()}, {},
+                                            trust, parts[j:])
+                    if target is not None:
+                        found[target] = max(found.get(target, 0.0), c * f + (1.0 - c) * 0.5)
+    memo[key] = found
+    return found
+
+
+def goes_alike(mind, a: int, b: int, trust: Optional[torch.Tensor] = None) -> float:
+    """F41: how far two items go on alike: the overlap of the shares of what each was lived to be followed by (1 for
+    the same item). Words of one kind (what a thing does, what it eats) go on alike; words of different kinds do not."""
+    if a == b:
+        return 1.0
+    memo = _moment_memo(mind)
+    key = ("alike", min(a, b), max(a, b), id(trust) if trust is not None else None)
+    if key not in memo:
+        ta, wa = _world_pos(mind, a, trust)
+        tb, wb = _world_pos(mind, b, trust)
+        sa, sb = sum(wa), sum(wb)
+        if sa <= 0.0 or sb <= 0.0:
+            memo[key] = 0.0
+        else:
+            share_b = {v: w / sb for v, w in zip(tb, wb)}
+            memo[key] = sum(min(w / sa, share_b.get(v, 0.0)) for v, w in zip(ta, wa))
+    return memo[key]
+
+
+def known_claim(mind, known_here: Dict[int, float], said_known, mass, trust=None, sequence=()):
+    """F41: (value, f) of the frame's claim "what is known of the filler comes next" for the context being read.
+    The members went on, here, with things known of them (``said_known``: the share of the frame's votes of each
+    word, with the member's lived sequence it carried on); of the things known of this filler, the one most like what
+    they said is claimed (among equals, the more known, then the one the members said most, then the one learned
+    first), with
+        f = sum_t said(t) * max_t alike(v, t):
+    how far the members went on with things known of them, times how like the claimed thing is to something they
+    said. A filler with one thing left to say says it when the members ever said its like here, however many other
+    kinds they also said (they had those left to say; it has not). Two words are alike as far as they go on alike, as
+    words anywhere or as the lived sequences they carry on (``goes_alike``; the same word is itself): what a thing
+    does is like what another does, not like what it eats."""
+    if not known_here or not said_known:
+        return None, 0.0
+    carried = {v: mind.S.tuple_index.get(tuple(sequence) + (v,), -1) for v in known_here}
+
+    def alike(v, said):
+        t, lived = said
+        if v == t:
+            return 1.0
+        words = goes_alike(mind, v, t, trust)
+        if words < 1.0 and lived >= 0 and carried[v] >= 0:
+            words = max(words, goes_alike(mind, carried[v], lived, trust))
+        return words
+    fit = {v: sum(share * alike(v, said) for said, share in said_known.items()) for v in known_here}
+
+    def rank(v):
+        return (round(fit[v], 9), round(known_here[v], 9), frequency(*mass[v]) if v in mass else 0.0, -v)
+    best = max(known_here, key=rank)
+    return best, min(1.0, sum(said_known.values())) * max(alike(best, said) for said in said_known)
 
 
 def _lexicon(mind, cid: int, since: int) -> list:
@@ -1981,6 +2412,8 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
             readings = [own_mass(mind, suffix[0], 1, trust)]
             if starts and i == 0:                       # the whole utterance so far is this one item
                 readings.insert(0, start_mass(mind, suffix[0], trust))
+            if getattr(cfg, "known", False) and unit == mind.context:   # F41: what followed the item earlier in this
+                heard = heard | episode_said(mind, suffix[0])            # episode is an echo too
         else:
             piece = S.tuple_index.get(suffix)
             if piece is None:

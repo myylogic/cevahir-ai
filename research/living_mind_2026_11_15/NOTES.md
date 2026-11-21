@@ -2710,3 +2710,167 @@ modelled mathematically.
 - Every test command that fits is answered exactly: with one item of window to spare, nothing that fits is left wrong at
   either size (844 of 844 at 11, 1,188 of 1,188 at 12).
 - The Transformer was not run at this size (0 / 844 at 11).
+
+## Unsaid Known (F41), the topic and the urge: an answer that tells what is known (2026-11-21)
+
+**The owner's direction.** The mind should give long answers, and the urge to speak should be modelled
+mathematically. F40 was a first step (T-long, facts in the watched order: 20 → 22 of 54; in any order: 0 of 54).
+
+**Where the answers stopped** (the white box of the section above, word by word).
+- Asked about a thing never asked about, the mind names it and then expects three words equally (in any order: each
+  under 1/2, because each began a third of the watched answers).
+- The words that are right there are the things *known of that thing*: how its own lived sequences go on. No relation
+  of a frame named them: NEXT names the one strongest continuation (and, among equally strong ones, an arbitrary
+  one).
+- Between the facts the watched answers say "." and the thing's name again. The frames that would say so hold the
+  words of the fact just told ("… X uçar" → "."), so a thing whose fact words no asked thing shares has no such
+  frame.
+- After a fact read alone ("X fare yer"), the mind expects the turn to end, as the read sentence did.
+
+**F41** (`Config.known`, off by default; `read.py`: `known_unsaid`, `known_claim`, `sequence_reading`,
+`unsaid_share`, `only_asked`; `act.py`: `_driven`).
+
+1. **What is known of a thing.** How the lived sequences that began with it go on (F26's `start_mass`: a sentence
+   read, an utterance after silence), and, inside such a sequence, how that lived sequence goes on. Not what has
+   already followed it in the present episode (heard or said), and not what was only *asked* of it: a sequence that
+   began with it and was answered by another turn ("X hakkında ne biliyorsun ?", "X nerede bulunur ?") is a
+   question, not knowledge (`only_asked`, read from the mind's own life: what followed the end of that turn).
+2. **A relation of frames, KNOWN.** A member's lived value counts for KNOWN when it is a thing known of the member at
+   that place (the filler's last place is in the turn that is going on; a filler in the other's turn is REPLY's).
+   The frame's frequency of KNOWN is the share of its votes that were such things.
+3. **The claim.** Of the things known of the read filler, the one most like what the members said of themselves is
+   claimed, with f = (the frame's KNOWN frequency) × (how like the claimed thing is to something the members said).
+   Two words are alike as far as they go on alike (the overlap of the shares of what each was lived to be followed
+   by), as words anywhere or as the lived sequences they carry on. What a thing does is like what another does, not
+   like what it eats: a question about one kind of fact is answered with the thing's own fact of that kind.
+4. **Explained words.** A word the members said because of what they are, or of what was known of them, is the
+   relation's evidence and is not claimed for another filler: a member's own name said by no one else, and a word
+   that only members who knew it said, where the filler's own knowledge stands against it (inside its own lived
+   sequence, when that goes on otherwise; just after its name in an answer about it, when another thing of the
+   word's kind is known of it). Elsewhere what the members agree on stays the frame's to say (a property a thing has
+   from its kind).
+5. **Ties.** Of several equally strong continuations none is "the strongest": NEXT and START name nothing there.
+6. **The topic.** When a word claimed by KNOWN is said, its filler is the topic of the answer for the episode.
+7. **Known Sequences** (`sequence_reading`). Where no word would be said, the lived contexts of the place's other
+   members are read in which their own lived sequence stood as the topic's does (just named, going on, or ended
+   with the same items after it). Each votes what it went on with, the member read as the topic and a thing known
+   of the member as the thing known of the topic most like it. Contexts are compared as answers about their own
+   filler: the other's turn (the question) word by word, and in the answer every lived sequence of the filler as one
+   place. This gives the words between facts ("." and the name again) to things that share no fact word with anyone.
+8. **The urge** (`unsaid_share`): the unsaid share of what is known of the topic, in [0, 1]. Its links to speech are
+   a model, not learned:
+   - nothing is said when it is 0 and the topic's own sequence has ended (the answer has said what there was);
+   - while it is above 0, as many of the members' ends of turn as their goings-on are not counted (an answer that
+     ends for having nothing left has gone on at least once for every end; what a member had left cannot be read
+     from a lived context, which keeps its last items only); the ends beyond that count as an expected end (members
+     that stopped with things unsaid: an answer about one thing);
+   - just after the topic is named, the things known of it and not said yet are things to say, not rivals.
+
+9. **Echo.** What followed an item earlier in the present episode (heard or said) is an echo, not knowledge: also
+   where the lived continuation of the last words is read (F16), and where NEXT and START are read for the present
+   context.
+
+**T-long** (`t_long.py`; twelve animals, three facts each read apart, six asked; the six never asked are asked):
+
+| | without | F40 | F41 |
+|---|---|---|---|
+| facts in the watched order, seeds 0-2: facts said whole | 20 / 54 | 22 / 54 | **54 / 54** |
+| the same, seeds 3-8 (never looked at) | 46 / 108 | | **108 / 108** |
+| facts in any order, seeds 0-2 | 0 / 54 | 0 / 54 | **54 / 54** |
+| the same, seeds 3-8 (never looked at) | 0 / 108 | | **107 / 108** |
+| unfinished sentences, confabulated sentences (9 seeds, both orders) | 71, 12 | | **0, 0** |
+
+**T-tell** (`t_tell.py`, new): a world F41 was not developed on. Twelve things with two to four facts (class,
+place, property, deed), three kinds of question lived by one mind ("X nasıl bir şey ?" → every fact in any order;
+"X nerede bulunur ?" → the place; "X ne yapar ?" → the deed); things never in a dialogue (C) and things asked the
+other questions but never asked to be told about (B).
+
+- **The first run, as found** (seeds 0-2, before anything was changed for this world): tell C 21 / 38 facts (1
+  without F41), 8 sentences left unfinished; tell B 17 / 35 with 4 confabulated sentences (the question it had heard
+  of the thing said as if known: "çam … . çam nerede bulunur"); "where" right 2 / 10, six answers went on to tell
+  everything; "does" right 5 / 7.
+- What it exposed, and what was changed: a question is not knowledge (point 1: `only_asked`); a word of the question
+  that also begins a fact ("bir") was taken as said (what follows the thing, not what is present); the ends of
+  turn were dropped whenever anything was unsaid, so an answer about one thing went on (the rule of point 8, and the
+  counted ends as an expected end of turn); the question's own words were read as "a sequence of the thing" and all
+  questions looked alike (point 7: the other's turn is compared word by word).
+- **After those changes** (9 seeds; seeds 3-8 were never looked at):
+
+| | without | F41, seeds 0-2 | F41, seeds 3-8 |
+|---|---|---|---|
+| tell, never in a dialogue: facts said whole | 2 / 113 (all seeds) | 37 / 38 | 67 / 75 |
+| tell, asked other things before | 6 / 112 | 33 / 35 | 65 / 77 |
+| unfinished, confabulated (all tell answers) | 64, 8 | 0, 0 | 1, 0 |
+| "where": right (the place and nothing more) | 1 / 31 | 8 / 10 | 16 / 21 |
+| "does": right | 2 / 23 | 5 / 7 | 7 / 16 |
+| "does", no deed known: says another fact of the thing | 4 / 13 | 5 / 5 | 5 / 8 |
+| "where", no place known: says another fact of the thing | 4 / 5 | 2 / 2 | 3 / 3 |
+| whole answers (exactly the thing's facts), C and B | 0 / 72 | 21 / 24 | 32 / 48 |
+
+- **What it costs here.** Asked what a thing does when no deed is known of it, the mind more often says a property
+  of it (true of the thing, not what was asked): a property and a deed both end their sentence, so they go on alike.
+
+**Everything else, lived and answered with F41** (official runs, frozen code):
+
+| | without | with F41 |
+|---|---|---|
+| T-compose (3 seeds) | 75 / 75 | 75 / 75 |
+| SCAN within 11, lived and answered with it (seed 0) | 789 / 844 | **810 / 844** |
+| meaning world, relations world, T-purpose, T-cause (read from the context) | | identical |
+| T-deduce and T-chain with F37 | 48 / 48, 27 / 27 | the same |
+| listening worlds, held-out at 600 | 0.783 / 0.812 | 0.783 / 0.812 |
+| teacher protocol, the owner's documents ("X nedir ?" for subjects never taught): exact, F1 | 120, 0.7444 | **130, 0.7630** |
+| recall of what was read once, a two-word cue: exact / valid / silent | 90 / 146 / 31 | 89 / 144 / 31 |
+
+- **SCAN.** The 21 answers gained are answers that ran on (their last word is decided after the command's first word
+  has left the window); no template lost an answer. Taken apart (the same life lived twice more with one
+  rule taken out): without the echo rule in the continuation of the last words (point 9), 789 again; without the
+  rule of ties (point 5), 810. The gain is the echo rule's: the mind no longer reads what followed a word earlier in
+  its own answer as what follows it, which is what made those answers run on.
+- **The teacher protocol** asks about subjects the teacher pairs never taught, whose sentence was read: what F41 is
+  for, on the owner's own documents (aggregates only; the data are not in this repository). The answers are longer
+  (10.3 words against 8.4) and overrun less (2 against 6).
+- **Cost.** Under the same load, the 200 teacher questions take 453 s against 190 s (2.4 times), the recall
+  questions 78 s against 64 s, SCAN's answers 953 s against 727 s.
+- **Off by default**: recall with a two-word cue loses one exact answer and two valid ones; a question about a kind
+  of fact that is not known of the thing is more often answered with another fact of it (T-tell above); and an
+  answer on the largest mind takes about 2.4 times as long. Switches off: the lesson-free gate (7,039 moments) and
+  the 17 configurations are bit-identical.
+
+**Failed forms and what they eliminated.**
+- *Free choice measured per member* (the overlap of each member's lived continuations with what was known of it):
+  0.40 on a seed where three of six members began all three watched answers alike. Pooled over the frame by word it
+  was 0.67. Both gave way to the claim of point 3, which also answers a question about one kind of fact; a frame
+  that says one kind (always the deed second) is followed by likeness, not by freedom.
+- *The claim as "how far what the members said has a like among the filler's things"* (a sum over what they said):
+  a filler with one thing left scored a third. The members had the other kinds left to say; it has not.
+- *Likeness by words alone*: the words of things never asked go on with the end of the turn only, those of asked
+  things with "." too (0.5). The lived sequences they carry on go on alike.
+- *The urge as a discount of the ends by (1 - urge)*: one fact left of three spared a third of the ends and the
+  answers stopped at two facts. *All ends dropped while anything is unsaid*: answers about one thing went on to
+  tell everything.
+- *The spared ends measured over all answers to the same question* (not at the place): worse (T-long in any order
+  54 → 47, T-tell 37 → 35): by the later facts the question has left the window, and what is pooled there is not
+  the whole answer.
+- *KNOWN for a filler in the other's turn*: the filler's reply became its "known sequence", it became the topic, and
+  the urge ended SCAN-like answers after their first word (T-compose 75 → 66). KNOWN is of the turn that is going
+  on.
+- *An explained word dropped whenever anything else is known of the filler*: the generated worlds lost their
+  induction (a property a thing has from its kind: held-out 0.812 → 0.613). And *KNOWN counted when frames are
+  chosen*: the attribute world 0.783 → 0.700 (that its members said things known of them is true of many frames).
+- *What is known of a thing as whatever followed it anywhere*: on the owner's documents the teacher protocol fell
+  (120 → 105 exact): a word in the middle of other sentences is not how the thing's own sentences go on. With the
+  sequences that began with it (F26's measure) it rose to 130.
+
+**Limits.**
+- It tells as many things as it has seen told: a thing with four facts among watched answers of three stops at three
+  (the members ended there, and their ends at that place are not spared).
+- Likeness is how words go on. Two kinds of fact that go on alike (a property, a deed) are one kind to it.
+- The urge counts every sequence that began with the thing; in a long life some of them are not things to tell.
+- A member's own unsaid things are not kept with its lived contexts (the window): the urge's links to speech are
+  assumed, and verified only where the window shows the whole answer.
+- The topic is set only when a KNOWN claim is acted on; an answer that begins otherwise is not driven.
+- **Next.** The echo rule on its own (it gave SCAN its 21 answers and cost nothing measured with F41): as a switch
+  of its own, with the whole battery, to see whether it can be on by default. The cost on a large mind (likeness of
+  frequent words, the members' contexts read every moment). A measure of likeness that tells a property from a deed.
+  The program's `--ac known` turns F41 on for a mind by its owner's choice.

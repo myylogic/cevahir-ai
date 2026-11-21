@@ -254,6 +254,12 @@ def _race(mind, candidates, theta: float, T: int) -> List[Event]:
         ranked = sorted(by_channel[channel], reverse=True)
         score, e, unit = ranked[0]
         rival = ranked[1][0] if len(ranked) > 1 else 0.5
+        if getattr(mind.cfg, "known", False) and getattr(mind, "topic", None) is not None:
+            driven, unsaid = _driven(mind, channel)
+            if not driven:
+                continue                               # F41: nothing known of the topic is left to say
+            if unit in unsaid:                         # F41: the other things known of the topic and not said yet are
+                rival = next((r[0] for r in ranked[1:] if r[2] not in unsaid), 0.5)   # still to say, not rivals
         if getattr(mind.cfg, "urge", False) and len(ranked) > 1 and rival > 0.5 + theta / (2.0 * T):
             u = _urge(mind, unit, ranked[1][2])        # F40: how far the two are things known about the same item
             rival = (1.0 - u) * rival + u * 0.5        # (another thing to say, not an alternative): against silence
@@ -265,10 +271,37 @@ def _race(mind, candidates, theta: float, T: int) -> List[Event]:
             score, e, unit = tried
         acts.append(Event(mind.ch.names[channel], mind.ch.symbol(channel, int(S.u_symbol[unit])), ACTED))
         mind.hoping = (unit, e)
+        if getattr(mind.cfg, "known", False):          # F41: a thing known of a filler is said: the answer's topic
+            from .read import _moment_memo
+            claim = _moment_memo(mind).get(("known_claim", mind.context))
+            if claim is not None and claim[2] == unit:
+                mind.topic = (claim[0], claim[1], mind.episode_start)
         if mind.__dict__.get("_explain_on"):           # the chat's !neden: where this word came from
             from .neden import attribute
             mind.__dict__.setdefault("_why", []).append(attribute(mind, unit, consequence(mind, unit)))
     return acts
+
+
+def _driven(mind, channel: int):
+    """F41 (the urge to go on): an answer that tells what is known of its topic is driven by what is still unsaid.
+    (driven, the things known of the topic that may be said now). Not driven when the topic is in the present
+    context, its channel is this one, its own lived sequence has ended there (or it has just been named) and nothing
+    known of it is unsaid: the answer has said what there was to say. Just after the topic is named, the things known
+    of it and not said yet are all things to say: none of them is another's rival."""
+    from .read import known_unsaid, topic_state, unsaid_share
+    if mind.context is None or mv_view(mind, "u_channel")[mind.topic[0]] != channel:
+        return True, ()
+    not_self = mind.trust.clone()
+    not_self[ACTED] = 0.0
+    state = topic_state(mind, mind.context, not_self)
+    if state is None or state[2] == "inside":
+        return True, ()
+    y, j, where, _ = state
+    if where == "start":
+        unsaid = known_unsaid(mind, y, mind.context, j, not_self, episode=True)
+        if unsaid:
+            return True, unsaid
+    return unsaid_share(mind, y, not_self) > 0.0, ()
 
 
 def _urge(mind, a: int, b: int) -> float:

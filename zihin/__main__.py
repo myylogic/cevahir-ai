@@ -159,6 +159,9 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
          "exact_relations", "analogy", "corroborate", "paradigmatic", "bind_relations",      # lack these (--ac)
          "company", "replies", "purpose", "forms")
 
+STUDIED = ("inherit", "witness", "difference", "urge", "known")   # measured and off by default (F37-F41): no mind is
+                                                                   # raised with them; --ac turns one on by choice
+
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
 
@@ -1163,7 +1166,9 @@ def main(argv=None) -> None:
                                                "a mind keeps the convention it was raised with")
     ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
     ap.add_argument("--ac", default="", help="switch on, for a loaded mind, mechanisms that new minds are raised with "
-                    "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own settings")
+                    "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own "
+                    "settings. Also the mechanisms that were measured and are off by default (inherit, witness, "
+                    "difference, urge, known), for a loaded or a new mind")
     args = ap.parse_args(argv)
     keep_at = clean_path(args.kayit) if args.kayit else home_mind()    # ~ and quotes as in the commands
     ledgers = os.path.dirname(os.path.abspath(keep_at))   # session ledgers live next to the kept mind
@@ -1179,8 +1184,11 @@ def main(argv=None) -> None:
         newer = [k for k in NEWER if args.variant == "speaking" and not getattr(mind.cfg, k, False)]  # speaking has all
         asked = [k.strip() for k in args.ac.split(",") if k.strip()]
         for k in asked:
+            if k in STUDIED:
+                continue                                 # turned on below, for a loaded or a new mind alike
             if k not in NEWER:
-                print("  (--ac: bilinmeyen mekanizma '%s'; seçenekler: %s)" % (k, ", ".join(NEWER)))
+                print("  (--ac: bilinmeyen mekanizma '%s'; seçenekler: %s; ölçülmüş ve varsayılan olarak kapalı "
+                      "olanlar: %s)" % (k, ", ".join(NEWER), ", ".join(STUDIED)))
             elif not getattr(mind.cfg, k, False):
                 setattr(mind.cfg, k, True)
                 print("  açıldı: %s (bu zihin onunla büyümedi; senin isteğinle açıldı)" % k)
@@ -1197,6 +1205,10 @@ def main(argv=None) -> None:
         if args.no_ledger:
             mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path = {}, False, False, None
         mind.add_channel(CHANNEL, "act")
+    for k in (k.strip() for k in args.ac.split(",")):    # studied mechanisms: off by default, on by the owner's choice
+        if k in STUDIED and not getattr(mind.cfg, k, False):
+            setattr(mind.cfg, k, True)
+            print("  açıldı: %s (ölçülmüş, varsayılan olarak kapalı bir mekanizma; senin isteğinle açıldı)" % k)
     session = Session(mind, pieces_for(mind, args.parca))
     session.explain = True                               # !neden explains the last answer word by word
     interactive = sys.stdin.isatty()

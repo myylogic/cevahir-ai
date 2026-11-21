@@ -219,6 +219,24 @@ At each moment, roughly each word, the mind lives these steps:
   continuations says how far: the leader then races against silence instead of against its rival. A first step to
   long answers: more facts said about things never asked, no more confabulated (T-long 20 → 22 of 54: two sentences
   that stopped half way finished; confabulated 4 and 4).
+- **Unsaid Known (F41, off by default).** What is known of a thing is how the lived sequences that began with it go
+  on: not what was only asked of it (a sequence that another turn answered is a question), and not what the present
+  episode has already said. A frame's value may be such a thing: the members of a place went on with things known of
+  themselves, and of the read filler the known thing most like what they said is claimed (two words are alike as far
+  as they go on alike, as words or as the lived sequences they carry on; so a question about one kind of fact is
+  answered with the thing's own fact of that kind). When such a claim is acted on, its filler is the topic of the
+  answer. Where no word would be said, the lived contexts of the place's other members in which their own known
+  sequence stood the same way say how to go on (the words between facts), each read as an answer about its own
+  filler. The urge to go on is the unsaid share of what is known of the topic: nothing is said when it is 0, and
+  while it is above 0 the members' ends of turn count only beyond their goings-on (an answer that ends for having
+  nothing left has gone on at least once for every end); these links of the urge to speech are a model, not learned.
+  Asked about things never asked about, the mind tells their facts read apart, whole and no more: T-long 20 → 54 of
+  54 in the watched order and 0 → 54 of 54 in any order (on seeds never looked at, 108 of 108 and 107 of 108, no
+  sentence unfinished or confabulated). In a world it was not developed on (T-tell: two to four facts, three kinds
+  of question lived by one mind), 2 → 104 of 113 facts for things never in a dialogue, and the place alone when asked
+  where (1 → 24 of 31). On the owner's documents the teacher protocol rises from 120 to 130 exact. A SCAN life lived with it answers 810 of the 844 commands within 11 (789 without): 21 answers that ran on now end, and none is lost.
+  Off by default: recall with a two-word cue loses one answer (90 → 89), a question about a kind of fact that is not
+  known of the thing is more often answered with another fact of it, and an answer on the largest mind takes about 2.4 times as long (453 s against 190 s for the teacher questions).
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -411,6 +429,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Witness Reliability | Tanığın Güvenilirliği | F38, off by default | source reliability; NARS deduction; backoff in variable-order models |
 | Replacement Witness | Değişiklik Tanığı | F39, off by default | Mill's method of difference |
 | Urge to Go On | Sürdürme İsteği | F40, off by default | drive and habit (Hull): whether to speak apart from what to say |
+| Unsaid Known | Söylenmemiş Bilinen | F41, off by default | recall inside a generalisation (the frame is transparent to the filler's own lived sequences); distributional likeness; drive as the unsaid share |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |
