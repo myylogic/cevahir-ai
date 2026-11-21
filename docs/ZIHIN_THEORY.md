@@ -237,6 +237,49 @@ At each moment, roughly each word, the mind lives these steps:
   where (1 → 24 of 31). On the owner's documents the teacher protocol rises from 120 to 130 exact. A SCAN life lived with it answers 810 of the 844 commands within 11 (789 without): 21 answers that ran on now end, and none is lost.
   Off by default: recall with a two-word cue loses one answer (90 → 89), a question about a kind of fact that is not
   known of the thing is more often answered with another fact of it, and an answer on the largest mind takes about 2.4 times as long (453 s against 190 s for the teacher questions).
+- **Episode Echo (F42).** What already followed an item in the present episode, heard or said, is an echo, not
+  knowledge of what follows it now: it is not read as the lived continuation of the last word (F16 held this for the
+  partner's words only), nor as how a frame's filler goes on (NEXT, START). The rule was part of F41 and gave it its
+  SCAN answers; alone it gives the same (SCAN within 11: 789 → 810 of 844, answers that ran on now end) and changes
+  nothing else that is measured (T-compose, meaning, relations, T-purpose, T-cause, T-deduce, T-chain, the listening
+  worlds, T-tell, the teacher protocol and recall on the owner's documents; T-long 66 → 68 of 162). On in the speaking
+  configuration.
+- **Wholes (F43, off by default).** The mind decides from its last F items; an answer longer than that is said with
+  the question out of sight. What holds more is not a longer window but larger items. A sequence that was said alone
+  and answered is a whole, and every watched dialogue is lived once more as two items, the utterance and its answer,
+  so that a whole's reply is one lived continuation however long. When the answer of a watched dialogue is made of the
+  replies of wholes that stand in its utterance, the dialogue is lived once more in summary: each such whole as its
+  form (its own summary with the wholes inside it as bare wholes; a whole with no whole inside is a bare whole), each
+  reply as a pointer to the place of its whole. Of the ways to read an answer so, the fewest words left unexplained,
+  then the fewest items; when two tie, nothing is concluded; and a summary must fit the window. An utterance never
+  answered is heard in the summary that was lived and answered, or, when none was, in the one the mind's frames would
+  answer most firmly (each considered in imagination and undone, the substance bit for bit what it was). When the mind
+  decides a pointer it sets its working state aside, answers that part as if it had been said alone (remembered whole
+  if it was answered before; in its own summary if it is new), and takes its working state up again; the echo of all
+  it said meanwhile is one item. The window bounds each level, not the answer. A summary is another level and is lived
+  on a channel of its own, the words that stand in it too, so what the mind reads word by word is what it was (on the
+  words' own channel the summaries entered the frames of plain words, and one world broke). SCAN's add-jump split with
+  commands of every length (T-scan; 7,706 test commands, answers of up to 48 actions): after watching 1,082 of SCAN's
+  13,204 training dialogues twice (77,696 moments, six and a half minutes of life on one core), the mind answers
+  **7,706 of the 7,706** exactly, the 6,862 whose dialogue does not fit a window of 12 items and the 1,448 with
+  answers of 25 to 48 actions among them; with 382 dialogues, 499 of a sample of 500 (3 of 500 without F43). A
+  Transformer trained from scratch on the same 1,082 dialogues answers 1 of 7,706 (298 of 300 of its own training
+  commands). In a world it was not developed on (T-görev: jobs of two words made of two or three steps, joined and
+  repeated by Turkish words that stand before, around and between them; the new job watched only alone): 492 of 492
+  over three seeds (0 without F43), every dialogue that does not fit the window among them; as first found, before one
+  line was changed, 51 of 164. What it does not do: an answer that transforms a part instead of repeating it has no
+  summary; summaries are learned from watched dialogues only; the parts' own questions are imagined (what a long life
+  of such answers leaves was not measured); and with very few lived commands of a form the order of two parts can be
+  the other connective's (once in 500 answers at 382 dialogues).
+- **Lived Exclusion across channels (F44).** F27 counts what an instance was lived to go on with on a channel against
+  what it never went on with on that channel. The end of a turn and a word are on two channels, so an instance that
+  always went on with the end of the turn said nothing against a word a sibling frame proposed there, and a lived
+  summary did not stop ("jump twice" said as three jumps). But an instance's record holds all that followed it: what
+  is not in it followed in none of its lived moments, on any channel. The largest of the instance's positive masses on
+  a world channel counts against every world target it never went on with. Alone it changes one thing in the whole
+  battery: in the relations world a known person's greeting no longer runs on into the greeting of no one in
+  particular (0.75 → 0.00 of the probes; her own greeting 1.00 as before); SCAN within 11, the teacher protocol and
+  recall are what they were. On in the speaking configuration.
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of
@@ -430,6 +473,9 @@ The models were small and the data scarce; with far more data the gap may close.
 | Replacement Witness | Değişiklik Tanığı | F39, off by default | Mill's method of difference |
 | Urge to Go On | Sürdürme İsteği | F40, off by default | drive and habit (Hull): whether to speak apart from what to say |
 | Unsaid Known | Söylenmemiş Bilinen | F41, off by default | recall inside a generalisation (the frame is transparent to the filler's own lived sequences); distributional likeness; drive as the unsaid share |
+| Episode Echo | Bölüm Yankısı | F42 | inhibition of return; repetition avoidance in sequence generation |
+| Wholes | Bütünler | F43, off by default | chunking (Miller); working memory as a stack of suspended contexts; roles and fillers, pointers; analysis by synthesis |
+| Lived Exclusion across channels | Kanallar Arası Dışlama | F44 | closed-world reading of an instance's own record |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

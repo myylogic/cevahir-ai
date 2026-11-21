@@ -206,7 +206,12 @@ def excluded(mind, out: Dict[int, float], own: Dict[int, Tuple[float, float]]) -
     on with something, is read with W+ = 0 and W- = the instance's own positive mass on that channel (the full record:
     each of those moments was a moment it was not followed by the target), nested last as own evidence is:
         e <- c * 0 + (1 - c) e,   c = conviction(W-)
-    Targets the instance has its own evidence on keep that evidence (F14 records their failures); nothing is written."""
+    Targets the instance has its own evidence on keep that evidence (F14 records their failures); nothing is written.
+    F44 (``exclusive_world``): the record of an instance holds everything that followed it, on every channel, so a
+    target that is not in it followed the instance in none of its lived moments, whatever its channel: the largest of
+    the instance's positive masses on a world channel (its lived moments, counted on the channel that held an item in
+    most of them) counts against every world target it never went on with. An instance that always went on with the
+    end of the turn is evidence against a word there."""
     k = mind.cfg.k
     channel = mv_view(mind, "u_channel")
     totals: Dict[int, float] = {}
@@ -215,10 +220,11 @@ def excluded(mind, out: Dict[int, float], own: Dict[int, Tuple[float, float]]) -
             totals[channel[target]] = totals.get(channel[target], 0.0) + w_pos
     if not totals:
         return
+    across = max(totals.values()) if getattr(mind.cfg, "exclusive_world", False) else 0.0
     for target in list(out):
         if target in own or not _world(mind, target):
             continue
-        total = totals.get(channel[target], 0.0)
+        total = max(totals.get(channel[target], 0.0), across)
         if total > 0.0:
             out[target] = (1.0 - conviction(total, k)) * out[target]
 
@@ -1401,6 +1407,7 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
         corroborate = getattr(cfg, "corroborate", False) and getattr(cfg, "situations", False)
         claims: Dict[int, Tuple[float, float, float]] = {}
         known_on = getattr(cfg, "known", False) and filler is not None and tail is None
+        echo_on = known_on or (getattr(cfg, "echo", False) and filler is not None and tail is None)
         known_here: Dict[int, float] = {}
         said_known, only_known, own_names = {}, frozenset(), frozenset()
         topic = getattr(mind, "topic", None)
@@ -1451,9 +1458,9 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 continue
             if known_on and target >= 0 and target != filler and explained(target):
                 continue                           # F41: what a member said of itself is not said of another filler
-            if known_on and target in (NEXT, START) and unit == mind.context:
+            if echo_on and target in (NEXT, START) and unit == mind.context:
                 target = resolve(mind, target, filler, tuple(fixed) + tuple(sorted(episode_said(mind, filler))),
-                                 category)         # F41: what followed the filler in this episode is an echo
+                                 category)         # F42: what followed the filler in this episode is an echo
             else:
                 target = resolve(mind, target, filler, fixed, category)
             if target is None:
@@ -2412,8 +2419,9 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
             readings = [own_mass(mind, suffix[0], 1, trust)]
             if starts and i == 0:                       # the whole utterance so far is this one item
                 readings.insert(0, start_mass(mind, suffix[0], trust))
-            if getattr(cfg, "known", False) and unit == mind.context:   # F41: what followed the item earlier in this
-                heard = heard | episode_said(mind, suffix[0])            # episode is an echo too
+            if (getattr(cfg, "echo", False) or getattr(cfg, "known", False)) and unit == mind.context:
+                heard = heard | episode_said(mind, suffix[0])   # F42: what followed the item earlier in this episode
+                                                                # is an echo too
         else:
             piece = S.tuple_index.get(suffix)
             if piece is None:

@@ -147,8 +147,8 @@ def speaking(folder: str = None) -> Config:
     return Config.changed(support="members", bind_repeats=True, next_only_present=True, neg_floor=1.0 / 14,
                           backoff=True, resemblance=True, race=True, situations=True, explore=True, starts=True,
                           exclusive=True, exact_relations=True, analogy=True, corroborate=True, paradigmatic=True,
-                          bind_relations=True, company=True, replies=True, purpose=True, forms=True,
-                          log_path=_log_path(folder) if folder else _log_path())
+                          bind_relations=True, company=True, replies=True, purpose=True, forms=True, echo=True,
+                          exclusive_world=True, log_path=_log_path(folder) if folder else _log_path())
 
 
 VARIANTS = {"speaking": speaking,
@@ -157,10 +157,10 @@ VARIANTS = {"speaking": speaking,
 
 NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "exclusive",   # a loaded mind may
          "exact_relations", "analogy", "corroborate", "paradigmatic", "bind_relations",      # lack these (--ac)
-         "company", "replies", "purpose", "forms")
+         "company", "replies", "purpose", "forms", "echo", "exclusive_world")
 
-STUDIED = ("inherit", "witness", "difference", "urge", "known")   # measured and off by default (F37-F41): no mind is
-                                                                   # raised with them; --ac turns one on by choice
+STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes")   # measured and off by default: no mind is
+                                                                             # raised with them; --ac turns one on by choice
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -611,6 +611,9 @@ class Session:
         self.listen(answer, prov)
         self.end_of_turn(prov, tone=self.tone(answer))
         self.mind.step([])
+        if getattr(self.mind.cfg, "wholes", False):      # F43: the dialogue lived once more as wholes, and in summary
+            from .butun import consolidate
+            consolidate(self, first, answer, prov, asker)
 
     def reply(self, text: str, limit: int = 80, say=None) -> str:
         """You speak (told), then the mind may speak: what its own decision emits, one symbol per moment, until silence.
@@ -630,17 +633,22 @@ class Session:
         if self.explain:                                 # !neden: each decided word is attributed as it is decided
             self.mind.__dict__["_why"] = []
             self.mind.__dict__["_explain_on"] = True
-        if self.turns:                                   # the turn passes when your utterance has ended
-            self.listen(text, TOLD, speaker=self.partner)
-            acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
-        else:                                            # older minds: the turn passes with your last word
-            self.listen(" ".join(symbols[:-1]), TOLD)
-            acts = self.mind.step(self.events(symbols[-1], TOLD))
-        if not acts and self.turns:                      # nothing at once: a moment passes in silence (it may feel its
-            acts = self.mind.step([])                    # not knowing, L7), then the next; what it decides is its own
-            if not acts:
-                acts = self.mind.step([])
-        said = self.speak(acts, say, limit)
+        said = None
+        if self.turns and getattr(self.mind.cfg, "wholes", False):   # F43: an utterance never answered that has a
+            from .butun import reply_in_parts                          # summary is heard in it, answered part by part
+            said = reply_in_parts(self, text, limit, say)
+        if said is None:
+            if self.turns:                               # the turn passes when your utterance has ended
+                self.listen(text, TOLD, speaker=self.partner)
+                acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
+            else:                                        # older minds: the turn passes with your last word
+                self.listen(" ".join(symbols[:-1]), TOLD)
+                acts = self.mind.step(self.events(symbols[-1], TOLD))
+            if not acts and self.turns:                  # nothing at once: a moment passes in silence (it may feel its
+                acts = self.mind.step([])                # not knowing, L7), then the next; what it decides is its own
+                if not acts:
+                    acts = self.mind.step([])
+            said = self.speak(acts, say, limit)
         if self.explain:
             self.sources = self.mind.__dict__.pop("_why", [])
             self.mind.__dict__.pop("_explain_on", None)
@@ -1168,7 +1176,7 @@ def main(argv=None) -> None:
     ap.add_argument("--ac", default="", help="switch on, for a loaded mind, mechanisms that new minds are raised with "
                     "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own "
                     "settings. Also the mechanisms that were measured and are off by default (inherit, witness, "
-                    "difference, urge, known), for a loaded or a new mind")
+                    "difference, urge, known, wholes), for a loaded or a new mind")
     args = ap.parse_args(argv)
     keep_at = clean_path(args.kayit) if args.kayit else home_mind()    # ~ and quotes as in the commands
     ledgers = os.path.dirname(os.path.abspath(keep_at))   # session ledgers live next to the kept mind

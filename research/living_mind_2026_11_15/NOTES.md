@@ -2874,3 +2874,206 @@ other questions but never asked to be told about (B).
   of its own, with the whole battery, to see whether it can be on by default. The cost on a large mind (likeness of
   frequent words, the members' contexts read every moment). A measure of likeness that tells a property from a deed.
   The program's `--ac known` turns F41 on for a mind by its owner's choice.
+
+## Episode Echo (F42): the rule that gave SCAN its answers, taken out of F41 and measured alone (2026-11-21)
+
+**Why.** F41's gain on SCAN (789 → 810 of 844) came from one rule (the section above, "Taken apart"): what already
+followed an item in the present episode is an echo, not knowledge of what follows it now. The rule does not need
+F41. It is a switch of its own now (`Config.echo`), and F41 holds it as before.
+
+**The rule** (`read.py`: `episode_said`).
+1. In the lived continuation of the last word (F16, `continuation_backoff`): what followed that word earlier in this
+   episode, heard or said, is not read as what follows it ("what the partner just said is an echo" was F16's own rule;
+   this is the same rule for the mind's own words and for the whole episode).
+2. Where a frame's relation names how the filler goes on (NEXT, START) for the present context: not what followed
+   the filler in this episode.
+
+**Measured alone** (`--set echo=1`, the whole battery on one frozen copy of the code; baseline = the same battery
+without it, as recorded for F41):
+
+| | without | echo |
+|---|---|---|
+| SCAN within 11 (seed 0), lived and answered with it | 789 / 844 | **810 / 844**, template by template as with F41 |
+| T-compose (3 seeds); meaning; relations; T-purpose; T-cause (context); T-deduce; T-chain with F37 | 75 / 75; … | the same outputs |
+| listening worlds (held-out, 600 moments) | 0.783, 0.812 | 0.783, 0.812 |
+| T-long, the watched order (9 seeds): facts whole, unfinished, confabulated | 66 / 162, 17, 12 | 68 / 162, 21, 6 |
+| T-long, any order | 0 / 162 | 0 / 162 |
+| T-tell (9 seeds) | 2 / 113, 6 / 112, … | the same |
+| the owner's documents: teacher protocol (exact, F1) | 120, 0.7444 | 120, 0.7444 |
+| the owner's documents: recall with a two-word cue (exact, valid, silent) | 90, 146, 31 | 90, 146, 31 |
+
+- **The two parts.** With the first part alone (the second taken out of a copy of the code): T-long 66 / 162,
+  unfinished 21, confabulated 8; SCAN within 11 810 / 844 (the whole gain is the first part's). The second part is T-long's two facts more and two
+  confabulations fewer.
+- **What F41 costs is not this rule's.** Recall is 90 with the echo rule and 89 with F41: the answer F41 loses is
+  lost by the rest of F41.
+- **On in the speaking configuration.** Nothing measured is lost and SCAN gains 21 answers, so a mind raised by the
+  program has it from birth (`speaking()`); a mind raised before can be given it (`--ac echo`). The gates (the
+  lesson-free life and the 17 configurations) do not use the speaking configuration and are bit-identical.
+
+## A correction: SCAN's seconds were the life's, not the answers' (2026-11-21)
+
+`t_compose.py` records `seconds`, the time of the **life** (watching the training dialogues), and no time for
+answering. Four lines above call it answering: "(answering 823 s against 727 s)" (F39), "answering 990 s against
+727 s" (the window), "(85,893 moments lived; answering 2,393 s)" (SCAN within 12) and "SCAN's answers 953 s against
+727 s" (F41). Each of these is the life's time: a switch that is on while the mind watches is read at every watched
+moment too. The scores are not touched. How long the answers take was measured once, by hand, for the first SCAN run
+("about 20 minutes" for 844 answers on fresh copies); `t_scan.py` now records both times.
+
+## Wholes (F43) and Lived Exclusion across channels (F44): what does not fit the window, answered part by part (2026-11-21)
+
+**The limit this removes.** "What bounds SCAN here is the window" (above): everything of the add-jump split that
+fits the window was answered, and 85% of the split does not fit a window of 12. A working memory was not built; the
+first design ("the question held as one item") was not enough: an answer of 48 actions has no place to be counted in.
+
+**What holds more than the window.** Not a longer window: larger items. A sequence known as a whole stands as one
+item, and so does what it was answered with. Nothing is told to the mind about any language; `zihin/butun.py`:
+
+1. **A whole.** A sequence that was said alone and answered is a whole. Every dialogue the mind watches is lived once
+   more as two items, the utterance and its answer (`said` symbols), on a channel of its own (point 5). What a whole
+   was answered with is then one lived continuation, however long (`lived_reply`).
+2. **A summary** (`align`). When the answer of a watched dialogue is made of the replies of wholes that stand in the
+   utterance, the dialogue is lived once more in summary: each such whole as its **form**, each reply as a
+   **pointer** to the place of its whole, the other words as they are.
+   "walk around left thrice and run twice ⏎ (24 actions) (2 actions)" is lived as
+   `[⟨whole thrice⟩ and ⟨whole twice⟩ ⏎ reply(0) reply(2)]`: six items.
+   - Of the ways the answer can be read so: the fewest words left unexplained, then the fewest items; when two
+     different readings tie ("walk and walk": which "walk" was answered first?), nothing is concluded.
+   - The form of a whole is its own summary with the wholes inside it as bare wholes (how it is built, not of
+     what); a whole in which no whole stands is a bare whole.
+   - A summary is one the mind can hold: it fits the window.
+3. **Hearing an utterance never answered** (`reading`). A proper run of it is a whole when it was answered alone, or
+   (never met) when its own summary was lived and answered: a whole by its form ("jump around left": `[whole around
+   left ⏎]` was lived). Of the summaries its wholes give, the one whose context was lived and answered is taken.
+   When none was lived, each is considered (`consider`): brought to mind, read, and undone (the substance is bit for
+   bit what it was), and the one the mind's **frames** would answer most firmly is taken.
+4. **Answering in parts** (`_go_on`). At the summary's level the mind decides as it always does, from its last
+   items. When it decides a pointer, it says the reply of that part: it sets its working state aside (`set_aside`),
+   answers the part as if it had been said alone, and takes its working state up again (`take_up`). A part answered
+   before is remembered whole; a new one is answered in its own summary, in the same way; one with no summary, word
+   by word. The echo of all that was said meanwhile is one item, the pointer. Every level holds a few items; the
+   window bounds each level, not the answer.
+5. **Another level, another channel.** A summary is lived on a channel of its own (`LEVEL`) with an end of the turn
+   of its own (`LEVEL_END`): its wholes and pointers, and the words that stand in it too. What the mind reads word
+   by word is what it was before any summary was lived.
+
+**F44, Lived Exclusion across channels** (`Config.exclusive_world`; `read.excluded`). The first run of F43 said
+"jump twice" as three jumps. The summary `[whole twice ⏎ reply(0) reply(0)]` was lived many times and always went on
+with the end of the turn; its sibling `[whole thrice ⏎ reply(0) reply(0)]` went on with a third reply, and the frame
+over the two claimed it here. F27 counts what an instance went on with on a channel against what it never went on
+with **on that channel**; the end of a turn and a word are on two channels, so the instance's own record said nothing
+against the word. But the record of an instance holds all that followed it: a target that is not in it followed in
+none of its lived moments, whatever its channel. F44: the largest of the instance's positive masses on a world
+channel counts against every world target it never went on with.
+
+*Measured alone* (`--set exclusive_world=1`, the whole battery against the same code without it): every output is
+the same (T-compose 75 / 75, meaning, T-purpose, T-cause, T-deduce, T-chain with F37, the listening worlds 0.783 and
+0.812, T-long 68 / 162, T-tell, SCAN within 11 810 / 844, and on the owner's documents the teacher protocol 120 exact
+with F1 0.7444 and recall 90 / 146 / 31) but one number, in the relations world: a known person's greeting no longer
+runs on into the greeting of no one in particular (the general greeting's word after her own: 0.75 → 0.00 of the
+probes; her own greeting 1.00 as before). Nothing lost and an answer that ran on now ends: F44 is on in the speaking
+configuration (`--ac exclusive_world` gives it to a mind raised before).
+
+**T-scan** (`t_scan.py`, new): SCAN's add-jump split with commands and answers of every length. Training: the 81
+commands without a connective and "jump" alone, and N of the 13,122 commands with "and" / "after" drawn at random;
+two epochs, the shorter commands first in the first; window 13. Test: commands with jump, each told to a forked copy
+of the mind.
+
+| T-scan (window 13, two epochs) | exact | the dialogue does not fit 12 items | answers of 25 to 48 actions |
+|---|---|---|---|
+| the mind without F43; 382 training dialogues; a sample of 500 tests | 3 / 500 | 1 / 449 | 0 / 94 |
+| the mind with F43; the same 382 dialogues (3% of SCAN's 13,204); the same 500 tests | 499 / 500 | 448 / 449 | 94 / 94 |
+| a Transformer trained from scratch on the 1,082 dialogues (298 of 300 of its training commands exact); all 7,706 tests | 1 / 7,706 | 0 / 6,862 | 0 / 1,448 |
+| **the mind with F43; 1,082 training dialogues (8% of SCAN's 13,204); all 7,706 tests** | **7,706 / 7,706** | **6,862 / 6,862** | **1,448 / 1,448** |
+
+- **The life** of the full run: the 81 commands without a connective, "jump" alone and 1,000 of the 13,122 joined
+  commands, twice: 77,696 moments, 389 s on one core. Each dialogue is lived three times: word by word, as two
+  items, and in summary.
+- **The answers**: 6,072 s for 7,806 answers on three cores (about 2.3 s an answer on one core), each on a forked
+  copy of the mind. Every command of the split is right: with and without a connective, of every length of answer.
+- **What was watched is remembered whole**: a hundred watched commands whose dialogue does not fit 12 items, asked
+  again: 100 of 100 (42 of 100 without F43, at 382 dialogues).
+- **The one error at 382 dialogues**: "look around left after jump opposite right" was said in the order of "and".
+  Its pair of forms had not been lived with "after"; see the last point of "What is not there".
+- **Within the window too**: SCAN within 11 at a window of 11 (the battery below): 810 → 844 of 844. The window of
+  12 that those 34 answers needed without F43 is not needed with it. The life there: 58,803 → 113,054 moments,
+  1,019 s → 1,383 s.
+- **What the mind does with a test command**, level by level ("jump around left thrice and walk twice"):
+  heard as `[⟨whole thrice⟩ and ⟨whole twice⟩]`, a summary lived with other wholes; it decides `reply(0)`; the
+  part "jump around left thrice" is new, heard as `[⟨whole around left⟩ thrice]`, and answered `reply(0)` three
+  times; the part "jump around left" is new, heard as `[whole around left]`, and answered turn, `reply(0)`, four
+  times; "jump" was answered before and is remembered: "i_jump". Then `reply(2)`: "walk twice" was watched and is
+  remembered whole. `!neden` shows these levels, each decision under its part.
+
+**T-görev** (`t_gorev.py`, new; a world F43 was not developed on): jobs made of jobs, in Turkish. A primitive is a
+job of two words with two or three steps ("çay demle"), the words that repeat stand before the job ("iki kere …"),
+the words that order two parts stand around them ("önce … sonra …") or between them, reversed ("… ama önce …").
+The new job ("kahve yap") is watched only alone; the test is every command it stands in (164).
+
+| T-görev, 3 seeds (164 tests each; 163 training dialogues, two epochs, window 13) | without F43 | with F43 |
+|---|---|---|
+| exact | 0 / 492 | **492 / 492** |
+| one part ("iki kere kahve yap") | 0 / 6 | 6 / 6 |
+| two parts joined (of them: both hold the new job) | 0 / 486 (0 / 54) | 486 / 486 (54 / 54) |
+| the dialogue does not fit the window | 0 / 477 | 477 / 477 |
+| the seeds never looked at (1 and 2) | 0 / 328 | 328 / 328 |
+
+
+- **The first run, as found** (seed 0, F43 as it was after SCAN alone): 51 of 164 (0 without F43). The form of a
+  whole in which no whole stands was its own words, so the new job, never met in a summary, had a form of its own
+  that nothing lived shared. In SCAN the primitives are single words (bare wholes), and the flaw did not show.
+  After it: a whole in which no whole stands is a bare whole (one line), and seed 0 is 164 of 164.
+
+**F43 with the rest** (`--set wholes=1`, the whole battery against the same code without it; F42 and F44 in both).
+T-compose 75 / 75, the relations world, T-deduce, T-chain with F37, T-cause, the listening worlds (0.783 and 0.812),
+T-long and T-tell are the same; so are the teacher protocol (120 exact, F1 0.7444) and recall (90 / 146 / 31) on the
+owner's documents (those minds were raised before F43: nothing of them was lived in summary). The meaning world is
+the same but for the greeting of two words, remembered whole ("aleyküm selam", without the general greeting after
+it). T-purpose: polite answers to things never handed 8 → 9 of 9. SCAN within 11: 810 → 844 of 844.
+
+**Off by default.** It is new, its summaries are learned from watched dialogues only, and a life with it is longer
+(each watched dialogue is lived once or twice more). `python -m zihin --ac wholes` turns it on for a mind.
+
+**What failed on the way, and what it showed.**
+- *Without F44* (T-compose, the first run): 21 of 25. Every error was an answer that did not stop.
+- *Summaries that were lived only* (T-scan, 300 joined commands, 200 tests): 160 of 200; 39 of the 40 errors were
+  silences: the test's pair of forms had not been lived with that connective.
+- *Considering a reading by everything the mind reads* (frames, then what resembles, then what follows the last
+  words): the right reading led by a hair or lost. "jump left and run twice": `[whole left and whole twice]` 0.694
+  against the right `[⟨whole left⟩ and ⟨whole twice⟩]` 0.691, and the answer was eight jumps. Read apart, every
+  wrong reading owed its whole support to Situation Resemblance (F23), which answers anything that ends alike; the
+  frames claimed the right reading only (the others: 0.000). So a reading is considered by what the frames claim:
+  199 of 200 on that sample.
+- *Summaries on the words' own channel* (the whole battery with that form): one world broke. In the meaning world
+  a greeting that was only told ("hi") was no longer answered (class 1.00 → 0.00, silent), and three of the four
+  meaning questions went wrong ("selam ne demek ?" → ", nasılsın demektir"; lenient 0.67 → 0.00). Two causes, one
+  flaw: the items of a summary were items like any word. (a) Every watched dialogue lived as two items put its
+  utterance into the place "· ⏎" of everything ever said alone, and the frame of that place then spoke with
+  hundreds of members whose answers were other dialogues' answers. (b) A summary never lived was claimed by a frame
+  of plain words ("· ne demek ⏎": its members the words that were defined), which then named the bare whole itself
+  as "the asked word". After it: **a summary is lived on a channel of its own**, with an end of the turn of its own,
+  and the words that stand in it too. No item of a summary is an item of the words' level, so no frame, category or
+  resemblance of that level holds one. The meaning world is then what it was, but for a greeting of two words that
+  was answered before: it is remembered whole ("aleyküm selam") and no longer runs on into the general greeting.
+  (The tables above are of the form with the channel of its own; the numbers of this list are of the forms they
+  describe.)
+- *Two flaws of the core found by considering and undoing*: the situations' reading was kept by unit and moment,
+  both of which come again after an undo (`Mind.undo_last` now drops it, as it drops the other readings); and an
+  undo restores the knobs of the moment it undoes, a moment in which the mind was listening (`consider` puts the
+  knobs back).
+
+**What is not there.**
+- An answer must be made of the replies of runs of the utterance, in any order and number, with words of its own
+  between them. An answer that transforms a part (reverses it, counts in it) has no summary.
+- Summaries are learned from watched dialogues only (not from what is read), at the end of the dialogue: the mind
+  does not yet hear a watched question in summary while it is said.
+- An utterance heard in summary is not also heard word by word; what the mind says in a part is not lived by the
+  levels above it except as the pointer (so feedback on a long answer reaches the summary's path only).
+- The parts' questions are imagined, and their answers are the mind's own acts: a life of many such answers leaves
+  imagined and acted evidence at the parts' contexts (it is never read as lived evidence, and its weight was not
+  measured over a long life).
+- The readings of an utterance are every choice of its wholes: few for nine words, many for a long sentence (at
+  most 64 are considered).
+- With one or two lived commands of a form, the only frame over a new pair may be the connective's ("and" speaking
+  for "after"): the order of the parts is then the other connective's (seen once in 500 answers at 382 training
+  dialogues; not in the 7,706 at 1,082).

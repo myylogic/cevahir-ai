@@ -34,6 +34,11 @@ def attribute(mind, unit: int, consequence: float = 0.0) -> Dict[str, object]:
     from .form import parts_of
     ch, symbol = mind.symbol_of(unit)
     record: Dict[str, object] = {"word": str(symbol), "source": "bilinmiyor", "detail": ""}
+    if not isinstance(symbol, str) and getattr(mind.cfg, "wholes", False):
+        from .butun import show                           # F43: a whole, a pointer or a sequence held as one item
+        record["word"] = show(symbol)
+    if "_part_depth" in mind.__dict__:
+        record["depth"] = max(0, int(mind.__dict__["_part_depth"]))   # F43: how deep in parts it was decided
     context = mind.context
     if context is None:
         record.update(source="bağlamsız", detail="")
@@ -196,9 +201,10 @@ def report(why) -> str:
         return "  son cevapta açıklanacak bir kelime yok (sessiz kaldı ya da açıklama kapalıydı)"
     lines = []
     for r in why:
-        lines.append("  %-14s %-13s %s" % (r["word"], r["source"], r["detail"]))
+        inner = "  " * int(r.get("depth", 0))               # F43: a word decided while answering a part, under its part
+        lines.append("  %s%-14s %-13s %s" % (inner, r["word"], r["source"], r["detail"]))
         if r.get("conflict"):
-            lines.append("  %-14s %-13s %s" % ("", "çelişki", r["conflict"]))
+            lines.append("  %s%-14s %-13s %s" % (inner, "", "çelişki", r["conflict"]))
     counts: Dict[str, int] = {}
     for r in why:
         counts[str(r["source"])] = counts.get(str(r["source"]), 0) + 1

@@ -105,6 +105,19 @@ class Config:
                                     # goes on (a thing known of it and not said yet in this answer), the one most like
                                     # what the members said of themselves; the answer goes on while something known
                                     # of its topic is unsaid and ends when nothing is
+    echo: bool = False              # F42 (Episode Echo): what already followed an item in the present episode (heard
+                                    # or said) is an echo, not knowledge of what follows it now: not read as the lived
+                                    # continuation of the last word (F16), nor as "how the filler goes on" (NEXT,
+                                    # START); F41 holds it too
+    exclusive_world: bool = False   # F44 (Lived Exclusion across channels): what an instance was lived to go on with on
+                                    # any world channel counts against every world target it never went on with (its
+                                    # record holds all that followed it): an instance that always went on with the end
+                                    # of the turn is evidence against a word there (F27 reads one channel at a time)
+    wholes: bool = False            # F43 (Wholes): a sequence said alone and answered is a whole; a watched dialogue
+                                    # whose answer is made of the replies of wholes in its utterance is lived once more
+                                    # in summary (wholes as their forms, replies as pointers), and an utterance never
+                                    # answered whose summary was lived is heard in it and answered part by part, the
+                                    # working state set aside for each part (zihin/butun.py)
     urge: bool = False              # F40 (Urge to Go On): when the leading word's rival is itself expected, it races
                                     # against silence as far as the two are things known about the same item (their
                                     # share of that item's lived continuations): another thing to say, not a rival
@@ -789,6 +802,7 @@ class Mind:
         self.trust = self._trust()
         self.__dict__.pop("_between_memo", None)
         self.__dict__.pop("_episode_memo", None)
+        self.__dict__.pop("_situation_cache", None)        # (kept by unit and moment: both come again after an undo)
 
     def retract(self, m: int) -> Dict[str, int]:
         """Retract moment m at the level of the ledger: exactly its increments are removed."""
@@ -796,6 +810,7 @@ class Mind:
         self.trust = self._trust()
         self.__dict__.pop("_between_memo", None)
         self.__dict__.pop("_episode_memo", None)
+        self.__dict__.pop("_situation_cache", None)
         if "personal_log" in self.__dict__:
             from .iliski import forget_moment
             forget_moment(self, m)
