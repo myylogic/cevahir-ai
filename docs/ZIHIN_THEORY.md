@@ -253,24 +253,30 @@ At each moment, roughly each word, the mind lives these steps:
   reply as a pointer to the place of its whole. Of the ways to read an answer so, the fewest words left unexplained,
   then the fewest items; when two tie, nothing is concluded; and a summary must fit the window. An utterance never
   answered is heard in the summary that was lived and answered, or, when none was, in the one the mind's frames would
-  answer most firmly (each considered in imagination and undone, the substance bit for bit what it was). When the mind
-  decides a pointer it sets its working state aside, answers that part as if it had been said alone (remembered whole
-  if it was answered before; in its own summary if it is new), and takes its working state up again; the echo of all
-  it said meanwhile is one item. The window bounds each level, not the answer. A summary is another level and is lived
-  on a channel of its own, the words that stand in it too, so what the mind reads word by word is what it was (on the
-  words' own channel the summaries entered the frames of plain words, and one world broke). SCAN's add-jump split with
-  commands of every length (T-scan; 7,706 test commands, answers of up to 48 actions): after watching 1,082 of SCAN's
-  13,204 training dialogues twice (77,696 moments, six and a half minutes of life on one core), the mind answers
-  **7,706 of the 7,706** exactly, the 6,862 whose dialogue does not fit a window of 12 items and the 1,448 with
-  answers of 25 to 48 actions among them; with 382 dialogues, 499 of a sample of 500 (3 of 500 without F43). A
-  Transformer trained from scratch on the same 1,082 dialogues answers 1 of 7,706 (298 of 300 of its own training
-  commands). In a world it was not developed on (T-görev: jobs of two words made of two or three steps, joined and
-  repeated by Turkish words that stand before, around and between them; the new job watched only alone): 492 of 492
-  over three seeds (0 without F43), every dialogue that does not fit the window among them; as first found, before one
-  line was changed, 51 of 164. What it does not do: an answer that transforms a part instead of repeating it has no
-  summary; summaries are learned from watched dialogues only; the parts' own questions are imagined (what a long life
-  of such answers leaves was not measured); and with very few lived commands of a form the order of two parts can be
-  the other connective's (once in 500 answers at 382 dialogues).
+  answer most firmly (each considered in imagination and undone, the substance bit for bit what it was; only readings
+  whose items were all lived before are considered: a consideration cannot be the first evidence for what it
+  considers). A summary is also lived as its construction (its words as they are, every whole bare): the forms say
+  which reading of an utterance is its summary, and a summary whose forms never met in it is answered as the lived
+  summaries of the same construction were. When the mind decides a pointer it sets its working state aside, answers
+  that part as if it had been said alone (remembered whole if it was answered before; in its own summary if it is
+  new), and takes its working state up again; the echo of all it said meanwhile is one item. The window bounds each
+  level, not the answer. A summary is another level and is lived on a channel of its own, the words that stand in it
+  too, so what the mind reads word by word is what it was (on the words' own channel the summaries entered the frames
+  of plain words, and one world broke). SCAN's add-jump split with commands of every length (T-scan; 7,706 test
+  commands, answers of up to 48 actions): after watching 1,082 of SCAN's 13,204 training dialogues twice (77,696
+  moments, six and a half minutes of life on one core), the mind answers **7,706 of the 7,706** exactly, the 6,862
+  whose dialogue does not fit a window of 12 items and the 1,448 with answers of 25 to 48 actions among them; with 182
+  dialogues (1.4%) 500 of a sample of 500, with 112 dialogues 482 and with 92 dialogues 367, every other answer a
+  silence and none wrong (without F43, 3 of 500 at 382 dialogues). Neither the curriculum nor the second epoch is
+  needed at 382 dialogues. Taken apart at 112 dialogues: with no forms (every whole bare) 165 of 500, wrong groupings;
+  with forms that keep the forms inside them 246, silences; with the forms as they are 482. A Transformer trained from
+  scratch on the same 1,082 dialogues answers 1 of 7,706 (298 of 300 of its own training commands). In a world it was
+  not developed on (T-görev: jobs of two words made of two or three steps, joined and repeated by Turkish words that
+  stand before, around and between them; the new job watched only alone): 492 of 492 over three seeds (0 without F43),
+  every dialogue that does not fit the window among them; as first found, before one line was changed, 51 of 164. What
+  it does not do: an answer that transforms a part instead of repeating it has no summary; summaries are learned from
+  watched dialogues only; the parts' own questions are imagined (what a long life of such answers leaves was not
+  measured); and an answer of the full run takes about 2.3 s on one core (nothing was done for speed).
 - **Lived Exclusion across channels (F44).** F27 counts what an instance was lived to go on with on a channel against
   what it never went on with on that channel. The end of a turn and a word are on two channels, so an instance that
   always went on with the end of the turn said nothing against a word a sibling frame proposed there, and a lived
@@ -279,7 +285,9 @@ At each moment, roughly each word, the mind lives these steps:
   a world channel counts against every world target it never went on with. Alone it changes one thing in the whole
   battery: in the relations world a known person's greeting no longer runs on into the greeting of no one in
   particular (0.75 → 0.00 of the probes; her own greeting 1.00 as before); SCAN within 11, the teacher protocol and
-  recall are what they were. On in the speaking configuration.
+  recall are what they were. F43 needs it where a construction has a sibling that goes on: without it T-görev falls
+  from 492 to 315 of 492 ("iki kere kahve yap" said three times) and T-compose from 75 to 67 of 75. On in the speaking
+  configuration.
 - **Resemblance Vote.** Two things resemble each other through shared facets, and a facet is more telling the fewer
   things share it. The members most like a new thing speak loudest, weighted as in exemplar models of categorisation
   (the generalized context model). Seeing and hearing recognise this way: new images 73% / 83% / 67%, new sounds of

@@ -3077,3 +3077,82 @@ it). T-purpose: polite answers to things never handed 8 → 9 of 9. SCAN within 
 - With one or two lived commands of a form, the only frame over a new pair may be the connective's ("and" speaking
   for "after"): the order of the parts is then the other connective's (seen once in 500 answers at 382 training
   dialogues; not in the 7,706 at 1,082).
+
+## Wholes (F43) taken apart, and the construction of a summary (2026-11-21)
+
+**What was still wrong, with few watched dialogues.** The section above ends with one error in 500 at 382 training
+dialogues. Taken further down (the code of that section; a sample of 500 tests):
+
+| training dialogues (of SCAN's 13,204) | exact |
+|---|---|
+| 1,082 (all 7,706 tests) | 7,706 / 7,706 |
+| 382, three draws of the training commands | 499, 499, 500 of 500 |
+| 382, no curriculum (every epoch shuffled) | 496 / 500 |
+| 382, one epoch | 498 / 500 |
+| 182 | 471 / 500 |
+
+Every error was of one kind: two parts said in the order of the other connective ("look around left after jump
+opposite right" in the order of "and"). The summary `[⟨form⟩ after ⟨form⟩]` with that pair of forms had not been
+lived, and the only frame that held it was the frame over the connective's own place, whose one member was "and".
+
+**The construction of a summary** (`butun.construction`, `_heard_as`). What is answered to "… after …" does not
+depend on the forms of its two wholes: it depends on which wholes stand where. So a summary is lived at one more
+grain: as its construction, its words as they are and every whole bare (`[whole after whole ⏎ reply(2) reply(0)]`).
+The forms still say which reading of an utterance is its summary (that is where "(A after B) twice" is told from
+"A after (B twice)"); when the chosen summary was never lived with these forms and its construction was, it is heard
+as its construction and answered as the lived summaries of that construction were.
+
+**And one more wrong reading that it uncovered.** With the constructions lived, 182 dialogues gave 498 of 500, and the
+two errors were of a new kind: "look right after jump right twice" said as "(look right after jump right) twice".
+Both readings had been "claimed by a frame" (0.644 against 0.633). The wrong one held an item that the mind had
+never lived, the form `⟨whole after whole⟩` standing as a whole; the frame over "· twice" claimed it only because
+hearing it there, in the consideration itself, made it a member of that place. So: **a reading is considered only
+when every item of it was lived before** (its words and the forms of its wholes, in some summary). A consideration
+cannot be the first evidence for what it considers.
+
+**With both** (a sample of 500 tests; window 13; two epochs unless said):
+
+| training dialogues (of SCAN's 13,204) | exact | silent | wrong |
+|---|---|---|---|
+| 92 (the 81 without a connective, "jump", 10 joined) | 367 / 500 | 133 | 0 |
+| 112 (30 joined) | 482 / 500 | 18 | 0 |
+| 182 (100 joined) | **500 / 500** (471 before) | 0 | 0 |
+| 382 (300 joined), three draws of the training commands | 500, 500, 500 (499, 499, 500 before) | 0 | 0 |
+| 382, no curriculum (every epoch shuffled) | 500 / 500 (496 before) | 0 | 0 |
+| 382, one epoch | 500 / 500 (498 before) | 0 | 0 |
+
+- **What it does not know it does not say.** With too few dialogues to hold a command's construction, the mind is
+  silent; in these 3,500 answers not one is wrong.
+- **The curriculum is not needed** (the shorter commands first), nor the second epoch, at 382 dialogues.
+- The runs at 92 and 112 dialogues used a copy of `t_scan.py` whose probe of watched commands is as large as there
+  are such commands (the script asks for a hundred and stops when there are fewer).
+
+**Taken apart** (copies of the code; the same 500 tests):
+
+| | 112 dialogues | 382 dialogues |
+|---|---|---|
+| the forms as they are: a whole's own summary, the wholes inside it bare | 482 / 500 | 500 / 500 |
+| every whole bare (no forms) | 165 / 500 (335 wrong, none silent) | 500 / 500 |
+| forms that keep the forms of the wholes inside them | 246 / 500 (254 silent, none wrong) | 500 / 500 |
+| without F44 | | 500 / 500 |
+
+- **Why the form is what it is.** With no forms a reading is taken by how often its construction was lived, and
+  with few joined commands "· twice" was lived more than "· and ·": "jump twice and walk twice" is said as "(jump
+  twice and walk) twice". With forms that keep everything, a pair of forms is rarely one that was lived, and the
+  mind is silent. A form that says how a whole is built and not of what is between the two. With many dialogues
+  the three are the same.
+- **F44 is needed where a construction has a sibling that goes on**: T-görev without it 315 of 492 ("iki kere kahve
+  yap" said three times: "üç kere" went on where "iki kere" ended), T-compose 67 of 75 (75 with it). On the SCAN
+  sample it made no difference.
+
+**T-görev with the final code** (3 seeds, 492 tests): 492 of 492; at the mind's own window of 7: 492 of 492; with 53
+training dialogues instead of 163: 492 of 492.
+
+**The rest of the battery with the final code** (`--set wholes=1`): as in the section above (T-compose, relations,
+T-deduce, T-chain, T-cause, T-long, T-tell, the teacher protocol and recall the same; the meaning world the same but
+for the greeting of two words remembered whole; T-purpose 8 → 9 of 9). The full run of 7,706 and SCAN within 11 are
+run again with the final code and written below when they end.
+
+**Still not there.** Everything of "What is not there" above but its last point, which the construction answers.
+The sub-questions' cost: an answer of the full run takes about 2.3 s on one core, most of it in reading every choice
+of wholes of a nine-word command; nothing was done for speed.

@@ -14,10 +14,13 @@ Nothing here is told to the mind; all of it is read from what it lived.
   it as bare wholes: the form says how it is built, not of what; a whole in which no whole stands is a bare whole),
   each reply as a pointer to the place of its whole, the other words as they are. Of the ways an answer can be read
   so, the one that leaves the fewest words unexplained is taken, then the one with the fewest items; when two
-  different readings tie, nothing is concluded. A summary is one the mind can hold: it fits the window.
+  different readings tie, nothing is concluded. A summary is one the mind can hold: it fits the window. It is lived
+  once more as its construction, every whole bare: what is answered to a construction does not depend on the forms of
+  its wholes, so a summary whose forms never met in it is answered as its construction was (``_heard_as``).
 * Answering in parts. An utterance answered before is remembered whole (heard as the one item it was lived as). An
   utterance never answered whose summary was lived and answered (the summary's context has lived continuations of its
-  own), or whose summary the mind's frames would answer (``consider``), is heard in that summary (``reading``). A
+  own), or whose summary the mind's frames would answer (``consider``; only a summary whose every item was lived
+  before: a consideration is not the first evidence for what it considers), is heard in that summary (``reading``). A
   whole inside it is a sequence answered before, or a sequence never met whose own summary was lived and answered (a
   whole by its form). When the mind decides a pointer, it says the reply of that part: it sets its working state
   aside, answers the part as if it had been said alone (what it remembers of a part answered before; a new part in
@@ -248,9 +251,10 @@ def reading(mind, words: tuple, F: int, memo: dict, session=None):
     A proper run of it is a whole when it was said alone and answered, or (never met) when its own summary was lived
     and answered. Of the summaries these wholes give, the one whose context was lived and went on with the most
     evidence (expected over 1/2) is taken, the shorter of equals; none when two different ones tie.
-    ``session`` (the utterance is to be answered now): when no summary of it was lived, each is considered
-    (``consider``: brought to mind and undone) and the one the mind would answer most firmly is taken, when that is
-    over the speaking line and no other reading is as firm."""
+    ``session`` (the utterance is to be answered now): when no summary of it was lived, each summary whose items
+    were all lived before (its words and the forms of its wholes, in some summary) is considered (``consider``:
+    brought to mind and undone), and the one the mind's frames would answer most firmly is taken, when that is over
+    the speaking line and no other reading is as firm."""
     key = ("reading", words, session is not None)
     if key in memo:
         return memo[key]
@@ -281,9 +285,9 @@ def reading(mind, words: tuple, F: int, memo: dict, session=None):
         line = 0.5 + mind.knob["theta"] / (2.0 * mind.cfg.T)
         seen = set()
         for items, where in sorted(unlived, key=lambda found: len(found[0]))[:CONSIDERED]:   # the larger wholes first
-            if items in seen:
-                continue
-            seen.add(items)
+            if items in seen or any(mind.unit_of(LEVEL, x) < 0 for x in items):
+                continue                                 # (an item never lived: being considered would itself make it
+            seen.add(items)                              # a member of the place it is heard in)
             firm = consider(session, items)
             if firm <= line:
                 continue
@@ -384,9 +388,27 @@ def _live(s, first, answer, prov: int, asker: str, tones) -> None:
     s.mind.step([])
 
 
+def construction(items: tuple) -> tuple:
+    """A summary as its construction: its words as they are, every whole bare (which wholes stand where, whatever
+    their forms)."""
+    return tuple(WHOLE if is_whole(x) else x for x in items)
+
+
+def _heard_as(mind, items: tuple) -> tuple:
+    """How a summary is heard to be answered: as it is when it was lived and answered so (or when its construction
+    was not); as its construction when only that was lived and answered. The forms of the wholes say which reading
+    of an utterance is its summary (``reading``); what is answered to a construction does not depend on them, so a
+    summary whose forms never met in it is answered as the lived summaries of the same construction were."""
+    def lived(summary: tuple) -> bool:
+        return any(expectation(p, n, mind.cfg.k) > 0.5 for p, n in went_on(mind, summary).values())
+    bare = construction(items)
+    return bare if bare != items and not lived(items) and lived(bare) else items
+
+
 def consolidate(s, first: str, answer: str, prov: int, asker: str) -> None:
     """After a dialogue was watched: it is lived once more as two items (the utterance, its answer), and, when its
-    answer is made of the replies of wholes that stand in the utterance, once more in that summary."""
+    answer is made of the replies of wholes that stand in the utterance, once more in that summary and once more as
+    the summary's construction (every whole bare)."""
     mind = s.mind
     words, answered = tuple(s.body(first)), tuple(s.body(answer))
     if not words or not answered:
@@ -396,6 +418,8 @@ def consolidate(s, first: str, answer: str, prov: int, asker: str) -> None:
     _live(s, (said(words),), (said(answered),), prov, asker, tones)
     if summary is not None:
         _live(s, summary[0], summary[1], prov, asker, tones)
+        if construction(summary[0]) != summary[0]:       # ... and once more as its construction
+            _live(s, construction(summary[0]), summary[1], prov, asker, tones)
 
 
 # ---------------------------------------------------------------------------------------------------------- answering
@@ -448,7 +472,7 @@ def reply_in_parts(s, text: str, limit: int, say=None) -> Optional[List[str]]:
                 say(w)
     mind.__dict__["_part_depth"] = 0
     try:
-        _hear(s, found[0], TOLD, s.partner)
+        _hear(s, _heard_as(mind, found[0]), TOLD, s.partner)
         acts = _end(s, TOLD, s.tone(text), listening=False)
         _go_on(s, acts, words, found[1], out, [limit], 0, memo, LEVEL)
     finally:
@@ -469,7 +493,7 @@ def _answer(s, words: tuple, out, budget: list, depth: int, memo: dict) -> None:
     mind.__dict__["_part_depth"] = depth                 # (for !neden: how deep in parts a word was decided)
     try:
         if found is not None:                            # remembered whole, or heard in its summary
-            _hear(s, found[0], IMAGINED)
+            _hear(s, _heard_as(mind, found[0]), IMAGINED)
             acts = _end(s, IMAGINED, ".", listening=False)
             _go_on(s, acts, words, found[1], out, budget, depth, memo, LEVEL)
         else:                                            # word by word, as the session hears and the mind answers

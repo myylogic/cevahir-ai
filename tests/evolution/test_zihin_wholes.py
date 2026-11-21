@@ -190,3 +190,16 @@ def test_undo_drops_the_reading_of_situations():
     mind._situation_cache = ((0, mind.t, None), {})
     mind.undo_last()
     assert "_situation_cache" not in mind.__dict__
+
+
+def test_a_summary_is_also_lived_as_its_construction(with_wholes):
+    """The construction of a summary: its words as they are, every whole bare. A summary whose forms never met in it
+    is heard as its construction when that was lived and answered."""
+    mind = with_wholes.mind
+    whole = B.WHOLE
+    summary = (("whole", whole, "thrice"), "and", ("whole", whole, "twice"))
+    assert B.construction(summary) == (whole, "and", whole)
+    assert B.went_on(mind, B.construction(summary))                      # lived as a construction too
+    assert B._heard_as(mind, summary) == summary                         # lived as it is: heard as it is
+    never = (("whole", whole, "never"), "and", whole)
+    assert not B.went_on(mind, never) and B._heard_as(mind, never) == (whole, "and", whole)
