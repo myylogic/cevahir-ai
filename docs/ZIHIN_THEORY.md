@@ -314,6 +314,22 @@ At each moment, roughly each word, the mind lives these steps:
   the meaning world, relations, T-purpose, T-deduce, T-chain, T-long, T-tell and SCAN's add-jump are what they were.
   What it is not yet: the mind does not decide by itself *when* to look something up (the owner starts it), it wants
   only what a frame of its own asked for (not what it has never been asked), and the library of the test is clean.
+- **Looking Up by Itself (F47, off by default; with F46).** When to look something up is the mind's own decision.
+  In a silent moment, for each item a claim was left open for, as for any act: rate = the drive + what this led to
+  before = (2 e_open - 1) + (2 e_look - 1), where e_open is how firmly the claim is open (F46) and e_look what
+  looking that item up has led to (its own record over the record of every look; 1/2 while nothing was ever looked
+  up, so the first look is driven by the want alone). It acts when ceil(theta / rate) <= T: the line it speaks at.
+  The reading is carried out by the session, only when the owner lets it (`--ac look`; `!bakma`, `!bak`), from the
+  sources the owner gave (a folder of the owner's documents, `--kaynak`, before the web; `--agsiz`: never the web),
+  every page printed. Having read, the mind reads the claim again where it was left open: that is the outcome of the
+  act. Met: the want is over and looking gains evidence. Still open: evidence against looking that item up, and
+  against looking in general, so a mind whose looks lead to nothing stops by its own evidence, not by a counter.
+  T-want, left to itself (5 seeds; nobody tells it to look): before it was asked anything, 0 looks; after four
+  questions it could not answer, **20 looks, all 20 of those things and nothing else**; the claim met by what it
+  read 20 of 20; asked again **20 of 20**; no look in the silence that follows. A library that holds nothing: one
+  look per mind, then none (the wants stay). A library that holds half: each thing once, one failed thing once
+  more, then none; 10 of 20 answered. What it is not: the clock of thinking and sleeping is still the program's;
+  the mind looks up single words; and it reads text only (it cannot yet learn from what it hears or sees).
 - **Told Apart (F45, off by default; with F43).** A word that was never said alone has no reply of its own, and stands
   in a summary as the word it is: what was lived with "left" says nothing of "right" in the same place, and the mind
   said left's answer ("around right", held out with every command it stands in: 0 of 500, 379 of them wrong). But it
@@ -542,6 +558,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Lived Exclusion across channels | Kanallar Arası Dışlama | F44 | closed-world reading of an instance's own record |
 | Told Apart | Fark ile Cevap | F45, off by default | Mill's method of difference; minimal pairs; contrast in word learning |
 | Open Claims | Açık Kalan Beklenti | F46, off by default | feeling of knowing; information gaps (Loewenstein); known unknowns as the drive to look up |
+| Looking Up by Itself | Kendi Kararıyla Bakmak | F47, off by default | information seeking as an act chosen by its expected outcome; learned helplessness when looking never helps |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

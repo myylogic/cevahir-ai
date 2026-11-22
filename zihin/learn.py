@@ -714,6 +714,35 @@ def note_claims(mind, claims) -> None:
         add_evidence1(mind, W_POS if is_open else W_NEG, ACTED, tie, e, relief=False)
 
 
+def settle_look(mind, filler: int):
+    """F47: the outcome of a look, lived as one moment of the mind's own life (as the outcome of a way of reading
+    is, web.WayChooser). The claim is read again where it was left open (``read.claim_again``): what it shows is
+    written like any claim of a moment (``note_claims``: met, W- of the item's open tie; still open, W+), and it is
+    the outcome of the act: on the ties (the item -> relief) and (every look -> relief) of the mind's own channel,
+    W+ by the claim's expectation when the claim is now met, W- when it is still open (by 1 when nothing claims it
+    there any more). Returns True (met), False (still open) or None (there was nothing to read again)."""
+    from .read import LOOK_ALL, OPEN_CHANNEL, claim_again
+    S = mind.S
+    v = S.arrays()
+    symbol = mind.ch.symbol(int(v.channel[filler]), int(v.symbol[filler]))
+    where = getattr(mind, "open_where", {})
+    S.begin(mind.t + 1, mind.ch.sizes())
+    mind.t += 1
+    try:
+        claim = claim_again(mind, where.get(filler), filler)
+        if claim is not None:
+            note_claims(mind, [(filler, claim)])
+        met = claim is not None and not claim[1]
+        amount = claim[0] if claim is not None else 1.0
+        channel = mind.add_channel(OPEN_CHANNEL, "knob")
+        for name in (LOOK_ALL, symbol):
+            tie = S.tie(mind._atom(channel, name), mind.feel_unit["relief"], EXPECT, 1)
+            add_evidence1(mind, W_POS if met else W_NEG, ACTED, tie, amount, relief=False)
+    finally:
+        S.end()
+    return None if claim is None else met
+
+
 def _verdict(mind, general: int, v: int, leave_out: float = 0.0):
     """How generalisation g fared on a lived value v: (w+, w-) for its RELY tie, or None if g had no opinion.
 

@@ -378,3 +378,126 @@ python research/living_mind_2026_11_22/t_want.py --seeds 5 --set open_claims=1  
 python research/living_mind_2026_11_22/t_want.py --seeds 5 --form nerede --set open_claims=1
 python -m pytest tests/evolution/test_zihin_open_claims.py -q
 ```
+
+## 8. The mind decides by itself when to look something up (F47), and three faults fixed
+
+What was asked next: the mind should decide by itself when to look something up; and the other problems should be
+fixed before anything is published.
+
+### 8.1 The decision, in the mind's own terms
+
+The mind already decides its acts by one rule (`act.decide`): for a candidate act, rate = the drive + what this
+path led to before, and it acts when the rate reaches its threshold in time, ceil(theta / rate) <= T. For words the
+drive is 2e - 1 of the word's expectation; the line this draws is the line it speaks at.
+
+**F47, Looking Up by Itself** (switch `look`, off by default; needs F46): in a silent moment in which nothing was
+said, each item a claim was left open for is a candidate, with
+
+    rate = (2 e_open - 1) + (2 e_look - 1)
+
+e_open is how firmly the claim about the item is open (F46's tie, the item -> holds). e_look is what looking that
+item up has led to, read general -> specific as everything else is: the record of every look (a unit "*" of the
+mind's own channel -> relief), then the item's own record over it, e <- c f + (1 - c) e. While nothing was ever
+looked up e_look is 1/2 and adds nothing: the first look is driven by the want alone. No number was chosen for this:
+theta and T are the mind's own, the same as for speaking.
+
+The decision is the mind's (`Mind.looking`, set in the moment). The reading is the body's: the session carries the
+look out (`Session.silent_moment`, `web.look_up`) only when the owner lets it. And the outcome is again the mind's
+own: having read, it **reads the claim again where it was left open** (`read.claim_again`: the context of the open
+claim is kept with the item). What that shows is written as any claim of a moment is (met: W- on the item's open
+tie; still open: W+), and it is the outcome of the act (the item -> relief and every look -> relief: W+ when the
+claim is now met, W- when it is still open). So the want ends because the mind sees that it can now go on, not
+because the program says it read something; and looking stops paying, by the same evidence rule, when it does not
+help.
+
+### 8.2 What the owner controls
+
+`--ac look` turns it on, and the program says at the start what the mind will do. The session carries out a look
+only in the silences of the online life (not with `--yasamsiz`), at most one every five seconds (`Session.LOOK_GAP`,
+a setting of the program, declared as such). It only reads. Where it reads: a folder of the owner's own documents
+given with `--kaynak` (`web.Folder`: the sentences that hold the word are what is read) before the web;
+`--agsiz` keeps its looks off the web altogether, so nothing leaves the machine. On the web the word it looks up
+goes to the search service (Wikipedia unless Google keys are set): a word of a conversation, sent out by the mind's
+own decision. That is why it is off by default and announced. `!bakma` stops it for the session, `!bak` allows it
+again, Ctrl+C stops a look, every page read is printed, and a look is an entry of the history that `!unut` takes
+back.
+
+### 8.3 Results (`t_want_self.py`, `results/want.jsonl`; 5 seeds, 20 silent moments in each phase)
+
+No command is given in any of these. The test never tells the mind what to look up or when.
+
+| | looks before it was asked | looks after 4 questions it could not answer | claim met by what it read | asked again | looks afterwards |
+|---|---|---|---|---|---|
+| without F47 (F46 alone) | 0 | 0 | - | 0 / 20 | 0 |
+| F47, the library holds every thing | 0 | **20, all of the 20 things, nothing else** | 20 | **20 / 20** | 0 |
+| F47, the library holds nothing | 0 | 5 (one a mind) | 0 | 0 / 20 | 0 |
+| F47, the library holds 2 of the 4 | 0 | 25 (each thing once, one unmet thing once more) | 10 | 10 / 20 | 0 |
+| F47 and F41, the second form ("X nerede bulunur ?") | 0 | 20, all of the 20 things | 20 | **20 / 20** | 0 |
+
+What looking up is expected to lead to for an item never looked up, read after the run: 0.863 where every look
+closed its claim, 0.423 where half did, 0.301 where the one look led to nothing (1/2 at birth). With no success
+before it, one look that leads to nothing is enough to stop a mind from looking, until a want grows (it is asked
+again): the evidence rule counts single experiences heavily (k = 1), here as everywhere. A mind that has seen looks
+help tries an unmet thing once more and then stops.
+
+### 8.4 Three faults, found by measuring, fixed
+
+**A page read while someone was present was kept as that person's (`t_page.py`).** `Session.read_path` reads a
+document with no one in particular present. `web.research` read a page with whoever the mind was talking to still
+present, so by F33 (what is lived with a person is theirs) what the page said was recalled for that person and not
+told to anyone else. Four ways of reading a page of two sentences, the mind talking with one person and asked
+afterwards by another (5 seeds, 4 things each):
+
+| sentence ends perceived | who is present | "X nedir ?" answered exactly | recall of the two sentences |
+|---|---|---|---|
+| no (as it was) | the partner (as it was) | **0 / 20** | 20 / 20, 20 / 20 |
+| no | no one in particular | **20 / 20** | 20 / 20, 20 / 20 |
+| yes | the partner | 0 / 20 | 20 / 20, 20 / 20 |
+| yes (as a document) | no one in particular (as a document) | 20 / 20 | 20 / 20, 20 / 20 |
+
+Who is present decides it; whether the end of a sentence is perceived changes nothing here. `research` now reads a
+page with no one in particular present. The sentence end is left as it was (no measured difference). The note in
+7.5 said this difference was "unexplained" and should be measured before anything is changed: this is that
+measurement.
+
+**Undoing a moment heard while listening left the mind mute.** While someone speaks, the session raises the act
+threshold for each moment and sets it back after. A moment's working state is kept from its start, so the state
+kept for a heard moment held the raised threshold (1e9), and `Mind.undo_last` put it back: after undoing a heard
+moment the mind decided nothing. Now the threshold the mind has when the undo is asked is kept; a threshold the
+mind changed itself still goes back. Two tests. The 17 configurations and the digest gate are bit for bit what they
+were (none of them undoes a heard moment).
+
+**The unfinished sentence of the second question form is what F41 completes.** "leylek nerede bulunur ?" was
+answered "leylek bacada": "bulunur" is a word of the question, and the frame does not name its own fixed words.
+With F41 (Unsaid Known: the answer has a topic and goes on with what is known of it and not said yet) the answer is
+"leylek bacada bulunur": 20 of 20 exact, for things read about and for things looked up. No new mechanism; the
+earlier rows were run without F41.
+
+### 8.5 What was not done, and why
+
+- **The published SCAN files.** Fetching the repository of SCAN's authors into this session was refused by the
+  session's permission check (the session may read the owner's repository only). The generated splits are therefore
+  still not compared byte for byte with the published files. It needs the owner's explicit permission for that
+  repository; nothing else is missing for it.
+- **Watching and listening.** The mind decides when to turn to a source it was given, and the sources are texts
+  (the web reader, a folder of documents). It has hearing and seeing as percepts that accompany an utterance, not
+  as a way to take in language: it cannot learn what a recording says. Deciding when to listen means little until
+  it can.
+- **The clock of thinking and sleeping** is still a setting of the program (declared "awaiting the owner's
+  decision" in the code). The same rule could decide it; not done here.
+
+### 8.6 Gates
+
+Switches off: digest gate `7039 162de2fe…de03f`, the 17 configurations, the scripted life plain and with wholes:
+bit for bit what they were. Tests: 362 passed (10 new: looking up by itself 8, among them the page read with
+someone present, and undo after listening 2; the earlier 352 unchanged).
+
+### 8.7 Reproduce
+
+```
+python research/living_mind_2026_11_22/t_want_self.py --set open_claims=1,look=1            # 20 looks, 20 / 20
+python research/living_mind_2026_11_22/t_want_self.py --set open_claims=1,look=1 --empty    # one look a mind
+python research/living_mind_2026_11_22/t_page.py
+python -m pytest tests/evolution/test_zihin_look.py tests/evolution/test_zihin_undo_hush.py -q
+python -m zihin --ac look --kaynak my_documents --agsiz      # it looks only in your folder, by itself
+```

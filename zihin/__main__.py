@@ -45,6 +45,9 @@ Commands (Turkish, with English aliases):
                                     known: tau x drive) are researched; it measures what each way of reading gave it
                                     and chooses its way by that. With --ac open_claims, what it was asked about and
                                     found it did not know comes first
+    !bak / !bakma        / !look, !nolook  with --ac look the mind decides by itself, in the silences of its online
+                                    life, to look up what it found it did not know (every page read is printed);
+                                    !bakma stops that for this session, !bak allows it again
     !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
                                     the path that led to it is remembered and weighed next time, L5). The answer stays
                                     open for it until the feedback or the next utterance (yours, or the mind's own),
@@ -162,7 +165,7 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
          "company", "replies", "purpose", "forms", "echo", "exclusive_world")
 
 STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
-           "told_apart", "open_claims")                                      # is raised with them; --ac turns one on
+           "told_apart", "open_claims", "look")                              # is raised with them; --ac turns one on
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -495,6 +498,43 @@ class Session:
         self.explain = False                    # the chat records where each word of an answer came from (!neden)
         self.sources: List[dict] = []           # ... the record of the last answer, word by word
         self.open_turn = False                # the mind has just answered; feedback may still come
+        self.may_look = False                 # F47: the owner lets this session carry out the mind's own looks
+        self.look_source = None               # ... from this source (None: web.default_source)
+        self.look_gap = self.LOOK_GAP         # ... at least this many seconds apart
+        self.looked_at = 0.0
+        self.looks: List[dict] = []           # ... the reports of the looks of this session
+
+    LOOK_GAP = 5.0                            # a setting of the program (not learned): seconds between two looks of
+                                              # its own, so that a reading service is never asked in a burst
+
+    def silent_moment(self, say=print) -> List[Event]:
+        """A silent moment of its life, lived as any moment. When the mind decided in it to look something up (F47,
+        ``Mind.looking``) and the owner lets this session look (``may_look``), the look is carried out: what is found
+        is read (every page printed), the mind settles it, and it is an entry of the history (so !unut takes it
+        back). Returns the acts the mind decided in the moment (its words, said by the caller)."""
+        import time
+        acts = self.mind.step([])
+        looking = getattr(self.mind, "looking", None)
+        if looking is None or acts or not self.may_look or time.time() - self.looked_at < self.look_gap:
+            return acts
+        from .web import look_up
+        start = self.mind.t + 1
+        say("\n  zihin (kendi kararıyla) bakıyor: %s" % (looking[1],))
+        try:
+            report = look_up(self, looking, source=self.look_source, say=say)
+        except Interrupted:
+            raise
+        except Exception as exc:                        # a service that does not answer: the look led to nothing
+            from .learn import settle_look
+            say("  bakılamadı (%s)" % type(exc).__name__)
+            report = {"topic": str(looking[1]), "read": [], "note": type(exc).__name__,
+                      "met": settle_look(self.mind, looking[0])}
+        self.looked_at = time.time()
+        self.looks.append(report)
+        outcome = {True: "beklenti kapandı", False: "beklenti hâlâ açık", None: "okunacak bir beklenti kalmamış"}
+        say("  okundu: %d cümle; %s" % (report.get("sentences", 0), outcome[report.get("met")]))
+        self.remember(READ, "[kendi kararıyla baktı] %s" % (looking[1],), list(range(start, self.mind.t + 1)))
+        return acts
 
     def words(self, text: str) -> List[str]:
         """The text adapter with this mind's language convention: everything the session reads and hears."""
@@ -1069,9 +1109,12 @@ class Life:
             return
         with self.lock:
             start = self.session.mind.t + 1
-            acts = self.session.mind.step([])            # a silent moment of its life, lived as any moment
-            if acts:                                     # its own decision emitted something: it is said
-                self._speak(acts, start)
+            before = len(self.session.looks)
+            acts = self.session.silent_moment()          # a silent moment of its life, lived as any moment (F47: a
+            if acts:                                     # look it decided on is carried out); its own decision
+                self._speak(acts, start)                 # emitted something: it is said
+            elif len(self.session.looks) > before:
+                print("\n> ", end="", flush=True)
         if self.thought is None and quiet >= self.think_after:     # innate rhythm: one inner thought per silence
             with self.lock:
                 topic = topic_of(self.session)
@@ -1166,6 +1209,10 @@ def main(argv=None) -> None:
     ap.add_argument("--kim", help="who is talking to the mind (asked at the start if not given)")
     ap.add_argument("--yasamsiz", action="store_true", help="no life clock: while you are silent the mind lives no "
                                                             "moments, does not think and does not sleep")
+    ap.add_argument("--kaynak", help="with --ac look: a folder of your own documents the mind may turn to by itself; "
+                                     "it is asked before the web")
+    ap.add_argument("--agsiz", action="store_true", help="with --ac look: its own looks never go to the web (only "
+                                                         "--kaynak is read; nothing leaves this machine)")
     ap.add_argument("--parca", help="word pieces as facets: 'cevahir' (the repository's own tokenizer: root, suffixes, "
                                     "stem, last syllable; kept by minds raised with pieces, opt-in for new minds: "
                                     "they multiply the ties per moment), 'yok' (none), or a ByteLevelBPE json")
@@ -1178,7 +1225,7 @@ def main(argv=None) -> None:
     ap.add_argument("--ac", default="", help="switch on, for a loaded mind, mechanisms that new minds are raised with "
                     "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own "
                     "settings. Also the mechanisms that were measured and are off by default (inherit, witness, "
-                    "difference, urge, known, wholes, told_apart, open_claims), for a loaded or a new mind")
+                    "difference, urge, known, wholes, told_apart, open_claims, look), for a loaded or a new mind")
     ap.add_argument("--pencere", type=int, help="how many items a NEW mind holds at once (its window, 3 to 15; "
                     "default 7); a mind keeps the window it has")
     args = ap.parse_args(argv)
@@ -1227,7 +1274,21 @@ def main(argv=None) -> None:
         if k in STUDIED and not getattr(mind.cfg, k, False):
             setattr(mind.cfg, k, True)
             print("  açıldı: %s (ölçülmüş, varsayılan olarak kapalı bir mekanizma; senin isteğinle açıldı)" % k)
+    if getattr(mind.cfg, "look", False) and not getattr(mind.cfg, "open_claims", False):
+        mind.cfg.open_claims = True                      # what it looks up is what a claim was left open for
+        print("  açıldı: open_claims (look onsuz çalışmaz)")
     session = Session(mind, pieces_for(mind, args.parca))
+    if getattr(mind.cfg, "look", False):                 # F47: the owner lets the mind look things up by itself
+        from .web import Folder, Sources, default_source
+        own = [Folder(clean_path(args.kaynak), getattr(mind, "dil", "tr"))] if args.kaynak else []
+        session.look_source = Sources(own + ([] if args.agsiz else [default_source()]))
+        session.may_look = not args.yasamsiz and bool(session.look_source.sources)
+        where = (["klasörün (%s)" % args.kaynak] if args.kaynak else []) + (
+            [] if args.agsiz else ["ağ: aradığı kelime arama servisine gider (GOOGLE_API_KEY yoksa Vikipedi)"])
+        print("  (bu zihin, cevabını bilmediğini kendi fark ettiği şeylere SESSİZLİKTE KENDİ KARARIYLA bakar; baktığı "
+              "yer: %s; okuduğu her sayfa yazılır, yalnız okur; !bakma kapatır, !bak açar, Ctrl+C durdurur%s)" % (
+                  ", sonra ".join(where) if where else "yok (--agsiz ve --kaynak verilmedi)",
+                  "" if session.may_look else "; şimdi bakmaz (yaşam saati kapalı ya da bakacak yer yok)"))
     session.explain = True                               # !neden explains the last answer word by word
     interactive = sys.stdin.isatty()
     name = args.kim
@@ -1456,6 +1517,12 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                         print("  %s: %s yoluyla %s cümle, kazanç %s (yollar: %s)" % (
                             topic, report.get("way"), report.get("sentences"), report.get("gain_per_100_moments"),
                             report.get("ways")))
+                elif cmd in ("bak", "bakma", "look", "nolook"):   # F47: may it carry out its own looks?
+                    if not getattr(session.mind.cfg, "look", False):
+                        print("  bu zihin kendi kararıyla bakmıyor (açmak için programı --ac look ile başlat)")
+                    else:
+                        session.may_look = cmd in ("bak", "look")
+                        print("  kendi kararıyla bakması %s" % ("açık" if session.may_look else "kapalı"))
                 elif cmd in ("his", "feel"):
                     print(feelings(session.mind))
                 elif cmd in ("gor", "gör", "see"):

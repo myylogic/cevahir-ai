@@ -20,7 +20,7 @@ at the end of the file.
 from __future__ import annotations
 
 import math
-from typing import Hashable, List
+from typing import Hashable, List, Optional
 
 import torch
 
@@ -391,6 +391,50 @@ def decide(mind) -> List[Event]:
         acts.append(Event(mind.ch.names[channel], mind.ch.symbol(channel, int(S.u_symbol[unit])), ACTED))
         mind.hoping = (unit, -neg_e)
     return acts
+
+
+def look(mind) -> Optional[tuple]:
+    """F47 (Looking Up by Itself): in a silent moment, the item the mind decides to look up, as (its unit, its
+    symbol), or None.
+
+    Its candidates are the items a claim of its own frames was left open for (F46; e_open over 1/2) at a context
+    that still stands. For each, as for any act (``decide``): rate = the drive + what this led to before,
+        rate = (2 e_open - 1) + (2 e_look - 1),
+    e_look what looking that item up has led to (``read.look_expectation``: its own record over the record of every
+    look; 1/2 when nothing was ever looked up, so the first look is driven by the want alone). It acts when the rate
+    reaches the threshold in time, ceil(theta / rate) <= T: the line it speaks at. A look that did not close the
+    claim counts against looking that item up again, and against looking in general; one that closed it ends the
+    want. The first of equals: the shortest latency, then the firmest want, then the oldest item. Reads only: the
+    act is carried out by the session (``web.look_up``) and settled in ``learn.settle_look``."""
+    from .read import claim_again, look_expectation, open_claim
+    where = getattr(mind, "open_where", None)
+    if not where or not getattr(mind.cfg, "open_claims", False):
+        return None
+    S = mind.S
+    theta, T = mind.knob["theta"], mind.cfg.T
+    v = S.arrays()
+    best = None
+    for filler, context in where.items():
+        if filler >= S.n_units or not v.ualive[filler]:
+            continue
+        symbol = mind.ch.symbol(int(v.channel[filler]), int(v.symbol[filler]))
+        e_open = open_claim(mind, symbol)
+        if e_open <= 0.5:
+            continue
+        rate = (2.0 * e_open - 1.0) + (2.0 * look_expectation(mind, symbol) - 1.0)
+        if rate <= 0.0:
+            continue
+        latency = math.ceil(theta / rate - 1e-12)
+        if latency > T:
+            continue
+        entry = (latency, -e_open, filler, symbol)
+        if best is None or entry[:3] < best[:3]:
+            best = entry
+    if best is None:
+        return None
+    if claim_again(mind, where[best[2]], best[2]) is None:   # nothing claims it there any more: nothing to look for
+        return None
+    return best[2], best[3]
 
 
 # ---------------------------------------------------------------------- control knobs (section 8, simple)

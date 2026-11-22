@@ -1394,6 +1394,51 @@ def _note_claim(mind, filler: int, e: float, is_open: bool) -> None:
         memo[("claim", filler)] = (e, is_open)
 
 
+def claim_again(mind, context: int, filler: int) -> Optional[Tuple[float, bool]]:
+    """F47: the claim that was left open at ``context`` about ``filler``, read again as the mind stands now: (e,
+    whether it is still open), or None when no frame claims a relation of the filler's record there any more (or the
+    context is gone). Reads only."""
+    S = mind.S
+    v = S.arrays()
+    if context is None or context >= S.n_units or not v.ualive[context] or not v.kind[context] & COMPOSED \
+            or filler not in parts_of(mind, context):
+        return None
+    mind.__dict__.pop("_between_memo", None)           # read afresh: nothing noted before counts
+    memo = mind.__dict__.get("_read_memo")
+    if memo is not None:
+        memo.pop(("claim", filler), None)
+    mind.__dict__["_claim_again"] = context
+    try:
+        members_map(mind, context)
+        return _moment_memo(mind).pop(("claim", filler), None)
+    finally:
+        mind.__dict__.pop("_claim_again", None)
+        mind.__dict__.pop("_between_memo", None)
+
+
+LOOK_ALL = "*"          # F47: the unit of every look (what looking things up has led to in general)
+
+
+def look_expectation(mind, symbol) -> float:
+    """F47: what looking ``symbol`` up is expected to lead to, read general -> specific as everywhere: e <- e(every
+    look -> relief), then e <- c f + (1 - c) e with the item's own record (f, c). 1/2 when nothing was ever looked
+    up."""
+    k, relief = mind.cfg.k, mind.feel_unit["relief"]
+    e = 0.5
+    for name, own in ((LOOK_ALL, False), (symbol, True)):
+        unit = mind.unit_of(OPEN_CHANNEL, name)
+        tie = mind.S.find_tie(unit, relief, EXPECT, 1) if unit >= 0 else -1
+        if tie < 0:
+            continue
+        w_pos, w_neg = mass1(mind, tie)
+        if own:
+            c = conviction(w_pos + w_neg, k)
+            e = c * frequency(w_pos, w_neg) + (1.0 - c) * e
+        else:
+            e = expectation(w_pos, w_neg, k)
+    return e
+
+
 def open_claim(mind, symbol) -> float:
     """F46: how far the mind holds that claims about the item ``symbol`` are left open: the expectation of the tie
     (its unit on the mind's own channel -> holds), 1/2 when no claim about it was ever left open."""
@@ -1467,7 +1512,8 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
         known_here: Dict[int, float] = {}
         said_known, only_known, own_names = {}, frozenset(), frozenset()
         open_on = getattr(cfg, "open_claims", False) and filler is not None and trust is None \
-            and unit == mind.context               # F46: the claims of the present moment, read with the full trust
+            and (unit == mind.context or mind.__dict__.get("_claim_again") == unit)   # F46: the claims of the present
+                                                   # moment, read with the full trust (F47: or a claim read again)
         topic = getattr(mind, "topic", None)
         telling = where and (where[-1] < len(parts_of(mind, unit)) - 1 or (
             topic is not None and topic[0] == filler and topic[2] == getattr(mind, "episode_start", None)))

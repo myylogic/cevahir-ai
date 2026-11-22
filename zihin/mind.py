@@ -127,6 +127,12 @@ class Config:
                                     # of it) and the relation names nothing for this filler, the mind notes, on a
                                     # channel of its own, that something it does not know follows this item; what it
                                     # looks up first is what such claims were left open for (web.wanted_topics)
+    look: bool = False              # F47 (Looking Up by Itself; with open_claims): in a silent moment the mind may
+                                    # decide to look up an item a claim was left open for: the want (how firmly the
+                                    # claim is open) plus what looking up led to before, against the line it speaks
+                                    # at; having read, it reads the claim again where it was left open, and what that
+                                    # shows is the outcome of the act (act.look, learn.settle_look). The reading is
+                                    # the session's to carry out, from the sources its owner gave it
     urge: bool = False              # F40 (Urge to Go On): when the leading word's rival is itself expected, it races
                                     # against silence as far as the two are things known about the same item (their
                                     # share of that item's lived continuations): another thing to say, not a rival
@@ -267,6 +273,8 @@ class Mind:
         self.company = None                          # F33: the known person present (set by the session)
         self.topic = None                            # F41: (item, its place, episode) the present answer tells what
                                                      # it knows of (set when such a claim is acted on)
+        self.open_where: Dict[int, int] = {}         # F46/F47: item -> the context a claim about it was last left open
+        self.looking = None                          # F47: the item it decided, in this moment, to look up
         self.voice: Dict[int, tuple] = {}            # F24: context -> (voice that spoke, every voice heard), as
                                                      # (kind, claim, f) each; judged by what comes next
         self.imagined = 0
@@ -395,11 +403,16 @@ class Mind:
                 acts = act_mod.babble(self)
             for event in acts:
                 self.pending.append(event)
+            self.looking = act_mod.look(self) if getattr(cfg, "look", False) and not items and not acts \
+                and not listening else None                # F47: a silent moment, nothing said: look something up?
             self._feel(surprise)                           # step 6
         finally:
             self._read_memo = None
         if claims:
             note_claims(self, claims)
+            for filler, (_, is_open) in claims:            # where the claim was left open (to be read again there)
+                if is_open and self.context is not None:
+                    self.open_where[filler] = self.context
         if "_personal_moment" in self.__dict__ or "personal_log" in self.__dict__:
             from .iliski import end_moment                 # F33: this moment's notes, kept for undo and retraction
             end_moment(self)
@@ -977,7 +990,7 @@ class Mind:
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
-                  "unknown", "voice", "witnesses", "episode_start", "company", "topic")
+                  "unknown", "voice", "witnesses", "episode_start", "company", "topic", "open_where")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}
@@ -994,8 +1007,13 @@ class Mind:
             self.ch.truncate(channel, 0)
         if entry.undo is None:
             raise RuntimeError("only the most recent moment keeps its working state")
+        theta = self.knob["theta"]
         for name, value in entry.undo.items():
             setattr(self, name, value)
+        if self.knob["theta"] >= 1e8:                      # the undone moment was lived while listening: whoever spoke
+            self.knob["theta"] = theta                     # had raised the act threshold for that moment only and has
+                                                           # set it back since; the state before the moment is the
+                                                           # threshold the mind has now, not the raised one
         self.trust = self._trust()
         self.__dict__.pop("_between_memo", None)
         self.__dict__.pop("_episode_memo", None)

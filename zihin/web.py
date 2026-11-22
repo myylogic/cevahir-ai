@@ -209,6 +209,76 @@ class GoogleSearch:
         return url
 
 
+class Folder:
+    """A folder of the owner's own documents as a source (F47: what the mind may turn to by itself without the
+    web): every document under the folder that ``__main__.read_document`` reads (.txt, .md, .docx, .pdf, code).
+    A topic is found in the documents that hold the word; what is read of a document is its sentences that hold
+    the word, in their order (a document is not about one topic as an encyclopedia page is). Nothing leaves the
+    machine."""
+
+    def __init__(self, path: str, dil: str = "tr") -> None:
+        self.path, self.dil = path, dil
+        self._texts: Optional[Dict[str, List[str]]] = None
+
+    def _load(self) -> Dict[str, List[str]]:
+        if self._texts is None:
+            from .__main__ import read_document, sentences
+            self._texts = {}
+            names = [self.path] if os.path.isfile(self.path) else sorted(
+                os.path.join(root, name) for root, _, files in os.walk(self.path) for name in files)
+            for name in names:
+                try:
+                    text = read_document(name)
+                except Exception:                      # not a text, or a reader that is not installed
+                    continue
+                if text:
+                    self._texts[name] = sentences(text, self.dil)
+        return self._texts
+
+    def _holding(self, name: str, topic: str) -> List[str]:
+        from .__main__ import words
+        wanted = set(words(topic, self.dil))
+        return [sentence for sentence in self._load()[name] if wanted & set(words(sentence, self.dil))]
+
+    def search(self, topic: str, limit: int = 2) -> List[str]:
+        found = [(len(self._holding(name, topic)), name) for name in self._load()]
+        found = sorted(((n, name) for n, name in found if n), key=lambda nn: (-nn[0], nn[1]))
+        self._topic = topic
+        return [name for _, name in found[:limit]]
+
+    def extract(self, identifier: str) -> str:
+        return "\n".join(self._holding(identifier, self._topic))
+
+    def address(self, identifier: str) -> str:
+        return identifier
+
+
+class Sources:
+    """Several sources asked in order: what the first one that finds the topic holds is what is read (the owner's
+    folder before the web)."""
+
+    def __init__(self, sources: List["Source"]) -> None:
+        self.sources = list(sources)
+        self._of: Dict[str, "Source"] = {}
+
+    def search(self, topic: str, limit: int = 2) -> List[str]:
+        for source in self.sources:
+            try:
+                found = source.search(topic, limit) if isinstance(source, Folder) else source.search(topic)
+            except Exception:                          # a service that does not answer: the next source
+                continue
+            if found:
+                self._of = {identifier: source for identifier in found}
+                return found
+        return []
+
+    def extract(self, identifier: str) -> str:
+        return self._of[identifier].extract(identifier)
+
+    def address(self, identifier: str) -> str:
+        return self._of[identifier].address(identifier)
+
+
 def default_source(lang: str = "tr") -> Source:
     """Google (Custom Search JSON API) when GOOGLE_API_KEY and GOOGLE_CSE_ID are both set, otherwise Wikipedia."""
     key, cx = _google_keys()
@@ -258,6 +328,18 @@ def wanted_topics(mind, channel: str, n: int) -> List[str]:
             scored.append((score, str(mind.ch.symbol(cid, int(S.u_symbol[u])))))
     scored.sort(key=lambda sw: -sw[0])                     # stable: equal scores keep the order the units were born
     return (first + [w for _, w in scored if w not in first])[:n]
+
+
+def look_up(session, looking, source: Optional["Source"] = None, say: Callable[[str], None] = print) -> Dict[str, object]:
+    """F47: carry out the mind's own decision to look an item up (``looking`` = (its unit, its symbol), act.look):
+    read what is found (``research``), then the mind settles the look by reading the claim again where it was left
+    open (learn.settle_look). Returns research's report with "met": True, False, or None when nothing could be read
+    again."""
+    from .learn import settle_look
+    filler, symbol = looking
+    report = research(session, str(symbol), source=source, say=say)
+    report["met"] = settle_look(session.mind, filler)
+    return report
 
 
 class WayChooser:
@@ -333,6 +415,10 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
     if getattr(session, "close_turn", None) is not None:
         session.close_turn()                           # an answered turn still open ends before the reading begins
                                                        # (the chat does this for every command; here for any caller)
+    if getattr(session, "company", None) is not None:
+        session.company(None)                          # F33: a page is no one's in particular, as a document is (read
+                                                       # with the partner still present it was kept as lived with them
+                                                       # and was not recalled with anyone else: t_page.py)
     for title in titles:
         text = source.extract(title)
         label = getattr(source, "found", {}).get(title, (title,))[0] if hasattr(source, "found") else title
