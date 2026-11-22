@@ -2174,3 +2174,27 @@ wholes) are bit-identical to the references. Tests: 441 passed (9 new: `test_zih
     python research/living_mind_2026_11_22/t_again.py --ac asked_place
     python research/living_mind_2026_11_22/t_again.py --ac families,lived_apart,asked_place
     python -m zihin --ac known,families,lived_apart,asked_place
+
+## 19. The published SCAN files: "jump around right" and the length split
+
+Two more of the published splits ended while sections 17 and 18 were being measured (`t_scan_official.py`, the life
+of section 11.7: about 1,090 of the published training commands watched twice, the shorter first, F43 and F45 on,
+window 13; the whole published test file asked; rows appended to `results/scan_official.jsonl`):
+
+    split               exact             training commands watched twice
+    right               4,475 of 4,476    1,087 of 15,225
+    opposite right      4,476 of 4,476    1,087 of 15,225
+    around right        4,474 of 4,476    1,087 of 15,225
+    jump around right   1,173 of 1,173    1,096 of 18,528
+    length              3,919 of 3,920    1,094 of 16,990
+    add jump            running
+
+18,517 of 18,521 so far. The length split asks for answers of 24 to 48 actions after training on commands whose
+answers have at most 22; the mind answers them part by part (F43) with what its wholes are known to do (F45). Its
+one wrong answer there is "jump right and jump around right thrice": it says 12 of the 26 actions (the turn and
+the jump, six times) and stops. Not traced. The three wrong answers of the "right" and "around right" splits are
+one error (sections 16.5 and 17.11: a lived command that answers like an action phrase is taken as one); whether
+this fourth is the same is not known.
+
+Nothing of this round was built or tuned for them: the runs use one copy of the code, frozen when section 11 was
+measured, with F43 and F45 on and every later mechanism off. They are written down as they came out.

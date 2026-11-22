@@ -501,9 +501,11 @@ At each moment, roughly each word, the mind lives these steps:
   template splits of the same paper: "jump around right" 200 of 200, "V right" 200 of 200, "V opposite right" 200 of 200 (a
   Transformer from scratch on the around-right dialogues: 3 of 500). These were measured on splits generated here
   from the grammar; compared with the published files (2026-11-22) the generated "right" and "opposite right" splits
-  are easier than the published ones (they keep the "turn" commands in training). On the **published** "right"
-  split: **4,475 of 4,476** (1,087 of the 15,225 training commands watched twice); the other published splits are
-  being run and are reported in `research/living_mind_2026_11_22` as they end. In a world it was not developed on (T-dans:
+  are easier than the published ones (they keep the "turn" commands in training). On the **published** files
+  (about 1,090 of the published training commands watched twice): "right" **4,475 of 4,476**, "opposite right"
+  **4,476 of 4,476**, "around right" **4,474 of 4,476**, "jump around right" **1,173 of 1,173**, and the length
+  split (answers of 24 to 48 actions) **3,919 of 3,920**; "add jump" is running
+  (`research/living_mind_2026_11_22`, notes section 19). In a world it was not developed on (T-dans:
   Turkish moves said alone, directions never said alone and placed before the move, "iki kez" and "üç kez" between
   them; held out, one direction with both): the first run **600 of 600** over three seeds (0 of 600 without F45; a
   Transformer 108 of 200); when the new direction is met in **one dialogue only** ("geriye zıpla"), 600 of 600 of the
