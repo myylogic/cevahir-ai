@@ -41,6 +41,14 @@ Commands (Turkish, with English aliases):
     !kendin              / !introspect  what it can say about itself from its own evidence (its self unit)
     !arastir <konu>      / !research  on your command: search the web (Google Custom Search if GOOGLE_API_KEY and
                                     GOOGLE_CSE_ID are set, otherwise Wikipedia) and read what is found (pages printed)
+    !sor_hepsi <dosya>   / !ask_all  every line of a file asked at the same time: each is answered by the mind as
+                                    it is now, in a process of its own (as many as the machine has processors); the
+                                    answers are exactly what it would give one after another, and none is lived
+    !dusun_hepsi a, b, c / !think_all  the same for thoughts: what it thinks about each topic now, at the same time
+    !ag                  / !net     what this machine can reach: one small request to each service the mind reads
+                                    from, with the reason when one cannot be reached (proxy, refusal, no network)
+    !oku_url <adres> ... / !read_url  web pages by their addresses, read as documents are: fetched at the same time,
+                                    read in the order given; the site's robots.txt is obeyed, every page is printed
     !kendini_gelistir [n] / !improve  the n topics it most wants to know by its own evidence (telling and not yet well
                                     known: tau x drive) are researched; it measures what each way of reading gave it
                                     and chooses its way by that. With --ac open_claims, what it was asked about and
@@ -503,6 +511,7 @@ class Session:
         self.look_gap = self.LOOK_GAP         # ... at least this many seconds apart
         self.looked_at = 0.0
         self.looks: List[dict] = []           # ... the reports of the looks of this session
+        self.net = None                       # the session's way out to the network (zihin/ag.py; None: made on demand)
 
     LOOK_GAP = 5.0                            # a setting of the program (not learned): seconds between two looks of
                                               # its own, so that a reading service is never asked in a burst
@@ -1213,6 +1222,10 @@ def main(argv=None) -> None:
                                      "it is asked before the web")
     ap.add_argument("--agsiz", action="store_true", help="with --ac look: its own looks never go to the web (only "
                                                          "--kaynak is read; nothing leaves this machine)")
+    ap.add_argument("--onbelleksiz", action="store_true", help="do not keep fetched web pages on disk (by default they "
+                                                               "are kept under the mind's folder, in 'ag', for 30 days)")
+    ap.add_argument("--cevrimdisi", action="store_true", help="read the web only from what was kept before (no request "
+                                                              "leaves this machine; what is not kept is not read)")
     ap.add_argument("--parca", help="word pieces as facets: 'cevahir' (the repository's own tokenizer: root, suffixes, "
                                     "stem, last syllable; kept by minds raised with pieces, opt-in for new minds: "
                                     "they multiply the ties per moment), 'yok' (none), or a ByteLevelBPE json")
@@ -1278,13 +1291,17 @@ def main(argv=None) -> None:
         mind.cfg.open_claims = True                      # what it looks up is what a claim was left open for
         print("  açıldı: open_claims (look onsuz çalışmaz)")
     session = Session(mind, pieces_for(mind, args.parca))
+    from .ag import Net                                  # the one way out to the network: polite, retrying, kept
+    session.net = Net(cache=None if args.onbelleksiz else os.path.join(home_folder(), "ag"), offline=args.cevrimdisi)
+    lang = "tr" if getattr(mind, "dil", "tr") == "tr" else "en"
     if getattr(mind.cfg, "look", False):                 # F47: the owner lets the mind look things up by itself
-        from .web import Folder, Sources, default_source
+        from .web import Folder, Sources, web_sources
         own = [Folder(clean_path(args.kaynak), getattr(mind, "dil", "tr"))] if args.kaynak else []
-        session.look_source = Sources(own + ([] if args.agsiz else [default_source()]))
+        session.look_source = Sources(own + ([] if args.agsiz else web_sources(lang, session.net).sources))
         session.may_look = not args.yasamsiz and bool(session.look_source.sources)
         where = (["klasörün (%s)" % args.kaynak] if args.kaynak else []) + (
-            [] if args.agsiz else ["ağ: aradığı kelime arama servisine gider (GOOGLE_API_KEY yoksa Vikipedi)"])
+            [] if args.agsiz else ["ağ: aradığı kelime arama servisine gider (GOOGLE_API_KEY yoksa Vikipedi, sonra "
+                                   "Vikisözlük)"])
         print("  (bu zihin, cevabını bilmediğini kendi fark ettiği şeylere SESSİZLİKTE KENDİ KARARIYLA bakar; baktığı "
               "yer: %s; okuduğu her sayfa yazılır, yalnız okur; !bakma kapatır, !bak açar, Ctrl+C durdurur%s)" % (
                   ", sonra ".join(where) if where else "yok (--agsiz ve --kaynak verilmedi)",
@@ -1508,6 +1525,45 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     from .web import research
                     report = research(session, rest.strip())
                     print("  okudum: %s" % report)
+                elif cmd in ("sor_hepsi", "ask_all"):     # many questions at the same time, none of them lived
+                    from .paralel import answers
+                    target = clean_path(rest)
+                    if not os.path.isfile(target):
+                        print("  kullanım: !sor_hepsi <dosya>  (her satır bir soru)")
+                    else:
+                        f, _ = open_text(target)
+                        with f:
+                            questions = [line.strip() for line in f if line.strip()]
+                        started = time.time()
+                        said = answers(session, questions)
+                        for question, answer in zip(questions, said):
+                            print("  %s\n      -> %s" % (question, answer))
+                        print("  %d soru, %.1f sn; kopyalar cevapladı: zihin bunları yaşamadı (öğrenmedi, geri bildirim "
+                              "alamaz)" % (len(questions), time.time() - started))
+                elif cmd in ("dusun_hepsi", "düşün_hepsi", "think_all"):   # many thoughts at the same time
+                    from .paralel import thoughts
+                    topics = [t.strip() for t in rest.split(",") if t.strip()]
+                    if not topics:
+                        print("  kullanım: !dusun_hepsi konu1, konu2, ...")
+                    else:
+                        for topic, (words_, reality) in zip(topics, thoughts(session, topics)):
+                            print("  %s: %s  (gerçeklik %.2f)" % (topic, " ".join(words_) or "(sessiz)", reality))
+                        print("  kopyalar düşündü: zihin bunları yaşamadı")
+                elif cmd in ("ag", "ağ", "net"):          # what can be reached from here (nothing is read into the mind)
+                    from .ag import check
+                    print("\n".join(check(session.net, "tr" if session.dil == "tr" else "en")))
+                elif cmd in ("oku_url", "read_url"):      # web pages by their addresses, read as documents are
+                    from .web import read_pages
+                    urls = [u for u in rest.split() if u.lower().startswith(("http://", "https://"))]
+                    if not urls:
+                        print("  kullanım: !oku_url <adres> [adres ...]  (http ya da https)")
+                    else:
+                        start = session.mind.t + 1
+                        report = read_pages(session, urls, session.net)
+                        if session.mind.t >= start:
+                            session.remember(READ, "[ağdan okudu] %s" % " ".join(urls),
+                                             list(range(start, session.mind.t + 1)))
+                        print("  %d cümle, %d an" % (report["sentences"], report["moments"]))
                 elif cmd in ("kendini_gelistir", "kendini_geliştir", "improve"):
                     from .web import research, wanted_topics
                     topics = wanted_topics(session.mind, CHANNEL, int(rest) if rest.strip().isdigit() else 3)

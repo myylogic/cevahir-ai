@@ -330,6 +330,14 @@ At each moment, roughly each word, the mind lives these steps:
   look per mind, then none (the wants stay). A library that holds half: each thing once, one failed thing once
   more, then none; 10 of 20 answered. What it is not: the clock of thinking and sleeping is still the program's;
   the mind looks up single words; and it reads text only (it cannot yet learn from what it hears or sees).
+- **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
+  mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
+  into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
+  structure of what they read; on natural text recall fell, 148 valid of 200 to 95, and parting more often made the
+  loss smaller, never nothing). What writes nothing runs at the same time exactly: many questions or thoughts, each
+  answered by a process that is the mind as it stands (`zihin/paralel.py`; word for word the answers given one after
+  another, the asking mind untouched; 60 answers in parts 4.8 times sooner on 4 processors). The readings inside one
+  moment could run at the same time too; that needs the substance's indices in shared memory and is not built.
 - **Told Apart (F45, off by default; with F43).** A word that was never said alone has no reply of its own, and stands
   in a summary as the word it is: what was lived with "left" says nothing of "right" in the same place, and the mind
   said left's answer ("around right", held out with every command it stands in: 0 of 500, 379 of them wrong). But it

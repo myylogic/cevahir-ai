@@ -61,11 +61,16 @@ class Source(Protocol):
 
 
 class Wikipedia:
-    """Search and plain-text extracts from one language edition. ``fetch`` can be replaced (tests, other sources)."""
+    """Search and plain-text extracts from one language edition (the MediaWiki API, made for programs). ``fetch`` can
+    be replaced (tests, other sources); with ``net`` (zihin/ag.py) every request goes through it: it waits between
+    requests, tries again when the service is busy, and keeps what it fetched. ``site``: another wiki of the same
+    family (``Wiktionary``)."""
 
-    def __init__(self, lang: str = "tr", fetch: Callable[[str], dict] = _get_json) -> None:
-        self.base = "https://%s.wikipedia.org/w/api.php" % lang
-        self.lang, self.fetch = lang, fetch
+    site = "wikipedia.org"
+
+    def __init__(self, lang: str = "tr", fetch: Callable[[str], dict] = _get_json, net=None) -> None:
+        self.base = "https://%s.%s/w/api.php" % (lang, self.site)
+        self.lang, self.fetch = lang, (net.json if net is not None and fetch is _get_json else fetch)
 
     def search(self, topic: str, limit: int = 2) -> List[str]:
         q = urllib.parse.urlencode({"action": "query", "list": "search", "srsearch": topic, "srlimit": limit,
@@ -80,7 +85,13 @@ class Wikipedia:
         return "\n".join(page.get("extract", "") for page in pages.values())
 
     def address(self, title: str) -> str:
-        return "https://%s.wikipedia.org/wiki/%s" % (self.lang, urllib.parse.quote(title.replace(" ", "_")))
+        return "https://%s.%s/wiki/%s" % (self.lang, self.site, urllib.parse.quote(title.replace(" ", "_")))
+
+
+class Wiktionary(Wikipedia):
+    """The dictionary of the same family: what a word means, where an encyclopedia has no page for it."""
+
+    site = "wiktionary.org"
 
 
 _SKIPPED = frozenset({"script", "style", "noscript", "nav", "header", "footer", "aside", "form",
@@ -165,12 +176,15 @@ class GoogleSearch:
     """
 
     def __init__(self, key: Optional[str] = None, cx: Optional[str] = None, lang: str = "tr",
-                 fetch: Callable[[str], dict] = _get_json, urlopen: Callable = urllib.request.urlopen) -> None:
+                 fetch: Callable[[str], dict] = _get_json, urlopen: Callable = urllib.request.urlopen,
+                 net=None) -> None:
         env_key, env_cx = _google_keys()
         self._key, self._cx = key or env_key, cx or env_cx
         if not (self._key and self._cx):
             raise ValueError("Google search needs GOOGLE_API_KEY and GOOGLE_CSE_ID")
-        self.lang, self.fetch, self.urlopen = lang, fetch, urlopen
+        self.net = net                                    # zihin/ag.py: polite, retrying, kept (never the keyed call)
+        self.lang, self.urlopen = lang, urlopen
+        self.fetch = net.json if net is not None and fetch is _get_json else fetch
         self.found: Dict[str, Tuple[str, str]] = {}       # url -> (title, snippet) of every result seen
 
     def search(self, topic: str, limit: int = 5) -> List[str]:
@@ -194,6 +208,11 @@ class GoogleSearch:
         """
         if not _is_web(url):
             raise ValueError("only http(s) pages are read, not %r" % url)
+        if self.net is not None:                           # the site's robots.txt is obeyed, the page is kept
+            try:
+                return self.net.page(url)
+            except (OSError, ValueError, http.client.HTTPException):
+                return ""
         try:
             request = urllib.request.Request(url, headers={"User-Agent": AGENT})
             with self.urlopen(request, timeout=TIMEOUT) as response:
@@ -279,10 +298,52 @@ class Sources:
         return self._of[identifier].address(identifier)
 
 
-def default_source(lang: str = "tr") -> Source:
-    """Google (Custom Search JSON API) when GOOGLE_API_KEY and GOOGLE_CSE_ID are both set, otherwise Wikipedia."""
+def default_source(lang: str = "tr", net=None) -> Source:
+    """Google (Custom Search JSON API) when GOOGLE_API_KEY and GOOGLE_CSE_ID are both set, otherwise Wikipedia.
+    With ``net`` (zihin/ag.py) the requests go through it."""
     key, cx = _google_keys()
-    return GoogleSearch(key, cx, lang) if key and cx else Wikipedia(lang)
+    return GoogleSearch(key, cx, lang, net=net) if key and cx else Wikipedia(lang, net=net)
+
+
+def web_sources(lang: str = "tr", net=None) -> "Sources":
+    """What the mind reads from the web, asked in order: the search (``default_source``), then the dictionary of the
+    same language (a word an encyclopedia has no page for)."""
+    return Sources([default_source(lang, net), Wiktionary(lang, net=net)])
+
+
+def read_pages(session, urls: List[str], net=None, say: Callable[[str], None] = print) -> Dict[str, object]:
+    """``!oku_url``: web pages given by their addresses, read as documents are (each sentence heard, its end
+    perceived, a pause; no one in particular present). The pages are fetched at the same time (``Net.many``) and
+    read in the order given, so what is lived is what fetching them one by one would give. Returns counts and, for
+    each address, what happened."""
+    from .ag import Net, why
+    from .events import IMITATED
+    from .__main__ import sentences
+    net = net or getattr(session, "net", None) or Net()
+    mind = session.mind
+    dil = getattr(session, "dil", getattr(mind, "dil", "tr"))
+    check = getattr(session, "check", None)
+    urls = [u for u in urls if _is_web(u)]
+    texts = net.many(urls)
+    session.close_turn()
+    session.company(None)
+    start, lived, report = mind.t, 0, []
+    for url, text in zip(urls, texts):
+        if isinstance(text, Exception):
+            say("  okunamadı: %s (%s)" % (url, why(text)))
+            report.append((url, "okunamadı"))
+            continue
+        found = sentences(text, dil)
+        say("  okunuyor: %s (%d cümle)" % (url, len(found)))
+        for sentence in found:
+            if check is not None:
+                check()
+            session.listen(sentence, IMITATED)
+            session.end_of_turn(IMITATED, tone=session.tone(sentence))
+            mind.step([])
+            lived += 1
+        report.append((url, "%d cümle" % len(found)))
+    return {"read": report, "sentences": lived, "moments": mind.t - start}
 
 
 def firm_knowledge(mind, unit: int) -> int:
@@ -387,9 +448,10 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
     what is read are split and lower-cased by the session's convention (its mind's dil), as everything it hears."""
     from .events import IMITATED
     from .__main__ import CHANNEL, sentences, words
-    source = default_source() if source is None else source
     mind = session.mind
     dil = getattr(session, "dil", getattr(mind, "dil", "tr"))
+    if source is None:                                 # the session's way out (zihin/ag.py) when it has one
+        source = default_source("tr" if dil == "tr" else "en", getattr(session, "net", None))
     adapter = getattr(session, "words", None) or (lambda text: words(text, dil))
     check = getattr(session, "check", None)            # a long reading stops between sentences when asked (Ctrl+C)
     chooser = WayChooser(mind)
@@ -397,10 +459,10 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
     try:
         titles = source.search(topic)
     except Exception as exc:                           # a search service that refuses (key, quota, closed API)
-        if isinstance(source, Wikipedia):
+        if isinstance(source, (Wikipedia, Sources)):
             raise
         say("  arama servisi yanıt vermedi (%s); Vikipedi'ye bakıyorum" % type(exc).__name__)
-        source = Wikipedia()
+        source = Wikipedia("tr" if dil == "tr" else "en", net=getattr(session, "net", None))
         titles = source.search(topic)
     if not titles:
         return {"topic": topic, "read": [], "note": "bulunamadı"}
@@ -421,10 +483,11 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
                                                        # and was not recalled with anyone else: t_page.py)
     for title in titles:
         text = source.extract(title)
-        label = getattr(source, "found", {}).get(title, (title,))[0] if hasattr(source, "found") else title
+        held = source._of.get(title, source) if isinstance(source, Sources) else source   # the source that found it
+        label = getattr(held, "found", {}).get(title, (title,))[0] if hasattr(held, "found") else title
         say("  okunuyor: %s  (%s)" % (label, source.address(title)))
         read_titles.append(title)
-        if isinstance(source, Wikipedia):              # Wikipedia section headings (== ... ==), one line each
+        if isinstance(held, Wikipedia):                # Wikipedia section headings (== ... ==), one line each
             text = re.sub(r"(?m)^=+[^=\n]+=+\s*$", " ", text)
         for sentence in sentences(text, dil):
             if lived >= budget:

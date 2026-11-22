@@ -501,3 +501,120 @@ python research/living_mind_2026_11_22/t_page.py
 python -m pytest tests/evolution/test_zihin_look.py tests/evolution/test_zihin_undo_hush.py -q
 python -m zihin --ac look --kaynak my_documents --agsiz      # it looks only in your folder, by itself
 ```
+
+## 9. Parallel work with nothing lost, a technique eliminated, and the way out to the internet
+
+What was asked: Cevahir should be able to work "with many agents" and learn a topic quickly; then, once the
+measurement below was on the table: **no loss is acceptable**, a technique that loses anything is the wrong
+technique and is to be taken back; what is meant is running the mind itself, its thinking, in parallel. And the mind
+must be able to research on the internet: the infrastructure for that is to be built.
+
+### 9.1 Sibling minds: measured, and eliminated
+
+The hypothesis: copies of the mind live different things at the same time, and what each learned is added into the
+one mind (the units and ties found by their content, the increments each copy's ledger holds). The adding itself
+is exact: one copy absorbed leaves exactly the copy's evidence, tie by tie (1,659 ties compared by content: the same
+tables, the same use), several times faster than living (0.2 to 0.3 ms a moment against 1.4 to 1.6); the sums do
+not depend on the order of the copies.
+
+But the mind that absorbed its siblings is not the mind that lived the same things in turn
+(`eliminated_siblings/t_siblings.py`, 4 siblings):
+
+| world | in turn | apart | the same answer |
+|---|---|---|---|
+| a generated library, 40 things (after a shared beginning) | 40 answers, 40 + 40 recalls | the same | 40 of 40 |
+| SCAN add-jump, 60 held-out commands (after the simple commands) | 60 | 60 | 60 of 60 |
+| the owner's documents from an empty mind, recall of 200 sentences: exact / valid / silent | 85 / 148 / 37 | **75 / 95 / 64** | 118 of 200 |
+| the same, the first half read by the one mind before | 87 / 146 / 41 | 82 / 122 / 44 | 148 of 200 |
+| the same from an empty mind, parting and absorbing in 8 rounds | 90 / 146 / 32 | 80 / 122 / 40 | 161 of 200 |
+
+Why: what a moment writes depends on what the mind expected in it (a miss is weighed by the expectation it
+disappointed; a frame is induced when a second instance is met), and a sibling expected with what it knew when it
+parted, not with what its siblings were learning meanwhile. The two minds hold almost the same evidence in sum
+(1.4% less negative evidence in the absorbed one) and yet answer 52 of 200 cues differently. Where the siblings
+share a beginning that already holds the structure of what they read, nothing was lost; on natural text it was, and
+parting more often made the loss smaller, never nothing.
+
+The owner's decision: no loss at all. **The technique is eliminated.** It was taken out of the mind and out of the
+program again (no `zihin/kardes.py`, no `!birlikte_oku`); what is kept is this record, the code of the experiment
+and its rows, in `eliminated_siblings/`, marked as such. A life is lived in turn.
+
+### 9.2 What can be done at the same time with nothing lost
+
+The measurement above is not an accident of the implementation. If what a moment writes depends on what was
+written before it, two stretches of life cannot be lived at once and leave the mind that living them in turn
+leaves; checking afterwards whether they were independent (as databases do) does not help here either, because
+everything a mind reads shares its most common words with everything else it reads. So:
+
+- **What writes nothing can run at the same time, exactly.** Answering and thinking are readings of the mind as it
+  stands. `zihin/paralel.py`: each question (or topic) is answered by a forked process, which *is* the mind at that
+  instant, and ends; the mind that asked is untouched. Pinned by tests: the answers are word for word what the mind
+  gives one after another on copies (also for answers in parts, also for thoughts with their reality scores), and
+  the asking mind has the same moment, the same substance digest and the same ledger afterwards. Measured
+  (`t_at_once.py`): 60 held-out SCAN commands answered in parts, 56.1 s one after another, **11.8 s at the same
+  time in 4 processes (4.8x; more than the 4 processors, because a fork needs no copy made of the mind)**, 60 of 60
+  the same, the digest unchanged. In the program: `!sor_hepsi <file>`, `!dusun_hepsi a, b, c`. None of these
+  answers is lived (no learning from them, no feedback on them): to live one, the mind does it in turn.
+- **Fetching** (waiting for the network) at the same time, reading in the order asked: exact, and built (9.3).
+- **Inside one moment** the mind makes many readings that do not depend on each other (each frame's members, each
+  unit's expectations): these too could run at the same time and give the same moment. That is the real meaning of
+  "the mind itself in parallel", and it is not built: today the substance's indices are Python objects, which
+  processes cannot share and Python's threads cannot read at the same time. It needs the indices as arrays in
+  shared memory: the same step that the memory measurements of section 2 ask for (460 bytes a tie to about 100).
+  One piece of work, two results; it is the next engineering step, and nothing in it changes a result.
+- **Living faster** on one processor (a compiled kernel for the inner loops) also loses nothing; not built.
+
+### 9.3 The way out to the internet (`zihin/ag.py`)
+
+The mind could already read Wikipedia (and Google's official search with the owner's keys). What was missing is
+everything that makes that dependable and well-behaved. Now every request passes through one place, `ag.Net`:
+it only reads; it says who it is; it waits between requests to one host; it tries again when a service is busy or
+a connection breaks (after the wait the service names, or a doubling one) and does not try a refusal again; it
+obeys robots.txt for pages; it keeps what it fetched on disk (30 days, under the mind's folder), so nothing is
+fetched twice and a session can be repeated or read with no network at all (`--cevrimdisi`); it never keeps or
+prints an address that carries a key; it is bounded in time and size; and every request is in its log. Sources:
+the encyclopedia, then the dictionary of the same family (`web.Wiktionary`), the owner's folder before both
+(`--kaynak`), Google when keys are set. New in the program: `!ag` (what can be reached from this machine, and why
+not when it cannot), `!oku_url <address> ...` (pages by address: fetched at the same time, read in the order
+given, as documents are), `--onbelleksiz`, `--cevrimdisi`. 12 tests, none of which opens a connection (the
+transport, the clock and the waiting are replaced).
+
+**Live, from the machine this work was done on.** Its network lets the Turkish Wikipedia through and refuses most
+other hosts; `!ag` says exactly that ("Vikipedi (tr) ulaşılıyor", "Vikisözlük (tr) ulaşılamıyor: … 403 … no rule
+or network setting allows this host"). The first plain request to Wikipedia was answered 429 (too many requests);
+through `Net` the same request waits as told and succeeds on the second try: the retry logic was needed within the
+first minute of real use.
+
+**The whole loop on the real internet (`t_live_look.py`; a demonstration, not a benchmark).** A mind with T-want's
+beginning was asked about four real things it never met (leylek, bakır, armut, vapur) and left in silence. Nobody
+told it to look anything up. In the next four silent moments it looked each of them up by itself on the Turkish
+Wikipedia (12 sentences of the first page, later 60: it tries its two ways of reading), settled each look itself
+(claim met: 4 of 4), and looked no more. Asked again:
+
+- "leylek nedir ?" -> **"leylek ( ciconia ciconia ) , leylekgiller ( ciconiidae ) familyasından büyük ve uzun
+  bacaklı bir kuş türüdür"**: the page's own first sentence, whole.
+- "bakır nedir ?" -> "bakır ," and the same for armut and vapur: after 60 sentences of a real page many sentences
+  begin with the word, and where a word begins several sentences the mind stops (as it always has: it does not
+  guess at a fork). With F41 on, the same.
+
+Two things this shows honestly. The loop works end to end on the real internet, by the mind's own decision. And
+the mind's own test of a look ("does the relation now name something for this item?") is weaker than "can I now
+say it": for three of the four it counted the claim as met and can say two tokens. A stricter settling (the claim
+is met when the mind can go on to the end of a statement) is the next step for F47; reading less of a page served
+better than reading more here, and the ways of reading are not yet judged by whether the claim closed.
+
+### 9.4 Gates
+
+The core is as it was at the commit before (the changes are in `web.py`, the program and two new modules).
+Switches off: digest gate, the 17 configurations and the scripted life (plain and with wholes): bit for bit what
+they were. Tests: 377 passed (15 new: the network 12, at the same time 3).
+
+### 9.5 Reproduce
+
+```
+python -m zihin.ag                                                    # what can this machine reach?
+python research/living_mind_2026_11_22/t_at_once.py                   # the same answers, 4.8x sooner
+python research/living_mind_2026_11_22/t_live_look.py                 # needs the Turkish Wikipedia
+python research/living_mind_2026_11_22/eliminated_siblings/t_siblings.py scan     # the eliminated technique
+python -m pytest tests/evolution/test_zihin_ag.py tests/evolution/test_zihin_paralel.py -q
+```
