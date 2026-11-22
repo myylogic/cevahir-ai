@@ -130,6 +130,11 @@ class Config:
                                     # relation to try; tried like any way (F57), and in use it is a relation of a
                                     # frame like the others: the members vouch for it; a relation it built and
                                     # took into use is a step of the next chain (read.built_value, deney.propose)
+    unseen_share: bool = False      # F60 (The Unseen Share; with families): the frame that speaks counts against a
+                                    # word its members never went on with only as far as its members went on with
+                                    # one another's words (aile.repeated): where every member went on with a word of
+                                    # its own, a word never seen there is what is to be expected, and the family's
+                                    # claim is not lowered by it
     conjectures: bool = False       # F59 (Conjectures): a thing told to go on with an item that is itself told about
                                     # is linked to it; what is told of that item, with the thing in its place, is a
                                     # candidate; where the thing was told that too the link carried it, where it was
@@ -381,6 +386,8 @@ class Mind:
         self.waiting: Dict[tuple, tuple] = {}        # F59: kind of link -> the things whose candidates wait for its record
         self.conjectures: Dict[tuple, dict] = {}     # F59: what it conjectured, with its source and what became of it
         self.supposing = None                        # F59: the thing it decided, in this moment, to think over
+        self.pairs_tried: List[tuple] = []           # F57: the pairs of ways it found to do together what neither
+                                                     # does alone, and tries
         self.relations: tuple = ()                   # F58: the relations it built itself that are in use (chains)
         self.relations_tried: List[tuple] = []       # F58: those it has proposed and tries
         self.relation_paths: List[tuple] = []        # F58: every chain it ever proposed (a chain's code is its place)
@@ -1186,7 +1193,8 @@ class Mind:
                   "unknown", "voice", "witnesses", "episode_start", "company", "topic", "open_where", "taking",
                   "heard", "about", "claimed", "faults", "_held_back", "open_plain", "met_once", "wondered",
                   "called", "trial_base", "trial_changes", "trial_cases", "trial_mark", "relations",
-                  "relations_tried", "relation_paths", "pondering", "linked", "waiting", "conjectures")
+                  "relations_tried", "relation_paths", "pondering", "linked", "waiting", "conjectures",
+                  "pairs_tried")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}

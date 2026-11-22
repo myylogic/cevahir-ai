@@ -3060,3 +3060,100 @@ leave them.
     python research/living_mind_2026_11_22/t_whole.py life [--same]
 
 The code is that of section 23 (nothing in `zihin/` changes); rows in `results/whole.jsonl`.
+
+## 26. Two ways together, and the unseen share (F57's trials of pairs; F60)
+
+### 26.1 Where this starts
+
+The first item of the queue of section 25: in a life in which every kind of question is asked of the same six
+things, the mind does not take frames of frames (F53) into use and answers nothing in the two other fields. The
+frame made of a thing's own earlier questions ("kedi ne X ⏎": after a question about kedi came "et", then "çay")
+has members, the frame of the new kind has none; it speaks, and counts against every word its members never went
+on with, among them the word the family claims: the claim is read at 0.48 and not said.
+
+### 26.2 F60 The Unseen Share (`Config.unseen_share`, off by default; with families; `aile.repeated`)
+
+F11 counts every member of a frame against a value it did not go on with. That is right of a place whose members
+go on alike. Of a place whose members each went on with a word of their own (every question about kedi was
+answered otherwise) it says the opposite of what they show: that what follows changes with what fills the place,
+so that a word never seen there is what is to be expected.
+
+The frame that speaks counts against a word none of its members went on with only as far as its members went on
+with one another's words: where the family's claim was lowered by the frame's conviction c, it is lowered by c r,
+r the share of the frame's members whose word another member went on with too (0 where every member's word is its
+own, 1 where they all say the same; in between as the sample says: the share of a sample that was not seen is as
+large as the share of its items that were seen once). Nothing else changes: what the members did go on with is
+read as before.
+
+### 26.3 Why the mind could not find it, and what was added to its trials (`zihin/deney.py`)
+
+F60 was first given to the mind as one more way to try (section 21's F57). It was not taken, in the very life it
+was built for: alone it changes nothing (with no family there is no claim to keep up), and F53 alone changes
+nothing that is said (its claim stays under the line). Section 21.11 had named this limit: one way is changed at a
+time, and a gain that needs two sleeping ways together is not found.
+
+**Two together.** Where the configuration did not say what came and no single way would have said it, a sleeping
+way that alone changed what the mind *read* there (though not what it would say) is tried once more with each
+other sleeping way. A pair that then says what came is a way to try: it is kept, tried in every later situation
+like any way (both on against the configuration as it is), with a record of its own on the mind's channel; when
+the record proves it (the same rule: more often better than worse by more than one experience) the two are taken
+into use together, as one change. A pair of which one way has since been taken alone is not tried any more (the
+other is, alone). The mind's report names it ("birlikte: ... + ...").
+
+So the mind's experiment now has two steps, as an experimenter's has: one thing changed; and where that explains
+nothing, two things that each leave a trace.
+
+### 26.4 Measured (code md5 356f42ab...; 5 seeds)
+
+The life of section 25 in both forms, the committed script, the mind with the three switches of this round and
+nothing set by hand (right / wrong / silent; the rows of section 25 beside them):
+
+    the life                  code           animals    bodies     numbers    ways in use at the end (lives of 5)
+    the same six animals      section 25     60/0/0     0/0/80     0/0/80     asked_place 5
+                              this section   60/0/0     80/0/0     80/0/0     families 5, asked_place 5, unseen_share 5
+    each animal once          section 25     60/0/0     80/0/0     80/0/0     families 5, asked_place 5
+                              this section   60/0/0     80/0/0     80/0/0     families 5, asked_place 5
+
+In the life in which every kind is asked of the same six animals the mind now finds the pair in all five lives
+(frames of frames and the unseen share, taken together as one change) and answers **220 of 220**, where it
+answered the six other animals and nothing in the two other fields (60 of 220). In the life in which each animal
+is asked once nothing changes: frames of frames makes its difference alone there and is taken alone; the unseen
+share never did better and sleeps.
+
+The measurements of section 21 again with this code (`t_self.py`, the committed script; rows in
+`results/pairs.jsonl`), to see what the trials of pairs and one more way on trial change where they were not
+needed:
+
+    t_self.py curriculum, F57 + F58      every count as committed (fresh things, the things taught, the rounds,
+                                         the changes and their moments); the rounds take 73 s (66 s)
+    t_self.py worlds, three conditions   every count as committed; the rounds with F57 take 66 s (50 s)
+    t_self.py control (b)                as committed
+    t_self.py control (a)                in one life of five the pair F53 + F60 is taken into use (two cases in
+                                         which the two together said the answer and the configuration said
+                                         nothing: the second and third round of a kind answered with words of
+                                         its own); the first answers of the kinds after it 0 wrong, 3 silent
+    t_self.py control (c)                one more round answered right (38 of 60; 37)
+
+The first of the two is what was looked for: where the pair is not needed nothing moves. The control (a) said
+that a way that does harm where it is tried is not taken; it still says so of F53 alone (0 of 5), and a pair that
+did better twice and never worse was taken once, and did no harm after.
+
+### 26.5 What it does not do
+
+* Pairs, not three together; and only pairs of which one way alone changes what is read at the failure. Two ways
+  that each leave no trace alone are not found.
+* The cost: at a failure no single way mends, one more reading for every pair tried (the rounds of section 21's curriculum take 73 s where they took 66 s, those of the naming
+  world 66 s where they took 50 s).
+* The unseen share is read from which words the members went on with, each member once; it lowers only what the
+  frame that speaks counts against the family's claim (F53). The same question for a frame without a family (how
+  much a frame of varied members should count against anything) is not touched.
+* The limits of 21.11 stand: trials only where an outcome is shown; one configuration for the whole mind.
+
+### 26.6 Gates, tests, reproduce
+
+With every studied switch off the lesson-free gate, the 17 configurations and the scripted life (plain and with
+wholes) are bit-identical to the references. Tests: 469 passed (5 new: `test_zihin_unseen_share.py` 3, two in
+`test_zihin_trials.py`).
+
+    python research/living_mind_2026_11_22/t_whole.py life [--same]
+    python -m zihin --ac faults,trials,built_relations,conjectures        (!deney names a pair it took)

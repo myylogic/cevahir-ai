@@ -20,6 +20,9 @@ What is pinned here
   filler is proposed, tried like any way and taken into use ("what is known of the thing, then what stands at the
   asked place of that": a fact read of the thing's class). A relation it built is a step of the next chain: a fact
   read of the class's order is reached by a chain of three, built from the chain of two.
+* Two together: where no single way mends a failure, a sleeping way that alone changed what was read there is
+  tried with each other sleeping way; a pair that says what came is kept and tried like any way, and when its
+  record proves it the two are taken into use together, as one change.
 * The configuration the mind came to is its own: saved and loaded with it; a moment undone takes the change back.
 * The chat's ``!deney`` reports the record.
 """
@@ -157,14 +160,17 @@ def test_nothing_is_taken_where_nothing_can_be_known():
     assert deney.record(m, "asked_place") == (0.0, 0.0)
 
 
-def scripted(monkeypatch, says):
-    """The dry readings replaced by a script: ``says(mind)`` -> the word it would say, or None."""
-    def would_say(mind, context, chain=None):
+def scripted(monkeypatch, says, reads=None):
+    """The dry readings replaced by a script: ``says(mind)`` -> the word it would say, or None; ``reads(mind)`` ->
+    something that stands for what it read (ways that change it are told apart from ways that change nothing)."""
+    def would_say(mind, context, chain=None, read=None):
+        if read is not None and reads is not None:
+            read["read"] = reads(mind)
         word = says(mind)
         if word is None:
             return {}
         unit = mind.unit_of(CHANNEL, word)
-        return {int(read.mv_view(mind, "u_channel")[unit]): unit}
+        return {int(globals()["read"].mv_view(mind, "u_channel")[unit]): unit}
     monkeypatch.setattr(deney, "would_say", would_say)
 
 
@@ -198,6 +204,40 @@ def test_a_way_in_use_that_does_harm_is_put_away(monkeypatch):
     change = m.trial_changes[-1]
     assert (change["way"], change["on"], change["better"], change["worse"]) == ("families", False, 0.0, 2.0)
     assert m.trial_base["families"] is True
+
+
+def test_two_ways_that_only_work_together_are_found_and_taken_as_one_change(monkeypatch):
+    s = raised(trials=True)
+    m = s.mind
+    now = {}
+    scripted(monkeypatch,                                  # the answer comes only with both; one of them alone
+             lambda mind: now["right"] if (mind.cfg.families and mind.cfg.unseen_share) else None,   # changes what
+             lambda mind: bool(mind.cfg.families))         # is read, the other alone changes nothing
+    now["right"] = fact(THINGS[0], "yer")
+    teacher(s, THINGS[0], "yer")
+    pair = (deney.PAIR, "families", "unseen_share")
+    assert m.pairs_tried == [pair] and deney.record(m, pair) == (1.0, 0.0)
+    assert deney.record(m, "families") == (0.0, 0.0) and deney.record(m, "unseen_share") == (0.0, 0.0)
+    assert m.cfg.families is False and m.cfg.unseen_share is False          # one case is not knowledge
+    now["right"] = fact(THINGS[1], "yer")
+    teacher(s, THINGS[1], "yer")
+    assert m.cfg.families is True and m.cfg.unseen_share is True            # taken together
+    change = m.trial_changes[-1]
+    assert (change["way"], change["on"], change["better"], change["worse"]) == (pair, True, 2.0, 0.0)
+    assert len(m.trial_changes) == 1 and pair not in deney.ways(m)          # one change; the pair is not a way any more
+    assert "birlikte" in "\n".join(deney.report(m))
+
+
+def test_no_pair_is_tried_where_one_way_mends_it(monkeypatch):
+    s = raised(trials=True)
+    m = s.mind
+    now = {}
+    scripted(monkeypatch, lambda mind: now["right"] if mind.cfg.asked_place else None,
+             lambda mind: (bool(mind.cfg.asked_place), bool(mind.cfg.families)))
+    for x in THINGS[:2]:
+        now["right"] = fact(x, "yer")
+        teacher(s, x, "yer")
+    assert m.pairs_tried == [] and m.cfg.asked_place is True
 
 
 def test_it_builds_a_relation_of_its_own_and_then_one_out_of_that():

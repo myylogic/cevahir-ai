@@ -519,6 +519,19 @@ At each moment, roughly each word, the mind lives these steps:
   chain of three out of that one (0 of 40 -> 40 of 40). The mind set by hand with the mechanisms of the sections
   before answers 8 of those 120 questions (and says a wrong word to 14). Nobody wrote either relation. What is still given: the primitive
   relations, that a new relation is a chain, the experiment and what counts as better.
+- **Two together (F57, the trials of pairs) and the Unseen Share (F60, off by default; with families).** One
+  way is changed at a time, so a gain that needs two sleeping ways together is not seen: each alone changes
+  nothing that is said. Where the configuration did not say what came and no single way mended it, a sleeping way
+  that alone changed what the mind *read* there is tried once more with each other sleeping way; a pair that then
+  says what came is kept and tried like any way, with a record of its own, and when the record proves it the two
+  are taken into use together, as one change. The case it was found in: a thing that was asked two kinds of
+  question is asked a third the mind never met. The frame made of that thing's own earlier questions has members
+  where the new kind's frame has none; it speaks, and counts against every word its members never went on with,
+  among them the word the family of frames (F53) claims: the claim is lowered under the line and not said. F60:
+  a frame's members count against a word none of them went on with only as far as they went on with one another's
+  words; where every member went on with a word of its own, what follows that place changes with what fills it,
+  and a word never seen there is what is to be expected (the unseen share of a sample whose items are all
+  different is the whole of it). Neither F53 nor F60 alone says the word there; the mind finds the two together.
 - **Conjectures (F59, off by default).** Everything the mind said of a thing it had been told of that thing, or
   read from what it knew at the moment it was asked. Here it comes, unasked and in its own time, to statements
   nobody told it, and keeps them apart from what it knows. A thing told to go on with an item that is itself told
@@ -796,6 +809,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | The Kind of a Whole | Bütünün Türü | F56, off by default | constituency (what a phrase is made of) kept apart from its denotation; attachment ambiguity |
 | Trials | Kendi Üzerinde Deney | F57, off by default | model selection by the learner itself; controlled (single-variable) experiments; counterfactual evaluation of one's own policy on logged situations; algorithm configuration; metareasoning |
 | Built Relations | Kurulan İlişkiler | F58, off by default (with trials) | program / relation induction by composition; multi-hop inference found from a failure; library learning (what was built becomes a building block) |
+| The Unseen Share | Görülmemiş Pay | F60, off by default (with families) | the missing mass of a sample (Good-Turing: what was never seen is as likely as the items seen once are many); type-token variety of a slot; productivity of a construction |
 | Conjectures | Varsayımlar | F59, off by default | hypothesis formation; property induction over a learned relation (which links license inference); abduction kept apart from knowledge by provenance; hypothesis testing against later evidence; default reasoning with exceptions |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |

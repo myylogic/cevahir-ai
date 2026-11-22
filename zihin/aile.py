@@ -301,6 +301,47 @@ def speak(mind, unit: int, trust: Optional[torch.Tensor], out: Dict[int, float],
         _moment_memo(mind)[("known_claim", unit)] = (filler, category, known)
 
 
+def repeated(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None) -> float:
+    """How far the members of a frame's place went on with words another member went on with too: the share of the
+    members whose word was repeated, in [0, 1] (1 where there are none to tell). A frame's members count against a
+    word none of them went on with as far as they repeat one another: where every member went on with a word of its
+    own, what follows that place changes with what fills it, and a word never seen there is what is to be expected
+    (the unseen share of a sample whose items are all different is the whole of it)."""
+    from .read import _moment_memo, _world_pos, kind_masks, mv_view
+    from .store import ABSTRACT, CATEGORY
+    memo = _moment_memo(mind)
+    key = ("repeated", frame, exclude, id(trust) if trust is not None else None)
+    if memo is not None and key in memo:
+        return memo[key]
+    S = mind.S
+    parts = parts_of(mind, frame)
+    kinds, src = mv_view(mind, "u_kind"), mv_view(mind, "t_src")
+    channels, act = mv_view(mind, "u_channel"), kind_masks(mind)[5]
+    cats = {p for p in parts if kinds[p] & CATEGORY}
+    rate = 1.0
+    if len(cats) == 1:
+        category = next(iter(cats))
+        where = tuple(j for j, p in enumerate(parts) if p == category)
+        said = []
+        for tie in S.inc.get((category, ABSTRACT), ()):
+            x = src[tie]
+            instance = S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts)))
+            if instance is None or instance == exclude:
+                continue
+            words = frozenset(v for v, p in zip(*_world_pos(mind, instance, trust)) if p > 0.0 and act[channels[v]])
+            if words:
+                said.append(words)
+        if said:
+            count: Dict[int, int] = {}
+            for words in said:
+                for v in words:
+                    count[v] = count.get(v, 0) + 1
+            rate = sum(1 for words in said if any(count[v] > 1 for v in words)) / len(said)
+    if memo is not None:
+        memo[key] = rate
+    return rate
+
+
 def write(mind, out: Dict[int, float], src, target: int, e0: float, kind: int) -> None:
     """One family claim into a reading; F49: read with what family claims of that kind have come to."""
     e = e0

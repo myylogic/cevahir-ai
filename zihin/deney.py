@@ -43,6 +43,14 @@ Here that decision is the mind's, taken as its builders took it: by a controlled
   difference, and every change, is kept with its context, what came, and what each configuration would have said:
   why the mind reads as it does now can be read from its own record (``report``; the chat's ``!deney``).
 
+* **Two together.** One way is changed at a time, so a gain that needs two sleeping ways together is not seen:
+  each alone changes nothing that is said. Where the configuration did not say what came and no single way mended
+  it, a sleeping way that alone changed what the mind *read* there (though not what it would say) is tried once
+  more with each other sleeping way; a pair that then says what came is a way to try, kept and tried like any
+  other (both on against the configuration), with a record of its own; when the record proves it the two are
+  taken into use together, as one change. Found by measuring: a life in which frames of frames was never taken
+  because what kept its claim down was another way's to mend.
+
 What a way *is*: the mechanisms of reading the mind was built with (``WAYS``), and (F58, ``propose``) the relations
 it builds itself: where it did not say what came, a chain of two of its own relations that names it for a filler
 of the context is a relation nobody wrote, and it is tried like any other way; one it has taken into use is a
@@ -63,29 +71,51 @@ from .store import EXPECT, W_NEG, W_POS
 
 CHANNEL = "deney"            # the mind's own channel for the trials of its ways
 BETTER = "iyi"               # the unit the ties (way -> better) point at
-WAYS = ("known", "families", "lived_apart", "asked_place", "echo_exact", "inherit", "witness", "difference")
+WAYS = ("known", "families", "lived_apart", "asked_place", "echo_exact", "inherit", "witness", "difference",
+        "unseen_share")
 KEPT = 1024                  # the contexts at which it decided, kept until what follows is shown (the oldest go first)
 CASES = 256                  # the last cases in which a way made a difference (a record for the report)
 NAMES = {"known": "hakkında bilineni söylemek (F41)", "families": "çerçevelerin çerçevesi (F53)",
          "lived_apart": "ayrı yaşanmış ilişki (F54)", "asked_place": "sorulan yer (F55)",
          "echo_exact": "aynı kelimelerin yankısı (F52)", "inherit": "türünden kalan (F37)",
-         "witness": "tanığın güvenilirliği", "difference": "fark yöntemi (F39)"}
+         "witness": "tanığın güvenilirliği", "difference": "fark yöntemi (F39)",
+         "unseen_share": "görülmemiş pay (F60)"}
+
+
+PAIR = "birlikte"             # the mark of two ways tried together: (PAIR, a, b)
+
+
+def singles(mind) -> Tuple[object, ...]:
+    """The ways on trial one at a time: the mechanisms of reading the configuration has, and the relations the
+    mind has built (``Mind.relations_tried``, F58)."""
+    cfg = mind.cfg
+    return tuple(way for way in WAYS if hasattr(cfg, way)) + tuple(getattr(mind, "relations_tried", ()))
+
+
+def is_pair(way) -> bool:
+    return isinstance(way, tuple) and len(way) == 3 and way[0] == PAIR
 
 
 def ways(mind) -> Tuple[object, ...]:
-    """The ways on trial in this mind: the mechanisms of reading its configuration has, and the relations it has
-    built (``Mind.relations_tried``, F58)."""
-    cfg = mind.cfg
-    return tuple(way for way in WAYS if hasattr(cfg, way)) + tuple(getattr(mind, "relations_tried", ()))
+    """The ways on trial in this mind: the single ones, and the pairs it found to do together what neither does
+    alone, for as long as both sleep (``Mind.pairs_tried``)."""
+    return singles(mind) + tuple(pair for pair in getattr(mind, "pairs_tried", ())
+                                 if not in_use(mind, pair[1]) and not in_use(mind, pair[2]))
 
 
 def in_use(mind, way) -> bool:
     if isinstance(way, str):
         return bool(getattr(mind.cfg, way, False))
+    if is_pair(way):
+        return in_use(mind, way[1]) and in_use(mind, way[2])
     return way in getattr(mind, "relations", ())
 
 
 def _set(mind, way, on: bool) -> None:
+    if is_pair(way):
+        _set(mind, way[1], on)
+        _set(mind, way[2], on)
+        return
     if isinstance(way, str):
         setattr(mind.cfg, way, on)
     else:
@@ -163,10 +193,12 @@ class _aside:
         mind.__dict__.update(self.saved)
 
 
-def would_say(mind, context: int, chain: Optional[dict] = None) -> Optional[Dict[int, int]]:
+def would_say(mind, context: int, chain: Optional[dict] = None,
+              read: Optional[dict] = None) -> Optional[Dict[int, int]]:
     """What the mind would say at ``context`` with its configuration as it stands, by channel: the reading it
     decides with (its own words left out) and the same race, run dry. Nothing is said, set or kept. ``chain``: a
-    dict that is given F49's chain of this reading (unit -> [(ways, the reading's own claim, the claim), ...])."""
+    dict that is given F49's chain of this reading (unit -> [(ways, the reading's own claim, the claim), ...]).
+    ``read``: a dict that is given the reading itself (what it expects of each word it could say)."""
     from . import read as R
     from .act import _race
     cfg = mind.cfg
@@ -181,6 +213,8 @@ def would_say(mind, context: int, chain: Optional[dict] = None) -> Optional[Dict
             chain.update(found[1])
         act, channels = R.kind_masks(mind)[5], R.mv_view(mind, "u_channel")
         candidates = {unit: e for unit, e in reading.items() if act[channels[unit]]}
+        if read is not None:
+            read.update(candidates)
         return {int(channels[unit]): int(unit) for unit in _race(mind, candidates, cfg.theta, cfg.T, dry=True)}
 
 
@@ -253,6 +287,21 @@ def propose(mind, context: int, came: Dict[int, int], now: Dict[int, int]) -> No
         tried.remove(idle)
 
 
+def pairs(mind, readers) -> List[tuple]:
+    """The pairs to try where no single way mended a failure: each sleeping way that alone changed what was read
+    there, with each other sleeping way (pairs the mind already keeps are tried with the rest of its ways)."""
+    asleep = [way for way in singles(mind) if not in_use(mind, way)]
+    out = []
+    for a in readers:
+        for b in asleep:
+            if a == b:
+                continue
+            pair = (PAIR,) + tuple(sorted((a, b), key=repr))
+            if pair not in out and pair not in mind.pairs_tried:
+                out.append(pair)
+    return out
+
+
 def _worth(said: Optional[int], came: int) -> int:
     """What an answer was worth: what came (1), nothing (0), another word (-1)."""
     return 0 if said is None else (1 if said == came else -1)
@@ -273,7 +322,8 @@ def trial(mind, items) -> None:
     del mind.called[context]
     faults = getattr(mind.cfg, "faults", False)
     chain_now: dict = {}
-    now = would_say(mind, context, chain_now if faults else None)
+    read_now: dict = {}
+    now = would_say(mind, context, chain_now if faults else None, read_now)
     if now is None:
         return
     claimed_now = _claims(mind, chain_now, set(now.values())) if faults else {}
@@ -281,18 +331,26 @@ def trial(mind, items) -> None:
     if getattr(mind.cfg, "built_relations", False):
         propose(mind, context, came, now)
     if not mind.trial_base:
-        mind.trial_base = {way: in_use(mind, way) for way in ways(mind)}
+        mind.trial_base = {way: in_use(mind, way) for way in singles(mind)}
     k = mind.cfg.k
     differed = []
+    readers = []                                           # sleeping ways that alone changed what was read here
+    missed = [channel for channel, v in came.items() if now.get(channel) != v]
+    mended = False                                         # whether some one way would have said what it missed
     for way in ways(mind):                                 # every way is tried against the same configuration: the
         on = in_use(mind, way)                             # one the mind has at this moment
-        mind.trial_base.setdefault(way, on)
+        if not is_pair(way):
+            mind.trial_base.setdefault(way, on)
         chain: dict = {}
+        read: dict = {}
         _set(mind, way, not on)
         try:
-            other = would_say(mind, context, chain if faults and not on else None)
+            other = would_say(mind, context, chain if faults and not on else None, read)
         finally:
             _set(mind, way, on)
+        if not on and not is_pair(way) and read != read_now:
+            readers.append(way)
+        mended = mended or any(other.get(channel) == came[channel] for channel in missed)
         if faults and not on:                              # F49 for a way that sleeps: what it alone claims here is
             for claimant, claim in _claims(mind, chain, set(other.values())).items():   # a prediction too
                 if claimant not in claimed_now and claimant not in asleep:
@@ -308,6 +366,25 @@ def trial(mind, items) -> None:
             mind.trial_cases.append({"t": mind.t, "way": way, "context": int(context), "came": v,
                                      "with": with_way.get(channel), "without": without.get(channel),
                                      "better": a > b})
+    if missed and readers and not mended:
+        for pair in pairs(mind, readers):                  # two together: no single way mended what it missed
+            _set(mind, pair, True)
+            try:
+                other = would_say(mind, context)
+            finally:
+                _set(mind, pair, False)
+            for channel in missed:
+                v = came[channel]
+                if _worth(other.get(channel), v) > _worth(now.get(channel), v):
+                    if pair not in mind.pairs_tried:
+                        mind.pairs_tried.append(pair)
+                    _settle(mind, pair, True)
+                    if pair not in differed:
+                        differed.append(pair)
+                    mind.trial_cases.append({"t": mind.t, "way": pair, "context": int(context), "came": v,
+                                             "with": other.get(channel), "without": now.get(channel),
+                                             "better": True})
+        del mind.pairs_tried[:-TRIED]
     del mind.trial_cases[:-CASES]
     if asleep:                                             # a way that sleeps is read with F49's record like any
         from . import hata                                 # other, and it cannot earn one unless what it claims is
@@ -344,6 +421,8 @@ def sync(mind) -> None:
 def way_name(mind, way) -> str:
     if isinstance(way, str):
         return NAMES.get(way, way)
+    if is_pair(way):
+        return "birlikte: %s + %s" % (way_name(mind, way[1]), way_name(mind, way[2]))
     from . import hata
     return "kendi kurduğu ilişki: " + " sonra ".join(hata.NAMES.get(r, str(r)) for r in way)
 

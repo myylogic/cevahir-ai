@@ -1882,8 +1882,9 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                                                              # against what the others share (the members of a
                                                              # narrower place of it are others too)
         for target, (e_family, kind) in prior.items():     # F53: what the family claims and this frame's members
-            if target not in out:                          # never went on with: the frame's evidence against it
-                aile.write(mind, out, src, target, (1.0 - c) * e_family, kind)
+            if target not in out:                          # never went on with: the frame's evidence against it, as
+                against = c * aile.repeated(mind, frame, unit, trust) if getattr(cfg, "unseen_share", False) else c
+                aile.write(mind, out, src, target, (1.0 - against) * e_family, kind)   # far as its members repeat
         if voices and trust is None:
             mind.__dict__.setdefault("voice", {})[unit] = (heard[spoke], heard)
     elif getattr(cfg, "families", False):              # F53: no frame speaks for this context: a family of frames
