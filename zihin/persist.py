@@ -171,6 +171,7 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
                           ("episode_start", lambda: mind.t),          # these existed (their text was lower-cased
                           ("open_where", dict), ("looking", lambda: None), ("taking", lambda: (0.0, 0, 0.0, None)),
                           ("heard", lambda: None), ("thinking", lambda: None), ("about", lambda: None),
+                          ("claimed", dict), ("faults", list), ("_held_back", list),
                           ("company", lambda: None), ("topic", lambda: None)):   # by Turkish rules; the present run
         if not hasattr(mind, name):                                 # is taken to begin at the moment of loading;
             setattr(mind, name, default())                          # no one is present at loading, F33)

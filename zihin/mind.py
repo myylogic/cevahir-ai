@@ -138,6 +138,13 @@ class Config:
                                     # over those moments) plus what its thoughts have come to before, against the line
                                     # it speaks at (act.think_now, learn.settle_thought). The inner voice is the
                                     # session's to let happen; with this on the program's clock for thinking is unused
+    faults: bool = False            # F49 (Fault Tracing): every way of reading (a frame's claim by its kind, the
+                                    # backoffs, forms, similar situations) has a tie of its own, (way -> holds);
+                                    # what each claimed where the mind was free to speak is kept with its context
+                                    # and settled when that context is lived to go on (the break is where its own
+                                    # word and the lived one part); lambda, how far a reading is believed, is the
+                                    # expectation of that tie read general -> specific, 1/2 with nothing lived
+                                    # (zihin/hata.py)
     urge: bool = False              # F40 (Urge to Go On): when the leading word's rival is itself expected, it races
                                     # against silence as far as the two are things known about the same item (their
                                     # share of that item's lived continuations): another thing to say, not a rival
@@ -285,6 +292,11 @@ class Mind:
         self.heard = None                            # F48: its surprise over what it last took in, not thought about yet
         self.about = None                            # F48: the item its expectation was of where it failed most
         self.thinking = None                         # F48: the rate at which it decided, in this moment, to think
+        self.claimed: Dict[int, tuple] = {}          # F49: context -> what each way claimed there, not yet met by
+                                                     # reality: (ways, the claimed unit, whether it was said)
+        self.faults: List[dict] = []                 # F49: the last claims that failed (a record for the report)
+        self._held_back: List[tuple] = []            # F49: (context, moment) of the claims it held back, not yet
+                                                     # counted as answered or as still waiting
         self.voice: Dict[int, tuple] = {}            # F24: context -> (voice that spoke, every voice heard), as
                                                      # (kind, claim, f) each; judged by what comes next
         self.imagined = 0
@@ -360,6 +372,14 @@ class Mind:
             percepts.append((self._atom(channel, SELF_SYMBOL), 1.0, own, channel))
         learn_follow(self, percepts)                       # step 5 for the previous moment
         learn_value(self, percepts)                        # L5: a value signal reaches every step of the episode
+        if self.claimed and getattr(cfg, "faults", False):   # F49: what its ways claimed here meets what is lived
+            from . import hata
+            hata.judge(self, items)
+            for unit, intensity, _, channel in percepts:
+                if intensity > 0.0 and self.ch.kind(channel) == "value":
+                    sign = self.value_sign.get((self.ch.names[channel], self.symbol_of(unit)[1]))
+                    if sign:
+                        hata.valued(self, sign)
         if cfg.substitution:
             from .anlam import substitution
             substitution(self, items)                      # meaning: y where x was expected, judged by what follows
@@ -1011,7 +1031,7 @@ class Mind:
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
                   "unknown", "voice", "witnesses", "episode_start", "company", "topic", "open_where", "taking",
-                  "heard", "about")
+                  "heard", "about", "claimed", "faults", "_held_back")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}

@@ -355,9 +355,20 @@ def decide(mind) -> List[Event]:
         not_self = mind.trust.clone()
         not_self[ACTED] = 0.0                              # own repetitions are a record, not a reason (section 7)
         channels, act = mv_view(mind, "u_channel"), kind_masks(mind)[5]
+        faults = getattr(cfg, "faults", False)
+        if faults:
+            mind.__dict__.pop("_src_last", None)
         for unit, e in members_map(mind, mind.context, not_self).items():
             if act[channels[unit]] and (e > 0.5 or cfg.race):
                 candidates[unit] = e
+        if faults and cfg.race:                            # F49: what each way claimed here is kept until reality
+            from . import hata                             # speaks of this context
+            found = mind.__dict__.pop("_src_last", None)
+            src = found[1] if found is not None and found[0] == mind.context else {}
+            acts = _race(mind, candidates, theta, T)
+            if src:
+                hata.note(mind, src, [mind.unit_of(event.channel, event.symbol) for event in acts])
+            return acts
     elif mind.context is not None:
         only_imitated = torch.zeros(N_PROV, dtype=F64)
         only_imitated[IMITATED] = mind.trust[IMITATED]

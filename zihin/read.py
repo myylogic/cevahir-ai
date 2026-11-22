@@ -1490,6 +1490,8 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     """
     cfg, S = mind.cfg, mind.S
     voices = getattr(cfg, "voices", False)
+    faults = getattr(cfg, "faults", False)             # F49: which way made each claim, and how far it is believed
+    src: Optional[Dict[int, list]] = {} if faults else None    # target -> [(ways, the neutral claim, the claim)]
     best = None
     heard = []                                         # F24: every voice that could speak: (kind, claim, f)
     frames = [(general, e_abs, None) for general, e_abs in generalisations(mind, unit)]
@@ -1572,6 +1574,8 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                     _note_claim(mind, filler, e, target is None)
                 if target is not None:
                     e = held * f + (1.0 - held) * 0.5
+                    if faults:
+                        src.setdefault(target, []).append((KNOWN, e))   # F49: the kind of claim that named it
                     out[target] = max(out.get(target, 0.0), e)
                     _moment_memo(mind)[("known_claim", unit)] = (filler, category, target)
                 continue
@@ -1587,11 +1591,28 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 _note_claim(mind, filler, e, target is None)
             if target is None:
                 continue
+            if faults:
+                src.setdefault(target, []).append((asked, e))   # F49: the kind of claim that named this value
             out[target] = max(out.get(target, 0.0), e)
             if corroborate and (target not in claims or e > claims[target][0]):
                 claims[target] = (e, held, f)
         if claims:
             corroborated(mind, unit, trust, frame, claims, out, tail)
+        if faults:                                 # F49: each claim of the frame, read with what claims of its
+            from . import hata                     # way have come to (the frame's reading is the neutral claim)
+            doubted = 0.0
+            for target, keys in src.items():       # (the strongest kind of claim carries the corroborated one)
+                top = max(e for _, e in keys)
+                made = []
+                for key, e0 in keys:
+                    e0 = out[target] if e0 == top else e0
+                    ways = hata.frame_ways(key, frame)
+                    made.append((ways, e0, hata.believed(mind, ways, e0)))
+                made.sort(key=lambda claim: -claim[2])
+                src[target] = made
+                out[target] = made[0][2]
+                if made[0][2] <= 0.5 < made[0][1]:
+                    doubted = max(doubted, made[0][1])
         if voices and trust is None:
             mind.__dict__.setdefault("voice", {})[unit] = (heard[spoke], heard)
     own = own_mass(mind, unit, 1, trust)
@@ -1616,27 +1637,53 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     if getattr(cfg, "known", False) and unit == mind.context and getattr(mind, "topic", None) is not None:
         said_line = 0.5 + cfg.theta / (2.0 * cfg.T)     # F41: when no word would be said, how the members went on
         words = mv_view(mind, "u_channel")              # where their own known sequences stood as the topic's does
-        if not any(e > said_line and words[t] == words[mind.topic[0]] for t, e in out.items()):
-            for target, e in sequence_reading(mind, unit, trust).items():
-                out[target] = max(out.get(target, 0.0), e)
-    if cfg.backoff and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
-        for target, e in continuation_backoff(mind, unit, trust).items():
-            out[target] = max(out.get(target, 0.0), e)
-    if getattr(cfg, "substitution", False) and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
-        for target, e in substitute_backoff(mind, unit, trust).items():
-            out[target] = max(out.get(target, 0.0), e)
+        if not any(e > said_line and words[t] == words[mind.topic[0]] for t, e in _had(out, src)):
+            _take(mind, out, src, sequence_reading(mind, unit, trust), "dizi")
+    if cfg.backoff and not any(e > 0.5 for t, e in _had(out, src) if _world(mind, t)):
+        _take(mind, out, src, continuation_backoff(mind, unit, trust), "devam")
+    if getattr(cfg, "substitution", False) and not any(e > 0.5 for t, e in _had(out, src) if _world(mind, t)):
+        _take(mind, out, src, substitute_backoff(mind, unit, trust), "yerine")
     line = 0.5 + mind.knob["theta"] / (2.0 * cfg.T)     # F36: when nothing would be said (the speaking line), a
-    if getattr(cfg, "forms", False) and not any(e > line for t, e in out.items() if _world(mind, t)):
-        for target, e in form_reading(mind, unit, trust).items():   # word never met is read as the form it is of
-            out[target] = max(out.get(target, 0.0), e)
+    if getattr(cfg, "forms", False) and not any(e > line for t, e in _had(out, src) if _world(mind, t)):
+        _take(mind, out, src, form_reading(mind, unit, trust), "biçim")   # word never met is read as its form
     own_line = 0.5 + cfg.theta / (2.0 * cfg.T)          # F39 only when nothing would be said at the mind's own
-    if getattr(cfg, "difference", False) and not any(e > own_line for t, e in out.items() if _world(mind, t)):
-        for target, e in replacement_reading(mind, unit, trust).items():   # line (not the one raised to listen)
+    if getattr(cfg, "difference", False) and not any(e > own_line for t, e in _had(out, src) if _world(mind, t)):
+        _take(mind, out, src, replacement_reading(mind, unit, trust), "fark")   # line (not the one raised to listen)
+    if getattr(cfg, "situations", False) and not any(e > 0.5 for t, e in _had(out, src) if _world(mind, t)):
+        _take(mind, out, src, situation_backoff(mind, unit, trust), "durum")
+    if src:
+        mind.__dict__["_src_last"] = (unit, src)         # F49: the chain of this reading (act.decide keeps its own)
+        if best is not None and open_on and doubted > own_line and \
+                not any(e > own_line for t, e in out.items() if _world(mind, t)):
+            _note_claim(mind, filler, doubted, True)     # F46: what its frame would have said of this filler it has
+    return out                                           # learned not to believe, and nothing else is said: open
+
+
+def _had(out: Dict[int, float], src: Optional[Dict[int, tuple]]):
+    """The claims a less specific reading steps back for. F49: a reading the mind has learned not to believe has
+    still spoken (the mind is unsure, it is not without a reading): its neutral claim counts here, so that a cruder
+    reading does not take the place of one that was found wanting."""
+    if not src:
+        return out.items()
+    return [(t, max([e] + [claim[1] for claim in src[t]]) if t in src else e) for t, e in out.items()]
+
+
+def _take(mind, out: Dict[int, float], src: Optional[Dict[int, tuple]], reading: Dict[int, float], name: str) -> None:
+    """What a reading that is not a frame's claims goes into ``out`` where it is the strongest. F49 (``src`` given):
+    read with what claims of that way of reading have come to (``hata.believed``), and noted as the way that made
+    the claim."""
+    if src is None:
+        for target, e in reading.items():
             out[target] = max(out.get(target, 0.0), e)
-    if getattr(cfg, "situations", False) and not any(e > 0.5 for t, e in out.items() if _world(mind, t)):
-        for target, e in situation_backoff(mind, unit, trust).items():
-            out[target] = max(out.get(target, 0.0), e)
-    return out
+        return
+    from . import hata
+    ways = hata.reading_ways(name)
+    for target, e0 in reading.items():
+        e = hata.believed(mind, ways, e0)
+        made = src.setdefault(target, [])
+        made.append((ways, e0, e))
+        made.sort(key=lambda claim: -claim[2])
+        out[target] = max(out.get(target, 0.0), e)
 
 
 def said_after(x: int, sequence) -> set:

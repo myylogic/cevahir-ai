@@ -343,6 +343,36 @@ At each moment, roughly each word, the mind lives these steps:
   stricter:** a claim is met only when the mind, brought back to the situation, says what follows and stops where
   the end of a turn is expected; a first word is not knowing ("bakır ," no longer counts), the claim stays open and
   the way of reading is judged by it. Sleep is still on the program's clock.
+- **Fault Tracing (F49, off by default; `zihin/hata.py`).** The core writes a failed expectation on the tie that
+  expected. But most of what the mind says of a thing it never lived is a *reading* (a frame's members and the kind
+  of their claim, a continuation, a form, similar situations), and a reading has no tie: when it fails, nothing is
+  written, the one instance is corrected and the next is read as before. Here every way of reading has ties of its
+  own on the mind's own channel and is judged as everything is, by what was then lived. The chain is kept where it
+  is computed (which way made each claim, how strongly). What each way claimed where the mind was free to speak is
+  kept with its context, said or not (rivals that kept each other silent are all kept). When that context is lived
+  again and goes on from outside, each claim is settled: (way → holds) W+ or W−, (way → claimed) by the strength
+  it was made with. So the break is found by living: the words before it are confirmed, the word at it is the
+  fault, nothing told to the mind about it. Told only "good" or "bad", each link of the answer takes the blame the
+  chain itself gives it, (1 − e_i) / (1 − Π e_j): the link it was least sure of most. The record is read back
+  general → specific as everywhere: e ← e0; e ← c e_level + (1 − c) e, with
+  e_level = 1/2 + (f_held − 1/2) / (f_claimed − 1/2) (e0 − 1/2): the claim's advantage over 1/2 rescaled by how
+  far reality fell short of, or exceeded, what the level claimed. The general levels (every way; the kind of claim)
+  are the vote of the ways that have a record of their own, each counted once as a member is in a frame. A way
+  never tried has only that vote; where the vote is against it, the mind weighs holding the claim back against
+  saying it once to find out, by its own record of whether what it held back was then answered. Measured
+  (`research/living_mind_2026_11_22`, section 11; 5 seeds; the teacher's loop: asked, then shown the true dialogue
+  whatever it said): in frames whose members merely share a value, wrong answers 66 → 29 and on things never asked
+  about 25 and 24 of 40 → 0 and 0; eight such frames one after another cost 5, 4, 2, 2, 1, 0, 0, 0 wrong answers
+  (120 → 14; with the frame's own record alone 53: every frame pays for itself), at the price of lawful frames
+  withheld until shown (29 answers of 80, fewer with each lawful frame); where two readings disagree it learns
+  which to believe in half the rounds (all of 40 fresh things right after 8 rounds instead of 16); told only good
+  or bad, 33 wrong → 12 with the lawful frame untouched; and with F46 and F47, after looking things up by its own
+  decision it says what it read (1 wrong of 80 where the mind without it still asserts 38). Where nothing misleads,
+  nothing changes. Eight forms were built and taken out on the way (the notes say which and why). What it does not
+  do: it learns about its ways only where it was free to speak (a mind that only watches learns nothing about
+  them); it makes no new structure from an error (the category is not split by what the exceptions share); only
+  the frame that spoke is in the chain. `!hata` prints what the mind has learned about its own ways and its last
+  faults.
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
@@ -366,7 +396,11 @@ At each moment, roughly each word, the mind lives these steps:
   "walk around left" is lived as [whole around whole: the reply of the third, the reply of the first, four times],
   and "walk around right", never met, is the same summary. "around right": 0 → **500 of 500**; the three other
   template splits of the same paper: "jump around right" 200 of 200, "V right" 200 of 200, "V opposite right" 200 of 200 (a
-  Transformer from scratch on the around-right dialogues: 3 of 500). In a world it was not developed on (T-dans:
+  Transformer from scratch on the around-right dialogues: 3 of 500). These were measured on splits generated here
+  from the grammar; compared with the published files (2026-11-22) the generated "right" and "opposite right" splits
+  are easier than the published ones (they keep the "turn" commands in training). On the **published** "right"
+  split: **4,475 of 4,476** (1,087 of the 15,225 training commands watched twice); the other published splits are
+  being run and are reported in `research/living_mind_2026_11_22` as they end. In a world it was not developed on (T-dans:
   Turkish moves said alone, directions never said alone and placed before the move, "iki kez" and "üç kez" between
   them; held out, one direction with both): the first run **600 of 600** over three seeds (0 of 600 without F45; a
   Transformer 108 of 200); when the new direction is met in **one dialogue only** ("geriye zıpla"), 600 of 600 of the
@@ -581,6 +615,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Open Claims | Açık Kalan Beklenti | F46, off by default | feeling of knowing; information gaps (Loewenstein); known unknowns as the drive to look up |
 | Looking Up by Itself | Kendi Kararıyla Bakmak | F47, off by default | information seeking as an act chosen by its expected outcome; learned helplessness when looking never helps |
 | Thinking by Itself | Kendi Kararıyla Düşünmek | F48, off by default (on in the online life) | surprise as the drive to think (prediction error); reflection valued by what it comes to |
+| Fault Tracing | Hata İzi | F49, off by default | error monitoring and metacognitive confidence; calibration of confidence by observed outcomes; the reject option (abstaining when unsure); credit (blame) assignment along a chain; partial pooling (each frame one vote) |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

@@ -45,6 +45,10 @@ Commands (Turkish, with English aliases):
                                     it is now, in a process of its own (as many as the machine has processors); the
                                     answers are exactly what it would give one after another, and none is lived
     !dusun_hepsi a, b, c / !think_all  the same for thoughts: what it thinks about each topic now, at the same time
+    !hata                / !faults  (with --ac faults) what the mind has learned about its own ways of reading (how
+                                    often each held against what it claimed) and where its last faults were: the
+                                    context, the word it said or would have said, what was lived, the way that
+                                    claimed it
     !ag                  / !net     what this machine can reach: one small request to each service the mind reads
                                     from, with the reason when one cannot be reached (proxy, refusal, no network)
     !oku_url <adres> ... / !read_url  web pages by their addresses, read as documents are: fetched at the same time,
@@ -173,7 +177,7 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
          "company", "replies", "purpose", "forms", "echo", "exclusive_world")
 
 STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
-           "told_apart", "open_claims", "look", "think")                     # is raised with them; --ac turns one on
+           "told_apart", "open_claims", "look", "think", "faults")           # is raised with them; --ac turns one on
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -1593,6 +1597,11 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                         for topic, (words_, reality) in zip(topics, thoughts(session, topics)):
                             print("  %s: %s  (gerçeklik %.2f)" % (topic, " ".join(words_) or "(sessiz)", reality))
                         print("  kopyalar düşündü: zihin bunları yaşamadı")
+                elif cmd in ("hata", "faults"):           # F49: what it learned about its own ways, its last faults
+                    from . import hata
+                    if not getattr(session.mind.cfg, "faults", False):
+                        print("  hata izi kapalı (bu zihin --ac faults ile açılmadı); kayıt:")
+                    print("\n".join(hata.report(session.mind)))
                 elif cmd in ("ag", "ağ", "net"):          # what can be reached from here (nothing is read into the mind)
                     from .ag import check
                     print("\n".join(check(session.net, "tr" if session.dil == "tr" else "en")))

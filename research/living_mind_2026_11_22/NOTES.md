@@ -728,3 +728,267 @@ python research/living_mind_2026_11_22/t_scan_official.py verify --scan <the pub
 python -m pytest tests/evolution/test_zihin_think.py -q
 python -m zihin --kaynak my_documents         # it looks in your folder by itself; add --ag for the web
 ```
+
+## 11. The mind examines its own computation: an audit of what was there, and F49 Fault Tracing
+
+### 11.1 What was asked
+
+The owner, about what a living mind must be able to do with its own mistakes: it must find out what it does not know;
+determine *from its own chain of computation* why it was wrong; restructure the knowledge involved; and take from the
+same error a principle for how it learns. More widely: reason about its own learning and its own methods, and decide
+by itself what to do about them. And: check first whether any of this is already in the system, and look at the
+development from this side.
+
+### 11.2 The audit: the system as it stood before this section
+
+| what is asked | what was there | what was missing |
+|---|---|---|
+| to find out what it does not know | felt not-knowing (L7: when it is free to answer and nothing is over the line, the amount it does not know is perceived as an inner event); open claims (F46: a relation of its frame names nothing for this item); the stricter test "can I say it to the end" (F47, section 10.3); surprise over what it takes in (F48) | all of these are about *having nothing to say*. Nothing told the mind that something it says confidently is the kind of thing it gets wrong |
+| to determine from the chain why it was wrong | the chain is explicit: every word of an answer can be attributed to the reading that supplied it (`neden.attribute`: the context's own record, a frame and its relation, a continuation, a form, similar situations), with the reading it overrode | that was a report *for the owner* (`!neden`), computed on request. The mind itself used none of it: a value signal credits every step of the path alike (L5), and a correction changes the corrected instance only |
+| to restructure the knowledge involved | at the level of the instance: its own record now says otherwise and excludes what the generalisation proposes there (F27) | nothing above the instance: the frame that misled reads the next new filler exactly as before (measured below: 24 wrong of 30 in a frame it was corrected in 6 times, and still 25 of 40 on things never asked about) |
+| to take a learning principle from the error | two earlier mechanisms judged readings by what was then lived: F9 (every generalisation by the values its instances then lived) and F24 (kinds of voices: how many members, how much they agree). Both are off in the speaking configuration; F9 feeds another way of reading than the one a chat mind uses, F24 only the choice among frames (measured mixed, 2026-11-15) | neither is driven by the mind's own answers, neither covers the readings that are not a frame's vote, neither says where a chain broke. How far a reading is believed was one constant for all readings and all lives |
+| to reason about its own learning and methods | records of its own on its own channels: trust in each kind of source and each person (judged by direct experience), what looking something up led to (F47), what thinking led to (F48), which way of reading a page closed a claim (section 10.3) | no record of its own *ways of reading*, which is where its answers come from; nothing it could report about them |
+| to decide by itself what to do | to speak or not (the race), to try in hesitation, to look something up (F47), to think (F48) | to hold a doubtful claim back or to try it; to ask; to sleep (still the program's clock) |
+
+So: knowing that it has nothing to say was there. Knowing that what it says is doubtful, why, and what to do about
+the way of reading that produced it, was not. That is what this section builds.
+
+### 11.3 F49 Fault Tracing (`Config.faults`, off by default; `zihin/hata.py`)
+
+**The gap in the core.** A failed expectation of a tie is written on that tie (W−). But most of what the mind says
+of a thing it never lived is not a tie's expectation: it is a *reading* (what the members of a frame lived in the
+same place, by which relation; the lived continuation of the last words; the form of a word never met; the most
+similar lived situations). A reading has no tie, so its failure is written nowhere.
+
+1. **The chain is kept where it is computed.** `read.members_map` notes for every claim it makes which way made it
+   and how strongly: the frame and the kind of its claim (the members' own word, the asked word itself, its
+   continuation, what is known of it, ...) or the name of the reading. Not a reconstruction: the computation itself.
+2. **A claim is a prediction whether or not it is said.** At a moment in which the mind is free to speak, what each
+   way claimed most is kept with its context (`Mind.claimed`) when the reading made it over the line the mind speaks
+   at, or when it is the word the mind says. Rivals that kept each other silent are all kept. The strength kept is
+   the reading's own (as if nothing had been learned about the way), so a way the mind has stopped believing is
+   still tested and can earn its credit back. Not where the context has a record of its own (there memory speaks,
+   and the core judges memory on its own tie).
+3. **Reality locates the break.** When that context is lived again and goes on from outside (someone shows or says
+   what follows), each claim kept for it is settled on the two ties of its way, on the mind's own channel:
+   (way → holds): W+ 1 if it held, W− 1 if it failed; (way → claimed): W+ e0, W− 1 − e0, what the way had
+   expected. The words of an answer before the break are confirmed by the same pass (their contexts are lived again
+   with the same words); the word at the break is the fault; what the mind said after it is never judged (those
+   contexts are never lived). So the break is found exactly, by living, with nothing told to the mind about it.
+4. **Only told "good" or "bad".** Good: every claim the mind said in the answer held. Bad: at least one failed and
+   nothing says which; the chain says how likely each was. A claim believed with e fails with 1 − e, so given that
+   the answer failed, link i failed with (1 − e_i) / (1 − Π e_j): the link the mind was least sure of takes most of
+   the blame.
+5. **Read back with the core's rule.** Where the claims of a level were made with f_claimed on average and held
+   f_held of the time, a claim of strength e0 is worth, by that level,
+
+   > e_level = 1/2 + (f_held − 1/2) / (f_claimed − 1/2) · (e0 − 1/2), kept within 0 and 1
+
+   (its advantage over 1/2 rescaled by how far reality fell short of, or exceeded, what the level claimed), and the
+   levels are read general → specific as everywhere: e ← e0; e ← c e_level + (1 − c) e. The levels of a frame's
+   claim: every way; the kind of claim; this frame's claim of that kind. Only the last has ties. The general
+   levels are the **vote** of the ways that have a record of their own, each counted once with its conviction, as a
+   member is in a frame, the one being read left out: what an untested frame's claim is worth is how frames like
+   it have fared, not how many answers were given in one of them.
+6. **A way never tried.** It has only that vote. Where the vote is for it, it is believed more. Where the vote is
+   against it, the mind weighs holding the claim back against saying it once to find out:
+   e = a e_vote + (1 − a) e0, with a = e(held back → holds), its own record of whether what it held back was then
+   answered: W+ when a claim it did not say is settled by what it then lives, W− when it is called on again and a
+   claim it held back earlier is still waiting. 1/2 before it has held anything back.
+7. **What follows from it elsewhere.** A less specific reading does not step in for one the mind has learned to
+   doubt (the neutral claim still counts for stepping back), and when nothing is then said, the doubted claim is
+   an open claim about that item (F46), which the mind may look up by itself (F47).
+
+With nothing settled every claim is the reading's own, bit for bit. Nothing names a word, a frame or a domain. No
+number is chosen: one experience per settled claim, the core's k, the line the mind already speaks at. `!hata`
+(`!faults`) prints what the mind has learned about its own ways and where its last faults were.
+
+### 11.4 What was tried on the way and taken out again
+
+Each of these was built and measured before the form above:
+
+| tried | what it did | why it went |
+|---|---|---|
+| the constant λ replaced by e(way → holds): e = 1/2 + 2λ (e0 − 1/2) | a frame that had held 3 times of 8 kept asserting | the race says a leader over weaker rivals at any e over 1/2; a gentle discount never brings a claim under it |
+| the claim replaced by its way's rate of holding (the core's nested rule with the claim as the prior) | silenced failing frames at once | it washed out what each claim's own strength said: in the two-readings world a weak claim (the members no longer agree) was lifted to the record earned by strong ones, and the mind got *worse* (5 of 40 fresh things right after 4 rounds, against 18 with the switch off) |
+| the scale s = (f_held − 1/2)/(f_claimed − 1/2) nested level by level | right in most lives | unbounded when a way's mean claim is near 1/2 (one life reached s = 43 and went silent on what it knew). The levels are now combined as expectations of the claim, each within 0 and 1 |
+| one way noted per claimed word | | two kinds of claim of one frame can name the same word; the word was then read by one of them only (and doubted with it) |
+| general levels as pools of every settled claim | strong transfer | a frame asked about 30 times outvoted everything else. Now each way votes once (F11's rule) |
+| "bad" shared equally among the words said | | the asked word said back, which never fails, took a third of every blame. Now by the weakest link (it still takes some while the mind is equally sure of every link: see 11.6) |
+| an untested frame always read by the others' vote | 14 wrong of 160 where off has 120 (below) | it never tries a frame that would have held: 30 of 80 lawful answers withheld until shown, and told only good or bad such a frame is lost for good (0 of 40) |
+| an untested frame always tried | nothing withheld | the principle then adds almost nothing (50 wrong against 53 with the frame's own record alone) |
+
+The last two are both right somewhere, and which one depends on the life; so the mind now measures that itself
+(step 6).
+
+### 11.5 Measured (`t_fault.py`; 5 seeds each; rows in `results/fault.jsonl`)
+
+In every part the same life is lived in each condition. The only thing that ever corrects the mind is the
+**teacher's loop**: it is asked, it answers or stays silent, and then the true dialogue is shown to it (watched),
+whatever it said. Nothing tells it that it was wrong, where, or why.
+
+**Misled** (frames whose members merely share a value). Five question frames about 48 things. In V1 to V3 the
+answer depends on the thing (one of four values at random); in L1 and L2 it is the same for every thing. The mind
+first watches the same 8 things in all five frames, and those 8 share one value in each frame, so it generalises in
+all five and in V1 to V3 that is right for one thing in four. Then the teacher's loop, 6 new things a frame, in the
+order V1, V2, L1, V3, L2; at the end 8 things never asked about. Right / wrong / silent:
+
+| | V1 | V2 | L1 | V3 | L2 | wrong in V1-V3 (of 90) | 8 fresh things at the end: V1, V2, V3 |
+|---|---|---|---|---|---|---|---|
+| off | 6/24/0 | 7/23/0 | 30/0/0 | 11/19/0 | 30/0/0 | **66** | 14/25/1, 14/24/2, 7/32/1 |
+| on | 4/10/16 | 2/6/22 | 25/0/5 | 6/13/11 | 30/0/0 | **29** | 0/0/40, 0/0/40, 4/12/24 |
+| on, the frame's own record only | 4/10/16 | 3/9/18 | 30/0/0 | 6/13/11 | 30/0/0 | 32 | as on |
+| on, an untested frame always held back | 4/10/16 | 2/6/22 | 23/0/7 | 6/13/11 | 30/0/0 | 29 | as on |
+
+With the switch off the mind goes on asserting what the first eight shared, in the loops and afterwards, however
+often it was corrected: a correction repairs the instance. With it on the wrong answers fall from 66 to 29, and on
+things never asked about V1 and V2 are silent (0 wrong of 40 each, where off has 25 and 24). Most of that is the
+frame's own record (32); the principle adds a little here (V2 costs 6 wrong instead of 9) and withholds 5 answers
+of the first lawful frame until it has been shown to hold. What is lost with the errors: the lucky guesses (24
+right in V1 to V3 became 12; the mind cannot know which doubted claim would have been right). V3 is not settled by
+the end (12 wrong of 40): its shared value is right for a third of the things in these lives and its record hovers
+near one half.
+
+**Regular** (the same life, every frame lawful): 150 of 150 in the loops and 200 of 200 fresh things right in all
+four conditions. Where nothing misleads, nothing changes.
+
+**Many** (is a principle taken from the errors?). Eight misleading frames and four lawful ones, 4 new things in
+each, 64 things. Wrong answers in each frame in the order lived (of 20), 5 seeds:
+
+| order | | the eight misleading frames, in the order lived | sum (of 160) | the four lawful frames: right / silent (of 80) |
+|---|---|---|---|---|
+| misleading first | off | 15 11 18 15 17 17 13 14 | **120** | 80 / 0 |
+| | on | **5 4 2 2 1 0 0 0** | **14** | 51 / 29 (silent 10, 10, 7, 2 in the order lived) |
+| | on, the frame's own record only | 5 8 5 8 6 6 7 8 | 53 | 80 / 0 |
+| | on, an untested frame always held back | 5 4 2 2 1 0 0 0 | 14 | 50 / 30 |
+| lawful first | off | 16 15 17 17 16 14 12 11 | 118 | 80 / 0 |
+| | on | 10 7 6 6 7 4 7 6 | 53 | 80 / 0 |
+| | on, the frame's own record only | 6 7 6 6 7 4 7 6 | 49 | 80 / 0 |
+
+This is the principle: with only the frame's own record every misleading frame pays for itself (about 6 wrong
+each, for ever); with the vote of the frames before it, the n-th misleading frame costs 5, 4, 2, 2, 1, 0, 0, 0. The
+price is on the other side: after eight frames of that kind failed, a lawful frame is not tried either until it
+is shown to hold (10 of 20 answers withheld in the first, 2 in the fourth: the vote turns as lawful frames prove
+themselves). And the principle follows the life lived: a mind whose first four frames held goes on trying the
+next ones (53 wrong, no decline within eight frames; the first costs more, 10 against 6, because it is believed
+more).
+
+**Told only "good" or "bad"** (no answer is ever shown; one misleading frame, then one lawful, 8 things each):
+
+| | V1 | L1 | fresh at the end: V1, L1 |
+|---|---|---|---|
+| off | 7/33/0 | 40/0/0 | 14/26/0, 40/0/0 |
+| on | 4/**12**/24 | **40**/0/0 | 3/5/32, 40/0/0 |
+| on, an untested frame always held back | 4/12/24 | **0**/0/40 | 0/0/40, 0/0/40 |
+
+33 wrong answers become 12 with nothing but "bad" to go on (the blame by the weakest link). The third row is why
+step 6 exists: held back by the vote, the lawful frame is never tried, nothing is ever said about a silence, and
+the frame is lost for good. With step 6 the mind's silences in V1 go unanswered, its weight for holding back
+falls (0.50, 0.25, 0.17, 0.12, ... in a test life), and it tries the next frame: 40 of 40.
+
+**Two readings that disagree.** Every thing was read of once ("X V yer ."); the 8 watched dialogues share one
+value. For a new thing the frame's members agree on the value itself and on a relation (what followed the thing in
+what was read), and the two name different words. 8 fresh things after n rounds of the teacher's loop:
+
+| | n = 0 | 2 | 4 | 8 | 16 | in the 16 rounds |
+|---|---|---|---|---|---|---|
+| off | 14/0/26 | 14/0/26 | 18/0/22 | 35/0/5 | 40/0/0 | 49/0/31 |
+| on | 14/0/26 | 15/0/25 | 20/0/20 | **40/0/0** | 40/0/0 | **60/0/20** |
+
+Both get there (the members' vote itself turns as corrected things join the frame); with the switch on the mind
+gets there in half the rounds, because every silent conflict it is shown settles both rivals: the value's claim
+failed, the relation's held.
+
+**The loop by itself** (F46 and F47 on in both conditions). The mind read of the 8 watched things only; a library
+holds one sentence about every thing; the mind may look into it in its silent moments by its own decision. Each of
+16 new things: asked; three silent moments; asked again on a copy (before anyone shows it anything); then shown.
+Whole answer right / the right value but not the rest / another value / nothing, of 80:
+
+| | first answers | looks of its own (claim met) | after its own looking |
+|---|---|---|---|
+| off | 9 / 0 / 44 / 27 | 15 (5) | 9 / 1 / **38** / 32 |
+| on | 4 / 0 / 10 / 66 | 35 (20) | **16 / 6 / 1** / 57 |
+
+Without F49 the mind looks things up and then still asserts what the first eight shared (38 wrong after reading
+the right sentence itself). With it: it stops asserting, looks up what it now knows it does not know, and says
+what it read: 22 right or right in the value, 1 wrong. In the first seed, from the fourth thing on, every answer
+after its own looking is right before anyone has shown it anything (`R-RRKKRRRRRRRRRR`). In the other seeds
+looking stops early: an answer that names the right value and cannot yet say the last word counts, by F47's strict
+test, as a claim not met, so looking is judged not to pay (57 times nothing).
+
+**What the mind says about itself** (`!hata`; one life of "misled", seed 0; shortened):
+
+```
+okuma yolları (kendi sicili olan yolların oyu: kaç yol; iddia ettiği -> tuttuğu oran):
+  her okuma                                    11.3 yol   0.65 -> 0.85
+  genelleme: üyelerin aynı kelimesi             7.0 yol   0.65 -> 0.75
+  genelleme: sorulan kelimenin kendisi          4.3 yol   0.66 -> 1.00
+kendi sicili olan yollar (tuttu / tutmadı; iddia ettiği -> tuttuğu oran; öyle bir iddia şimdi nasıl okunuyor):
+  genelleme: sorulan kelimenin kendisi (çerçeve: X ne yer ⏎)        6.0 / 0.0   0.65 -> 1.00  şimdi 0.99
+  genelleme: üyelerin aynı kelimesi (çerçeve: X ne yer ⏎ X)         2.0 / 4.0   0.63 -> 0.33  şimdi 0.40
+  genelleme: üyelerin aynı kelimesi (çerçeve: X canlı mı ⏎)         6.0 / 0.0   0.65 -> 1.00  şimdi 0.96
+  genelleme: üyelerin aynı kelimesi (çerçeve: X nerede yaşar ⏎ X)   0.0 / 3.0   0.63 -> 0.00  şimdi 0.20
+son yanılgılar (kırılmanın yeri):
+  'kanguru ne renk ⏎ kanguru' ardından 'kahve' dedi; yaşanan 'sarı'. Kaynağı: genelleme: üyelerin aynı kelimesi
+      (çerçeve: X ne renk ⏎ X); böyle bir iddiayı 0.71 okuyordu, şimdi 0.35
+  'kurt nerede yaşar ⏎ kurt' ardından 'ormanda' diyecekti; yaşanan 'denizde'. ...
+söylemeyip tuttuğu iddialar: 6 kez sonradan gösterildi, 0 kez cevapsız kaldı; hiç denenmemiş bir yolu, benzerleri
+  tutmadıysa, 0.93 oranında tutuyor (gerisinde bir kez deniyor)
+```
+
+**Cost.** The loops of "misled" took 6.3 s with the switch on and 6.4 s off, those of "regular" 7.2 s and 6.7 s
+(a shared machine): nothing measurable in these lives. The record is read once a moment by walking the mind's own
+channel; on a mind with thousands of judged frames that walk will show and wants an index.
+
+### 11.6 What it does not do
+
+* **It learns about its ways only where it was free to speak.** While it only listens the mind makes no full
+  reading (that is what made listening cheap, section 1), so nothing is claimed and nothing is settled: a mind that
+  only watches or reads learns nothing about its ways. Reading silently what it would have said at every new
+  context would make all it watches a test of its ways, at the cost of the full reading there. Not built.
+* **No new structure is made from an error.** The frame's claim is doubted for the next filler whatever that
+  filler is. "The ones that are like this one eat what this one eats" (splitting the category by what its members
+  share elsewhere) is not formed. This is the next step of "restructure", and the lost lucky guesses are its
+  measure (24 right became 12).
+* **Only the frame that spoke is in the chain.** If another frame held the right word and lost the choice, the
+  chain does not show it.
+* **Memory and written inferences are not judged here.** The context's own record is judged by the core on its
+  tie; what was inferred and written (the told-apart word of F45, the parts of a whole) is evidence of class
+  "inferred", not a way of reading.
+* **Only "good" or "bad":** while the mind is equally sure of every link the blame is nearly equal, and the asked
+  word said back takes blame it did not earn; after one "bad" the mind can fall silent in that frame altogether.
+* **A frame right for a third of its things** is read near one half and still said when it leads (V3 above).
+* The weight for holding back starts at 1/2 (the first untested frames are half held back); the claims of the last
+  1,024 contexts are kept; a moment taken back (`!unut`) takes back what was settled in it but not a claim kept in
+  it.
+* Off by default, like every mechanism measured in small worlds only. Not yet measured on the owner's documents:
+  the recall battery there only reads and asks (no answer is followed by the truth), so nothing in it would be
+  settled.
+
+### 11.7 The published SCAN files: the first split is in
+
+The runs on the published files (section 10.4) are being made one split after another; each takes about an hour
+on three processors. The first:
+
+| split (published files) | training commands watched | published test | exact |
+|---|---|---|---|
+| template "right" (`template_split/..._right`) | 1,087 of 15,225, twice | 4,476 | **4,475** (1 wrong, 0 silent) |
+
+The one wrong: "walk twice and walk right" answered with the two parts in the other order. So the result
+withdrawn in section 10.4 ("V right 200 of 200", measured on an easier split) is replaced by this one on the
+published split: 4,475 of 4,476. The other splits (opposite right, around right, jump around right, length,
+add-jump) follow in the same file (`results/scan_official.jsonl`) as they end, whatever they show.
+
+### 11.8 Gates
+
+Switches off: digest gate, the 17 configurations and the scripted life (plain and with wholes): bit for bit what
+they were. With the switch on and nothing settled yet, a mind answers as with it off and its substance is the same
+(pinned by a test). Tests: 394 passed (11 new).
+
+### 11.9 Reproduce
+
+```
+python research/living_mind_2026_11_22/t_fault.py misled     # also: regular, many, valued, two, loop, report
+python -m pytest tests/evolution/test_zihin_faults.py -q
+python -m zihin --ac faults        # then !hata: what the mind has learned about its own ways
+```
