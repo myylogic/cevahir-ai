@@ -430,6 +430,242 @@ def think_now(mind) -> Optional[float]:
     return rate
 
 
+GROUNDED = (-1, -2, -3, -5, -7)   # F50: the kinds of a frame's claim that read what was lived of the filler itself
+                                  # (the asked word, its continuation, how its sequences began, what it was answered
+                                  # with alone, what is known of it)
+
+
+def grounded(made) -> bool:
+    """F50: whether a word's claim rests on what the mind lived of the thing asked about: some way that claims it
+    (more for than against) is a frame's relation that reads the filler's own record. ``made``: [(ways, the reading's
+    own claim, the claim), ...] (hata's chain). The members' own word, the members of its kind, a continuation, a
+    form or a similar situation rest on what others share."""
+    for ways, e0, _ in made:
+        kind = ways[1]
+        if e0 > 0.5 and len(kind) == 2 and kind[0] == "g" and kind[1] in GROUNDED:
+            return True
+    return False
+
+
+def lived_so(mind, context: int, unit: int) -> bool:
+    """F50: whether ``unit`` is how the mind's own utterance so far went on when it lived those words as a sequence
+    of their own: what a sentence it read or was told went on with from the item its utterance began with
+    (``read.known_unsaid``; with F41 also from the answer's topic). It is then saying something it lived of that
+    very thing, whichever way made the claim. What it only ever said itself, or imagined, is not counted, nor what
+    followed the same words in the present episode (an echo)."""
+    from .events import IMAGINED
+    from .form import parts_of
+    from .read import known_unsaid, kind_masks, mv_view
+    from .store import COMPOSED
+    kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+    parts = parts_of(mind, context) if kinds[context] & COMPOSED else (context,)
+    sense = kind_masks(mind)[4]
+    start = 0
+    for j, p in enumerate(parts):
+        if sense[channels[p]]:
+            start = j + 1
+    places = [start] if start < len(parts) else []
+    topic = getattr(mind, "topic", None)
+    if topic is not None and topic[0] in parts:
+        places.append(len(parts) - 1 - parts[::-1].index(topic[0]))
+    trust = mind.trust.clone()
+    trust[ACTED] = 0.0
+    trust[IMAGINED] = 0.0
+    return any(known_unsaid(mind, parts[j], context, j, trust, episode=True).get(unit, 0.0) > 0.0 for j in places)
+
+
+def rests_on_others(mind, context: int, unit: int, made) -> bool:
+    """F50: whether the word the mind is about to say at ``context`` rests only on what others share: some way
+    claims it (``made``: hata's chain), none of them reads the record of the thing asked about (``grounded``), the
+    context has no record of its own of a word there, and it is not how a sentence the mind lived went on from
+    where its own utterance began (``lived_so``)."""
+    from .events import IMAGINED
+    from .read import mv_view, own_mass
+    if not made or grounded(made):
+        return False
+    channels = mv_view(mind, "u_channel")
+    trust = mind.trust.clone()
+    trust[ACTED] = 0.0
+    trust[IMAGINED] = 0.0
+    if any(w_pos > 0.0 and channels[v] == channels[unit] for v, (w_pos, _) in
+           own_mass(mind, context, 1, trust).items()):
+        return False                                       # this very situation was lived: memory speaks
+    return not lived_so(mind, context, unit)
+
+
+def look_now(mind, items, acts) -> Optional[tuple]:
+    """F50 (Finding Out): in a moment in which the mind is free to speak and something was just lived for real
+    (someone's turn has ended, or it is in the middle of its own answer), whether it decides to look something up
+    before it says the next word, as (the item's unit, its symbol, the rate, its not-knowing u, whether the open
+    claim is a plain one, whether it is about the next word only: it had a word to say), or None. Not in a moment
+    that only comes to mind (a thought, a situation recalled).
+
+    Two cases, one measure. It decided nothing where something of its own is expected (a word more for than
+    against, or a claim of its frame about the thing asked about that was left open in this moment; it does not
+    expect the world to go on: it is not done): u = 1 - 2 max(0, m), m its best expectation's margin over what
+    stands against it (the strongest rival, or 1/2): a claim left open and hesitation between rivals are both not
+    knowing. Where nothing of its own is expected it was told something, not asked: that is no reason to look (what
+    is new in it the mind may ask itself about in its own time, F51). Or it is about to say a word whose claim does not
+    rest on what it lived of the thing asked about (``grounded``), at a context it has no record of its own of:
+    u = 1. Of the thing itself it has lived nothing there; how firmly the things of its kind agree is what it
+    expects, not what it knows (and is what it goes by when it cannot look, or found nothing). As for any act:
+    rate = the drive + what this led to before,
+        rate = (2u - 1) + (2 e_look - 1),
+    acted on when ceil(theta / rate) <= T. What to look up: the item the frame that speaks is about; with no frame,
+    the item of what it was just told that it knows least (one never met before this run of items, else the best
+    topic by its own evidence). Not an item whose claims its own record holds to be met (e_open under 1/2: it has
+    read about it; the other words of the answer are not found by reading the same again). Reads only."""
+    from .events import IMAGINED
+    from .mind import INNER_CHANNEL
+    from .read import _moment_memo, kind_masks, look_expectation, mv_view, own_mass
+    context = mind.context
+    if context is None or not mind.ch.has(INNER_CHANNEL):
+        return None
+    channels = mv_view(mind, "u_channel")
+    inner = mind.ch.id(INNER_CHANNEL)
+    if any(p == IMAGINED or channels[u] == inner for u, p in items):
+        return None                                        # a moment that only comes to mind, or an inner event
+    act = kind_masks(mind)[5]
+    said = [mind.unit_of(e.channel, e.symbol) for e in acts if mind.ch.has(e.channel)]
+    said = [u for u in said if u >= 0 and act[channels[u]]]
+    if said:
+        made = (mind.__dict__.get("_src_now") or {}).get(said[0])
+        if not rests_on_others(mind, context, said[0], made):
+            return None                                    # it rests on its own record, or on what it lived of it
+        from . import hata                                 # of the thing itself it has lived nothing here: what it
+        u = 1.0 - max(0.0, 2.0 * hata.proven(mind, made[0][0]) - 1.0)   # knows is how far this way is proven to hold
+    else:
+        sense = kind_masks(mind)[4]
+        if any(e > 0.5 for v, e in mind.predicted.items() if sense[channels[v]] and channels[v] != inner):
+            return None                                    # it expects the world to go on (the end of its turn): it
+        ranked = sorted((e for v, e in mind.predicted.items() if act[channels[v]]), reverse=True)   # is done
+        best = ranked[0] if ranked else 0.5
+        rival = max(ranked[1], 0.5) if len(ranked) > 1 else 0.5
+        if best <= 0.5 and not any(type(key) is tuple and len(key) == 2 and key[0] == "claim" and held[1]
+                                   for key, held in _moment_memo(mind).items()):
+            return None                                    # nothing of its own is expected here and no claim of its
+        u = 1.0 - 2.0 * max(0.0, best - rival)             # frame was left open: it was told something, not asked
+    item = _moment_memo(mind).get(("filler", context))
+    plain = True
+    if item is None:                                       # no frame speaks: only when it has just been called on
+        sense = kind_masks(mind)[4]                        # from outside (not where it stopped in its own answer)
+        if said or not any(p not in (ACTED, IMAGINED) and sense[channels[u]] and channels[u] != inner
+                           for u, p in items):
+            return None
+        item = _least_known(mind, context)
+    elif not said:
+        plain = ("claim", item) not in _moment_memo(mind)   # a relation of its frame was left open: F46's own claim
+    if item is None:
+        return None
+    v = mind.S.arrays()
+    symbol = mind.ch.symbol(int(v.channel[item]), int(v.symbol[item]))
+    from .read import OPEN_CHANNEL, mass1, open_claim
+    held = mind.unit_of(OPEN_CHANNEL, symbol)
+    tie = mind.S.find_tie(held, mind.holds, EXPECT, 0) if held >= 0 else -1
+    if tie >= 0 and sum(mass1(mind, tie)) > 0.0 and open_claim(mind, symbol) <= 0.5:
+        return None                                        # its claims were open and are met: it has read about it
+    rate = (2.0 * u - 1.0) + (2.0 * look_expectation(mind, symbol) - 1.0)
+    if rate <= 0.0 or math.ceil(mind.knob["theta"] / rate - 1e-12) > mind.cfg.T:
+        return None
+    return item, symbol, rate, u, plain, bool(said)
+
+
+def wonder(mind) -> Optional[tuple]:
+    """F51 (Asking Itself): in a silent moment in which nothing else was decided, the item the mind decides to ask
+    itself about, as (its unit, its symbol, the rate), or None. Its candidates are the items it has met in one run
+    of items only, in what it was told or read (``Mind.met_once``: an item lived again in another run is no longer
+    new, so the words that every sentence holds never stay), the oldest first. Of such an item it has lived one
+    mention: u = 1. As for any act: rate = (2u - 1) + (2 e_wonder - 1), e_wonder what asking itself has led to
+    (``read.wonder_expectation``: a look that then met the unknown it found counts for, one that did not counts
+    against; 1/2 before the first). It is acted on when ceil(theta / rate) <= max(T, the moments it has now been
+    silent): within a moment the drive must reach the line in T, as for any act; over a silence in which nothing
+    else happens it goes on adding up, so an act that has rarely paid is taken again after a longer wait and is
+    never given up for good (after n askings that led nowhere, rate = 1 / (n + 1): the next after n + 1 silent
+    moments). Reads only: the asking is the inner voice's (``dusunce.ask_itself``), carried out by the session."""
+    from .read import wonder_expectation
+    fresh = getattr(mind, "met_once", None)
+    if not fresh:
+        return None
+    rate = 1.0 + (2.0 * wonder_expectation(mind) - 1.0)
+    if rate <= 0.0 or math.ceil(mind.knob["theta"] / rate - 1e-12) > max(mind.cfg.T, getattr(mind, "idle", 0)):
+        return None                                        # (patience: see below)
+    v = mind.S.arrays()
+    for unit in fresh:
+        if unit < mind.S.n_units and v.ualive[unit]:
+            return unit, mind.ch.symbol(int(v.channel[unit]), int(v.symbol[unit])), rate
+    return None
+
+
+def holds_back(mind, items, acts) -> bool:
+    """F50: whether the word the mind is about to say is one it does not assert: it rests on what others share
+    (``rests_on_others``), the way that claims it is not proven to hold by its own record (``hata.proven`` at most
+    1/2: never settled, or not yet held more often than it failed by more than one experience: one lucky hit is
+    not knowledge), and the mind's own record holds that it does not know this
+    of the item: a relation of its frame that reads the item's own record names nothing for it in this moment
+    (F46), or a claim about it was left open before and is still open (it looked and found nothing, or could not
+    look). What it could not find out it does not say as if it knew, as long as what it holds back is answered
+    (``hata.answered`` at least 1/2: someone shows it, or it can look later); where no one ever does, saying it is
+    the only way to find out. In any moment, also one that comes to mind again (the situation it is brought back
+    to after a look)."""
+    from .events import IMAGINED
+    from .read import OPEN_CHANNEL, _moment_memo, kind_masks, mass1, mv_view, open_claim, own_mass
+    from .mind import INNER_CHANNEL
+    context = mind.context
+    if context is None or not acts:
+        return False
+    channels = mv_view(mind, "u_channel")
+    if mind.ch.has(INNER_CHANNEL) and any(channels[u] == mind.ch.id(INNER_CHANNEL) for u, _ in items):
+        return False                                       # what one says in an inner state (not knowing, looking)
+    act = kind_masks(mind)[5]                              # is not a claim about the thing asked about
+    said = [mind.unit_of(e.channel, e.symbol) for e in acts if mind.ch.has(e.channel)]
+    said = [u for u in said if u >= 0 and act[channels[u]]]
+    if not said:
+        return False
+    made = (mind.__dict__.get("_src_now") or {}).get(said[0])
+    if not rests_on_others(mind, context, said[0], made):
+        return False
+    from . import hata
+    if hata.proven(mind, made[0][0]) > 0.5 or hata.answered(mind) < 0.5:
+        return False                                       # this way is proven to hold by its own record; or what
+    item = _moment_memo(mind).get(("filler", context))     # it holds back is not answered (no one shows it, it has
+    if item is None:                                       # nowhere to look): saying it is how it finds out
+        return False
+    v = mind.S.arrays()
+    symbol = mind.ch.symbol(int(v.channel[item]), int(v.symbol[item]))
+    now = _moment_memo(mind).get(("claim", item))         # F46: a relation of its frame left open in this very moment
+    if now is None or not now[1]:
+        if mind.__dict__.get("_settling"):                 # (on the copy that finds out whether a claim is still open:
+            return False                                   # what was open before is the question, not the answer)
+        held = mind.unit_of(OPEN_CHANNEL, symbol)
+        tie = mind.S.find_tie(held, mind.holds, EXPECT, 0) if held >= 0 else -1
+        if tie < 0 or sum(mass1(mind, tie)) <= 0.0 or open_claim(mind, symbol) <= 0.5:
+            return False
+    return True
+
+
+def _least_known(mind, context: int) -> Optional[int]:
+    """F50: of the items of what the mind was just told (the single items of the context, on an act channel), the
+    one it knows least: the last one that was never met before the present run of items; when it met them all, the
+    best topic by its own evidence (dusunce.topic_score: telling and not yet well known)."""
+    from .dusunce import topic_score
+    from .form import parts_of
+    from .read import kind_masks, mv_view
+    from .store import ATOMIC
+    v = mind.S.arrays()
+    act = kind_masks(mind)[5]
+    channels = mv_view(mind, "u_channel")
+    parts = [p for p in (parts_of(mind, context) or (context,)) if v.kind[p] & ATOMIC and act[channels[p]]]
+    if not parts:
+        return None
+    since = getattr(mind, "episode_start", mind.t)
+    new = [p for p in parts if int(v.ubirth[p]) >= since]
+    if new:
+        return new[-1]
+    scored = [(topic_score(mind, p), -i, p) for i, p in enumerate(parts)]
+    best = max(scored)
+    return best[2] if best[0] > 0.0 else None
+
+
 def look(mind) -> Optional[tuple]:
     """F47 (Looking Up by Itself): in a silent moment, the item the mind decides to look up, as (its unit, its
     symbol, the rate of the decision), or None.
@@ -453,24 +689,29 @@ def look(mind) -> Optional[tuple]:
     theta, T = mind.knob["theta"], mind.cfg.T
     v = S.arrays()
     found = []
+    asked = getattr(mind, "wondered", None) if getattr(mind.cfg, "wonder", False) else None
     for filler, context in where.items():
         if filler >= S.n_units or not v.ualive[filler]:
             continue
         symbol = mind.ch.symbol(int(v.channel[filler]), int(v.symbol[filler]))
         e_open = open_claim(mind, symbol)
-        if e_open <= 0.5:
-            continue
+        own = bool(asked) and filler in asked              # F51: it asked itself this, could not answer and has
+        if own:                                            # not looked yet: that is not knowing for certain
+            e_open = 1.0                                   # (u = 1), and its drive adds up over a silence
+        if e_open <= 0.5:                                  # (``wonder``'s patience). What it looked for and did not
+            continue                                       # find is looked for again by the rule as it was
         rate = (2.0 * e_open - 1.0) + (2.0 * look_expectation(mind, symbol) - 1.0)
         if rate <= 0.0:
             continue
         latency = math.ceil(theta / rate - 1e-12)
-        if latency > T:
+        if latency > (max(T, getattr(mind, "idle", 0)) if own else T):
             continue
         found.append((latency, -e_open, filler, symbol, rate))
+    plain = getattr(mind, "open_plain", ())
     for latency, _, filler, symbol, rate in sorted(found, key=lambda entry: entry[:3]):
-        if claim_again(mind, where[filler], filler) is not None:   # (nothing claims it there any more: nothing to
-            return filler, symbol, rate                             # look for)
-    return None
+        if filler in plain or claim_again(mind, where[filler], filler) is not None:   # (nothing claims it there
+            return filler, symbol, rate                             # any more: nothing to look for; F50: a plain
+    return None                                                     # claim is settled by saying it, not by a frame)
 
 
 # ---------------------------------------------------------------------- control knobs (section 8, simple)

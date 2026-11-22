@@ -39,6 +39,7 @@ from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, PART, SLOTTED, W_NEG, W_P
 FEELINGS = ("surprise", "relief", "load", "conflict")
 SELF_CHANNEL, SELF_SYMBOL = "benlik", "ben"
 INNER_CHANNEL, NOT_KNOWING = "ic", "bilmemek"     # L7: not knowing, perceived as an inner event
+LOOKING = "bakmak"                                # F50: having decided to look something up, perceived likewise
 
 
 @dataclass
@@ -145,6 +146,28 @@ class Config:
                                     # word and the lived one part); lambda, how far a reading is believed, is the
                                     # expectation of that tie read general -> specific, 1/2 with nothing lived
                                     # (zihin/hata.py)
+    find_out: bool = False          # F50 (Finding Out; with open_claims, look and faults): what the mind does not
+                                    # know it acts on, in the moment it is called on. Called on and with nothing to
+                                    # say, or about to say something that rests on what others share and not on
+                                    # what it lived of the thing asked about, it looks first when it has somewhere
+                                    # to look: rate = (2u - 1) + (2 e_look - 1), u its not-knowing in that moment
+                                    # (L7's measure). It does not assert what it is about to look up; that it is
+                                    # looking is an inner event (how one says so is learned, never given); having
+                                    # read, it is brought back to what it was asked and says what it can say now.
+                                    # A thought that comes to nothing is an unknown about its topic (act.look_now,
+                                    # Session.reply, Session.say_again)
+    echo_exact: bool = False        # F52 (Echo of the Same Words): in the lived continuation of the last words
+                                    # (F16) a continuation is an echo only where it followed these very words in
+                                    # what is present; without it every word the partner just said is left out,
+                                    # wherever it stood (read.continuation_backoff)
+    wonder: bool = False            # F51 (Asking Itself; with open_claims, look): an item the mind has met in one
+                                    # run of items only is an unknown. In a silent moment it may decide to ask
+                                    # itself about it: rate = (2u - 1) + (2 e_wonder - 1), u = 1 (it has lived one
+                                    # mention of it), e_wonder what asking itself has led to. It brings to mind the
+                                    # question it knows best with the item in its place (imagined) and answers
+                                    # inwardly; what it cannot answer there is an open claim about the item, which
+                                    # it may look up (F47); what it then reads brings new items: a chain
+                                    # (act.wonder, dusunce.ask_itself)
     silent_claims: bool = False     # F49, while it only listens (with faults): at a context it has no record of its
                                     # own of, the mind makes its full reading although it cannot speak, and what
                                     # its ways claim there is kept and settled by what comes next like any claim:
@@ -292,6 +315,16 @@ class Mind:
                                                      # it knows of (set when such a claim is acted on)
         self.open_where: Dict[int, int] = {}         # F46/F47: item -> the context a claim about it was last left open
         self.looking = None                          # F47: the item it decided, in this moment, to look up
+        self.met_once: Dict[int, int] = {}           # F51: the items it has met in one run of items only (item ->
+                                                     # the moment that run began), not asked itself about yet,
+                                                     # the oldest first
+        self.wondering = None                        # F51: the item it decided, in this moment, to ask itself about
+        self.wondered: Dict[int, bool] = {}          # F51: the items it asked itself about and could not answer:
+                                                     # what a look then shows settles what the asking was worth
+        self.open_plain: Dict[int, bool] = {}        # F50: the items whose open claim is not a frame's relation (a
+                                                     # call it had nothing to say to, a thought that came to
+                                                     # nothing: False; a word it would have said on what others
+                                                     # share: True, the claim is about that next word only)
         self.taking = (0.0, 0, 0.0, None)            # F48: its surprise over the moments of what it is taking in: the
                                                      # sum, how many, the greatest, and the item before that moment
         self.heard = None                            # F48: its surprise over what it last took in, not thought about yet
@@ -396,7 +429,9 @@ class Mind:
             self.idle = 0
             if not self.episode:
                 self.episode_start = self.t                # a run of items begins after a pause (F29 reads what was
-            for unit, _ in items:                          # lived before it)
+                if getattr(cfg, "find_out", False):        # lived before it); F50: whether it only comes to mind
+                    self.__dict__["_came_to_mind"] = all(prov == IMAGINED for _, prov in items)
+            for unit, _ in items:
                 self.episode.append(unit)
                 maybe_chunk(self, slot)
             self.episode = self.episode[-self.knob["F"]:]
@@ -427,7 +462,33 @@ class Mind:
             claims = [(key[1], held) for key, held in self._read_memo.items()   # F46: what the speaking frame
                       if type(key) is tuple and len(key) == 2 and key[0] == "claim"] \
                 if getattr(cfg, "open_claims", False) else ()                    # claimed of its filler's record
+            sought = None
+            if not listening and items and getattr(cfg, "find_out", False) and getattr(cfg, "look", False) \
+                    and self.__dict__.get("can_look"):
+                sought = act_mod.look_now(self, items, acts)   # F50: called on and it does not know: it looks first
+                decided = bool(acts)
+                if sought is not None:
+                    acts = []                              # what it is about to look up it does not assert
+                    if sought[0] == self.__dict__.get("_sought"):
+                        sought = None                      # (it is looking that up already: one decision, until it
+                    else:                                  # is next called on from outside)
+                        self.__dict__["_sought"] = sought[0]
+                        self.pending.append(Event(INNER_CHANNEL, LOOKING, ACTED, min(1.0, sought[3])))
+                        if not any(item == sought[0] and held[1] for item, held in claims):
+                            claims = list(claims) + [(sought[0], (sought[3], True))]   # (F46 did not note it open
+                        if sought[4]:                                                # in this moment: one note)
+                            self.open_plain[sought[0]] = sought[5]
+                    if decided and getattr(cfg, "faults", False):
+                        from . import hata
+                        hata.withheld(self, self.context)  # (the claim was held back, not said)
+            if sought is None and acts and not listening and getattr(cfg, "find_out", False) \
+                    and act_mod.holds_back(self, items, acts):
+                acts = []                                  # F50: what it could not find out it does not assert
+                from . import hata
+                hata.withheld(self, self.context)
             self._unknowing(items, acts, listening)
+            if sought is not None:
+                self.unknown = 0.0                         # it is looking: that is what it feels, not not knowing
             imagine = cfg.imagine and not items
             rethink = cfg.reflect and cfg.reliability and not items
             babble = cfg.knobs and not items and not acts
@@ -443,6 +504,27 @@ class Mind:
                 self.pending.append(event)
             free = not items and not acts and not listening   # a silent moment in which nothing was said
             self.looking = act_mod.look(self) if free and getattr(cfg, "look", False) else None   # F47
+            if sought is not None:
+                self.looking = sought[:3]                  # F50: decided in the moment it was called on
+            if listening and items and "_sought" in self.__dict__ and any(
+                    prov not in (ACTED, IMAGINED) for _, prov in items):
+                del self.__dict__["_sought"]               # F50: called on anew from outside
+            if getattr(cfg, "wonder", False):              # F51: the items met in one run of items only; and, free
+                if items and listening:                    # and with nothing else decided, whether it asks itself
+                    born, act_ch = mv_view(self, "u_birth"), kind_masks(self)[5]   # about one of them
+                    channel, met = mv_view(self, "u_channel"), self.met_once
+                    for unit, prov in items:
+                        if prov in (ACTED, IMAGINED) or not act_ch[channel[unit]]:
+                            continue
+                        if born[unit] == self.t:
+                            met[unit] = self.episode_start
+                        elif met.get(unit, self.episode_start) != self.episode_start:
+                            del met[unit]                  # lived again in another run: it is no longer new
+                    while len(met) > 64:
+                        del met[next(iter(met))]
+                self.wondering = act_mod.wonder(self) if free and getattr(self, "thinking", None) is None \
+                    and (self.looking is None or not self.__dict__.get("can_look", True)) else None   # (a look it
+                                                                    # cannot carry out does not stand in the way)
             if getattr(cfg, "think", False):               # F48: how surprised it was by what it is taking in (and
                 if items and listening:                    # where most: the item its failed expectation was of), and
                     total, n, peak, about = self.taking    # whether it now thinks about it
@@ -1039,7 +1121,7 @@ class Mind:
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
                   "unknown", "voice", "witnesses", "episode_start", "company", "topic", "open_where", "taking",
-                  "heard", "about", "claimed", "faults", "_held_back")
+                  "heard", "about", "claimed", "faults", "_held_back", "open_plain", "met_once", "wondered")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}

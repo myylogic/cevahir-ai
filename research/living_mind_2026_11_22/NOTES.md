@@ -1137,3 +1137,445 @@ with wholes): bit for bit what they were. Tests: 396 passed (1 new).
 python research/living_mind_2026_11_22/t_fault_watch.py
 python -m zihin --ac faults,silent_claims
 ```
+
+## 14. Finding out: what the mind does not know it acts on, in the turn it is asked in, and goes on living while it does (F50)
+
+### 14.1 What was asked
+
+The owner: while it is talking, when the mind does not know something, it must start by itself what it takes to
+learn it (look, watch, listen), and go on producing output meanwhile, as a person who is thinking does not freeze
+("bugün hava İstanbul'da nasıl": something like "bakalım nasılmış", while it finds out). All of it as processes
+inside the mind, started by the mind, with no command such as read or learn. "There can be no silent claim: where
+there is an unknown the mind must move to learn it." It must tell the person what it found and take it into itself.
+The sources of every error must be found and corrected mathematically; full success is wanted in the tests.
+
+### 14.2 What was there, and the gap
+
+Felt not-knowing (L7), open claims (F46), looking up by its own decision in a later silent moment (F47), thinking by
+itself (F48), a record of its own ways of reading (F49). The gap, measured below: asked about a thing it has read
+nothing of, the mind says the word the things of that kind share. That word is not a silent claim in the sense of
+section 13 (F49 keeps and settles it), but nothing in the mind marks it as *not knowledge of the thing asked
+about*, and nothing makes it find out before it speaks. F47 looks only afterwards, only in a silence, only for a
+claim that a frame's relation left open; and a look carried out by the session stopped the mind until the page was
+read.
+
+### 14.3 The model (`Config.find_out`, off by default; with open_claims, look and faults)
+
+1. **What rests on others.** F49's chain says, for every word the mind is about to say, which ways claim it. A
+   claim *rests on what was lived of the thing asked about* when some way that makes it (more for than against)
+   is a relation of the frame that reads the filler's own record (the asked word itself, its own continuation, how
+   sequences that began with it went on, what it was answered with, what is known of it and not said yet); or
+   when the context has a record of its own (memory speaks); or when the word is how a sentence the mind read or
+   was told went on from the item its own utterance began with (`act.lived_so`: it is reciting something it lived,
+   whichever way made the claim; what it only ever said or imagined itself does not count). Everything else (the
+   members' own word, the members of a narrower place, a similar situation, a form) rests on what others share
+   (`act.rests_on_others`).
+2. **Not knowing, at the moment of speaking.** When the mind is about to say a word that rests on what others
+   share, what it knows is how far that way is *proven* by its own record:
+
+   > proven = W+ / (W+ + W- + k) of the tie (way -> holds); u = 1 - max(0, 2 proven - 1)
+
+   (F49's tie; what the record does not yet say counts for nothing, so a way never settled has u = 1 and one lucky
+   hit is still u = 1). When it decided nothing although something of its own is expected (a word more for than
+   against, or a claim of its frame left open in this moment): u = 1 - 2 max(0, m), m the margin of its best
+   expectation over what stands against it. Where nothing of its own is expected it was told something, not asked:
+   that is no reason to look (what is new in it belongs to its own time, section 15).
+3. **The decision, as for any act**: rate = (2u - 1) + (2 e_look - 1), acted on when ceil(theta / rate) <= T
+   (`act.look_now`). It is taken in any moment in which the mind is free to speak and something real was just
+   lived, also in the middle of its own answer. One decision for a thing until the mind is next called on from
+   outside.
+4. **What then happens, all of it lived by the mind.** The word is withheld (F49 keeps the claim as held back, not
+   said). That it is looking is an inner event (`bakmak`, on the channel of inner events, with intensity u); how
+   one says so is never given: a mind that heard a word said in that state says that word itself the next time,
+   and one that never did says nothing. The open claim is written (once: where F46 wrote it in this moment it is
+   not written again). The look is carried out within the turn; in the online life only the fetching is started,
+   on a thread that touches nothing of the mind, the turn ends at once and the mind goes on living. When what it
+   sent for has come it is read as any page is; then the items of the situation the claim was left open in come to
+   mind again (imagined), and the mind says what it can say now, by its own decisions.
+5. **Whether the claim is met** is found on a copy brought back to the situation: the first word it says there must
+   not rest on what others share (a claim about the next word only), or it must say what follows to the end (a
+   claim a frame's relation left open: F47's stricter test). On that copy what was open before is not consulted:
+   that is the question, not the answer.
+6. **With nowhere to look, or when the look found nothing** (`act.holds_back`): a word that rests on what others
+   share is not asserted when the way that claims it is not proven by its own record (proven at most 1/2), the
+   mind's own record holds the thing to be unknown to it (a relation of its frame that reads the item's record
+   names nothing for it now, or a claim about it was left open and still is), and holding back is answered
+   (F49's own record of that: someone then shows it, or it can look later; 1/2 before it has held anything back).
+   Where no one ever answers, saying it is the only way left to find out, and the mind then says it.
+7. **What was lived of the thing itself stands against what the others share.** Where a relation that reads a
+   record of the filler lived apart from the frame's own instances (how the sequences that began with it went on,
+   what it was answered with alone, what is known of it) names a word r and the members (also those of a narrower
+   place: they are others too) propose another word v on the same channel: e_v <- (1 - c_r) e_v,
+   c_r = max(0, 2 e_r - 1), as the context's own record stands against a generalisation (F27). Without it the two
+   claims tie and nothing is said after the asked word.
+8. **With F41** (what is known of the thing and not said yet): a shared claim that F49 found wanting does not
+   stand in the way of the reading of the thing's own known sequence (F49's rule that a cruder reading does not
+   step in for a doubted one is about readings that rest on others).
+
+No word, frame or domain is named anywhere; no number is chosen (one experience per settled claim, the core's k,
+the line the mind already speaks at).
+
+### 14.4 The sources of the errors found on the way, and what was done about each
+
+Every one of these was located by tracing the mind's own chain at the moment it went wrong.
+
+| what was seen | its source | what was done |
+|---|---|---|
+| after its look the mind said the value it read and not the rest of the sentence (60 of 80 answers in the first measurement) | four sources, found one after another: (a) F16's rule "what the partner just said is an echo" leaves out every word of the partner's utterance wherever it stood, so the continuation of the sentence it read was dropped because the question held that word; (b) the copy that tests whether a claim is met consulted the record that the claim was open (circular: nothing could ever be found met); (c) the open claim was written twice in one moment (by F46 and by the new step), so one met look could never bring it back under 1/2; (d) F49's "a cruder reading does not step in" kept F41's reading of the thing's own known sequence out | (a) the echo rule in its exact form, a switch of its own (14.5); (b) and (c) corrected; (d) point 8 above |
+| one answer of 80 silent with everything on | the narrower vote (section 12) was computed after the own-record rule and stood against what the mind had just read of the thing itself (0.936 against 0.984: neither said) | the members of a narrower place are others too (point 7) |
+| the late answer went on with words of the next dialogue ("et martı", "et aslan aslan ne yer") | the measurement, and a weakness of the session: an utterance the mind made outside a turn did not mark a turn, so the next thing lived joined the same run of items | `Session.speak` marks its own utterance as a turn |
+| in a turn in which the partner had taught "bakalım", the late answer stayed empty | the mind decided to look a second time in the same turn (for the word it says while looking), which moved the situation the first look was for | one decision for a thing until it is next called on |
+| every lawful frame went silent where the mind is only told good or bad (0 of 40, where F49 alone has 40) | the first form of point 6 held back unconditionally | holding back is judged by whether it is then answered; a way proven by its own record is said |
+| 6 wrong answers of 80 where the library lacks every second thing | one lucky hit made a way count as holding (1 of 1: expectation 0.75) | proven = c f: one lucky hit is not knowledge |
+| told a sentence in the chat, the mind looked something up as if it had been asked, wrote a claim that can never be met (there is nothing to say after a statement) and looked it up again and again | a statement and a question it cannot answer both leave it free with nothing to say | point 2: where nothing of its own is expected it was told something |
+| in the chat a look decided in a silent moment of a turn (F47) was carried out as if it were this step's | the session took the mind's last look decision, whichever it was | only the one decided when it was called on |
+
+### 14.5 F52, the echo rule in its exact form (`Config.echo_exact`, off by default)
+
+F16 reads, when nothing else speaks, the lived continuation of the mind's own last words, and leaves out "what the
+partner just said: an echo, not knowledge". As written that leaves out every word of the partner's utterance,
+wherever it stood there. F42 already holds the exact rule for one item over the whole episode (what followed *that
+item* earlier in the episode). F52 is the same for the last words of any length: a continuation is an echo only
+where it followed these very words in what is present. A sentence the mind read elsewhere is then carried on
+although the question holds one of its words. Measured in this section's world only (below): it completes 19 of
+the 24 answers that F50 alone leaves at the value. With F41 on it changes nothing there. **Not run on the whole
+battery** (SCAN, the owner's documents, T-long): until it is, it stays a studied switch and nothing is claimed for
+it elsewhere.
+
+### 14.6 Measured (`t_find_out.py`, 5 seeds; rows in `results/find_out.jsonl`)
+
+The world of section 11's loop: 8 things read of ("X V yer .") and watched being asked; they share one value. Of
+the other things the mind has read nothing; a library holds one sentence about each.
+
+**Asked once** about each of 16 new things; whatever it says in that one turn (its own look and what it says
+after it included) is its answer; then the true dialogue is shown. Whole answer right / the right value but not
+the rest / another value / nothing, of 80:
+
+| | answers | looks of its own |
+|---|---|---|
+| off | 9 / 0 / 44 / 27 | 0 |
+| F46 + F47 + F49 (looks only in later silences) | 4 / 0 / 10 / 66 | 0 |
+| the same with F50 | 56 / 24 / **0** / 0 | 80 |
+| the same with F50 and F52 | 75 / 5 / **0** / 0 | 80 |
+| the same with F50 and F41 | **80 / 0 / 0 / 0** | 80 |
+
+**The library holds every second thing.** Of 80, and of the 40 it holds:
+
+| | answers | of the 40 the library holds |
+|---|---|---|
+| off | 9 / 0 / 44 / 27 | 6 / 0 / 21 / 13 |
+| F46 + F47 + F49 | 4 / 0 / 10 / 66 | 4 / 0 / 6 / 30 |
+| the same with F50 | 26 / 14 / 1 / 39 | 26 / 14 / 0 / 0 |
+| the same with F50 and F52 | 36 / 4 / 1 / 39 | 36 / 4 / 0 / 0 |
+| the same with F50 and F41 | 40 / 0 / **1** / 39 | **40 / 0 / 0 / 0** |
+
+Of the 40 things the library does not hold the mind says the asked word and holds, 39 times; once it says a wrong
+value. That one was traced: in that life the first three new things all ate the same, the narrower vote had held
+twice with nothing against it (proven 2/3), and the fourth thing, about which nothing could be found, was said to
+eat it too. It is an induction the mind's record supported, and it was wrong.
+
+**While it goes on living** (the look fetched in the background; a library that answers only when it is let). 12
+new things a life. In the first 3 turns the partner says "bakalım" right after the mind began to look; counted
+over the other 45 turns. Between the question and the arrival of what the mind sent for it is asked "merhaba":
+
+| | the turn ended while what it sent for was on its way | it said "bakalım" by itself as it began to look | it answered "merhaba" meanwhile | its answer after what it sent for had come (whole / value / another value / nothing) |
+|---|---|---|---|---|
+| F46 + F47 + F49 + F50 | 45 of 45 | 40 of 45 | 45 of 45 | 33 / 12 / 0 / 0 |
+| the same with F41 | 45 of 45 | 44 of 45 | 45 of 45 | **45 / 0 / 0 / 0** |
+
+One life, turn by turn (said at once | answered meanwhile | said after reading): "sinek bakalım | merhaba | tohum
+yer", "kelebek bakalım | merhaba | balık yer", ... The word it says while it looks was said to it three times, in
+that state, by its partner; nothing else was done about it. In one turn of 45 it began to look without saying it
+(the fourth turn of one life: the word was not firm yet).
+
+**The earlier parts again, with F50 on** (`t_find_out.py again`). F50 changes what the mind says also where it has
+nowhere to look. The parts of `t_fault.py` and `t_fault_kinds.py` were run once more with F50 on in every
+condition that has F49 on, and compared count by count with the committed rows:
+
+| part | against the committed rows |
+|---|---|
+| two readings that disagree; told only good or bad; every frame lawful; eight frames one after another; the kinds (section 12) | the same counts |
+| misled | one answer of 200 on things never asked about changed from silent to wrong |
+| the loop with a library (section 11.5; the only part where it can look) | first answers 4 / 0 / 10 / 66 became 56 / 24 / 0 / 0; after its own looking 16 / 6 / 1 / 57 became 59 / 21 / 0 / 0; 7 looks in later silences instead of 35 (it had looked in the turn) |
+
+The kinds were not the same at first: before any round the mind with F50 asserted, of every fresh thing, the
+sentence it had read about it (40 wrong of 40 where F49 alone says nothing). The source: the relation "its own
+continuation" (NEXT) holds for every member, because a member's strongest continuation is the very answer of the
+dialogue the frame generalises; so it says nothing of whether what was read of a *new* thing answers the question,
+and point 7 let it stand against what the others share. Point 7 now counts only the relations that read a record
+lived apart from the frame's own instances (how sequences that began with the thing went on, what it was answered
+with alone, what is known of it).
+
+### 14.7 What it does not do
+
+* The whole sentence after a look needs F41 (80 of 80) or F52 (75 of 80); F50 alone gives the value it read and
+  stops in 24 of 80 answers, early in a life, before it has watched a dialogue with another value.
+* One wrong answer of 80 remains where the library lacks the thing (an induction that had held twice). A mind that
+  speaks from what held so far will sometimes be wrong; what F50 guarantees is narrower: it looks first when it
+  can, and it does not assert an unproven word about a thing it knows to be unknown to it while someone answers.
+* Where no one ever shows it anything and it has nowhere to look, it says the shared word after one unanswered
+  silence (and is wrong where the frame misleads). That is the rule working, not a remedy.
+* A mind whose looks have failed several times and never met anything stops looking when asked (rate = 2 e_look
+  under the line after four failures in a row from the start): nothing in F50 tries again. Section 15's patience
+  is for the mind's own time only.
+* It needs a question it has lived being answered. The owner's example ("how is the weather in Istanbul today")
+  takes a mind that has lived such questions and has a source for the weather; neither is here. It has no sense
+  of the clock, and it does not ask its partner when it cannot look (asking must be learned, not scripted: an
+  earlier decision of the owner's that the tests pin).
+* The word it says while it looks is one word it heard in that state; it does not compose "let us see how it is".
+* Measured in one small world. Not on a long life, on real documents or on the web; the cost on a large mind (the
+  chain is read at every decision, and one more reading where a word rests on others) is not measured.
+
+### 14.8 Gates, tests, reproduce
+
+Switches off: digest gate, the 17 configurations and the scripted life (plain and with wholes): bit for bit what
+they were. The measurements, the gates and the tests were run on one frozen copy of the code. Tests: 417 passed
+(21 new: `test_zihin_find_out.py` 13, `test_zihin_wonder.py` 8).
+
+```
+python research/living_mind_2026_11_22/t_find_out.py asked      # also: half, living, again
+python -m pytest tests/evolution/test_zihin_find_out.py -q
+python -m zihin --ac find_out,known --kaynak <a folder of your documents>
+```
+
+## 15. Asking itself: what is new in what it was told the mind asks itself about, in its own time (F51)
+
+### 15.1 What was asked
+
+The owner's example: cars run with an engine; an engine needs fuel; how does an engine work; it is made of these
+parts; if the valves have a fault that leads to this; in such engines that is a chronic fault, why; the pistons
+wear them, why; friction and the material: look it up; so the material matters too; and so on: "a tremendous
+widening, a cross spiral". And: only the mind can know which knowledge it lacks. Every step of that example is the
+same step: something new appears in what was just understood, the mind asks about it what it knows how to ask,
+cannot answer, finds out, and what it finds brings the next new thing.
+
+Sections 10 to 14 gave the mind the parts (it knows when it cannot say something to the end, it can look, it can
+think in its own time). What was missing is the first move: nothing made the mind ask itself anything. An open
+claim arose only when someone asked.
+
+### 15.2 The model (`Config.wonder`, off by default; with open_claims and look)
+
+1. **What is new.** An item is new while the mind has met it in one run of items only, in what it was told or read
+   (`Mind.met_once`). An item lived again in another run is no longer new, so the words that every sentence holds
+   never stay, and nothing has to say which words are "content". What the mind only said or imagined itself brings
+   nothing new.
+2. **The decision**, in a silent moment in which nothing else was decided, as for any act:
+   rate = (2u - 1) + (2 e_wonder - 1). Of a new item the mind has lived one mention: u = 1. e_wonder is what
+   asking itself has led to (below); 1/2 before the first.
+3. **Patience.** Within a moment the drive must reach the line in T, as for any act. Over a silence in which
+   nothing else happens it goes on adding up: the act is taken when ceil(theta / rate) <= max(T, the moments it has
+   now been silent). So an act of its own time that has rarely paid is taken again after a longer wait and is never
+   given up for good (after n askings that led nowhere rate = 1 / (n + 1): the next after n + 1 silent moments).
+   The first form, without this, stopped asking for ever after four askings that led nowhere: the same failure F48
+   had shown ("it learned from one empty thought never to think again").
+4. **The question.** The mind asks the question it knows best: a generalisation with one place whose last item is
+   the end of a turn and whose instances were answered (the lived context of a member went on with a word:
+   someone's turn followed; a sentence that was read and left at that is not a question), the one answered of the
+   most things (`dusunce.question_frames`).
+5. **Asking** (`dusunce.ask_itself`). The question's items come to mind one after another with the new item in the
+   frame's place (imagined; nothing is said aloud), and from its end the inner voice answers by the mind's own
+   decisions. An unknown is found when it said nothing, when the first word it said rests on what others share
+   (section 14), or when a relation of its frame named nothing for the item (F46). The unknown is an open claim
+   about the item at the end of the imagined question.
+6. **Looking.** An unknown it found by asking itself and has not looked up yet is not knowing for certain: u = 1 in
+   the look's rate (F47's rate with e_open = 1), with the same patience. The look is F47's: the page is read, the
+   claim read again. What it reads brings new items: the chain.
+7. **What asking was worth** is what the look then shows: met, W+ of the tie (asking itself -> relief); not met,
+   W-. An asking that found the mind already knew writes nothing.
+8. **A look that failed, weighed by what was expected.** With this switch a failed look counts against looking
+   *that item* up again as far as looking was expected to pay then (W- by e_look of every look at that moment). A
+   failure that was expected says little of the item, so it is looked for again when looking pays again; a failure
+   where looking usually pays is strong, and the item is tried a few times and left. What was looked for and not
+   found is looked for again by F47's own rule (within T), not by patience.
+
+### 15.3 Measured (`t_wonder.py`, 5 seeds; rows in `results/wonder.jsonl`)
+
+The mind of every part: 8 things read of and watched being asked ("X ne yer ?" -> "X V yer ."), four values among
+them; it knows one question.
+
+**A chain.** Seven things, each eats the next; the library holds one sentence about each of the five in the middle.
+The partner tells one sentence, about the first, and says nothing more; 40 silent moments. Then the six things
+that eat something are asked about on copies that may not look (right / wrong / silent, of 30):
+
+| | asked itself (could not answer) | looks (met) | afterwards | of the last thing: the asked word, and holds | words said aloud in the silence |
+|---|---|---|---|---|---|
+| F46 + F47 + F49 + F50 + F41 | 0 | 0 | 5 / 0 / 25 | 5 of 5 | 0 |
+| the same with F51 | 35 (30) | 45 (25) | **30 / 0 / 0** | 5 of 5 | 0 |
+| with F51, nowhere to look | 10 (5) | 0 | 5 / 0 / 25 | 5 of 5 | 0 |
+
+One life, as it went (the first seed): told "serçe martı yer ." It asked itself "serçe ne yer" and answered inwardly
+"serçe martı yer"; "martı ne yer": could not answer, looked it up, read; "arı ne yer" (the thing it had just read
+of): looked up; and so on through karınca, panda, kaz; of kanguru, the last, the library holds nothing: four looks,
+none met, and it stopped. Its last look was at the 16th silent moment in every life. Without the switch nothing
+happens in the silence and the mind knows the one thing it was told. With nowhere to look it still asks, and then
+holds an open claim about the thing it could not answer: it knows what it lacks.
+
+**Two chains** of four things, their first sentences told one after the other (right / wrong / silent, of 30):
+
+| | asked itself (could not answer) | looks (met) | afterwards |
+|---|---|---|---|
+| without F51 | 0 | 0 | 10 / 0 / 20 |
+| with F51 | 40 (30) | 50 (20) | **30 / 0 / 0** |
+| with F51, nowhere to look | 20 (10) | 0 | 10 / 0 / 20 |
+
+Both are followed, in alternation (what is new is taken oldest first).
+
+**A library that holds nothing**, then is filled. Ten sentences are told, each about two new things, six silent
+moments after each. Per life, sentence by sentence:
+
+| sentence | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| questions it asked itself | 2 | 2 | 2 | 2 | 2 | 2 | 1 | 1 | 0 | 0 |
+| looks | 1 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | 1 | 0 |
+| what asking is then expected to lead to | 0.25 | 0.17 | 0.12 | 0.10 | 0.08 | 0.07 | 0.07 | 0.07 | 0.06 | 0.06 |
+| what looking is then expected to lead to | 0.18 | 0.10 | 0.06 | 0.04 | 0.03 | 0.02 | 0.02 | 0.02 | 0.02 | 0.02 |
+
+It asks and looks less and less often (the waits grow), and does not stop. Then the library is given a sentence
+about each of the ten things it could not find, and 60 silent moments pass with no one saying anything: it asks
+itself 80 more questions, looks 170 times (85 met), and of the 50 things asked about afterwards on copies it
+answers **50 right, 0 wrong, 0 silent**. It came back by itself to everything it had not been able to find.
+
+**A young mind.** Raised with the switch on from its first moment, the library holding only the chain:
+
+| | while it was raised: asked itself (could not answer), looks (met) | then, the chain: asked itself, looks (met) | afterwards |
+|---|---|---|---|
+| no silent moments while it is raised | 0, 0 | 35, 45 (25) | 30 / 0 / 0 |
+| 3 silent moments after every lesson | 55 (20), 20 (0) | 35, 65 (25) | **30 / 0 / 0** |
+
+With silences in its youth it asks itself about the words of its lessons as they are new (55 questions, 20 of
+which it cannot answer, 20 looks that find nothing: "balık ne yer", "tohum ne yer", "merhaba ne yer"; one of them,
+at a moment when the only answered frame it had was a statement's, was "koyun kurbağa yer"). Twenty looks that led
+nowhere do not keep it from following the chain afterwards.
+
+**In the program** (`python -m zihin --ac find_out,wonder,known --kaynak <folder>`, driven at a pseudo-terminal;
+the folder holds four one-sentence files), after 16 lessons typed in:
+
+```
+> aslan ne yer ?
+  zihin: aslan
+    zihin (kendi kararıyla) bakıyor: aslan
+>   okunuyor: kaynak/aslan.txt
+  zihin (kendiliğinden): et yer
+> kartal yılan yer .
+  zihin: (sessiz)
+  zihin (kendi kendine sordu): kartal ne yer -> kartal yılan yer
+  zihin (kendi kendine sordu): yılan ne yer -> bilmiyor
+  zihin (kendi kararıyla) bakıyor: yılan
+  okunuyor: kaynak/yılan.txt
+  okundu: 1 cümle; beklenti kapandı
+  zihin (kendi kendine sordu): kurbağa ne yer -> bilmiyor
+  zihin (kendi kararıyla) bakıyor: kurbağa
+  okunuyor: kaynak/kurbağa.txt
+  okundu: 2 cümle; beklenti kapandı
+> yılan ne yer ?
+  zihin: yılan kurbağa yer
+```
+
+(shortened: between these lines it also asked itself about "et" and "merhaba", which it had met once, and looked
+up "et", "merhaba" and "kartal" without finding anything.) The lines in brackets are the program showing what the
+mind did; nothing in them is said by the mind.
+
+### 15.4 What was tried on the way and changed
+
+| tried | what it did | why it went |
+|---|---|---|
+| new = every item first met in what it took in | after its lessons the list held every word it knew; it would have asked itself about "ne" and "yer" | new = met in one run of items only: nothing is listed by hand and the common words drop out by being lived again |
+| the question = the largest frame that ends with the end of a turn | a young mind asked itself a statement ("koyun kurbağa yer") | a question is a turn that was answered |
+| decisions within T only | four askings that led nowhere ended asking for good; one failed look ended looking for things noted once | patience (15.2, 3) and u = 1 for what it asked itself (6) |
+| a failed look written with full weight on the item | after a time in which the library held nothing, the things it had failed to find were never looked for again, although looking paid again | weighed by what was expected (8): 30 of 50 silent became 50 of 50 right |
+| the same weighting on the record of every look, so that one absent topic does not drag looking down | the absent end of the chain was looked up 28 times in 40 silent moments | taken out: the record of every look is written as before, and patience is for what was not looked up yet (4 looks) |
+| self-asking waits while a look is decided | with nowhere to look the look is decided for ever and nothing more was asked (2 of 4 new things) | a look that cannot be carried out does not stand in the way |
+| (the measurement) two sentences told with no pause between them | they were one run of items; the second was not a sentence of its own and answers ran on (10 wrong of 30) | a telling ends with a pause, as in a conversation |
+
+### 15.5 What it does not do
+
+* It asks one question, the one it knows best, of anything new, whether or not that question suits the thing
+  ("merhaba ne yer"). Choosing the question by the place the item was met in, and asking more than one, are not
+  built. The owner's example has many kinds of question (how, why, what follows); here there is one.
+* It does not reason over what it found: "so the material matters too" is an inference the chain does not make.
+  It collects, one link at a time.
+* What is new is taken oldest first, breadth first; nothing weighs which unknown matters more.
+* It never says anything to its partner about what it found unless asked (the program shows its inner questions
+  and looks; that is the program, not the mind).
+* A look that failed where looking usually pays is repeated a few times (4 of the 9 looks a life in the chain are
+  for the one absent thing).
+* Finding the question walks every unit of the mind (kept while its structure does not grow): on a large mind that
+  is a cost at each asking, not measured.
+* Measured in small worlds and one short run of the program; not on a long life, on real documents or on the web.
+
+### 15.6 Gates, tests, reproduce
+
+Switches off: digest gate, the 17 configurations and the scripted life (plain and with wholes): bit for bit what
+they were. Tests: `tests/evolution/test_zihin_wonder.py` (8).
+
+```
+python research/living_mind_2026_11_22/t_wonder.py chain      # also: chains, dead, young
+python -m pytest tests/evolution/test_zihin_wonder.py -q
+python -m zihin --ac find_out,wonder,known --kaynak <a folder of your documents>
+```
+
+## 16. Other results of this round, as they came out
+
+### 16.1 F49 with silent claims on the owner's documents: no gain
+
+Sections 11 to 13 ended with "not measured on real documents". Measured now: the owner's documents read once from
+an empty mind (about 188,700 moments), then 200 of their sentences recalled from their first two words (the recall of
+`recall_once.py`). Counts only; nothing of the documents is kept or printed.
+
+| | exact | valid | silent | reading took | ways with a record of their own |
+|---|---|---|---|---|---|
+| off | 90 | 146 | 31 | 307 s | 0 |
+| faults and silent claims | 90 | 144 | 40 | 2,701 s | 1,059 |
+
+Exact recall is the same; 9 more answers are silent and 2 fewer valid; reading took 8.8 times as long. What the
+records say of natural text: over all ways the claims were made with 0.62 on average and held 0.28 of the time (the
+members' own word 0.63 -> 0.30; the item's own continuation 0.61 -> 0.10). So on text the mind's readings hold far
+less often than they claim, it learns that, and what follows is mostly more silence where it would have said
+something that was valid but not the sentence. For recall of what was read once this is not an improvement, and at
+this cost silent claims cannot be left on while reading a library. What it is for (a mind that is asked and then
+shown) is what sections 11 to 13 measured.
+
+### 16.2 The published SCAN files
+
+The template split "opposite right": **4,476 of 4,476** exact on the published test file (1,087 of the 15,225
+published training commands watched twice; 94,919 moments; row appended to `results/scan_official.jsonl`). With
+"right" (4,475 of 4,476, section 11.7) two published template splits are in. "around right" is still running as
+this is written; "jump around right", length and add-jump on the published files have not been run. The one wrong
+answer of "right" ("walk twice and walk right": the turn said before the two walks) has not been traced.
+
+### 16.3 COGS, a first measurement: 0 of 205
+
+COGS (Kim and Linzen 2020; the published files, MIT licence, 20 MB, fetched to a folder outside this repository and
+not kept in it) asks for the logical form of a sentence and tests 21 kinds of generalisation the training file is
+built to leave out. `t_cogs.py`: a mind watched 1,155 of the 24,155 published training lines twice (the 155 lines
+that are not ordinary sentences and 1,000 ordinary ones; 123,232 moments, 313 s; F43 and F45 on, window 13, as for
+SCAN), and was asked 100 lines of the published in-distribution test file and 5 of each of the 21 generalisation
+cases. Exact match of the whole logical form:
+
+| | exact | silent |
+|---|---|---|
+| in distribution (100) | **0** | 71 |
+| generalisation (105) | **0** | 84 |
+
+It begins some answers rightly and stops ("A boy broke ." -> "boy ( x _ 1 ) and", where the form goes on "break .
+theme ( x _ 2 , x _ 1 )"). A logical form here is 10 to 153 tokens (41 in the middle) in which every variable is
+the position of a word in the sentence, and one ordinary sentence in 24 of the training file was lived. Nothing in
+the mind counts positions, and its frames have seen too little of any one form. The sequence models the benchmark
+was published with are trained on the whole file (its Transformer is reported at about 96% in distribution and
+about 35% on the generalisation set: quoted from memory, not re-checked here). So on this benchmark the mind is at
+the bottom, and this row is where it stands (`results/cogs.jsonl`). What it would take is not known yet; that is
+the next thing to find out, not something to claim.
+
+### 16.4 Asked in this round and not done
+
+* A sense of the clock and of the present moment (the time of day, how long a silence has lasted) as something the
+  mind perceives: not built.
+* Asking its partner when it cannot look: not built (it must be learned from living, by an earlier decision).
+* More than one question of its own, a question chosen for the thing, and reasoning over what it found (the "why"
+  steps of the owner's example): not built.
+* The indices in shared memory for running a moment's independent readings at the same time (the task carried
+  over from section 9): not started.
+* F52 on the whole battery; F50 and F51 on a long life, on the owner's documents and on the web: not run.
+* The one wrong answer of the published SCAN "right" split, and the invalid recalls on the documents: not traced.
+* The Turkish documents (`README-TR.md`, `docs/ZIHIN_KURAM.md`, `docs/ZIHIN_KILAVUZ.md`) were last brought up to
+  date at F43.

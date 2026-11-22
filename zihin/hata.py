@@ -192,6 +192,26 @@ def answered(mind) -> float:
     return expectation(w_pos, w_neg, mind.cfg.k)
 
 
+def proven(mind, ways) -> float:
+    """How far the claims of one way are known to hold, by its own record alone: W+ / (W+ + W- + k) of the tie
+    (way -> holds), the frequency with which its claims held, held with the conviction of that record (c f: what
+    the record does not yet say counts for nothing). 0 while none of its claims was ever settled; over 1/2 only
+    when they held more often than they failed by more than one experience (the weight of having no record)."""
+    w_pos, w_neg = _mass(mind, ways[-1])
+    return w_pos / (w_pos + w_neg + mind.cfg.k)
+
+
+def withheld(mind, context: int) -> None:
+    """F50: the word the mind decided at ``context`` was not said after all (it looks first, or holds it): the
+    claims kept for that moment were held back, not said, and wait to be answered like any claim held back."""
+    claims = mind.claimed.get(context)
+    if not claims or not any(claim[2] is True for claim in claims):
+        return
+    mind.claimed[context] = tuple((ways, unit, False if said is True else said, e0, e)
+                                  for ways, unit, said, e0, e in claims)
+    mind.__dict__.setdefault("_held_back", []).append((context, mind.t))
+
+
 def read_as(found, e0: float) -> float:
     """A claim of strength ``e0`` read with the record ``found`` of its way, general -> specific as everywhere:
     e <- e0; at every judged level e <- c e_level + (1 - c) e. e_level is what that level says a claim of this
@@ -312,8 +332,9 @@ def note(mind, src: Dict[int, list], said: List[int], listening: bool = False) -
             return                                         # the context was lived to go on: its own record speaks
     claimed = mind.claimed
     waiting = mind.__dict__.get("_held_back")
-    if waiting:                                            # called on again: what it held back in an earlier run of
-        start = getattr(mind, "episode_start", 0)          # items and is still waiting was not answered
+    if waiting and not mind.__dict__.get("_came_to_mind"):   # called on again: what it held back in an earlier run
+        start = getattr(mind, "episode_start", 0)          # of items and is still waiting was not answered (F50: not
+                                                           # in a run that only comes to mind: no one called on it)
         still = [(c, t) for c, t in waiting if t >= start]
         for c, t in waiting:
             if t < start and any(claim[2] is False for claim in claimed.get(c, ())):

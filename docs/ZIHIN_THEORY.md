@@ -392,6 +392,52 @@ At each moment, roughly each word, the mind lives these steps:
   context (the watching took 1.8 times as long), and before it has watched anything of another kind it is worse
   than the mind without it (it asserts what held for everything it watched: 30 wrong of 40 where the other says
   nothing).
+- **Finding Out (F50, off by default; with open claims, looking and fault tracing).** Asked about a thing it has
+  read nothing of, the mind used to say the word the things of that kind share: nothing marked that word as not
+  being knowledge of the thing asked about, and it looked things up only later, in a silence. F49's chain says
+  which ways claim the word the mind is about to say. A claim *rests on what was lived of the thing* when a
+  relation that reads the thing's own record makes it, when the context has a record of its own, or when the word
+  is how a sentence the mind read went on from where its own utterance began; everything else rests on what
+  others share. Of a word that rests on others the mind knows only how far that way is proven by its own record:
+  proven = W+ / (W+ + W- + k), u = 1 - max(0, 2 proven - 1) (what the record does not yet say counts for
+  nothing: one lucky hit is not knowledge). As for any act, rate = (2u - 1) + (2 e_look - 1) against the line it
+  speaks at: it withholds the word and looks the thing up first, in the turn it was asked in. That it is looking is
+  an inner event; the word one says then is learned by living it, never given. In the online life what it sent for
+  is fetched while it goes on living (it answers other things meanwhile), and when it has come the mind reads it,
+  is brought back to what it was asked and says what it can say now. With nowhere to look, or when the look found
+  nothing, it does not assert the shared word as long as holding back is answered (someone shows it; its own
+  record of that), and says it where no one ever does. What was lived of the thing itself stands against what the
+  others share (e_v <- (1 - c_r) e_v). Measured (5 seeds; 16 new things asked once each, a library that holds one
+  sentence about each; whole answer / the value only / another value / nothing, of 80): off 9 / 0 / 44 / 27; with
+  looking only in later silences 4 / 0 / 10 / 66; with F50 56 / 24 / 0 / 0; with F50 and F41 (what is known of the
+  thing and not said yet) **80 / 0 / 0 / 0**. A library that holds every second thing: 40 of the 40 it holds whole
+  and right; of the 40 it does not hold, 39 times the asked word and nothing more, once a wrong value (an induction
+  its record supported: three new things in a row had eaten the same). Fetched in the background: the turn ended
+  at once 45 of 45, it said the word it had heard three times in that state 44 of 45, answered something else
+  meanwhile 45 of 45, and its late answer was whole and right 45 of 45. It needs a question the mind has lived
+  being answered and somewhere to look; it does not ask its partner; not measured on a long life or on the web.
+- **Asking Itself (F51, off by default; with open claims and looking).** Until here an open claim arose only when
+  someone asked. An item is *new* while the mind has met it in one run of items only (the words every sentence
+  holds are lived again at once and never stay; nothing lists which words are content). In a silent moment, as
+  for any act, rate = (2u - 1) + (2 e_wonder - 1), u = 1: it brings to mind the question it knows best (a turn
+  that was answered, generalised over one place) with the new item in its place and answers inwardly; what it
+  cannot answer from what it lived of the thing is an open claim, which it looks up by itself; what it reads
+  brings the next new thing. Patience: over a silence in which nothing else happens the drive goes on adding up
+  (acted on when ceil(theta / rate) <= max(T, the moments it has been silent)), so an act of its own time that
+  has rarely paid is taken again after a longer wait and never given up; a look that failed counts against
+  looking that item up again only as far as looking was expected to pay then. Measured (5 seeds): told one
+  sentence about the first of a chain of seven things, then 40 silent moments with no one saying anything: 35
+  questions of its own, 45 looks, and all 30 things that eat something answered right afterwards (5 of 30 without
+  it), nothing said aloud, and of the last thing, about which nothing could be found, the asked word and nothing
+  more. Two chains at once: 30 of 30. A library that holds nothing: it asks and looks ever more rarely and does
+  not stop; when the library is then filled it comes back by itself to everything it could not find (50 of 50).
+  A youth of 20 looks that led nowhere does not keep it from the chain (30 of 30). It asks one question of
+  anything new, oldest first, and does not reason over what it found.
+- **Echo of the Same Words (F52, off by default).** F16 leaves out, of the lived continuation of the mind's last
+  words, "what the partner just said", as written every word of the partner's utterance wherever it stood. In its
+  exact form (F42's rule, for last words of any length) a continuation is an echo only where it followed these
+  very words in what is present. Measured in F50's world only: 19 more whole answers of 80 without F41, nothing
+  changed with it. Not run on the whole battery.
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
@@ -635,6 +681,9 @@ The models were small and the data scarce; with far more data the gap may close.
 | Looking Up by Itself | Kendi Kararıyla Bakmak | F47, off by default | information seeking as an act chosen by its expected outcome; learned helplessness when looking never helps |
 | Thinking by Itself | Kendi Kararıyla Düşünmek | F48, off by default (on in the online life) | surprise as the drive to think (prediction error); reflection valued by what it comes to |
 | Fault Tracing | Hata İzi | F49, off by default | error monitoring and metacognitive confidence; calibration of confidence by observed outcomes; the reject option (abstaining when unsure); credit (blame) assignment along a chain; partial pooling (each frame one vote) |
+| Finding Out | Öğrenmek İçin Harekete Geçmek | F50, off by default | epistemic (information seeking) actions; knowing versus guessing by the source of a claim; the reject option with a learned policy; acting while waiting (asynchronous retrieval) |
+| Asking Itself | Kendine Sorma | F51, off by default | curiosity as self-posed questions; intrinsic motivation; active learning; exploration of a frontier; persistence under sparse reward |
+| Echo of the Same Words | Aynı Kelimelerin Yankısı | F52, off by default | |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

@@ -744,10 +744,31 @@ def claim_state(mind, filler: int):
     from .dusunce import goes_to_an_end
     from .read import claim_again
     context = getattr(mind, "open_where", {}).get(filler)
+    if filler in getattr(mind, "open_plain", ()):          # F50: a plain claim (no frame's relation): it is met when
+        from .dusunce import from_what_it_lived            # the mind, brought back, says what follows to the end
+        if context is None:                                # from what it lived of the thing asked about
+            return None
+        word_only = bool(mind.open_plain[filler])          # (one experience: it was open, it is met)
+        return 1.0, from_what_it_lived(mind, context, word_only=word_only) is not True
     claim = claim_again(mind, context, filler)
     if claim is not None and not claim[1] and goes_to_an_end(mind, context) is False:
         claim = (claim[0], True)
     return claim
+
+
+def note_unknown(mind, item: int, context: int, amount: float = 1.0) -> None:
+    """F50: the mind found, in its own time, that it does not know something of an item (a thought about it came to
+    nothing): a plain open claim about the item at the situation it was found in, written as one moment of its own
+    life (W+ of the item's open tie, as ``note_claims`` writes a claim left open)."""
+    S = mind.S
+    S.begin(mind.t + 1, mind.ch.sizes())
+    mind.t += 1
+    try:
+        note_claims(mind, [(item, (amount, True))])
+    finally:
+        S.end()
+    mind.open_where[item] = context
+    mind.open_plain[item] = False
 
 
 def settle_look(mind, filler: int, looked: bool = True):
@@ -773,9 +794,19 @@ def settle_look(mind, filler: int, looked: bool = True):
         if looked:
             amount = claim[0] if claim is not None else 1.0
             channel = mind.add_channel(OPEN_CHANNEL, "knob")
-            for name in (LOOK_ALL, symbol):
-                tie = S.tie(mind._atom(channel, name), mind.feel_unit["relief"], EXPECT, 1)
-                add_evidence1(mind, W_POS if met else W_NEG, ACTED, tie, amount, relief=False)
+            expected = 1.0
+            if not met and getattr(mind.cfg, "wonder", False):   # F51: a look that failed counts against looking
+                from .read import look_expectation               # this item up again as far as looking was expected
+                expected = look_expectation(mind, LOOK_ALL)      # to pay then (a failure that was expected says
+            for name in (LOOK_ALL, symbol):                      # little of the item: it is looked for again when
+                tie = S.tie(mind._atom(channel, name), mind.feel_unit["relief"], EXPECT, 1)   # looking pays again)
+                add_evidence1(mind, W_POS if met else W_NEG, ACTED, tie,
+                              amount * (expected if name != LOOK_ALL else 1.0), relief=False)
+            if getattr(mind, "wondered", {}).pop(filler, None):   # F51: the unknown was found by asking itself:
+                from .read import THINK_CHANNEL, WONDER             # what the look shows is what the asking was worth
+                thoughts = mind.add_channel(THINK_CHANNEL, "knob")
+                tie = S.tie(mind._atom(thoughts, WONDER), mind.feel_unit["relief"], EXPECT, 1)
+                add_evidence1(mind, W_POS if met else W_NEG, ACTED, tie, 1.0, relief=False)
     finally:
         S.end()
     return None if claim is None else met

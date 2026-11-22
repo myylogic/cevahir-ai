@@ -93,11 +93,163 @@ def goes_to_an_end(mind, context: int, limit: int = 60):
     if not moments:
         return None
     copy = mind.clone()
-    copy.step([])                                          # from rest: the situation begins a run of its own
-    acts = take_in(copy, moments)
+    copy.__dict__["_settling"] = True                      # (whether a claim is still open is what is being found out:
+    copy.step([])                                          # act.holds_back does not go by what was open before)
+    acts = take_in(copy, moments)                          # from rest: the situation begins a run of its own
     said: List[str] = []
     go_on(copy, acts, said.extend, limit, imagined=True)
     return bool(said) and copy.predicted.get(end, 0.5) > 0.5
+
+
+def moments_of(mind, context: int) -> List[List[Event]]:
+    """The items of a lived situation as moments that come to mind again (imagined), one item a moment; [] when the
+    situation is not made of single items. A single item is a situation of one moment."""
+    from .form import parts_of
+    from .store import ATOMIC
+    v = mind.S.arrays()
+    moments = []
+    for part in parts_of(mind, context) or (context,):
+        if not v.kind[part] & ATOMIC:
+            return []
+        channel = int(v.channel[part])
+        moments.append([Event(mind.ch.names[channel], mind.ch.symbol(channel, int(v.symbol[part])), IMAGINED)])
+    return moments
+
+
+def question_frames(mind) -> List[int]:
+    """F51: the questions the mind knows, as frames: generalisations with one place whose last item is the end of a
+    turn and whose instances were answered (the lived context of a member, with that end, went on with a word:
+    someone's turn followed; a sentence that was read and left at that is not a question). The one answered of the
+    most things first. Found by walking its units (done when it asks itself something, not every moment; kept
+    while the mind's structure does not grow)."""
+    from .__main__ import TURN, TURN_END
+    from .form import parts_of
+    from .read import kind_masks, mv_view, own_mass
+    from .store import ABSTRACT, ATOMIC, CATEGORY, SLOTTED
+    end = mind.unit_of(TURN, TURN_END)
+    if end < 0:
+        return []
+    S = mind.S
+    kept = mind.__dict__.get("_questions")
+    if kept is not None and kept[0] == (S.n_units, S.n_ties):
+        return kept[1]
+    v = S.arrays()
+    channels, act = mv_view(mind, "u_channel"), kind_masks(mind)[5]
+    trust = mind.trust.clone()
+    trust[IMAGINED] = 0.0                                  # (what it asked and answered inwardly was not answered)
+    found = []
+    for unit in range(S.n_units):
+        if not v.ualive[unit] or not v.kind[unit] & SLOTTED:
+            continue
+        parts = parts_of(mind, unit)
+        if len(parts) < 2 or parts[-1] != end:
+            continue
+        places = [j for j, p in enumerate(parts) if v.kind[p] & CATEGORY]
+        if len(places) != 1 or not all(v.kind[p] & (ATOMIC | CATEGORY) for p in parts):
+            continue
+        j = places[0]
+        answered = 0
+        for tie in S.inc.get((parts[j], ABSTRACT), ()):
+            lived = S.tuple_index.get(parts[:j] + (int(S.t_src[tie]),) + parts[j + 1:])
+            if lived is not None and any(w_pos > 0.0 and act[channels[t]]
+                                         for t, (w_pos, _) in own_mass(mind, lived, 1, trust).items()):
+                answered += 1
+        if answered:
+            found.append((-answered, unit))
+    out = [unit for _, unit in sorted(found)]
+    mind.__dict__["_questions"] = ((S.n_units, S.n_ties), out)
+    return out
+
+
+def ask_itself(session, item: int, limit: int = 30):
+    """F51: the mind asks itself about an item, in the question it knows best: the frame's items come to mind one
+    after another with the item in the frame's place (imagined; nothing is said aloud), and from the end of the
+    question the inner voice answers by the mind's own decisions. Returns (the question's words, the inner words,
+    whether an unknown was found). An unknown: it said nothing, or the first word it said rests on what others share
+    (``from_what_it_lived``'s test), or a relation of its frame named nothing for the item (F46 noted it in that
+    very moment). The unknown is an open claim about the item at the end of the imagined question (written here when
+    F46 did not write it), which the mind may look up by itself (F47); the item is kept (``Mind.wondered``) so that
+    what the look shows settles what the asking was worth. With no question it knows, (None, [], False)."""
+    from .__main__ import CHANNEL
+    from .act import rests_on_others
+    from .form import parts_of
+    from .learn import note_unknown
+    from .read import open_claim
+    from .store import CATEGORY
+    mind = session.mind
+    frames = question_frames(mind)
+    if not frames:
+        return None, [], False
+    v = mind.S.arrays()
+    moments, asked = [], []
+    for part in parts_of(mind, frames[0]):
+        unit = item if v.kind[part] & CATEGORY else part
+        channel = int(v.channel[unit])
+        symbol = mind.ch.symbol(channel, int(v.symbol[unit]))
+        moments.append([Event(mind.ch.names[channel], symbol, IMAGINED)])
+        if mind.ch.names[channel] == CHANNEL:
+            asked.append(str(symbol))
+    symbol = mind.ch.symbol(int(v.channel[item]), int(v.symbol[item]))
+    before = open_claim(mind, symbol)
+    mind.step([])                                          # from rest: the question begins a run of its own
+    acts = take_in(mind, moments)
+    context = mind.context
+    said: List[str] = []
+    guessed = [False]
+
+    def out(words_now: List[str]) -> None:
+        made_now = mind.__dict__.get("_src_now") or {}
+        for w in ([] if said else words_now):
+            unit = mind.unit_of(CHANNEL, w)
+            if mind.context is not None and rests_on_others(mind, mind.context, unit, made_now.get(unit)):
+                guessed[0] = True
+        said.extend(words_now)
+    go_on(mind, acts, out, limit, imagined=True)
+    mind.step([])                                          # the thought has ended
+    unknown = not said or guessed[0] or open_claim(mind, symbol) > max(before, 0.5)
+    if unknown:
+        if not open_claim(mind, symbol) > max(before, 0.5) and context is not None:
+            note_unknown(mind, item, context)              # (F46 did not write it: a plain claim, at the question's end)
+        mind.wondered[item] = True
+    return asked, said, unknown
+
+
+def from_what_it_lived(mind, context: int, limit: int = 60, word_only: bool = False):
+    """F50: whether the mind, brought back to a lived situation with nowhere to look, says what follows it to the
+    end, and says the word that follows *that situation* from what it lived of the thing asked about: as
+    ``goes_to_an_end``, and the first word it decides there does not rest only on what others share (hata's chain:
+    a word made by a way that is not ``act.grounded``, at a context that has no record of its own of it). The
+    words after it are the shape of the answer and are not asked this. ``word_only``: the claim was about that next
+    word only (the mind had a word to say there, resting on what others share): it is met when the word it now
+    says there rests on what it lived of the thing, whether or not it can say the rest. True, False, or None when
+    it cannot be told. On a copy: nothing is lived."""
+    from .__main__ import CHANNEL, TURN, TURN_END
+    from .act import rests_on_others
+    end = mind.unit_of(TURN, TURN_END)
+    if end < 0 or context is None:
+        return None
+    moments = moments_of(mind, context)
+    if not moments:
+        return None
+    copy = mind.clone()
+    copy.__dict__["can_look"] = False
+    copy.__dict__["_settling"] = True
+    copy.step([])                                          # from rest: the situation begins a run of its own
+    acts = take_in(copy, moments)
+    said: List[str] = []
+    guessed = [False]
+
+    def out(words_now: List[str]) -> None:
+        made_now = copy.__dict__.get("_src_now") or {}
+        for w in ([] if said else words_now):              # only the word that follows the situation itself
+            unit = copy.unit_of(CHANNEL, w)
+            if copy.context is not None and rests_on_others(copy, copy.context, unit, made_now.get(unit)):
+                guessed[0] = True
+        said.extend(words_now)
+    go_on(copy, acts, out, limit, imagined=True)
+    if word_only:
+        return bool(said) and not guessed[0]
+    return bool(said) and copy.predicted.get(end, 0.5) > 0.5 and not guessed[0]
 
 
 def take_in(mind, moments: List[List[Event]]) -> List[Event]:

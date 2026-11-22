@@ -1432,6 +1432,20 @@ def think_expectation(mind) -> float:
     return expectation(w_pos, w_neg, mind.cfg.k)
 
 
+WONDER = "sor"          # F51: the unit of every question the mind asked itself (on its channel for thoughts)
+
+
+def wonder_expectation(mind) -> float:
+    """F51: what asking itself about a new item is expected to lead to: the expectation of the tie (asking itself ->
+    relief); 1/2 while it has never done so."""
+    unit = mind.unit_of(THINK_CHANNEL, WONDER)
+    tie = mind.S.find_tie(unit, mind.feel_unit["relief"], EXPECT, 1) if unit >= 0 else -1
+    if tie < 0:
+        return 0.5
+    w_pos, w_neg = mass1(mind, tie)
+    return expectation(w_pos, w_neg, mind.cfg.k)
+
+
 def look_expectation(mind, symbol) -> float:
     """F47: what looking ``symbol`` up is expected to lead to, read general -> specific as everywhere: e <- e(every
     look -> relief), then e <- c f + (1 - c) e with the item's own record (f, c). 1/2 when nothing was ever looked
@@ -1529,6 +1543,8 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
         open_on = getattr(cfg, "open_claims", False) and filler is not None and trust is None \
             and (unit == mind.context or mind.__dict__.get("_claim_again") == unit)   # F46: the claims of the present
                                                    # moment, read with the full trust (F47: or a claim read again)
+        if filler is not None and tail is None and getattr(cfg, "find_out", False):
+            _moment_memo(mind)[("filler", unit)] = filler   # F50: the item the frame that speaks is about
         topic = getattr(mind, "topic", None)
         telling = where and (where[-1] < len(parts_of(mind, unit)) - 1 or (
             topic is not None and topic[0] == filler and topic[2] == getattr(mind, "episode_start", None)))
@@ -1621,6 +1637,10 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                     made.append((ways, e0, hata.believed(mind, ways, e0)))
                     made.sort(key=lambda claim: -claim[2])
                     out[target] = max(out.get(target, 0.0), made[0][2])
+            if getattr(cfg, "find_out", False) and filler is not None:
+                _own_record_against_shared(mind, out, src)   # F50: what was lived of the thing itself stands
+                                                             # against what the others share (the members of a
+                                                             # narrower place of it are others too)
         if voices and trust is None:
             mind.__dict__.setdefault("voice", {})[unit] = (heard[spoke], heard)
     own = own_mass(mind, unit, 1, trust)
@@ -1645,8 +1665,10 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     if getattr(cfg, "known", False) and unit == mind.context and getattr(mind, "topic", None) is not None:
         said_line = 0.5 + cfg.theta / (2.0 * cfg.T)     # F41: when no word would be said, how the members went on
         words = mv_view(mind, "u_channel")              # where their own known sequences stood as the topic's does
-        if not any(e > said_line and words[t] == words[mind.topic[0]] for t, e in _had(out, src)):
-            _take(mind, out, src, sequence_reading(mind, unit, trust), "dizi")
+        had = out.items() if getattr(cfg, "find_out", False) else _had(out, src)   # (F50: what the others share,
+        if not any(e > said_line and words[t] == words[mind.topic[0]] for t, e in had):   # found wanting, does not
+            _take(mind, out, src, sequence_reading(mind, unit, trust), "dizi")   # stand in the way of what is known
+                                                                                 # of the thing itself)
     if cfg.backoff and not any(e > 0.5 for t, e in _had(out, src) if _world(mind, t)):
         _take(mind, out, src, continuation_backoff(mind, unit, trust), "devam")
     if getattr(cfg, "substitution", False) and not any(e > 0.5 for t, e in _had(out, src) if _world(mind, t)):
@@ -1665,6 +1687,44 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 not any(e > own_line for t, e in out.items() if _world(mind, t)):
             _note_claim(mind, filler, doubted, True)     # F46: what its frame would have said of this filler it has
     return out                                           # learned not to believe, and nothing else is said: open
+
+
+OWN_RECORD = (-3, -5, -7)       # F50: the relations of a frame that read a record of the filler lived apart from
+                                # the frame's own instances: how the sequences that began with it went on, what it
+                                # was answered with alone, what is known of it. Not its continuation anywhere
+                                # (NEXT): for a member that includes the very dialogues the frame generalises, so
+                                # it holds for every member whatever else was lived of it, and says nothing of
+                                # whether what was read of a new thing answers the question
+
+
+def _own_record_against_shared(mind, out: Dict[int, float], src: Dict[int, list]) -> None:
+    """F50: the claims of the frame that speaks, where a relation that reads the filler's own record names a word
+    r (the members vouch for the relation: for each of them it named what that member lived) and the members' own
+    word proposes another word v of the same channel. A channel carries one item a moment, so "r follows", held
+    with conviction c_r, is "v does not follow" held as firmly: as the context's own record stands against what a
+    generalisation proposes there (F27), nested last,
+        e_v <- c_r * 0 + (1 - c_r) e_v,   c_r = max(0, 2 e_r - 1)
+    (the conviction of a claim e = c f + (1 - c)/2 that all its members agree on). A relation the mind has learned
+    not to believe (F49: e_r under 1/2) excludes nothing. What the thing itself was lived to go on with is more
+    specific than what the things of its kind share; before this rule the two tied, and the mind that had just read
+    the answer about the thing itself said nothing (measured)."""
+    channels = mv_view(mind, "u_channel")
+    own: Dict[int, float] = {}                               # channel -> the firmest claim of the filler's own record
+    named = set()
+    for target, made in src.items():
+        for ways, _, e in made:
+            kind = ways[1]
+            if len(kind) == 2 and kind[0] == "g" and kind[1] in OWN_RECORD and e > 0.5:
+                named.add(target)
+                own[channels[target]] = max(own.get(channels[target], 0.0), 2.0 * e - 1.0)
+    if not own:
+        return
+    for target, made in src.items():
+        c = own.get(channels[target], 0.0)
+        if target in named or c <= 0.0:
+            continue
+        src[target] = [(ways, e0, (1.0 - c) * e) for ways, e0, e in made]
+        out[target] = (1.0 - c) * out[target]
 
 
 def narrower_vote(mind, frame: int, unit: int, y: int, c_frame: float, trust=None) -> Dict[int, float]:
@@ -2633,7 +2693,12 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
     it cannot start an utterance, only carry one on.
     F26 (``starts``): a composed suffix of fewer than F items is a sequence that began with those items (only an
     episode's beginning makes such a unit); an utterance of one item so far is read the same way, as how sequences
-    that began with it went on (``start_mass``), before what followed that item anywhere."""
+    that began with it went on (``start_mass``), before what followed that item anywhere.
+    F52 (``echo_exact``): the rule "what the partner just said is an echo" in its exact form. Without it no word of
+    the partner's utterance is read as a continuation, wherever it stood there. With it a continuation is an echo
+    only where it followed these very words in what is present (the same rule F42 holds for one item over the
+    whole episode): a sentence the mind read elsewhere is carried on although the question holds one of its
+    words."""
     S, cfg = mind.S, mind.cfg
     if not mv_view(mind, "u_kind")[unit] & COMPOSED:
         return {}
@@ -2644,13 +2709,17 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
         if sense[channels[p]]:
             start = j + 1
     tail = parts[start:]
-    heard = set(parts[:start])                          # what the partner just said is an echo, not knowledge
+    exact = getattr(cfg, "echo_exact", False)
+    heard = set() if exact else set(parts[:start])      # what the partner just said is an echo, not knowledge
     first = 1 if len(tail) == len(parts) else 0         # the whole tuple is the unit itself, read already
     starts = getattr(cfg, "starts", False)
     for i in range(first, len(tail)):
         suffix = tail[i:]
         if not suffix:
             continue
+        if exact:                                       # F52: ... where it followed these very words (not any word
+            n = len(suffix)                             # the partner said, wherever it stood)
+            heard = {parts[j + n] for j in range(len(parts) - n) if parts[j:j + n] == suffix}
         if len(suffix) == 1:
             readings = [own_mass(mind, suffix[0], 1, trust)]
             if starts and i == 0:                       # the whole utterance so far is this one item

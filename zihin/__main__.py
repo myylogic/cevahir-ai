@@ -59,7 +59,12 @@ Commands (Turkish, with English aliases):
                                     found it did not know comes first
     !bak / !bakma        / !look, !nolook  with --ac look the mind decides by itself, in the silences of its online
                                     life, to look up what it found it did not know (every page read is printed);
-                                    !bakma stops that for this session, !bak allows it again
+                                    !bakma stops that for this session, !bak allows it again. With --ac find_out it
+                                    also looks in the turn it is asked in, before it says a word that rests only on
+                                    what others share: what it sends for is fetched while it goes on living, and it
+                                    answers when it has read it. With --ac wonder it asks itself, in a silence, the
+                                    question it knows about what was new in what it was told, and looks up what it
+                                    cannot answer (each inner question is printed and is an entry of the history)
     !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
                                     the path that led to it is remembered and weighed next time, L5). The answer stays
                                     open for it until the feedback or the next utterance (yours, or the mind's own),
@@ -178,7 +183,7 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
 
 STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
            "told_apart", "open_claims", "look", "think", "faults",           # is raised with them; --ac turns one on
-           "silent_claims")
+           "silent_claims", "find_out", "wonder", "echo_exact")
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -511,6 +516,11 @@ class Session:
         self.explain = False                    # the chat records where each word of an answer came from (!neden)
         self.sources: List[dict] = []           # ... the record of the last answer, word by word
         self.open_turn = False                # the mind has just answered; feedback may still come
+        self.background = False               # F50: a look decided in a turn is fetched while the mind goes on living
+                                              # (the online life sets it); else it is carried out within the turn
+        self.fetching = None                  # ... (what is being fetched: looking, the open situation, the thread, its box)
+        self.owed: Dict[int, int] = {}        # ... item -> the situation of a call it has not answered yet
+        self.look_notes: List[str] = []       # ... what a look of its own printed (shown by the chat after the answer)
         self.may_look = False                 # F47: the owner lets this session carry out the mind's own looks
         self.look_source = None               # ... from this source (None: web.default_source)
         self.look_gap = self.LOOK_GAP         # ... at least this many seconds apart
@@ -523,6 +533,73 @@ class Session:
     LOOK_GAP = 5.0                            # a setting of the program (not learned): seconds between two looks of
                                               # its own, so that a reading service is never asked in a burst
 
+    @property
+    def may_look(self) -> bool:
+        return self.__dict__.get("_may_look", False)
+
+    @may_look.setter
+    def may_look(self, allowed: bool) -> None:
+        self.__dict__["_may_look"] = bool(allowed)
+        self.mind.__dict__["can_look"] = bool(allowed)      # F50: the mind knows whether it has somewhere to look
+
+    def find_out(self, looking, say=None, limit: int = 80) -> List[str]:
+        """F50: carry out, within the turn, a look the mind decided on when it was called on; then the mind is brought
+        back to what it was asked and says what it can say now (``say_again``). With ``background`` (the online
+        life) only the fetching is started, on a thread that touches nothing of the mind: the turn ends at once, the
+        mind goes on living, and a later silent moment reads what was found and answers (``silent_moment``). Returns
+        the words it said after its look ([] when the fetching was only started)."""
+        import time
+        from .web import fetch, look_up
+        context = self.mind.open_where.get(looking[0])
+        note = self.look_notes.append
+        note("zihin (kendi kararıyla) bakıyor: %s" % (looking[1],))
+        first = self.speak(self.mind.step([]), say, limit)   # it perceives that it is looking (an inner event,
+                                                             # alone in its moment): what it learned to say then,
+        if self.background and self.fetching is not None:    # it says
+            return first                                     # (one look at a time: this one waits for its turn)
+        if self.background:
+            box: Dict[str, object] = {}
+            source = self.look_source
+
+            def work() -> None:
+                box["fetched"] = fetch(self, str(looking[1]), source)
+            thread = threading.Thread(target=work, daemon=True)
+            self.fetching = (looking, context, thread, box)
+            if context is not None:
+                self.owed[looking[0]] = context
+            thread.start()
+            return first
+        first += self.speak(self.mind.step([]), say, limit)   # a pause: what it reads begins a run of its own
+        try:
+            report = look_up(self, looking, source=self.look_source, say=note)
+        except Interrupted:
+            raise
+        except Exception as exc:                        # a service that does not answer: the look led to nothing
+            from .learn import settle_look
+            note("%s: bakılamadı (%s)" % (looking[1], type(exc).__name__))
+            report = {"topic": str(looking[1]), "read": [], "note": type(exc).__name__,
+                      "met": settle_look(self.mind, looking[0])}
+        self.looks.append(report)
+        self.looked_at = time.time()
+        self.company(self.partner)
+        return first + (self.speak(self.recall(context), say, limit) if context is not None else [])
+
+    def recall(self, context: int) -> List[Event]:
+        """F50: the mind is brought back to a situation it lived (what it was asked): after a pause its items come to
+        mind again one after another (imagined; nothing is said for it), and what it decides at the last of them is
+        its own. Returns those acts (the caller says them: ``speak``)."""
+        from .dusunce import moments_of, take_in
+        moments = moments_of(self.mind, context)
+        if not moments:
+            return []
+        self.mind.step([])                               # a pause: what was asked comes to mind as a run of its own
+        acts = take_in(self.mind, moments)
+        if not acts:                                     # as in a turn: a moment in silence, then the next
+            acts = self.mind.step([])
+            if not acts:
+                acts = self.mind.step([])
+        return acts
+
     def silent_moment(self, say=print) -> List[Event]:
         """A silent moment of its life, lived as any moment; then what the mind decided in it about its own time is
         let happen. It decided to look something up (F47, ``Mind.looking``) and the owner lets this session look
@@ -532,11 +609,26 @@ class Session:
         came to, and it is an entry of the history too. Returns the acts the mind decided in the moment (its words,
         said by the caller)."""
         import time
+        if self.fetching is not None and not self.fetching[2].is_alive():   # F50: what it sent for has come: it reads
+            from .web import look_up                                        # it now, and answers what it was asked
+            looking, context, _, box = self.fetching
+            self.fetching = None
+            start = self.mind.t + 1
+            self.close_turn()
+            self.mind.step([])                           # a pause: what it reads begins a run of its own
+            report = look_up(self, looking, source=self.look_source, say=say, fetched=box.get("fetched"))
+            self.looks.append(report)
+            self.looked_at = time.time()
+            self.remember(READ, "[kendi kararıyla baktı] %s" % (looking[1],), list(range(start, self.mind.t + 1)))
+            self.owed.pop(looking[0], None)
+            self.company(self.partner)
+            return self.recall(context) if context is not None else []
         acts = self.mind.step([])
         if acts:
             return acts
         looking = getattr(self.mind, "looking", None)
-        if looking is not None and self.may_look and time.time() - self.looked_at >= self.look_gap:
+        if looking is not None and self.may_look and self.fetching is None \
+                and time.time() - self.looked_at >= self.look_gap:   # (one look at a time: none while one is on its way)
             from .web import look_up
             start = self.mind.t + 1
             say("\n  zihin (kendi kararıyla) bakıyor: %s" % (looking[1],))
@@ -559,6 +651,22 @@ class Session:
                 say("  okundu: %d cümle; %s" % (report.get("sentences", 0), outcome[report.get("met")]))
             self.remember(READ, "[kendi kararıyla baktı] %s" % (looking[1],), list(range(start, self.mind.t + 1)))
             return acts
+        wondering = getattr(self.mind, "wondering", None)
+        if wondering is not None and getattr(self.mind, "thinking", None) is None:
+            from .dusunce import ask_itself              # F51: it asks itself about an item it met for the first time
+            start = self.mind.t + 1
+            self.mind.met_once.pop(wondering[0], None)
+            asked, words_, unknown = ask_itself(self, wondering[0])
+            if asked is None:                            # it knows no question to ask yet: nothing to ask itself
+                self.mind.met_once.clear()
+            else:
+                say("\n  zihin (kendi kendine sordu): %s -> %s" % (
+                    " ".join(asked), "bilmiyor" if unknown else " ".join(words_) or "(sessiz)"))
+                self.thoughts.append((" ".join(asked), words_, 1.0 if not unknown else 0.0))
+                self.remember(SPOKE, "[kendi kendine sordu] %s -> %s" % (
+                    " ".join(asked), " ".join(words_) or ("(bilmiyor)" if unknown else "(sessiz)")),
+                    list(range(start, self.mind.t + 1)))
+            return acts
         if getattr(self.mind, "thinking", None) is not None:
             from .dusunce import think, topic_of
             from .learn import settle_thought
@@ -567,7 +675,14 @@ class Session:
             topic = str(self.mind.symbol_of(about)[1]) if about is not None and \
                 self.mind.symbol_of(about)[0] == CHANNEL else topic_of(self)
             words_, reality = think(self, topic) if topic else ([], 0.0)
-            settle_thought(self.mind, bool(words_), reality)
+            unit = self.mind.unit_of(CHANNEL, topic) if topic else -1
+            if not words_ and unit >= 0 and getattr(self.mind.cfg, "find_out", False) \
+                    and getattr(self.mind.cfg, "open_claims", False):
+                from .learn import note_unknown          # F50: a thought that came to nothing is an unknown about
+                note_unknown(self.mind, unit, unit)      # its topic (what it may then look up), not a thought that
+                self.mind.heard = None                   # was worth nothing
+            else:
+                settle_thought(self.mind, bool(words_), reality)
             self.thought = (topic, words_, reality)
             self.thoughts.append(self.thought)
             self.remember(SPOKE, "[kendi kararıyla düşündü] %s: %s" % (topic or "-", " ".join(words_) or "(sessiz)"),
@@ -718,17 +833,26 @@ class Session:
             from .butun import reply_in_parts                          # summary is heard in it, answered part by part
             said = reply_in_parts(self, text, limit, say)
         if said is None:
+            looking = None
             if self.turns:                               # the turn passes when your utterance has ended
                 self.listen(text, TOLD, speaker=self.partner)
                 acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
+                looking = getattr(self.mind, "looking", None)   # F50: it decided to look in the moment it was called on
             else:                                        # older minds: the turn passes with your last word
                 self.listen(" ".join(symbols[:-1]), TOLD)
                 acts = self.mind.step(self.events(symbols[-1], TOLD))
             if not acts and self.turns:                  # nothing at once: a moment passes in silence (it may feel its
                 acts = self.mind.step([])                # not knowing, L7), then the next; what it decides is its own
+                looking = looking or getattr(self.mind, "looking", None)
                 if not acts:
                     acts = self.mind.step([])
+                    looking = looking or getattr(self.mind, "looking", None)
             said = self.speak(acts, say, limit)
+            if self.may_look and getattr(self.mind.cfg, "find_out", False):
+                looking = getattr(self.mind, "looking", None) or looking   # (or decided in the middle of its answer)
+                if looking is not None and looking[0] == self.mind.__dict__.get("_sought"):   # (not a look it
+                    said = said + self.find_out(looking, say, limit)   # decided on in a silent moment of the turn,
+                                                                       # F47: that one is its own time's)
         if self.explain:
             self.sources = self.mind.__dict__.pop("_why", [])
             self.mind.__dict__.pop("_explain_on", None)
@@ -753,13 +877,17 @@ class Session:
                 if say is not None:
                     say(w)                               # out as it is said (online life)
         go_on(self.mind, acts, out, limit)
+        if said:
+            self.open_turn = True                        # its own utterance is a turn: what comes next begins after it
         return said
 
     def close_turn(self) -> None:
         self.answered = None
         if self.open_turn:
             self.mind.step([])
-            self.open_turn = False
+            if self.mind.episode and getattr(self.mind.cfg, "find_out", False):
+                self.mind.step([])                       # F50: an inner event was still to be perceived in that
+            self.open_turn = False                       # moment (it had begun to look): the pause comes after it
 
     def feedback(self, good: bool) -> str:
         """How the mind's last answer was received: a value event at the end of the same episode (L5: every step of
@@ -1087,6 +1215,8 @@ class Life:
         self.done = threading.Event()
         self.thread = threading.Thread(target=self._run, daemon=True)
         session.voice = self.say
+        session.background = True                        # F50: in its online life what it sends for is fetched
+                                                         # while it goes on living (it reads it in a silent moment)
 
     def say(self, word: str) -> None:
         import time
@@ -1178,6 +1308,7 @@ class Life:
         said = self.session.speak(acts, self.say)
         self.session.remember(SPOKE, "[kendiliğinden] %s" % " ".join(said), list(range(start, self.session.mind.t + 1)),
                               said=said)
+        self.session.open_turn = True                    # its own utterance is a turn: what comes next begins after it
         print("\n> ", end="", flush=True)
 
 
@@ -1277,7 +1408,8 @@ def main(argv=None) -> None:
     ap.add_argument("--ac", default="", help="switch on, for a loaded mind, mechanisms that new minds are raised with "
                     "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own "
                     "settings. Also the mechanisms that were measured and are off by default (inherit, witness, "
-                    "difference, urge, known, wholes, told_apart, open_claims, look), for a loaded or a new mind")
+                    "difference, urge, known, wholes, told_apart, open_claims, look, think, faults, silent_claims, "
+                    "find_out, wonder, echo_exact), for a loaded or a new mind")
     ap.add_argument("--pencere", type=int, help="how many items a NEW mind holds at once (its window, 3 to 15; "
                     "default 7); a mind keeps the window it has")
     args = ap.parse_args(argv)
@@ -1326,6 +1458,11 @@ def main(argv=None) -> None:
         if k in STUDIED and not getattr(mind.cfg, k, False):
             setattr(mind.cfg, k, True)
             print("  açıldı: %s (ölçülmüş, varsayılan olarak kapalı bir mekanizma; senin isteğinle açıldı)" % k)
+    for need, wants in (("find_out", ("faults", "look")), ("wonder", ("look",)), ("silent_claims", ("faults",))):
+        for k in wants if getattr(mind.cfg, need, False) else ():
+            if not getattr(mind.cfg, k, False):
+                setattr(mind.cfg, k, True)
+                print("  açıldı: %s (%s onsuz çalışmaz)" % (k, need))
     asked_look = "look" in [k.strip() for k in args.ac.split(",")]
     if (args.ag or args.kaynak) and not getattr(mind.cfg, "look", False):
         mind.cfg.look = True                             # giving it somewhere to look is letting it look: what it
@@ -1695,6 +1832,9 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                     print(" (sessiz)" if answer == "(sessiz)" else "", flush=True)
                 else:
                     print("  zihin: %s" % session.reply(line))
+                for note in session.look_notes:              # F50: what a look of its own did in this turn
+                    print("    %s" % note)
+                session.look_notes.clear()
                 if args.his:
                     print(feelings(session.mind))
                 turns_since_save += 1

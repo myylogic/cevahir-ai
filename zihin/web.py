@@ -391,7 +391,22 @@ def wanted_topics(mind, channel: str, n: int) -> List[str]:
     return (first + [w for _, w in scored if w not in first])[:n]
 
 
-def look_up(session, looking, source: Optional["Source"] = None, say: Callable[[str], None] = print) -> Dict[str, object]:
+def fetch(session, topic: str, source: Optional["Source"] = None) -> Dict[str, object]:
+    """F50: what a look needs from outside, and nothing of the mind: the titles found for ``topic`` and their texts.
+    It touches only the source (the network, a folder), so it can run while the mind goes on living; the reading is
+    done afterwards by ``research(..., fetched=...)``. A source that fails leaves {"error": ...}."""
+    dil = getattr(session, "dil", "tr")
+    if source is None:
+        source = default_source("tr" if dil == "tr" else "en", getattr(session, "net", None))
+    try:
+        titles = source.search(topic)
+        return {"topic": topic, "source": source, "titles": titles, "texts": {t: source.extract(t) for t in titles}}
+    except Exception as exc:                               # reported by the reader, in the mind's own time
+        return {"topic": topic, "source": source, "titles": [], "texts": {}, "error": type(exc).__name__}
+
+
+def look_up(session, looking, source: Optional["Source"] = None, say: Callable[[str], None] = print,
+            fetched: Optional[Dict[str, object]] = None) -> Dict[str, object]:
     """F47: carry out the mind's own decision to look an item up (``looking`` = (its unit, its symbol, ...),
     act.look). First the mind is brought back to the situation the claim was left open in: when it can now say it to
     the end (it has learned it meanwhile), nothing is fetched and the claim is written as met. Otherwise what is
@@ -405,7 +420,7 @@ def look_up(session, looking, source: Optional["Source"] = None, say: Callable[[
     if state is not None and not state[1]:
         settle_look(mind, filler, looked=False)
         return {"topic": str(symbol), "read": [], "sentences": 0, "met": True, "note": "kendi bildiğiyle"}
-    report = research(session, str(symbol), source=source, say=say, record=False)
+    report = research(session, str(symbol), source=source, say=say, record=False, fetched=fetched)
     report["met"] = settle_look(mind, filler)
     if report.get("way") and report["met"] is not None:
         WayChooser(mind).judge(report["way"], bool(report["met"]))
@@ -461,7 +476,8 @@ class WayChooser:
 
 
 def research(session, topic: str, source: Optional[Source] = None, way: Optional[str] = None,
-             say: Callable[[str], None] = print, record: bool = True) -> Dict[str, object]:
+             say: Callable[[str], None] = print, record: bool = True,
+             fetched: Optional[Dict[str, object]] = None) -> Dict[str, object]:
     """Look a topic up, read it with a way of reading, measure the gain, record it (``record`` False: the caller
     judges the way itself, ``look_up``). Returns a report. The topic and what is read are split and lower-cased by
     the session's convention (its mind's dil), as everything it hears. Each sentence is heard, its end perceived (as
@@ -476,8 +492,13 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
     check = getattr(session, "check", None)            # a long reading stops between sentences when asked (Ctrl+C)
     chooser = WayChooser(mind)
     way = way or chooser.choose()
+    texts = None
+    if fetched is not None:                            # F50: found beforehand (``fetch``), while the mind went on living
+        source, titles, texts = fetched.get("source", source), list(fetched.get("titles", ())), fetched.get("texts", {})
+        if fetched.get("error"):
+            return {"topic": topic, "read": [], "note": str(fetched["error"])}
     try:
-        titles = source.search(topic)
+        titles = titles if texts is not None else source.search(topic)
     except Exception as exc:                           # a search service that refuses (key, quota, closed API)
         if isinstance(source, (Wikipedia, Sources)):
             raise
@@ -503,7 +524,7 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
                                                        # and was not recalled with anyone else: t_page.py)
     end_of_turn = getattr(session, "end_of_turn", None)
     for title in titles:
-        text = source.extract(title)
+        text = texts[title] if texts is not None else source.extract(title)
         held = source._of.get(title, source) if isinstance(source, Sources) else source   # the source that found it
         label = getattr(held, "found", {}).get(title, (title,))[0] if hasattr(held, "found") else title
         say("  okunuyor: %s  (%s)" % (label, source.address(title)))
