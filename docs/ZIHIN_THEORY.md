@@ -463,6 +463,19 @@ At each moment, roughly each word, the mind lives these steps:
   kinds of question learned one after another stayed answered (160 of 160) where three of four had gone silent.
   In the kinds world of F49 it takes away a silence that was an accident and leaves the plain induction (30 wrong
   of 40 before the first round, corrected by what is then lived).
+- **The Asked Place (F55, off by default).** A question is a statement the mind knows with one item replaced, and
+  the answer is that item. The run of items a thing begins in the context is read against what is known of the
+  thing (the sequences that began with it, without what was only ever asked of it): a known sequence that is the
+  run in every item but one names what it holds at that place. Nothing says which word is the question word: it is
+  the one place where what was asked and what is known differ. It is a relation of a frame like the others: the
+  members vouch for it (the value each went on with is what its own known sequence holds there) before it is read
+  for a new filler, and a family can agree on it. F41 and F53 read what is known of a thing only where the answer
+  names the thing first; this reads it wherever the question names it. Measured (5 seeds; answers that are the
+  value alone, several facts read of every thing): a fresh thing asked a mastered kind 0 of 40 -> 40 of 40; with
+  F53 a new kind at first sight 40 of 40; of a thing nothing was read of, nothing is said. Two watched things that
+  happen to carry the same value mislead the mind after two dialogues (6 wrong of 40) unless what was lived of the
+  thing itself stands against what the others share (F50's rule: 0 wrong). One place, and the run must begin with
+  the thing.
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
@@ -711,6 +724,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Echo of the Same Words | Aynı Kelimelerin Yankısı | F52, off by default | |
 | Frames of Frames | Çerçevelerin Çerçevesi | F53, off by default | learning to learn (a learning set); schema abstraction over schemas; two-place (relational) generalisation; hierarchical priors (the general level is the specific level's prior) |
 | Relations Lived Apart | Ayrı Yaşanmış İlişkiler | F54, off by default | held-out validation (a rule is tested on evidence that did not make it); circular evidence |
+| The Asked Place | Sorulan Yer | F55, off by default | question answering by aligning a question with a known statement; analogy as structure alignment; the wh-word as the one unaligned slot |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

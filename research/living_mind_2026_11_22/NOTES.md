@@ -1979,3 +1979,198 @@ wholes) are bit-identical to the references. Tests: 432 passed (15 new: `test_zi
     python research/living_mind_2026_11_22/t_cogs_why.py run --cogs FOLDER --form published|pointer|short [--ac families]
     python research/living_mind_2026_11_22/t_cogs_why.py distance --cogs FOLDER --form published|short
     python -m zihin --ac known,families,lived_apart
+
+## 18. The asked place: a question is a statement the mind knows with one item replaced (F55)
+
+### 18.1 The limit this starts from
+
+Section 17.9, second item: F41 and F53's `LINK` read what is known of a thing only where the answer names the
+thing first, because they go on from the thing's name. Where the answer is the value alone ("X ne yer ?" -> "V .")
+and more than one fact was read of every thing, F41 says nothing: the name is not in the answer, and the
+relations that name "the strongest continuation" (START, NEXT) do not say which of several facts was asked for.
+The first item of the queue (17.12).
+
+### 18.2 The model (`Config.asked_place`, off by default)
+
+What a learner does with "X ne yer ?" when it has read "X V yer ." is to see that the two are the same sentence
+but for one word, and to say the word that stands there. Nothing has to tell it which word is the question word:
+it is the one place where what was asked and what is known differ.
+
+`read.asked_places(x, context)`: the run of items that a thing x begins in the context (from its first place to
+the end of that utterance) is read against what is known of x: its own lived sequences (those that began with it:
+a sentence read, an utterance after silence; F26), without what was only ever asked of it (F41's `only_asked`: a
+question about x is a sequence that began with x too, and it is not something known of x). A known sequence that is
+the run in every item but one names what it holds at that place, with the evidence the sequence was lived with (the
+least along it). Where the place holds more than one thing each is an answer: the most lived is named, among those
+lived equally the one learned first (F41's rule for the things known of a topic).
+
+It is a relation of a frame like the others (`ASKED`): for a member of a frame it counts where the value the
+member went on with is what a known sequence of its own holds at the asked place (any of them), so the frame's
+members vouch for it before it is used; for a new filler it is read against the present context. It is a relation
+that reads the filler's own record: an open claim when it names nothing (F46), a way of reading with a record of
+its own (F49), one of the relations that stand against what others share (F50), and a kind a family can agree on
+(F53).
+
+Lived apart, by construction: the member's known sequence is one that began with it, and a dialogue's answer does
+not begin a sequence (checked: with nothing read, a member's asked places are empty, in both forms of answer). So
+the dialogue does not vouch for itself (F54's principle).
+
+### 18.3 Measured (`t_asked.py`, 5 seeds; rows in `results/asked.jsonl`; code md5 97118900...)
+
+The world of section 17 with the answer as the value alone ("X ne Q ?" -> "V ."). A new kind of question after
+the mind has mastered k kinds; 8 fresh things asked it on copies after n watched dialogues (right / wrong / silent
+of 40), and 8 fresh things asked one mastered kind at the end:
+
+    condition                   k   n=0       n=1       n=2       n=4       a mastered kind
+    F41                         0   0/0/40    0/0/40    34/6/0    40/0/0    -
+    F41                         1   0/0/40    0/0/40    34/6/0    40/0/0    0/0/40
+    F41                         2   0/0/40    0/0/40    34/6/0    40/0/0    0/0/40
+    F41                         4   0/0/40    0/0/40    34/6/0    40/0/0    0/0/40
+    F41 + F53 + F54             0   0/0/40    0/0/40    34/6/0    40/0/0    -
+    F41 + F53 + F54             1   0/0/40    0/0/40    34/6/0    40/0/0    0/0/40
+    F41 + F53 + F54             2   0/0/40    0/0/40    34/6/0    40/0/0    0/0/40
+    F41 + F53 + F54             4   0/0/40    0/0/40    34/6/0    40/0/0    0/0/40
+    F41 + F55                   0   0/0/40    0/0/40    34/6/0    40/0/0    -
+    F41 + F55                   1   0/0/40    0/0/40    34/6/0    40/0/0    40/0/0
+    F41 + F55                   2   0/0/40    0/0/40    34/6/0    40/0/0    40/0/0
+    F41 + F55                   4   0/0/40    0/0/40    34/6/0    40/0/0    40/0/0
+    F41 + F53 + F54 + F55       0   0/0/40    0/0/40    34/6/0    40/0/0    -
+    F41 + F53 + F54 + F55       1   0/0/40    0/0/40    34/6/0    40/0/0    40/0/0
+    F41 + F53 + F54 + F55       2   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F53 + F54 + F55       4   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    the four with F49 and F50   0   0/0/40    0/0/40    40/0/0    40/0/0    -
+    the four with F49 and F50   1   0/0/40    0/0/40    40/0/0    40/0/0    40/0/0
+    the four with F49 and F50   2   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    the four with F49 and F50   4   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+
+With F41 alone, and with F53 and F54 on too, a fresh thing asked a kind the mind has mastered is not answered (0 of
+40, all silent), and a new kind is not answered at first sight whatever was mastered: F41 goes on from the thing's
+name and `LINK` is read from it, and the name is not in the answer. With F55 the mastered kinds are answered (40 of
+40), and with F53 on too a mind that has mastered two kinds or more answers a new kind at first sight (40 of 40 at
+n = 0).
+
+After two dialogues of the new kind 6 of 40 answers are wrong in every condition but the last (one seed of five):
+the two watched things happened to carry the same value, the frame's members agree on that word, it ties with what
+the asked place names, and the mind tries one of the two. With F49 and F50 on (the last rows) what was lived of the
+thing itself stands against what the others share (section 14): 40 of 40. That rule needs F49's chain to know
+which way made which claim; without it the tie stands.
+
+The same world with answers that name the thing ("X V Q ."), the world of section 17.4:
+
+    condition                   k   n=0       n=1       n=2       n=4       a mastered kind
+    F41                         0   0/0/40    0/0/40    34/0/6    35/0/5    -
+    F41                         1   0/0/40    0/0/40    34/0/6    35/0/5    0/0/40
+    F41                         2   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41                         4   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F53 + F54             0   0/0/40    0/0/40    34/0/6    35/0/5    -
+    F41 + F53 + F54             1   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F53 + F54             2   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F53 + F54             4   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F55                   0   0/0/40    0/0/40    34/0/6    35/0/5    -
+    F41 + F55                   1   0/0/40    0/0/40    34/0/6    35/0/5    0/0/40
+    F41 + F55                   2   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F55                   4   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F53 + F54 + F55       0   0/0/40    0/0/40    34/0/6    35/0/5    -
+    F41 + F53 + F54 + F55       1   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F53 + F54 + F55       2   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F53 + F54 + F55       4   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    the four with F49 and F50   0   0/0/40    0/0/40    40/0/0    40/0/0    -
+    the four with F49 and F50   1   0/0/40    0/0/40    40/0/0    40/0/0    40/0/0
+    the four with F49 and F50   2   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    the four with F49 and F50   4   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+
+Where the answer names the thing, F55 adds nothing to F53 and F54 and takes nothing away (their rows are those of
+17.4), and it does not do F54's work: with one kind mastered and F55 alone the fresh thing is still not answered
+(0/0/40), because the relation the dialogue itself vouches for is still there and ties with it. With F49 and F50
+on, the answers that were silent after two and four dialogues (6 and 5 of 40: a value most of the watched things
+share against what is known of the thing) are given too: 40 of 40 from two dialogues on, at every k.
+
+A new kind at first sight (the value alone), 4 kinds mastered, the fact never read of half of the fresh things;
+and two facts of the asked kind read of every fresh thing:
+
+    condition                   the fact was read   never read: a value / nothing
+    F41                         0/0/20              0 / 20
+    F41 + F53 + F54             0/0/20              0 / 20
+    F41 + F55                   0/0/20              0 / 20
+    F41 + F53 + F54 + F55       20/0/0              0 / 20
+    the four with F49 and F50   20/0/0              0 / 20
+
+    condition                   one of the two / both / another word / nothing
+    F41                         36 / 0 / 4 / 0
+    F41 + F53 + F54             36 / 0 / 4 / 0
+    F41 + F55                   36 / 0 / 4 / 0
+    F41 + F53 + F54 + F55       40 / 0 / 0 / 0
+    the four with F49 and F50   40 / 0 / 0 / 0
+
+Nothing is made up of a thing whose fact was never read. Where the asked place holds two
+things the mind says one of the two (36 of 40 in the first three conditions, 40 of 40 with F53, F54 and F55, and
+with F49 and F50); in 4 of 40 (one seed) the first three conditions say the word the two watched things happened
+to share, which is neither. Measured first with the rule "of several lived equally none is named": the four wrong
+answers were there in every condition; the rule was changed (18.2) and the rows are those of the code as it is.
+
+### 18.4 In the worlds measured before (`t_again.py`, rows appended to `results/again.jsonl`)
+
+    part                 F55: same as committed   F53 + F54 + F55: same as with F53 + F54
+    find_out.asked       3 of 5                   5 of 5
+    find_out.half        4 of 5                   4 of 5
+    wonder.chain         3 of 3                   3 of 3
+    fault.misled         2 of 4                   4 of 4
+    fault.regular        4 of 4                   4 of 4
+    fault.two            1 of 2                   1 of 2
+    fault.loop           2 of 2                   2 of 2
+    fault_kinds.kinds    3 of 3                   3 of 3
+
+F55 alone, against the committed rows of sections 11, 12, 14 and 15: 22 of 28 the same count for count. What
+changed: more whole answers in F50's world without F41 (56 -> 60 of 80, with F52 75 -> 76; the library holding
+every second thing 26 -> 28 of 40); the two readings that disagree are right sooner with F49 (after four rounds 20
+-> 27 of 40, no wrong answer); and in the misled world one answer of 200 about things never asked about went from
+silent to wrong, the same answer F54 changes (a tie that kept the mind silent about a fresh thing is broken, and
+it is told the value the watched things share).
+
+With F53 and F54 on, F55 changes two rows of 28, both for the better by one or two answers (the half library
+34 -> 36 whole answers; the two readings 68 -> 69 right in the loop), and nothing else: F51's chain, the regular
+world, the loop with a library and the kinds world are the same.
+
+All of the mind's tests were run once with `asked_place` on by default (a copy, not kept). Two things changed.
+With F53 the answer to a new kind stopped at the value ("aslan taş" for "aslan taş taşır"): the value was named by
+two kinds of family claim, only the firmer was kept, and the one that makes the thing the answer's topic (F41) was
+dropped. Now every kind that names a word is kept as a claim of its own and the topic is set by the thing known
+whichever other kind names it too (pinned by a test; section 17's rows were measured again and are the same: 36 of
+36 rows of `forms` and `judged` count for count). And the pinned answer of the older reading without F26 ("muz
+tatlı", the error F26 was built for) becomes "muz": the asked place and the old relation name different words and
+neither is said.
+
+### 18.5 COGS with F53, F54 and F55
+
+    form        with            exact  said nothing  stopped  another token  tokens right
+    short       -               68     4             6        22             86% (1510 of 1756)
+    short       F53             67     3             9        21             86% (1518 of 1756)
+    short       F53+F54         67     3             9        21             86% (1518 of 1756)
+    published   -               0      71            9        19             2% (103 of 4525)
+    published   F53             0      59            19       20             7% (313 of 4525)
+    short       F53+F54+F55     67     3             9        21             86% (1518 of 1756)
+    published   F53+F54+F55     0      59            19       20             7% (313 of 4525)
+
+F55 changes nothing on COGS: the short form 67 of 100 and the published form 0 exact with 59 silent, as with F53
+alone. A sentence there is not a question about a thing of which the mind has read a statement. The 100 answers of
+the short form take 129 s against 72 s (the asked places are read for every member at every token).
+
+### 18.6 What it does not do
+
+* The run must begin with the thing, and what is known must begin with it too ("X ne yer ?" against "X V yer .").
+  A question that names the thing later, or a fact told in another order, is not aligned. One place only: what was
+  asked and what is known may differ in one item.
+* What is known is the sequences that began with the thing. What was told of it in the middle of other sentences
+  is not read.
+* Two things at the asked place: one is said, never both.
+* Not measured on a long life, on the owner's documents or on the web.
+
+### 18.7 Gates, tests, reproduce
+
+With every studied switch off the lesson-free gate, the 17 configurations and the scripted life (plain and with
+wholes) are bit-identical to the references. Tests: 441 passed (9 new: `test_zihin_asked_place.py`).
+
+    python research/living_mind_2026_11_22/t_asked.py forms | echo | unknown | twice
+    python research/living_mind_2026_11_22/t_again.py --ac asked_place
+    python research/living_mind_2026_11_22/t_again.py --ac families,lived_apart,asked_place
+    python -m zihin --ac known,families,lived_apart,asked_place

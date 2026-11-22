@@ -430,7 +430,7 @@ def think_now(mind) -> Optional[float]:
     return rate
 
 
-GROUNDED = (-1, -2, -3, -5, -7, -8, -9)   # F50: the kinds of a frame's claim that read what was lived of the filler
+GROUNDED = (-1, -2, -3, -5, -7, -8, -9, -10)   # F50: the kinds of a frame's claim that read what was lived of the filler
                                   # itself (the asked word, its continuation, how its sequences began, what it was
                                   # answered with alone, what is known of it); F53: of a family's claim, also the
                                   # thing known of it that goes on to the other asked word, and that word itself

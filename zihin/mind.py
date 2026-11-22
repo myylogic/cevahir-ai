@@ -161,6 +161,10 @@ class Config:
                                     # speaks for but a family fits is read by the family, every frame one vote on
                                     # the kind of what its members went on with (zihin/aile.py): what was learned
                                     # about kinds of question carries over to a new kind
+    asked_place: bool = False       # F55 (The Asked Place): a frame's value may be what a lived sequence of the
+                                    # filler's own holds at the one place where it differs from the run of items the
+                                    # filler begins in the context: a question is a statement the mind knows with one
+                                    # item replaced, and the answer is that item (read.asked_places)
     lived_apart: bool = False       # F54 (Relations Lived Apart): a frame's relation "what the filler goes on with"
                                     # (NEXT) counts for a member only as far as the member lived it apart from its own
                                     # instance in the frame. Where the answer repeats the filler and goes on, the

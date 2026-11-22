@@ -224,9 +224,12 @@ def votes(mind, unit: int, trust: Optional[torch.Tensor] = None):
 
 def claims(mind, unit: int, trust: Optional[torch.Tensor] = None):
     """What the family that fits a context claims there, each kind named for the context's own filler and its item
-    at the second place: ({target: (e, kind)}, (the filler, the widest frame's category, [(kind, e, whether it
-    named nothing), ...] for the relations of the filler's own record)), or ({}, None). Read once a moment."""
-    from .read import ALIKE, INHERIT, KNOWN, NEXT, REPLY, SELF, START, _moment_memo, frame_category, resolve
+    at the second place: ({target: (e, kind)} with the firmest kind that names each target, (the filler, the widest
+    frame's category, [(kind, e, whether it named nothing), ...] for the relations of the filler's own record, the
+    thing known of the filler that LINK names or None, {target: [(e, kind), ...]} with every kind that names it)),
+    or ({}, None). Read once a moment."""
+    from .read import ALIKE, ASKED, INHERIT, KNOWN, NEXT, REPLY, SELF, START, _moment_memo, asked_place, \
+        frame_category, resolve
     memo = _moment_memo(mind)
     key = ("aile", unit, id(trust) if trust is not None else None)
     if key in memo:
@@ -241,50 +244,59 @@ def claims(mind, unit: int, trust: Optional[torch.Tensor] = None):
     fixed = tuple(p for j, p in enumerate(parts) if j not in first)
     category = frame_category(mind, frame)
     out: Dict[int, Tuple[float, int]] = {}
+    every: Dict[int, List[Tuple[float, int]]] = {}
     own = []
+    known = None
     for kind, share in vote.items():
         if kind == KNOWN or share <= 0.5:                  # (KNOWN: a set, chosen by what the members said: LINK
             continue                                       # stands for it.) A family claims what its frames agree
         e = c * share + (1.0 - c) * 0.5                    # on; a word that only some of them say is each frame's
         if kind == LINK:                                   # own, and the family says nothing for or against it
-            target = link(mind, unit, first, second_item, trust)
+            target = known = link(mind, unit, first, second_item, trust)
         elif kind == SECOND:
             target = second_item
         elif kind == SELF:
             target = filler
+        elif kind == ASKED:                                # F55: read against the context's own run
+            target = asked_place(mind, filler, unit, first[0], trust)
         elif kind < 0:
             target = resolve(mind, kind, filler, fixed, category)
         else:
             target = kind
-        if kind in (NEXT, START, ALIKE, REPLY, INHERIT, LINK):
+        if kind in (NEXT, START, ALIKE, REPLY, INHERIT, LINK, ASKED):
             own.append((kind, e, target is None))
-        if target is not None and (target not in out or e > out[target][0]):
+        if target is None:
+            continue
+        every.setdefault(target, []).append((e, kind))
+        if target not in out or e > out[target][0]:
             out[target] = (e, kind)
-    memo[key] = (out, (filler, category, own))
+    memo[key] = (out, (filler, category, own, known, every))
     return memo[key]
 
 
 def speak(mind, unit: int, trust: Optional[torch.Tensor], out: Dict[int, float], src) -> None:
     """The family's claims for a context no frame speaks for, written into a reading (``read.members_map``). F46: a
     relation of the filler's own record that names nothing here is an open claim about the filler. F49: every kind
-    of family claim is a way of reading with a record of its own. F41: a thing known of the filler that is claimed
-    makes it the answer's topic."""
+    of family claim is a way of reading with a record of its own, and a word two kinds name is claimed by both. F41:
+    a thing known of the filler that is claimed (LINK, whichever other kind names it too) makes it the answer's
+    topic."""
     from .read import _moment_memo, _note_claim
     found, about = claims(mind, unit, trust)
     if about is None:
         return
     cfg = mind.cfg
-    filler, category, own = about
+    filler, category, own, known, every = about
     if getattr(cfg, "find_out", False):
         _moment_memo(mind)[("filler", unit)] = filler
     if getattr(cfg, "open_claims", False) and trust is None \
             and (unit == mind.context or mind.__dict__.get("_claim_again") == unit):
         for _, e, nothing in own:
             _note_claim(mind, filler, e, nothing)
-    for target, (e0, kind) in found.items():
-        write(mind, out, src, target, e0, kind)
-        if kind == LINK and getattr(cfg, "known", False):
-            _moment_memo(mind)[("known_claim", unit)] = (filler, category, target)
+    for target, made in every.items():
+        for e0, kind in made:
+            write(mind, out, src, target, e0, kind)
+    if known is not None and getattr(cfg, "known", False):
+        _moment_memo(mind)[("known_claim", unit)] = (filler, category, known)
 
 
 def write(mind, out: Dict[int, float], src, target: int, e0: float, kind: int) -> None:

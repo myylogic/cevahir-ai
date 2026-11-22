@@ -435,6 +435,7 @@ ALIKE = -4            # F31: "what stands where the filler stands" (the paradigm
 REPLY = -5            # F34: "what the filler, said on its own, was answered with" (the continuation of filler + event)
 INHERIT = -6          # F37: "what the filler's classes go on with, its own record last" (deduction with exceptions)
 KNOWN = -7            # F41: "how the filler's own lived sequences go on from here, not said yet" (a set of things)
+ASKED = -10           # F55: "what a lived sequence of the filler's own holds where it differs from the present run"
 
 
 def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[int] = None) -> Optional[int]:
@@ -452,6 +453,8 @@ def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[
         return inherited(mind, filler, fixed) if filler is not None else None
     if target == KNOWN:
         return None                                    # a set: read where the frame's votes are (known_claim)
+    if target == ASKED:
+        return None                                    # read against the context itself (asked_place)
     if target in (NEXT, START):
         if filler is None:
             return None
@@ -531,6 +534,64 @@ def next_apart(mind, filler: int, fixed, instance: int) -> Optional[int]:
     if memo is not None:
         memo[key] = found
     return found
+
+
+def asked_places(mind, x: int, context: int, first: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F55 (The Asked Place): the run of items that ``x`` begins in a context (from position ``first`` to the end of
+    that utterance: the items of x's channel that follow it), read against what is known of x: its own lived
+    sequences (those that began with it: a sentence read, an utterance after silence; F26), without what was only
+    ever asked of it (``only_asked``, F41: a question about x is a sequence that began with x too). A known sequence
+    that is the run in every item but one says what stands at that one place: {the item it holds there: how much
+    the sequence was lived (the least evidence along it)}. A question is a statement the mind knows with one item
+    replaced; nothing says which item is the question word: it is the one place where what was asked and what is
+    known differ. For a member of a frame the relation holds where the value it went on with is any of these."""
+    memo = _moment_memo(mind)
+    key = ("asked_places", x, context, first, id(trust) if trust is not None else None)
+    if memo is not None and key in memo:
+        return memo[key]
+    S = mind.S
+    kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+    parts = parts_of(mind, context) if kinds[context] & COMPOSED else (context,)
+    channel = channels[x]
+    end = first + 1
+    while end < len(parts) and channels[parts[end]] == channel:
+        end += 1
+    run = parts[first:end]
+    found: Dict[int, float] = {}
+    if len(run) >= 2 and run[0] == x:
+        def goes_on(sequence):
+            if len(sequence) == 1:
+                return {v: b for v, (b, _) in start_mass(mind, x, trust).items()
+                        if channels[v] == channel and not only_asked(mind, x, v)}
+            unit = S.tuple_index.get(sequence)
+            if unit is None or kinds[unit] & SLOTTED:
+                return {}
+            return {v: p for v, p in zip(*_world_pos(mind, unit, trust)) if channels[v] == channel}
+
+        def walk(sequence, differs, lived):
+            pos = len(sequence)
+            if pos == len(run):
+                if differs is not None:
+                    found[differs] = max(found.get(differs, 0.0), lived)
+                return
+            for v, p in goes_on(sequence).items():
+                if v == run[pos]:
+                    walk(sequence + (v,), differs, min(lived, p))
+                elif differs is None:
+                    walk(sequence + (v,), v, min(lived, p))
+        walk((x,), None, float("inf"))
+    if memo is not None:
+        memo[key] = found
+    return found
+
+
+def asked_place(mind, x: int, context: int, first: int, trust: Optional[torch.Tensor] = None) -> Optional[int]:
+    """F55: the item ``asked_places`` names for a context being read: the most lived; among those lived equally the
+    one learned first (F41's rule for the things known of a topic: each of them is an answer, and one is said)."""
+    found = asked_places(mind, x, context, first, trust)
+    if not found:
+        return None
+    return max(found, key=lambda v: (round(found[v], 9), -v))
 
 
 def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None):
@@ -1309,6 +1370,7 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
     known_of: Dict[int, float] = {}
     not_known: Dict[int, float] = {}
     own_name: Dict[int, float] = {}
+    asks = relational and tail is None and bool(where) and getattr(mind.cfg, "asked_place", False)   # F55
     apart = (relational and tail is None and bool(where) and where[-1] == len(parts) - 1   # F54: the instance ends
              and getattr(mind.cfg, "lived_apart", False))   # with the member: what it went on with, the member did
     alike = relational and getattr(mind.cfg, "paradigmatic", False)
@@ -1344,13 +1406,16 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
         known_x: Dict[int, float] = {}
         if known:                                      # F41: how x's own lived sequence goes on from its last
             known_x = known_unsaid(mind, x, instance, where[-1], trust)              # place in the instance
-        places = memberships_before(mind, x, since) if alike else None
-        loose = []
+        asked_x = asked_places(mind, x, instance, where[0], trust) if asks else ()   # F55: what x's own lived
+        places = memberships_before(mind, x, since) if alike else None               # sequences hold where the
+        loose = []                                                                   # instance's run differs
         for v, p, keys in zip(targets, own, _value_keys(mind, x, targets, fixed, relational, starts, exact, category,
                                                         inline=False, apart=instance if apart else None)):
             share = weight * p / total
             for key in keys:
                 shares[key] = shares.get(key, 0.0) + share
+            if v in asked_x:                           # (any of them: where the place holds two things, each
+                shares[ASKED] = shares.get(ASKED, 0.0) + share   # is an answer to what was asked)
             if known:                                  # F41: said by a member of which it was known (with the lived
                 if v == x:                             # sequence of the member that it carried on), or not; a
                     own_name[v] = own_name.get(v, 0.0) + share   # member that said itself
@@ -1662,7 +1727,9 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
             if known_on and target >= 0 and target != filler and explained(target):
                 continue                           # F41: what a member said of itself is not said of another filler
             asked = target
-            if echo_on and target in (NEXT, START) and unit == mind.context:
+            if target == ASKED:                    # F55: what the filler's own lived sequence holds where the run
+                target = asked_place(mind, filler, unit, where[0], trust)   # it begins here differs from it
+            elif echo_on and target in (NEXT, START) and unit == mind.context:
                 target = resolve(mind, target, filler, tuple(fixed) + tuple(sorted(episode_said(mind, filler))),
                                  category)         # F42: what followed the filler in this episode is an echo
             else:
@@ -1761,7 +1828,7 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
     return out                                           # learned not to believe, and nothing else is said: open
 
 
-OWN_RECORD = (-3, -5, -7)       # F50: the relations of a frame that read a record of the filler lived apart from
+OWN_RECORD = (-3, -5, -7, -10)  # F50: the relations of a frame that read a record of the filler lived apart from
                                 # the frame's own instances: how the sequences that began with it went on, what it
                                 # was answered with alone, what is known of it. Not its continuation anywhere
                                 # (NEXT): for a member that includes the very dialogues the frame generalises, so

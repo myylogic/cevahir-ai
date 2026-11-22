@@ -183,7 +183,8 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
 
 STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
            "told_apart", "open_claims", "look", "think", "faults",           # is raised with them; --ac turns one on
-           "silent_claims", "find_out", "wonder", "echo_exact", "families", "lived_apart")
+           "silent_claims", "find_out", "wonder", "echo_exact", "families", "lived_apart",
+           "asked_place")
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -1409,7 +1410,7 @@ def main(argv=None) -> None:
                     "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own "
                     "settings. Also the mechanisms that were measured and are off by default (inherit, witness, "
                     "difference, urge, known, wholes, told_apart, open_claims, look, think, faults, silent_claims, "
-                    "find_out, wonder, echo_exact, families, lived_apart), for a loaded or a new mind")
+                    "find_out, wonder, echo_exact, families, lived_apart, asked_place), for a loaded or a new mind")
     ap.add_argument("--pencere", type=int, help="how many items a NEW mind holds at once (its window, 3 to 15; "
                     "default 7); a mind keeps the window it has")
     args = ap.parse_args(argv)

@@ -85,7 +85,9 @@ FAULTS = 32                  # the last faults kept for the report (a record for
 
 NAMES = {0: "üyelerin aynı kelimesi", "dar": "başka bir yeri de paylaşan üyelerin kelimesi",
          -1: "sorulan kelimenin kendisi", -2: "kelimenin devamı", -3: "dizinin başı",
-         -4: "yerine geçen kelime", -5: "tek başına aldığı cevap", -6: "türünden kalan", -7: "hakkında bilinen"}
+         -4: "yerine geçen kelime", -5: "tek başına aldığı cevap", -6: "türünden kalan", -7: "hakkında bilinen",
+         -8: "hakkında bilinenden sorunun diğer kelimesine giden", -9: "sorunun diğer kelimesinin kendisi",
+         -10: "bilinen dizide sorulan yerde duran"}
 READINGS = {"aile": "çerçeve ailesinin oyu",
             "dizi": "bilinen dizinin devamı", "devam": "son kelimelerin yaşanmış devamı",
             "yerine": "yerine geçen kelimenin devamı", "biçim": "kelimenin biçimi",
