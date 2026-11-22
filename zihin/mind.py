@@ -156,6 +156,17 @@ class Config:
                                     # read, it is brought back to what it was asked and says what it can say now.
                                     # A thought that comes to nothing is an unknown about its topic (act.look_now,
                                     # Session.reply, Session.say_again)
+    families: bool = False          # F53 (Frames of Frames): frames that differ in one fixed word and are the same
+                                    # otherwise are a family, a generalisation with two places; a context no frame
+                                    # speaks for but a family fits is read by the family, every frame one vote on
+                                    # the kind of what its members went on with (zihin/aile.py): what was learned
+                                    # about kinds of question carries over to a new kind
+    lived_apart: bool = False       # F54 (Relations Lived Apart): a frame's relation "what the filler goes on with"
+                                    # (NEXT) counts for a member only as far as the member lived it apart from its own
+                                    # instance in the frame. Where the answer repeats the filler and goes on, the
+                                    # instance's continuation is the member's continuation (one event): the relation
+                                    # held for every member by the dialogue itself, whatever else was lived of it
+                                    # (read.lived_apart)
     echo_exact: bool = False        # F52 (Echo of the Same Words): in the lived continuation of the last words
                                     # (F16) a continuation is an echo only where it followed these very words in
                                     # what is present; without it every word the partner just said is left out,
@@ -1172,6 +1183,8 @@ class Mind:
         state.pop("_lexicon_index", None)
         state.pop("_why", None)
         state.pop("_explain_on", None)
+        state.pop("_aileler", None)                       # F53: the index of families (read from the frames again)
+        state.pop("_questions", None)                     # F51: the questions it knows (found again)
         for name in READ_CACHES:
             state.pop(name, None)
         return state

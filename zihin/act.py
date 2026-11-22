@@ -430,9 +430,10 @@ def think_now(mind) -> Optional[float]:
     return rate
 
 
-GROUNDED = (-1, -2, -3, -5, -7)   # F50: the kinds of a frame's claim that read what was lived of the filler itself
-                                  # (the asked word, its continuation, how its sequences began, what it was answered
-                                  # with alone, what is known of it)
+GROUNDED = (-1, -2, -3, -5, -7, -8, -9)   # F50: the kinds of a frame's claim that read what was lived of the filler
+                                  # itself (the asked word, its continuation, how its sequences began, what it was
+                                  # answered with alone, what is known of it); F53: of a family's claim, also the
+                                  # thing known of it that goes on to the other asked word, and that word itself
 
 
 def grounded(made) -> bool:
@@ -442,7 +443,7 @@ def grounded(made) -> bool:
     form or a similar situation rest on what others share."""
     for ways, e0, _ in made:
         kind = ways[1]
-        if e0 > 0.5 and len(kind) == 2 and kind[0] == "g" and kind[1] in GROUNDED:
+        if e0 > 0.5 and len(kind) == 2 and kind[0] in ("g", "aile") and kind[1] in GROUNDED:
             return True
     return False
 

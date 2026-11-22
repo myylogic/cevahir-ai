@@ -86,7 +86,8 @@ FAULTS = 32                  # the last faults kept for the report (a record for
 NAMES = {0: "üyelerin aynı kelimesi", "dar": "başka bir yeri de paylaşan üyelerin kelimesi",
          -1: "sorulan kelimenin kendisi", -2: "kelimenin devamı", -3: "dizinin başı",
          -4: "yerine geçen kelime", -5: "tek başına aldığı cevap", -6: "türünden kalan", -7: "hakkında bilinen"}
-READINGS = {"dizi": "bilinen dizinin devamı", "devam": "son kelimelerin yaşanmış devamı",
+READINGS = {"aile": "çerçeve ailesinin oyu",
+            "dizi": "bilinen dizinin devamı", "devam": "son kelimelerin yaşanmış devamı",
             "yerine": "yerine geçen kelimenin devamı", "biçim": "kelimenin biçimi",
             "fark": "tek kelimesi değişen durum", "durum": "en benzer yaşanmış durumlar"}
 
@@ -96,6 +97,12 @@ def frame_ways(key, frame: int) -> tuple:
     relation it names); this frame's claim of that kind."""
     kind = key if key == NARROWER or (isinstance(key, int) and key < 0) else 0
     return ALL, ("g", kind), ("g", kind, int(frame))
+
+
+def family_ways(kind) -> tuple:
+    """F53: the way of a family's claim, general -> specific: every way; the family's claim of that kind (a relation
+    it names, or a word every frame's members said)."""
+    return ALL, ("aile", kind if isinstance(kind, int) and kind < 0 else 0)
 
 
 def wanting(mind, ways) -> bool:

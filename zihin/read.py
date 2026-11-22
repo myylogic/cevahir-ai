@@ -487,6 +487,52 @@ def continuations(mind, unit: int, exclude=()) -> Dict[int, float]:
     return dict(zip(d[keep].tolist(), expectations(w_pos[keep], w_neg[keep], mind.cfg.k).tolist()))
 
 
+def lived_apart(mind, unit: int, instance: int, exclude=()) -> Dict[int, float]:
+    """F54 (Relations Lived Apart): what a member of a frame went on with apart from its own instance in that frame,
+    as positive evidence by value. ``instance`` is a context that ends with ``unit``: every time it went on with a
+    value, ``unit`` went on with that value too (one event, written on both), so the instance's own evidence for a
+    value is taken out of the unit's:
+        W+_apart(unit -> v) = W+(unit -> v) - W+(instance -> v)
+    A value the unit went on with nowhere else is not one of its continuations apart. (Only positive evidence can
+    be told apart: what a tie missed is not kept by the event that made it miss, and the instance's own events are
+    misses of the unit's other continuations.)"""
+    found = _unit_arrays(mind, unit)
+    if found is None:
+        return {}
+    d, w_pos, _ = found
+    if not isinstance(d, list):
+        d, w_pos = d.tolist(), w_pos.tolist()
+    inside = dict(zip(*_world_pos(mind, instance)))
+    world, channel = kind_masks(mind)[3], mv_view(mind, "u_channel")
+    out: Dict[int, float] = {}
+    for v, p in zip(d, w_pos):
+        if not world[channel[v]] or v in exclude or v == unit or p <= 0.0:
+            continue
+        rest = p - inside.get(v, 0.0)
+        if rest > 1e-9 * p:
+            out[v] = rest
+    return out
+
+
+def next_apart(mind, filler: int, fixed, instance: int) -> Optional[int]:
+    """F54: NEXT for a member of a frame as far as it was lived apart from the member's own instance: the value it
+    went on with most apart (``lived_apart``; the rivals' evidence is what stands against each, F25 b, so the most
+    evidence is the strongest expectation). Of several it went on with equally none is the strongest."""
+    memo = mind.__dict__.get("_read_memo")
+    key = ("next_apart", filler, tuple(fixed), instance)
+    if memo is not None and key in memo:
+        return memo[key]
+    goes_on = lived_apart(mind, filler, instance, fixed)
+    found = max(goes_on, key=goes_on.get) if goes_on else None
+    if found is not None:
+        top = goes_on[found]
+        if sum(1 for p in goes_on.values() if p >= top - 1e-9 * top) > 1:
+            found = None
+    if memo is not None:
+        memo[key] = found
+    return found
+
+
 def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None):
     """F11: what the members of a frame's category have lived in its slot, read now from their own evidence.
 
@@ -505,31 +551,35 @@ def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = 
 
 
 def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, exact: bool,
-                category: Optional[int] = None, inline: bool = True) -> List[List[int]]:
+                category: Optional[int] = None, inline: bool = True, apart: Optional[int] = None) -> List[List[int]]:
     """The keys under which each value a member x lived counts, in the order of ``targets``: the value itself, or the
     relation it stands in to x (F12 SELF and NEXT, F26 START: the first that holds, before the value). F28 (``exact``):
     the value itself always, and with it the most specific relation that names exactly that value as it would be
     resolved for the read instance (SELF, then START, then NEXT). F31 (``paradigmatic``, with ``category``, the frame's
     place): last, ALIKE, where the value is the item that stands most where x stands (``inline``; the members' reading
-    adds it afterwards, where it can hold, see ``member_votes``)."""
+    adds it afterwards, where it can hold, see ``member_votes``). F54 (``apart``, the member's own instance where it
+    ends with the member): NEXT holds for the member only as far as it was lived apart from that instance."""
     alike = inline and relational and category is not None and getattr(mind.cfg, "paradigmatic", False)
     replies = relational and getattr(mind.cfg, "replies", False)
     inherits = relational and getattr(mind.cfg, "inherit", False)
     memo = mind.__dict__.get("_read_memo")             # the same member, values and frame are read more than once in
     if memo is not None:                               # a moment (under each trust, and by every frame of the place):
         memo_key = ("value_keys", x, tuple(targets), tuple(fixed), relational, starts, exact, category, alike,
-                    replies, inherits)                 # nothing is written while the memo is open, and no caller
+                    replies, inherits, apart)          # nothing is written while the memo is open, and no caller
         hit = memo.get(memo_key)                       # changes the lists it is given
         if hit is not None:
             return hit
-        found = _value_keys_read(mind, x, targets, fixed, relational, starts, exact, category, alike, replies, inherits)
+        found = _value_keys_read(mind, x, targets, fixed, relational, starts, exact, category, alike, replies, inherits,
+                                 apart)
         memo[memo_key] = found
         return found
-    return _value_keys_read(mind, x, targets, fixed, relational, starts, exact, category, alike, replies, inherits)
+    return _value_keys_read(mind, x, targets, fixed, relational, starts, exact, category, alike, replies, inherits,
+                            apart)
 
 
 def _value_keys_read(mind, x: int, targets, fixed, relational: bool, starts: bool, exact: bool,
-                     category: Optional[int], alike: bool, replies: bool, inherits: bool) -> List[List[int]]:
+                     category: Optional[int], alike: bool, replies: bool, inherits: bool,
+                     apart: Optional[int] = None) -> List[List[int]]:
     """``_value_keys``, read from the substance (its switches already read)."""
     if exact:
         named: Dict[int, int] = {}
@@ -544,7 +594,7 @@ def _value_keys_read(mind, x: int, targets, fixed, relational: bool, starts: boo
                 best = resolve(mind, INHERIT, x, fixed)         # whatever followed x anywhere
                 if best is not None and best not in named:
                     named[best] = INHERIT
-            best = resolve(mind, NEXT, x, fixed)
+            best = resolve(mind, NEXT, x, fixed) if apart is None else next_apart(mind, x, fixed, apart)
             if best is not None and best not in named:
                 named[best] = NEXT
             if alike and _may_stand_in(mind, x, targets, fixed, named):
@@ -556,7 +606,8 @@ def _value_keys_read(mind, x: int, targets, fixed, relational: bool, starts: boo
                 if best is not None and best not in named:
                     named[best] = REPLY
         return [[v, named[v]] if v in named else [v] for v in targets]
-    goes_on = _continuing(mind, x, fixed) if relational else ()
+    goes_on = () if not relational else (_continuing(mind, x, fixed) if apart is None
+                                         else lived_apart(mind, x, apart, fixed).keys())
     stands = resolve(mind, ALIKE, x, fixed, category) if alike and _may_stand_in(mind, x, targets, fixed, {}) else None
     answered = resolve(mind, REPLY, x, fixed) if replies else None
     deduced = resolve(mind, INHERIT, x, fixed) if inherits and _may_inherit(mind, x, targets) else None
@@ -1084,6 +1135,7 @@ def member_analogy(mind, frame: int, exclude: int, trust: Optional[torch.Tensor]
     exact = getattr(mind.cfg, "exact_relations", False)
     since = getattr(mind, "episode_start", mind.t)
     src = mv_view(mind, "t_src")
+    apart = relational and getattr(mind.cfg, "lived_apart", False) and where[-1] == len(parts) - 1   # F54
     pooled: Dict[int, List[float]] = {}
     for tie in S.inc.get((category, ABSTRACT), ()):
         x = src[tie]
@@ -1104,7 +1156,8 @@ def member_analogy(mind, frame: int, exclude: int, trust: Optional[torch.Tensor]
         if c <= 0.0:
             continue
         w = k * c / (1.0 - c)
-        for v, p, keys in zip(targets, own, _value_keys(mind, x, targets, fixed, relational, starts, exact, category)):
+        for v, p, keys in zip(targets, own, _value_keys(mind, x, targets, fixed, relational, starts, exact, category,
+                                                        apart=instance if apart else None)):
             f = (p / total) * f2
             for key in keys:
                 acc = pooled.setdefault(key, [0.0, 0.0])
@@ -1220,9 +1273,11 @@ def _bound_frames_read(mind, unit: int, kinds, paradigmatic: bool, replies: bool
     return every
 
 
-def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None, tail: Optional[int] = None):
+def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None, tail: Optional[int] = None,
+                 channel: Optional[int] = None):
     """``member_mass`` and, fifth, how many members voted (the numerosity of the voice, F24). ``tail`` (F32): each
-    member's instance is followed by the item the relation names for that member (``bound_frames``)."""
+    member's instance is followed by the item the relation names for that member (``bound_frames``). ``channel``
+    (F53): only the members that are items of this channel vote."""
     S, k = mind.S, mind.cfg.k
     parts = parts_of(mind, frame)
     kinds = mv_view(mind, "u_kind")
@@ -1254,13 +1309,18 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
     known_of: Dict[int, float] = {}
     not_known: Dict[int, float] = {}
     own_name: Dict[int, float] = {}
+    apart = (relational and tail is None and bool(where) and where[-1] == len(parts) - 1   # F54: the instance ends
+             and getattr(mind.cfg, "lived_apart", False))   # with the member: what it went on with, the member did
     alike = relational and getattr(mind.cfg, "paradigmatic", False)
     if alike:                                          # F31: values that may stand where their member stands
         since = getattr(mind, "episode_start", mind.t)
         rivals = {src[t] for t in S.inc.get((category, ABSTRACT), ())}
         may, may_share = [], 0.0
+    of_channel = mv_view(mind, "u_channel") if channel is not None else None
     for tie in S.inc.get((category, ABSTRACT), ()):
         x = src[tie]
+        if of_channel is not None and of_channel[x] != channel:
+            continue
         if tail is None:
             instance = S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts)))
         else:
@@ -1287,7 +1347,7 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
         places = memberships_before(mind, x, since) if alike else None
         loose = []
         for v, p, keys in zip(targets, own, _value_keys(mind, x, targets, fixed, relational, starts, exact, category,
-                                                        inline=False)):
+                                                        inline=False, apart=instance if apart else None)):
             share = weight * p / total
             for key in keys:
                 shares[key] = shares.get(key, 0.0) + share
@@ -1545,6 +1605,10 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                                                    # moment, read with the full trust (F47: or a claim read again)
         if filler is not None and tail is None and getattr(cfg, "find_out", False):
             _moment_memo(mind)[("filler", unit)] = filler   # F50: the item the frame that speaks is about
+        prior: Dict[int, tuple] = {}
+        if getattr(cfg, "families", False) and tail is None:   # F53: what the family of this frame claims here is
+            from . import aile                                 # the frame's prior, in place of 1/2 (general ->
+            prior = aile.claims(mind, unit, trust)[0]          # specific, as everywhere)
         topic = getattr(mind, "topic", None)
         telling = where and (where[-1] < len(parts_of(mind, unit)) - 1 or (
             topic is not None and topic[0] == filler and topic[2] == getattr(mind, "episode_start", None)))
@@ -1589,7 +1653,7 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 if open_on:
                     _note_claim(mind, filler, e, target is None)
                 if target is not None:
-                    e = held * f + (1.0 - held) * 0.5
+                    e = held * f + (1.0 - held) * (prior[target][0] if target in prior else 0.5)
                     if faults:
                         src.setdefault(target, []).append((KNOWN, e))   # F49: the kind of claim that named it
                     out[target] = max(out.get(target, 0.0), e)
@@ -1607,6 +1671,8 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 _note_claim(mind, filler, e, target is None)
             if target is None:
                 continue
+            if target in prior:                    # F53: nested over what the family claims of this target
+                e = held * f + (1.0 - held) * prior[target][0]
             if faults:
                 src.setdefault(target, []).append((asked, e))   # F49: the kind of claim that named this value
             out[target] = max(out.get(target, 0.0), e)
@@ -1641,8 +1707,14 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 _own_record_against_shared(mind, out, src)   # F50: what was lived of the thing itself stands
                                                              # against what the others share (the members of a
                                                              # narrower place of it are others too)
+        for target, (e_family, kind) in prior.items():     # F53: what the family claims and this frame's members
+            if target not in out:                          # never went on with: the frame's evidence against it
+                aile.write(mind, out, src, target, (1.0 - c) * e_family, kind)
         if voices and trust is None:
             mind.__dict__.setdefault("voice", {})[unit] = (heard[spoke], heard)
+    elif getattr(cfg, "families", False):              # F53: no frame speaks for this context: a family of frames
+        from . import aile                             # that fits it does (frames of frames)
+        aile.speak(mind, unit, trust, out, src)
     own = own_mass(mind, unit, 1, trust)
     for target, (w_pos, w_neg) in own.items():
         c = conviction(w_pos + w_neg, cfg.k)

@@ -438,6 +438,31 @@ At each moment, roughly each word, the mind lives these steps:
   exact form (F42's rule, for last words of any length) a continuation is an echo only where it followed these
   very words in what is present. Measured in F50's world only: 19 more whole answers of 80 without F41, nothing
   changed with it. Not run on the whole battery.
+- **Frames of Frames (F53, off by default).** A frame generalises contexts that differ in one item. Frames that
+  differ from each other in one fixed word and are the same otherwise are a *family*, a generalisation with two
+  places: the frames' own place and the place of the word that varies. Nothing is stored for it; it is read from
+  the frames that are there. A context a family fits is read by it: every frame votes once, with the conviction of
+  its members, on the *kind* of what its members went on with (a relation of the value to the frame's filler; the
+  frame's own varying word; the thing known of the filler whose lived sequence goes on to that word; a word all of
+  them said): vote(kind) = sum c_frame f_frame(kind) / sum c_frame, e = c vote + (1 - c)/2 with
+  c = lam e_new conviction(sum c_frame). A family claims only what its frames agree on, a place holds items of one
+  kind, and where a frame of its own already speaks the family's claim is its prior in place of 1/2. So what was
+  learned about kinds of question carries over to a new kind. Measured (5 seeds): a mind that has mastered two or
+  more kinds of question answers a new kind at first sight, 40 of 40, where the same mind without it needs two
+  dialogues and gets 34, whatever it had mastered before; a kind answered otherwise is not made up and is learned
+  as fast; of a thing whose fact was never read only the asked word. With F49 its kinds of claim have records:
+  where the family's claim is false the mind is wrong about the first new kind and holds the claim back for the
+  next three (wrong first answers 20 -> 5); where lawful and false kinds alternate, one outcome cannot tell them
+  apart and the right first answers are lost. Two places only.
+- **Relations Lived Apart (F54, off by default).** A frame's relation "what the filler goes on with" was checked,
+  for a member, against the member's own continuation. Where an answer repeats the asked word and goes on, the
+  instance's continuation is the member's continuation (one event, written on both), so the relation held for every
+  member by the dialogue itself. Now it counts only as far as the member lived it apart from its own instance:
+  W+_apart(x -> v) = W+(x -> v) - W+(instance -> v), the strongest of what is left. Measured: with two facts read
+  of every thing and one kind of question mastered a fresh thing was not answered (0 of 40) and now is (40 of 40);
+  kinds of question learned one after another stayed answered (160 of 160) where three of four had gone silent.
+  In the kinds world of F49 it takes away a silence that was an accident and leaves the plain induction (30 wrong
+  of 40 before the first round, corrected by what is then lived).
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
@@ -684,6 +709,8 @@ The models were small and the data scarce; with far more data the gap may close.
 | Finding Out | Öğrenmek İçin Harekete Geçmek | F50, off by default | epistemic (information seeking) actions; knowing versus guessing by the source of a claim; the reject option with a learned policy; acting while waiting (asynchronous retrieval) |
 | Asking Itself | Kendine Sorma | F51, off by default | curiosity as self-posed questions; intrinsic motivation; active learning; exploration of a frontier; persistence under sparse reward |
 | Echo of the Same Words | Aynı Kelimelerin Yankısı | F52, off by default | |
+| Frames of Frames | Çerçevelerin Çerçevesi | F53, off by default | learning to learn (a learning set); schema abstraction over schemas; two-place (relational) generalisation; hierarchical priors (the general level is the specific level's prior) |
+| Relations Lived Apart | Ayrı Yaşanmış İlişkiler | F54, off by default | held-out validation (a rule is tested on evidence that did not make it); circular evidence |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

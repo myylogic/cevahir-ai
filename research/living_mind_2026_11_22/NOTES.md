@@ -1601,3 +1601,381 @@ F45 (a whole does not say of what kind it is), met here once in 4,476. Not corre
 16.4 lists the Turkish documents as last brought up to date at F43. That is wrong: their text was replaced by a pair
 of images on 2026-11-20 (commit 9da86b8, the owner's), so there is nothing in them to bring up to date. The line
 should not have been written; it is corrected here and left in place above.
+
+## 17. Growing as it learns: frames of frames (F53), relations lived apart (F54), and why COGS came out 0
+
+### 17.1 What was asked
+
+The owner, after sections 14 to 16: the point is learning, comprehension, and raising generalisation to higher
+levels. A person becomes more intelligent as they learn: a two-year-old and a forty-year-old have the same
+hardware, and the person deepens, generalises, comprehends right and wrong, comprehends comprehending; the way of
+thinking itself develops. The mind must develop like that. And: what was not done is not a failure, it is the next
+problem to overcome, so it goes into the work queue; and why COGS came out 0 is to be found out.
+
+### 17.2 The measure, and what it showed before anything was built (`t_grow.py`)
+
+The same new thing is given to the same mind at different stages of what it has learned. A world of 48 things and
+seven kinds of fact ("X V Q .": what a thing eats, drinks, likes, wears, reads, draws, carries; four values a kind,
+one at random for each thing). Every fact of every thing is read once, as a sentence. A kind of question is
+*mastered* when the mind watched it asked and answered about 8 things, twice ("X ne Q ?" -> "X V Q ."). The mind
+has mastered k kinds; then a new kind of question appears, about a kind of fact it has only read. After n watched
+dialogues of the new kind, 8 fresh things are asked it on copies.
+
+With F41 alone the answer was the same for k = 0, 1, 2, 3, 4 and 6: nothing at n = 0 and n = 1, 34 of 40 at n = 2,
+35 at n = 4. A mind that had mastered six kinds of question learned the seventh exactly as a mind that had
+mastered none learned its first. What it had learned about kinds of question did not carry over: it learned more,
+and did not learn better.
+
+### 17.3 F53 Frames of Frames (`Config.families`, off by default; `zihin/aile.py`)
+
+A frame generalises lived contexts that differ in one item (its place). Frames that differ from each other in one
+fixed word, and are the same otherwise, are a **family**: "X ne yer ?", "X ne içer ?", "X ne sever ?" are one
+family whose varying word is the verb. A family is a generalisation with two places: the frames' own place, and
+the place of the word that varies. Nothing new is stored for it: it is read from the frames that are there (an
+index of the frames by the families they could belong to is built as frames are made and is not kept when the
+mind is saved or copied).
+
+A context that a family fits (its item at the varying place is one the family never had there) is read by the
+family. Every frame of it votes once, with the conviction of its members, on the *kind* of what its members went
+on with:
+
+* a relation of the frame's value to its own filler (the filler itself, its continuation, how its sequences began,
+  what it was answered with, what stands where it stands), named for the context's own filler;
+* `SECOND`: the frame's own varying word, named as the context's item at that place;
+* `LINK`: a thing known of the filler whose own lived sequence goes on to the frame's varying word; for the
+  context, the thing known of its filler that goes on to *its* item at that place. It is the relation between the
+  two places: of all that is known of the thing asked about, what the question's other word leads to;
+* a word every frame's members said.
+
+    vote(kind) = sum over frames of c_frame f_frame(kind) / sum over frames of c_frame
+    e = c vote + (1 - c) 1/2,   c = lam e_new conviction(sum of c_frame)
+
+with e_new what one lived instance gives a filler it meets for the first time. Of several families that fit, the
+one that agrees most speaks, as among frames. So how firmly a new kind of question is read depends on how many
+kinds the mind has mastered.
+
+Where no frame speaks for the context, the family speaks alone. Where a frame does (it has members of its own
+already), the family's claim is the frame's prior in place of 1/2, as everything in the mind is nested general
+to specific: e = c_frame f + (1 - c_frame) e_family, and what the family claims and the frame's members did not
+say is claimed with the weight the frame leaves, (1 - c_frame) e_family. Every kind of family claim is a way of
+reading with a record of its own (F49: `("aile", kind)`), a relation of the filler's own record that names
+nothing is an open claim about the filler (F46), and the thing known of the filler that is claimed makes it the
+answer's topic (F41).
+
+Three rules were found by measuring (17.6):
+
+* a family claims only what its frames agree on (a vote over 1/2). A word that some frames' members said and
+  others did not is each frame's own (the value that goes with its own word): the family says nothing for or
+  against it;
+* a place holds items of one kind: the item at the varying place is of the channel the family's words there are
+  of, and in each frame only the members that are items of the filler's channel vote;
+* (F54, below) a relation counts for a member only as far as it was lived apart from the member's own instance.
+
+### 17.4 Measured (`t_grow.py`, 5 seeds; rows in `results/grow.jsonl`; code md5 3d41d20c...)
+
+A new kind of question after the mind has mastered k kinds; 8 fresh things asked it on copies after n watched
+dialogues of the new kind (right / wrong / silent of 40), and 8 fresh things asked one mastered kind at the end:
+
+    condition         k   n=0       n=1       n=2       n=4       a mastered kind
+    F41               0   0/0/40    0/0/40    34/0/6    35/0/5    -
+    F41               1   0/0/40    0/0/40    34/0/6    35/0/5    0/0/40
+    F41               2   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41               3   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41               4   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41               6   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F53         0   0/0/40    0/0/40    34/0/6    35/0/5    -
+    F41 + F53         1   0/0/40    0/0/40    34/0/6    35/0/5    0/0/40
+    F41 + F53         2   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F53         3   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F53         4   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F53         6   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F54         0   0/0/40    0/0/40    34/0/6    35/0/5    -
+    F41 + F54         1   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F54         2   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F54         3   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F54         4   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F54         6   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F53 + F54   0   0/0/40    0/0/40    34/0/6    35/0/5    -
+    F41 + F53 + F54   1   0/0/40    0/0/40    34/0/6    35/0/5    40/0/0
+    F41 + F53 + F54   2   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F53 + F54   3   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F53 + F54   4   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+    F41 + F53 + F54   6   40/0/0    40/0/0    40/0/0    40/0/0    40/0/0
+
+With F53 a mind that has mastered two or more kinds answers a new kind of question the first time it meets it,
+about things it was never asked anything about, with the fact it read: 40 of 40 at n = 0, where the same mind
+without it needs two dialogues and then gets 34. With no kind or one kind mastered there is no family (one frame
+is not a family) and nothing changes. The row for one mastered kind is section 17.5.
+
+A kind of question that looks like the others and is answered otherwise ("X ne bilir ?" -> "hiçbir şey ."; no
+fact of that kind was ever read):
+
+    condition         k   n=0       n=1       n=2       n=4       n=8
+    F41               0   0/0/40    0/0/40    40/0/0    40/0/0    40/0/0
+    F41               4   0/0/40    0/0/40    40/0/0    40/0/0    40/0/0
+    F41 + F53         0   0/0/40    0/0/40    40/0/0    40/0/0    40/0/0
+    F41 + F53         4   0/0/40    0/0/40    40/0/0    40/0/0    40/0/0
+    F41 + F54         0   0/0/40    0/0/40    40/0/0    40/0/0    40/0/0
+    F41 + F54         4   0/0/40    0/0/40    40/0/0    40/0/0    40/0/0
+    F41 + F53 + F54   0   0/0/40    0/0/40    40/0/0    40/0/0    40/0/0
+    F41 + F53 + F54   4   0/0/40    0/0/40    40/0/0    40/0/0    40/0/0
+
+Nothing is made up before the exception is shown (the family names the asked word; nothing known of the thing
+leads to the new verb, so `LINK` names nothing), and it is learned from its own dialogues as fast as without the
+family.
+
+A new kind at first sight, the mind having mastered 4 kinds, where for half of the fresh things the fact of the
+new kind was never read:
+
+    condition         the fact was read     never read: only the asked word / a value / nothing
+    F41               0/0/20                0 / 0 / 20
+    F41 + F53         20/0/0                20 / 0 / 0
+    F41 + F54         0/0/20                0 / 0 / 20
+    F41 + F53 + F54   20/0/0                20 / 0 / 0
+
+The first seed with F53: panda -> panda dal taşır | kaz -> kaz dal taşır | kanguru -> kanguru taş taşır | tilki ->
+tilki kum taşır | yunus (never read) -> yunus | timsah (never read) -> timsah | koala (never read) -> koala | deve
+(never read) -> deve.
+
+What it costs (6 kinds mastered; the same machine, nothing else running):
+
+    condition         the life (12,720 moments)   280 answers on copies
+    F41                16.3 s                      17.8 s (0.06 s an answer)
+    F41 + F53          16.3 s                      25.2 s (0.09 s an answer)
+    F41 + F54          17.0 s                      19.0 s (0.07 s an answer)
+    F41 + F53 + F54    16.1 s                      25.2 s (0.09 s an answer)
+
+### 17.5 F54 Relations Lived Apart (`Config.lived_apart`, off by default)
+
+Two errors were found by the measure above, and they have one source.
+
+*One kind mastered, two facts read of every thing.* With F41 a fresh thing asked the mastered kind got its name
+and nothing more (0 of 40 right, 40 silent; the row k = 1 above). *New kinds learned one after another.* In the
+teacher's loop (asked, then shown the true dialogue), after the fourth new kind was learned the three learned
+before it went silent for fresh things (first seed: 8 of 8 right after each kind's own loop, 0 of 8 after the
+last kind's).
+
+Traced in the mind's own readings. A frame's relation NEXT says "the value is what the filler goes on with": for
+a member x it is checked against x's own strongest continuation. Where the answer repeats the asked word and goes
+on ("X ne yer ?" -> "X V yer ."), the frame's context ends with x, so the instance's continuation *is* x's
+continuation: one event, written on both. The relation held for every member by the dialogue itself, whatever
+else was lived of it. For a fresh thing it then names that thing's strongest continuation anywhere (another fact
+of it), which ties with what is known of it (F41), and the mind says nothing; and every frame that was learned
+in the loop votes for it, so the family comes to claim it (vote 0.65 after the fourth kind). The same source was
+met in section 14 (F50's own-record rule had to leave NEXT out for it) and was left there as it was.
+
+F54: a relation that reads the filler's own record counts for a member only as far as the member lived it apart
+from its own instance in the frame. For NEXT, where the instance ends with the member:
+
+    W+_apart(x -> v) = W+(x -> v) - W+(instance -> v)
+
+and the member's continuation apart is the value with the most of it (the rivals' evidence is what stands against
+each, as F25 b reads it); of several it went on with equally none is the strongest; a value it went on with
+nowhere else is not a continuation of it. Only positive evidence can be told apart: what a tie missed is not kept
+by the event that made it miss, and the instance's own events are the misses of the member's other continuations.
+(Tried first with the negative evidence left as it was: the relation still held for every member, because the
+dialogue itself had made the other fact miss more often. Measured, then changed.) Where the context does not end
+with the member (the answer is the value alone) the instance's continuation is not the member's, and nothing
+changes. A relation that was lived apart still holds: with one fact read of every thing a fresh thing is
+answered with and without the switch (pinned by a test).
+
+Measured: the row k = 1 above (0/0/40 -> 40/0/0, with and without F53), and the loop below.
+
+### 17.6 Does it learn how far its own generalising deserves to be believed (`t_grow.py judged`, 5 seeds)
+
+The mind has mastered 3 kinds; then four new kinds appear one after another, each in the teacher's loop for 4
+rounds. Three worlds: every new kind is answered as the mastered ones are (lawful); every new kind is answered
+otherwise although its facts were read, each with two words of its own (otherwise); the two in turn (mixed). The
+first answer of every new kind, then all rounds, then 8 fresh things at the end (right / wrong / silent):
+
+    world      condition               first answers of the four new kinds   all 16 rounds   fresh at the end (160)
+    lawful     F41 + F53               5/0/0 5/0/0 5/0/0 5/0/0  (20/0/0)     80/0/0          40/0/120
+    lawful     F41 + F53 + F54         5/0/0 5/0/0 5/0/0 5/0/0  (20/0/0)     80/0/0          160/0/0
+    lawful     F41 + F53 + F49         5/0/0 5/0/0 5/0/0 5/0/0  (20/0/0)     80/0/0          160/0/0
+    lawful     F41 + F53 + F54 + F49   5/0/0 5/0/0 5/0/0 5/0/0  (20/0/0)     79/0/1          160/0/0
+    otherwise  F41 + F53               0/5/0 0/5/0 0/5/0 0/5/0  (0/20/0)     40/20/20        160/0/0
+    otherwise  F41 + F53 + F54         0/5/0 0/5/0 0/5/0 0/5/0  (0/20/0)     40/20/20        160/0/0
+    otherwise  F41 + F53 + F49         0/5/0 0/0/5 0/0/5 0/0/5  (0/5/15)     55/5/20         160/0/0
+    otherwise  F41 + F53 + F54 + F49   0/5/0 0/0/5 0/0/5 0/0/5  (0/5/15)     55/5/20         160/0/0
+    mixed      F41 + F53               0/5/0 5/0/0 0/5/0 5/0/0  (10/10/0)    60/10/10        160/0/0
+    mixed      F41 + F53 + F54         0/5/0 5/0/0 0/5/0 5/0/0  (10/10/0)    60/10/10        160/0/0
+    mixed      F41 + F53 + F49         0/5/0 0/0/5 0/5/0 0/0/5  (0/10/10)    55/10/15        160/0/0
+    mixed      F41 + F53 + F54 + F49   0/5/0 0/0/5 0/5/0 0/0/5  (0/10/10)    55/10/15        160/0/0
+
+In the lawful world every first answer is right in every condition (20 of 20). Without F54 the three kinds
+learned first go silent for fresh things at the end (40 of 160 right): the error of 17.5; with F54 all 160 are
+right.
+
+In the world where the family's claim is false, the mind without F49 asserts it at the first sight of every new
+kind (20 wrong of 20). With F49 it is wrong about the first new kind (5 of 5) and then holds the family's claim
+back: 0 wrong and 15 silent on the three kinds that follow, and it learns each of them from its own dialogues
+sooner (55 right in the loops against 40). The family's kinds of claim are ways of reading with records of their
+own, and one settled failure is enough to make the mind wait: it has judged its own way of generalising by what
+came of it.
+
+In the mixed world the same rule costs. A failure silences the claim for the next kind, which was lawful, and
+that kind's own success restores it for the one after, which was not: 10 wrong either way, and the 10 right
+first answers are lost (0/10/10 against 10/10/0). Nothing at first sight tells a lawful kind from the other, and
+a record of one outcome cannot either. Written down as it came out.
+
+### 17.7 F53 and F54 in the worlds measured before them (`t_again.py`, 5 seeds; rows in `results/again.jsonl`)
+
+`t_again.py` runs the parts of the earlier scripts unchanged with more switches on. Compared count by count with
+the committed rows of sections 11, 12, 14 and 15:
+
+    part                 rows   F54: same as committed   F53 + F54: same as committed
+    find_out.asked       5      5 of 5                   3 of 5
+    find_out.half        5      5 of 5                   3 of 5
+    wonder.chain         3      3 of 3                   3 of 3
+    fault.misled         4      2 of 4                   2 of 4
+    fault.regular        4      4 of 4                   4 of 4
+    fault.two            2      2 of 2                   0 of 2
+    fault.loop           2      2 of 2                   0 of 2
+    fault_kinds.kinds    3      0 of 3                   0 of 3
+
+With F54 alone 23 of the 28 rows are the same count for count: F50's world, F51's chain, the regular
+world, the two readings that disagree and the loop with a library. In the misled world one answer of 200 about
+things never asked about changed from silent to wrong (in two conditions).
+
+The kinds world of section 12 changed in all three conditions, and the change says what F54 took away. Before any
+round the mind used to be silent about fresh things (0/0/40), and without F49 it then said, from the fourth round
+to the end, the sentence it had read (40 wrong of 40). Both came from NEXT held by the dialogue itself: for a
+fresh thing it named the kind word of the sentence read about it; that tied with the food the eight watched
+things share (silence), and once the loop had shown other foods it stood alone (wrong). With F54 that relation is
+not there. What is left is the plain induction: all eight watched things ate the same, so before any round the
+mind says that food of everything, 10 right and 30 wrong of 40 (the fresh things of the watched kind, and the
+others). Without F49 it goes on so until the loop has shown the other foods and is then silent (0/0/40 from the
+16th round, where it was 40 wrong). With F49: 10/30/0 before any round, then 10/0/30 after four rounds (40/0/0
+with F53 on too) and 40 of 40 from the eighth round as before; in the loop itself right 80 -> 105, wrong 5 -> 10,
+silent 35 -> 5. So F54 trades a silence that was an accident for an induction that is wrong 30 times of 40 before
+the first round and is corrected by what is then lived; with somewhere to look, F50 holds such a word back.
+
+With F53 and F54: F50's world with F41 is the same (80 of 80 whole and right; 40 of 40 of what the library
+holds). Without F41 the whole answer comes more often (56 -> 71 of 80, with F52 75 -> 77; half: 26 -> 34 and
+36 -> 38 of 40): the family claims the word that follows the value. No wrong answer was added. F51's chain is the
+same. The two readings that disagree: right 49 -> 63 without F49 and 60 -> 68 with it, no wrong answer. The loop
+with a library, after its own looking: whole answers 16 -> 44 of 80 with F49 (wrong 1 -> 1), and 9 -> 17 without
+(wrong 38 -> 31). Misled: the one answer above, and one lawful answer more withheld in the loops (25 -> 24 of 30).
+
+All of the mind's tests were also run once with `lived_apart` on by default (a copy of the code, not kept): the
+only behaviour that changed is the pinned numbers of the older, non-exact reading of relations (F12 before F28),
+which F54 turns into F28's.
+
+### 17.8 What was tried on the way and changed, each measured
+
+* The family speaking only where no frame speaks: after one dialogue of the new kind a frame with one member
+  spoke weakly and the family was not consulted (n = 1: 0 of 16). Now the family's claim is the frame's prior.
+* The family's vote on every word as the frame's prior, also under 1/2: on COGS in its short form (below) exact
+  answers fell from 68 to 59 of 100. A word that only some frames' members said (the base form that goes with
+  each frame's own verb) had a low family vote, which pulled the frame's own claim under the line ("see" for "saw":
+  0.615 -> 0.478). Now a family claims only what its frames agree on: 67 of 100 (three answers lost and two gained,
+  all five at a position index after the sentence had left the window).
+* The family reading an inner event as a word. While the mind looks something up it perceives that it is looking
+  (F50), and that inner event is an item of its context where the value then stands. With F53 on in F50's world
+  the family read the feeling as the value and said the word that follows a value: "arı yer ot yer"; 80 of 80
+  right went to 10 right, 70 wrong. Found by `t_again.py`, traced, and the rule "a place holds items of one kind"
+  was made; a test pins it.
+* F54 with the negative evidence kept (17.5).
+
+### 17.9 What they do not do
+
+* Two places. A family is frames that differ in one fixed word. Three or more places at once are not read; COGS
+  needs them (17.10).
+* `LINK` and F41 read what is known of a thing only where the answer names the thing first. Where the answer is
+  the value alone ("X ne yer ?" -> "V .") and two facts were read of every thing, F41 says nothing (measured in
+  a small world; the mind without F41 answers there by the order the facts were read in, which is an accident of
+  the script). In the queue.
+* With F41 alone, 5 of 40 fresh things are silent after four dialogues of a new kind (n = 4 above): three of the
+  four watched things happened to carry the same value, and that shared word rivals what is known of the thing
+  itself. F50's own-record rule decides it only where F50 is on; F53 decides it by the family's claim.
+* In the mixed world F49 turns with each outcome (17.6): one failure silences the family's claim for the next
+  new kind, one success restores it.
+* In the kinds world of section 12, F54 takes away a silence that was an accident (17.7).
+* The cost (17.4), and nothing here was run on a long life, on the owner's documents or on the web.
+
+### 17.10 COGS: why 0 (`t_cogs_why.py`; rows in `results/cogs_why.jsonl`; the published files, kept outside the repository)
+
+Section 16.3 left this open. Three measurements, each the life of `t_cogs.py` (the lines that are not ordinary
+sentences and 1,000 sampled ordinary ones, each watched twice) and 100 sampled lines of the published
+in-distribution test file.
+
+*Where the answers break.* For every answer: how many tokens are right before the first difference, and what was
+due there.
+
+    form        with       exact  said nothing  stopped  another token  tokens right        breaks most at
+    short       -          68     4             6        22             86% (1510 of 1756)  index 24; word not in the sentence 6; word in the sentence 2
+    short       F53        67     3             9        21             86% (1518 of 1756)  index 25; word not in the sentence 8
+    short       F53+F54    67     3             9        21             86% (1518 of 1756)  index 25; word not in the sentence 8
+    published   -          0      71            9        19             2% (103 of 4525)    connective 47; word in the sentence 35; word not in the sentence 13
+    published   F53        0      59            19       20             7% (313 of 4525)    connective 39; word in the sentence 34; word not in the sentence 21
+    pointer     -          0      74            7        18             2% (62 of 3255)     connective 48; word in the sentence 34; word not in the sentence 14
+
+In the published form 71 of 100 answers break before their first token and 2% of the tokens are right. Writing
+every variable as the word it points to (the pointer form: nothing has to be counted) changes nothing: 74 silent.
+So the position indices are not the first cause. With only sentences whose logical form has at most 20 tokens (in
+the life and in the test), 68 of 100 are exact; of the 32 that are not, 24 break at a position index, and in 24
+of the 28 answers that stopped or went on wrongly the sentence had already left the window (13 items).
+
+*How far the asked sentences are from what was lived* (`t_cogs_why.py distance`; words in which a sentence
+differs from the nearest sentence of its length):
+
+    form        among                                       1 word   2    3    4 or more
+    published   the life (1,155 sentences)                  15       39   22   24
+    published   the whole training file (24,155 sentences)  48       31   12   9
+    short       the life (1,106 sentences)                  98       2    0    0
+    short       the whole training file (4,050 sentences)   100      0    0    0
+
+A frame generalises contexts that differ in one item. In the published form 15 of the 100 asked sentences are one
+word away from a sentence the mind lived, 85 are two or more away: for those there is no frame, and the mind,
+which says nothing it has no reading for, is silent at the first token. In the short form 98 of 100 are one word
+away, and 68 are answered. That is the first cause: the mind generalises over one place at a time, and COGS asks
+for several at once. (Against the whole training file 48 would be one word away: a longer life would help, and
+half of the sentences would still have no frame.)
+
+*With F53* (two places): in the published form the answers that break before the first token go from 71 to
+59 and the tokens right before the first difference from 2% to 7%; no answer is exact.
+Where it now breaks most is a word that is not in the sentence (the base form of an inflected verb: "break" for
+"broke"; stopped there 12 times): the family has a kind for the varying word itself and none for the
+word that goes with it. In the short form 68 -> 67.
+
+So, in the order the measurements give: (1) generalisation over more than two places at once; (2) the word that
+goes with a word (never said alone: it has to be found from the dialogues it occurs in); (3) position indices,
+and answers that outgrow the window. None of the three is built. This is where the mind stands on COGS and why;
+it is not a claim about COGS.
+
+### 17.11 The published SCAN "around right" split
+
+4,474 of 4,476 exact (1,087 of 15,225 training commands watched twice; row appended to
+`results/scan_official.jsonl`). The two wrong answers are "look after look around right" and "run thrice and run
+around right": the error of section 16.5 again (a lived command that answers like an action phrase is taken as
+one, and "around right" is applied to it). The published splits so far: right 4,475 of 4,476, opposite right
+4,476 of 4,476, around right 4,474 of 4,476. "jump around right" is running.
+
+### 17.12 The work queue: what is not done, in the order it will be taken
+
+1. Reading what is known of a thing by the question's other words where the answer does not name the thing
+   (17.9), and generalisation over more than two places (17.10): one mechanism is being looked for, since both
+   are "the lived sequences that match the context in some places, read at the places where they differ".
+2. The word that goes with a word; position indices; answers longer than the window (17.10).
+3. Kinds of wholes: the three wrong answers of the published SCAN splits (16.5, 17.11).
+4. More than one question of its own, a question chosen for the thing, and reasoning over what it found
+   (section 15.5).
+5. Saying that it does not know and asking its partner, learned by living (one attempt was made in this round
+   and taken back: the word came out twice and at the wrong moments).
+6. A sense of the clock and of the present moment.
+7. F50, F51, F52 on a long life, on the owner's documents, on the web, and F52 on the whole battery; the rest of
+   the published SCAN splits.
+8. The indices in shared memory (section 9).
+
+### 17.13 Gates, tests, reproduce
+
+With every studied switch off the lesson-free gate, the 17 configurations and the scripted life (plain and with
+wholes) are bit-identical to the references. Tests: 432 passed (15 new: `test_zihin_families.py` 9,
+`test_zihin_lived_apart.py` 6).
+
+    python research/living_mind_2026_11_22/t_grow.py forms | exception | unknown | cost | judged
+    python research/living_mind_2026_11_22/t_again.py --ac lived_apart
+    python research/living_mind_2026_11_22/t_again.py --ac families,lived_apart
+    python research/living_mind_2026_11_22/t_cogs_why.py run --cogs FOLDER --form published|pointer|short [--ac families]
+    python research/living_mind_2026_11_22/t_cogs_why.py distance --cogs FOLDER --form published|short
+    python -m zihin --ac known,families,lived_apart
