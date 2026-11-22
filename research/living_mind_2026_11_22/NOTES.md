@@ -2702,3 +2702,27 @@ in `test_zihin_asked_place.py`).
 
     python research/living_mind_2026_11_22/t_self.py curriculum | control | kept | worlds | traced
     python -m zihin --ac faults,trials,built_relations        (then, in the chat: !deney)
+
+## 22. The published SCAN files: "add jump" has ended, and the "right" split with F56 over its whole test file
+
+The last of the six published splits of section 19 has ended (`t_scan_official.py`, the same life and the same
+frozen copy of the code as there: about 1,090 of the published training commands watched twice, F43 and F45 on,
+every later mechanism off; the whole published test file asked; the row appended to `results/scan_official.jsonl`):
+
+    split               exact             training commands watched twice
+    right               4,475 of 4,476    1,087 of 15,225
+    opposite right      4,476 of 4,476    1,087 of 15,225
+    around right        4,474 of 4,476    1,087 of 15,225
+    jump around right   1,173 of 1,173    1,096 of 18,528
+    length              3,919 of 3,920    1,094 of 16,990
+    add jump            7,706 of 7,706    1,082 of 13,204
+
+26,223 of 26,227 over the six published test files. The four answers that are not exact are the four of section
+20 (one source, closed by F56). The "add jump" run took 14,979 s of answering with three processes (5.8 s an answer
+of one processor); nothing in it was built or tuned for that file.
+
+The first of the whole test files with F56 on (section 20.4; `t_scan_kinds.py run`, the code frozen with section
+20, md5 4d33b86f...; the row appended to `results/scan_kinds.jsonl`): the published "right" split **4,476 of
+4,476** (4,475 without F56; 1,087 of 15,225 training commands watched twice). The length, around right, jump
+around right and opposite right files with F56 are running, one after another; their rows will be appended as
+they come out.
