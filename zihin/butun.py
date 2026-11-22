@@ -224,17 +224,21 @@ def form(mind, words: tuple, reply: Optional[tuple], F: int, memo: dict) -> tupl
         return WHOLE
     key = ("form", words, reply)
     if key not in memo:
-        inner = align(mind, words, reply, F, memo) if reply is not None else reading(mind, words, F, memo)
+        built = getattr(mind.cfg, "whole_kinds", False)  # F56: how it is built, whatever the order of its answer
+        inner = align(mind, words, reply, F, memo, built) if reply is not None else reading(mind, words, F, memo)
         memo[key] = WHOLE if inner is None else WHOLE + tuple(WHOLE if is_whole(x) else x for x in inner[0])
     return memo[key]
 
 
-def align(mind, words: tuple, answer: tuple, F: int, memo: dict):
+def align(mind, words: tuple, answer: tuple, F: int, memo: dict, built: bool = False):
     """The summary of a lived dialogue: (the utterance's items, the answer's items, {place: run}), or None.
     A proper run of the utterance that was said alone and answered before is a whole; the answer is read as the
     replies of some of them (no two overlapping, every one of them pointed to) and words of its own. The reading with
     the fewest words left unexplained, then the fewest items; none when two readings tie, or when the summary does not
-    fit the window."""
+    fit the window. ``built`` (F56, for the form of a whole): the utterance's items are given also where the one
+    cheapest choice of wholes reads the answer in more than one order (its replies are alike: "walk twice and walk"
+    answers as its two wholes in either order, and so does "a and a"). Which wholes stand in it is known then, and
+    that is all a form says; the summary's answer is one of the orders and is not to be lived."""
     replies = {}
     for span in _spans(len(words)):
         reply = _reply(mind, words[span[0]:span[1]], memo)
@@ -247,7 +251,12 @@ def align(mind, words: tuple, answer: tuple, F: int, memo: dict):
             continue
         cost, pieces, only = cover
         if {p for p in pieces if isinstance(p, tuple)} != set(chosen):
-            continue                                     # a whole not pointed to stays the words it is
+            if not built:
+                continue                                 # a whole not pointed to stays the words it is
+            said = [replies[p] for p in pieces if isinstance(p, tuple)]     # F56: wholes that answer alike are
+            if any(said.count(replies[span]) < sum(1 for other in chosen if replies[other] == replies[span])
+                   for span in chosen):                  # pointed to by the same words: each of them has a reply
+                continue                                 # of its own in the answer ("a and a": "ia ia")
         found.append((cost, only, chosen, pieces))
     if not found:
         return None
@@ -259,7 +268,7 @@ def align(mind, words: tuple, answer: tuple, F: int, memo: dict):
         coarsest = [r for r in top if all(holds(r, other) for other in top)]
         if len(coarsest) == 1:
             top = coarsest
-    if len(top) != 1 or not top[0][1]:
+    if len(top) != 1 or not (top[0][1] or built):
         return None                                      # two readings tie: nothing is concluded
     _, _, chosen, pieces = top[0]
     forms = {span: form(mind, words[span[0]:span[1]], replies[span], F, memo) for span in chosen}

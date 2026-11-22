@@ -2198,3 +2198,75 @@ this fourth is the same is not known.
 
 Nothing of this round was built or tuned for them: the runs use one copy of the code, frozen when section 11 was
 measured, with F43 and F45 on and every later mechanism off. They are written down as they came out.
+
+## 20. The kind of a whole: the four wrong answers of the published SCAN splits have one source, and it is closed (F56)
+
+### 20.1 The source
+
+The four answers of the published splits that were not exact (one of "right", two of "around right", one of
+"length": sections 16.5, 17.11, 19) were traced to one place in the mind's own readings (`zihin/butun.py`). For
+"jump right and jump around right thrice" the mind lists its readings and how each was lived:
+
+    ‹whole› thrice                                 lived as it is, evidence 26
+    ‹‹whole› ‹whole›› and ‹‹whole› thrice›          lived as it is, evidence 17
+    (two more, never lived)
+
+and takes the first. The whole in it is "jump right and jump around right", a command the mind lived and
+answered. A whole stands in a summary as its form (how it is built: which wholes stand in it), and a form is read
+from the whole's own summary. This command's answer is the turn and the jump five times, which reads as the
+replies of its two wholes in either order ("jump right" then "jump around right", or the other way round): two
+readings tie, nothing is concluded, the command has no summary, and so it had no form. It stood as a bare whole,
+and a bare whole before "thrice" is what "walk thrice" is. The same command not lived ("walk and jump around right
+thrice") is read rightly, because there the first part has the form ‹‹whole› and ‹whole››, and a whole of that
+form never stood before "thrice". So the mind was wrong exactly where it had lived more: where a part of the
+command was itself a lived command whose answer is made of like parts ("walk twice and walk": three walks; "look
+after look"; "run thrice and run").
+
+### 20.2 F56 (`Config.whole_kinds`, off by default; with wholes)
+
+The form of a whole says which wholes stand in it; it does not say in what order their replies come. So where
+the one cheapest choice of wholes reads the answer in more than one order, the form is still known, and it is
+given (`butun.align(..., built=True)`, used by `butun.form` only). Wholes that answer alike are each pointed to
+by the same words ("a and a" answered "ia ia": two wholes, two replies), which counts for the form too. The
+summary of the lived dialogue itself is still not concluded and not lived: its answer has no one order.
+
+### 20.3 Measured (`t_scan_kinds.py`; rows in `results/scan_kinds.jsonl`; code md5 4d33b86f...)
+
+The four commands, the life of each split lived with the switch off and on (the life of `t_scan_official.py`):
+
+    split          command                                    F56 off (actions)         F56 on (actions)
+    right          walk twice and walk right                  not exact (4 said, 4 true)  exact (4 said, 4 true)
+    around right   look after look around right               not exact (12 said, 9 true)  exact (9 said, 9 true)
+    around right   run thrice and run around right            not exact (20 said, 11 true)  exact (11 said, 11 true)
+    length         jump right and jump around right thrice    not exact (30 said, 26 true)  exact (26 said, 26 true)
+
+The same sampled commands of each published test file asked of both minds:
+
+    split               asked   exact, F56 off   exact, F56 on   answered differently
+    right               200     199              200             1
+    opposite right      200     200              200             0
+    around right        200     200              200             0
+    jump around right   200     200              200             0
+    length              200     200              200             0
+
+1,000 commands in all: 999 exact without the switch and 1,000 with it. One command is answered differently, and
+it is one of the four ("walk twice and walk right" happened to be in the sample of its split). The lives have the
+same number of moments with the switch off and on.
+
+All of the mind's tests were run once with the switch on by default (a copy, not kept): nothing changed.
+
+### 20.4 What it does not do, and what is running
+
+* Only the form is given. A lived dialogue whose answer has no one order is still not lived in summary.
+* The whole published test files with the switch on are running (they take hours); their rows will be appended
+  when they end, as they come out.
+
+### 20.5 Gates, tests, reproduce
+
+With every studied switch off the lesson-free gate, the 17 configurations and the scripted life (plain and with
+wholes) are bit-identical to the references. Tests: 444 passed (3 new: `test_zihin_whole_kinds.py`, a small
+world in which the error and its correction are reproduced).
+
+    python research/living_mind_2026_11_22/t_scan_kinds.py wrong  --scan FOLDER
+    python research/living_mind_2026_11_22/t_scan_kinds.py sample --scan FOLDER --split length --test 200
+    python research/living_mind_2026_11_22/t_scan_kinds.py run    --scan FOLDER --split length

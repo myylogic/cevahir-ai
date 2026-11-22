@@ -119,6 +119,11 @@ class Config:
                                     # in summary (wholes as their forms, replies as pointers), and an utterance never
                                     # answered whose summary was lived is heard in it and answered part by part, the
                                     # working state set aside for each part (zihin/butun.py)
+    whole_kinds: bool = False       # F56 (The Kind of a Whole; with wholes): the form of a whole says which wholes
+                                    # stand in it also where its answer reads as their replies in more than one
+                                    # order ("walk twice and walk" answers like "walk thrice"): without it such a
+                                    # lived command had no form, stood as a bare whole and took what an action
+                                    # phrase takes ("[walk twice and walk] right"); zihin/butun.py (form, align)
     told_apart: bool = False        # F45 (Told Apart; with wholes): when two lived dialogues differ in one word of
                                     # the utterance and their answers differ in one pair of words, each of the two
                                     # words answers with its own (Mill's method of difference): a word never said

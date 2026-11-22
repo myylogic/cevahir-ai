@@ -476,6 +476,15 @@ At each moment, roughly each word, the mind lives these steps:
   happen to carry the same value mislead the mind after two dialogues (6 wrong of 40) unless what was lived of the
   thing itself stands against what the others share (F50's rule: 0 wrong). One place, and the run must begin with
   the thing.
+- **The Kind of a Whole (F56, off by default; with wholes).** A whole stands in a summary as its form: which
+  wholes stand in it. The form was read from the whole's own summary, and a lived command whose answer reads as the
+  replies of its wholes in more than one order ("walk twice and walk": three walks) has none: two readings tie and
+  nothing is concluded. Such a command stood as a bare whole and took what an action phrase takes
+  ("[walk twice and walk] right"): the one source of all four answers of the published SCAN splits that were not
+  exact (traced in the mind's own list of readings). A form says which wholes stand in a whole, not in what order
+  their replies come: it is now given also there, and the dialogue's summary stays unconcluded. Measured: the four
+  commands exact with it (each split's life lived with the switch off and on); a small world reproduces the error
+  and its correction (a test).
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
@@ -727,6 +736,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Frames of Frames | Çerçevelerin Çerçevesi | F53, off by default | learning to learn (a learning set); schema abstraction over schemas; two-place (relational) generalisation; hierarchical priors (the general level is the specific level's prior) |
 | Relations Lived Apart | Ayrı Yaşanmış İlişkiler | F54, off by default | held-out validation (a rule is tested on evidence that did not make it); circular evidence |
 | The Asked Place | Sorulan Yer | F55, off by default | question answering by aligning a question with a known statement; analogy as structure alignment; the wh-word as the one unaligned slot |
+| The Kind of a Whole | Bütünün Türü | F56, off by default | constituency (what a phrase is made of) kept apart from its denotation; attachment ambiguity |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |
