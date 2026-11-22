@@ -2980,3 +2980,83 @@ the queue.
     python research/living_mind_2026_11_22/t_repair.py review
 
 The code is that of section 23 (nothing in `zihin/` changes with this section); tests as there (464).
+
+## 25. The three together: one mind, nothing set by hand (`t_whole.py`, 5 seeds; code md5 1dd09721...)
+
+Sections 21 and 23 measured the mechanisms of this round apart, and section 23.6 asked a mind whose ways of reading
+had been turned on by hand. Here nothing is: one mind with F49 and the three switches of this round (trials, built
+relations, conjectures) lives one life, and what it can then do is compared with the same life lived with each
+part alone.
+
+The life: the three fields of section 23.4 (the classes' statements; of every thing its class, a fact of its own
+and its other link; the class's two statements told of six animals only), with two more facts of its own read of
+every animal. The mind reads all of it, a silent moment after each sentence, and silent moments at the end until
+it has nothing left to think over. Then it is asked twelve questions in the teacher's loop (whatever it says, the
+true dialogue is shown; every answer the value alone), each of the twelve animals once: what four of them eat, what
+two drink, what two like, what two bear, what two are covered with. Nothing is asked about any body or number.
+Then, on copies, every thing is asked what was told of none of them: the six other animals, and every body and
+number, their classes' two statements ("demir ne iletir ?"), in kinds of question that were never asked in those
+fields (right / wrong / silent):
+
+    condition            animals    bodies     numbers    conjectures (hold)   ways in use at the end (lives of 5)
+    as it was            0/0/60     0/0/80     0/0/80     0 (0)                nothing
+    trials alone         2/1/57     0/0/80     0/0/80     0 (0)                families 5, asked_place 5
+    conjectures alone    0/0/60     0/0/80     0/0/80     229 (229)            nothing
+    the three together   60/0/0     80/0/0     80/0/0     229 (229)            families 5, asked_place 5
+
+* Alone, trials give the mind its ways of reading (it takes the asked place and frames of frames into use in all
+  five lives) and nothing to read with them: of those things it was told nothing (2 right of 220). Alone,
+  conjectures give it 229 statements of its own, all of which hold, and no way to answer a question whose answer
+  is a value alone (0 of 220).
+* Together: **220 of 220**. In a life of twelve questions about animals the mind set its own ways of reading by
+  what those questions showed it; before that, by itself, it had come to what nobody told it of 22 things; and
+  asked about bodies and numbers, of which it was told no such fact and asked nothing, in kinds of question it
+  never met there, it answers every one. No way of reading was turned on by hand in any of these lives.
+
+**The first form of this life, as it was measured (`--same`).** The five kinds were first all asked of the same six
+animals (thirty rounds):
+
+    condition            animals    bodies     numbers    conjectures (hold)   ways in use at the end (lives of 5)
+    as it was            0/0/60     0/0/80     0/0/80     0 (0)                nothing
+    trials alone         0/0/60     0/0/80     0/0/80     0 (0)                asked_place 5
+    conjectures alone    0/0/60     0/0/80     0/0/80     229 (229)            nothing
+    the three together   60/0/0     0/0/80     0/0/80     229 (229)            asked_place 5
+
+There the mind takes the asked place into use and not frames of frames, and answers nothing in the two other
+fields (the six other animals it answers: their kinds were asked in the life). Traced: frames of frames makes its
+difference at the first sight of a new kind of question, and in this life every first sight is about a thing
+that was asked other kinds before. The questions already asked of that thing make a frame of their own ("kedi ne
+X": after a question about kedi came "et", then "çay"), which has members where the frame of the new kind has
+none; it speaks, and what its members never went on with it counts against (F53: the frame's evidence nests over
+the family's claim): the family's claim of the right word is read at 0.48 (seed 0, the first sight of the third
+kind) and is not said. So frames of
+frames never does better in its trials in that life, the mind does not take it, and rightly by its own record.
+The frame that speaks there is over another place than the family's, and its members agree on no word (each went
+on with a different one); how much such a frame should count against a word it never saw is the first item of
+the queue below. Section 21's curriculum did not meet this: every thing was asked one kind there.
+
+### 25.1 What this is and is not
+
+It is the first measurement in these notes in which what the mind can do at the end was decided by nothing its
+builders set for that world: the ways it reads with it chose by its own trials, and what it reads it concluded by
+itself from what it found a kind of link to carry. It is one small world built for the purpose, with sentences of
+one shape; the limits of sections 21.11 and 23.8 all hold here, and the second table shows how little it takes to
+leave them.
+
+### 25.2 The work queue after this section
+
+1. A frame over another place, whose members agree on no word, speaks against the family's claim (above): the
+   unseen share of a place whose members never repeat a word.
+2. The choice among families that fit a context; a past question nobody answered (21.9, 24.3).
+3. Links in other shapes and kinds of links that behave alike; conjectures on the owner's documents (23.8).
+4. Trials where no outcome is shown (21.11).
+5. Generalisation over more than two places; the word that goes with a word, position indices, answers longer
+   than the window (17.10).
+6. More questions of its own, asking its partner, a sense of the clock, the long life and the web, F52 on the
+   battery, the indices in shared memory (17.12).
+
+### 25.3 Reproduce
+
+    python research/living_mind_2026_11_22/t_whole.py life [--same]
+
+The code is that of section 23 (nothing in `zihin/` changes); rows in `results/whole.jsonl`.
