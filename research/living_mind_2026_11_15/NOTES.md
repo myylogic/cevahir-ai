@@ -3357,3 +3357,6 @@ configurations are bit-identical, and 343 tests of the mind pass.
   length split without F45).
 - Summaries are still learned from watched dialogues only, and an answer that changes a part in some other way than
   word for word has no summary.
+
+**SCAN within 11 with F45 on** (the run that was still going when the section above was written; F43 and F45,
+a window of 11): 844 of 844.

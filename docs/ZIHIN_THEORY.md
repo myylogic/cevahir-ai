@@ -316,7 +316,7 @@ At each moment, roughly each word, the mind lives these steps:
   Transformer 108 of 200); when the new direction is met in **one dialogue only** ("geriye zıpla"), 600 of 600 of the
   other commands it stands in (1 of 600 without F45; a Transformer 7 of 200). The lives of SCAN's add-jump and of
   T-görev with the switch off are bit for bit what they were; with it on, add-jump 300 of a sample of 300, T-görev 492 of
-  492 with an unchanged life (nothing there is told apart), and every world of the battery, the teacher protocol and recall are what they were. With words as wholes two readings of an
+  492 with an unchanged life (nothing there is told apart), and every world of the battery, the teacher protocol and recall are what they were (SCAN within 11: 844 of 844). With words as wholes two readings of an
   answer can be equally cheap. When every whole of the one lies inside a whole of the other ("turn left" and the
   "left" in it answer alike) they are one reading at two grains and the larger wholes are taken; when their wholes
   cross (in SCAN "walk after run left" answers the same whether "left" is run's or the conjunction's) they are two
