@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Wholes (F43): an utterance held as parts and answered part by part; a first working memory.
+"""Wholes (F43): an utterance held as parts and answered part by part; a first working memory. Told Apart (F45): what
+a word never said alone answers with.
 
 The mind decides every word from its last F items (its window). An answer longer than the window is said with the
 question out of sight, and a long question does not fit the window at all. What holds more than the window is not a
@@ -13,19 +14,30 @@ Nothing here is told to the mind; all of it is read from what it lived.
   dialogue is lived once more in summary (``align``): each such whole as its form (its own summary, the wholes inside
   it as bare wholes: the form says how it is built, not of what; a whole in which no whole stands is a bare whole),
   each reply as a pointer to the place of its whole, the other words as they are. Of the ways an answer can be read
-  so, the one that leaves the fewest words unexplained is taken, then the one with the fewest items; when two
-  different readings tie, nothing is concluded. A summary is one the mind can hold: it fits the window. It is lived
-  once more as its construction, every whole bare: what is answered to a construction does not depend on the forms of
-  its wholes, so a summary whose forms never met in it is answered as its construction was (``_heard_as``).
+  so, the one that leaves the fewest words unexplained is taken, then the one with the fewest items. When two tie
+  and every whole of the one lies inside a whole of the other, they are one reading at two grains and the larger
+  wholes are taken ("turn left" and the "left" in it answer alike); when their wholes cross, they are two readings
+  and nothing is concluded. A summary is one the mind can hold: it fits the window. It is lived once more as its
+  construction, every whole bare: what is answered to a construction does not depend on the forms of its wholes, so
+  a summary whose forms never met in it is answered as its construction was (``_heard_as``).
 * Answering in parts. An utterance answered before is remembered whole (heard as the one item it was lived as). An
-  utterance never answered whose summary was lived and answered (the summary's context has lived continuations of its
-  own), or whose summary the mind's frames would answer (``consider``; only a summary whose every item was lived
-  before: a consideration is not the first evidence for what it considers), is heard in that summary (``reading``). A
-  whole inside it is a sequence answered before, or a sequence never met whose own summary was lived and answered (a
-  whole by its form). When the mind decides a pointer, it says the reply of that part: it sets its working state
-  aside, answers the part as if it had been said alone (what it remembers of a part answered before; a new part in
-  its own summary, or word by word) and takes its working state up again where it left it. The echo of all it said
-  meanwhile is one item, the pointer.
+  utterance never answered is heard in its summary (``reading``): the one that was lived and answered as it is (the
+  summary's context has lived continuations of its own); when none was, the one that was lived and answered as its
+  construction, every item of it lived before (its words and the forms of its wholes, in some summary: what was
+  never lived as an item is not known to stand as one). A whole inside it is a sequence answered before, or a
+  sequence never met that has such a summary of its own (a whole by its form). When the mind decides a pointer,
+  it says the reply of that part: it sets its working state aside, answers the part as if it had been said alone
+  (what it remembers of a part answered before; a new part in its own summary, or word by word) and takes its working
+  state up again where it left it. The echo of all it said meanwhile is one item, the pointer.
+* Told apart (F45, ``Config.told_apart``). A word that was never said alone has no reply of its own, and stands in a
+  summary as the word it is: what was lived with "left" says nothing of "right" in the same place. When two lived
+  dialogues differ in one word of the utterance and their answers, of one length, differ in one pair of words wherever
+  they differ, each of the two words answers with its own (the method of difference): that is lived as a dialogue of
+  its own, inferred (``tell_apart``), and the word is a whole from then on. Only dialogues the mind can hold are
+  compared. A word that was itself said alone and answered keeps the reply it was given. The residue: the difference
+  is assigned only when what the two answers share is what the shared words answer with, and a word of the answer
+  that a shared word answers with is not the differing word's share. A word told apart in several ways, none of
+  them most of the evidence, has no reply.
 
 The window bounds each level, not the answer: "jump around left thrice and walk twice" is five items and its answer
 two, and each of the two is answered in a few items of its own.
@@ -40,7 +52,7 @@ from __future__ import annotations
 import copy
 from typing import Dict, List, Optional, Tuple
 
-from .events import ACTED, IMAGINED, SENSED, TOLD, Event
+from .events import ACTED, IMAGINED, INFERRED, SENSED, TOLD, Event
 from .evidence import expectation
 from .form import mv_view
 
@@ -50,9 +62,7 @@ REPLY = "reply"                 # ("reply", j): "the reply of the whole at place
 LEVEL = "ozet"                  # the channel of the summaries' items: wholes, pointers, and the words that stand in them
 LEVEL_END = "⏎⏎"                # the end of a turn as a summary lives it (on the turn channel)
 DEPTH = 8                       # how deep a part may be answered in parts (a safety cap)
-CONSIDERED = 64                 # how many readings never lived are considered for one utterance (a safety cap)
 CHOICES = 4096                  # how many choices of wholes are read for one utterance (a safety cap)
-LOOSE = ("situations", "backoff", "substitution", "forms", "difference")   # readings that are not a frame's claim
 # the working state of the present episode (Mind._TRANSIENT without the clock, the knobs and what is not the episode's)
 WORKING = ("focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending", "predicted",
            "act_hope", "hoping", "chunked", "idle", "prov_of", "unknown", "voice", "witnesses", "episode_start",
@@ -88,9 +98,10 @@ def show(symbol) -> str:
 
 
 # ---------------------------------------------------------------------------------------------- reading what was lived
-def went_on(mind, symbols) -> Dict[object, Tuple[float, float]]:
+def went_on(mind, symbols, without=()) -> Dict[object, Tuple[float, float]]:
     """What the lived summary "these items, then the end of the turn" went on with, {symbol: (W+, W-)}: what was
-    lived, not the mind's own acts and not what it imagined. Empty when no such summary was lived."""
+    lived, not the mind's own acts and not what it imagined (``without``: nor these classes). Empty when no such
+    summary was lived."""
     from .__main__ import TURN
     from .read import own_mass
     end = mind.unit_of(TURN, LEVEL_END)
@@ -103,6 +114,8 @@ def went_on(mind, symbols) -> Dict[object, Tuple[float, float]]:
     trust = mind.trust.clone()
     trust[ACTED] = 0.0
     trust[IMAGINED] = 0.0
+    for prov in without:
+        trust[prov] = 0.0
     level, channels = mind.ch.id(LEVEL), mv_view(mind, "u_channel")
     return {mind.symbol_of(v)[1]: (p, n) for v, (p, n) in own_mass(mind, context, 1, trust).items()
             if channels[v] == level and p > 0.0}
@@ -110,12 +123,18 @@ def went_on(mind, symbols) -> Dict[object, Tuple[float, float]]:
 
 def lived_reply(mind, words) -> Optional[tuple]:
     """What a sequence, said alone, was answered with (its words), or None: the strongest lived continuation of the
-    dialogue lived as two items, when it is expected over 1/2."""
-    best = None
+    dialogue lived as two items, when it is expected over 1/2. F45: of a single word, when it is also most of what
+    the word was answered with (a word told apart in several ways, none of them most of the evidence, has no reply)."""
+    best, total = None, 0.0
     for symbol, (p, n) in went_on(mind, [said(words)]).items():
-        if is_said(symbol) and expectation(p, n, mind.cfg.k) > 0.5 and (best is None or p > best[0]):
+        if not is_said(symbol):
+            continue
+        total += p
+        if expectation(p, n, mind.cfg.k) > 0.5 and (best is None or p > best[0]):
             best = (p, symbol[1:])
-    return best[1] if best is not None else None
+    if best is None or (len(words) == 1 and getattr(mind.cfg, "told_apart", False) and 2.0 * best[0] <= total):
+        return None
+    return best[1]
 
 
 def _reply(mind, words, memo) -> Optional[tuple]:
@@ -234,6 +253,12 @@ def align(mind, words: tuple, answer: tuple, F: int, memo: dict):
         return None
     cheapest = min(reading_[0] for reading_ in found)
     top = [reading_ for reading_ in found if reading_[0] == cheapest]
+    if len(top) > 1:                                     # the same reading at two grains: the larger wholes
+        def holds(coarse, fine) -> bool:
+            return all(any(i <= a and b <= j for i, j in coarse[2]) for a, b in fine[2])
+        coarsest = [r for r in top if all(holds(r, other) for other in top)]
+        if len(coarsest) == 1:
+            top = coarsest
     if len(top) != 1 or not top[0][1]:
         return None                                      # two readings tie: nothing is concluded
     _, _, chosen, pieces = top[0]
@@ -246,16 +271,14 @@ def align(mind, words: tuple, answer: tuple, F: int, memo: dict):
     return items, answered, where
 
 
-def reading(mind, words: tuple, F: int, memo: dict, session=None):
+def reading(mind, words: tuple, F: int, memo: dict):
     """The summary an utterance never answered is heard in: (items, {place: run}), or None.
-    A proper run of it is a whole when it was said alone and answered, or (never met) when its own summary was lived
-    and answered. Of the summaries these wholes give, the one whose context was lived and went on with the most
-    evidence (expected over 1/2) is taken, the shorter of equals; none when two different ones tie.
-    ``session`` (the utterance is to be answered now): when no summary of it was lived, each summary whose items
-    were all lived before (its words and the forms of its wholes, in some summary) is considered (``consider``:
-    brought to mind and undone), and the one the mind's frames would answer most firmly is taken, when that is over
-    the speaking line and no other reading is as firm."""
-    key = ("reading", words, session is not None)
+    A proper run of it is a whole when it was said alone and answered, or (never met) when it has such a summary of
+    its own. Of the summaries these wholes give, the one whose context was lived and went on with the most evidence
+    (expected over 1/2) is taken, the shorter of equals; none when two different ones tie. When none was lived as it
+    is: the same of the summaries whose construction was lived so, every item of the summary lived before (its words
+    and the forms of its wholes, in some summary)."""
+    key = ("reading", words)
     if key in memo:
         return memo[key]
     memo[key] = None                                     # (a run is never read through itself)
@@ -268,80 +291,60 @@ def reading(mind, words: tuple, F: int, memo: dict, session=None):
         elif len(part) > 1 and reading(mind, part, F, memo) is not None:
             forms[span] = form(mind, part, None, F, memo)
     best, tie, unlived = None, False, []
-    for chosen in _disjoint(forms):
-        items, where = _summary(words, chosen, forms)
-        if len(items) + 2 > F:
-            continue
-        lived = [p for p, n in went_on(mind, items).values() if expectation(p, n, mind.cfg.k) > 0.5]
+
+    def weigh(items: tuple, where, lived_as: tuple) -> bool:
+        """Take a summary by how its lived context went on (the most evidence, the shorter of equals)."""
+        nonlocal best, tie
+        lived = [p for p, n in went_on(mind, lived_as).values() if expectation(p, n, mind.cfg.k) > 0.5]
         if not lived:
-            unlived.append((items, where))
-            continue
+            return False
         rank = (max(lived), -len(items))
         if best is None or rank > best[0]:
             best, tie = (rank, items, where), False
         elif rank == best[0] and items != best[1]:
             tie = True
-    if best is None and session is not None and unlived:
-        line = 0.5 + mind.knob["theta"] / (2.0 * mind.cfg.T)
-        seen = set()
-        for items, where in sorted(unlived, key=lambda found: len(found[0]))[:CONSIDERED]:   # the larger wholes first
-            if items in seen or any(mind.unit_of(LEVEL, x) < 0 for x in items):
-                continue                                 # (an item never lived: being considered would itself make it
-            seen.add(items)                              # a member of the place it is heard in)
-            firm = consider(session, items)
-            if firm <= line:
-                continue
-            rank = (round(firm, 9), -len(items))
-            if best is None or rank > best[0]:
-                best, tie = (rank, items, where), False
-            elif rank == best[0]:
-                tie = True
+        return True
+    for items, where in _summaries(mind, words, forms, F):
+        if not weigh(items, where, items):
+            unlived.append((items, where))
+    if best is None:                                     # none was lived as it is: as its construction
+        for items, where in unlived:
+            bare = construction(items)
+            if bare != items and all(mind.unit_of(LEVEL, x) >= 0 for x in items):
+                weigh(items, where, bare)
     memo[key] = None if best is None or tie else (best[1], best[2])
     return memo[key]
 
 
-def consider(s, items) -> float:
-    """How firmly the mind's frames would answer an utterance heard in this reading: it is brought to mind so
-    (imagined, the present working state set aside), the highest expectation of a word after its end is read from
-    what its frames claim (the generalisations of lived contexts that differ from it in one place; not what merely
-    resembles it, F23, nor what follows its last words, F16: those answer any reading), and the moments are undone:
-    nothing of a reading that was only considered stays."""
-    from .read import members_map
-    from .store import DiskLog
-    mind = s.mind
-    depth, start, log, logged = mind.cfg.undo_depth, mind.t, mind.S.log, mind.S.keep_log
-    mind.cfg.undo_depth = len(items) + 2
-    mind.S.keep_log = True                               # what a moment changed is kept while it may be undone
-    if isinstance(log, DiskLog):                         # the considered moments stay in memory: none enters the ledger
-        kept, log.keep = log.keep, log.keep + len(items) + 2
-    held, knobs = set_aside(mind), dict(mind.knob)
-    firm = 0.0
-    try:
-        _hear(s, items, IMAGINED)
-        _end(s, IMAGINED, ".")
-        if mind.context is not None:
-            trust = mind.trust.clone()
-            trust[ACTED] = 0.0
-            text, channels = mind.ch.id(LEVEL), mv_view(mind, "u_channel")
-            cfg = mind.cfg
-            loose = {name: getattr(cfg, name, False) for name in LOOSE}
-            for name in loose:                           # what a frame claims (and the context's own record): not
-                setattr(cfg, name, False)                # what only resembles, nor what only follows the last words
-            try:
-                firm = max((e for u, e in members_map(mind, mind.context, trust).items() if channels[u] == text),
-                           default=0.0)
-            finally:
-                for name, value in loose.items():
-                    setattr(cfg, name, value)
-    finally:
-        while mind.t > start:
-            mind.undo_last()
-        mind.cfg.undo_depth, mind.S.keep_log = depth, logged
-        mind.knob = knobs                                # (undone to a moment in which the mind was listening)
-        if isinstance(log, DiskLog):
-            log.keep = kept
-        take_up(mind, held)
-    return firm
+def _summaries(mind, words: tuple, forms: Dict[Tuple[int, int], tuple], F: int):
+    """Every summary of an utterance by the given wholes (at least one of them) that the mind can hold and whose
+    construction may have been lived: (items, {place: run}). A summary lived as it is was lived as its construction
+    too (``consolidate``), and every beginning of a lived sequence is a lived sequence: a choice of wholes is
+    followed only while its construction so far was lived."""
+    lived, starts = mind.S.tuple_index, {}
+    for (i, j), shape in forms.items():
+        starts.setdefault(i, []).append((j, shape))
+    bare, out = mind.unit_of(LEVEL, WHOLE), []
+
+    def grow(i: int, items: tuple, where: dict, units: tuple) -> None:
+        if i == len(words):
+            if where:
+                out.append((items, dict(where)))
+            return
+        if len(items) + 3 > F:                           # (one more item, its end, and an answer)
+            return
+        for j, item, unit, whole in [(i + 1, words[i], mind.unit_of(LEVEL, words[i]), False)] + [
+                (j, shape, bare, True) for j, shape in sorted(starts.get(i, ()), key=lambda found: found[0])]:
+            now = units + (unit,)
+            if unit < 0 or (len(now) > 1 and now not in lived):
+                continue
+            if whole:
+                where[len(items)] = (i, j)
+            grow(j, items + (item,), where, now)
+            if whole:
+                del where[len(items)]
+    grow(0, (), {}, ())
+    return out
 
 
 # ------------------------------------------------------------------------------------------------------------- living
@@ -378,9 +381,11 @@ def _end(s, prov: int, tone: str, listening: bool = True):
         mind.knob["theta"] = theta
 
 
-def _live(s, first, answer, prov: int, asker: str, tones) -> None:
-    """A dialogue lived in summary as the session watches one: the utterance, its end, the answer, its end, a pause."""
-    s.company(asker)
+def _live(s, first, answer, prov: int, asker: Optional[str], tones) -> None:
+    """A dialogue lived in summary as the session watches one: the utterance, its end, the answer, its end, a pause.
+    ``asker`` None: no one said it (a dialogue the mind inferred)."""
+    if asker is not None:
+        s.company(asker)
     _hear(s, first, prov, asker)
     _end(s, prov, tones[0])
     _hear(s, answer, prov)
@@ -405,15 +410,77 @@ def _heard_as(mind, items: tuple) -> tuple:
     return bare if bare != items and not lived(items) and lived(bare) else items
 
 
+def _holes(mind) -> dict:
+    """{(the words before, the words after): the words that stood between them}, over the sequences lived as one item
+    that an utterance the mind can hold with its answer may be (read from the alphabet of the summaries' channel and
+    kept as it grows: nothing but what the mind lived)."""
+    symbols = mind.ch.symbols[mind.ch.id(LEVEL)]
+    longest = int(mind.knob["F"]) - 2
+    kept = mind.__dict__.get("_whole_holes")
+    if kept is None or kept[0] > len(symbols) or kept[2] != longest:
+        kept = mind.__dict__["_whole_holes"] = [0, {}, longest]
+    for symbol in symbols[kept[0]:]:
+        if is_said(symbol) and len(symbol) - 1 <= longest:
+            words = symbol[1:]
+            for i, word in enumerate(words):
+                kept[1].setdefault((words[:i], words[i + 1:]), {})[word] = True
+    kept[0] = len(symbols)
+    return kept[1]
+
+
+def said_alone(mind, word) -> bool:
+    """Whether a word was itself said alone and answered (in what the mind lived, not in what it inferred)."""
+    return any(is_said(x) and expectation(p, n, mind.cfg.k) > 0.5
+               for x, (p, n) in went_on(mind, [said((word,))], without=(INFERRED,)).items())
+
+
+def tell_apart(s, words: tuple, answered: tuple, tones) -> None:
+    """F45 (Told Apart): the method of difference on two lived dialogues. When this dialogue and one lived before
+    differ in one word of the utterance, and their answers (of one length) differ in one pair of words wherever they
+    differ, each of the two words answers with the word its dialogue's answer has there: that is lived as a dialogue
+    of its own (inferred), unless the word was itself said alone and answered. The residue: what the two answers
+    share must be what the shared words answer with (until then the difference cannot be assigned), and a word of
+    the answer that a shared word answers with is not the differing word's share (in "walk twice" and "walk left"
+    the answers differ in "i_walk" and "i_lturn", and "i_walk" is walk's). Only dialogues the mind can hold are
+    compared (the utterance, its end and the answer fit the window), and only utterances of several words: the two
+    agree in all but one word."""
+    mind = s.mind
+    if len(words) < 2 or len(words) + 1 + len(answered) > mind.knob["F"] or not mind.ch.has(LEVEL):
+        return
+    holes = _holes(mind)
+    for i, word in enumerate(words):
+        rest, known = words[:i] + words[i + 1:], None
+        for other in list(holes.get((words[:i], words[i + 1:]), ())):
+            if other == word:
+                continue
+            before = lived_reply(mind, words[:i] + (other,) + words[i + 1:])
+            if before is None or len(before) != len(answered):
+                continue
+            apart = {(x, y) for x, y in zip(answered, before) if x != y}
+            if len(apart) != 1:
+                continue
+            if known is None:                            # what the words the two utterances share answer with
+                known = {lived_reply(mind, (x,)) for x in rest}
+            if any((x,) not in known for x, y in zip(answered, before) if x == y):
+                continue                                 # what the two answers share is not accounted for yet
+            (mine, its), = apart
+            for w, a in ((word, mine), (other, its)):
+                if (a,) in known or said_alone(mind, w):
+                    continue                             # (the residue: what another word of the utterance answers
+                _live(s, (said((w,)),), (said((a,)),), INFERRED, None, tones)    # with is not this word's share)
+
+
 def consolidate(s, first: str, answer: str, prov: int, asker: str) -> None:
     """After a dialogue was watched: it is lived once more as two items (the utterance, its answer), and, when its
     answer is made of the replies of wholes that stand in the utterance, once more in that summary and once more as
-    the summary's construction (every whole bare)."""
+    the summary's construction (every whole bare). F45: before that, what its words answer with is told apart."""
     mind = s.mind
     words, answered = tuple(s.body(first)), tuple(s.body(answer))
     if not words or not answered:
         return
     tones = (s.tone(first), s.tone(answer))
+    if getattr(mind.cfg, "told_apart", False):
+        tell_apart(s, words, answered, tones)
     summary = align(mind, words, answered, mind.knob["F"], {})
     _live(s, (said(words),), (said(answered),), prov, asker, tones)
     if summary is not None:
@@ -460,7 +527,7 @@ def reply_in_parts(s, text: str, limit: int, say=None) -> Optional[List[str]]:
             return None
         found = ((said(words),), {})
     else:
-        found = reading(mind, words, mind.knob["F"], memo, s)
+        found = reading(mind, words, mind.knob["F"], memo)
         if found is None:
             return None
     spoken: List[str] = []
@@ -489,7 +556,7 @@ def _answer(s, words: tuple, out, budget: list, depth: int, memo: dict) -> None:
     if _reply(mind, words, memo) is not None:
         found = ((said(words),), {})
     elif depth < DEPTH and len(words) > 1:
-        found = reading(mind, words, mind.knob["F"], memo, s)
+        found = reading(mind, words, mind.knob["F"], memo)
     mind.__dict__["_part_depth"] = depth                 # (for !neden: how deep in parts a word was decided)
     try:
         if found is not None:                            # remembered whole, or heard in its summary

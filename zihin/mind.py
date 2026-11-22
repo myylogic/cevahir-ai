@@ -118,6 +118,10 @@ class Config:
                                     # in summary (wholes as their forms, replies as pointers), and an utterance never
                                     # answered whose summary was lived is heard in it and answered part by part, the
                                     # working state set aside for each part (zihin/butun.py)
+    told_apart: bool = False        # F45 (Told Apart; with wholes): when two lived dialogues differ in one word of
+                                    # the utterance and their answers differ in one pair of words, each of the two
+                                    # words answers with its own (Mill's method of difference): a word never said
+                                    # alone becomes a whole (zihin/butun.py)
     urge: bool = False              # F40 (Urge to Go On): when the leading word's rival is itself expected, it races
                                     # against silence as far as the two are things known about the same item (their
                                     # share of that item's lived continuations): another thing to say, not a rival

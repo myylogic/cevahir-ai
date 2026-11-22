@@ -3156,3 +3156,204 @@ run again with the final code and written below when they end.
 **Still not there.** Everything of "What is not there" above but its last point, which the construction answers.
 The sub-questions' cost: an answer of the full run takes about 2.3 s on one core, most of it in reading every choice
 of wholes of a nine-word command; nothing was done for speed.
+
+## Two more splits of SCAN as found; a part read by its construction; consideration taken out; Told Apart (F45) (2026-11-21)
+
+**The full run and SCAN within 11 with the code of the section above** (commit d4175c7; promised there):
+the full run again **7,706 of 7,706** (92,636 moments, 380 s of life; the answers took 6,575 s on
+three cores that other runs shared). SCAN within 11 items at a window of 11: 844 of 844; the listening worlds the same as before.
+
+**Two splits F43 was not developed on, as found.** `t_scan_splits.py` was written before it was run. The length split
+(Lake & Baroni 2018): training, the commands whose answer has at most 22 actions (16,990); test, those of 24 to 48
+actions (3,920); the sizes generated here are the published ones. No answer of the test's length is ever seen, and
+the one command without a connective that is in the test, "V around D thrice" (24 actions), is never said alone. A
+template split (after Loula, Baroni & Lake 2018): no command in which "around right" stands is in the training set
+(15,225 commands); every such command is the test (5,685). It is generated here; the published files were not
+downloaded, so its sizes may differ from theirs. With the code of the section above, `--train 1000`, a sample of 500
+tests each, and a Transformer trained from scratch on the same dialogues:
+
+| | the mind (F43, d4175c7) | silent | wrong | a Transformer |
+|---|---|---|---|---|
+| length, 1,094 dialogues | **101 / 500** | 182 | 217 | 0 / 500 (297 / 300 of its training commands) |
+| - both parts in the training set | 99 / 99 | | | 0 / 99 |
+| - a part of 24 actions | 2 / 401 | | | 0 / 401 |
+| around right, 1,087 dialogues | **0 / 500** | 121 | 379 | 3 / 500 (300 / 300) |
+
+Both are failures, and most of what was not exact was wrong, not silent: when the mind finds no summary it answers
+word by word, as it did before F43, and what follows the last words is a piece of some other answer.
+
+**The length split: a part that was never said.** "walk around left thrice and look" is `[‹whole thrice› and ‹whole›]`,
+a summary lived a hundred times. But "walk around left thrice" was never said alone, so it is a whole only by its
+form, and `reading` gave a part a form only when a summary of it had been lived as it is: `[‹whole around left›
+thrice]` never was (its answer has 24 actions). Its construction, `[whole thrice]`, was lived by every "· thrice",
+and each of its items was lived before. The utterance being answered was allowed more than its parts: for it alone,
+summaries never lived were considered. **A part is read as an utterance is**: when no summary of it was lived as it
+is, the one whose construction was lived and answered, every item of it lived before (`reading`).
+
+| the same 500 tests, 1,094 dialogues | exact | silent | wrong |
+|---|---|---|---|
+| as found | 101 | 182 | 217 |
+| a part read by its construction | **500** | 0 | 0 |
+| - a part of 24 actions; two of them | 388 / 388; 13 / 13 | | |
+| - answers of 33 to 48 actions | 88 / 88 | | |
+
+**Consideration taken out** (an eliminated step). The first form of F43 answered an utterance whose summary had not
+been lived by considering each summary of it: brought to mind in imagination, what the frames would answer read,
+the moments undone. The construction of a summary (the section above) was added beside it. With parts read by their
+construction, consideration was counted (an instrumented copy): in the battery (T-compose, the meaning world,
+relations, T-purpose, T-deduce, T-cause, T-long, T-tell, T-görev, T-dans) it was reached 236 times and decided no
+reading; on 60 tests of the around-right split it was reached 108 times, and the 60 answers were the same without
+it. In the code before, 100 add-jump tests at 92
+dialogues took 460 considerations for 77 right answers and 23 silences; without it, and with the construction, 100
+right answers and none. What the frames claim for a summary never lived was, wherever it was right, what its
+construction had lived. `consider` is removed, and with it the difference between the utterance and its parts. The
+two flaws of the core's undo that it had uncovered stay fixed, with their test.
+
+A correction to the section above: the cost of an answer is not "reading every choice of wholes". A profile of
+twelve answers shows nearly all of it in the mind's own decisions (the votes of the members of its frames at every
+moment of every part). The choices of wholes are now followed only while their construction so far was lived
+(`_summaries`; the same answers on 324 tests of three worlds), which removes a cap, not the cost.
+
+**Add-jump again** (the same samples of 500 tests as above; window 13, two epochs):
+
+| training dialogues (of SCAN's 13,204) | the section above | now | silent | wrong |
+|---|---|---|---|---|
+| 84 (2 joined), four draws of the two | | 500; 259; 251; 237 | 0; 241; 249; 200 | 0; 0; 0; 63 |
+| 86 (4 joined) | | 500 | 0 | 0 |
+| 88 (6 joined) | | 500 | 0 | 0 |
+| 92 (10 joined) | 367 (133 silent) | **500** | 0 | 0 |
+| 112 (30 joined) | 482 (18 silent) | 500 | 0 | 0 |
+| 182 (100 joined) | 500 | 500 | 0 | 0 |
+| 382 (300 joined) | 500 | 500 | 0 | 0 |
+| 1,082, a sample of 2,000 of the 7,706 tests | | **2,000 / 2,000** | 0 | 0 |
+
+The silences at 92 and 112 dialogues were consideration's: the frames did not claim over the speaking line what
+the construction had lived. What the mind needs is each construction once and each form once as an item: the first
+draw of two joined commands ("look left thrice after look opposite right thrice", "look opposite right twice and
+turn around right thrice") holds both connectives and both repeating words, and gives 500 of 500. A draw of two
+commands with "after" leaves every "and" command unanswered (259: 241 silent, none wrong); a draw of two with "and",
+every "after" command (251: 249 silent); a draw with both connectives in which "· twice" never stood as an item, 237
+(200 silent, and 63 wrong: where no summary is found the mind answers word by word, as it did before F43, and on
+these commands that is a piece of some other answer).
+
+**The length split with fewer dialogues** (of its 16,990; the same 500 tests): 194 dialogues (100 joined) 500 of
+500; 124 (30 joined) 500; 104 (the 94 commands without a connective and 10 joined) 500.
+
+**Told Apart (F45, `Config.told_apart`, off by default; `butun.tell_apart`).** What was wrong in "around right" is
+one word. "walk around left" was lived as `[whole around left ⏎ i_lturn reply(0) i_lturn reply(0) …]`: "left" is the
+word it is, and so is "i_lturn". A word that was never said alone has no reply of its own, so what was lived with
+"left" says nothing of "right" in the same place; the only member of the frame over that place is "left", and the
+mind said left's answer (379 wrong of 500).
+
+But the mind had lived "walk left ⏎ i_lturn i_walk" and "walk right ⏎ i_rturn i_walk". Two lived dialogues that
+differ in one word of the utterance, and whose answers, of one length, differ in one pair of words wherever they
+differ: each of the two words answers with its own. This is the method of difference (Mill), on two dialogues the
+mind can hold (the utterance, its end and the answer fit the window; utterances of several words: the two agree in
+all but one word). What it gives is lived as a dialogue of its own, inferred ("left ⏎ i_lturn", provenance
+INFERRED, weighed by the trust the mind has in what it infers), unless the word was itself said alone and answered.
+From then on the word is a whole: "walk around left" is `[whole around whole ⏎ reply(2) reply(0) reply(2) reply(0) …]`,
+and "walk around right", never met, is the same summary. With the switch off the lives of SCAN's add-jump and of
+T-görev are bit for bit what they were (the same digest).
+
+| a sample of tests; window 13 | without F45 | with F45 | a Transformer |
+|---|---|---|---|
+| around right, 1,087 dialogues, 500 tests | 0 (379 wrong) | **500** (none silent, none wrong) | 3 / 500 |
+| around right, 387 dialogues, no curriculum (every epoch shuffled), 200 tests | | 200 | |
+| "jump around right", 399 dialogues, 200 tests | | 200 | |
+| "V right", 390 dialogues, 200 tests | | 200 | |
+| "V opposite right", 390 dialogues, 200 tests | | 200 | |
+| add-jump, 382 dialogues, 300 tests | 500 / 500 | 300 / 300 | |
+| length, 394 dialogues, 200 tests | (500 / 500 at 194 and at 1,094 dialogues) | 200 / 200 | |
+
+(The three other template splits of the same paper are generated here in the same way: every command in which the
+template stands is held out. They were run once, with F45.)
+
+**T-dans: a world F45 was not developed on** (`t_dans.py`, written before it was run). Moves said alone ("zıpla ⏎
+sıçra"); four directions never said alone, before the move ("sağa zıpla ⏎ sağ sıçra"); "uzun" (the direction's step
+twice), "iki kez" and "üç kez" between the direction and the move ("sağa iki kez zıpla ⏎ sağ sıçra sağ sıçra");
+"P sonra Q". Held out: every command in which "geriye iki kez" or "geriye üç kez" stands (1,032 of 4,692). 210
+training dialogues an epoch, 3 seeds, 200 tests each:
+
+| | exact | silent | wrong |
+|---|---|---|---|
+| F43 and F45, the first run (as found) | **600 / 600** | 0 | 0 |
+| F43 alone | 0 / 600 | 393 | 207 |
+| neither | 0 / 600 | 393 | 207 |
+| a Transformer from scratch (seed 0, 200 tests) | 108 / 200 | 0 | 92 |
+| F43 and F45, the final code | 600 / 600 | 0 | 0 |
+| - with 100 training dialogues (40 joined) | 600 / 600 | 0 | 0 |
+
+Nothing was changed for it. (The Transformer does better here than on SCAN: the held-out pattern is a short one.)
+
+**One dialogue.** `t_dans.py --tek` (added after the first run above; written before it was run): "geriye" is met in
+one dialogue, "geriye zıpla ⏎ geri sıçra"; every other command in which it stands is the test (1,935): with a move
+it was never met with, with "uzun", "iki kez" and "üç kez", alone and joined. 203 training dialogues, 3 seeds, 200
+tests each: F43 and F45 **600 of 600** (the first run, and the final code); F43 alone 1 of 600 (532 silent, 67
+wrong); a Transformer from scratch 7 of 200 (203 of 203 of its training commands).
+
+**T-görev** with F45 on: its life is bit for bit the life without it (nothing in that world is told apart);
+492 of 492 with F43 alone and with both.
+
+**A flaw the chat found.** In the chat program a taught mind explained "sıçra" as inferred: an utterance of one word
+had been compared with another utterance of one word, and its reply inferred a moment before it was lived. Two
+utterances of one word do not agree in anything; only utterances of several words are compared now.
+
+**What the battery caught: the residue.** With F45 on, T-compose fell from 75 to 63 of 75 ("jump twice" said as one
+jump). "walk twice ⏎ i_walk i_walk" and "walk left ⏎ i_lturn i_walk" differ in one word, and their answers in one
+pair of words: the method gave "left" its "i_lturn", and "twice" an "i_walk" that is walk's. "twice" became a
+whole, and "jump twice" was heard as `[whole whole]`. Two conditions, both of the method of residues (what is
+already accounted for is taken out before the rest is assigned): the difference is assigned only when what the two
+answers share is what the shared words answer with (in a life without a curriculum "look twice" and "look left" are
+met before "look" is said alone, and nothing can be assigned yet); and a word of the answer that a shared word
+answers with is not the differing word's share. Beside them, a word told apart in several ways, none of them most
+of the evidence, has no reply. T-compose with F45: 63 → 71 (the second condition alone) → 75 of 75.
+
+**Ties: one reading at two grains, or two readings.** With "left" a whole, "turn left twice ⏎ i_lturn i_lturn" has
+two readings that are equally cheap (the whole "turn left" twice; "left" twice), and a tie concluded nothing. Three
+forms, on the "jump around right" split (399 dialogues, 200 tests):
+
+| of equally cheap readings | exact | |
+|---|---|---|
+| the one with the fewest items of the utterance (the larger whole), always | 194 | 6 wrong, one mistake: "jump around right after run left twice" said as "(jump around right after run left) twice" |
+| none (a tie concludes nothing, as before F45) | 195 | 4 silent, 1 wrong: every command in which "turn left" or "turn right" is a part |
+| the larger wholes when every whole of the one reading lies inside a whole of the other; none when they cross | **200** | |
+
+The first: in SCAN "walk after run left" has the same answer whether "left" belongs to "run" or to "walk after run"
+(the direction's step comes first either way), so where "walk after run" had been said alone the dialogue has two
+equally cheap readings; the larger whole is the conjunction, and a conjunction standing as one whole before a
+direction was lived. That made the form of a conjunction a lived item, and the rule of lived items no longer kept
+"(A after B) twice" out. The second: "turn left" and the "left" in it answer alike ("turn" has no step of its own),
+so every dialogue with such a part tied, was not lived in summary, and the form of "turn left" never stood as an
+item. The two ties are of different kinds. Where every whole of one reading lies inside a whole of the other, they
+are one reading at two grains, and the larger wholes say no less. Where their wholes cross ("walk after [run left]",
+"[walk after run] left"), they are two readings of the utterance, and nothing is concluded. With the switch off no
+tie of the first kind arises in SCAN, T-görev, T-compose or the relations world (their lives have the same digests).
+The runs marked "as found" above were made before these corrections; the final code's runs are in the same tables.
+
+**In the program.** `python -m zihin --yeni --pencere 13 --ac wholes,told_apart`, then `!ogret dans.tsv` twice
+(`t_dans.py --dump dans.tsv`), `!konus`, and "geriye iki kez zıpla" is answered "geri sıçra geri sıçra"; `!neden`
+shows the two pointers, and under each the word with its source: inferred, by the method of difference. `--pencere`
+is new: the window of a new mind (3 to 15; these summaries have nine items and do not fit seven).
+
+**The battery with the final code.** With F43 alone (`--set wholes=1`) and with F43 and F45 (`--set
+wholes=1,told_apart=1`): T-compose 75 of 75, the meaning world, relations, T-purpose, T-deduce (with and without
+F37), T-chain, T-cause, T-long, T-tell and the listening worlds give the output they gave in the section above, line
+for line; on the owner's documents the teacher protocol is 120 exact (F1 0.7444) and recall 90 exact, 146 valid, 31
+silent, as before (those minds were raised before F43). SCAN within 11 items at a window of 11, F43 alone: 844 of
+844 (run one step before the rule of ties; that world's life has the same digest with the final code). The same
+with F45 on is still running and is written below when it ends. Switches off: the lesson-free gate and the 17
+configurations are bit-identical, and 343 tests of the mind pass.
+
+**What is not there.**
+- One word for one word. A word whose part of the answer is several words, or none ("twice"), is not told apart; nor
+  is one whose two dialogues differ in length.
+- A whole does not say of what kind it is. `[whole whole]` is one construction whether a direction comes before the
+  move or after it: two ways of speaking that differ only in the kinds of their wholes would share their evidence.
+  The mind has categories on the words' level; summaries do not use them.
+- An inference can be wrong: where two frames agree on every filler lived in both ("what X eats", "what X likes"),
+  a filler lived in one is answered in the other by analogy. Evidence decides, and the switch is off by default.
+- A told-apart word is answered as any part is, with a set-aside working state: an answer costs more with F45
+  (on the around-right sample about 9 s of one core for an answer, on a shared machine, against 1.3 s on the
+  length split without F45).
+- Summaries are still learned from watched dialogues only, and an answer that changes a part in some other way than
+  word for word has no summary.

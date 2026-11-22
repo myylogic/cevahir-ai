@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """Living with a Zihin mind from the terminal.
 
-    python -m zihin [--load PATH] [--variant members] [--dil tr|diger]
+    python -m zihin [--load PATH] [--variant members] [--dil tr|diger] [--pencere N] [--ac wholes,told_apart]
 
 The mind of this computer is kept in $CEVAHIR_HOME/zihin/cevahir.zihin (default ~/.cevahir/zihin; --kayit elsewhere).
 A session's experience ledger (what makes !unut exact) is written next to it as defter-<ms>-<pid>.log and deleted at a
 clean exit, once the mind has been saved without it (and at exit with --kaydetme); --defter-yok keeps none. --dil sets
 how a new mind's text is lower-cased: tr (default, Turkish: I -> ı, İ -> i) or diger (plain lower case); a mind keeps
-the convention it was raised with.
+the convention it was raised with. --pencere sets how many items a new mind holds at once (its window, 3 to 15,
+default 7).
 
 Every plain line is something you TELL the mind (provenance "told"), one word per moment, then a silent moment.
 Commands (Turkish, with English aliases):
@@ -159,8 +160,8 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
          "exact_relations", "analogy", "corroborate", "paradigmatic", "bind_relations",      # lack these (--ac)
          "company", "replies", "purpose", "forms", "echo", "exclusive_world")
 
-STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes")   # measured and off by default: no mind is
-                                                                             # raised with them; --ac turns one on by choice
+STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
+           "told_apart")                                                     # is raised with them; --ac turns one on
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -1176,7 +1177,9 @@ def main(argv=None) -> None:
     ap.add_argument("--ac", default="", help="switch on, for a loaded mind, mechanisms that new minds are raised with "
                     "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own "
                     "settings. Also the mechanisms that were measured and are off by default (inherit, witness, "
-                    "difference, urge, known, wholes), for a loaded or a new mind")
+                    "difference, urge, known, wholes, told_apart), for a loaded or a new mind")
+    ap.add_argument("--pencere", type=int, help="how many items a NEW mind holds at once (its window, 3 to 15; "
+                    "default 7); a mind keeps the window it has")
     args = ap.parse_args(argv)
     keep_at = clean_path(args.kayit) if args.kayit else home_mind()    # ~ and quotes as in the commands
     ledgers = os.path.dirname(os.path.abspath(keep_at))   # session ledgers live next to the kept mind
@@ -1207,8 +1210,14 @@ def main(argv=None) -> None:
         if args.dil and args.dil != getattr(mind, "dil", "tr"):
             print("  (bu zihin '%s' harf kuralıyla büyüdü ve onu korur; --dil %s yeni bir zihin içindir)" % (
                 getattr(mind, "dil", "tr"), args.dil))
+        if args.pencere and args.pencere != mind.knob["F"]:
+            print("  (bu zihnin penceresi %d öğe ve onu korur; --pencere yeni bir zihin içindir)" % mind.knob["F"])
     else:
-        mind = Mind(VARIANTS[args.variant](ledgers))
+        cfg = VARIANTS[args.variant](ledgers)
+        if args.pencere:                                    # the window of a new mind (the range of its own knob)
+            from .act import KNOB_RANGE
+            cfg.F = max(KNOB_RANGE["F"][0], min(KNOB_RANGE["F"][1], args.pencere))
+        mind = Mind(cfg)
         mind.dil = args.dil or "tr"                         # kept with the mind (persist: minds saved before are tr)
         if args.no_ledger:
             mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path = {}, False, False, None

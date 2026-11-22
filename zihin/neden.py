@@ -49,6 +49,14 @@ def attribute(mind, unit: int, consequence: float = 0.0) -> Dict[str, object]:
     if own is not None and expectation(own[0], own[1], mind.cfg.k) > 0.5 and conviction(sum(own), mind.cfg.k) >= 0.5:
         record.update(source="yaşanmış", detail="bu bağlamdan sonra bu kelime yaşandı (hatırlama, kanıt %.1f)"
                       % sum(own))
+        if getattr(mind.cfg, "told_apart", False):       # F45: what a word never said alone answers with was inferred
+            from .events import INFERRED
+            direct = trust.clone()
+            direct[INFERRED] = 0.0
+            lived = R.own_mass(mind, context, 1, direct).get(unit)
+            if lived is None or sum(lived) < 0.5 * sum(own):
+                record.update(source="çıkarım", detail="tek kelimesi farklı iki diyalogun cevaplarındaki farktan "
+                              "çıkarıldı (fark yöntemi, kanıt %.1f)" % sum(own))
     elif _known_claim(mind, context, unit, trust, record):
         pass                                             # F41: a thing known of the topic, not said yet
     else:
@@ -125,7 +133,11 @@ def _contradiction(mind, context: int, unit: int, trust) -> Optional[tuple]:
     for source, reading in readings:
         top = other_top(reading)
         if top is not None and (found is None or top[1] > found[2]):
-            found = (source, str(mind.symbol_of(top[0])[1]), top[1])
+            other = mind.symbol_of(top[0])[1]
+            if not isinstance(other, str) and getattr(cfg, "wholes", False):
+                from .butun import show                  # F43: a pointer, a whole or a sequence held as one item
+                other = show(other)
+            found = (source, str(other), top[1])
     return found
 
 
