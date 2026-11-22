@@ -1579,3 +1579,25 @@ the next thing to find out, not something to claim.
 * The one wrong answer of the published SCAN "right" split, and the invalid recalls on the documents: not traced.
 * The Turkish documents (`README-TR.md`, `docs/ZIHIN_KURAM.md`, `docs/ZIHIN_KILAVUZ.md`) were last brought up to
   date at F43.
+
+### 16.5 The one wrong answer of the published "right" split, traced (after 16.2 and 16.4 were written)
+
+The same life was lived again (97,184 moments) and the command asked with the sources of each part. "walk twice
+and walk right" should be I_WALK I_WALK I_TURN_RIGHT I_WALK; the mind says I_TURN_RIGHT I_WALK I_WALK I_WALK. Its
+own account: the whole in the first place is "walk twice and walk", recalled as lived (I_WALK I_WALK I_WALK), and
+"right" is applied to that whole (the turn first, inferred by the difference method). It read
+[walk twice and walk] right where the grammar means [walk twice] and [walk right].
+
+Why this command and no other. Of the 1,036 test commands that end with "right", the words before it are a command
+the mind lived in 55. In 8 of those that lived command answers with one action repeated; with "after" both readings
+give the same answer, and "run thrice and run right" (four runs) was answered right. "walk twice and walk" answers
+exactly as "walk thrice" does. F45 knows a whole by its answer, so to the mind the two are the same whole, an
+action phrase, and an action phrase followed by "right" is read by what it found for "X right". The grammar tells
+them apart by their form; the mind tells wholes apart by what they do. That is the limit already written down for
+F45 (a whole does not say of what kind it is), met here once in 4,476. Not corrected.
+
+### 16.6 A correction to 16.4
+
+16.4 lists the Turkish documents as last brought up to date at F43. That is wrong: their text was replaced by a pair
+of images on 2026-11-20 (commit 9da86b8, the owner's), so there is nothing in them to bring up to date. The line
+should not have been written; it is corrected here and left in place above.
