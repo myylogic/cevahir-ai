@@ -369,8 +369,8 @@ At each moment, roughly each word, the mind lives these steps:
   or bad, 33 wrong → 12 with the lawful frame untouched; and with F46 and F47, after looking things up by its own
   decision it says what it read (1 wrong of 80 where the mind without it still asserts 38). Where nothing misleads,
   nothing changes. Eight forms were built and taken out on the way (the notes say which and why). What it does not
-  do: it learns about its ways only where it was free to speak (a mind that only watches learns nothing about
-  them); only the frame that spoke is in the chain. `!hata` prints what the mind has learned about its own ways and its last
+  do without the switch for it (below): learn about its ways where it was not free to speak; and only the frame
+  that spoke is in the chain. `!hata` prints what the mind has learned about its own ways and its last
   faults.
   **Restructuring** (the same switch; added the same day, notes section 12). A frame's category is every item that
   ever filled its place; when its own vote has been found wanting (its record), the vote is taken again among the
@@ -383,6 +383,15 @@ At each moment, roughly each word, the mind lives these steps:
   asked and then shown: **40 of 40 right**, where the mind with the switch off is wrong on 40 of 40 to the end (it
   answers with the sentence it read about the thing) and the mind that only doubts says nothing (0 wrong, 0
   right). It does not find a likeness that no single lived place carries.
+  **While it only watches** (`Config.silent_claims`, a switch of its own, off by default; notes section 13). At a
+  context it has no record of its own of, the mind makes its full reading although it cannot speak, and what its
+  ways claim there, with the word it would have said, is settled by what it hears next: everything new it watches
+  is a test of its ways. Measured (5 seeds), a mind that is **never asked**: after watching eight dialogues about
+  things of all kinds it answers 40 of 40 fresh things right (40 of 40 wrong without the step), having found from
+  watching alone which reading misleads and how the category splits. It costs the full reading at every new
+  context (the watching took 1.8 times as long), and before it has watched anything of another kind it is worse
+  than the mind without it (it asserts what held for everything it watched: 30 wrong of 40 where the other says
+  nothing).
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the

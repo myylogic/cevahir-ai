@@ -145,6 +145,11 @@ class Config:
                                     # word and the lived one part); lambda, how far a reading is believed, is the
                                     # expectation of that tie read general -> specific, 1/2 with nothing lived
                                     # (zihin/hata.py)
+    silent_claims: bool = False     # F49, while it only listens (with faults): at a context it has no record of its
+                                    # own of, the mind makes its full reading although it cannot speak, and what
+                                    # its ways claim there is kept and settled by what comes next like any claim:
+                                    # everything new it watches or reads is then a test of its ways. Costs the full
+                                    # reading at every new context it listens to (hata.watch)
     urge: bool = False              # F40 (Urge to Go On): when the leading word's rival is itself expected, it races
                                     # against silence as far as the two are things known about the same item (their
                                     # share of that item's lived continuations): another thing to say, not a rival
@@ -416,6 +421,9 @@ class Mind:
         try:                                               # (read.py reads each unit once in this stretch)
             self.predicted = predictions(self, "own" if listening else None)   # step 3 (cheap while listening)
             acts = [] if listening else act_mod.decide(self)   # step 4: no decision to take while listening
+            if listening and items and getattr(cfg, "silent_claims", False) and getattr(cfg, "faults", False):
+                from . import hata                         # F49: what its ways claim of what it is about to hear
+                hata.watch(self)
             claims = [(key[1], held) for key, held in self._read_memo.items()   # F46: what the speaking frame
                       if type(key) is tuple and len(key) == 2 and key[0] == "claim"] \
                 if getattr(cfg, "open_claims", False) else ()                    # claimed of its filler's record

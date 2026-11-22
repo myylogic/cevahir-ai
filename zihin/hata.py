@@ -241,7 +241,36 @@ def believed(mind, ways, e0: float) -> float:
     return e
 
 
-def note(mind, src: Dict[int, list], said: List[int]) -> None:
+def watch(mind) -> None:
+    """While the mind only listens (it cannot speak now): at a context it has no record of its own of what follows,
+    it makes the reading it would have decided with, and what each way claims there over the line it speaks at, and
+    the word it would say were it its turn, are kept as any claim is (``note``), to be settled by what it hears
+    next. Such a claim was neither said nor held back (it was not the mind's turn): it says nothing about whether
+    holding back is answered."""
+    from . import read as R
+    context = mind.context
+    if context is None:
+        return
+    trust = mind.trust.clone()
+    trust[ACTED] = 0.0
+    act = R.kind_masks(mind)[5]
+    channels = R.mv_view(mind, "u_channel")
+    outside = trust.clone()
+    outside[IMAGINED] = 0.0
+    if any(w_pos > 0.0 and act[channels[v]] for v, (w_pos, _) in R.own_mass(mind, context, 1, outside).items()):
+        return                                             # it has lived this context: memory speaks, nothing to test
+    mind.__dict__.pop("_src_last", None)
+    reading = R.members_map(mind, context, trust)
+    found = mind.__dict__.pop("_src_last", None)
+    if found is not None and found[0] == context:
+        from .act import _race                             # the word it would say here, were it its turn (the same
+        cfg = mind.cfg                                     # race on the same reading; nothing is said)
+        candidates = {unit: e for unit, e in reading.items() if act[channels[unit]] and (e > 0.5 or cfg.race)}
+        would = _race(mind, candidates, cfg.theta, cfg.T, dry=True) if cfg.race else []
+        note(mind, found[1], would, listening=True)
+
+
+def note(mind, src: Dict[int, list], said: List[int], listening: bool = False) -> None:
     """At a moment in which the mind was free to speak: what each way claimed most for the present context, when
     that claim is over the line the mind speaks at as the reading made it (it would have been said had it no rival
     and had the mind learned nothing about its ways) or is the word the mind says; kept with the context, the way,
@@ -264,12 +293,14 @@ def note(mind, src: Dict[int, list], said: List[int]) -> None:
         for ways, e0, e in made:
             if ways not in top or e0 > top[ways][0]:
                 top[ways] = (e0, unit, e)
-    claims = [(ways, unit, unit in said, e0, e) for ways, (e0, unit, e) in top.items()
+    def how(unit: int):                                    # True: it said it; False: it held it back; None: it was
+        return None if listening else unit in said         # not its turn (``said`` is then what it would have said)
+    claims = [(ways, unit, how(unit), e0, e) for ways, (e0, unit, e) in top.items()
               if e0 > line or (unit in said and e0 > 0.5)]
     for unit in said:                                      # the word it says, by every way that claimed it (a
         for ways, e0, e in src.get(unit, ()):              # claim: more for than against)
             if e0 > 0.5 and all(c[0] != ways for c in claims):
-                claims.append((ways, unit, True, e0, e))
+                claims.append((ways, unit, how(unit), e0, e))
     if not claims:
         return
     trust = mind.trust.clone()
@@ -285,12 +316,12 @@ def note(mind, src: Dict[int, list], said: List[int]) -> None:
         start = getattr(mind, "episode_start", 0)          # items and is still waiting was not answered
         still = [(c, t) for c, t in waiting if t >= start]
         for c, t in waiting:
-            if t < start and any(not claim[2] for claim in claimed.get(c, ())):
+            if t < start and any(claim[2] is False for claim in claimed.get(c, ())):
                 _held(mind, False)
         mind.__dict__["_held_back"] = still
     claimed.pop(context, None)
     claimed[context] = tuple(claims)
-    if any(not claim[2] for claim in claims):
+    if any(claim[2] is False for claim in claims):
         mind.__dict__.setdefault("_held_back", []).append((context, mind.t))
     while len(claimed) > KEPT:
         claimed.pop(next(iter(claimed)))
@@ -355,8 +386,8 @@ def judge(mind, items) -> None:
             continue
         before = _read_now(mind, ways, e0)
         settle(mind, ways, v == target, e0)
-        if not said:
-            _held(mind, True)                              # what it did not say was answered by what it lives
+        if said is False:
+            _held(mind, True)                              # what it held back was answered by what it lives
         if v != target:
             _fault(mind, mind.context, target, v, ways, said, e0, before, _read_now(mind, ways, e0))
     if rest:
@@ -379,8 +410,8 @@ def valued(mind, sign: float) -> None:
         claims = mind.claimed.get(context)
         if not claims:
             continue
-        kept = tuple(c for c in claims if not c[2])
-        found += [(context, c) for c in claims if c[2]]
+        kept = tuple(c for c in claims if c[2] is not True)
+        found += [(context, c) for c in claims if c[2] is True]
         if kept:
             mind.claimed[context] = kept
         else:
@@ -409,7 +440,7 @@ def _fault(mind, context: int, claimed: int, lived: Optional[int], ways, said: b
     of that strength by that way was read as before and is read as now."""
     faults = mind.faults
     faults.append({"t": mind.t, "context": int(context), "claimed": int(claimed),
-                   "lived": None if lived is None else int(lived), "ways": ways, "said": bool(said),
+                   "lived": None if lived is None else int(lived), "ways": ways, "said": said,
                    "e0": e0, "before": before, "after": after})
     del faults[:-FAULTS]
 
@@ -471,7 +502,8 @@ def report(mind, most: int = 12) -> List[str]:
         for f in mind.faults[-5:]:
             lived = "yaşanan '%s'" % _shown(mind, f["lived"]) if f["lived"] is not None else "cevap kötü karşılandı"
             lines.append("    '%s' ardından '%s' %s; %s. Kaynağı: %s; böyle bir iddiayı %.2f okuyordu, şimdi %.2f" % (
-                _shown(mind, f["context"]), _shown(mind, f["claimed"]), "dedi" if f["said"] else "diyecekti", lived,
+                _shown(mind, f["context"]), _shown(mind, f["claimed"]), "dedi" if f["said"] else "diyecekti"
+                if f["said"] is False else "bekliyordu (dinlerken)", lived,
                 way_name(mind, f["ways"]), f["before"], f["after"]))
     waiting = sum(len(c) for c in mind.claimed.values())
     if waiting:

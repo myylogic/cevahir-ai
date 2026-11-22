@@ -32,6 +32,11 @@ What is pinned here
   to be of its kind): a new thing of each kind is then answered right, where the mind with that step left out says
   nothing after the asked word and the mind with the switch off answers with something else it read. The chat's
   ``!neden`` names that way.
+* Silent claims (``Config.silent_claims``, off by default, studied): a mind that is never asked, only reads and
+  watches, settles what its ways claimed of what it was about to hear. Without the switch nothing is ever settled
+  in such a life; with it the ways have records of their own, none of them counts as a claim held back, and in
+  the world of kinds the mind that only watched answers a new thing of each kind right, where the mind without it
+  answers with something else it read.
 """
 from __future__ import annotations
 
@@ -328,3 +333,24 @@ def test_a_frame_found_wanting_is_read_through_a_narrower_place_of_its_filler():
     assert answers["on"] == ("çakal et yer", "mors balık yer")   # the category split by what the things were read to be
     assert answers["doubt"] == ("çakal", "mors")                 # doubt alone: the asked word, then nothing
     assert "et" not in answers["off"][0].split() and "balık" not in answers["off"][1].split()
+
+
+def test_a_mind_that_only_watches_settles_its_silent_claims():
+    assert Config().silent_claims is False and "silent_claims" in STUDIED
+    answers = {}
+    for name, switches in (("on", {"faults": True}), ("silent", {"faults": True, "silent_claims": True})):
+        s = raised_with_kinds(**switches)
+        for x in ("aslan", "fok", "kurt", "yunus", "kaplan", "balina"):
+            s.watch(V[0] % x, V[1] % (x, FOOD[KIND[x]]))    # watched; the mind is never asked
+        s.close_turn()
+        mind = s.mind
+        answers[name] = (ask(s, V[0] % "çakal"), ask(s, V[0] % "mors"))
+        if name == "on":
+            assert not mind.ch.has(hata.CHANNEL) and not mind.claimed and not mind.faults   # nothing was settled
+        else:
+            assert any(len(key) == 3 for key in hata.votes(mind))            # its ways have records of their own
+            assert mind.faults and all(f["said"] is None for f in mind.faults)   # neither said nor held back
+            assert hata.answered(mind) == 0.5                # ... so it says nothing of whether holding back is answered
+            assert "bekliyordu (dinlerken)" in "\n".join(hata.report(mind))
+    assert answers["silent"] == ("çakal et yer", "mors balık yer")
+    assert "et" not in answers["on"][0].split() and "balık" not in answers["on"][1].split()

@@ -177,7 +177,8 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
          "company", "replies", "purpose", "forms", "echo", "exclusive_world")
 
 STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
-           "told_apart", "open_claims", "look", "think", "faults")           # is raised with them; --ac turns one on
+           "told_apart", "open_claims", "look", "think", "faults",           # is raised with them; --ac turns one on
+           "silent_claims")
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 

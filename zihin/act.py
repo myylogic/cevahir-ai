@@ -237,7 +237,7 @@ def _value_evidence(mind, unit: int) -> float:
     return known
 
 
-def _race(mind, candidates, theta: float, T: int) -> List[Event]:
+def _race(mind, candidates, theta: float, T: int, dry: bool = False) -> List[Event]:
     """F19: one act per channel per moment, so the candidates of a channel are alternatives that exclude each
     other. Each scores its expectation plus half its consequences (L5); the leader accumulates its advantage over
     the strongest rival (over 1/2, "saying nothing", when it has none) and is emitted if that advantage reaches the
@@ -269,6 +269,9 @@ def _race(mind, candidates, theta: float, T: int) -> List[Event]:
             if tried is None:
                 continue
             score, e, unit = tried
+        if dry:                                        # F49 (silent claims): only which unit it would say; nothing
+            acts.append(unit)                          # is set and nothing is said
+            continue
         acts.append(Event(mind.ch.names[channel], mind.ch.symbol(channel, int(S.u_symbol[unit])), ACTED))
         mind.hoping = (unit, e)
         if getattr(mind.cfg, "known", False):          # F41: a thing known of a filler is said: the answer's topic

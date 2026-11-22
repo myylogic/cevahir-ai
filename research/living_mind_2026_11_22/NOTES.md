@@ -1082,3 +1082,58 @@ python research/living_mind_2026_11_22/t_fault_kinds.py           # the measurem
 python research/living_mind_2026_11_22/t_fault_kinds.py again     # the earlier parts with the code as it is
 python -m pytest tests/evolution/test_zihin_faults.py -q
 ```
+
+## 13. While it only watches: silent claims (`Config.silent_claims`, off by default)
+
+The first limit of sections 11.6 and 12.4: a claim was settled only where the mind was free to speak, so a mind
+that is never asked learned nothing about its ways and restructured nothing.
+
+**The step.** While it listens the mind cannot speak, and for speed it reads only its own record of the present
+context (section 1). With `silent_claims` (and `faults`), at a context it has **no record of its own** of, it makes
+the reading it would have decided with, although it cannot speak; what each way claims there over the line, and
+the word it would have said were it its turn (the same race, nothing said), are kept as any claim is, and settled
+by what it hears next (`hata.watch`). Such a claim was neither said nor held back, so it says nothing about
+whether holding back is answered. Everything new the mind watches or reads is then a test of its ways.
+
+**Measured** (`t_fault_watch.py`, 5 seeds; rows in `results/fault_watch.jsonl`). The mind is **never asked** in
+its life: it reads and watches only. After n more watched dialogues it is asked on copies about 8 fresh things.
+Right / wrong / silent, of 40:
+
+| the world of section 12 (what a thing eats follows its kind) | n = 0 | 4 | 8 | 16 | the watching took |
+|---|---|---|---|---|---|
+| off | 0/0/40 | 0/0/40 | 0/40/0 | 0/40/0 | 5.2 s |
+| on (nothing is ever settled: the mind is never asked) | 0/0/40 | 0/0/40 | 0/40/0 | 0/40/0 | 4.9 s |
+| on with silent claims | 10/30/0 | 10/30/0 | **40/0/0** | **40/0/0** | 9.2 s |
+
+| 8 watched things share a value the others do not (section 11's misleading frame) | n = 0 | 4 | 8 | 16 | the watching took |
+|---|---|---|---|---|---|
+| off | 14/26/0 | 14/26/0 | 14/25/1 | 6/9/25 | 1.5 s |
+| on (nothing is ever settled) | 14/26/0 | 14/26/0 | 14/25/1 | 6/9/25 | 1.7 s |
+| on with silent claims | 14/26/0 | 14/26/0 | 10/21/9 | **1/0/39** | 2.9 s |
+
+Without having given one answer of its own, the mind that watched eight dialogues about things of all four kinds
+answers every fresh thing right (40 of 40; without the step 40 of 40 wrong): from watching alone it found the
+relation that misleads (what was read about the thing: its claims failed as it listened), found the frame's own
+vote wanting, and read the frame through the place the thing shares with the things of its kind. In the misleading
+frame it ends with no wrong answer (9 without).
+
+**What it costs, and where it is worse.**
+
+* Time: the watching took 1.8 to 1.9 times as long (the full reading at every new context; the second time a
+  context is met it has a record of its own and nothing is read).
+* Before it has watched anything of another kind (n = 0 and 4 in the first table) the mind with silent claims is
+  *worse*: 30 wrong of 40 where the others say nothing. Its frame's vote held for every one of the eight things it
+  watched, so it believes it more and asserts it; the others hesitate between two readings and stay silent. It
+  asserts what has held for everything it watched until it watches otherwise.
+* In the misleading frame the lucky guesses go with the errors (14 right became 1).
+* Not measured on a long life or on the owner's documents: the cost there and what natural text does to the
+  records (most of what follows in a text is not what any reading claims over the line, so little should be
+  settled, but that is a guess until it is measured).
+
+**Gates, tests, reproduce.** Switches off: digest gate, the 17 configurations and the scripted life (plain and
+with wholes): bit for bit what they were. Tests: 396 passed (1 new).
+
+```
+python research/living_mind_2026_11_22/t_fault_watch.py
+python -m zihin --ac faults,silent_claims
+```
