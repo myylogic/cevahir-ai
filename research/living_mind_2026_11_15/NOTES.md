@@ -3360,3 +3360,7 @@ configurations are bit-identical, and 343 tests of the mind pass.
 
 **SCAN within 11 with F45 on** (the run that was still going when the section above was written; F43 and F45,
 a window of 11): 844 of 844.
+
+**The full add-jump run with the final code** (F43 alone; 1,082 training dialogues watched twice, 92,636 moments,
+372 s of life): **7,706 of 7,706**, as with the two forms before it. The answers took 3,496 s on four cores,
+about 1.8 s of one core for an answer.

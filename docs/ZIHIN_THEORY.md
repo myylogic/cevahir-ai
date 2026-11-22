@@ -264,9 +264,9 @@ At each moment, roughly each word, the mind lives these steps:
   (on the words' own channel the summaries entered the frames of plain words, and one world broke). SCAN's add-jump
   split with commands of every length (T-scan; 7,706 test commands, answers of up to 48 actions): after watching
   1,082 of SCAN's 13,204 training dialogues twice (six and a half minutes of life on one core) the mind answered
-  **7,706 of the 7,706** exactly with the first form of F43 and again with the second; with the present one, 2,000
-  of a sample of 2,000 of them. With **92 dialogues** (0.7% of the training set: the 81 commands without a
-  connective, "jump", ten joined commands; ten seconds of life) it answers **500 of a sample of 500**. What it needs
+  **7,706 of the 7,706** exactly, with each of the three forms F43 has had (the present one included). With **92
+  dialogues** (0.7% of the training set: the 81 commands without a connective, "jump", ten joined commands; ten
+  seconds of life) it answers **500 of a sample of 500**. What it needs
   is each construction once and each form once as an item: with two joined commands that hold both connectives and
   both repeating words, 500 of 500; with two that both say "after", the 259 that do not say "and" (the rest silent).
   A Transformer trained from scratch on the 1,082 dialogues answers 1 of 7,706 (298 of 300 of its own training
@@ -283,7 +283,7 @@ At each moment, roughly each word, the mind lives these steps:
   at 92 dialogues with it). What F43 does not do: an answer that changes a part other than word for word (F45) has
   no summary; summaries are learned from watched dialogues only; the parts' own questions are imagined (what a long
   life of such answers leaves was not measured); a whole does not say of what kind it is; and an answer of the full
-  run takes about 2.3 s on one core, nearly all of it the mind's own decisions at every moment of every part.
+  run takes about 1.8 s on one core, nearly all of it the mind's own decisions at every moment of every part.
 - **Lived Exclusion across channels (F44).** F27 counts what an instance was lived to go on with on a channel against
   what it never went on with on that channel. The end of a turn and a word are on two channels, so an instance that
   always went on with the end of the turn said nothing against a word a sibling frame proposed there, and a lived
