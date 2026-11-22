@@ -77,6 +77,14 @@ def attribute(mind, unit: int, consequence: float = 0.0) -> Dict[str, object]:
                 if e is not None and e > 0.5:
                     record.update(source=name, detail="%s, e=%.2f" % (label, e))
                     break
+    made = mind.__dict__.get("_src_now", {}).get(unit) if getattr(mind.cfg, "faults", False) else None
+    if made:                                             # F49: the way that claimed it, and how it is read now
+        from . import hata
+        ways, e0, e = made[0]
+        if record["source"] == "bilinmiyor":
+            record.update(source="genelleme", detail=hata.way_name(mind, ways))
+        if e != e0:
+            record["detail"] = str(record["detail"]) + "; bu yolun sicili: %.2f yerine %.2f okundu" % (e0, e)
     if consequence:
         record["detail"] = str(record["detail"]) + "; sonuç beklentisi %+.2f" % consequence
     clash = _contradiction(mind, context, unit, trust)

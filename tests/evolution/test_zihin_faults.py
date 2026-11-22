@@ -27,6 +27,11 @@ What is pinned here
 * A settled claim is evidence of its moment: undoing the moment takes it back and the claim is kept again.
 * What is kept survives saving and loading; a mind saved before F49 loads with nothing kept.
 * ``hata.report`` names the ways and the last faults.
+* Restructuring: where what a thing eats follows a kind it was read to be of, and the frame's own vote was found
+  wanting, the frame is read through the narrower place the thing shares with some of the members (the things read
+  to be of its kind): a new thing of each kind is then answered right, where the mind with that step left out says
+  nothing after the asked word and the mind with the switch off answers with something else it read. The chat's
+  ``!neden`` names that way.
 """
 from __future__ import annotations
 
@@ -265,3 +270,61 @@ def test_the_report_names_the_ways_and_the_last_faults(base):
     text = "\n".join(hata.report(s.mind))
     assert "üyelerin aynı kelimesi" in text and "sorulan kelimenin kendisi" in text
     assert "'ot' dedi" in text and "yaşanan 'et'" in text and "X ne yer" in text
+
+
+KIND = {"aslan": "yırtıcı", "kurt": "yırtıcı", "kaplan": "yırtıcı", "çakal": "yırtıcı",
+        "fok": "sucul", "yunus": "sucul", "balina": "sucul", "mors": "sucul"}
+FOOD = {"evcil": "ot", "yırtıcı": "et", "sucul": "balık"}
+
+
+def raised_with_kinds(**switches) -> Session:
+    made = chat._log_path
+    chat._log_path = lambda: None
+    try:
+        cfg = VARIANTS["speaking"]()
+    finally:
+        chat._log_path = made
+    cfg.keep_log, cfg.log_path = False, None
+    for name, value in switches.items():
+        setattr(cfg, name, value)
+    torch.manual_seed(0)
+    mind = Mind(cfg)
+    mind.add_channel(CHANNEL, "act")
+    s = Session(mind)
+    kinds = {**{x: "evcil" for x in THINGS}, **KIND}
+    for _ in range(2):
+        for x, kind in kinds.items():                      # the kind of every thing, read in a sentence
+            s.company(None)
+            s.listen("%s %s bir hayvandır ." % (x, kind), 2)
+            s.end_of_turn(2, tone=".")
+            mind.step([])
+        for x in THINGS:                                    # the watched dialogues are all of one kind
+            s.watch(V[0] % x, V[1] % (x, "ot"))
+    s.close_turn()
+    return s
+
+
+def test_a_frame_found_wanting_is_read_through_a_narrower_place_of_its_filler():
+    answers = {}
+    for name, switches, narrower in (("off", {}, True), ("doubt", {"faults": True}, False),
+                                     ("on", {"faults": True}, True)):
+        s = raised_with_kinds(**switches)
+        if not narrower:
+            s.mind.__dict__["_fault_narrower"] = False
+        for x in ("aslan", "fok", "kurt", "yunus", "kaplan", "balina"):
+            taught(s, V[0] % x, V[1] % (x, FOOD[KIND[x]]))
+        answers[name] = (ask(s, V[0] % "çakal"), ask(s, V[0] % "mors"))
+        if name == "on":
+            mind = s.mind
+            assert hata.wanting(mind, hata.frame_ways(0, next(key[2] for key in hata.votes(mind)
+                                                              if len(key) == 3 and key[1] == 0)))
+            own = [key for key in hata.votes(mind) if len(key) == 3 and key[1] == hata.NARROWER]
+            assert len(own) == 1 and hata.votes(mind)[own[0]][1] == 1.0       # that way's claims all held
+            assert "başka bir yeri de paylaşan üyelerin kelimesi" in "\n".join(hata.report(mind))
+            c = Session(mind.clone())
+            c.explain = True
+            assert c.reply(V[0] % "çakal", limit=30) == "çakal et yer"
+            assert any("başka bir yeri de paylaşan" in str(r.get("detail", "")) for r in c.sources)
+    assert answers["on"] == ("çakal et yer", "mors balık yer")   # the category split by what the things were read to be
+    assert answers["doubt"] == ("çakal", "mors")                 # doubt alone: the asked word, then nothing
+    assert "et" not in answers["off"][0].split() and "balık" not in answers["off"][1].split()

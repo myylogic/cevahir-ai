@@ -365,6 +365,7 @@ def decide(mind) -> List[Event]:
             from . import hata                             # speaks of this context
             found = mind.__dict__.pop("_src_last", None)
             src = found[1] if found is not None and found[0] == mind.context else {}
+            mind.__dict__["_src_now"] = src                # (the chat's !neden names the way of a word from it)
             acts = _race(mind, candidates, theta, T)
             if src:
                 hata.note(mind, src, [mind.unit_of(event.channel, event.symbol) for event in acts])

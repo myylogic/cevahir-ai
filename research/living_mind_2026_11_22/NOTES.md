@@ -992,3 +992,93 @@ python research/living_mind_2026_11_22/t_fault.py misled     # also: regular, ma
 python -m pytest tests/evolution/test_zihin_faults.py -q
 python -m zihin --ac faults        # then !hata: what the mind has learned about its own ways
 ```
+
+## 12. Restructuring: a frame found wanting is read through a narrower place of the thing asked about
+
+Section 11.6 named what F49 did not do: "no new structure is made from an error; the frame's claim is doubted for
+the next filler whatever that filler is". Of the four things asked (11.1) that was the one still open: *restructure
+the knowledge involved*. This is that step. It is part of F49 (the same switch).
+
+### 12.1 The step
+
+A frame's category is every item that ever filled its place. When the members disagree, or agree by the accident
+of which members came first, the category is too wide for the claim: the answer follows something the members do
+not all share. What they share *elsewhere* is already in the mind: every lived place (a category) an item filled
+is a membership (F29 reads likeness from exactly these). So:
+
+* when the frame's own vote has been **found wanting** (its record: its claims held less often than it claimed,
+  `hata.wanting`), the vote is taken again among the members that share **another lived place** with the filler
+  (a category both were members of before the present run of items);
+* each such place is in effect a narrower frame (this frame, among those fillers only), and as among frames
+  (F11) the one whose members agree most speaks: score = conviction(members there) · max_v f(v), its claims
+  e = c f + (1 − c)/2 with the frame's own c and the members counted anew; a place that holds every member is
+  not narrower and says nothing (`read.narrower_vote`);
+* the claim is a way of its own, ("g", narrower, frame), noted in the chain, settled by what is then lived and
+  read back like any other (section 11.3): whether reading a frame through its filler's other places *holds* is
+  itself learned from the mind's own record, per frame and, through the vote, in general.
+
+Nothing says which place matters. The category is split where the error showed it had to be, by a place the mind
+lived, and the split is kept only as far as its claims hold.
+
+### 12.2 Measured (`t_fault_kinds.py`, 5 seeds; rows in `results/fault_kinds.jsonl`)
+
+What a thing eats follows its kind (four kinds, four foods). The kind of every thing was read once in a sentence
+("X K bir hayvandır ."). The 8 watched dialogues ("X ne yer ?" → "X V yer .") are all of one kind. Then 24 rounds
+of the teacher's loop with new things of all four kinds; 8 fresh things (two of each kind) on copies after n
+rounds. Right / wrong / silent, of 40:
+
+| | n = 0 | 4 | 8 | 16 | 24 | in the 24 rounds (of 120) |
+|---|---|---|---|---|---|---|
+| off | 0/0/40 | 0/40/0 | 0/40/0 | 0/40/0 | 0/40/0 | 0/95/25 |
+| on, doubt only (the step left out) | 0/0/40 | 0/0/40 | 0/0/40 | 0/0/40 | 0/0/40 | 0/5/115 |
+| on | 0/0/40 | 0/0/40 | **40/0/0** | **40/0/0** | **40/0/0** | 80/5/35 |
+
+With the switch off the mind is wrong on every fresh thing from the fourth round to the end: asked what a thing
+eats it says the sentence it read about it ("serçe yırtıcı bir hayvandır": the relation "what followed the thing in
+what was read" names the wrong thing here, and nothing ever tells that relation it failed). With doubt alone it
+stops saying that after one wrong answer in a life (5 in five lives) and then says nothing: it knows that it does
+not know. With the step: one wrong answer in a life, seven silent rounds while two things of each kind are shown,
+and from the ninth round every answer is right, also for the 8 things never asked about: "serçe et yer", by "the
+members that share another place with it" (in the first life: 20 claims held, none failed).
+
+So from the same errors: the reading that misled is doubted (the relation: 0 held of 24), the frame's own vote is
+found wanting, the frame is read through the place the thing shares with the members of its kind, and that
+reading earns its own record.
+
+### 12.3 The earlier parts again
+
+The step was added after the parts of `t_fault.py` were measured (section 11.5). `t_fault_kinds.py again` runs them
+once more with the code as it is and compares every count with the committed rows:
+
+| part of `t_fault.py` | rows | against the committed rows |
+|---|---|---|
+| misled | 4 | one count moved, in two rows (on; an untested frame always held back): on the things never asked about, V2 0/0/40 became 0/1/39 (one wrong answer where there was silence: a place with one member there spoke) |
+| regular | 4 | the same counts |
+| many | 8 | the same counts |
+| told only good or bad | 3 | the same counts |
+| two readings | 2 | the same counts |
+| the loop by itself | 2 | the same counts |
+
+So the numbers of section 11.5 stand with the step in the code, with that one answer of 200 changed for the worse.
+
+### 12.4 What it does not do
+
+* The narrower place must be a place the mind **lived** (here: a sentence read about each thing). Likeness that
+  no single lived place carries (a combination of two places, a degree) is not found: one place, the one where the
+  members agree most.
+* It is tried only for a frame whose own vote has a record against it. A mind that only watched (no answer of its
+  own ever settled) does not restructure anything: section 11.6's first limit stands.
+* A place with one member there already speaks (conviction 1/2): one coincidence can make a claim; its record then
+  decides.
+* Measured in one small world. Not on the owner's documents.
+
+### 12.5 Gates, tests, reproduce
+
+Switches off: digest gate, the 17 configurations and the scripted life (plain and with wholes): bit for bit what
+they were. Tests: 395 passed (1 new; the chat's `!neden` now names the way of a word made by these readings).
+
+```
+python research/living_mind_2026_11_22/t_fault_kinds.py           # the measurement above
+python research/living_mind_2026_11_22/t_fault_kinds.py again     # the earlier parts with the code as it is
+python -m pytest tests/evolution/test_zihin_faults.py -q
+```

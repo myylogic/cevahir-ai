@@ -57,6 +57,12 @@ it (F46: what it may look up by itself, F47).
   e = a e_vote + (1 - a) e0, a = e(held back -> holds): W+ whenever a claim it did not say is settled by what it
   then lives, W- whenever it is called on again and a claim it held back earlier is still waiting.
 
+* **Restructuring.** A frame's category is every item that ever filled its place. When the frame's own vote has
+  been found wanting (``wanting``: its claims held less often than it claimed), the vote is taken again among the
+  members that share another lived place with the filler (``read.narrower_vote``): the category is split where the
+  error showed it had to be, by a place the mind lived. That claim is a way of its own (kind ``NARROWER``), settled
+  and read back like the others, so the split is kept only as far as its claims hold.
+
 Nothing here names a word, a frame or a domain; no number is chosen (one experience per settled claim, the core's
 k, the line the mind already speaks at). ``report`` says what the mind has learned about its own ways and where its
 last faults were.
@@ -73,10 +79,12 @@ CHANNEL = "okuma"            # the mind's own channel for its ways of reading
 ALL = "*"                    # every way (what its readings in general have been worth)
 EXPECTED = "beklenen"        # the unit the ties (way -> claimed) point at: what the way itself expected
 HELD = "sustu"               # holding a claim back: the tie (held back -> holds) says how often that was answered
+NARROWER = "dar"             # the kind of a frame's claim made through a narrower place of its filler (restructuring)
 KEPT = 1024                  # the contexts whose claims are kept until reality speaks of them (the oldest go first)
 FAULTS = 32                  # the last faults kept for the report (a record for the owner; the evidence is in the ties)
 
-NAMES = {0: "üyelerin aynı kelimesi", -1: "sorulan kelimenin kendisi", -2: "kelimenin devamı", -3: "dizinin başı",
+NAMES = {0: "üyelerin aynı kelimesi", "dar": "başka bir yeri de paylaşan üyelerin kelimesi",
+         -1: "sorulan kelimenin kendisi", -2: "kelimenin devamı", -3: "dizinin başı",
          -4: "yerine geçen kelime", -5: "tek başına aldığı cevap", -6: "türünden kalan", -7: "hakkında bilinen"}
 READINGS = {"dizi": "bilinen dizinin devamı", "devam": "son kelimelerin yaşanmış devamı",
             "yerine": "yerine geçen kelimenin devamı", "biçim": "kelimenin biçimi",
@@ -86,8 +94,17 @@ READINGS = {"dizi": "bilinen dizinin devamı", "devam": "son kelimelerin yaşanm
 def frame_ways(key, frame: int) -> tuple:
     """The way of a frame's claim, general -> specific: every way; the kind of claim (the members' own word, or the
     relation it names); this frame's claim of that kind."""
-    kind = key if isinstance(key, int) and key < 0 else 0
+    kind = key if key == NARROWER or (isinstance(key, int) and key < 0) else 0
     return ALL, ("g", kind), ("g", kind, int(frame))
+
+
+def wanting(mind, ways) -> bool:
+    """Whether this way's own record has found it wanting: its claims held less often than it claimed. (A way never
+    settled has not been found anything.)"""
+    if not mind.ch.has(CHANNEL):
+        return False
+    own = votes(mind).get(ways[-1])
+    return own is not None and own[1] < own[2]
 
 
 def reading_ways(name: str) -> tuple:
@@ -403,7 +420,7 @@ def way_name(mind, ways) -> str:
     if last == ALL:
         return "her okuma"
     if last[0] == "g":
-        name = "genelleme: %s" % NAMES.get(last[1], "ilişki %d" % last[1])
+        name = "genelleme: %s" % NAMES.get(last[1], "ilişki %s" % (last[1],))
         if len(last) == 3:
             name += " (çerçeve: %s)" % _shown(mind, last[2])
         return name

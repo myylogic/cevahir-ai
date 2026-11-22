@@ -1613,6 +1613,14 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 out[target] = made[0][2]
                 if made[0][2] <= 0.5 < made[0][1]:
                     doubted = max(doubted, made[0][1])
+            if filler is not None and tail is None and hata.wanting(mind, hata.frame_ways(0, frame)) \
+                    and mind.__dict__.get("_fault_narrower", True):   # (research: False leaves this step out)
+                ways = hata.frame_ways(hata.NARROWER, frame)   # the frame's own vote was found wanting: read it
+                for target, e0 in narrower_vote(mind, frame, unit, filler, c, trust).items():   # through a
+                    made = src.setdefault(target, [])          # narrower place of its filler
+                    made.append((ways, e0, hata.believed(mind, ways, e0)))
+                    made.sort(key=lambda claim: -claim[2])
+                    out[target] = max(out.get(target, 0.0), made[0][2])
         if voices and trust is None:
             mind.__dict__.setdefault("voice", {})[unit] = (heard[spoke], heard)
     own = own_mass(mind, unit, 1, trust)
@@ -1657,6 +1665,65 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 not any(e > own_line for t, e in out.items() if _world(mind, t)):
             _note_claim(mind, filler, doubted, True)     # F46: what its frame would have said of this filler it has
     return out                                           # learned not to believe, and nothing else is said: open
+
+
+def narrower_vote(mind, frame: int, unit: int, y: int, c_frame: float, trust=None) -> Dict[int, float]:
+    """F49 (restructuring): the claims of ``frame`` for the instance ``unit`` read through a narrower place of its
+    filler ``y``. A frame's category is every item that ever filled its place; when its members' vote was found
+    wanting (the mind's own record of it, ``hata.wanting``), the vote is taken again among the members that share
+    *another* lived place with the filler (a category both were members of before the present run of items: the
+    place of things said to be of one kind, of things something else was done to, ...). Each such place is a frame
+    of its own in effect (this frame, among those fillers only), and as among frames (F11) the one whose members
+    agree most speaks: score = conviction(members) max_v f(v), its claims
+        e = c f + (1 - c) 1/2,   c = c_frame conviction(members there) / conviction(all members)
+    (``c_frame`` is the frame's own lam e(i -> g) conviction(members): the same claim with the members counted
+    anew). A place that holds every member is not narrower and says nothing. So the category is split by what its
+    members share elsewhere, where the error showed that it had to be; whether such readings hold is settled like
+    any other way's (the record of ("g", NARROWER, frame)). Reads only."""
+    S, k = mind.S, mind.cfg.k
+    kinds = mv_view(mind, "u_kind")
+    parts = parts_of(mind, frame)
+    cats = {p for p in parts if kinds[p] & CATEGORY}
+    if len(cats) != 1:
+        return {}
+    category = cats.pop()
+    where = tuple(j for j, p in enumerate(parts) if p == category)
+    src = mv_view(mind, "t_src")
+    lived: Dict[int, Dict[int, float]] = {}                # member -> its instance's shares of what it went on with
+    for tie in S.inc.get((category, ABSTRACT), ()):
+        x = src[tie]
+        if x == y:
+            continue
+        instance = S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts)))
+        if instance is None or instance == unit:
+            continue
+        targets, own = _world_pos(mind, instance, trust)
+        total = sum(own)
+        if total > 0.0:
+            lived[x] = {v: p / total for v, p in zip(targets, own)}
+    if len(lived) < 2:
+        return {}
+    since = getattr(mind, "episode_start", mind.t)
+    best = None
+    for place, e_in in memberships_before(mind, y, since).items():
+        if place == category or e_in <= 0.5:
+            continue
+        there = [x for x in (src[tie] for tie in S.inc.get((place, ABSTRACT), ())) if x in lived]
+        if not there or len(there) == len(lived):
+            continue                                       # no member shares it, or every member does: not narrower
+        mass: Dict[int, float] = {}
+        for x in there:
+            for v, share in lived[x].items():
+                mass[v] = mass.get(v, 0.0) + share
+        n = float(len(there))
+        score = conviction(n, k) * max(mass.values()) / n
+        if best is None or score > best[0] or (score == best[0] and place < best[3]):
+            best = (score, n, mass, place)
+    if best is None:
+        return {}
+    _, n, mass, _ = best
+    c = c_frame * conviction(n, k) / conviction(float(len(lived)), k)
+    return {v: c * (m / n) + (1.0 - c) * 0.5 for v, m in mass.items()}
 
 
 def _had(out: Dict[int, float], src: Optional[Dict[int, tuple]]):

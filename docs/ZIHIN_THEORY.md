@@ -370,9 +370,19 @@ At each moment, roughly each word, the mind lives these steps:
   decision it says what it read (1 wrong of 80 where the mind without it still asserts 38). Where nothing misleads,
   nothing changes. Eight forms were built and taken out on the way (the notes say which and why). What it does not
   do: it learns about its ways only where it was free to speak (a mind that only watches learns nothing about
-  them); it makes no new structure from an error (the category is not split by what the exceptions share); only
-  the frame that spoke is in the chain. `!hata` prints what the mind has learned about its own ways and its last
+  them); only the frame that spoke is in the chain. `!hata` prints what the mind has learned about its own ways and its last
   faults.
+  **Restructuring** (the same switch; added the same day, notes section 12). A frame's category is every item that
+  ever filled its place; when its own vote has been found wanting (its record), the vote is taken again among the
+  members that share *another lived place* with the thing asked about (a category both were members of: F29 reads
+  likeness from the same memberships), and as among frames the place whose members agree most speaks. That claim is
+  a way of its own, settled and read back like any other, so the category is split where the error showed it had
+  to be, by a place the mind lived, and the split is kept only as far as its claims hold. Measured
+  (`t_fault_kinds.py`, 5 seeds): what a thing eats follows its kind, which was read in a sentence about each
+  thing, and the watched dialogues are all of one kind. On 8 things never asked about, after 8 rounds of being
+  asked and then shown: **40 of 40 right**, where the mind with the switch off is wrong on 40 of 40 to the end (it
+  answers with the sentence it read about the thing) and the mind that only doubts says nothing (0 wrong, 0
+  right). It does not find a likeness that no single lived place carries.
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
