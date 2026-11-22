@@ -208,6 +208,9 @@ class Config:
         return cls.changed(**base)
 
 
+_RANK_SCRATCH = np.zeros(0, dtype=np.float64)   # Mind._rank_first: zero outside a call (a sum per category unit)
+
+
 class Mind:
     """A mind that learns while it lives. All knowledge is in ``self.S`` (units, ties, evidence)."""
 
@@ -521,7 +524,187 @@ class Mind:
 
     def _rank(self, base, parts, context, fresh, F):
         """Generalisations of what is present (categories, frames), their order, and the F winners after the
-        EXPECT(lag 0) spreading. Returns (ranked, gens, virtual, grounded)."""
+        EXPECT(lag 0) spreading. Returns (ranked, gens, virtual, grounded): of ``gens``, ``virtual`` and ``grounded``
+        at least the entries of the ranked keys (all that the settling reads of them)."""
+        cfg = self.cfg
+        if cfg.select == "specific" and cfg.evoke == "grounded_first":
+            found = self._rank_first(base, parts, context, fresh, F)
+            if found is not None:
+                return found
+        return self._rank_all(base, parts, context, fresh, F)
+
+    def _rank_first(self, base, parts, context, fresh, F):
+        """``_rank`` with select = "specific" and grounded_first, when the focus is filled before every candidate
+        has been listed: exactly the ranking ``_rank_all`` gives, without building the candidates that get no place.
+
+        What is present ranks first. After it the generalisations come in rounds: in each round one frame for each
+        place of the context, the most specific first (the smallest extension, then the most active, then a frame
+        that exists before one to be recruited); when the frames are used up, one category for each present unit in
+        the same way. A mind that has lived much has thousands of candidates for a moment and the focus has F
+        places: the candidates are ordered as arrays, and only those whose turn comes are built. Returns None (then
+        ``_rank_all``) when something present is itself a generalisation, or when every candidate has been listed
+        and the focus is not full (then all of them are read, and what is called to mind too)."""
+        S, cfg = self.S, self.cfg
+        inc, out = S.inc, S.out
+        for unit in base:                                  # (as _present_fills) what is present has no rank of its
+            if (unit, ABSTRACT) in inc:                    # own among the generalisations and keeps its activation
+                return None
+            if (unit, PART, -1) in out and any((p, ABSTRACT) in inc for p in parts_of(self, unit)):
+                return None
+        scored = sorted(((0, 0, 0, 0), -a, 0 if unit in fresh else 1, 0, (unit,), unit)
+                        for unit, a in base.items() if a > 0.0)
+        ranked = [(key, -neg) for _, neg, _, _, _, key in scored[:F]]
+        gens: Dict[int, Tuple[int, float]] = {}
+        virtual: Dict[Tuple[int, ...], Tuple[float, int, float]] = {}
+        grounded = dict(base)
+        if len(scored) >= F:
+            return ranked, gens, virtual, grounded
+        k = cfg.k
+        known: Dict[int, Optional[tuple]] = {}
+
+        def categories(unit: int):
+            """(categories, expectations) of a unit as arrays, where the expectation exceeds 1/2 (categories_of)."""
+            if unit not in known:
+                ties = out.get((unit, ABSTRACT, 0))
+                if not ties:
+                    known[unit] = None
+                elif len(ties) <= SMALL:
+                    pairs = [(c, e) for c, e in categories_of(self, unit) if e > 0.5]
+                    known[unit] = (np.array([c for c, _ in pairs], dtype=np.int64),
+                                   np.array([e for _, e in pairs], dtype=np.float64)) if pairs else None
+                else:
+                    ids, dst = S.out_ids((unit, ABSTRACT, 0))
+                    w = masses(self, ids)
+                    e = expectations(w[0], w[1], k)
+                    keep = e > 0.5
+                    known[unit] = (dst.numpy()[keep], e[keep]) if keep.any() else None
+            return known[unit]
+
+        extension = S.abstract_sizes()                     # len(inc[(c, ABSTRACT)]) of every unit, as one array
+
+        def sizes_of(cats: np.ndarray) -> np.ndarray:
+            return extension[cats]
+
+        def frames(pos: int, where, cats, es, others: float, a_part: float):
+            """The frames of one place in order: (key, activation, expectation, whether it exists)."""
+            a_frame = (others + a_part * (2.0 * es - 1.0)) / len(parts)
+            sizes, neg = sizes_of(cats), -a_frame
+            turn = np.lexsort((neg, sizes)).tolist()
+            i = 0
+            while i < len(turn):
+                j = i + 1
+                while j < len(turn) and sizes[turn[j]] == sizes[turn[i]] and neg[turn[j]] == neg[turn[i]]:
+                    j += 1
+                tied = []                                  # equal so far: a frame that exists first (by its unit),
+                for t in turn[i:j]:                        # then the frames to be recruited (by their parts)
+                    category = int(cats[t])
+                    if where is not None:
+                        filled = list(parts)
+                        for q in where:
+                            filled[q] = category
+                        frame_parts = tuple(filled)
+                    else:
+                        frame_parts = parts[:pos] + (category,) + parts[pos + 1:]
+                    frame = S.tuple_index.get(frame_parts)
+                    if frame is None:
+                        if cfg.typed_frames:
+                            tied.append(((1, frame_parts), frame_parts, float(a_frame[t]), float(es[t]), False))
+                    else:
+                        tied.append(((0, frame), frame, float(a_frame[t]), float(es[t]), True))
+                if len(tied) > 1:
+                    tied.sort(key=lambda found: found[0])
+                for _, key, a, e, exists in tied:
+                    yield key, a, e, exists
+                i = j
+
+        if context is not None:
+            places = []
+            for pos, part in enumerate(parts):
+                found = categories(part) if part in base else None
+                if found is None:
+                    continue
+                where = None
+                if cfg.bind_repeats:
+                    if part in parts[:pos]:
+                        continue                           # the slot of this unit was built at its first position
+                    where = [j for j, q in enumerate(parts) if q == part]
+                others = sum(base.get(p, 0.0) for j, p in enumerate(parts) if j != pos)
+                places.append(frames(pos, where, found[0], found[1], others, base.get(part, 0.0)))
+            while places:                                  # one round: the next frame of every place, in order
+                left = []
+                for place in places:
+                    entry = next(place, None)
+                    if entry is None:
+                        continue
+                    left.append(place)
+                    key, a, e, exists = entry
+                    if exists:
+                        a = max(0.0, a)
+                    if a > 0.0:
+                        ranked.append((key, a))
+                        if exists:
+                            gens[key] = (context, e)
+                            grounded[key] = a
+                        else:
+                            virtual[key] = (a, context, e)
+                        if len(ranked) >= F:
+                            return ranked, gens, virtual, grounded
+                places = left
+        # the categories of what is present: their activation is summed over the units in the order of ``base``
+        global _RANK_SCRATCH
+        if _RANK_SCRATCH.size < S.n_units:
+            _RANK_SCRATCH = np.zeros(max(S.n_units, 2 * _RANK_SCRATCH.size), dtype=np.float64)
+        scratch, held = _RANK_SCRATCH, []
+        try:
+            for unit, a_u in base.items():
+                found = categories(unit)
+                if found is None:
+                    continue
+                cats, es = found
+                running = np.minimum(1.0, scratch[cats] + a_u * (2.0 * es - 1.0))
+                scratch[cats] = running
+                held.append((unit, cats, es, running))
+            if not held:
+                return None
+            every = np.concatenate([cats for _, cats, _, _ in held])
+            whose = np.concatenate([np.full(len(cats), unit, dtype=np.int64) for unit, cats, _, _ in held])
+            first = np.lexsort((whose, every))             # a category has its rank from the smallest unit it is of
+            owned, at = np.unique(every[first], return_index=True)
+            owner = whose[first][at]
+            turns = []
+            for unit, cats, es, running in sorted(held, key=lambda found: found[0]):
+                turns.append((unit, cats, np.lexsort((cats, -running, sizes_of(cats))).tolist()))
+            number = 0
+            while True:
+                more = False
+                for unit, cats, turn in turns:
+                    if number >= len(turn):
+                        continue
+                    more = True
+                    category = int(cats[turn[number]])
+                    if int(owner[np.searchsorted(owned, category)]) != unit:
+                        continue
+                    a = float(scratch[category])
+                    if a > 0.0:
+                        best = None
+                        for other, c2, e2, _ in held:      # the instance it is most surely a category of
+                            hit = np.flatnonzero(c2 == category)
+                            if hit.size and (best is None or float(e2[hit[0]]) > best[1]):
+                                best = (other, float(e2[hit[0]]))
+                        ranked.append((category, a))
+                        gens[category] = best
+                        grounded[category] = a
+                        if len(ranked) >= F:
+                            return ranked, gens, virtual, grounded
+                if not more:
+                    return None                            # every candidate listed and the focus is not full
+                number += 1
+        finally:
+            for _, cats, _, _ in held:
+                scratch[cats] = 0.0
+
+    def _rank_all(self, base, parts, context, fresh, F):
+        """``_rank`` in full: every candidate built and ordered, and the EXPECT(lag 0) spreading."""
         S, cfg = self.S, self.cfg
         # derived activation: categories of what is present, frames in which a category stands in
         derived: Dict[int, float] = {}

@@ -515,6 +515,22 @@ def _value_keys(mind, x: int, targets, fixed, relational: bool, starts: bool, ex
     alike = inline and relational and category is not None and getattr(mind.cfg, "paradigmatic", False)
     replies = relational and getattr(mind.cfg, "replies", False)
     inherits = relational and getattr(mind.cfg, "inherit", False)
+    memo = mind.__dict__.get("_read_memo")             # the same member, values and frame are read more than once in
+    if memo is not None:                               # a moment (under each trust, and by every frame of the place):
+        memo_key = ("value_keys", x, tuple(targets), tuple(fixed), relational, starts, exact, category, alike,
+                    replies, inherits)                 # nothing is written while the memo is open, and no caller
+        hit = memo.get(memo_key)                       # changes the lists it is given
+        if hit is not None:
+            return hit
+        found = _value_keys_read(mind, x, targets, fixed, relational, starts, exact, category, alike, replies, inherits)
+        memo[memo_key] = found
+        return found
+    return _value_keys_read(mind, x, targets, fixed, relational, starts, exact, category, alike, replies, inherits)
+
+
+def _value_keys_read(mind, x: int, targets, fixed, relational: bool, starts: bool, exact: bool,
+                     category: Optional[int], alike: bool, replies: bool, inherits: bool) -> List[List[int]]:
+    """``_value_keys``, read from the substance (its switches already read)."""
     if exact:
         named: Dict[int, int] = {}
         if relational:
@@ -1152,8 +1168,21 @@ def bound_frames(mind, unit: int) -> List[Tuple[int, float, tuple]]:
     if not kinds[unit] & COMPOSED or kinds[unit] & SLOTTED or not getattr(mind.S, "bind_repeats", False) \
             or not (paradigmatic or replies):
         return []
+    inherit = getattr(mind.cfg, "inherit", False)
+    memo = mind.__dict__.get("_read_memo")             # read under each trust of a moment: the same frames (they do
+    if memo is not None:                               # not depend on the trust; nothing is written meanwhile)
+        memo_key = ("bound_frames", unit, paradigmatic, replies, inherit)
+        hit = memo.get(memo_key)
+        if hit is None:
+            hit = memo[memo_key] = tuple(_bound_frames_read(mind, unit, kinds, paradigmatic, replies, inherit))
+        return list(hit)
+    return _bound_frames_read(mind, unit, kinds, paradigmatic, replies, inherit)
+
+
+def _bound_frames_read(mind, unit: int, kinds, paradigmatic: bool, replies: bool, inherit: bool):
+    """``bound_frames``, read from the substance."""
     relations = ([ALIKE] if paradigmatic else []) + ([REPLY] if replies else []) + \
-        ([INHERIT] if getattr(mind.cfg, "inherit", False) else [])
+        ([INHERIT] if inherit else [])
     parts = parts_of(mind, unit)
     shortest = 2 if replies else len(parts) - 1          # F31 alone binds the last item only
     every = []

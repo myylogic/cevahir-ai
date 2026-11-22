@@ -430,6 +430,7 @@ class Substance:
         self.frame_of: Dict[Tuple[int, Tuple[int, ...]], int] = {}     # same key -> induced frame unit
         self._out_ids: Dict[Tuple[int, int, int], tuple] = {}  # out key -> (count, ids, dst) as tensors
         self._parts: Dict[int, tuple] = {}     # composed unit -> (its PART list, its length, parts), see ``parts``
+        self._abstract_in = None               # (ties counted, ABSTRACT in-degree of every unit), ``abstract_sizes``
 
     def _index_tie(self, tie: int, src: int, dst: int, form: int, lag: int, lookup: bool = True) -> None:
         # Compact indices (exact: the same ids in the same order). A tie's key is one packed integer instead of a
@@ -467,6 +468,30 @@ class Substance:
         self._out_ids[key] = (len(ties), ids, dst)
         return ids, dst
 
+    def abstract_sizes(self) -> np.ndarray:
+        """For every unit, how many ABSTRACT ties come in to it (the size of a category's extension):
+        ``len(inc[(unit, ABSTRACT)])`` of every unit as one array (at least n_units long; read it, do not write).
+        Kept between moments: a tie is born at the end of the table, so the count is brought up to date with the
+        ties born since it was taken; whatever takes ties out of ``inc`` (``_forget_rows``, ``_clear_indices``)
+        drops it, and it is counted again from the tensors."""
+        v, n = self._np(), self.n_ties
+        hit = self.__dict__.get("_abstract_in")
+        if hit is None or hit[0] > n:
+            keep = v.alive[:n] & (v.form[:n] == ABSTRACT)
+            count = np.bincount(v.dst[:n][keep], minlength=max(self._cu, 1)).astype(np.int64, copy=False)
+            self._abstract_in = (n, count)
+            return count
+        seen, count = hit
+        if count.size < self.n_units:
+            count = np.concatenate((count, np.zeros(max(self._cu, self.n_units) - count.size, dtype=np.int64)))
+        if seen < n:
+            keep = v.alive[seen:n] & (v.form[seen:n] == ABSTRACT)
+            if keep.any():
+                np.add.at(count, v.dst[seen:n][keep], 1)
+        if seen < n or count is not hit[1]:
+            self._abstract_in = (n, count)
+        return count
+
     def _np(self) -> _Arrays:
         """numpy views of every array (see ``_Arrays``), taken again after growth replaced an array."""
         v = self._npv
@@ -489,7 +514,7 @@ class Substance:
     _UNIT_ARRAYS = ("u_kind", "u_channel", "u_symbol", "u_arity", "u_birth", "u_use", "u_alive")
     _TIE_ARRAYS = ("t_src", "t_dst", "t_form", "t_lag", "t_cls", "t_row", "t_use", "t_last", "t_birth", "t_alive")
     _ROW_ARRAYS = ("r_tie", "r_was")
-    _CACHES = ("_out_ids", "_views", "_class_ids", "_npv", "_parts", "_slot_keys", "_lut")
+    _CACHES = ("_out_ids", "_views", "_class_ids", "_npv", "_parts", "_slot_keys", "_lut", "_abstract_in")
 
     def __getstate__(self):
         """Saved and copied without the spare capacity (the rows beyond n_units / n_ties / n_rows are zeros); the
@@ -514,7 +539,7 @@ class Substance:
         touched = state.pop("_touched", None)    # the moment's touched ties as kept before ``_touch`` (a set)
         state.pop("_views", None)
         self.__dict__.update(state)
-        self._out_ids, self._npv, self._parts = {}, None, {}
+        self._out_ids, self._npv, self._parts, self._abstract_in = {}, None, {}, None
         self.__dict__.setdefault("_touch", [])
         self.__dict__.setdefault("_touch1", sorted(touched) if touched else [])
         self.__dict__.setdefault("version", 0)
@@ -1220,6 +1245,7 @@ class Substance:
     def _forget_rows(self, units0: int, ties0: int) -> None:
         """Take the units >= units0 and the ties >= ties0 (the newest rows) out of every cache."""
         v = self._np()
+        self._abstract_in = None
         for unit in range(units0, self.n_units):
             if not v.ualive[unit]:
                 continue
