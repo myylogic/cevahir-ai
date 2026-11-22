@@ -49,6 +49,10 @@ Commands (Turkish, with English aliases):
                                     often each held against what it claimed) and where its last faults were: the
                                     context, the word it said or would have said, what was lived, the way that
                                     claimed it
+    !deney               / !trials  (with --ac trials) the trials of its own ways of reading: which it uses and
+                                    which sleep, how often each did better or worse than the mind without it, every
+                                    way it took into use or put away, and the last cases (the context, what came,
+                                    what it would have said with the way and without it)
     !ag                  / !net     what this machine can reach: one small request to each service the mind reads
                                     from, with the reason when one cannot be reached (proxy, refusal, no network)
     !oku_url <adres> ... / !read_url  web pages by their addresses, read as documents are: fetched at the same time,
@@ -184,7 +188,7 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
 STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
            "told_apart", "open_claims", "look", "think", "faults",           # is raised with them; --ac turns one on
            "silent_claims", "find_out", "wonder", "echo_exact", "families", "lived_apart",
-           "asked_place", "whole_kinds")
+           "asked_place", "whole_kinds", "trials", "built_relations")
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -1410,7 +1414,8 @@ def main(argv=None) -> None:
                     "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own "
                     "settings. Also the mechanisms that were measured and are off by default (inherit, witness, "
                     "difference, urge, known, wholes, told_apart, open_claims, look, think, faults, silent_claims, "
-                    "find_out, wonder, echo_exact, families, lived_apart, asked_place, whole_kinds), for a loaded or a new mind")
+                    "find_out, wonder, echo_exact, families, lived_apart, asked_place, whole_kinds, trials, built_relations), for "
+                    "a loaded or a new mind")
     ap.add_argument("--pencere", type=int, help="how many items a NEW mind holds at once (its window, 3 to 15; "
                     "default 7); a mind keeps the window it has")
     args = ap.parse_args(argv)
@@ -1459,7 +1464,8 @@ def main(argv=None) -> None:
         if k in STUDIED and not getattr(mind.cfg, k, False):
             setattr(mind.cfg, k, True)
             print("  açıldı: %s (ölçülmüş, varsayılan olarak kapalı bir mekanizma; senin isteğinle açıldı)" % k)
-    for need, wants in (("find_out", ("faults", "look")), ("wonder", ("look",)), ("silent_claims", ("faults",))):
+    for need, wants in (("find_out", ("faults", "look")), ("wonder", ("look",)), ("silent_claims", ("faults",)),
+                        ("built_relations", ("trials",))):
         for k in wants if getattr(mind.cfg, need, False) else ():
             if not getattr(mind.cfg, k, False):
                 setattr(mind.cfg, k, True)
@@ -1736,6 +1742,13 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                         for topic, (words_, reality) in zip(topics, thoughts(session, topics)):
                             print("  %s: %s  (gerçeklik %.2f)" % (topic, " ".join(words_) or "(sessiz)", reality))
                         print("  kopyalar düşündü: zihin bunları yaşamadı")
+                elif cmd in ("deney", "trials"):          # F57: the trials of its own ways of reading
+                    from . import deney
+                    if not getattr(session.mind.cfg, "trials", False):
+                        print("  (deney kapalı: --ac trials ile açılır)")
+                    else:
+                        for line in deney.report(session.mind):
+                            print(line)
                 elif cmd in ("hata", "faults"):           # F49: what it learned about its own ways, its last faults
                     from . import hata
                     if not getattr(session.mind.cfg, "faults", False):

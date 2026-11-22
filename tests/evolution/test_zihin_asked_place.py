@@ -23,6 +23,9 @@ What is pinned here
   asked place, and the thing known that goes on to the asked word), both are kept, and the second makes the thing
   the answer's topic (found with this switch on in every test: the answer had stopped at the value).
 * The claim is a way of reading with a record of its own (F49), named in the mind's chain.
+* A thing that was asked one kind of question before is asked another: the question being asked now is not
+  something told of the thing (nothing has followed it yet), so the earlier question stays what was asked of it and
+  is not read as what is known. (Found by measuring: every such thing answered with the earlier question's word.)
 """
 from __future__ import annotations
 
@@ -170,3 +173,19 @@ def test_the_claim_is_a_way_with_a_record_of_its_own():
     copy.reply("aslan ne yer ?", limit=30)
     ways = {claim[0][1] for claims in copy.mind.claimed.values() for claim in claims}
     assert ("g", read.ASKED) in ways
+
+
+def test_a_thing_asked_one_kind_before_is_asked_another():
+    on = raised(asked=("yer",), known=True, asked_place=True)
+    for _ in range(2):                                     # a second kind, watched about six other things
+        for x in THINGS[6:12]:
+            on.watch("%s ne içer ?" % x, "%s ." % fact(x, "içer"))
+    on.close_turn()
+    for x in THINGS[:6]:                                   # asked "yer" before; now asked "içer"
+        assert asks(on, "%s ne içer ?" % x) == fact(x, "içer")     # (the error: "yer", the earlier question's word)
+    for x in THINGS[6:12]:                                 # and the other way round
+        assert asks(on, "%s ne yer ?" % x) == fact(x, "yer")
+    m = Session(on.mind.clone())
+    m.listen("inek ne içer ?", IMITATED)                   # as the question is heard: "ne" is still what was asked
+    mind = m.mind
+    assert read.only_asked(mind, unit(mind, "inek"), unit(mind, "ne")) is True

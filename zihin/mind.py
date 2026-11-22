@@ -119,6 +119,17 @@ class Config:
                                     # in summary (wholes as their forms, replies as pointers), and an utterance never
                                     # answered whose summary was lived is heard in it and answered part by part, the
                                     # working state set aside for each part (zihin/butun.py)
+    trials: bool = False            # F57 (Trials): at a context where the mind decided and which then goes on from
+                                    # outside, before what came is taken in, the same context is read once more as
+                                    # the mind decides it and once more with each of its ways of reading changed
+                                    # (on if off, off if on); what came says which was better, each way has a record
+                                    # of that, and the mind's own configuration follows the record (zihin/deney.py)
+    built_relations: bool = False   # F58 (Built Relations; with trials): where the mind did not say what then came,
+                                    # a chain of two of its own relations that names it for a filler of the context
+                                    # ("what is known of it, then what stands at the asked place of that") is a
+                                    # relation to try; tried like any way (F57), and in use it is a relation of a
+                                    # frame like the others: the members vouch for it; a relation it built and
+                                    # took into use is a step of the next chain (read.built_value, deney.propose)
     whole_kinds: bool = False       # F56 (The Kind of a Whole; with wholes): the form of a whole says which wholes
                                     # stand in it also where its answer reads as their replies in more than one
                                     # order ("walk twice and walk" answers like "walk thrice"): without it such a
@@ -353,6 +364,14 @@ class Mind:
         self.claimed: Dict[int, tuple] = {}          # F49: context -> what each way claimed there, not yet met by
                                                      # reality: (ways, the claimed unit, whether it was said)
         self.faults: List[dict] = []                 # F49: the last claims that failed (a record for the report)
+        self.called: Dict[int, int] = {}             # F57: the contexts at which it decided, until what follows is shown
+        self.trial_base: Dict[object, bool] = {}     # F57: its ways as they stood when the trials began
+        self.trial_changes: List[dict] = []          # F57: every way it took into use or put away, and on what record
+        self.trial_cases: List[dict] = []            # F57: the last cases in which a way made a difference
+        self.trial_mark: Dict[object, tuple] = {}    # F57: a sleeping way's record when the configuration last changed
+        self.relations: tuple = ()                   # F58: the relations it built itself that are in use (chains)
+        self.relations_tried: List[tuple] = []       # F58: those it has proposed and tries
+        self.relation_paths: List[tuple] = []        # F58: every chain it ever proposed (a chain's code is its place)
         self._held_back: List[tuple] = []            # F49: (context, moment) of the claims it held back, not yet
                                                      # counted as answered or as still waiting
         self.voice: Dict[int, tuple] = {}            # F24: context -> (voice that spoke, every voice heard), as
@@ -428,6 +447,9 @@ class Mind:
             channel = self.ch.id(SELF_CHANNEL)
             own = ACTED if any(prov == ACTED for _, prov in items) else IMAGINED   # speaking aloud, or thinking
             percepts.append((self._atom(channel, SELF_SYMBOL), 1.0, own, channel))
+        if self.called and getattr(cfg, "trials", False):  # F57: what follows a context it decided at is shown:
+            from . import deney                            # its ways are tried on it before what came is taken in
+            deney.trial(self, items)
         learn_follow(self, percepts)                       # step 5 for the previous moment
         learn_value(self, percepts)                        # L5: a value signal reaches every step of the episode
         if self.claimed and getattr(cfg, "faults", False):   # F49: what its ways claimed here meets what is lived
@@ -506,6 +528,9 @@ class Mind:
                 acts = []                                  # F50: what it could not find out it does not assert
                 from . import hata
                 hata.withheld(self, self.context)
+            if not listening and getattr(cfg, "trials", False):
+                from . import deney
+                deney.called(self, acts)                   # F57: it decided here; kept until what follows is shown
             self._unknowing(items, acts, listening)
             if sought is not None:
                 self.unknown = 0.0                         # it is looking: that is what it feels, not not knowing
@@ -1141,7 +1166,9 @@ class Mind:
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
                   "unknown", "voice", "witnesses", "episode_start", "company", "topic", "open_where", "taking",
-                  "heard", "about", "claimed", "faults", "_held_back", "open_plain", "met_once", "wondered")
+                  "heard", "about", "claimed", "faults", "_held_back", "open_plain", "met_once", "wondered",
+                  "called", "trial_base", "trial_changes", "trial_cases", "trial_mark", "relations",
+                  "relations_tried", "relation_paths")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}
@@ -1161,6 +1188,9 @@ class Mind:
         theta = self.knob["theta"]
         for name, value in entry.undo.items():
             setattr(self, name, value)
+        if getattr(self.cfg, "trials", False):
+            from . import deney
+            deney.sync(self)                               # F57: its ways as its record of their changes says
         if self.knob["theta"] >= 1e8:                      # the undone moment was lived while listening: whoever spoke
             self.knob["theta"] = theta                     # had raised the act threshold for that moment only and has
                                                            # set it back since; the state before the moment is the

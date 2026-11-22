@@ -443,7 +443,8 @@ def grounded(made) -> bool:
     form or a similar situation rest on what others share."""
     for ways, e0, _ in made:
         kind = ways[1]
-        if e0 > 0.5 and len(kind) == 2 and kind[0] in ("g", "aile") and kind[1] in GROUNDED:
+        if e0 > 0.5 and len(kind) == 2 and kind[0] in ("g", "aile") and (
+                kind[1] in GROUNDED or (isinstance(kind[1], int) and kind[1] <= -100)):   # (F58: a built relation)
             return True
     return False
 

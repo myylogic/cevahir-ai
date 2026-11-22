@@ -173,6 +173,9 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
                           ("heard", lambda: None), ("thinking", lambda: None), ("about", lambda: None),
                           ("claimed", dict), ("faults", list), ("_held_back", list), ("open_plain", dict),
                           ("met_once", dict), ("wondering", lambda: None), ("wondered", dict),
+                          ("called", dict), ("trial_base", dict), ("trial_changes", list), ("trial_cases", list),
+                          ("trial_mark", dict),
+                          ("relations", tuple), ("relations_tried", list), ("relation_paths", list),
                           ("company", lambda: None), ("topic", lambda: None)):   # by Turkish rules; the present run
         if not hasattr(mind, name):                                 # is taken to begin at the moment of loading;
             setattr(mind, name, default())                          # no one is present at loading, F33)

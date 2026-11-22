@@ -485,6 +485,40 @@ At each moment, roughly each word, the mind lives these steps:
   their replies come: it is now given also there, and the dialogue's summary stays unconcluded. Measured: the four
   commands exact with it (each split's life lived with the switch off and on); a small world reproduces the error
   and its correction (a test).
+- **Trials (F57, off by default).** Until here which ways of reading a mind uses was decided outside it: a
+  mechanism was written after a failure was traced, measured by its builders and turned on by hand. Here that
+  decision is the mind's, taken as its builders took it: a controlled experiment on what it lives, one thing
+  changed. A context at which the mind decided, and which then goes on from outside (someone shows the answer), is
+  read again before what came is taken in: once as the mind decides it (the same reading and race, run dry) and once
+  for each of its ways with that one way changed. Where the two differ the way gets one experience on a tie of
+  its own (better where the configuration with it said what came; saying what came is better than silence, silence
+  better than another word). A sleeping way is taken into use when it did better more often than worse by more than
+  one experience (W+ / (W+ + W- + k) > 1/2: F50's rule), a way in use is put away by the same rule the other way
+  round, and a way in use stays on trial. One change at a time: two ways that mend the same failure are proven by
+  the same cases and nothing was shown about the two together, so one is taken and the trials of the sleeping ways
+  begin again against the new configuration. The configuration is the mind's own state (saved with it, undone
+  with a moment), and every case and change is kept with what each configuration would have said (`!deney`).
+  Measured (5 seeds, a curriculum of eight kinds of question in the teacher's loop): the mind as it was answers 2
+  of 320 questions about fresh things; with trials it takes the asked place and frames of frames into use in every
+  life and answers the five kinds read of the thing itself (200 of 200), a sixth at first sight (40 of 40); what it
+  was taught before is answered after every change. In a world where answers name the thing it takes other ways
+  (F41, F53, F52, F37) and answers 200 of 200, where the setting made by hand answers 194. A way that does harm
+  where it is tried is not taken (0 of 5). No way was put away in any life measured: where a claim failed it was
+  stopped where it is made, after one failure, by the frame's members, the family's agreement and F49.
+- **Built Relations (F58, off by default; with trials).** Where the configuration did not say what came, the
+  failure is looked into before what came is taken in: for the filler of each one-place frame of the context,
+  every chain of two of the mind's relations is read, and one that names what came is a relation to try (the steps:
+  how its sequences went on, what it goes on with, what it was answered with, what stands where it stands, what a
+  known sequence holds at the asked place, the things known of it). A proposed chain is a way like any other
+  (F57); in use it is a relation of a frame, vouched for by the frame's members like the relations the mind was
+  built with. A relation it built is a step of the next chain, so a chain of three is found as a chain of two once
+  the shorter one has proven itself, and so on: the relations grow out of the ones that worked. Measured in the
+  same curriculum: asked what was read only of a thing's class, the mind builds "what is known of it, then what
+  stands at the asked place of that" in every life (0 of 40 -> 40 of 40 for fresh things; the same structure met
+  again is learned in one round instead of three); asked what was read only of the class's order it builds the
+  chain of three out of that one (0 of 40 -> 40 of 40). The mind set by hand with the mechanisms of the sections
+  before answers 8 of those 120 questions (and says a wrong word to 14). Nobody wrote either relation. What is still given: the primitive
+  relations, that a new relation is a chain, the experiment and what counts as better.
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
@@ -737,6 +771,8 @@ The models were small and the data scarce; with far more data the gap may close.
 | Relations Lived Apart | Ayrı Yaşanmış İlişkiler | F54, off by default | held-out validation (a rule is tested on evidence that did not make it); circular evidence |
 | The Asked Place | Sorulan Yer | F55, off by default | question answering by aligning a question with a known statement; analogy as structure alignment; the wh-word as the one unaligned slot |
 | The Kind of a Whole | Bütünün Türü | F56, off by default | constituency (what a phrase is made of) kept apart from its denotation; attachment ambiguity |
+| Trials | Kendi Üzerinde Deney | F57, off by default | model selection by the learner itself; controlled (single-variable) experiments; counterfactual evaluation of one's own policy on logged situations; algorithm configuration; metareasoning |
+| Built Relations | Kurulan İlişkiler | F58, off by default (with trials) | program / relation induction by composition; multi-hop inference found from a failure; library learning (what was built becomes a building block) |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

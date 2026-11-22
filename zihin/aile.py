@@ -228,8 +228,8 @@ def claims(mind, unit: int, trust: Optional[torch.Tensor] = None):
     frame's category, [(kind, e, whether it named nothing), ...] for the relations of the filler's own record, the
     thing known of the filler that LINK names or None, {target: [(e, kind), ...]} with every kind that names it)),
     or ({}, None). Read once a moment."""
-    from .read import ALIKE, ASKED, INHERIT, KNOWN, NEXT, REPLY, SELF, START, _moment_memo, asked_place, \
-        frame_category, resolve
+    from .read import ALIKE, ASKED, BUILT, INHERIT, KNOWN, NEXT, REPLY, SELF, START, _moment_memo, asked_place, \
+        built_path, built_value, frame_category, resolve
     memo = _moment_memo(mind)
     key = ("aile", unit, id(trust) if trust is not None else None)
     if key in memo:
@@ -259,11 +259,13 @@ def claims(mind, unit: int, trust: Optional[torch.Tensor] = None):
             target = filler
         elif kind == ASKED:                                # F55: read against the context's own run
             target = asked_place(mind, filler, unit, first[0], trust)
+        elif kind <= BUILT:                                # F58: a relation the mind built, read for this filler
+            target = built_value(mind, built_path(mind, kind), filler, unit, first[0], fixed, category, trust)
         elif kind < 0:
             target = resolve(mind, kind, filler, fixed, category)
         else:
             target = kind
-        if kind in (NEXT, START, ALIKE, REPLY, INHERIT, LINK, ASKED):
+        if kind in (NEXT, START, ALIKE, REPLY, INHERIT, LINK, ASKED) or kind <= BUILT:
             own.append((kind, e, target is None))
         if target is None:
             continue

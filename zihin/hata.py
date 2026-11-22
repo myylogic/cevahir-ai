@@ -481,7 +481,12 @@ def way_name(mind, ways) -> str:
     if last == ALL:
         return "her okuma"
     if last[0] == "g":
-        name = "genelleme: %s" % NAMES.get(last[1], "ilişki %s" % (last[1],))
+        kind = last[1]
+        if isinstance(kind, int) and kind <= -100 and -100 - kind < len(getattr(mind, "relation_paths", ())):
+            named = "kendi kurduğu: " + " sonra ".join(NAMES.get(r, str(r)) for r in mind.relation_paths[-100 - kind])
+        else:                                              # (F58: a relation the mind built, by its steps)
+            named = NAMES.get(kind, "ilişki %s" % (kind,))
+        name = "genelleme: %s" % named
         if len(last) == 3:
             name += " (çerçeve: %s)" % _shown(mind, last[2])
         return name

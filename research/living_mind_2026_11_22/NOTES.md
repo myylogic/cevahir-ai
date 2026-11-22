@@ -2270,3 +2270,435 @@ world in which the error and its correction are reproduced).
     python research/living_mind_2026_11_22/t_scan_kinds.py wrong  --scan FOLDER
     python research/living_mind_2026_11_22/t_scan_kinds.py sample --scan FOLDER --split length --test 200
     python research/living_mind_2026_11_22/t_scan_kinds.py run    --scan FOLDER --split length
+
+## 21. A mind that tries its own ways of learning: trials (F57), relations it builds itself (F58), and a fault of F55 they found
+
+### 21.1 What was asked
+
+The owner, in this round: a result of 100% on a benchmark is not proof that the architecture is new; only the one
+who builds it can know. The mind is not to be a program that runs rules decided beforehand: it is to widen its own
+relations, build new ones, follow the chain of computation behind its decisions and change its structure through
+its errors. Its learning is not to stop at updating what it knows: it should look into the chain of computation of
+its own failures, develop other ways of learning, compare them in controlled experiments, and carry what works
+into its own architecture for good; and it must be measured whether what it learned before is kept, and which
+limits each change removes. "We will not have written the hypothesis; we will have built the learning that makes
+it possible."
+
+### 21.2 What was decided outside the mind until now, said plainly
+
+Sections 11 to 20 of these notes were made in one way. The mind failed at something; its builders traced the
+failure in the mind's own readings, saw what kind of reading would have found the answer, wrote that reading as a
+mechanism (F41 what is known of a thing, F53 frames of frames, F54 relations lived apart, F55 the asked place, F56
+the kind of a whole), measured it in worlds they made, and turned it on by hand (`--ac`). Inside each mechanism
+the mind decides by what it lived: which relation holds in which frame is for the frame's members to say, and how
+far each way of reading deserves belief is the record of that way (F49). But *which ways of reading there are* and
+*which of them this mind uses* were decided outside it. A world that is answered because a mechanism was written
+after that world's failure was analysed shows what its builders learned, not what the mind did; the four wrong
+answers of the published SCAN splits (section 20) and the value-only answers of section 18 are of that kind, and
+so is every "0 of 40 -> 40 of 40" above.
+
+What changes in this section:
+
+* **Which ways it uses is the mind's own decision**, taken as its builders took it: a controlled experiment on
+  what it lives, one thing changed (F57).
+* **The relations themselves can be the mind's own**: where it fails it finds chains of its relations that would
+  have named what came, tries them, and keeps those that prove themselves; a relation it built is a building
+  block of the next (F58). Nobody wrote "what is known of what is known of a thing, read at the asked place".
+
+What is still decided outside it, so that nothing more is claimed than there is: the core (evidence, frames, the
+race); the primitive relations a chain is made of; that a new relation is a *chain* of relations; the experiment
+itself and what counts as better (saying what came is better than saying nothing, saying nothing is better than
+saying another word). The mind chooses among ways, and composes relations; it does not yet invent a primitive.
+
+### 21.3 F57 Trials (`Config.trials`, off by default; `zihin/deney.py`)
+
+* **A situation.** A context at which the mind decided what to say (it was its turn), and which then goes on from
+  outside on a channel it speaks on: someone shows what the answer was (the teacher's loop, a correction, a
+  dialogue watched after its own attempt).
+* **The experiment.** At that moment, before what came is taken in, the mind reads the same context once more as
+  it decides it (the reading it speaks with, the same race, run dry: nothing is said, set or kept) and once more
+  for each of its ways with that one way changed: on if it is off, off if it is on. The memory is the same, the
+  situation is the same, one thing differs. What came then says which was better.
+* **The record.** Where the two differ the way gets one experience on a tie of its own, on the mind's own channel
+  `deney`: W+ where the configuration with the way did better, W- where the one without it did. Nothing is written
+  where they say the same.
+* **The configuration follows.** A sleeping way is taken into use when W+ / (W+ + W- + k) > 1/2 (it did better
+  more often than worse by more than one experience: F50's rule; one lucky hit is not knowledge). A way in use is
+  put away by the same rule the other way round. A way in use stays on trial for as long as the mind lives.
+* **One change at a time.** Every way was tried alone against the configuration of that moment; two ways that each
+  mend the same failure both look proven, and nothing was shown about the two together. So the configuration
+  changes by one way (the firmest record; among equals the first in the mind's list), and the trials of the ways
+  that sleep begin again from that moment: what they did against a configuration that is no more says nothing
+  about the one there is (the evidence stays in the tie; the record counts from the change).
+* **A sleeping way is read as a way in use would be.** With F49 every claim is read with the record of its way,
+  and a way never judged is read by how ways like it have fared; where the ways in use have been failing (which is
+  when another is needed) a sleeping way would be read as one of them and could never show what it is worth. What
+  a sleeping way alone claims in its trial is therefore settled by what came, on that way's own F49 ties, as a
+  claim the mind made and did not say is settled.
+* **Kept.** The configuration is the mind's own state: saved and loaded with it, taken back when a moment is
+  undone. Every case in which a way made a difference and every change are kept with the context, what came, and
+  what each configuration would have said: why the mind reads as it does can be read from its own record (the
+  chat's `!deney`).
+
+The ways on trial: F41 (`known`), F53 (`families`), F54 (`lived_apart`), F55 (`asked_place`), F52 (`echo_exact`),
+F37 (`inherit`), the witness's reliability (`witness`), F39 (`difference`), and every relation the mind built.
+
+### 21.4 F58 Built Relations (`Config.built_relations`, off by default; with trials)
+
+Where the configuration did not say what came, the failure is looked into before what came is taken in: for the
+filler of each one-place frame of the context, every chain of two of the mind's relations is read, and a chain
+that names what came is a relation to try. The steps are the mind's relations: how the sequences that began with
+an item went on (START), what it goes on with (NEXT), what it was answered with (REPLY), what stands where it
+stands (ALIKE), what a known sequence holds at the asked place (ASKED), and the things known of it (KNOWN: a set;
+the next step keeps those it names something for). A chain is read for the filler: the first step for it, each
+later step for what the step before named, standing where the filler stands in the context.
+
+A proposed chain is a way like any other (F57): tried in every later situation against the configuration, taken
+into use when its record proves it. In use it is a relation of a frame like the others: it counts for a member of
+a frame where it names the value that member went on with, so a frame claims by it only what its own members
+vouch for; with F53 a family of frames carries it to a new frame.
+
+**A relation it built is a step of the next chain.** The steps a chain is made of are the primitive relations and
+the relations the mind built and took into use; so a chain of three is found, as a chain of two, once the shorter
+one has proven itself, and so on to any length. The search does not grow with the length: it is guided by what
+worked.
+
+### 21.5 Measured: a curriculum (`t_self.py curriculum`, 5 seeds; rows in `results/self.jsonl`; code md5 fd7f7bd2...)
+
+The world: 48 things; of every thing seven sentences read once in an order of its own (six facts "X V Q .", four
+values a kind; its class "X K sınıfındandır ."); of every class its two properties ("K V doğurur .",
+"K V örtünür .") and its order ("K S takımındandır ."); of every order one property ("S V üretir ."). Then one
+mind lives five stages in the teacher's loop (asked; whatever it says the true dialogue is shown), every answer
+the value alone: two kinds read of the thing itself (6 rounds each), three more such kinds (4 each), a kind read
+of its class (6), a second of the same structure (4), a kind read of the class's order (6). 40 things are asked
+about, one question each; 8 are never asked about. Everything below is measured on copies of the mind.
+
+Four conditions live the same life: the mind **as it was** (the speaking configuration with F49, every studied way
+off); **F57**; **F57 + F58**; **set by hand** (F41, F53, F54, F55 on from the start, no trials: how its builders
+would set it for this world).
+
+8 things never asked about, asked every kind met so far after each stage (right / wrong / silent of 40):
+
+    condition     after     yer      içer     sever    giyer    okur     doğurur  örtünür  üretir   
+    as it was     stage 1   2/5/33   0/0/40
+                  stage 2   2/5/33   0/0/40   0/0/40   0/8/32   0/0/40
+                  stage 3   2/5/33   0/0/40   0/0/40   0/8/32   0/0/40   0/0/40
+                  stage 4   2/5/33   0/0/40   0/0/40   0/8/32   0/0/40   0/0/40   0/0/40
+                  stage 5   2/5/33   0/0/40   0/0/40   0/8/32   0/0/40   0/0/40   0/0/40   0/0/40
+                  a kind never asked in the life (çizer), at first sight: 0/0/40
+    F57           stage 1   40/0/0   40/0/0
+                  stage 2   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0
+                  stage 3   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0   0/0/40
+                  stage 4   40/0/0   40/0/0   40/0/0   32/8/0   40/0/0   0/0/40   3/6/31
+                  stage 5   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0   0/0/40   3/3/34   0/0/40
+                  a kind never asked in the life (çizer), at first sight: 40/0/0
+    F57 + F58     stage 1   40/0/0   40/0/0
+                  stage 2   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0
+                  stage 3   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0
+                  stage 4   40/0/0   40/0/0   40/0/0   32/8/0   40/0/0   40/0/0   40/0/0
+                  stage 5   40/0/0   40/0/0   40/0/0   32/8/0   40/0/0   40/0/0   40/0/0   40/0/0
+                  a kind never asked in the life (çizer), at first sight: 40/0/0
+    set by hand   stage 1   40/0/0   40/0/0
+                  stage 2   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0
+                  stage 3   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0   0/0/40
+                  stage 4   40/0/0   40/0/0   40/0/0   32/8/0   40/0/0   0/0/40   8/14/18
+                  stage 5   40/0/0   40/0/0   40/0/0   32/8/0   40/0/0   0/0/40   8/14/18  0/0/40
+                  a kind never asked in the life (çizer), at first sight: 40/0/0
+
+The things taught, asked their own question again after each stage, and asked one other kind met so far:
+
+    condition     after     their own question again (by the stage taught in)        another kind
+    as it was     stage 1   60/0/0                                                   3/3/54
+                  stage 2   60/0/0  60/0/0                                           2/4/114
+                  stage 3   60/0/0  60/0/0  30/0/0                                   2/5/143
+                  stage 4   60/0/0  60/0/0  30/0/0  20/0/0                           4/4/162
+                  stage 5   60/0/0  60/0/0  30/0/0  20/0/0  30/0/0                   4/4/192
+    F57           stage 1   60/0/0                                                   60/0/0
+                  stage 2   60/0/0  60/0/0                                           120/0/0
+                  stage 3   60/0/0  60/0/0  30/0/0                                   130/12/8
+                  stage 4   60/0/0  60/0/0  30/0/0  20/0/0                           118/2/50
+                  stage 5   60/0/0  60/0/0  30/0/0  20/0/0  30/0/0                   130/0/70
+    F57 + F58     stage 1   60/0/0                                                   60/0/0
+                  stage 2   60/0/0  60/0/0                                           120/0/0
+                  stage 3   60/0/0  60/0/0  30/0/0                                   150/0/0
+                  stage 4   60/0/0  60/0/0  30/0/0  20/0/0                           168/2/0
+                  stage 5   60/0/0  60/0/0  30/0/0  20/0/0  30/0/0                   198/2/0
+    set by hand   stage 1   60/0/0                                                   60/0/0
+                  stage 2   60/0/0  60/0/0                                           120/0/0
+                  stage 3   60/0/0  60/0/0  30/0/0                                   130/12/8
+                  stage 4   60/0/0  60/0/0  30/0/0  20/0/0                           119/27/24
+                  stage 5   60/0/0  60/0/0  30/0/0  20/0/0  30/0/0                   129/7/64
+
+The rounds of the life itself (right / wrong / silent), and the cost:
+
+    condition     yer      içer     sever    giyer    okur     doğurur  örtünür  üretir   the loops took
+    as it was     0/4/26   1/3/26   0/0/20   1/0/19   0/2/18   0/0/30   0/1/19   0/2/28   10 s
+    F57           10/5/15  23/1/6   14/1/5   16/0/4   19/0/1   0/11/19  1/7/12   1/3/26   58 s
+    F57 + F58     10/5/15  23/1/6   14/1/5   16/0/4   20/0/0   12/9/9   15/0/5   13/7/10  66 s
+    set by hand   19/1/10  25/0/5   20/0/0   20/0/0   20/0/0   0/8/22   3/6/11   3/6/21   12 s
+
+What the mind did to itself, by condition (in how many of the 5 lives each way is in use at the end):
+
+    as it was     nothing
+    F57           families 5, asked_place 5
+    F57 + F58     families 5, asked_place 5, chain (-7, -10) 5, chain (-7, -7, -10) 5
+    set by hand   known 5, families 5, lived_apart 5, asked_place 5
+
+**Which limit each change removed.** At every change two copies of the mind are taken at that moment, one as it is
+after the change and one with that one change undone, and the 8 fresh things are asked every kind, those met and
+those still to come. The same memory, one thing different (right of the kinds met / of the kinds to come):
+
+    condition     the change                              times  kinds met: without -> with    kinds to come: without -> with
+    F57           asked_place taken into use              5      9/15/24   -> 48/0/0          0/0/312   -> 0/0/312
+                  families taken into use                 5      154/6/0   -> 160/0/0         0/0/200   -> 80/0/120
+    F57 + F58     asked_place taken into use              5      9/15/24   -> 48/0/0          0/0/312   -> 0/0/312
+                  families taken into use                 5      146/6/0   -> 152/0/0         0/0/208   -> 88/0/120
+                  chain (-7, -10) taken into use          5      206/5/29  -> 240/0/0         40/0/80   -> 40/0/80
+                  chain (-7, -7, -10) taken into use      5      275/13/32 -> 312/8/0         40/0/0    -> 40/0/0
+
+The first seed's changes, kind by kind (right of 8, without the change -> with it):
+
+    moment 1866, asked_place taken into use during "içer": yer 5->8  içer 0->8  sever 0->0  giyer 0->0  okur 0->0  doğurur 0->0  örtünür 0->0  üretir 0->0  çizer 0->0
+    moment 1985, families taken into use during "giyer": yer 8->8  içer 8->8  sever 8->8  giyer 8->8  okur 0->8  doğurur 0->0  örtünür 0->0  üretir 0->0  çizer 0->8
+    moment 2117, chain (-7, -10) taken into use during "doğurur": yer 8->8  içer 8->8  sever 8->8  giyer 8->8  okur 8->8  doğurur 3->8  örtünür 0->0  üretir 0->0  çizer 8->8
+    moment 2251, chain (-7, -7, -10) taken into use during "üretir": yer 8->8  içer 8->8  sever 8->8  giyer 8->8  okur 8->8  doğurur 8->8  örtünür 8->8  üretir 0->8  çizer 8->8
+
+The mind's own record of the first seed (`!deney`, as it prints it):
+
+    Kendi üzerinde deney: her okuma yolu, o yol açık ve kapalıyken aynı durumda ne söyleyeceğime bakılarak sınanır; gelen cevap hangisinin daha iyi olduğunu söyler.
+      çerçevelerin çerçevesi (F53)                 kullanımda ; daha iyi 3, daha kötü 0
+      sorulan yer (F55)                            kullanımda ; daha iyi 14, daha kötü 0
+      kendi kurduğu ilişki: yerine geçen kelime sonra bilinen dizide sorulan yerde duran uykuda ; daha iyi 0, daha kötü 1 (şimdiki yapıya karşı: daha iyi 0, daha kötü 0)
+      kendi kurduğu ilişki: hakkında bilinen sonra bilinen dizide sorulan yerde duran kullanımda ; daha iyi 7, daha kötü 0
+      kendi kurduğu ilişki: hakkında bilinen sonra hakkında bilinen sonra bilinen dizide sorulan yerde duran kullanımda ; daha iyi 5, daha kötü 0
+      an 1866: sorulan yer (F55) kullanıma alındı (daha iyi 2, daha kötü 0)
+      an 1985: çerçevelerin çerçevesi (F53) kullanıma alındı (daha iyi 2, daha kötü 0)
+      an 2117: kendi kurduğu ilişki: hakkında bilinen sonra bilinen dizide sorulan yerde duran kullanıma alındı (daha iyi 2, daha kötü 0)
+      an 2251: kendi kurduğu ilişki: hakkında bilinen sonra hakkında bilinen sonra bilinen dizide sorulan yerde duran kullanıma alındı (daha iyi 2, daha kötü 0)
+      an 2251, çakal ne üretir ⏎ | gelen: ısı | yol açıkken: ısı | kapalıyken: (sessiz) | kendi kurduğu ilişki: hakkında bilinen sonra hakkında bilinen sonra bilinen dizide sorulan yerde duran
+      an 2264, penguen ne üretir ⏎ | gelen: ısı | yol açıkken: ısı | kapalıyken: (sessiz) | kendi kurduğu ilişki: hakkında bilinen sonra hakkında bilinen sonra bilinen dizide sorulan yerde duran
+      an 2277, şahin ne üretir ⏎ | gelen: zehir | yol açıkken: zehir | kapalıyken: (sessiz) | kendi kurduğu ilişki: hakkında bilinen sonra hakkında bilinen sonra bilinen dizide sorulan yerde duran
+      an 2290, yılan ne üretir ⏎ | gelen: zehir | yol açıkken: zehir | kapalıyken: (sessiz) | kendi kurduğu ilişki: hakkında bilinen sonra hakkında bilinen sonra bilinen dizide sorulan yerde duran
+
+What the tables say:
+
+* **The mind as it was** keeps what it was taught (every taught thing answers its own question again, at every
+  stage) and can do nothing else with it: a fresh thing is not answered (2 of 320 at the end), a taught thing
+  asked another kind is not either (4 right, 4 wrong, 192 silent). Every answer of this world needs a way of
+  reading it does not use.
+* **With F57** the mind takes the asked place into use in all five lives (after two cases, in the first or the
+  second kind of question) and frames of frames in all five (in the third or fourth kind). The kinds read of the
+  thing itself are then answered for fresh things (200 of 200 after stage 2), a kind it was never asked is
+  answered at first sight (40 of 40), and a taught thing asked another kind is answered (120 of 120 after stage
+  2). The kinds read of the class and of the order stay unanswered (0 of 40, 3 of 40, 0 of 40): no way it was built
+  with reads them.
+* **With F57 and F58** it also builds, in all five lives, "what is known of the thing, then what stands at the
+  asked place of that" during the first class kind, and out of that relation, during the order kind, "what is
+  known of what is known of the thing, then what stands at the asked place of that". All eight kinds are answered
+  for fresh things (40 of 40 each, but for one kind in one life: 21.9), the second class kind after one round
+  instead of three.
+* **Set by hand** for this world as its builders would have set it (the four mechanisms of sections 17 and 18) it
+  answers the kinds read of the thing itself and nothing of the others; of the second class kind it says a wrong
+  word to 14 of 40 fresh things. The mind that set itself ends ahead of the one its builders set, because it could
+  build what they had not built.
+* **What it learned before is kept.** Every thing taught answers its own question again after every later stage
+  and every change of configuration, in every condition (60, 60, 30, 20 and 30 of the same). One loss was found,
+  in what the mind generalises, not in what it was taught, and not from this section's mechanisms (21.9).
+* **It learns the next kind sooner.** Rounds of the life not answered right, F57 + F58, kind by kind in the order
+  met: read of the thing 20 of 30, 7 of 30, 6 of 20, 4 of 20, 0 of 20 (the fifth kind is answered from its first
+  question on); read of the class 18 of 30, then 5 of 20; read of the order 17 of 30. Each new structure costs it
+  about three rounds once (one failure to see what would have named the answer, two cases to prove it); the same
+  structure met again costs one.
+* **The cost.** The rounds of the life take about six times as long with trials (58 and 66 s against 10 s for 200
+  rounds over the five lives); reading, listening and answering on copies are not touched.
+
+Which limit each change removed, from the table of changes (the lives of F57 + F58): taking the asked place into
+use turned 9 right, 15 wrong and 24 silent answers about the kinds met into 48 right, and changed nothing for kinds
+not met yet; taking frames of frames into use changed the kinds to come from 0 of 208 to 88 of 208 at first sight
+(the kinds read of the thing; the class kinds stay silent) and mended six wrong answers of the kinds met; the
+chain of two changed the kinds met from 206 to 240 of 240; the chain of three from 275 to 312 of 320 (the eight
+wrong: 21.9).
+
+### 21.6 The same mind in another world (`t_self.py worlds`, 5 seeds)
+
+The same things and sentences; every answer names the thing ("X ne Q ?" -> "X V Q ."); five kinds in the teacher's
+loop (6, 6, 4, 4, 4 rounds); 8 fresh things at the end:
+
+    as it was     fresh: yer 5/35/0  içer 0/40/0  sever 0/40/0  giyer 0/40/0  okur 2/38/0 ; a kind never asked: 0/0/40
+                  rounds: yer 2/18/10  içer 1/24/5  sever 0/15/5  giyer 0/15/5  okur 2/13/5 ; the loops took 6 s
+                  in use at the end (lives of 5): nothing
+    F57           fresh: yer 40/0/0  içer 40/0/0  sever 40/0/0  giyer 40/0/0  okur 40/0/0 ; a kind never asked: 40/0/0
+                  rounds: yer 9/11/10  içer 16/9/5  sever 10/5/5  giyer 17/2/1  okur 20/0/0 ; the loops took 50 s
+                  in use at the end (lives of 5): known 5, families 5, echo_exact 4, inherit 3
+    set by hand   fresh: yer 34/6/0  içer 40/0/0  sever 40/0/0  giyer 40/0/0  okur 40/0/0 ; a kind never asked: 40/0/0
+                  rounds: yer 16/4/10  içer 19/6/5  sever 20/0/0  giyer 20/0/0  okur 20/0/0 ; the loops took 9 s
+                  in use at the end (lives of 5): known 5, families 5, lived_apart 5, asked_place 5
+
+Where the answer names the thing the mind as it was says a wrong word to almost every fresh thing (7 right of
+200). With F57 it takes other ways into use than in the world of 21.5: F41 (what is known of the thing: in all
+five lives) and F53 (five), F52 (four) and F37 (three); not F55, which only did there what F41 does and makes no
+difference once F41 is in use. Fresh things: 200 of 200, the kind never asked 40 of 40; set by hand 194 of 200
+and 40 of 40. The configuration is not one setting found once: it follows the world the mind lives in, and in
+both worlds the mind that set itself ended at least as well as the one set by its builders.
+
+### 21.7 What a mind that follows its own record must not do (`t_self.py control`, 5 seeds)
+
+Stage 1 as it is, then four kinds of question that are answered otherwise than a family of frames claims (two
+words of their own, whatever the thing), three rounds each:
+
+    (a) F53 on trial (F55 in use, F49 on)
+        taken into use in 0 of 5 lives, put away in 0, in use at the end in 0 ; record over the lives: better 1, worse 5
+        the first answer of a kind while F53 was in use 0/0/0, while it was not 0/0/20 ; all rounds 36/0/24
+        the first seed: sever:--- giyer:-RR okur:-RR çizer:-RR
+    (b) raised with F53 on by hand, without F49
+        taken into use in 0 of 5 lives, put away in 0, in use at the end in 5 ; record over the lives: better 10, worse 5
+        the first answer of a kind while F53 was in use 0/5/15, while it was not 0/0/0 ; all rounds 20/15/25
+        the first seed: sever:W-R giyer:-WR okur:-WR çizer:--R
+    (c) raised with F53 on by hand, with F49
+        taken into use in 0 of 5 lives, put away in 0, in use at the end in 5 ; record over the lives: better 0, worse 5
+        the first answer of a kind while F53 was in use 0/5/15, while it was not 0/0/0 ; all rounds 37/6/17
+        the first seed: sever:W-- giyer:-RR okur:-RR çizer:-RR
+
+(a) Where F53 would do harm it is not taken into use (0 of 5 lives; its record over the lives 1 better, 5
+worse): in its trial it claimed a value at the first sight of the first such kind, the answer was otherwise, and
+that was all, since its claim there was then read with its record (F49).
+
+(b), (c) A mind raised with F53 on by hand says a wrong word at the first sight of the first such kind (5 of 5
+lives) and at no later first sight (0 wrong, 15 silent): after one frame of the family is answered otherwise the
+family no longer agrees and claims nothing (F53's own rule), and with F49 the claim is also read with its record.
+The harm ends where the claim is made, after one failure, before a second case against the way could come; the
+record of F53 there is 10 better and 5 worse without F49 (by the trial's measure, the next word that came, it did
+more good than harm in those lives) and 0 better, 5 worse with it. **So the mind put no way away in any life
+measured.** The rule is the same as the one that takes a way into use and is pinned by a
+test on scripted readings; whether there is a world in which a way of the mind does lasting harm that only this
+rule ends is not known.
+
+### 21.8 Kept (`t_self.py kept`, 5 seeds)
+
+The life of F57 + F58, then the mind is saved and loaded: the loaded mind has the configuration, the relations
+and the record of changes of the saved one in 5 of 5 lives; of 360 questions to fresh things (every kind and
+the kind never asked, 8 things) 360 are answered as before saving (right before / after, by life: 72 / 72, 72 / 72, 64 / 64, 72 / 72, 72 / 72).
+
+### 21.9 Two faults in what was there before, found by the measure of what is kept
+
+**A fault of F55 (corrected).** The first run of the five-stage curriculum showed the direct kinds falling from 8
+of 8 to 4 of 8 for the "fresh" things after the last stage, every wrong answer the same word: "üretir". Two things
+were behind it. The first was an error of the measurement: with the fifth stage the things asked about had come to
+overlap the eight "fresh" ones (corrected: 40 asked, 8 never). The second was real, and it is in the code
+committed with section 18. A thing that had been asked one kind of question, asked another kind, answered with the
+earlier question's word. `only_asked` (F41) says that what a thing went on with was *asked* of it, not known of
+it, when every lived sequence that began so was answered; a sequence "told and left at that" makes it known. The
+question the mind is being asked at this moment has not been answered yet, so it counted as told and left at
+that, "ne" became something known of the thing, and the asked place then read the earlier question "X ne üretir"
+as a known sequence that differs from "X ne yer" in one item. Section 18 never met it: every thing asked there
+had never been asked about before.
+
+The rule now: the sequence that is being lived (the present context ends with it and nothing has followed it) is
+neither asked nor told; what follows it has not happened yet.
+
+Measured in the configuration set by hand (F41, F53, F54, F55; seed 0), the things taught asked one other kind
+met so far (right / wrong / silent), with the committed code and with the rule:
+
+    after stage 1 (12 things)   0/12/0  ->  12/0/0
+    after stage 2 (24 things)   0/24/0  ->  24/0/0
+    after stage 3 (30 things)   0/30/0  ->  26/0/4     (the 4: asked a kind read of the class, which this mind
+                                                        cannot answer and does not)
+
+Pinned by a test that fails on the committed code (`test_a_thing_asked_one_kind_before_is_asked_another`: "yer"
+instead of "su"). The rows of sections 17 and 18 are being measured again with the rule: `t_asked.py forms` (20
+rows) has ended, 20 of 20 count for count as committed; `t_asked.py echo`, `unknown` and `twice`, `t_again.py` with
+F55 and with F53 + F54 + F55, and `t_grow.py forms` and `judged` are running as this is written, and what they come
+to is added to these notes when they end.
+
+What it leaves open: a question that was asked in the past and never answered by anyone is still "told and left
+at that" by this rule (a thing asked about, nobody answering, and then asked something else). Whether such a
+sequence was a question can be read from what the mind expects after it (a frame of it whose members were
+answered); not built, in the queue.
+
+**A coincidence that F53 counts twice (traced, not corrected).** In one life of five (seed 2) the fresh things
+answer "X ne giyer ?" right after stages 2 and 3 (8 of 8) and all with the same wrong word after stage 4 (0 of 8),
+in every condition that has F53 and F55, the one set by hand included; with F57 alone it comes back after stage 5.
+Traced in the mind's readings: the four things that were asked this kind in that life all happen to wear the
+same thing. The frame's own members therefore agree on that word exactly as much as they agree on the asked
+place (2.92 to 2.92), and what decides between the two readings is the family that speaks for the frame. Two
+families fit the context: the frames of the question's kinds ("X ne yer", "X ne içer", ...), which vote for the
+asked place, and the frames "<thing> X giyer", which are the same four dialogues once more and vote for the
+word. The first family spoke (0.299 x 0.793 against 0.237 x 1). During stage 4 a frame joins the first family
+whose members vouch for neither ("X ne örtünür", answered from the class); its agreement falls a little, the
+product passes below the other, the second family speaks, and the word wins for every thing. Nothing was
+forgotten: one coincidence among four taught things is counted twice, and a comparison of two products decides.
+
+The mind has the rule that settles it: what was lived of the thing itself stands against what the others share
+(F50, section 14). It is part of `find_out`, which also changes what the mind does (it holds a word back and
+looks first), so it is not one of the ways F57 tries. Read with that rule on in the copies that are asked, the
+same life gives 8 of 8 after every stage (`t_self.py traced`: right of 8 after the five stages 8, 8, 8, 0, 0 as the
+mind is and 8, 8, 8, 8, 8 with the rule). Making that rule a way of reading of its own, tried like the others, and
+the choice among families that fit a context, are the first items of the queue below. The rows above are as they
+were measured.
+
+### 21.10 What was tried on the way and changed, each measured
+
+* The configuration changed inside the loop over the ways: a way tried after another had just been taken was
+  compared with a configuration that no longer was the mind's, and showed gains that were not its own. Now every
+  way is tried against the same configuration and the change comes after.
+* With F49 on, a sleeping way made a difference in 1 case of 50 rounds: its claims were read by the record of
+  "ways like it", which had been failing. Its own claims in the trial are now settled on its own ties (21.3).
+* Several ways were taken at once on the same cases: where answers name the thing, four of six ways came into use
+  in pairs (F41 with F55, F54 with F37; seed 0, without F49), each pair on the same two cases. One change at a
+  time, and the sleeping trials begin again: in that life the mind then takes F41, F54, F53 and F52 one after
+  another, and F55 and F37, which only did what another did, sleep on.
+* Chains of two relations only: the kind read of the class's order was not answered (0 of 8). The relations the
+  mind took into use became steps (21.4).
+* The control was first measured with the mark of `t_fault.py` (an answer shorter than the right one counts as
+  silent): a wrong one-word answer to a two-word truth was not seen as wrong, and "nothing wrong was said" was
+  reported of a mind that had said a wrong word. `t_self.py` marks anything said that is not the answer as wrong.
+* The first control of "a way in use that does harm" raised a mind with F41 on by hand in the value-only world:
+  F41 made no difference there in any case (record 0, 0) and was not a way that does harm. Replaced (21.7).
+
+### 21.11 What it does not do
+
+* A way is tried only where what follows a decision of the mind is shown: the teacher's loop, a dialogue watched
+  after its own attempt, a correction. In a free conversation what comes after its turn is its partner's next
+  utterance, which is a reaction to what it said, not a verdict on it: not measured, and the worth of an answer
+  cannot be read there by this rule.
+* Better is judged at the next word that came, context by context; an answer's later words are tried only as far
+  as the mind itself got.
+* One configuration for the whole mind. A way that helps in one kind of situation and harms in another has one
+  record. (Where a way's claim fails, the claim is stopped where it is made, by the frame's members, the family's
+  agreement and F49; 21.7.) A life that passes from one of the two worlds to the other was not measured.
+* One way is changed at a time: a gain that needs two sleeping ways together is not found until one of them has
+  been taken for a reason of its own. Among ways with the same record the order of the list decides.
+* A new relation is a chain of the mind's relations, read for one filler of a one-place frame. A relation that is
+  not such a chain (one between two fillers, a comparison, a count) cannot be built. The primitive relations are
+  given.
+* The cost: every trial reads the context once more for each way (the rounds of the life take 6 times as
+  long with trials; reading and listening are not touched, only the moments after its own decisions).
+* Putting a way away happened in no measured life (21.7); the rule is pinned by a test on scripted readings.
+* All conditions were measured with F49 on (the control also without). On a long life, the owner's documents, the
+  web: not measured.
+* The mind tries its ways on what it is asked in its life. What it could do before and is not asked any more is not
+  tried again, so a loss there (21.9, the second fault) is not seen by the mind itself; it was seen by the measure
+  on copies.
+
+### 21.12 The work queue after this section
+
+1. Hypotheses of its own across domains: a relation that proved itself in one field, tried by the mind itself, in
+   its own time, on what it knows of another; what it comes to is kept as a conjecture with its source and settled
+   when evidence comes. (The owner's example of physics, biology and mathematics; the next thing built.)
+2. What 21.9 left open: the rule "what was lived of the thing itself stands against what the others share" as a
+   way of reading of its own, on trial like the others; the choice among the families that fit a context; a past
+   question nobody answered.
+3. Trials where no outcome is shown (21.11, first item): what the mind can try from its own readings alone.
+4. Generalisation over more than two places; the word that goes with a word, position indices, answers longer
+   than the window (17.10).
+5. More questions of its own, asking its partner, a sense of the clock, the long life and the web, F52 on the
+   battery, the indices in shared memory (17.12, items 4 to 8).
+
+### 21.13 Gates, tests, reproduce
+
+With every studied switch off the lesson-free gate, the 17 configurations and the scripted life (plain and with
+wholes) are bit-identical to the references. Tests: 455 passed (11 new: `test_zihin_trials.py` 10, and one
+in `test_zihin_asked_place.py`).
+
+    python research/living_mind_2026_11_22/t_self.py curriculum | control | kept | worlds | traced
+    python -m zihin --ac faults,trials,built_relations        (then, in the chat: !deney)

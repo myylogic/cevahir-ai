@@ -436,6 +436,8 @@ REPLY = -5            # F34: "what the filler, said on its own, was answered wit
 INHERIT = -6          # F37: "what the filler's classes go on with, its own record last" (deduction with exceptions)
 KNOWN = -7            # F41: "how the filler's own lived sequences go on from here, not said yet" (a set of things)
 ASKED = -10           # F55: "what a lived sequence of the filler's own holds where it differs from the present run"
+BUILT = -100          # F58: the codes at and below this are relations the mind built itself: chains of its own
+                      # relations (``Mind.relation_paths[BUILT - code]``), each step read for what the step before named
 
 
 def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[int] = None) -> Optional[int]:
@@ -453,8 +455,8 @@ def resolve(mind, target: int, filler: Optional[int], fixed, category: Optional[
         return inherited(mind, filler, fixed) if filler is not None else None
     if target == KNOWN:
         return None                                    # a set: read where the frame's votes are (known_claim)
-    if target == ASKED:
-        return None                                    # read against the context itself (asked_place)
+    if target == ASKED or target <= BUILT:
+        return None                                    # read against the context itself (asked_place, built_value)
     if target in (NEXT, START):
         if filler is None:
             return None
@@ -536,9 +538,20 @@ def next_apart(mind, filler: int, fixed, instance: int) -> Optional[int]:
     return found
 
 
-def asked_places(mind, x: int, context: int, first: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
-    """F55 (The Asked Place): the run of items that ``x`` begins in a context (from position ``first`` to the end of
-    that utterance: the items of x's channel that follow it), read against what is known of x: its own lived
+def asked_run(mind, context: int, first: int) -> tuple:
+    """The run of items that the item at position ``first`` begins in a context: up to the end of that utterance
+    (the items of its channel that follow it)."""
+    kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
+    parts = parts_of(mind, context) if kinds[context] & COMPOSED else (context,)
+    channel = channels[parts[first]]
+    end = first + 1
+    while end < len(parts) and channels[parts[end]] == channel:
+        end += 1
+    return parts[first:end]
+
+
+def asked_in(mind, x: int, run: tuple, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F55 (The Asked Place): a run of items that ``x`` begins, read against what is known of x: its own lived
     sequences (those that began with it: a sentence read, an utterance after silence; F26), without what was only
     ever asked of it (``only_asked``, F41: a question about x is a sequence that began with x too). A known sequence
     that is the run in every item but one says what stands at that one place: {the item it holds there: how much
@@ -546,17 +559,12 @@ def asked_places(mind, x: int, context: int, first: int, trust: Optional[torch.T
     replaced; nothing says which item is the question word: it is the one place where what was asked and what is
     known differ. For a member of a frame the relation holds where the value it went on with is any of these."""
     memo = _moment_memo(mind)
-    key = ("asked_places", x, context, first, id(trust) if trust is not None else None)
+    key = ("asked_in", x, run, id(trust) if trust is not None else None)
     if memo is not None and key in memo:
         return memo[key]
     S = mind.S
     kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
-    parts = parts_of(mind, context) if kinds[context] & COMPOSED else (context,)
     channel = channels[x]
-    end = first + 1
-    while end < len(parts) and channels[parts[end]] == channel:
-        end += 1
-    run = parts[first:end]
     found: Dict[int, float] = {}
     if len(run) >= 2 and run[0] == x:
         def goes_on(sequence):
@@ -585,6 +593,11 @@ def asked_places(mind, x: int, context: int, first: int, trust: Optional[torch.T
     return found
 
 
+def asked_places(mind, x: int, context: int, first: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F55: ``asked_in`` for the run that ``x`` begins at position ``first`` of a context."""
+    return asked_in(mind, x, asked_run(mind, context, first), trust)
+
+
 def asked_place(mind, x: int, context: int, first: int, trust: Optional[torch.Tensor] = None) -> Optional[int]:
     """F55: the item ``asked_places`` names for a context being read: the most lived; among those lived equally the
     one learned first (F41's rule for the things known of a topic: each of them is an answer, and one is said)."""
@@ -592,6 +605,91 @@ def asked_place(mind, x: int, context: int, first: int, trust: Optional[torch.Te
     if not found:
         return None
     return max(found, key=lambda v: (round(found[v], 9), -v))
+
+
+STEPS = (START, NEXT, REPLY, ALIKE, ASKED, KNOWN)     # F58: the relations a built relation is a chain of
+
+
+def built_path(mind, code: int) -> tuple:
+    """The chain of relations a built relation's code stands for."""
+    return mind.relation_paths[BUILT - code]
+
+
+def built_code(mind, path: tuple) -> int:
+    """The code of a built relation in this mind (given when it is first proposed)."""
+    paths = mind.relation_paths
+    if path not in paths:
+        paths.append(path)
+    return BUILT - paths.index(path)
+
+
+def _strongest(goes_on: Dict[int, float]) -> Optional[int]:
+    """The one strongest of a set of items; none where two are as strong."""
+    if not goes_on:
+        return None
+    best = max(goes_on, key=goes_on.get)
+    top = goes_on[best]
+    if sum(1 for e in goes_on.values() if e >= top - 1e-9 * abs(top)) > 1:
+        return None
+    return best
+
+
+def step_items(mind, relation: int, y: int, run: tuple, fixed, category: Optional[int],
+               trust: Optional[torch.Tensor] = None, apart: Optional[int] = None) -> Dict[int, float]:
+    """F58: one step of a built relation: one of the mind's relations read for the item ``y`` standing where the
+    filler stands (``run``: the run of items the filler begins, read with y in its place), as {item: weight}.
+    START: how the sequences that began with y went on (the one strongest); NEXT: what y goes on with (apart from
+    ``apart``, the member's own instance, where that ends with it: F54); REPLY: what y, said alone, was answered
+    with; ALIKE: what stands where y stands; ASKED: what a known sequence of y holds where it differs from the run;
+    KNOWN: the things known of y, each by its share (how the sequences that began with y went on, without what was
+    only asked of it): a set, of which the next step keeps those it names something for."""
+    if relation == KNOWN:
+        channels = mv_view(mind, "u_channel")
+        began = {v: b for v, (b, _) in start_mass(mind, y, trust).items()
+                 if channels[v] == channels[y] and v not in fixed and not only_asked(mind, y, v)}
+        total = sum(began.values())
+        return {v: b / total for v, b in began.items()} if total > 0.0 else {}
+    if relation == START:
+        found = _strongest(start_continuations(mind, y, fixed))
+    elif relation == NEXT:
+        found = _strongest(lived_apart(mind, y, apart, fixed) if apart is not None else continuations(mind, y, fixed))
+    elif relation == REPLY:
+        found = reply_of(mind, y, fixed)
+    elif relation == ALIKE:
+        found = stand_in(mind, y, fixed, category)
+    elif relation == ASKED:
+        places = asked_in(mind, y, (y,) + tuple(run[1:]), trust)
+        found = max(places, key=lambda v: (round(places[v], 9), -v)) if places else None
+    else:
+        found = None
+    return {} if found is None else {found: 1.0}
+
+
+def built_value(mind, path: tuple, x: int, context: int, first: int, fixed, category: Optional[int],
+                trust: Optional[torch.Tensor] = None, apart: Optional[int] = None) -> Optional[int]:
+    """F58 (Built Relations): what a chain of the mind's relations names for the filler ``x`` at position ``first``
+    of a context: the first step is read for x, each later step for what the step before named, standing where x
+    stands ("the asked place of something known of it": of all that is known of x, the one of which the same can be
+    asked, and what stands there). One item: the strongest the chain ends in, none where it ends in none or in two
+    alike."""
+    memo = _moment_memo(mind)
+    key = ("built", path, x, context, first, tuple(fixed), category, id(trust) if trust is not None else None, apart)
+    if memo is not None and key in memo:
+        return memo[key]
+    run = asked_run(mind, context, first)
+    items: Dict[int, float] = {x: 1.0}
+    for i, relation in enumerate(path):
+        named: Dict[int, float] = {}
+        for y, weight in items.items():
+            for z, w in step_items(mind, relation, y, run, fixed, category, trust, apart if i == 0 else None).items():
+                named[z] = max(named.get(z, 0.0), weight * w)
+        items = named
+        if not items:
+            break
+    found = _strongest(items)
+    if memo is not None:
+        memo[key] = found
+    return found
 
 
 def member_mass(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None):
@@ -1371,6 +1469,8 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
     not_known: Dict[int, float] = {}
     own_name: Dict[int, float] = {}
     asks = relational and tail is None and bool(where) and getattr(mind.cfg, "asked_place", False)   # F55
+    built = tuple(getattr(mind, "relations", ())) if relational and tail is None and bool(where) else ()   # F58
+    ends = bool(where) and where[-1] == len(parts) - 1     # (the instance ends with the member: F54 for a first step)
     apart = (relational and tail is None and bool(where) and where[-1] == len(parts) - 1   # F54: the instance ends
              and getattr(mind.cfg, "lived_apart", False))   # with the member: what it went on with, the member did
     alike = relational and getattr(mind.cfg, "paradigmatic", False)
@@ -1416,6 +1516,11 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
                 shares[key] = shares.get(key, 0.0) + share
             if v in asked_x:                           # (any of them: where the place holds two things, each
                 shares[ASKED] = shares.get(ASKED, 0.0) + share   # is an answer to what was asked)
+            for path in built:                         # F58: a relation the mind built names this member's value
+                if built_value(mind, path, x, instance, where[0], fixed, category, trust,
+                               instance if ends else None) == v:
+                    code = built_code(mind, path)
+                    shares[code] = shares.get(code, 0.0) + share
             if known:                                  # F41: said by a member of which it was known (with the lived
                 if v == x:                             # sequence of the member that it carried on), or not; a
                     own_name[v] = own_name.get(v, 0.0) + share   # member that said itself
@@ -1729,6 +1834,8 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
             asked = target
             if target == ASKED:                    # F55: what the filler's own lived sequence holds where the run
                 target = asked_place(mind, filler, unit, where[0], trust)   # it begins here differs from it
+            elif target <= BUILT:                  # F58: a relation the mind built, read for this filler
+                target = built_value(mind, built_path(mind, target), filler, unit, where[0], fixed, category, trust)
             elif echo_on and target in (NEXT, START) and unit == mind.context:
                 target = resolve(mind, target, filler, tuple(fixed) + tuple(sorted(episode_said(mind, filler))),
                                  category)         # F42: what followed the filler in this episode is an echo
@@ -1853,7 +1960,8 @@ def _own_record_against_shared(mind, out: Dict[int, float], src: Dict[int, list]
     for target, made in src.items():
         for ways, _, e in made:
             kind = ways[1]
-            if len(kind) == 2 and kind[0] == "g" and kind[1] in OWN_RECORD and e > 0.5:
+            if len(kind) == 2 and kind[0] == "g" and e > 0.5 and (
+                    kind[1] in OWN_RECORD or (isinstance(kind[1], int) and kind[1] <= BUILT)):
                 named.add(target)
                 own[channels[target]] = max(own.get(channels[target], 0.0), 2.0 * e - 1.0)
     if not own:
@@ -2004,7 +2112,11 @@ def only_asked(mind, x: int, v: int) -> bool:
     """F41: ``v`` is what was asked of ``x``, not what is known of it: every lived sequence that began with x and
     went on with v was answered (its turn ended and the words of another turn followed). A sequence that was read or
     told and left at that (nothing followed its end), or one too long to follow, makes v known; so does v never having
-    begun a sequence with x (nothing says it was asked)."""
+    begun a sequence with x (nothing says it was asked). The sequence that is being lived (the present context ends
+    with it, and nothing has followed it) is neither: what follows it has not happened yet. Without this the question
+    the mind is being asked now counted as something told of the thing, and with it every question asked of it
+    before (found by measuring: a thing that had been asked one kind of question answered another kind with the
+    earlier question's word)."""
     memo = _moment_memo(mind)
     key = ("asked", x, v)
     if key in memo:
@@ -2012,6 +2124,8 @@ def only_asked(mind, x: int, v: int) -> bool:
     S, F = mind.S, mind.knob["F"]
     kinds, channels = mv_view(mind, "u_kind"), mv_view(mind, "u_channel")
     sense, act = kind_masks(mind)[4:6]
+    now = mind.context
+    present = () if now is None else (parts_of(mind, now) if kinds[now] & COMPOSED else (now,))
     first = S.tuple_index.get((x, v))
     asked = told = False
     stack = [first] if first is not None and not kinds[first] & SLOTTED else []
@@ -2027,14 +2141,14 @@ def only_asked(mind, x: int, v: int) -> bool:
                 went_on = True
                 if longer is not None and any(act[channels[w]] for w in _world_pos(mind, longer)[0]):
                     asked = True
-                else:
-                    told = True
+                elif present[-len(parts) - 1:] != parts + (t,):
+                    told = True                         # (the turn that ends at this moment is not yet either)
             elif longer is not None and not kinds[longer] & SLOTTED:
                 went_on = True
                 stack.append(longer)
             elif len(parts) >= F:
                 told = True                             # too long to follow
-        if not went_on:
+        if not went_on and present[-len(parts):] != parts:
             told = True
     memo[key] = asked and not told
     return memo[key]
