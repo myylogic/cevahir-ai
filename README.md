@@ -1,5 +1,7 @@
 # 🍌 🇹🇷 🍌 Cevahir AI & Engine
 
+**Daha Adil Bir Dünya Mümkün.**
+
 [English](README.md) · [Türkçe](README-TR.md)
 
 [Research archive DOI (always the latest version): 10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660) · [Research reports](docs/publications/README.md)
