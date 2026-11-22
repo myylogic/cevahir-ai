@@ -53,6 +53,9 @@ Commands (Turkish, with English aliases):
                                     which sleep, how often each did better or worse than the mind without it, every
                                     way it took into use or put away, and the last cases (the context, what came,
                                     what it would have said with the way and without it)
+    !varsayim            / !conjectures  (with --ac conjectures) the statements it came to by itself: each with
+                                    the link and the statement it was carried from, the record it rests on, and what
+                                    became of it when it was told more (held, failed, not met yet)
     !ag                  / !net     what this machine can reach: one small request to each service the mind reads
                                     from, with the reason when one cannot be reached (proxy, refusal, no network)
     !oku_url <adres> ... / !read_url  web pages by their addresses, read as documents are: fetched at the same time,
@@ -188,7 +191,7 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
 STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
            "told_apart", "open_claims", "look", "think", "faults",           # is raised with them; --ac turns one on
            "silent_claims", "find_out", "wonder", "echo_exact", "families", "lived_apart",
-           "asked_place", "whole_kinds", "trials", "built_relations")
+           "asked_place", "whole_kinds", "trials", "built_relations", "conjectures")
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -655,6 +658,14 @@ class Session:
                            None: "okunacak bir beklenti kalmamış"}
                 say("  okundu: %d cümle; %s" % (report.get("sentences", 0), outcome[report.get("met")]))
             self.remember(READ, "[kendi kararıyla baktı] %s" % (looking[1],), list(range(start, self.mind.t + 1)))
+            return acts
+        if getattr(self.mind, "supposing", None) is not None:
+            from .varsayim import carry_out               # F59: it thinks over what it was told of a thing
+            start = self.mind.t + 1
+            new = carry_out(self, say)
+            if new:
+                self.remember(SPOKE, "[kendi kendine vardı] %d varsayım" % len(new),
+                              list(range(start, self.mind.t + 1)))
             return acts
         wondering = getattr(self.mind, "wondering", None)
         if wondering is not None and getattr(self.mind, "thinking", None) is None:
@@ -1414,8 +1425,8 @@ def main(argv=None) -> None:
                     "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own "
                     "settings. Also the mechanisms that were measured and are off by default (inherit, witness, "
                     "difference, urge, known, wholes, told_apart, open_claims, look, think, faults, silent_claims, "
-                    "find_out, wonder, echo_exact, families, lived_apart, asked_place, whole_kinds, trials, built_relations), for "
-                    "a loaded or a new mind")
+                    "find_out, wonder, echo_exact, families, lived_apart, asked_place, whole_kinds, trials, built_relations, "
+                    "conjectures), for a loaded or a new mind")
     ap.add_argument("--pencere", type=int, help="how many items a NEW mind holds at once (its window, 3 to 15; "
                     "default 7); a mind keeps the window it has")
     args = ap.parse_args(argv)
@@ -1742,6 +1753,13 @@ def _one_line(session, line, chat, args, keep, turns_since_save):
                         for topic, (words_, reality) in zip(topics, thoughts(session, topics)):
                             print("  %s: %s  (gerçeklik %.2f)" % (topic, " ".join(words_) or "(sessiz)", reality))
                         print("  kopyalar düşündü: zihin bunları yaşamadı")
+                elif cmd in ("varsayim", "varsayım", "conjectures"):   # F59: what it conjectured by itself
+                    from . import varsayim
+                    if not getattr(session.mind.cfg, "conjectures", False):
+                        print("  (varsayım kapalı: --ac conjectures ile açılır)")
+                    else:
+                        for line in varsayim.report(session.mind):
+                            print(line)
                 elif cmd in ("deney", "trials"):          # F57: the trials of its own ways of reading
                     from . import deney
                     if not getattr(session.mind.cfg, "trials", False):

@@ -598,6 +598,28 @@ def wonder(mind) -> Optional[tuple]:
     return None
 
 
+def suppose(mind) -> Optional[int]:
+    """F59 (Conjectures): in a silent moment in which nothing else was decided, the thing the mind decides to think
+    over, or None. Its candidates are the things it was told something of since it last thought them over
+    (``Mind.pondering``), the oldest first; of such a thing there is something unthought: u = 1. As for any act:
+    rate = (2u - 1) + (2 e - 1), e what thinking things over has come to (``varsayim.worth``: what its links
+    carried held or did not; 1/2 before the first), acted on when ceil(theta / rate) <= max(T, the moments it has
+    now been silent): as F51's asking, an act that has rarely paid is taken again after a longer wait and is never
+    given up for good."""
+    from . import varsayim
+    waiting = getattr(mind, "pondering", None)
+    if not waiting:
+        return None
+    rate = 1.0 + (2.0 * varsayim.worth(mind) - 1.0)
+    if rate <= 0.0 or math.ceil(mind.knob["theta"] / rate - 1e-12) > max(mind.cfg.T, getattr(mind, "idle", 0)):
+        return None
+    v = mind.S.arrays()
+    for unit in waiting:
+        if unit < mind.S.n_units and v.ualive[unit]:
+            return unit
+    return None
+
+
 def holds_back(mind, items, acts) -> bool:
     """F50: whether the word the mind is about to say is one it does not assert: it rests on what others share
     (``rests_on_others``), the way that claims it is not proven to hold by its own record (``hata.proven`` at most

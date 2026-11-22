@@ -2726,3 +2726,197 @@ The first of the whole test files with F56 on (section 20.4; `t_scan_kinds.py ru
 4,476** (4,475 without F56; 1,087 of 15,225 training commands watched twice). The length, around right, jump
 around right and opposite right files with F56 are running, one after another; their rows will be appended as
 they come out.
+
+## 23. Conjectures: statements nobody told it and nobody asked for, from what a kind of link was found to carry (F59)
+
+### 23.1 What was asked
+
+The owner's example: give the mind knowledge of physics, of biology and of mathematics; without being asked it
+should form new hypotheses from the patterns the three fields share. "The point is this: we will not have written
+the hypothesis. We will have built the learning that makes the hypothesis possible."
+
+### 23.2 What was there before
+
+Everything the mind said of a thing it had been told of that thing, or read from what it knew when it was asked:
+F37 reads what is told of a thing's kind, F58's chains read "what is known of what is known of it", both at the
+moment of a question, for the frame of that question, as far as that frame's members vouch. In its own time the
+mind thought (F48: its inner voice goes on from a word by its own decisions) and asked itself the questions it
+knows (F51). Nothing made it put together, unasked, a statement that nobody had said, and keep it as its own
+conclusion to be tested.
+
+### 23.3 The model (`Config.conjectures`, off by default; `zihin/varsayim.py`)
+
+* **A link.** A thing x that was told to go on with an item y, where y is itself something told about (sentences
+  began with it): "x y ...". What follows y in that sentence is the link's tail (the words the link was made
+  with).
+* **A candidate.** Every statement told of y, with x in y's place. Nobody said it of x.
+* **What a link carries is learned.** Where the candidate was told of x too, the link carried that statement to
+  that thing (one experience for, booked once on a tie of the mind's own channel). Where x was told the same
+  statement with one item different, it did not (one against). The records are read level by level, each level the
+  vote of the one below it, every member once: this statement through links with this tail (the things it held
+  of, those it failed of); links with this tail (the statements for, against); links of any kind. A level has
+  decided when its record is for or against by more than k (one lucky agreement is not knowledge: F50's rule).
+  The most specific level that has decided speaks; a level that leans against without having decided keeps the
+  more general ones from speaking for it.
+* **A conjecture.** A candidate nobody told of x, whose record has decided for. The mind thinks it: its inner voice
+  lives the statement, imagined as every thought of the inner voice is (not told, not sensed). It is kept with its
+  source (the link, the statement it was carried from, the record it rested on) and with what becomes of it.
+  Because it is imagined, everything the mind already does with what it imagines applies: sleep sorts it against
+  what is lived (F22), and what is read from it weighs as much as the mind has learned to trust its imagination.
+  What the mind was told is read apart from it (a conjecture is never the premise of another).
+* **Settled by what is told later.** When x is told that statement the conjecture held; when x is told it with
+  another item at one place it failed. Either way the record moves, for every field at once.
+* **In its own time.** A thing of which something was told (or of whose linked item something was told) is
+  something to think over. In a silent moment in which nothing else was decided the mind decides to, as it
+  decides any act: rate = (2u - 1) + (2e - 1), u = 1 (there is something unthought), e what its own conjectures
+  came to when they met what it was told (1/2 before the first); one thing a moment, and the session lets it
+  happen (as it lets a thought or a question of its own happen).
+
+Nothing in it names a word, a field or a kind of link. The mind is not told that one word makes a class and
+another does not: it finds that what is told of the item before one word is told of the thing, and that what is
+told of the item before another word is not.
+
+### 23.4 Measured: three fields (`t_conj.py fields`, 5 seeds; rows in `results/conj.jsonl`; code md5 1dd09721...)
+
+The world: three fields with words of their own (12 animals, 8 bodies, 8 numbers; four classes each). Of every
+class two statements ("K V Q ."); of every thing its class ("X K sınıfındandır ."), one fact of its own
+("X V Q' .") and one sentence that links it to another thing of its field in another way ("X Y kovalar / çizer /
+izler ."). All sentences are read once in one random order over the three fields, a silent moment after each, and
+at the end silent moments until the mind has nothing left to think over. What holds in that world and is told of
+no thing: every thing has its class's two statements. The conditions differ only in what else is told:
+
+    condition                            conjectures  hold  do not   animals    bodies     numbers    moments it came to one
+    told in one field                    227          227   0        60/60      80/80      80/80      138
+    nothing told of things               0            0     0        0/120      0/80       0/80       0
+    told otherwise                       0            0     0        0/60       0/80       0/80       0
+    another word for the link            68           68    0        60/60      0/80       0/80       44
+    another word, two things told        188          188   0        60/60      60/60      60/60      114
+    one statement, one field             0            0     0        0/115      0/80       0/80       0
+    one statement in each of two fields  270          270   0        115/115    75/75      80/80      142
+    F59 off                              0            0     0        0/60       0/80       0/80       0
+
+(conjectures: all the mind made; hold / do not: whether they hold in the world; then, by field, how many of the
+statements that hold and were told of no thing it came to. The conditions: **told in one field**: the class's two
+statements are also told of six animals themselves; **nothing told of things**: of no thing; **told otherwise**: of
+the six animals, with another value; **another word for the link**: as the first, but bodies and numbers are linked
+to their classes with words of their own; **another word, two things told**: that, and in each of those two fields
+the statements are told of two things of one class; **one statement, one field**: one statement of one animal and
+nothing else; **one statement in each of two fields**: that and one statement of one body.)
+
+What it says:
+
+* With the evidence of one field the mind comes to every statement that holds of the other things and was told of
+  none: 60 of 60 animals' statements, and **80 of 80 and 80 of 80 in the two fields in which nothing was told of
+  any thing**. It made 227 conjectures and all 227 hold; none through the links that carry nothing (the record of
+  "X Y kovalar / çizer / izler" is against: what is told of the one chased, scratched or followed is told
+  otherwise of the thing), none of a thing's own fact, none of a class membership.
+* Without evidence that a link carries anything: nothing. With the evidence against: nothing. With one experience:
+  nothing.
+* One statement told of one thing in each of two fields: neither field alone holds more than one experience, the
+  two together do, and the mind comes to 270 of 270, 80 of them in the third field. The record of a kind of link
+  is one record over the fields: this is the sense in which a pattern the fields share makes the hypotheses.
+* What one word for the link carried is not believed of another word: with words of their own in the two other
+  fields, nothing there (0 of 80, 0 of 80), until two things of each field are told (60 of 60 each).
+* It thinks in its own moments: 138 silent moments in which it came to a conjecture over the five lives, the rest
+  of the silent moments it lived without.
+
+Every word of the world replaced by a random token (`--rename`), the same counts row for row:
+
+    condition                            conjectures  hold  do not   animals    bodies     numbers    moments it came to one
+    told in one field                    227          227   0        60/60      80/80      80/80      138
+    nothing told of things               0            0     0        0/120      0/80       0/80       0
+    told otherwise                       0            0     0        0/60       0/80       0/80       0
+    another word for the link            68           68    0        60/60      0/80       0/80       44
+    another word, two things told        188          188   0        60/60      60/60      60/60      114
+    one statement, one field             0            0     0        0/115      0/80       0/80       0
+    one statement in each of two fields  270          270   0        115/115    75/75      80/80      142
+    F59 off                              0            0     0        0/60       0/80       0/80       0
+
+### 23.5 What its conjectures came to (`t_conj.py settled`, 5 seeds)
+
+The life of "told in one field"; then the statements are told as they are of half of the things of every field,
+and in one field one class's statement is told otherwise of two of its things (exceptions nobody had told); then a
+thing of that class the mind never heard of is introduced:
+
+  227 conjectures before ; then told of half of the things as it is, and one class's statement told otherwise of two of its things: held 142, failed 10, still open 80 ; what thinking things over is worth to it, before -> after: [0.75, 0.833, 0.75, 0.833, 0.75] -> [0.919, 0.922, 0.919, 0.922, 0.919]
+  a thing of that class new to the mind: the class's other statement conjectured of it in 5 of 5 lives ; the statement that failed of two things conjectured of it in 0 ; anything else in 0
+
+The ten that failed are the mind's conjectures about the two things in each life of which the statement was then
+told otherwise: until then they were conjectures that did not hold, and nothing in the mind could have known. Once
+that statement had failed of two things it was not carried to the new thing; the class's other statement was.
+
+### 23.6 Asked what nobody told it (`t_conj.py asked`, 5 seeds)
+
+The life of "told in one field", lived by a mind that can be asked (F49, F53, F54 and F55 on; two kinds of
+question, "X ne Q ?" -> "V .", watched twice about the six animals that were told). Then every thing is asked what
+was told of none of them, on copies (right / wrong / silent): the other animals, and the bodies and numbers, of
+which no fact of this kind was ever told and no question ever asked:
+
+    without F59  animals 0/6/54  bodies 0/0/80  numbers 0/0/80
+    with F59     animals 60/0/0  bodies 80/0/0  numbers 80/0/0
+
+Without F59 it has nothing to say of them (and says a wrong word to 6 of the 60 questions about animals). With it
+the answer is read from what the mind had already thought by itself, before anyone asked: the question's kind is
+new to it there (carried by F53 from the two kinds it watched), and the asked place (F55) finds the statement its
+inner voice had made.
+
+### 23.7 What was tried on the way and changed, each measured
+
+* What thinking things over is worth was first read from every candidate the links made: most candidates of a
+  world are made by links that carry nothing, the worth fell, and the mind seldom thought (14 of 44 untold
+  statements found in the first world tried). It is now what the mind's own conjectures came to.
+* A thing whose candidates were not yet decided waited for the record of its kind of link only when no level had
+  spoken; where the general level had spoken against (most links carry nothing) it was never thought over again
+  (10 of 12). It waits whenever the statement's own record has not decided against.
+* A thing's links were noted only when they had candidates: a class's statement read after the thing's sentence
+  was not carried to it (22 of 24). The links are noted whenever the thing is thought over.
+* The levels above a statement were read without that statement's own vote: a statement that had held of one
+  thing was believed less than one never tried (37 of 46 and 21 of 30 with one statement told in each of two
+  fields). A statement's own record is one of the votes above it.
+* A statement that had failed of two things of a class and held of one was still conjectured of a fourth (the
+  general level spoke for it). A level that leans against keeps the more general ones from speaking (a test).
+* The records of a thing were booked while its candidates were being decided, in one pass: the thing whose own
+  statement was the evidence did not get its class's other statement (29 of 30). The records are booked first.
+* A conjecture was first thought as inferred. What follows a context from outside settles the claims of F49 and
+  the trials of F57, and "from outside" is everything but the mind's own acts and thoughts: an inferred statement
+  would have counted as evidence shown to it. It is thought as imagined.
+
+### 23.8 What it does not do
+
+* A link is the item right after the thing in a sentence it was told, and its tail the rest of that sentence; a
+  statement is carried whole, with the thing in the first place. A link said in another shape ("x is a y" with a
+  word between, the item not second), or a statement in which the item does not stand first, is not seen. In
+  running text tails seldom repeat, so no kind of link is found to carry and nothing is conjectured: on the
+  owner's documents and on natural text it was not measured and is expected to do little as it is.
+* "Told otherwise" is the same sentence with one item different. Where a thing truly has two values at a place
+  (it eats two things), the second counts against a link that carried the first.
+* A conjecture is not a premise. What is told of a thing's class's order is not carried to the thing (F58 reads
+  that at the moment of a question).
+* What one word for a link was found to carry is not believed of another word (measured: nothing in the two other
+  fields until two things there were told). Kinds of links that behave alike are not gathered.
+* It conjectures what was told of something else. A statement told of nothing (a law, a quantity, a comparison)
+  is outside what it can come to.
+* Where an exception was not told, the conjecture is false until it is (23.5).
+* Asked, the mind says a conjecture as it says anything it reads; that it is a conjecture is in its provenance and
+  in the mind's record (`!varsayim`), not in the words it says, and `!neden` does not name it yet.
+* Thinking a conjecture takes moments of the mind's life (its items and two more). The records are read whole in a
+  moment it thinks; that grows with them.
+
+### 23.9 The work queue after this section
+
+1. The rule "what was lived of the thing itself stands against what the others share" as a way of reading of its
+   own on trial; the choice among families that fit a context; a past question nobody answered (21.9).
+2. Links in other shapes and kinds of links that behave alike (23.8); conjectures on the owner's documents.
+3. Trials where no outcome is shown (21.11).
+4. Generalisation over more than two places; the word that goes with a word, position indices, answers longer
+   than the window (17.10).
+5. More questions of its own, asking its partner, a sense of the clock, the long life and the web, F52 on the
+   battery, the indices in shared memory (17.12).
+
+### 23.10 Gates, tests, reproduce
+
+With every studied switch off the lesson-free gate, the 17 configurations and the scripted life (plain and with
+wholes) are bit-identical to the references. Tests: 464 passed (9 new: `test_zihin_conjectures.py`).
+
+    python research/living_mind_2026_11_22/t_conj.py fields [--rename] | settled | asked
+    python -m zihin --ac conjectures        (then, in the chat: !varsayim)

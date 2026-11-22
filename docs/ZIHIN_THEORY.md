@@ -519,6 +519,27 @@ At each moment, roughly each word, the mind lives these steps:
   chain of three out of that one (0 of 40 -> 40 of 40). The mind set by hand with the mechanisms of the sections
   before answers 8 of those 120 questions (and says a wrong word to 14). Nobody wrote either relation. What is still given: the primitive
   relations, that a new relation is a chain, the experiment and what counts as better.
+- **Conjectures (F59, off by default).** Everything the mind said of a thing it had been told of that thing, or
+  read from what it knew at the moment it was asked. Here it comes, unasked and in its own time, to statements
+  nobody told it, and keeps them apart from what it knows. A thing told to go on with an item that is itself told
+  about is linked to it ("x y ..."; the rest of that sentence is the link's tail). Every statement told of the
+  item, with the thing in its place, is a candidate. Where the thing was told the candidate too the link carried
+  it (one experience for); where the thing was told it with one item different it did not (one against); the
+  records are read level by level, each the vote of the one below, every member once: this statement through
+  links with this tail, links with this tail, links of any kind. A level has decided when it is for or against by
+  more than k; the most specific level that has decided speaks, and one that leans against keeps the more general
+  from speaking for it. A candidate nobody told, whose record has decided for, is a conjecture: the inner voice
+  thinks it (imagined, as every thought; so sleep sorts it against what is lived and it weighs as the mind trusts
+  its imagination), and it is kept with its source and with what becomes of it when the thing is told more (held,
+  or failed). When to think a thing over is the mind's decision in a silent moment, as for any act. Nothing names a
+  word, a field or a kind of link: that what is told of the item before one word is told of the thing, and before
+  another word is not, is found. Measured (5 seeds; three fields with words of their own, the class's statements
+  told of six things of one field only): the mind comes to all 220 statements that hold of the other things and
+  were told of none (60 of 60 in that field, 80 of 80 and 80 of 80 in the two fields where nothing was told of any
+  thing) and to none that does not hold; to none with no such evidence, with one experience, or where the evidence
+  is against; one statement told in each of two fields, neither enough alone, is enough together (270 of 270). It
+  does not believe of another word for the link what one word carried. Links in other shapes, running text, and a
+  conjecture as the premise of another are not there.
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
@@ -775,6 +796,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | The Kind of a Whole | Bütünün Türü | F56, off by default | constituency (what a phrase is made of) kept apart from its denotation; attachment ambiguity |
 | Trials | Kendi Üzerinde Deney | F57, off by default | model selection by the learner itself; controlled (single-variable) experiments; counterfactual evaluation of one's own policy on logged situations; algorithm configuration; metareasoning |
 | Built Relations | Kurulan İlişkiler | F58, off by default (with trials) | program / relation induction by composition; multi-hop inference found from a failure; library learning (what was built becomes a building block) |
+| Conjectures | Varsayımlar | F59, off by default | hypothesis formation; property induction over a learned relation (which links license inference); abduction kept apart from knowledge by provenance; hypothesis testing against later evidence; default reasoning with exceptions |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

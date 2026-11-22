@@ -130,6 +130,13 @@ class Config:
                                     # relation to try; tried like any way (F57), and in use it is a relation of a
                                     # frame like the others: the members vouch for it; a relation it built and
                                     # took into use is a step of the next chain (read.built_value, deney.propose)
+    conjectures: bool = False       # F59 (Conjectures): a thing told to go on with an item that is itself told about
+                                    # is linked to it; what is told of that item, with the thing in its place, is a
+                                    # candidate; where the thing was told that too the link carried it, where it was
+                                    # told otherwise it did not; a candidate nobody told, whose kind of link has
+                                    # been found to carry, is thought by the inner voice in a silent moment
+                                    # (imagined, as every thought) and kept with its source until what is told
+                                    # later settles it (zihin/varsayim.py)
     whole_kinds: bool = False       # F56 (The Kind of a Whole; with wholes): the form of a whole says which wholes
                                     # stand in it also where its answer reads as their replies in more than one
                                     # order ("walk twice and walk" answers like "walk thrice"): without it such a
@@ -369,6 +376,11 @@ class Mind:
         self.trial_changes: List[dict] = []          # F57: every way it took into use or put away, and on what record
         self.trial_cases: List[dict] = []            # F57: the last cases in which a way made a difference
         self.trial_mark: Dict[object, tuple] = {}    # F57: a sleeping way's record when the configuration last changed
+        self.pondering: Dict[int, int] = {}          # F59: the things it was told something of, to think over
+        self.linked: Dict[int, tuple] = {}           # F59: item -> the things it found linked to it
+        self.waiting: Dict[tuple, tuple] = {}        # F59: kind of link -> the things whose candidates wait for its record
+        self.conjectures: Dict[tuple, dict] = {}     # F59: what it conjectured, with its source and what became of it
+        self.supposing = None                        # F59: the thing it decided, in this moment, to think over
         self.relations: tuple = ()                   # F58: the relations it built itself that are in use (chains)
         self.relations_tried: List[tuple] = []       # F58: those it has proposed and tries
         self.relation_paths: List[tuple] = []        # F58: every chain it ever proposed (a chain's code is its place)
@@ -570,6 +582,12 @@ class Mind:
                 self.wondering = act_mod.wonder(self) if free and getattr(self, "thinking", None) is None \
                     and (self.looking is None or not self.__dict__.get("can_look", True)) else None   # (a look it
                                                                     # cannot carry out does not stand in the way)
+            if getattr(cfg, "conjectures", False):         # F59: what it was told is something to think over; and,
+                from . import varsayim                     # free and with nothing else decided, whether it does
+                if items and listening:
+                    varsayim.took_in(self, items)
+                self.supposing = act_mod.suppose(self) if free and self.looking is None \
+                    and getattr(self, "wondering", None) is None else None
             if getattr(cfg, "think", False):               # F48: how surprised it was by what it is taking in (and
                 if items and listening:                    # where most: the item its failed expectation was of), and
                     total, n, peak, about = self.taking    # whether it now thinks about it
@@ -1168,7 +1186,7 @@ class Mind:
                   "unknown", "voice", "witnesses", "episode_start", "company", "topic", "open_where", "taking",
                   "heard", "about", "claimed", "faults", "_held_back", "open_plain", "met_once", "wondered",
                   "called", "trial_base", "trial_changes", "trial_cases", "trial_mark", "relations",
-                  "relations_tried", "relation_paths")
+                  "relations_tried", "relation_paths", "pondering", "linked", "waiting", "conjectures")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}
