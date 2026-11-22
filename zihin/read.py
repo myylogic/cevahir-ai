@@ -1329,6 +1329,7 @@ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] =
 
 VOICE_CHANNEL = "sesler"   # F24: the mind's own channel for the kinds of voices (not "ses": the hearing facets use it)
 VOICE_ALL = "*"         # F24: the unit of every voice (what voices in general have been worth)
+OPEN_CHANNEL = "acik"   # F46: the mind's own channel for what it found it did not know of an item (open claims)
 
 
 def voice_kind(voters: int, top: float) -> Tuple[int, int]:
@@ -1376,6 +1377,32 @@ def _claim(mind, unit: int, mass, where, fixed, category: Optional[int] = None) 
         if target is not None and f > claim_f:
             claim, claim_f = target, f
     return claim, claim_f
+
+
+def _note_claim(mind, filler: int, e: float, is_open: bool) -> None:
+    """F46 (Open Claims): the frame that speaks at the present moment claims, with expectation ``e``, that what
+    follows is a relation of its filler's own record (how its sequences go on, what it was answered with, what
+    stands where it stands, what is known of it). When the relation names nothing for this filler, the claim is
+    open: the mind's own evidence says something follows here, as it did for every member, and of this item it has
+    nothing. Kept for the moment: of the claims over 1/2 the strongest, and whether it is open (``Mind.step``
+    writes it, ``learn.note_claims``)."""
+    if e <= 0.5:
+        return
+    memo = _moment_memo(mind)
+    held = memo.get(("claim", filler))
+    if held is None or e > held[0]:
+        memo[("claim", filler)] = (e, is_open)
+
+
+def open_claim(mind, symbol) -> float:
+    """F46: how far the mind holds that claims about the item ``symbol`` are left open: the expectation of the tie
+    (its unit on the mind's own channel -> holds), 1/2 when no claim about it was ever left open."""
+    unit = mind.unit_of(OPEN_CHANNEL, symbol)
+    tie = mind.S.find_tie(unit, mind.holds, EXPECT, 0) if unit >= 0 else -1
+    if tie < 0:
+        return 0.5
+    w_pos, w_neg = mass1(mind, tie)
+    return expectation(w_pos, w_neg, mind.cfg.k)
 
 
 def frame_category(mind, frame: int) -> Optional[int]:
@@ -1439,6 +1466,8 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
         echo_on = known_on or (getattr(cfg, "echo", False) and filler is not None and tail is None)
         known_here: Dict[int, float] = {}
         said_known, only_known, own_names = {}, frozenset(), frozenset()
+        open_on = getattr(cfg, "open_claims", False) and filler is not None and trust is None \
+            and unit == mind.context               # F46: the claims of the present moment, read with the full trust
         topic = getattr(mind, "topic", None)
         telling = where and (where[-1] < len(parts_of(mind, unit)) - 1 or (
             topic is not None and topic[0] == filler and topic[2] == getattr(mind, "episode_start", None)))
@@ -1480,6 +1509,8 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
             if target == KNOWN:                    # F41: the thing known of the filler most like what the members
                 target, f = known_claim(mind, known_here, said_known, mass, trust,   # said of themselves here
                                         parts_of(mind, unit)[where[-1]:])
+                if open_on:
+                    _note_claim(mind, filler, e, target is None)
                 if target is not None:
                     e = held * f + (1.0 - held) * 0.5
                     out[target] = max(out.get(target, 0.0), e)
@@ -1487,11 +1518,14 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 continue
             if known_on and target >= 0 and target != filler and explained(target):
                 continue                           # F41: what a member said of itself is not said of another filler
+            asked = target
             if echo_on and target in (NEXT, START) and unit == mind.context:
                 target = resolve(mind, target, filler, tuple(fixed) + tuple(sorted(episode_said(mind, filler))),
                                  category)         # F42: what followed the filler in this episode is an echo
             else:
                 target = resolve(mind, target, filler, fixed, category)
+            if open_on and asked < SELF:           # F46: a relation that reads what was lived of the filler itself
+                _note_claim(mind, filler, e, target is None)
             if target is None:
                 continue
             out[target] = max(out.get(target, 0.0), e)

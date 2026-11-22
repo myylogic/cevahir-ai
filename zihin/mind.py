@@ -32,7 +32,7 @@ from .events import ACTED, IMAGINED, IMITATED, N_PROV, PROVENANCE, REFERENCE, SE
 from .evidence import conviction, expectation
 from .form import (READ_CACHES, SMALL, categories_of, compose, confirm_parts, expectations, kind_masks, masses,
                    masses_py, maybe_chunk, mv_view, np_view, parts_of, recognise)
-from .learn import learn_facets, learn_follow, learn_together, learn_value, reflect, tie_mass
+from .learn import learn_facets, learn_follow, learn_together, learn_value, note_claims, reflect, tie_mass
 from .read import conflict_of, predictions, total_drive
 from .store import ABSTRACT, ATOMIC, EXPECT, F64, I64, PART, SLOTTED, W_NEG, W_POS, Substance
 
@@ -122,6 +122,11 @@ class Config:
                                     # the utterance and their answers differ in one pair of words, each of the two
                                     # words answers with its own (Mill's method of difference): a word never said
                                     # alone becomes a whole (zihin/butun.py)
+    open_claims: bool = False       # F46 (Open Claims): when the frame that speaks claims a relation of its filler's
+                                    # own record (how its sequences go on, what it was answered with, what is known
+                                    # of it) and the relation names nothing for this filler, the mind notes, on a
+                                    # channel of its own, that something it does not know follows this item; what it
+                                    # looks up first is what such claims were left open for (web.wanted_topics)
     urge: bool = False              # F40 (Urge to Go On): when the leading word's rival is itself expected, it races
                                     # against silence as far as the two are things known about the same item (their
                                     # share of that item's lived continuations): another thing to say, not a rival
@@ -373,6 +378,9 @@ class Mind:
         try:                                               # (read.py reads each unit once in this stretch)
             self.predicted = predictions(self, "own" if listening else None)   # step 3 (cheap while listening)
             acts = [] if listening else act_mod.decide(self)   # step 4: no decision to take while listening
+            claims = [(key[1], held) for key, held in self._read_memo.items()   # F46: what the speaking frame
+                      if type(key) is tuple and len(key) == 2 and key[0] == "claim"] \
+                if getattr(cfg, "open_claims", False) else ()                    # claimed of its filler's record
             self._unknowing(items, acts, listening)
             imagine = cfg.imagine and not items
             rethink = cfg.reflect and cfg.reliability and not items
@@ -390,6 +398,8 @@ class Mind:
             self._feel(surprise)                           # step 6
         finally:
             self._read_memo = None
+        if claims:
+            note_claims(self, claims)
         if "_personal_moment" in self.__dict__ or "personal_log" in self.__dict__:
             from .iliski import end_moment                 # F33: this moment's notes, kept for undo and retraction
             end_moment(self)

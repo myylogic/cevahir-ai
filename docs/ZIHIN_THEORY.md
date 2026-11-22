@@ -295,6 +295,25 @@ At each moment, roughly each word, the mind lives these steps:
   recall are what they were. F43 needs it where a construction has a sibling that goes on: without it T-görev falls
   from 492 to 315 of 492 ("iki kere kahve yap" said three times) and T-compose from 75 to 67 of 75. On in the speaking
   configuration.
+- **Open Claims (F46, off by default).** Wanting to learn what it found it did not know. A frame that speaks claims a
+  relation of its filler's own record: "what follows is how the sequence that begins with the filler went on" (what it
+  was answered with, what stands where it stands, what is known of it). For every member the relation named
+  something; when for the present filler it names nothing, the mind's own evidence says that something follows here
+  and that of this item it has nothing: a known unknown, measured, not declared. Asked "leylek nedir ?" about a thing
+  it never met, the mind says "leylek" and stops; that moment's claim (its expectation e over 1/2) is written as
+  evidence on a channel of the mind's own, W+ of the tie (the item there -> holds), and W- when a claim about that item
+  is later met. What the mind looks up first (`!kendini_gelistir`) are the items whose claims are left open by that
+  evidence, before what it is merely unsure of (the older measure, tau x drive, named "bir" and class words: the
+  uncertainty of a function word is not a gap). T-want (generated; a library stands where the web stands, the same
+  interface): of the 20 topics the mind wants most after being asked about four things it never met (5 seeds),
+  **20 are those things** (0 without F46); it looks them up, and asked again answers **20 of 20** (0 of 20 when nothing
+  is looked up, 0 of 20 when it reads as much about other things); asked once more for real, the claims are met and
+  none of the 20 is wanted any longer. On a second question form it was not developed on ("X nerede bulunur ?"), as
+  found: 20 of 20 wanted, 20 of 20 answered with the fact's own words (never the whole sentence: the mind does not
+  repeat "bulunur", a word of the question, there, for things it read about as well). With the switch on, T-compose,
+  the meaning world, relations, T-purpose, T-deduce, T-chain, T-long, T-tell and SCAN's add-jump are what they were.
+  What it is not yet: the mind does not decide by itself *when* to look something up (the owner starts it), it wants
+  only what a frame of its own asked for (not what it has never been asked), and the library of the test is clean.
 - **Told Apart (F45, off by default; with F43).** A word that was never said alone has no reply of its own, and stands
   in a summary as the word it is: what was lived with "left" says nothing of "right" in the same place, and the mind
   said left's answer ("around right", held out with every command it stands in: 0 of 500, 379 of them wrong). But it
@@ -522,6 +541,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Wholes | Bütünler | F43, off by default | chunking (Miller); working memory as a stack of suspended contexts; roles and fillers, pointers; analysis by synthesis |
 | Lived Exclusion across channels | Kanallar Arası Dışlama | F44 | closed-world reading of an instance's own record |
 | Told Apart | Fark ile Cevap | F45, off by default | Mill's method of difference; minimal pairs; contrast in word learning |
+| Open Claims | Açık Kalan Beklenti | F46, off by default | feeling of knowing; information gaps (Loewenstein); known unknowns as the drive to look up |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

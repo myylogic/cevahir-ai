@@ -230,7 +230,8 @@ def wanted_topics(mind, channel: str, n: int) -> List[str]:
     topics by dusunce.topic_score, tau(u) x D(u): telling (few composed contexts hold it) and not yet well known (high
     drive). Nothing is left out by frequency (frequent words are held by many contexts: their tau is small) or by
     what a word looks like; symbols nothing ever followed score 0 and are not offered. Units !unut took back are not
-    counted."""
+    counted. With F46 (``open_claims``) the items a claim of the mind's own frames was left open for come first,
+    the most firmly open first: what it was asked for and did not have, before what it is unsure of."""
     from .dusunce import topic_score
     S = mind.S
     if not mind.ch.has(channel):
@@ -238,13 +239,25 @@ def wanted_topics(mind, channel: str, n: int) -> List[str]:
     cid = mind.ch.id(channel)
     n_units = S.n_units
     held = ((S.u_kind[:n_units].to(torch.int64) & ATOMIC) != 0) & (S.u_channel[:n_units] == cid) & S.u_alive[:n_units]
+    units = held.nonzero().flatten().tolist()
+    first: List[str] = []
+    if getattr(mind.cfg, "open_claims", False):            # F46: what a frame of its own needed and did not have
+        from .read import open_claim                       # (claims about the item left open, by its own evidence)
+        asked = []                                         # comes before what it is merely unsure of
+        for u in units:
+            symbol = mind.ch.symbol(cid, int(S.u_symbol[u]))
+            e = open_claim(mind, symbol)
+            if e > 0.5:
+                asked.append((e, str(symbol)))
+        asked.sort(key=lambda sw: -sw[0])
+        first = [w for _, w in asked[:n]]
     scored = []
-    for u in held.nonzero().flatten().tolist():
+    for u in units:
         score = topic_score(mind, u)
         if score > 0.0:
             scored.append((score, str(mind.ch.symbol(cid, int(S.u_symbol[u])))))
     scored.sort(key=lambda sw: -sw[0])                     # stable: equal scores keep the order the units were born
-    return [w for _, w in scored[:n]]
+    return (first + [w for _, w in scored if w not in first])[:n]
 
 
 class WayChooser:
@@ -317,6 +330,9 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
     firm_before = firm_knowledge(mind, before_unit) if before_unit >= 0 else 0
     start, read_titles, lived = mind.t, [], 0
     budget = WAYS[way]
+    if getattr(session, "close_turn", None) is not None:
+        session.close_turn()                           # an answered turn still open ends before the reading begins
+                                                       # (the chat does this for every command; here for any caller)
     for title in titles:
         text = source.extract(title)
         label = getattr(source, "found", {}).get(title, (title,))[0] if hasattr(source, "found") else title

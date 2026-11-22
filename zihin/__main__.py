@@ -43,7 +43,8 @@ Commands (Turkish, with English aliases):
                                     GOOGLE_CSE_ID are set, otherwise Wikipedia) and read what is found (pages printed)
     !kendini_gelistir [n] / !improve  the n topics it most wants to know by its own evidence (telling and not yet well
                                     known: tau x drive) are researched; it measures what each way of reading gave it
-                                    and chooses its way by that
+                                    and chooses its way by that. With --ac open_claims, what it was asked about and
+                                    found it did not know comes first
     !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
                                     the path that led to it is remembered and weighed next time, L5). The answer stays
                                     open for it until the feedback or the next utterance (yours, or the mind's own),
@@ -161,7 +162,7 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
          "company", "replies", "purpose", "forms", "echo", "exclusive_world")
 
 STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
-           "told_apart")                                                     # is raised with them; --ac turns one on
+           "told_apart", "open_claims")                                      # is raised with them; --ac turns one on
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -1177,7 +1178,7 @@ def main(argv=None) -> None:
     ap.add_argument("--ac", default="", help="switch on, for a loaded mind, mechanisms that new minds are raised with "
                     "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own "
                     "settings. Also the mechanisms that were measured and are off by default (inherit, witness, "
-                    "difference, urge, known, wholes, told_apart), for a loaded or a new mind")
+                    "difference, urge, known, wholes, told_apart, open_claims), for a loaded or a new mind")
     ap.add_argument("--pencere", type=int, help="how many items a NEW mind holds at once (its window, 3 to 15; "
                     "default 7); a mind keeps the window it has")
     args = ap.parse_args(argv)

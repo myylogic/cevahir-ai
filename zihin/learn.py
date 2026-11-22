@@ -687,6 +687,33 @@ def judge_voices(mind, changes: Dict[int, Dict[int, list]]) -> None:
                 add_evidence1(mind, W_POS if held else W_NEG, SENSED, tie, mind.knob["gain"])
 
 
+def note_claims(mind, claims) -> None:
+    """F46 (Open Claims): what the moment's speaking frame claimed of its filler's own record, written as evidence
+    on the mind's own channel (``read.OPEN_CHANNEL``), like the kinds of voices (F24): for each filler ``(e, open)``,
+    W+ of the tie (the item's unit there -> holds) grows by e when the claim was left open (the relation named
+    nothing for this item), W- by e when it was met. Only an item of a sense or act channel has such a unit, it is
+    made when a claim about it is first left open, and a claim that is met says nothing of an item no claim was ever
+    left open for. Booked as the mind's own percept (acted: self-produced, it never judges what the mind was told),
+    and it is no relief."""
+    from .read import OPEN_CHANNEL
+    S = mind.S
+    for filler, (e, is_open) in claims:
+        v = S.arrays()
+        if not v.kind[filler] & ATOMIC or v.channel[filler] < 0 \
+                or mind.ch.kind(int(v.channel[filler])) not in ("sense", "act"):
+            continue
+        symbol = mind.ch.symbol(int(v.channel[filler]), int(v.symbol[filler]))
+        if is_open:
+            channel = mind.add_channel(OPEN_CHANNEL, "knob")
+            unit = mind._atom(channel, symbol)
+        else:
+            unit = mind.unit_of(OPEN_CHANNEL, symbol)
+            if unit < 0:
+                continue
+        tie = S.tie(unit, mind.holds, EXPECT, 0)
+        add_evidence1(mind, W_POS if is_open else W_NEG, ACTED, tie, e, relief=False)
+
+
 def _verdict(mind, general: int, v: int, leave_out: float = 0.0):
     """How generalisation g fared on a lived value v: (w+, w-) for its RELY tie, or None if g had no opinion.
 

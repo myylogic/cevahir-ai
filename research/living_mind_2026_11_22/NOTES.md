@@ -268,3 +268,113 @@ al. 2019; Lake 2019 (NeurIPS); Andreas 2020 (GECA); Gordon et al. 2020; Nye et a
 (LANE, NeurIPS); Chen et al. 2020 (NeSS, NeurIPS); Furrer et al. 2020; "Equivariant Transduction through Invariant
 Alignment" (arXiv 2209.10926, 2022); Lake & Baroni 2023 (Nature). The figures were read from the papers' own tables
 or from later papers quoting them; where I could not confirm a figure it is given in words, not as a number.
+
+## 7. Wanting to learn what it could not answer: T-want and F46 Open Claims (the same day, after the commit above)
+
+What was asked: the mind should be able to want to learn, and to look up what it finds itself lacking. The program
+already had the two ends: `!arastir` reads what a search finds, and `!kendini_gelistir` picks the topics itself by
+one measure (tau x drive: telling, and not yet well known). What was never measured is the middle: **does the mind
+want the thing it just failed to answer?**
+
+### 7.1 The test, written first (`t_want.py`)
+
+Twelve things read about, one sentence each ("gül kırmızı bir çiçektir ."); for eight the question "X nedir ?" is
+watched being answered; four are read and never asked. Eight more things exist only in a library the mind has never
+read (a `zihin.web.Source`: the interface Wikipedia is read through; nothing is downloaded). Then: (1) the mind is
+asked about four library things; (2) it names what it wants most, as many topics as it was asked about, by its own
+evidence (the test never tells it which); (3) it looks them up; (4) it is asked again, on copies; (5) it is asked
+once more for real. Controls: a copy that looks nothing up, a copy that reads the same number of pages about things
+it was not asked about, and the four library things never mentioned to it.
+
+### 7.2 As found
+
+- The question form carries over to things read and never asked: 20 of 20 (5 seeds).
+- Asked about a thing it never met, the mind says its name and stops: "leylek nedir ?" -> "leylek". 0 of 20.
+- **Of the 20 topics it then wants most, 0 are the things it could not answer.** It wants "bir", "taşıttır",
+  "alettir", "çiçektir". The measure tau x drive sums, over what follows a word, use x (1 - conviction): a word used
+  much with many continuations scores high. That is the uncertainty of a function word, which no reading reduces,
+  not a gap. So the loop the owner asked about was open exactly in the middle: the mind did not want what it had
+  just been unable to say.
+
+### 7.3 What the mind's own evidence says at that moment (F46)
+
+Traced at the moment after it said "leylek": the frame that speaks is [X nedir ⏎ X], and its members agree on one
+thing with all their evidence (W+ 6.4, W- 0): *what follows is how the sequence that begins with the filler went
+on* (the relation START; for "gül" that is "kırmızı"). For "leylek" the relation names nothing. The mind's own
+frames therefore hold, at that moment, that something follows here and that of this item nothing is on record. That
+is a known unknown in the mind's own terms, and until now it was dropped (`if target is None: continue`).
+
+**F46, Open Claims** (switch `open_claims`, off by default): when the frame that speaks at the present moment claims,
+with expectation over 1/2, a relation of its filler's own record (NEXT, START, ALIKE, REPLY, INHERIT, KNOWN; not
+SELF, which says nothing about the filler) and the relation names nothing for this filler, the moment's strongest
+such claim is written as evidence on a channel of the mind's own ("acik"): W+ of the tie (the item's unit there ->
+holds) grows by e; when a claim about an item that has such a unit is met, W- grows by e. It is written like the
+kinds of voices (F24) and booked like not knowing (L7): the mind's own percept, never judging what it was told, no
+relief. No unit is made for an item whose claims are met, and no tie touches the word itself, so nothing that reads
+the word sees a difference. `web.wanted_topics` puts first the items whose tie stands over 1/2, the firmest first;
+the older measure fills the rest. It is a preference of one want over another, stated as such: what a frame of its
+own needed and did not have, before what it is merely unsure of.
+
+### 7.4 Results (`results/want.jsonl`, 5 seeds each)
+
+| | without F46 | with F46 |
+|---|---|---|
+| asked about things never met | 0 / 20 (the name only, 20) | 0 / 20 (the name only, 20) |
+| of the 20 topics it wants most, the things it could not answer | **0** | **20** |
+| found in the library | 0 / 20 | 20 / 20 |
+| asked again after reading | 0 / 20 | **20 / 20** exact |
+| control: nothing looked up | 0 / 20 | 0 / 20 |
+| control: reads as much about things it was not asked | 0 / 20 | 0 / 20 |
+| asked once more for real: still among what it wants most | - | **0 / 20** (the claim is met, the evidence turns) |
+| things never mentioned to it | the name only | the name only (it cannot want what it never heard of) |
+
+A second question form, written after F46 and run once ("X nerede bulunur ?" with a place for each thing): 20 of 20
+wanted are the gaps, 20 of 20 found, and asked again **0 of 20 exact, 20 of 20 with the fact's own words** ("leylek
+bacada"): the mind does not repeat "bulunur", a word of the question, and it does the same for the things it read
+about and was never asked (0 of 20 exact, 20 of 20 with the fact's own words). The count "with the fact's own
+words" was added after seeing this, and is reported next to the exact one for that reason. Wanting carried over as
+it was; the unfinished sentence is a property of answering in that form, not of F46.
+
+With the switch on, the other worlds answer as before: T-compose, the meaning world, relations, T-purpose, T-deduce,
+T-chain, T-long and T-tell (3 seeds each) and SCAN's add-jump (150 joined commands, 60 tests) give the same output
+lines, apart from timings; on the owner's documents the teacher protocol (120 exact, F1 0.7444) and recall with a
+two-word cue (90 / 146 / 31) are unchanged. With the switch off: the digest gate, the 17 configurations and the
+scripted life (plain and with wholes) are bit for bit what they were; 352 tests pass (5 new).
+
+### 7.5 What went wrong on the way
+
+- **The first version noted nothing.** The note was written on one of the two paths that resolve a relation; with
+  the echo rule (F42) on, START is resolved on the other. Found by tracing the moment, not by guessing: the claim
+  was there (W+ 6.4), the note was not.
+- **The first loop answered 6 of 12.** The wrong answers were of one kind: "bakır leylek göçmen bir kuştur". The
+  test called `research` directly after the mind's last answer ("bakır", unfinished), so the first page read went
+  on from that answer in the same turn and was learned as bakır's. The chat closes an answered turn before any
+  other command; the test did not, and `research` itself did not either. `research` now closes it (a no-op in the
+  chat), and a test pins that. After that: 12 of 12, then 20 of 20.
+- **A change tried and taken back.** I also made `research` perceive the end of each sentence, as a document's
+  sentences are perceived when a file is read. It made no difference to any count here, so it was reverted rather
+  than kept unmeasured. The difference between how a page and how a file are read is still there and unexplained
+  (a page's sentences have no perceived end; a page read after a chat is noted with the partner still present,
+  where a file is "no one's in particular"); it should be measured on recall before either is changed.
+
+### 7.6 What this is and what it is not
+
+It is the first measured step of the autonomy the owner described: the mind finds, by its own evidence, what it
+lacks; wants that; and when it is let to, reads it and can answer. Every part is the mind's own evidence (the claim
+of its frame, the evidence rule, retraction: the note is taken back with its moment).
+
+It is not yet: a mind that decides by itself *when* to look something up (the owner starts `!kendini_gelistir`; an
+urge that grows with open claims until the mind asks to read is the natural next mechanism, and the one that needs
+most care); a want for what it was never asked (a frame has to ask); a way to tell a page that answers the claim
+from one that does not (the test's library is clean: one page per thing, about that thing; on the real web the
+measure "did the claim close" is already there to judge a page by, and is not used yet); or anything about code and
+art, which are other work (T-code exists in the earlier notes; nothing new here).
+
+### 7.7 Reproduce
+
+```
+python research/living_mind_2026_11_22/t_want.py --seeds 5                          # as found: 0 of 20 wanted
+python research/living_mind_2026_11_22/t_want.py --seeds 5 --set open_claims=1      # 20 of 20, then 20 of 20
+python research/living_mind_2026_11_22/t_want.py --seeds 5 --form nerede --set open_claims=1
+python -m pytest tests/evolution/test_zihin_open_claims.py -q
+```
