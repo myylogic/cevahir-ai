@@ -2920,3 +2920,63 @@ wholes) are bit-identical to the references. Tests: 464 passed (9 new: `test_zih
 
     python research/living_mind_2026_11_22/t_conj.py fields [--rename] | settled | asked
     python -m zihin --ac conjectures        (then, in the chat: !varsayim)
+
+## 24. A loss repaired by living the kind again; a rule tried as a way and not kept; the earlier rows measured again
+
+### 24.1 The earlier rows with the corrected rule of 21.9
+
+The measurements that were running when section 21 was written have ended (the code of section 21, md5
+fd7f7bd2..., every script as committed, rows compared with the committed ones count for count, times left out):
+
+    t_asked.py forms, echo, unknown, twice                 50 of 50 rows
+    t_again.py with F55                                    28 of 28 rows
+    t_again.py with F53 + F54 + F55                        28 of 28 rows
+    t_grow.py forms, judged                                36 of 36 rows
+
+Nothing that was measured in sections 17 and 18 changes with the rule: every thing asked there had never been
+asked about before.
+
+### 24.2 What becomes of the loss of 21.9 when the mind lives the kind again (`t_repair.py review`, 5 seeds; code md5 1dd09721...)
+
+The second fault of 21.9: in one life of five the fresh things came to be answered wrong for one earlier kind
+after a later stage (a coincidence among the four things taught that kind, counted twice by F53). The mind does
+not see such a loss, since it is not asked that kind any more (21.11). Here it is: after the five stages a sixth,
+a review, asks the five kinds read of the thing itself again in the teacher's loop, four rounds each, of twenty
+things that had been asked another kind before. 8 fresh things asked every kind on copies, before and after:
+
+    condition                       yer      içer     sever    giyer    okur     doğurur  örtünür  üretir   
+    F57 + F58    after stage 5      40/0/0   40/0/0   40/0/0   32/8/0   40/0/0   40/0/0   40/0/0   40/0/0   
+                 after the review   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0   
+                 the review's rounds yer 20/0/0  içer 20/0/0  sever 20/0/0  giyer 19/1/0  okur 19/1/0 ; changes of configuration in it: none
+    set by hand  after stage 5      40/0/0   40/0/0   40/0/0   32/8/0   40/0/0   0/0/40   8/14/18  0/0/40   
+                 after the review   40/0/0   40/0/0   40/0/0   40/0/0   40/0/0   0/0/40   14/18/8  2/5/33   
+                 the review's rounds yer 20/0/0  içer 20/0/0  sever 20/0/0  giyer 19/1/0  okur 19/1/0 ; changes of configuration in it: none
+
+The life with the loss (seed 2: "giyer" 0 of 8 for fresh things after stage 5) answers it 8 of 8 after the review,
+in both conditions, and no way was taken or put away in the review: it is repaired by what is lived, not by a
+change of configuration. The coincidence was four taught things that happened to carry one value; four more
+things asked that kind carry others, the members of the frame no longer agree on a word, and the asked place
+stands alone again. One round of the review was answered wrong on the way (of that kind, in that life), and one
+of another kind in another life. Nothing else moved: the kinds that were right stay right (the mind that set
+itself: all eight kinds 40 of 40 after the review).
+
+So the loss of 21.9 was a wrong generalisation from too few cases, held for as long as the mind was not asked
+that kind, and gone when it was. What stays true of 21.11: while it is not asked, the mind does not know.
+
+### 24.3 Tried and not kept: F50's rule of reading as a way of its own on trial
+
+Section 21.9 named the rule that settles the coincidence ("what was lived of the thing itself stands against what
+the others share") and put "the rule as a way of reading of its own, tried like the others" first in the queue. It
+was built (a switch of its own, one of the ways F57 tries) and measured in a copy of the code, in the five lives
+of 24.2 with the review: the mind took it into use in 0 of 5 lives; its record over the lives was 2 better and 3
+worse (by life: 0 and 0, 0 and 1, 1 and 1, 1 and 0, 0 and 1). In the life with the loss it would have mended one
+answer of the review and spoiled another. Why it does worse in three cases was not traced. The mind's own trials
+say it is not worth having in this world, the loss is repaired without it (24.2), and it is not in the code. The
+choice among the families that fit a context (the comparison of two products that the coincidence tips) stays in
+the queue.
+
+### 24.4 Reproduce
+
+    python research/living_mind_2026_11_22/t_repair.py review
+
+The code is that of section 23 (nothing in `zihin/` changes with this section); tests as there (464).
