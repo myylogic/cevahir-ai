@@ -393,9 +393,31 @@ def decide(mind) -> List[Event]:
     return acts
 
 
+def think_now(mind) -> Optional[float]:
+    """F48 (Thinking by Itself): in a silent moment, whether the mind decides to think about what it last took in,
+    as the rate of that decision, or None.
+
+    What it took in last, and has not thought about, left a feeling: its surprise over those moments (``Mind.heard``:
+    under 1/2 when what it expected came, 1/2 when it expected nothing, over 1/2 when what it expected did not come).
+    As for any act (``decide``): rate = the drive + what this led to before,
+        rate = (2 surprise - 1) + (2 e_think - 1),
+    e_think what its thoughts have led to (``read.think_expectation``; 1/2 before its first), acted on when
+    ceil(theta / rate) <= T: the line it speaks at. So it thinks about what went against its expectations, and it
+    learns from what its thoughts come to whether thinking is worth it. Reads only: the thought is the session's to
+    let happen (the inner voice, ``dusunce.think``), and it is settled in ``learn.settle_thought``."""
+    from .read import think_expectation
+    heard = getattr(mind, "heard", None)
+    if heard is None:
+        return None
+    rate = (2.0 * heard - 1.0) + (2.0 * think_expectation(mind) - 1.0)
+    if rate <= 0.0 or math.ceil(mind.knob["theta"] / rate - 1e-12) > mind.cfg.T:
+        return None
+    return rate
+
+
 def look(mind) -> Optional[tuple]:
     """F47 (Looking Up by Itself): in a silent moment, the item the mind decides to look up, as (its unit, its
-    symbol), or None.
+    symbol, the rate of the decision), or None.
 
     Its candidates are the items a claim of its own frames was left open for (F46; e_open over 1/2) at a context
     that still stands. For each, as for any act (``decide``): rate = the drive + what this led to before,
@@ -405,7 +427,9 @@ def look(mind) -> Optional[tuple]:
     reaches the threshold in time, ceil(theta / rate) <= T: the line it speaks at. A look that did not close the
     claim counts against looking that item up again, and against looking in general; one that closed it ends the
     want. The first of equals: the shortest latency, then the firmest want, then the oldest item. Reads only: the
-    act is carried out by the session (``web.look_up``) and settled in ``learn.settle_look``."""
+    act is carried out by the session (``web.look_up``: before anything is fetched the mind is brought back to the
+    situation, and when it can now say it to the end there is nothing to look up) and settled in
+    ``learn.settle_look``."""
     from .read import claim_again, look_expectation, open_claim
     where = getattr(mind, "open_where", None)
     if not where or not getattr(mind.cfg, "open_claims", False):
@@ -413,7 +437,7 @@ def look(mind) -> Optional[tuple]:
     S = mind.S
     theta, T = mind.knob["theta"], mind.cfg.T
     v = S.arrays()
-    best = None
+    found = []
     for filler, context in where.items():
         if filler >= S.n_units or not v.ualive[filler]:
             continue
@@ -427,14 +451,11 @@ def look(mind) -> Optional[tuple]:
         latency = math.ceil(theta / rate - 1e-12)
         if latency > T:
             continue
-        entry = (latency, -e_open, filler, symbol)
-        if best is None or entry[:3] < best[:3]:
-            best = entry
-    if best is None:
-        return None
-    if claim_again(mind, where[best[2]], best[2]) is None:   # nothing claims it there any more: nothing to look for
-        return None
-    return best[2], best[3]
+        found.append((latency, -e_open, filler, symbol, rate))
+    for latency, _, filler, symbol, rate in sorted(found, key=lambda entry: entry[:3]):
+        if claim_again(mind, where[filler], filler) is not None:   # (nothing claims it there any more: nothing to
+            return filler, symbol, rate                             # look for)
+    return None
 
 
 # ---------------------------------------------------------------------- control knobs (section 8, simple)

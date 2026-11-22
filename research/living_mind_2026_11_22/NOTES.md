@@ -618,3 +618,113 @@ python research/living_mind_2026_11_22/t_live_look.py                 # needs th
 python research/living_mind_2026_11_22/eliminated_siblings/t_siblings.py scan     # the eliminated technique
 python -m pytest tests/evolution/test_zihin_ag.py tests/evolution/test_zihin_paralel.py -q
 ```
+
+## 10. No ability on a command: the mind's own time; a stricter test of "I know it now"; the published SCAN files
+
+What was asked: an intelligence that works by commands is not a living one. The mind is to use what it can do by
+its own decision. And: the published SCAN files may be fetched.
+
+### 10.1 Who decides what, today
+
+| what the mind can do | who decides when | |
+|---|---|---|
+| speak, answer, stay silent | the mind (always) | |
+| learn from what it lives | the mind (every moment) | |
+| notice that it does not know (L7), which item and which relation (F46) | the mind | |
+| look up what it found it did not know | the mind (F47), where its owner gave it somewhere to look | now by permission (`--ag`, `--kaynak`), not by a switch |
+| think (the inner voice) | **the mind (F48, new)**; before: the program's clock, ten seconds into every silence | `--saatli` gives the clock back |
+| sleep (dreams, sorting) | the program's clock, 600 s into a silence | not worked out: what makes this mind need sleep is not known; a clock is said to be a clock |
+| read a document, a page, hear a person | the world (someone gives it): not an ability used on command | |
+| retract, inspect, explain (`!unut`, `!neden`, `!ag` ...) | the owner: instruments of the owner, not abilities of the mind | |
+| answer many questions at once (`!sor_hepsi`) | the owner: it is the owner who asks many | |
+
+Giving the mind somewhere to look is a permission, as a room is; what it does there is its own. A command that
+makes it use an ability is not needed for anything in the upper half of the table any more, except sleep.
+
+### 10.2 F48, Thinking by Itself
+
+The mind already has the feeling this needs. Its surprise over the moments of what it takes in (measured, T-want's
+beginning): **0.26** for a sentence it expected ("gül kırmızı bir çiçektir ."), **0.50** exactly for words it never
+met (it expected nothing: nothing came true, nothing failed), **0.60** when a thing it knows is said to be otherwise
+("gül sarı bir çiçektir ."). The rule is the one every act has, with that feeling as the drive:
+
+    rate = (2 surprise - 1) + (2 e_think - 1),      acted on when ceil(theta / rate) <= T
+
+e_think is what its thoughts have come to (1/2 before the first): a thought's reality score (the mean expectation of
+its inner words from everything but imagination) is evidence for thinking, its complement against, and a thought in
+which nothing was said counts wholly against. It thinks about **the item its expectation was of where it failed
+most** (the item before the moment of greatest surprise), once: the thought spends the feeling.
+
+Measured (`t_own_time.py`, 3 seeds, 24 sentences told in each, five silent moments after each, no command):
+
+| sentence | surprise | thought about | what the thoughts were |
+|---|---|---|---|
+| expected | 0.26 | 0 of 24 | - |
+| against what it knew | 0.60 | **24 of 24** | what it knew: told "çam … bir ağaçtır" otherwise, it thinks "çam: yeşil bir ağaçtır" (reality 0.82) |
+| words never met | 0.50 | 15 of 24 | 4 empty, the others reality 0.36 |
+| the program's clock | - | 72 of 72 | whatever the sentence was |
+
+After the run its thoughts are expected to come to 0.59 to 0.61 (1/2 at birth): thinking has paid, so it now also
+thinks after neutral sentences (rate 0.2), and those thoughts (unreal or empty) pull the expectation back down: the
+rule regulates itself. It never thinks after what it expected.
+
+**What went wrong first.** The topic was chosen by the old measure (tau x drive: the best topic of the last
+sentence), and that picked "bir" again (as in 7.2). The thought about "bir" said nothing; a thought in which
+nothing is said counts against thinking; e_think fell to 0.25 and the mind never thought again: 3 thoughts of 72,
+all empty. The decision was right and the thought it led to was worthless, and the mind drew the conclusion its
+evidence allowed. The topic is now where the expectation failed, which the mind knows by itself.
+
+### 10.3 F47, stricter: to have a first word is not to know it
+
+9.3 showed that the mind counted a claim as met when the relation named anything ("bakır ,"). Now: after reading,
+the mind is **brought back to the situation the claim was left open in** (its items come to mind again on a copy;
+nothing of it is lived), goes on from there by its own decisions, and the claim is met only when it said something
+and **stops where the end of a turn is what it expects** (`dusunce.goes_to_an_end`). Stopping where no end is
+expected means it does not know how to go on: the claim stays open and the look counts against looking. For that
+the end of each sentence of a page is now perceived, as a document's are. Before anything is fetched the same test
+is made: when the mind has learned it meanwhile, nothing is fetched. And the way of reading used for a look is
+judged by whether the claim closed (it was judged by new firm ties before).
+
+The live run of 9.3 again, from the pages kept then (no request made): **leylek**: met, the page's whole first
+sentence as before. **vapur**: met, and now "vapur , çoğunlukla kısa mesafelerde yolcu taşımacılığında kullanılan
+bir deniz taşıtı". **bakır, armut**: not met, and the mind knows it (2 of 4 claims still open): "bakır ," is no
+longer taken for knowing. It tried bakır with the long way of reading first (60 sentences: not met), found the
+short way closing a claim (leylek), used the short way from then on, tried bakır once more with it (not met) and
+stopped.
+
+### 10.4 The published SCAN files (`t_scan_official.py verify`)
+
+With the owner's permission the published files were fetched (13 files, 28 MB with the repository's index; not
+kept in this repository). Against the generation these notes used:
+
+| | published | the same set as generated |
+|---|---|---|
+| all commands with their answers (`tasks.txt`) | 20,910 | **yes** (the six action tokens renamed one to one) |
+| add-jump: training / test | 14,670 lines (13,204 distinct; "jump" alone repeated) / 7,706 | **yes / yes** |
+| length: training / test | 16,990 / 3,920 | **yes / yes** |
+| around right: training / test | 15,225 / 4,476 | yes / **no** |
+| jump around right, opposite right, right: training / test | 18,528 / 1,173; 15,225 / 4,476; 15,225 / 4,476 | **no / no** |
+
+So the add-jump and length results stand on the published sets exactly. The template splits do not, and the
+difference matters. The published template splits leave out of training *and* test the 1,209 commands in which the
+template stands with "turn" ("turn around right", "turn opposite right", "turn right"), and test only on the
+template with a primitive ("jump right", "walk opposite right"). My generation kept the "turn" commands: for
+"around right" in the test (a superset of the published test), and for "opposite right" and "right" **in the
+training**: there the mind had watched "turn right" and "turn opposite right", which the published split withholds.
+The earlier "V right 200 of 200" and "V opposite right 200 of 200" were therefore measured on an easier split than
+the published one, and are withdrawn until the runs on the published files are in (running; reported when they
+end, whatever they show).
+
+### 10.5 Gates
+
+Switches off: digest gate, the 17 configurations and the scripted life (plain and with wholes): bit for bit what
+they were. Tests: 383 passed (6 new).
+
+### 10.6 Reproduce
+
+```
+python research/living_mind_2026_11_22/t_own_time.py
+python research/living_mind_2026_11_22/t_scan_official.py verify --scan <the published repository>
+python -m pytest tests/evolution/test_zihin_think.py -q
+python -m zihin --kaynak my_documents         # it looks in your folder by itself; add --ag for the web
+```

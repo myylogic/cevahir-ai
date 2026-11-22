@@ -1417,6 +1417,19 @@ def claim_again(mind, context: int, filler: int) -> Optional[Tuple[float, bool]]
 
 
 LOOK_ALL = "*"          # F47: the unit of every look (what looking things up has led to in general)
+THINK_CHANNEL = "dusun"  # F48: the mind's own channel for what its thoughts have led to
+THINK_ALL = "*"         # F48: the unit of every thought
+
+
+def think_expectation(mind) -> float:
+    """F48: what thinking is expected to lead to: the expectation of the tie (every thought -> relief); 1/2 while
+    the mind has not thought by its own decision yet."""
+    unit = mind.unit_of(THINK_CHANNEL, THINK_ALL)
+    tie = mind.S.find_tie(unit, mind.feel_unit["relief"], EXPECT, 1) if unit >= 0 else -1
+    if tie < 0:
+        return 0.5
+    w_pos, w_neg = mass1(mind, tie)
+    return expectation(w_pos, w_neg, mind.cfg.k)
 
 
 def look_expectation(mind, symbol) -> float:

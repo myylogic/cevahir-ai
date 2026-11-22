@@ -330,6 +330,19 @@ At each moment, roughly each word, the mind lives these steps:
   look per mind, then none (the wants stay). A library that holds half: each thing once, one failed thing once
   more, then none; 10 of 20 answered. What it is not: the clock of thinking and sleeping is still the program's;
   the mind looks up single words; and it reads text only (it cannot yet learn from what it hears or sees).
+- **Thinking by Itself (F48; the online life uses it, `--saatli` gives the program's clock back).** When to think
+  is the mind's own decision. What it takes in leaves its surprise over those moments (0.26 for what it expected,
+  1/2 exactly for words it never met, 0.60 when a thing it knows is said to be otherwise), and as for any act:
+  rate = (2 surprise - 1) + (2 e_think - 1) against the line it speaks at, e_think what its thoughts have come to
+  (their reality scores; a thought in which nothing was said counts against). It thinks about the item its
+  expectation was of where it failed most, once. Told 24 sentences of each kind and left in silence: it thought
+  about 0 of the expected ones, **24 of 24 of those that went against what it knew** (bringing back what it knew:
+  "çam: yeşil bir ağaçtır"), 15 of 24 of the neutral ones once thinking had paid, where the program's clock thinks
+  after every sentence. Chosen by the older topic measure the thought was about "bir", said nothing, and the mind
+  learned from that one empty thought never to think again: found, and fixed by thinking about what failed. **F47,
+  stricter:** a claim is met only when the mind, brought back to the situation, says what follows and stops where
+  the end of a turn is expected; a first word is not knowing ("bakır ," no longer counts), the claim stays open and
+  the way of reading is judged by it. Sleep is still on the program's clock.
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
@@ -567,6 +580,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Told Apart | Fark ile Cevap | F45, off by default | Mill's method of difference; minimal pairs; contrast in word learning |
 | Open Claims | Açık Kalan Beklenti | F46, off by default | feeling of knowing; information gaps (Loewenstein); known unknowns as the drive to look up |
 | Looking Up by Itself | Kendi Kararıyla Bakmak | F47, off by default | information seeking as an act chosen by its expected outcome; learned helplessness when looking never helps |
+| Thinking by Itself | Kendi Kararıyla Düşünmek | F48, off by default (on in the online life) | surprise as the drive to think (prediction error); reflection valued by what it comes to |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

@@ -173,7 +173,7 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
          "company", "replies", "purpose", "forms", "echo", "exclusive_world")
 
 STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
-           "told_apart", "open_claims", "look")                              # is raised with them; --ac turns one on
+           "told_apart", "open_claims", "look", "think")                     # is raised with them; --ac turns one on
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -512,37 +512,61 @@ class Session:
         self.looked_at = 0.0
         self.looks: List[dict] = []           # ... the reports of the looks of this session
         self.net = None                       # the session's way out to the network (zihin/ag.py; None: made on demand)
+        self.thought = None                   # F48: its last thought of its own: (topic, inner words, reality)
+        self.thoughts: List[tuple] = []       # ... and all of this session
 
     LOOK_GAP = 5.0                            # a setting of the program (not learned): seconds between two looks of
                                               # its own, so that a reading service is never asked in a burst
 
     def silent_moment(self, say=print) -> List[Event]:
-        """A silent moment of its life, lived as any moment. When the mind decided in it to look something up (F47,
-        ``Mind.looking``) and the owner lets this session look (``may_look``), the look is carried out: what is found
-        is read (every page printed), the mind settles it, and it is an entry of the history (so !unut takes it
-        back). Returns the acts the mind decided in the moment (its words, said by the caller)."""
+        """A silent moment of its life, lived as any moment; then what the mind decided in it about its own time is
+        let happen. It decided to look something up (F47, ``Mind.looking``) and the owner lets this session look
+        (``may_look``): the look is carried out (what is found is read, every page printed), the mind settles it,
+        and it is an entry of the history (so !unut takes it back). Else it decided to think about what it last took
+        in (F48, ``Mind.thinking``): the inner voice thinks it (``dusunce.think``), the mind settles what the thought
+        came to, and it is an entry of the history too. Returns the acts the mind decided in the moment (its words,
+        said by the caller)."""
         import time
         acts = self.mind.step([])
-        looking = getattr(self.mind, "looking", None)
-        if looking is None or acts or not self.may_look or time.time() - self.looked_at < self.look_gap:
+        if acts:
             return acts
-        from .web import look_up
-        start = self.mind.t + 1
-        say("\n  zihin (kendi kararıyla) bakıyor: %s" % (looking[1],))
-        try:
-            report = look_up(self, looking, source=self.look_source, say=say)
-        except Interrupted:
-            raise
-        except Exception as exc:                        # a service that does not answer: the look led to nothing
-            from .learn import settle_look
-            say("  bakılamadı (%s)" % type(exc).__name__)
-            report = {"topic": str(looking[1]), "read": [], "note": type(exc).__name__,
-                      "met": settle_look(self.mind, looking[0])}
-        self.looked_at = time.time()
-        self.looks.append(report)
-        outcome = {True: "beklenti kapandı", False: "beklenti hâlâ açık", None: "okunacak bir beklenti kalmamış"}
-        say("  okundu: %d cümle; %s" % (report.get("sentences", 0), outcome[report.get("met")]))
-        self.remember(READ, "[kendi kararıyla baktı] %s" % (looking[1],), list(range(start, self.mind.t + 1)))
+        looking = getattr(self.mind, "looking", None)
+        if looking is not None and self.may_look and time.time() - self.looked_at >= self.look_gap:
+            from .web import look_up
+            start = self.mind.t + 1
+            say("\n  zihin (kendi kararıyla) bakıyor: %s" % (looking[1],))
+            try:
+                report = look_up(self, looking, source=self.look_source, say=say)
+            except Interrupted:
+                raise
+            except Exception as exc:                    # a service that does not answer: the look led to nothing
+                from .learn import settle_look
+                say("  %s: bakılamadı (%s)" % (looking[1], type(exc).__name__))
+                report = {"topic": str(looking[1]), "read": [], "note": type(exc).__name__,
+                          "met": settle_look(self.mind, looking[0])}
+            self.looks.append(report)
+            if report.get("note") == "kendi bildiğiyle":   # nothing was fetched: it found it can say it already
+                say("  bakmasına gerek kalmadı: artık kendisi söyleyebiliyor (beklenti kapandı)")
+            else:
+                self.looked_at = time.time()
+                outcome = {True: "beklenti kapandı", False: "beklenti hâlâ açık",
+                           None: "okunacak bir beklenti kalmamış"}
+                say("  okundu: %d cümle; %s" % (report.get("sentences", 0), outcome[report.get("met")]))
+            self.remember(READ, "[kendi kararıyla baktı] %s" % (looking[1],), list(range(start, self.mind.t + 1)))
+            return acts
+        if getattr(self.mind, "thinking", None) is not None:
+            from .dusunce import think, topic_of
+            from .learn import settle_thought
+            start = self.mind.t + 1
+            about = getattr(self.mind, "about", None)      # the item its failed expectation was of, when it is a word
+            topic = str(self.mind.symbol_of(about)[1]) if about is not None and \
+                self.mind.symbol_of(about)[0] == CHANNEL else topic_of(self)
+            words_, reality = think(self, topic) if topic else ([], 0.0)
+            settle_thought(self.mind, bool(words_), reality)
+            self.thought = (topic, words_, reality)
+            self.thoughts.append(self.thought)
+            self.remember(SPOKE, "[kendi kararıyla düşündü] %s: %s" % (topic or "-", " ".join(words_) or "(sessiz)"),
+                          list(range(start, self.mind.t + 1)))
         return acts
 
     def words(self, text: str) -> List[str]:
@@ -1027,10 +1051,13 @@ class Life:
     decision in one of them emits words, they are said (Session.speak) and it is an entry of the history (kind
     "spoke"); nothing is said for it (no first speech after a silence, no question about a word it wants to know).
 
-    An innate rhythm, declared here and awaiting the owner's decision: once per silence, after THINK_AFTER seconds it
-    thinks (inner voice, lived as imagined, about the best topic of the last utterance it heard, dusunce.topic_of) and
-    after SLEEP_AFTER seconds it sleeps (dreams, then sorting). The clock is a setting of the program, not something
-    the mind learned; --yasamsiz turns the whole life clock off. Commands are handled in the same stream.
+    What it does with a silent moment is its own decision where the mind has one (the owner's decision of
+    2026-11-22: no ability is to hang on a command or a clock): to look up what it found it did not know (F47, when
+    the owner gave it somewhere to look) and to think about what it last took in (F48). Without F48 (--saatli, or an
+    older configuration) the program's rhythm thinks for it: once per silence, after THINK_AFTER seconds. Sleep
+    (dreams, then sorting) is still the program's rhythm, once per silence after SLEEP_AFTER seconds: what makes a
+    mind need sleep is not worked out yet, and a clock is said to be a clock. --yasamsiz turns the whole life off.
+    Commands are handled in the same stream.
 
     Ending it (Ctrl+C, !cik, the end of input) asks the session to stop: a long command stops at its next sentence,
     line or moment (Session.check), its life ends, and only then is the mind saved; a life that cannot be stopped is
@@ -1124,7 +1151,9 @@ class Life:
                 self._speak(acts, start)                 # emitted something: it is said
             elif len(self.session.looks) > before:
                 print("\n> ", end="", flush=True)
-        if self.thought is None and quiet >= self.think_after:     # innate rhythm: one inner thought per silence
+        if getattr(self.session.mind.cfg, "think", False):      # F48: when to think is the mind's own decision
+            pass                                                   # (Session.silent_moment let it happen above)
+        elif self.thought is None and quiet >= self.think_after:   # the program's rhythm: one thought per silence
             with self.lock:
                 topic = topic_of(self.session)
                 words_, reality = think(self.session, topic) if topic else ([], 0.0)
@@ -1218,10 +1247,15 @@ def main(argv=None) -> None:
     ap.add_argument("--kim", help="who is talking to the mind (asked at the start if not given)")
     ap.add_argument("--yasamsiz", action="store_true", help="no life clock: while you are silent the mind lives no "
                                                             "moments, does not think and does not sleep")
-    ap.add_argument("--kaynak", help="with --ac look: a folder of your own documents the mind may turn to by itself; "
-                                     "it is asked before the web")
-    ap.add_argument("--agsiz", action="store_true", help="with --ac look: its own looks never go to the web (only "
-                                                         "--kaynak is read; nothing leaves this machine)")
+    ap.add_argument("--kaynak", help="a folder of your own documents the mind may turn to by itself, when it decides "
+                                     "to; it is asked before the web (which it reads only with --ag)")
+    ap.add_argument("--ag", action="store_true", help="the mind may read the web by itself: what it found it did not "
+                                                      "know, when it decides to (the word it looks up goes to the "
+                                                      "search service; every page read is printed)")
+    ap.add_argument("--agsiz", action="store_true", help="its own looks never go to the web (only --kaynak is read; "
+                                                         "nothing leaves this machine)")
+    ap.add_argument("--saatli", action="store_true", help="the program's clock decides when it thinks in a silence "
+                                                          "(one thought ten seconds into each), not the mind itself")
     ap.add_argument("--onbelleksiz", action="store_true", help="do not keep fetched web pages on disk (by default they "
                                                                "are kept under the mind's folder, in 'ag', for 30 days)")
     ap.add_argument("--cevrimdisi", action="store_true", help="read the web only from what was kept before (no request "
@@ -1287,6 +1321,10 @@ def main(argv=None) -> None:
         if k in STUDIED and not getattr(mind.cfg, k, False):
             setattr(mind.cfg, k, True)
             print("  açıldı: %s (ölçülmüş, varsayılan olarak kapalı bir mekanizma; senin isteğinle açıldı)" % k)
+    asked_look = "look" in [k.strip() for k in args.ac.split(",")]
+    if (args.ag or args.kaynak) and not getattr(mind.cfg, "look", False):
+        mind.cfg.look = True                             # giving it somewhere to look is letting it look: what it
+        print("  açıldı: look (ona bakabileceği bir yer verdin; neye, ne zaman bakacağına kendisi karar verir)")
     if getattr(mind.cfg, "look", False) and not getattr(mind.cfg, "open_claims", False):
         mind.cfg.open_claims = True                      # what it looks up is what a claim was left open for
         print("  açıldı: open_claims (look onsuz çalışmaz)")
@@ -1297,17 +1335,23 @@ def main(argv=None) -> None:
     if getattr(mind.cfg, "look", False):                 # F47: the owner lets the mind look things up by itself
         from .web import Folder, Sources, web_sources
         own = [Folder(clean_path(args.kaynak), getattr(mind, "dil", "tr"))] if args.kaynak else []
-        session.look_source = Sources(own + ([] if args.agsiz else web_sources(lang, session.net).sources))
+        web = (args.ag or asked_look) and not args.agsiz  # the web only when the owner says so (--ag)
+        session.look_source = Sources(own + (web_sources(lang, session.net).sources if web else []))
         session.may_look = not args.yasamsiz and bool(session.look_source.sources)
         where = (["klasörün (%s)" % args.kaynak] if args.kaynak else []) + (
-            [] if args.agsiz else ["ağ: aradığı kelime arama servisine gider (GOOGLE_API_KEY yoksa Vikipedi, sonra "
-                                   "Vikisözlük)"])
+            ["ağ: aradığı kelime arama servisine gider (GOOGLE_API_KEY yoksa Vikipedi, sonra Vikisözlük)"]
+            if web else [])
         print("  (bu zihin, cevabını bilmediğini kendi fark ettiği şeylere SESSİZLİKTE KENDİ KARARIYLA bakar; baktığı "
               "yer: %s; okuduğu her sayfa yazılır, yalnız okur; !bakma kapatır, !bak açar, Ctrl+C durdurur%s)" % (
-                  ", sonra ".join(where) if where else "yok (--agsiz ve --kaynak verilmedi)",
+                  ", sonra ".join(where) if where else "yok (--ag ya da --kaynak ile bir yer ver)",
                   "" if session.may_look else "; şimdi bakmaz (yaşam saati kapalı ya da bakacak yer yok)"))
     session.explain = True                               # !neden explains the last answer word by word
     interactive = sys.stdin.isatty()
+    if interactive and not args.yasamsiz and not args.saatli and not getattr(mind.cfg, "think", False):
+        mind.cfg.think = True                            # F48: in its online life, when to think is its own decision
+        print("  (sessizlikte ne zaman düşüneceğine bu zihin kendisi karar verir: beklediğine aykırı bir şey "
+              "duyduğunda düşünür, düşüncelerinin neye vardığından öğrenir; program saati kullanılmaz, --saatli eski "
+              "düzeni verir)")
     name = args.kim
     if not name and interactive:
         name = input("Seninle konuşan kim? (adını yaz, boş bırakırsan 'biri') > ").strip()

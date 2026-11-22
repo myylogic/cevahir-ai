@@ -133,6 +133,11 @@ class Config:
                                     # at; having read, it reads the claim again where it was left open, and what that
                                     # shows is the outcome of the act (act.look, learn.settle_look). The reading is
                                     # the session's to carry out, from the sources its owner gave it
+    think: bool = False             # F48 (Thinking by Itself): in a silent moment the mind may decide to think about
+                                    # what it last took in: how far that went against what it expected (its surprise
+                                    # over those moments) plus what its thoughts have come to before, against the line
+                                    # it speaks at (act.think_now, learn.settle_thought). The inner voice is the
+                                    # session's to let happen; with this on the program's clock for thinking is unused
     urge: bool = False              # F40 (Urge to Go On): when the leading word's rival is itself expected, it races
                                     # against silence as far as the two are things known about the same item (their
                                     # share of that item's lived continuations): another thing to say, not a rival
@@ -275,6 +280,11 @@ class Mind:
                                                      # it knows of (set when such a claim is acted on)
         self.open_where: Dict[int, int] = {}         # F46/F47: item -> the context a claim about it was last left open
         self.looking = None                          # F47: the item it decided, in this moment, to look up
+        self.taking = (0.0, 0, 0.0, None)            # F48: its surprise over the moments of what it is taking in: the
+                                                     # sum, how many, the greatest, and the item before that moment
+        self.heard = None                            # F48: its surprise over what it last took in, not thought about yet
+        self.about = None                            # F48: the item its expectation was of where it failed most
+        self.thinking = None                         # F48: the rate at which it decided, in this moment, to think
         self.voice: Dict[int, tuple] = {}            # F24: context -> (voice that spoke, every voice heard), as
                                                      # (kind, claim, f) each; judged by what comes next
         self.imagined = 0
@@ -403,8 +413,18 @@ class Mind:
                 acts = act_mod.babble(self)
             for event in acts:
                 self.pending.append(event)
-            self.looking = act_mod.look(self) if getattr(cfg, "look", False) and not items and not acts \
-                and not listening else None                # F47: a silent moment, nothing said: look something up?
+            free = not items and not acts and not listening   # a silent moment in which nothing was said
+            self.looking = act_mod.look(self) if free and getattr(cfg, "look", False) else None   # F47
+            if getattr(cfg, "think", False):               # F48: how surprised it was by what it is taking in (and
+                if items and listening:                    # where most: the item its failed expectation was of), and
+                    total, n, peak, about = self.taking    # whether it now thinks about it
+                    if surprise > peak:                    # (the item before this one led it to expect otherwise)
+                        peak, about = surprise, (self.episode[-2] if len(self.episode) > 1 else None)
+                    self.taking = (total + surprise, n + 1, peak, about)
+                elif not items and self.taking[1]:
+                    self.heard, self.about = self.taking[0] / self.taking[1], self.taking[3]
+                    self.taking = (0.0, 0, 0.0, None)
+                self.thinking = act_mod.think_now(self) if free else None
             self._feel(surprise)                           # step 6
         finally:
             self._read_memo = None
@@ -990,7 +1010,8 @@ class Mind:
     # ------------------------------------------------------------------ transient state, undo, retraction
     _TRANSIENT = ("t", "focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending",
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
-                  "unknown", "voice", "witnesses", "episode_start", "company", "topic", "open_where")
+                  "unknown", "voice", "witnesses", "episode_start", "company", "topic", "open_where", "taking",
+                  "heard", "about")
 
     def _snapshot(self):
         return {name: copy.copy(getattr(self, name)) for name in self._TRANSIENT}

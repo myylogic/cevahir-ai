@@ -70,6 +70,36 @@ def think(session, topic: str, limit: int = 15, before: List[Event] = ()) -> Tup
     return thought, reality
 
 
+def goes_to_an_end(mind, context: int, limit: int = 60):
+    """F47: whether the mind, brought back to a lived situation, can say what follows it to the end. The items of
+    ``context`` come to mind again one after another on a copy of the mind (imagined; nothing of it is lived), and
+    from the last of them the copy goes on by its own decisions (the inner voice). True when it said something and,
+    where it stopped, the end of a turn is what it expects (over 1/2): it stopped because it was done. False when it
+    said nothing, or stopped where no end is expected: it does not know how to go on. None when this cannot be told
+    (a mind that never lived the end of a turn, or a situation that is not made of single items)."""
+    from .__main__ import TURN, TURN_END
+    from .form import parts_of
+    from .store import ATOMIC
+    end = mind.unit_of(TURN, TURN_END)
+    if end < 0 or context is None:
+        return None
+    v = mind.S.arrays()
+    moments = []
+    for part in parts_of(mind, context):
+        if not v.kind[part] & ATOMIC:
+            return None
+        channel = int(v.channel[part])
+        moments.append([Event(mind.ch.names[channel], mind.ch.symbol(channel, int(v.symbol[part])), IMAGINED)])
+    if not moments:
+        return None
+    copy = mind.clone()
+    copy.step([])                                          # from rest: the situation begins a run of its own
+    acts = take_in(copy, moments)
+    said: List[str] = []
+    go_on(copy, acts, said.extend, limit, imagined=True)
+    return bool(said) and copy.predicted.get(end, 0.5) > 0.5
+
+
 def take_in(mind, moments: List[List[Event]]) -> List[Event]:
     """Live these moments one after another without deciding until the last (the session's way of taking in an
     utterance: the act threshold is raised while it lasts); returns what the mind decides in the last one."""

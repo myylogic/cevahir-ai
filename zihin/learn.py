@@ -714,30 +714,68 @@ def note_claims(mind, claims) -> None:
         add_evidence1(mind, W_POS if is_open else W_NEG, ACTED, tie, e, relief=False)
 
 
-def settle_look(mind, filler: int):
-    """F47: the outcome of a look, lived as one moment of the mind's own life (as the outcome of a way of reading
-    is, web.WayChooser). The claim is read again where it was left open (``read.claim_again``): what it shows is
-    written like any claim of a moment (``note_claims``: met, W- of the item's open tie; still open, W+), and it is
-    the outcome of the act: on the ties (the item -> relief) and (every look -> relief) of the mind's own channel,
-    W+ by the claim's expectation when the claim is now met, W- when it is still open (by 1 when nothing claims it
-    there any more). Returns True (met), False (still open) or None (there was nothing to read again)."""
-    from .read import LOOK_ALL, OPEN_CHANNEL, claim_again
+def settle_thought(mind, said: bool, reality: float) -> None:
+    """F48: what a thought of its own came to, lived as one moment of the mind's own life: on the tie (every thought
+    -> relief) of the mind's own channel, W+ by the thought's reality score and W- by its complement (the reality
+    score is the mean expectation of its inner words from everything but imagination, ``dusunce.think``); a thought
+    in which nothing was said came to nothing: W- by 1. The feeling it thought about is spent (``Mind.heard``)."""
+    from .read import THINK_ALL, THINK_CHANNEL
     S = mind.S
-    v = S.arrays()
-    symbol = mind.ch.symbol(int(v.channel[filler]), int(v.symbol[filler]))
-    where = getattr(mind, "open_where", {})
     S.begin(mind.t + 1, mind.ch.sizes())
     mind.t += 1
     try:
-        claim = claim_again(mind, where.get(filler), filler)
+        channel = mind.add_channel(THINK_CHANNEL, "knob")
+        tie = S.tie(mind._atom(channel, THINK_ALL), mind.feel_unit["relief"], EXPECT, 1)
+        if said:
+            add_evidence1(mind, W_POS, ACTED, tie, reality, relief=False)
+            add_evidence1(mind, W_NEG, ACTED, tie, 1.0 - reality, relief=False)
+        else:
+            add_evidence1(mind, W_NEG, ACTED, tie, 1.0, relief=False)
+    finally:
+        S.end()
+    mind.heard = None
+
+
+def claim_state(mind, filler: int):
+    """F47: the claim about an item, read again where it was left open, as (e, whether it is open), or None when
+    nothing claims it there any more. Open also when the relation now names something and the mind, brought back to
+    that situation, still cannot say what follows to the end (``dusunce.goes_to_an_end``): to have a first word is
+    not to know it. Reads only (the bringing back is done on a copy)."""
+    from .dusunce import goes_to_an_end
+    from .read import claim_again
+    context = getattr(mind, "open_where", {}).get(filler)
+    claim = claim_again(mind, context, filler)
+    if claim is not None and not claim[1] and goes_to_an_end(mind, context) is False:
+        claim = (claim[0], True)
+    return claim
+
+
+def settle_look(mind, filler: int, looked: bool = True):
+    """F47: the outcome of a look, lived as one moment of the mind's own life (as the outcome of a way of reading
+    is, web.WayChooser). The claim is read again where it was left open (``claim_state``: met only when the mind can
+    now say it to the end): what that shows is written like any claim of a moment (``note_claims``: met, W- of the
+    item's open tie; still open, W+), and it is the outcome of the act: on the ties (the item -> relief) and (every
+    look -> relief) of the mind's own channel, W+ by the claim's expectation when the claim is now met, W- when it
+    is still open (by 1 when nothing claims it there any more). ``looked`` False: nothing was fetched (the mind
+    found it can say it already): only the claim is written. Returns True (met), False (still open) or None (there
+    was nothing to read again)."""
+    from .read import LOOK_ALL, OPEN_CHANNEL
+    S = mind.S
+    v = S.arrays()
+    symbol = mind.ch.symbol(int(v.channel[filler]), int(v.symbol[filler]))
+    claim = claim_state(mind, filler)
+    S.begin(mind.t + 1, mind.ch.sizes())
+    mind.t += 1
+    try:
         if claim is not None:
             note_claims(mind, [(filler, claim)])
         met = claim is not None and not claim[1]
-        amount = claim[0] if claim is not None else 1.0
-        channel = mind.add_channel(OPEN_CHANNEL, "knob")
-        for name in (LOOK_ALL, symbol):
-            tie = S.tie(mind._atom(channel, name), mind.feel_unit["relief"], EXPECT, 1)
-            add_evidence1(mind, W_POS if met else W_NEG, ACTED, tie, amount, relief=False)
+        if looked:
+            amount = claim[0] if claim is not None else 1.0
+            channel = mind.add_channel(OPEN_CHANNEL, "knob")
+            for name in (LOOK_ALL, symbol):
+                tie = S.tie(mind._atom(channel, name), mind.feel_unit["relief"], EXPECT, 1)
+                add_evidence1(mind, W_POS if met else W_NEG, ACTED, tie, amount, relief=False)
     finally:
         S.end()
     return None if claim is None else met

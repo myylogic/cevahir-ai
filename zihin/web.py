@@ -392,14 +392,23 @@ def wanted_topics(mind, channel: str, n: int) -> List[str]:
 
 
 def look_up(session, looking, source: Optional["Source"] = None, say: Callable[[str], None] = print) -> Dict[str, object]:
-    """F47: carry out the mind's own decision to look an item up (``looking`` = (its unit, its symbol), act.look):
-    read what is found (``research``), then the mind settles the look by reading the claim again where it was left
-    open (learn.settle_look). Returns research's report with "met": True, False, or None when nothing could be read
-    again."""
-    from .learn import settle_look
-    filler, symbol = looking
-    report = research(session, str(symbol), source=source, say=say)
-    report["met"] = settle_look(session.mind, filler)
+    """F47: carry out the mind's own decision to look an item up (``looking`` = (its unit, its symbol, ...),
+    act.look). First the mind is brought back to the situation the claim was left open in: when it can now say it to
+    the end (it has learned it meanwhile), nothing is fetched and the claim is written as met. Otherwise what is
+    found is read (``research``), the mind settles the look by reading the claim again (learn.settle_look), and the
+    way of reading it used is judged by that (it closed the claim or it did not). Returns research's report with
+    "met": True, False, or None when nothing could be read again."""
+    from .learn import claim_state, settle_look
+    filler, symbol = looking[0], looking[1]
+    mind = session.mind
+    state = claim_state(mind, filler)
+    if state is not None and not state[1]:
+        settle_look(mind, filler, looked=False)
+        return {"topic": str(symbol), "read": [], "sentences": 0, "met": True, "note": "kendi bildiğiyle"}
+    report = research(session, str(symbol), source=source, say=say, record=False)
+    report["met"] = settle_look(mind, filler)
+    if report.get("way") and report["met"] is not None:
+        WayChooser(mind).judge(report["way"], bool(report["met"]))
     return report
 
 
@@ -430,6 +439,15 @@ class WayChooser:
             return untried[0]
         return max(tried, key=lambda way: tried[way][0])
 
+    def judge(self, way: str, good: bool) -> None:
+        """F47: a way of reading used for a look of the mind's own is judged by what the look came to: it closed the
+        claim (W+ by 1) or it did not (W- by 1)."""
+        S = self.mind.S
+        S.begin(self.mind.t + 1, self.mind.ch.sizes())
+        self.mind.t += 1
+        add_evidence1(self.mind, W_POS if good else W_NEG, ACTED, self._tie(way), 1.0)
+        S.end()
+
     def record(self, way: str, gain: float) -> None:
         """gain = new firm ties on the topic per 100 moments; bounded evidence: w+ = g/(g+1), w- = 1/(g+1)."""
         good = gain / (gain + 1.0)
@@ -443,9 +461,11 @@ class WayChooser:
 
 
 def research(session, topic: str, source: Optional[Source] = None, way: Optional[str] = None,
-             say: Callable[[str], None] = print) -> Dict[str, object]:
-    """Look a topic up, read it with a way of reading, measure the gain, record it. Returns a report. The topic and
-    what is read are split and lower-cased by the session's convention (its mind's dil), as everything it hears."""
+             say: Callable[[str], None] = print, record: bool = True) -> Dict[str, object]:
+    """Look a topic up, read it with a way of reading, measure the gain, record it (``record`` False: the caller
+    judges the way itself, ``look_up``). Returns a report. The topic and what is read are split and lower-cased by
+    the session's convention (its mind's dil), as everything it hears. Each sentence is heard, its end perceived (as
+    when a document is read), and a moment passes."""
     from .events import IMITATED
     from .__main__ import CHANNEL, sentences, words
     mind = session.mind
@@ -481,6 +501,7 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
         session.company(None)                          # F33: a page is no one's in particular, as a document is (read
                                                        # with the partner still present it was kept as lived with them
                                                        # and was not recalled with anyone else: t_page.py)
+    end_of_turn = getattr(session, "end_of_turn", None)
     for title in titles:
         text = source.extract(title)
         held = source._of.get(title, source) if isinstance(source, Sources) else source   # the source that found it
@@ -495,6 +516,8 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
             if check is not None:
                 check()
             session.listen(sentence, IMITATED)
+            if end_of_turn is not None:                # the writer's sentence has ended: its end is perceived (so
+                end_of_turn(IMITATED, tone=session.tone(sentence))   # the mind knows where a statement is complete)
             mind.step([])
             lived += 1
         if lived >= budget:
@@ -504,7 +527,8 @@ def research(session, topic: str, source: Optional[Source] = None, way: Optional
     firm_after = firm_knowledge(mind, unit) if unit >= 0 else 0
     spent = max(1, mind.t - start)
     gain = 100.0 * max(0, firm_after - firm_before) / spent
-    chooser.record(way, gain)
+    if record:
+        chooser.record(way, gain)
     return {"topic": topic, "way": way, "read": read_titles, "sentences": lived, "moments": spent,
             "firm_before": firm_before, "firm_after": firm_after, "gain_per_100_moments": round(gain, 2),
             "ways": {w: round(chooser.expectation(w)[0], 3) for w in WAYS}}
