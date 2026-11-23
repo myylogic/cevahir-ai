@@ -3714,3 +3714,25 @@ wholes) are bit-identical to the references. Tests: 522 passed (12 new: `test_zi
     python research/living_mind_2026_11_22/t_full.py -- research/living_mind_2026_11_22/t_fault_kinds.py kinds --out /tmp/x.jsonl
     python research/living_mind_2026_11_22/t_full.py --off split_failed -- research/living_mind_2026_11_22/t_fault_kinds.py kinds --out /tmp/x.jsonl
     python research/living_mind_2026_11_22/t_full.py --off deduced_first -- research/living_mind_2026_11_15/t_chain.py --set inherit=1 --out /tmp/x.jsonl
+
+## 29. The whole published length and "jump around right" files with F56
+
+Two more of the whole published SCAN test files with F56 on (section 20.4; `t_scan_kinds.py run`, the code frozen
+with section 20, md5 4d33b86f...; one life each, seed 0; the rows appended to `results/scan_kinds.jsonl`):
+
+    the published split    watched twice (of the published training file)    exact with F56     without (section 22)
+    right                  1,087 of 15,225                                   4,476 of 4,476     4,475
+    length                 1,094 of 16,990                                   3,920 of 3,920     3,919
+    jump around right      1,096 of 18,528                                   1,173 of 1,173     1,173
+
+Nothing silent and nothing wrong in the two new files. The length file is answers of 24 to 48 actions, none of
+that length in what the mind watched; the one answer that was not exact without F56 is exact with it, as the
+sample of section 20 said it would be. The lives are 89,640 and 95,230 moments (181 s and 200 s); the answers took
+2,896 s and 3,534 s with two processes.
+
+Not finished: "around right" (4,474 of 4,476 without F56) and "opposite right" (4,476 without). Their runs were
+stopped twice to free the processors for the batteries of sections 27 and 28 and have been started again; their
+rows will be appended when they come out. "add jump" has no answer that F56 changes (7,706 of 7,706 without it,
+section 22) and was not run again.
+
+    python research/living_mind_2026_11_22/t_scan_kinds.py run --scan <the published SCAN folder> --split length --workers 2
