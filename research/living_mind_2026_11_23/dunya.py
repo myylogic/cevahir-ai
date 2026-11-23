@@ -317,7 +317,7 @@ class World:
     def line(self, kind: str, text: str, answer: Optional[str] = None, seen: Optional[List[Thing]] = None,
              event: Optional[Tuple[str, Thing, Thing]] = None, pointed: Optional[Thing] = None,
              seen_answer: Optional[List[Thing]] = None, event_answer: Optional[Tuple[str, Thing, Thing]] = None,
-             tags: Optional[dict] = None) -> dict:
+             tags: Optional[dict] = None, pointed_answer: Optional[Thing] = None) -> dict:
         """One line: what is said (and the answer of a dialogue), with what is perceived while it is said."""
         def scene(things, ev, point):
             if things is None and ev is None:
@@ -327,7 +327,7 @@ class World:
                     "pointed": point.index if point is not None else None,
                     "flat": self.flat(things or [], ev)}
         return {"kind": kind, "text": text, "answer": answer, "scene": scene(seen, event, pointed),
-                "scene_answer": scene(seen_answer, event_answer, None), "tags": tags or {}}
+                "scene_answer": scene(seen_answer, event_answer, pointed_answer), "tags": tags or {}}
 
     def naming(self, t: Thing, ask: bool = False) -> dict:
         """The teacher points at a thing and says what it is; or someone asks "bu ne ?" while it points, and the
@@ -335,9 +335,9 @@ class World:
         point = ("goster", self.teacher, t)
         present = [self.teacher, t]
         tags = {"thing": t.kind, "color": t.color()}
-        if ask:
+        if ask:                                          # the teacher goes on pointing while it is answered
             return self.line("what_this", self.what_this(), self.this_is(t), seen=present, event=point, pointed=t,
-                             seen_answer=present, event_answer=point, tags=tags)
+                             seen_answer=present, event_answer=point, pointed_answer=t, tags=tags)
         return self.line("name", self.this_is(t), seen=present, event=point, pointed=t, tags=tags)
 
     def act_lines(self, person: str, verb: str, other: Thing, beside: Optional[Thing] = None, ask: Optional[str] = None,

@@ -219,7 +219,9 @@ def speaking_line(mind) -> float:
 
 def contradicts(mind, z: Zemin, w: int, feats: Dict[int, float]) -> bool:
     """Whether the word expects, at least as firmly as the mind speaks, another value of one of the unit's
-    dimensions than the one it has: such a word does not name it ("elmaya" expects a stem; a ball has none)."""
+    dimensions than the one it has, and is as sure that no other value comes (every other value it met expected at
+    most 1 - e*): such a word does not name it ("elmaya" expects a stem; a ball has none). A dimension on which it met
+    another value it is not sure of varies for it, and is no mark."""
     prof = _word_profile(mind, z, w)
     line = speaking_line(mind)
     ident = mind.ch.id(IDENTITY) if mind.ch.has(IDENTITY) else -1
@@ -228,9 +230,64 @@ def contradicts(mind, z: Zemin, w: int, feats: Dict[int, float]) -> bool:
         if not values or ch == ident:                # (an identity is no property of a kind: a kind word heard
             continue                                 # twice with one thing expects it for a while)
         v, e = max(values.items(), key=lambda ve: ve[1])
-        if e >= line and v != f and values.get(f, 0.0) < line:
-            return True
+        if e < line or v == f or values.get(f, 0.0) >= line:
+            continue
+        if any(x > 1.0 - line for val, x in values.items() if val != v):
+            continue                                 # it is not as sure that the others do not come: the dimension
+        return True                                  # varies for this word (books come in colours)
     return False
+
+
+def _met(mind, z: Zemin, w: int) -> Dict[int, int]:
+    """How many values of each dimension the word has met: named with at least one whole observation's worth of
+    evidence (an alignment's share is a part of one)."""
+    key = ("met", w, mind.S.version)
+    hit = z.memo.get(key)
+    if hit is not None:
+        return hit
+    S = mind.S
+    lst = S.out.get((w, ADLANDIRIR, 0))
+    out: Dict[int, int] = {}
+    if lst:
+        ids = np.frombuffer(lst, dtype=np.int32).astype(np.int64)
+        v = S._np()
+        ids = ids[v.alive[ids]]
+        if len(ids):
+            p, _ = S.raw2(torch.from_numpy(ids))
+            pos = p.numpy().sum(axis=1) if p.dim() > 1 else p.numpy()
+            for tie, x in zip(ids, pos):
+                if x >= 1.0:                         # met: at least one whole observation's worth of evidence
+                    ch = int(v.channel[v.dst[tie]])
+                    out[ch] = out.get(ch, 0) + 1
+    z.memo[key] = out
+    return out
+
+
+def _sample(mind, z: Zemin) -> List[Dict[int, float]]:
+    """The features of up to 64 things the mind has perceived, spread over its life (what a word is compared with to
+    know how much it tells of one thing)."""
+    key = ("sample", len(mind.ch.symbols[mind.ch.id(THING)]) if mind.ch.has(THING) else 0)
+    hit = z.memo.get(key)
+    if hit is not None:
+        return hit
+    out = []
+    if mind.ch.has(THING):
+        c = mind.ch.id(THING)
+        n = len(mind.ch.symbols[c])
+        for i in range(0, n, max(1, n // 64)):
+            u = mind.S.atom_index.get((c, i), -1)
+            if u >= 0:
+                out.append(_features(mind, u))
+    z.memo[key] = out
+    return out
+
+
+def informative(mind, z: Zemin, w: int, feats: Dict[int, float]) -> float:
+    """How much more the word fits this thing than the things it is compared with (``_sample``) on average: what
+    it tells of this one ("bu", which fits every thing pointed at, tells little; "kitap" tells it is a book)."""
+    sample = _sample(mind, z)
+    base = sum(fit(mind, z, w, f) for f in sample) / len(sample) if sample else 0.0
+    return fit(mind, z, w, feats) - base
 
 
 def left_open(mind, z: Zemin, head: int, feats: Dict[int, float]) -> Dict[int, float]:
@@ -500,16 +557,24 @@ def _places(mind, z: Zemin, wunits, about: Dict[int, int], talked, share, presen
             places[jj] = ACTION
     view = present if present is not None else about
     feats = {i: _features(mind, u) for i, u in view.items()}
+    line = speaking_line(mind)
     for jj, w in enumerate(wunits):                   # modifiers: a word that tells a participant apart
         if places[jj] != w:
             continue
+        prof = _word_profile(mind, z, w)
         for hp, i in heads.items():
             head = wunits[hp]
-            mine = left_open(mind, z, head, feats[i])
-            here = fit(mind, z, w, mine)
             rivals = [x for x in feats if x != i and x not in heads.values() and fit(mind, z, head, feats[x]) > 0.0]
-            if here > 0.0 and rivals and all(fit(mind, z, w, left_open(mind, z, head, feats[x])) < here
-                                             for x in rivals):
+            if not rivals:
+                continue
+            told = False                              # on a dimension the head's word leaves open, it expects the
+            for f in left_open(mind, z, head, feats[i]):   # participant's value as firmly as the mind speaks, and
+                ch = _channel(mind, f)                # every other thing its head's word could name has another
+                if prof.get(ch, {}).get(f, 0.0) >= line and \
+                        all(_by_dimension(feats[x], mind).get(ch, (None,))[0] != f for x in rivals):
+                    told = True
+                    break
+            if told:
                 places[jj] = ("M", hp)
                 break
     return places, heads
@@ -640,11 +705,27 @@ def understand(mind, z: Zemin, words: List[str]) -> Optional[dict]:
 
 
 def _names_it(mind, z: Zemin, w: int, thing: int, feats: Dict[int, float]) -> int:
-    """1 when the word names this very thing (it expects its identity: a proper name), else 0."""
+    """1 when the word names this very thing (it expects its identity as firmly as the mind speaks: a proper name),
+    else 0."""
     ident = mind.ch.id(IDENTITY) if mind.ch.has(IDENTITY) else -1
     values = _word_profile(mind, z, w).get(ident, {})
     own = next((f for f in feats if _channel(mind, f) == ident), None)
-    return int(own is not None and values.get(own, 0.0) > 0.5)
+    return int(own is not None and values.get(own, 0.0) >= speaking_line(mind))
+
+
+def _a_name(mind, w: int) -> bool:
+    """Whether the word was ever lived in a participant's place of a construction (it has named participants)."""
+    S = mind.S
+    v = S._np()
+    for tie in S.inc.get((w, DOLGU)) or []:
+        if not v.alive[tie]:
+            continue
+        island = int(v.src[tie])
+        kappa, _ = mind.ch.symbol(int(v.channel[island]), int(v.symbol[island]))
+        key = mind.ch.symbol(int(v.channel[kappa]), int(v.symbol[kappa]))
+        if key[int(v.lag[tie])] == HEAD:
+            return True
+    return False
 
 
 def _event_word(mind, z: Zemin, q: dict) -> Optional[int]:
@@ -683,20 +764,22 @@ def _names_of(mind, z: Zemin, feats: Dict[int, float]) -> List[int]:
     v = S._np()
     ties = S.inc.get((own, ADLANDIRIR)) or []
     out = []
+    line = speaking_line(mind)
     for tie in ties:
-        if v.alive[tie] and int(v.lag[tie]) == 0 and _e(mind, int(tie)) > 0.5:
+        if v.alive[tie] and int(v.lag[tie]) == 0 and _e(mind, int(tie)) >= line:
             out.append(int(v.src[tie]))
     return out
 
 
 def _answer_turns(mind, q_turn: int) -> List[Tuple[float, int, tuple, str]]:
-    """What followed this turn from another speaker, most expected first (over 1/2): (e, construction unit, its key,
-    time relation)."""
+    """What followed this turn from another speaker, most expected first (at least as expected as the mind speaks):
+    (e, construction unit, its key, time relation)."""
     ids, dst, e = _out(mind, q_turn, EXPECT, 1)
     out = []
     v = mind.S._np()
+    line = speaking_line(mind)
     for turn, x in zip(dst, e):
-        if x <= 0.5:
+        if x < line:                                 # as firmly expected as the mind speaks
             continue
         kappa, zeta = mind.ch.symbol(int(v.channel[turn]), int(v.symbol[turn]))
         key = mind.ch.symbol(int(v.channel[kappa]), int(v.symbol[kappa]))
@@ -778,10 +861,11 @@ def answer(mind, z: Zemin, words: List[str], when: Optional[str] = None) -> Opti
         return None
     things = [_features(mind, z.present[i]) for i in parts if i in z.present]
     for _, kappa_a, key_a, zeta_a in tried:
-        if any(isinstance(p, tuple) and p[0] == "w" and things and
+        if any(isinstance(p, tuple) and p[0] == "w" and things and _a_name(mind, p[1]) and
                all(contradicts(mind, z, p[1], f) for f in things) for p in key_a):
-            continue                                 # a fixed word that names none of them (a form kept from
-        out = _fill(mind, z, q, kappa_a, key_a, zeta_a, parts, action)   # before the word meant anything)
+            continue                                 # a fixed word that has named participants and names none of
+        out = _fill(mind, z, q, kappa_a, key_a, zeta_a, parts, action)   # these (a form kept from before it meant
+                                                                         # anything: "bu bir elma" for a horse)
         if out is not None:
             wc = mind.ch.id(z.words)
             return [str(mind.ch.symbol(wc, int(mind.S._np().symbol[w]))) for w in out]
@@ -829,14 +913,19 @@ def _fill(mind, z: Zemin, q: dict, kappa_a: int, key_a: tuple, zeta_a: str, part
             every_word = _fillers(mind, kappa_a, None, j, every=True)
             asked = [named[i]] if i in named else []
             word = None
-            own_names = [w for w in dict.fromkeys(every_word + asked + _names_of(mind, z, tf))
-                         if _names_it(mind, z, w, thing, tf)]
-            for cands in (own_names, list(dict.fromkeys(island_words + asked)), every_word):
-                ranked = sorted(((fit(mind, z, w, tf), w) for w in cands if not contradicts(mind, z, w, tf)),
-                                reverse=True)       # its own name, whatever the action (a proper name); else the
-                if ranked and ranked[0][0] > 0.0:   # words lived here with this action word and the question's word
-                    word = ranked[0][1]             # (a kind word's form goes with the verb); else any lived here
-                    break
+            fixed = {p[1] for p in key_a if isinstance(p, tuple) and p[0] == "w"}   # a construction's fixed words
+            own_names = [w for w in dict.fromkeys(every_word + asked + _names_of(mind, z, tf))   # do not fill its
+                         if _names_it(mind, z, w, thing, tf) and w not in fixed]               # places ("bu bir _")
+            kept = [w for w in asked if w in every_word and w not in fixed]   # as the question called it, where that
+            for cands in (own_names, kept,                                    # word was lived in this place
+                          [w for w in dict.fromkeys(island_words + asked) if w not in fixed],
+                          [w for w in every_word if w not in fixed]):
+                ranked = sorted(((informative(mind, z, w, tf), w) for w in cands
+                                 if not contradicts(mind, z, w, tf) and fit(mind, z, w, tf) > 0.0), reverse=True)
+                if ranked:                          # its own name, whatever the action (a proper name); else the
+                    word = ranked[0][1]             # words lived here with this action word and the question's word
+                    break                           # (a kind word's form goes with the verb); else any lived here;
+                                                    # the one that tells most of it ("bu" fits every pointed thing)
             if word is None:
                 return None
             out[j] = word
