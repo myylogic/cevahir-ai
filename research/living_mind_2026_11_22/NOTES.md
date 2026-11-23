@@ -4212,3 +4212,95 @@ keeps failing is not believed. What costs is not following the wrong thoughts bu
 and that is what section 33's window bounds. Where the picture asks for more than was built here (a thought that
 widens by bringing in what the held thought is about, rather than by reading more frames) it is not yet a
 mechanism.
+
+## 36. The subject carries (F72): the thought that held widens to what it is about
+
+Asked, after section 35: by "the mind locks onto the right thought and widens it", look at the reading in which
+the thought that held brings in what is known of what it is about. Section 35 tried the locking (F71) and did not
+keep it. This section builds the widening, in the two places a thought holds: in the mind's own answer, and while it
+only listens.
+
+### 36.1 What was missing
+
+F41 keeps the topic of an answer: when the mind tells what it knows of a thing, that thing is the topic of the run,
+and what is known of it and not said yet carries the answer on. The topic lived only as long as the run. In Turkish
+the subject of the next sentence is usually dropped: "aslan nerede yaşar ?" - "aslan ormanda yaşar" - "ne yer ?".
+Measured on the world below, the whole mind answered the first question right and said nothing to the second (0 of
+40), although asked "aslan ne yer ?" whole it answered right (40 of 40). It knew; the thought it had just held did
+not reach the next question. The same while it reads: "panter ormanda yaşar . et yer ." taught it nothing about the
+panther's food (0 of 60 below).
+
+### 36.2 The mechanism in conversation (`Config.subject_carries`; on in the whole mind; `Session.carry_subject`)
+
+When the mind's answer told what it knew of a thing (F41's topic was set in that answer's run), the thing is held
+for the next turn (`Session.held_subject`). If the mind then has nothing to say to an utterance, it hears the
+utterance again in the inner voice with the held thing in the place the utterance leaves open, and answers from
+there. Where that place is, what it lived says: the utterance with one item more at some position has the shape
+of an utterance it lived (`Session._has_place`: the first instance of every shape with one place left out,
+`Substance.frame_first`, or a frame it made, `Substance.frame_of`); the first such position from the beginning is
+taken. The utterance is imagined (nothing is said by it, no decision is made while it comes to mind); what the
+mind decides at its end is said aloud as any answer. Only the turn right after the answer, only where the mind had
+nothing to say, only where the thing is not named in the utterance, only where such a shape was lived. Nothing is
+chosen by hand: not the place, not the kind of utterance, not the words.
+
+### 36.3 The mechanism while listening (`Config.subject_heard`, needs silent claims; on in the whole mind)
+
+While the mind only listens, a thought holds when a claim of one of its frames was what it then heard (the silent
+claims of section 27, `hata.judge`). The filler of that frame in the heard sentence is the thought's subject
+(`hata._held_about`). If the next sentence it hears leaves open a place for it (the same test, `_has_place`) and
+does not name it, the sentence comes to mind again in the inner voice with the subject in that place: "panter
+ormanda yaşar ." then "et yer ." is heard again as "panter et yer ." (imagined: the mind's own percept, trusted as
+its imagination is). The subject goes on being carried while the sentences leave it open; a sentence that names
+its own subject is not touched.
+
+### 36.4 Measured (`t_subject.py`, the whole mind with F72 off and on, 5 seeds; right / wrong / silent;
+`results/subject.jsonl`)
+
+In conversation: 24 animals, what each eats and where it lives read twice, both questions watched of 6; then, on
+copies, 8 animals never asked about:
+
+    the second question                                       without F72     F72
+    "X nerede yaşar ?" then "ne yer ?"                        0 / 0 / 40      40 / 0 / 0
+    "X ne yer ?" then "nerede yaşar ?"                        0 / 0 / 40      40 / 0 / 0
+    "ne yer ?" first (nothing to carry)                       0 / 0 / 40      0 / 0 / 40
+    "X nerede yaşar ?" then "Y ne yer ?" (another named)      40 / 0 / 0      40 / 0 / 0
+    "X ne yer ?" whole                                        40 / 0 / 0      40 / 0 / 0
+    "X ne içer ?" (never read) then "ne yer ?"                0 / 0 / 40      0 / 0 / 40
+
+While listening (`--heard`): of 12 animals both facts are read whole, twice, and "X ne yer ?" watched of 6; of the
+12 others the mind reads once "X P yaşar ." and then "V yer ." with the subject dropped. Asked "X ne yer ?":
+
+    asked of                                                  without F72     F72
+    the 12 read with the subject dropped                      0 / 0 / 60      60 / 0 / 0
+    6 of the animals read whole                               30 / 0 / 0      30 / 0 / 0
+
+140 of 140 where the subject was dropped, no wrong answer, and nothing changed where there was nothing to carry or
+where the subject was said. The cost: 4.1 s of processor time for the 40 carried questions against 1.1 s for the
+silent ones (the question is heard twice); 5.1 s against 2.5 s for the 60 sentences heard again while reading.
+
+The battery (the 37 lines of section 28's battery, the whole mind with F72 against the whole mind of section 33):
+35 lines the same, count for count. Two changed. The misled world: one wrong answer fewer on things never asked
+about (V2 0 / 1 / 39 -> 0 / 0 / 40, in both conditions with silent claims); it is F72 while listening (run with
+`subject_heard` off the line is as it was). The dialogue world of `meaning_switches.py` (3 seeds): "peki nasılsın
+?" answered right in one seed of three where it was answered in none (the extra-word wordings 0.56 -> 0.67);
+"evin nerede ?" silent in all three as before, the right word leading at the turn's end in two where it led in
+three; the life has 9 moments and 221 ties more (the sentences heard again inwardly).
+
+### 36.5 What it does not do
+
+* It carries one thing, one turn (in conversation) or while the sentences leave it open (listening). After an
+  utterance that held to no thing, nothing is carried; nothing older than the last held thought comes back.
+* The first position a lived shape allows is taken; an utterance that could take the thing in two places takes
+  the first. Where no utterance of that shape was lived, nothing is carried (the mind has to have lived such a
+  sentence whole at least once).
+* It does not decide whether the dropped subject is the held thing or someone else; it hears the sentence about the
+  held thing because that is the only thing it has in mind, as a listener does. A text that drops the subject of
+  a sentence about a new thing, never named, would be heard about the old one (not measured).
+
+### 36.6 Gates, tests, reproduce
+
+With every studied switch off the gates are bit-identical (code md5 65ec90ffd453e42986fcd0a12fe787db).
+548 tests pass (`tests/evolution/test_zihin_*.py`; `test_zihin_subject.py`, 5, is new).
+
+    python research/living_mind_2026_11_22/t_subject.py --seeds 5
+    python research/living_mind_2026_11_22/t_subject.py --heard --seeds 5

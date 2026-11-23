@@ -258,6 +258,14 @@ class Config:
                                     # record is read last, over the other, as the more specific evidence is
                                     # everywhere; and a moment in which it only listens is not being called on
                                     # again (what it held back is not counted unanswered there) (hata._apart)
+    subject_carries: bool = False   # F72 (The Subject Carries; with known): an utterance the mind has nothing to
+                                    # say to, right after an answer that told what it knew of a thing, is heard
+                                    # again inwardly with that thing in the place one of its frames has there
+                                    # (Session.carry_subject)
+    subject_heard: bool = False     # F72 while listening (with silent claims): a sentence heard right after one in
+                                    # which a thought held, that leaves open the place a frame has for that
+                                    # thought's subject, is heard again inwardly with the subject in that place
+                                    # (Session.carry_heard_subject)
     open_window: bool = False       # F70 (The Open Window): a family (F53) is read through the frames that come
                                     # to mind in the time the mind has: T frames (one a step of the moment),
                                     # the nearest to the context first, T more every later moment it has the

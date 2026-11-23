@@ -529,6 +529,8 @@ def judge(mind, items) -> None:
         if v is None:
             rest.append(claim)
             continue
+        if said is None and v == target and getattr(mind.cfg, "subject_heard", False):
+            _held_about(mind, ways)                        # F72: what the thought that held while listening was about
         before = _read_now(mind, ways, e0)
         settle(mind, ways, v == target, e0, turn=said is not None)
         if said is False:
@@ -539,6 +541,24 @@ def judge(mind, items) -> None:
         mind.claimed[mind.context] = tuple(rest)
     else:
         del mind.claimed[mind.context]
+
+
+def _held_about(mind, ways) -> None:
+    """F72 (with ``Config.subject_heard``): a claim of a frame held while the mind only listened: the item at the
+    frame's place in the context (its filler) is what the thought that held was about; kept with the run it was
+    heard in (``Session.end_of_turn`` carries it into the next sentence)."""
+    from .form import mv_view, parts_of
+    from .store import CATEGORY, COMPOSED
+    last = ways[-1]
+    if last[0] != "g" or len(last) != 3 or mind.context is None:
+        return
+    kinds = mv_view(mind, "u_kind")
+    frame, parts = parts_of(mind, last[2]), parts_of(mind, mind.context) if kinds[mind.context] & COMPOSED else ()
+    if len(frame) != len(parts):
+        return
+    where = [j for j, p in enumerate(frame) if kinds[p] & CATEGORY]
+    if where:
+        mind.__dict__["_heard_subject"] = (parts[where[0]], getattr(mind, "episode_start", -1))
 
 
 def valued(mind, sign: float) -> None:

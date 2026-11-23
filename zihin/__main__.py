@@ -212,13 +212,13 @@ STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # bu
            "silent_claims", "find_out", "wonder", "echo_exact", "families", "lived_apart",   # (the program's
            "asked_place", "whole_kinds", "trials", "built_relations", "conjectures", "unseen_share",   # default)
            "own_race", "echo_told", "relied_on", "shares_tested", "unknown_outside", "trial_ends",
-           "split_failed", "deduced_first", "own_turn", "open_window")
+           "split_failed", "deduced_first", "own_turn", "open_window", "subject_carries", "subject_heard")
 
 NEEDS = (("find_out", ("faults", "look")), ("wonder", ("look",)), ("silent_claims", ("faults",)),   # what does not
          ("built_relations", ("trials",)), ("unseen_share", ("families",)), ("look", ("open_claims",)),   # work
          ("echo_told", ("echo_exact",)), ("relied_on", ("silent_claims",)), ("shares_tested", ("told_apart",)),
          ("trial_ends", ("trials",)), ("split_failed", ("faults",)), ("deduced_first", ("faults", "inherit")),
-         ("own_turn", ("silent_claims",)),
+         ("own_turn", ("silent_claims",)), ("subject_heard", ("silent_claims",)),
          ("told_apart", ("wholes",)), ("whole_kinds", ("wholes",)))
                                                                                                     # without what
 
@@ -642,6 +642,7 @@ class Session:
         mind.add_channel(EAR, "sense")          # a heard thing likewise
         mind.add_channel(SOUND, "facet")
         self.view = None                        # an image shown for the next utterance: (gist, facets)
+        self.held_subject = None                # F72: the thing the last answer told what it knew of
         self.seen: Dict[str, str] = {}          # the file names of images shown in this session, by gist
         from .mind import INNER_CHANNEL, SELF_CHANNEL
         if not mind.ch.has(SELF_CHANNEL):       # minds born before the self unit existed get it now
@@ -954,9 +955,62 @@ class Session:
             events = [Event(TURN, TURN_END, prov)]
             if tone and self.tones:
                 events.append(Event(TONE, tone, prov))
-            return self.mind.step(events)
+            acts = self.mind.step(events)
         finally:
             self.mind.knob["theta"] = theta
+        if listening and getattr(self.mind.cfg, "subject_heard", False):
+            self.carry_heard_subject()
+        return acts
+
+    def _has_place(self, masked, p: int) -> bool:
+        """F72: whether the mind lived these items with one item more at position ``p``: a lived utterance of that
+        shape (``Substance.frame_first``: the first instance of every shape with one place left out) or a frame it
+        made of such utterances (``Substance.frame_of``)."""
+        from .store import frame_key
+        key = frame_key((p,), tuple(masked))
+        return self.mind.S.frame_first.get(key) is not None or self.mind.S.frame_of.get(key) is not None
+
+    def carry_heard_subject(self) -> None:
+        """F72 while the mind only listens (``Config.subject_heard``): a sentence heard right after one in which a
+        thought held (a claim of a frame it made while listening was what it then heard, ``hata._held_about``), that
+        leaves open the place one of its frames has for that thought's subject, is heard again in the inner voice
+        with the subject in that place: "aslan ormanda yaşar ." then "balık yer ." is heard again as "aslan balık
+        yer .". The subject goes on being carried while the sentences leave it open ("gece avlanır ." after it).
+        What is heard again is imagined (the mind's own percept, trusted as its imagination is); nothing is said."""
+        from .events import IMAGINED
+        from .form import parts_of
+        from .store import COMPOSED, frame_key
+        mind = self.mind
+        run = getattr(mind, "episode_start", -1)
+        held = mind.__dict__.get("_heard_subject")
+        this = held[0] if held is not None and held[1] == run else None
+        prev = getattr(self, "_heard_prev", None)
+        carried = False
+        context = mind.context
+        kinds = read.mv_view(mind, "u_kind")
+        if prev is not None and this is None and context is not None and kinds[context] & COMPOSED:
+            parts = parts_of(mind, context)
+            place = None
+            if prev not in parts:
+                for p in range(len(parts) + 1):
+                    masked = parts[:p] + (-1,) + parts[p:]
+                    if len(masked) <= mind.knob["F"] and self._has_place(masked, p):
+                        place = p
+                        break
+            if place is not None:
+                v = mind.S.arrays()
+                theta = mind.knob["theta"]
+                mind.knob["theta"] = 1e9
+                try:
+                    mind.step([])                        # from rest: the sentence comes to mind again with its subject
+                    for unit in parts[:place] + (prev,) + parts[place:]:
+                        channel = int(v.channel[unit])
+                        mind.step([Event(mind.ch.names[channel], mind.ch.symbol(channel, int(v.symbol[unit])),
+                                         IMAGINED)])
+                finally:
+                    mind.knob["theta"] = theta
+                carried = True
+        self._heard_prev = this if this is not None else (prev if carried else None)
 
     def watch(self, first: str, answer: str, prov: int = IMITATED, asker: str = SOMEONE) -> None:
         """Two others talk: one says ``first``, another answers ``answer``; the mind only watches. The end of each
@@ -996,9 +1050,11 @@ class Session:
             said = reply_in_parts(self, text, limit, say)
         if said is None:
             looking = None
+            heard = None
             if self.turns:                               # the turn passes when your utterance has ended
                 self.listen(text, TOLD, speaker=self.partner)
                 acts = self.end_of_turn(TOLD, listening=False, tone=self.tone(text))
+                heard = self.mind.context                # (F72: the utterance as it was when the turn passed)
                 looking = getattr(self.mind, "looking", None)   # F50: it decided to look in the moment it was called on
             else:                                        # older minds: the turn passes with your last word
                 self.listen(" ".join(symbols[:-1]), TOLD)
@@ -1010,6 +1066,8 @@ class Session:
                     acts = self.mind.step([])
                     looking = looking or getattr(self.mind, "looking", None)
             said = self.speak(acts, say, limit)
+            if not said and heard is not None and getattr(self.mind.cfg, "subject_carries", False):
+                said = self.carry_subject(heard, say, limit)   # F72: the subject of the thought that held
             if self.may_look and getattr(self.mind.cfg, "find_out", False):
                 looking = getattr(self.mind, "looking", None) or looking   # (or decided in the middle of its answer)
                 if looking is not None and looking[0] == self.mind.__dict__.get("_sought"):   # (not a look it
@@ -1019,9 +1077,57 @@ class Session:
             self.sources = self.mind.__dict__.pop("_why", [])
             self.mind.__dict__.pop("_explain_on", None)
         self.remember(CHAT, text, list(range(start, self.mind.t + 1)), [text], said)
+        topic = getattr(self.mind, "topic", None)        # F72: what the last answer held to, kept for the next turn
+        self.held_subject = topic[0] if said and topic is not None and topic[2] >= start else None
         self.open_turn = True                            # the turn stays open for "!dogru" / "!yanlis"
         self.answered = list(self.mind.trace)            # ... and the path that led to the answer is kept for them
         return " ".join(said) if said else "(sessiz)"
+
+    def carry_subject(self, heard: int, say=None, limit: int = 80) -> List[str]:
+        """F72 (The Subject Carries, ``Config.subject_carries``): an utterance the mind had nothing to say to, that
+        follows an answer in which it told what it knew of a thing (F41's topic), is heard again in the inner voice
+        with that thing in the place the utterance leaves open, and the mind answers from there.
+
+        Where the place is, what it lived says: the utterance with one item more at some position is the shape of an
+        utterance it lived (``_has_place``). The first such position, from the beginning, is taken. The thought held, so its subject is
+        carried into the next turn: "aslan nerede yaşar ?" - "aslan ormanda yaşar" - "ne yer ?" is heard again as
+        "aslan ne yer ?". Only the turn right after the answer, only when the mind had nothing to say, only where a
+        frame has the place. The question is imagined (nothing is said by it); what the mind then decides is said
+        aloud, as any answer. Returns the words said."""
+        from .events import IMAGINED
+        from .form import parts_of
+        from .store import COMPOSED, frame_key
+        mind = self.mind
+        subject = getattr(self, "held_subject", None)
+        kinds = read.mv_view(mind, "u_kind")
+        if subject is None or not kinds[heard] & COMPOSED:
+            return []
+        parts = parts_of(mind, heard)
+        if subject in parts:
+            return []                                    # (it was named: nothing was left open)
+        place = None
+        for p in range(len(parts) + 1):
+            masked = parts[:p] + (-1,) + parts[p:]
+            if len(masked) <= mind.knob["F"] and self._has_place(masked, p):
+                place = p
+                break
+        if place is None:
+            return []
+        v = mind.S.arrays()
+        moments = []
+        for unit in parts[:place] + (subject,) + parts[place:]:
+            channel = int(v.channel[unit])
+            moments.append([Event(mind.ch.names[channel], mind.ch.symbol(channel, int(v.symbol[unit])), IMAGINED)])
+        mind.step([])                                    # from rest: the utterance comes to mind again, whole
+        theta = mind.knob["theta"]
+        mind.knob["theta"] = 1e9                         # (nothing is decided while it comes to mind)
+        try:
+            for events in moments[:-1]:
+                mind.step(events)
+        finally:
+            mind.knob["theta"] = theta
+        acts = mind.step(moments[-1])
+        return self.speak(acts, say, limit)
 
     def speak(self, acts: List[Event], say=None, limit: int = 80) -> List[str]:
         """The mind says what it decided: every word its decisions emit is said (``say``: out as it is said) and comes

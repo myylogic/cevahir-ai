@@ -656,6 +656,14 @@ At each moment, roughly each word, the mind lives these steps:
   scores at half the reading. Not done: a frame is still read through all its members and F37 again for every
   item of a sentence, so the cost still grows, half as fast; and the store is still loaded whole into memory
   (notes of 2026-11-22, section 33).
+- **The Subject Carries (F72; on in the full configuration).** A thought that held has a subject: the thing an
+  answer told what the mind knew of (F41's topic), or the filler of the frame whose silent claim was what the mind
+  then heard. The next utterance, when the mind has nothing to say to it (or, while it listens, when it leaves a
+  place open and does not name the thing), is heard again in the inner voice with that subject in the place a lived
+  utterance of that shape had; the mind answers, or learns, from there. Turkish drops the subject of a sentence
+  about what is being spoken of; a listener holds the topic. Measured: 80 of 80 dropped-subject questions answered
+  right (none without it), 60 of 60 dropped-subject sentences learned, nothing carried where there was nothing to
+  carry (notes of 2026-11-22, section 36).
 - **The whole mind on real text (a measurement, not a mechanism).** Minds that lived only the owner's documents,
   cued with the first two words of a sentence they read (200 cues): the speaking configuration 90 exact, 146
   valid, 31 silent; the whole mind without silent claims 89, 151, 34. Three minds from nothing on the first 2,000
@@ -946,6 +954,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Deduction Stands Against the Co-members' Vote | Çıkarım, Sınıf Arkadaşlarının Oyuna Karşı Durur | F68, off by default (with F37 and F49) | default reasoning with exceptions; specificity; deduction against induction |
 | Its Own Turn Comes Last | Kendi Sırası En Son Okunur | F69, off by default (with silent claims) | what one was shown against what one is asked (a shift between the two samples); learning by watching against learning by one's own trials; source monitoring of one's own claims; nested (hierarchical) evidence |
 | The Open Window | Açılan Pencere | F70, off by default | cue-dependent retrieval; spreading activation with limited capacity; exemplar sampling; anytime reasoning (a deeper answer with more time) |
+| The Subject Carries | Konu Taşınır | F72, off by default (while listening: with silent claims) | the discourse topic held in working memory; zero anaphora (pro-drop); centering |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |
