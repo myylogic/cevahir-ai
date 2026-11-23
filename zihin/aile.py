@@ -180,6 +180,66 @@ def link(mind, unit: int, first: Tuple[int, ...], second_item: int, trust: Optio
     return found[0][1]
 
 
+WINDOWS = 1024         # the contexts whose depth is kept (the oldest go first): bookkeeping, not a measure
+
+
+def depth(mind, unit: int) -> int:
+    """F70: how many moments the mind has had this context in mind (this one counted): a context read for the first
+    time is at depth 1, and every later moment in which it is read again (asked again, or brought to mind in the
+    mind's own time) takes it one deeper. Read as often as one likes within a moment, it is the same."""
+    kept = mind.__dict__.get("_windows")
+    if kept is None:
+        kept = mind.__dict__["_windows"] = {}
+    held = kept.get(unit)
+    if held is None:
+        kept[unit] = held = [1, mind.t]
+        while len(kept) > WINDOWS:
+            kept.pop(next(iter(kept)))
+    elif held[1] != mind.t:
+        held[0] += 1
+        held[1] = mind.t
+    return held[0]
+
+
+def in_window(mind, unit: int, word: int, frames: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    """F70 (The Open Window, ``Config.open_window``): the frames of a family that come to mind for a context in the
+    time the mind has.
+
+    A family on a mind raised on running text holds hundreds of frames, and reading every one of them through every
+    member for every context makes a moment cost in proportion to all the mind holds. A moment has T steps (the
+    steps of the race in which it decides); in each the mind brings one frame to mind, so a context read for the
+    first time is read through T frames, and every later moment it has the same context in mind takes it T frames
+    deeper (``depth``), until the whole family is read: given time the reading is the one made without this.
+
+    Which come first: the frames whose word at the varying place stands most where the context's word stands (F31's
+    own measure of two words filling the same lived places: the expectation that they are interchangeable, 1/2
+    where they never met), of those equally near the one with the most members (the most familiar), then the one
+    made first. Nothing is weighed differently: the frames in the window vote as they always do, and the family's
+    conviction is that of the frames that were read."""
+    budget = int(mind.cfg.T) * depth(mind, unit)
+    if len(frames) <= budget:
+        return frames
+    from .read import _moment_memo, stand_ins
+    memo = _moment_memo(mind)
+    key = ("window", unit, word, len(frames), budget)
+    found = memo.get(key)
+    if found is None:
+        k = mind.cfg.k
+        near = stand_ins(mind, word, getattr(mind, "episode_start", mind.t))
+        sizes = mind.S.abstract_sizes()
+        kinds = mv_view(mind, "u_kind")
+
+        def order(entry):
+            i, (frame, w) = entry
+            held = near.get(w)
+            likeness = expectation(held[0], held[1], k) if held is not None else 0.5
+            members = max((int(sizes[p]) for p in parts_of(mind, frame) if kinds[p] & CATEGORY), default=0)
+            return -likeness, -members, i
+        ranked = sorted(enumerate(frames), key=order)[:budget]
+        found = memo[key] = [entry for _, entry in sorted(ranked)]     # (read in the family's own order)
+    return found
+
+
 def votes(mind, unit: int, trust: Optional[torch.Tensor] = None):
     """The family that speaks for a context, as (c, {kind: vote}, the filler's positions, the varying word's
     positions, the frame with the most members), or None. Of several families the one that agrees most speaks
@@ -190,6 +250,8 @@ def votes(mind, unit: int, trust: Optional[torch.Tensor] = None):
     parts = parts_of(mind, unit) if mv_view(mind, "u_kind")[unit] & COMPOSED else ()
     channels = mv_view(mind, "u_channel")
     for first, second, frames in families(mind, unit):
+        if getattr(cfg, "open_window", False):             # F70: the frames that come to mind in the time it has
+            frames = in_window(mind, unit, parts[second[0]], frames)
         num: Dict[int, float] = {}
         den = 0.0
         widest = None

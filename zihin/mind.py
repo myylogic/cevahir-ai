@@ -258,6 +258,11 @@ class Config:
                                     # record is read last, over the other, as the more specific evidence is
                                     # everywhere; and a moment in which it only listens is not being called on
                                     # again (what it held back is not counted unanswered there) (hata._apart)
+    open_window: bool = False       # F70 (The Open Window): a family (F53) is read through the frames that come
+                                    # to mind in the time the mind has: T frames (one a step of the moment),
+                                    # the nearest to the context first, T more every later moment it has the
+                                    # same context in mind, until the whole family is read; F37 reads the
+                                    # places of an item the same way (aile.in_window, read._places_in_mind)
     unknown_outside: bool = False   # F65 (Not Knowing Is of the World; with L7): the amount the mind does not know
                                     # is kept when the *world* has just done something and it decided nothing. An
                                     # end of a turn that only came to mind (the question it asked itself, a

@@ -941,7 +941,8 @@ def _inherited_of(mind, x: int, since: int):
     with the expectation each has over the deduced evidence, strongest first (of equals the one lived first; only
     those over 1/2: nothing else can be the answer); k)."""
     memo = _episode_memo(mind)
-    key = ("inherited_of", x, since)
+    budget = _places_in_mind(mind, x, since)[1]
+    key = ("inherited_of", x, since) if not budget else ("inherited_of", x, since, budget)
     hit = memo.get(key)
     if hit is None:
         order, values, e_deduced, lived, k = _inheritance(mind, x, since)[:5]
@@ -967,7 +968,7 @@ def _may_inherit(mind, x: int, targets) -> bool:
     since = getattr(mind, "episode_start", mind.t)
     channel = mv_view(mind, "u_channel")[x]
     own = None
-    for category, e_m in memberships_before(mind, x, since).items():
+    for category, e_m in _places_in_mind(mind, x, since)[0]:
         if e_m <= 0.5:
             continue
         profile = _class_profile(mind, category, channel, since, 2)
@@ -981,6 +982,48 @@ def _may_inherit(mind, x: int, targets) -> bool:
     return False
 
 
+def _places_in_mind(mind, x: int, since: int):
+    """F70 (The Open Window, ``Config.open_window``): the places an item filled that F37 reads, as (place,
+    expectation of the membership) in the order they were lived. Without the window, all of them. With it, those
+    that come to mind in the time the mind has had its present context in mind: T a moment (``aile.depth``); first
+    the places that say what the item is (their frame names a class, ``_names_a_class``: what F37 is asked for),
+    then the surest memberships, of equally sure ones the one lived first; a word that filled thousands of places
+    is not read through all of them for one answer. Returns (the places, how many the window allows: part of what
+    a run keeps the reading under)."""
+    places = memberships_before(mind, x, since)
+    if not getattr(mind.cfg, "open_window", False):
+        return places.items(), 0
+    from .aile import depth
+    budget = int(mind.cfg.T) * (depth(mind, mind.context) if getattr(mind, "context", None) is not None else 1)
+    if len(places) <= budget:
+        return places.items(), budget
+    sure = [(place, e) for place, e in places.items() if e > 0.5]
+    if len(sure) <= budget:
+        return sure, budget
+    ranked = sorted(enumerate(sure), key=lambda entry: (not _names_a_class(mind, entry[1][0], since),
+                                                         -entry[1][1], entry[0]))[:budget]
+    return [entry for _, entry in sorted(ranked)], budget
+
+
+def _names_a_class(mind, place: int, since: int) -> bool:
+    """F37: whether a place can say what its filler is: the most telling fixed word of its frame shares a stem with
+    a lived word that went on with something (a class spoken of on its own; the test of ``_said_of_a_class``, for
+    one place). Read once a run."""
+    memo = _episode_memo(mind)
+    key = ("names", place, since)
+    hit = memo.get(key)
+    if hit is None:
+        hit = False
+        words = _place_words(mind, place)
+        if words:
+            S = mind.S
+            telling = [1.0 / (1 + len(S.inc.get((q, PART), ()))) for q in words]
+            q = words[max(range(len(words)), key=lambda i: telling[i])]
+            hit = any(S.out.get((mate, EXPECT, 1)) for mate, _ in stem_mates(mind, q, since))
+        memo[key] = hit
+    return hit
+
+
 def _inheritance(mind, x: int, since: int, depth: int = 2):
     """F37: (the deduced values in order of expectation, the values, their expectations, x's own record
     {v: (W+, W-)}, k, the values' W+, their W-) for ``inherited``; read once a run. The deduced evidence of each class
@@ -989,7 +1032,8 @@ def _inheritance(mind, x: int, since: int, depth: int = 2):
     At depth 1 (a class word's own inheritance, read by ``_class_profile`` alone) only the values and their evidence
     are made: (None, the values, None, None, k, their W+, their W-)."""
     memo = _episode_memo(mind)
-    key = ("inheritance", x, since, depth)
+    places, budget = _places_in_mind(mind, x, since)
+    key = ("inheritance", x, since, depth) if not budget else ("inheritance", x, since, depth, budget)
     if key in memo:
         return memo[key]
     S, k = mind.S, mind.cfg.k
@@ -997,7 +1041,7 @@ def _inheritance(mind, x: int, since: int, depth: int = 2):
     pieces = []
     mates = set()
     src = mv_view(mind, "t_src")
-    for category, e_m in memberships_before(mind, x, since).items():
+    for category, e_m in places:
         if e_m <= 0.5:
             continue
         tie = S.find_tie(x, category, ABSTRACT, 0)

@@ -4056,3 +4056,125 @@ nothing this section could measure.
    settled or where nothing is ever asked) is a mechanism to be designed and measured, not a default to flip.
 2. The answering cost of the whole mind on a big mind (13.7 s a thought) is in F53's vote over every frame of a
    family and F37 once a run (section 30.5); it is a change of what is computed.
+
+## 33. The open window (F70): a moment reads what comes to mind, not all the mind holds
+
+Asked, in the owner's words: when a person recalls a subject a window opens in the mind and deepens; a mind that
+tried to load everything it knows at once would break down. Cevahir should work like that: not every moment it
+ever lived brought up each time, but what the present situation calls for.
+
+### 33.1 Where the mind stood
+
+The speaking configuration already works so: a moment reads the adjacency of its focus and context, a region of
+fixed size whatever the mind holds (0.09 to 0.17% of the ties a moment on minds of 1.3 and 3.3 million ties; the
+notes of 2026-11-15). The mechanisms built since do not. A family (F53) was read through every one of its frames
+and each frame through every member; F37 read every place an item ever filled. On a mind raised on running text
+a family holds hundreds of frames and a word has filled hundreds of places, so one reading cost in proportion to
+the mind (sections 30 and 32: 13.7 s a thought, a reading while listening 2.7 ms dearer for every thousand
+moments lived). Section 30 could share what was the same; it could not change what was read.
+
+### 33.2 The mechanism (`Config.open_window`, with frames of frames; on in the whole mind)
+
+A moment has T steps, the steps of the race in which the mind decides (T = 6, the design's). In each the mind
+brings one thing to mind.
+
+* **Depth** (`aile.depth`). A context read for the first time is at depth 1. Every later moment in which the
+  same context is read again (it is asked again, or the mind brings it to mind in its own time) takes it one
+  deeper; read many times within one moment it stays where it is.
+* **A family** (`aile.in_window`) is read through T frames a depth: first those whose word at the varying place
+  stands most where the context's word stands (F31's own measure: the expectation that two words are
+  interchangeable, 1/2 where they never shared a place), of equally near ones the frame with the most members,
+  then the one made first. The frames in the window vote as frames always do; the family's conviction is that of
+  the frames read.
+* **The places of an item** (`read._places_in_mind`) that F37 reads: T a depth of the present context; first the
+  places that say what the item is (their frame names a class: what F37 is asked for), then the surest
+  memberships, of equally sure ones the one lived first.
+
+No number is chosen (T is the moment's). Given time the window holds the whole family and the reading is the one
+made without it, number for number (pinned by a test); a family or an item that fits in the window is read
+exactly as before, which is every small world.
+
+### 33.3 Measured
+
+On the mind raised on the owner's documents without silent claims (186,457 moments; `t_cost.py`, one code, the
+switch off and on; processor seconds):
+
+    six answers                                         75.7 s    ->  20.9 s     the words of every thought and the store digest: the same
+    listening with silent claims, 30 sentences          20.2      ->  9.5 ms a moment     the store digest: the same
+
+Recall of all the documents (200 cues, `recall_once.py`; section 32.2):
+
+    the whole mind without silent claims                89 exact / 151 valid / 34 silent / 0.483 / 0.524    answering 2,746 s
+    the same mind with the window                       89 / 151 / 34 / 0.483 / 0.524                       answering 744 s (3.7 a thought)
+
+Every score the same; 3.7 times sooner (the speaking configuration answers the same cues in 69.5 s: eleven
+times now, forty before).
+
+The first 2,000 sentences, minds from nothing (`t_documents.py`, 100 cues; section 32.1 without the window):
+
+    configuration                           reading, s          answering, s      exact / valid / silent
+    the whole mind without silent claims    35.8  ->  33.8      145.2  ->  69.6   56 / 84 / 13  ->  56 / 84 / 13
+    the whole mind                          543.5 ->  321.5     163.0  ->  69.2   56 / 83 / 15  ->  56 / 83 / 15
+
+    moments lived                              4,310    9,628    14,523    19,118    23,594
+    ms a moment, the whole mind, section 32    4.5      11.2     23.0      32.8      44.9
+    with the window                            4.0      8.3      14.4      18.7      23.2
+
+The scores are the same to the last digit in every one of these; the cost is a half to a quarter of what it was.
+
+The battery of sections 27 to 31 again, the whole mind with F70 (37 lines, the same commands; rows appended to
+`results/full.jsonl`): 36 the same count for count; one changed, the misled world, one wrong answer fewer in the
+loops (40 -> 39; V1 5/13/12 -> 5/12/13). Every world the battery lives in is small enough that a family fits in
+the window or is read whole a moment later.
+
+### 33.4 Tried: one corrected, one not kept
+
+**The order of an item's places.** The first form took the surest memberships first. The battery found what
+that loses: in the world of deduction two steps away (member, class, kind) a thing that had filled more than T
+places lost the place that says what it is, and the answers fell from 27 of 27 to 24, the nearer property from 9
+of 9 to 6, the exception from 3 of 3 to 0 with two wrong generalisations. The places whose frame names a class
+now come first; the same line is 27, 9 and 3 again, and everything above is measured with that order.
+
+The same window on the two other readings F37 makes of every place of a class word (the forms of being of a
+class, whether it was said of a class): no gain on the 2,000 sentences (341 s of reading against 317 s, within
+the noise of a busy machine; the same scores). Not kept.
+
+### 33.5 What it does not do
+
+* **The cost still grows with the mind**, half as fast: 23.2 ms a moment after 24,000 moments with silent claims
+  against 1.7 without them. What still grows was profiled: F37 is read again for every item of every sentence
+  (170 items a sentence, each through T places, each place through every word that shares its stem), and a frame
+  is still read through all its members. The window is on two readings, not on the mind.
+* **Memory is not windowed at all.** The whole store is read into memory when a mind is loaded (1.1 GB for these
+  186,457 moments). What the owner describes for memory, a long-term store that stays on disk with only the
+  region a moment reads brought in, was planned in the notes of 2026-11-15 and is not built.
+* Depth grows only when the same context comes again. A mind that is given silence after a question does not
+  yet use it to read deeper before it answers (the context ends with the pause).
+* The whole mind with silent claims on all the documents, promised in 32.4, was stopped: after 2 h 28 min of
+  processor time with the code of section 28 it had not saved its mind, and the processor was needed for this
+  section's battery. It is to be made again when the window covers what a listening moment reads.
+
+### 33.6 Gates, tests, reproduce
+
+With every studied switch off the lesson-free gate, the 17 configurations and the scripted life (plain and with
+wholes) are bit-identical to the references (code md5 ab1d4cc0...). Tests: 542 passed (6 new, `test_zihin_window.py`).
+
+    python research/living_mind_2026_11_22/t_cost.py answer --mind <a saved mind> --data <its documents' folder> --codes . --sets "" open_window=1
+    python research/living_mind_2026_11_22/t_documents.py --data <the documents' folder> --variant full
+    python research/living_mind_2026_11_22/t_documents.py --data <the documents' folder> --variant full --off open_window
+
+## 34. The whole published "around right" file with F56
+
+The fourth whole published SCAN test file with F56 on (section 20.4; `t_scan_kinds.py run`, the code frozen with
+section 20, md5 4d33b86f...; one life, seed 0; the row appended to `results/scan_kinds.jsonl`):
+
+    the published split    watched twice (of the published training file)    exact with F56     without (section 22)
+    around right           1,087 of 15,225                                   4,476 of 4,476     4,474
+
+Nothing silent and nothing wrong: the two answers that were not exact without F56 are exact with it, as the
+sample of section 20 said. The life is 88,980 moments (188 s); the answers took 19,187 s with two processes on a
+machine busy with the batteries of sections 31 and 33. With "right", the length file and "jump around right"
+(section 29) four of the six published files have now been answered whole with F56, 14,045 of 14,045; "opposite
+right" (4,476 without) is running, and "add jump" has no answer that F56 changes.
+
+    python research/living_mind_2026_11_22/t_scan_kinds.py run --scan <the published SCAN folder> --split around_right --workers 2

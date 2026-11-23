@@ -642,6 +642,20 @@ At each moment, roughly each word, the mind lives these steps:
   from the first question; the value it could not look up asserted 9 -> 1 times; no cost where a frame holds but
   for one thing. What remains: 40 wrong against 29 without silent claims, because the other ways that claim the
   same word each fail once of their own (notes of 2026-11-22, section 31).
+- **The Open Window (F70; on in the full configuration).** A moment of the speaking configuration reads the
+  adjacency of its focus and context, a region of fixed size whatever the mind holds. The mechanisms built since
+  read all there was: a family (F53) through every frame and each frame through every member, F37 through every
+  place an item ever filled, so a reading cost in proportion to the mind. Now a moment brings to mind what it has
+  time for. It has T steps (the race's); a context read for the first time is at depth 1 and one deeper every
+  later moment in which it is read again. A family is read through T frames a depth: those whose word at the
+  varying place stands most where the context's word stands (F31), of equally near ones the frame with the most
+  members, then the one made first; they vote as frames always do, with the conviction of the frames read. F37
+  reads T places of an item a depth, those that say what it is (their frame names a class) first. Given time the window holds everything and the
+  reading is the one made without it; what fits in the window is read exactly as before. Measured on the owner's
+  documents: recall 89 / 151 / 34 of 200 with and without it, answered 3.7 times sooner; from nothing the same
+  scores at half the reading. Not done: a frame is still read through all its members and F37 again for every
+  item of a sentence, so the cost still grows, half as fast; and the store is still loaded whole into memory
+  (notes of 2026-11-22, section 33).
 - **The whole mind on real text (a measurement, not a mechanism).** Minds that lived only the owner's documents,
   cued with the first two words of a sentence they read (200 cues): the speaking configuration 90 exact, 146
   valid, 31 silent; the whole mind without silent claims 89, 151, 34. Three minds from nothing on the first 2,000
@@ -694,8 +708,8 @@ At each moment, roughly each word, the mind lives these steps:
   **4,476 of 4,476**, "around right" **4,474 of 4,476**, "jump around right" **1,173 of 1,173**, and the length
   split (answers of 24 to 48 actions) **3,919 of 3,920**, "add jump" **7,706 of 7,706**: 26,223 of 26,227 over the
   six published test files, the four wrong answers one source that F56 closes (with it the whole "right" file is
-  4,476 of 4,476, the length file 3,920 of 3,920 and "jump around right" 1,173 of 1,173; "around right" and
-  "opposite right" with it are running) (`research/living_mind_2026_11_22`, notes sections 19, 20, 22 and 29). In a world it was not developed on (T-dans:
+  4,476 of 4,476, the length file 3,920 of 3,920, "jump around right" 1,173 of 1,173 and "around right" 4,476 of
+  4,476; "opposite right" with it is running) (`research/living_mind_2026_11_22`, notes sections 19, 20, 22, 29 and 34). In a world it was not developed on (T-dans:
   Turkish moves said alone, directions never said alone and placed before the move, "iki kez" and "üç kez" between
   them; held out, one direction with both): the first run **600 of 600** over three seeds (0 of 600 without F45; a
   Transformer 108 of 200); when the new direction is met in **one dialogue only** ("geriye zıpla"), 600 of 600 of the
@@ -931,6 +945,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | The Category Is Split Where It Failed | Kategori Başarısız Olduğu Yerde Bölünür | F67, off by default (with F49) | calibration against resolution (a forecast right on the whole and wrong in each part); mixtures hidden in an average; error-driven category splitting |
 | Deduction Stands Against the Co-members' Vote | Çıkarım, Sınıf Arkadaşlarının Oyuna Karşı Durur | F68, off by default (with F37 and F49) | default reasoning with exceptions; specificity; deduction against induction |
 | Its Own Turn Comes Last | Kendi Sırası En Son Okunur | F69, off by default (with silent claims) | what one was shown against what one is asked (a shift between the two samples); learning by watching against learning by one's own trials; source monitoring of one's own claims; nested (hierarchical) evidence |
+| The Open Window | Açılan Pencere | F70, off by default | cue-dependent retrieval; spreading activation with limited capacity; exemplar sampling; anytime reasoning (a deeper answer with more time) |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

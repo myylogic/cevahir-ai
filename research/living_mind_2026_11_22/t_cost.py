@@ -11,6 +11,9 @@ documents the cues and sentences are drawn from (``recall_once.documents``). ``-
 ``zihin`` package (and this ``research`` folder); every one is run in a process of its own on the same mind, the
 same cues (seed 0) or sentences (seed 1).
 
+``--sets`` (section 33): the same code under several settings of the mind's switches, one process each (for
+example ``--sets "" open_window=1``); every run is compared with the first.
+
 ``answer``: n thoughts from two-word cues (the inner voice, ``dusunce.think``: what ``recall_once.py`` measures).
 ``listen``: n sentences listened to as the program reads a file (``Session.read_path``'s steps).
 
@@ -104,6 +107,7 @@ def main() -> None:
     ap.add_argument("--code")
     ap.add_argument("--n", type=int, default=0)
     ap.add_argument("--set", default="")
+    ap.add_argument("--sets", nargs="*", default=None)
     ap.add_argument("--note", default="")
     ap.add_argument("--out", default=OUT)
     args = ap.parse_args()
@@ -112,22 +116,24 @@ def main() -> None:
         one(args)
         return
     rows, first = [], None
-    for code in args.codes:
+    for code, switches in [(code, switches) for code in args.codes
+                           for switches in (args.sets if args.sets is not None else [args.set])]:
         env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
         out = subprocess.run([sys.executable, os.path.abspath(__file__), args.what, "--mind", args.mind, "--data",
-                              args.data, "--code", code, "--n", str(args.n), "--set", args.set],
+                              args.data, "--code", code, "--n", str(args.n), "--set", switches],
                              capture_output=True, text=True, env=env, check=True)
         got = json.loads(out.stdout.strip().split("\n")[-1])
         first = first or got["did"]
-        row = {"test": "cost_" + args.what, "code_md5": code_md5(code), "n": args.n, "switches_set": args.set,
+        row = {"test": "cost_" + args.what, "code_md5": code_md5(code), "n": args.n, "switches_set": switches,
                "mind_moments": got["mind_moments"], "ties": got["ties"], "moments": got["moments"],
                "wall_s": got["wall_s"], "cpu_s": got["cpu_s"], "each_s": got["each_s"],
                "same_as_the_first_code": got["did"] == first, "note": args.note}
         if args.what == "listen":
             row["ms_a_moment_cpu"] = round(1000.0 * got["cpu_s"] / max(1, got["moments"]), 1)
         rows.append(row)
-        print("%s code %s: %d %s, %.1f s wall, %.1f s of its own processor time%s ; the same as the first code: %s" % (
-            args.what, row["code_md5"][:8], args.n, "thoughts" if args.what == "answer" else "sentences",
+        print("%s code %s%s: %d %s, %.1f s wall, %.1f s of its own processor time%s ; the same as the first code: %s" % (
+            args.what, row["code_md5"][:8], " with " + switches if switches else "", args.n,
+            "thoughts" if args.what == "answer" else "sentences",
             row["wall_s"], row["cpu_s"],
             " (%.1f ms a moment, %d moments)" % (row["ms_a_moment_cpu"], row["moments"]) if args.what == "listen"
             else " (each: %s)" % row["each_s"], "yes" if row["same_as_the_first_code"] else "NO"), flush=True)
