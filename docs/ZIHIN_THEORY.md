@@ -673,6 +673,34 @@ At each moment, roughly each word, the mind lives these steps:
   owner's documents the whole mind thinks the same words in 199 of 200 answers, the median answer 2.70 s ->
   0.64 s; recall alone is 0.10 s. Where a moment is recalled what reads the deep reading after the decision
   (F50's looking) has nothing to read (notes of 2026-11-22, section 39).
+- **The Reach of a Continuation (F75; off, not in the full configuration).** A continuation read from the lived
+  sequence its last items match is a way of its own for each length of that match, so that Fault Tracing (F49)
+  keeps their records apart. Measured and not kept: the study's small mind said 10 of 41 untaught lines instead of
+  4, but in a small world the ways it opens are claimed with while the mind listens, each a voice in the vote of
+  every way, and where they fail every reading is believed less; the answer is not begun (notes of 2026-11-22,
+  section 41).
+- **The Ground (`Config.grounded`; off, not in the full configuration).** What is perceived and what is said meet in
+  the one store (research/living_mind_2026_11_23/: MODEL.md, NOTES.md). Perception binds opaque features to
+  tracked things, events and each participant's part (who starts it, who moves, who is turned to, who is touched);
+  what a thing lacks is seen too. A word refers to one of the things talked about (the participants of the event,
+  else what is pointed at, else everything in view), to the event, or to nothing: a soft one-to-one assignment
+  (Sinkhorn's balancing) of how much better than knowing nothing each word's meaning predicts each referent, each
+  value weighted by how rare it is in talk; the word then names the features of its referent by its share, and is
+  told against where it expected another value (Expected-Failure). An utterance's form becomes a construction: the
+  places of participants (named by the word that names them most), of modifiers (a word that tells its participant
+  apart from another thing in view, on what its head word leaves open), of the action, and fixed words; its places
+  hold the participation profile of what filled them (a role is a profile, never a name), its words are kept per
+  verb (verb islands), its time relation to the event is evidence, and what the answerer said back to it is learned
+  per turn. Understanding is the construction and the referents in view that fit the words best; answering is from
+  the meaning: the event going on, or the one an order asks for, told with the construction that answered such a
+  question, its places filled from the event by their profiles, each word chosen by how well it names what fills
+  the place (a proper name by the thing's identity; a word that firmly expects what the thing is not is not said).
+  Measured over three lives against a Transformer given the scene as tokens: who does what 48 and 54 of 72 (29, 42),
+  a colour never said with a kind 31 and 25 of 45 (0), naming a thing of a colour never seen 16 and 19 of 23 (21,
+  23), orders never shown said from the meaning alone 128 and 152 of 158 (Turkish misses: word forms never heard).
+  Not done: telling ("X nedir ?"), the form a place takes, orders with a colour. Tried and not kept: the pointwise
+  mutual information against talk in the assignment (the words heard with every pointed thing shut the kind word
+  out of "bu bir elma") and the exclusion value by value (notes of 2026-11-23, section 3).
 - **The whole mind on real text (a measurement, not a mechanism).** Minds that lived only the owner's documents,
   cued with the first two words of a sentence they read (200 cues): the speaking configuration 90 exact, 146
   valid, 31 silent; the whole mind without silent claims 89, 151, 34. Three minds from nothing on the first 2,000
@@ -965,6 +993,8 @@ The models were small and the data scarce; with far more data the gap may close.
 | The Open Window | Açılan Pencere | F70, off by default | cue-dependent retrieval; spreading activation with limited capacity; exemplar sampling; anytime reasoning (a deeper answer with more time) |
 | The Subject Carries | Konu Taşınır | F72, off by default (while listening: with silent claims) | the discourse topic held in working memory; zero anaphora (pro-drop); centering |
 | Recall or Reason | Hatırla ya da Düşün | F74, off by default (deep_only: what only a reasoned moment reads) | dual-process theories (fast retrieval, slow deliberation); the feeling of knowing as the signal to deliberate; metareasoning (computation spent where it can change the decision) |
+| The Reach of a Continuation | Devamın Erimi | F75, off by default, not in the full configuration (measured, not kept) | back-off between orders of context (n-gram back-off, prediction by partial matching) |
+| The Ground | Zemin | `Config.grounded`, off by default | cross-situational word learning with the referent first (Siskind 1996; Fazly et al. 2010); mutual exclusivity; joint attention; verb islands and constructions (Tomasello; construction grammar); thematic roles as profiles (Dowty 1991); time of speech and of event (Reichenbach) |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |
