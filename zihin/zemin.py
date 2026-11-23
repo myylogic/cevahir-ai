@@ -53,6 +53,7 @@ SAHIP, ADLANDIRIR, YUVA, DOLGU = 4, 5, 6, 7     # tie forms of the ground (the s
 THING, EVENT, PART, PAIR = "z_nesne", "z_olay", "z_katilim", "z_olay_zaman"
 TIME, CONS, ISLAND, TURN, IDENTITY = "z_zaman", "z_yapi", "z_ada", "z_tur", "z_kimlik"
 FEAT, PFEAT = "z:", "zk:"
+GENERAL = "z_genel"                             # what is talked about at all: how often each value is met in talk
 BEFORE, DURING = "once", "icinde"
 HEAD, ACTION = "_", "A"                         # kinds of places (a modifier's place is ("M", its head's place))
 FLOOR = 0.02                                    # the least a likelihood is read as (a value never met)
@@ -167,29 +168,48 @@ def _word_profile(mind, z: Zemin, w: int) -> Dict[int, Dict[int, float]]:
     return out
 
 
-def likelihood(mind, z: Zemin, w: int, feats: Dict[int, float]) -> Tuple[float, int]:
-    """How well word w's meaning predicts a unit with these features: (sum over the unit's dimensions of
-    ln P(value | w), the number of dimensions). P(value | w) is the word's expectation of that value (the one rule)
-    where it has one, else what its strongest expectation on that dimension leaves, else 1/2 (it expects nothing)."""
+def _rarity(mind, z: Zemin) -> Dict[int, float]:
+    """For every value met in talk, 1 - e(it is the value a thing talked about has on its dimension): how much it
+    tells (a value nearly every thing has, no wings, tells almost nothing; a thing's identity, a mane, much). Read
+    from the unit of what is talked about at all; 1/2 for a value never met."""
+    key = ("rare", mind.S.version)
+    hit = z.memo.get(key)
+    if hit is not None:
+        return hit
+    general = _unit(mind, GENERAL, "context", "*", create=False)
+    out = {}
+    if general >= 0:
+        _, dst, e = _out(mind, general, SAHIP, 0)
+        out = {int(f): 1.0 - float(x) for f, x in zip(dst, e)}
+    z.memo[key] = out
+    return out
+
+
+def likelihood(mind, z: Zemin, w: int, feats: Dict[int, float]) -> Tuple[float, float]:
+    """How well word w's meaning predicts a unit with these features, against knowing nothing: (sum over the unit's
+    dimensions of r (ln P(value | w) - ln 1/2), the sum of the weights r), r the value's rarity in talk (``_rarity``:
+    what a value tells). P(value | w) is the word's expectation of that value (the one rule) where it has one, else
+    what its strongest expectation on that dimension leaves, else 1/2 (it expects nothing)."""
     prof = _word_profile(mind, z, w)
-    total, n = 0.0, 0
+    rare = _rarity(mind, z)
+    total, n = 0.0, 0.0
     for ch, (f, a) in _by_dimension(feats, mind).items():
-        n += 1
+        r = rare.get(f, 0.5)
+        n += r
         values = prof.get(ch)
         if not values:
-            total += math.log(0.5)
             continue
         e = values.get(f)
         if e is None:
             e = 1.0 - max(values.values())
-        total += math.log(min(1.0, max(e, FLOOR)))
+        total += r * (math.log(min(1.0, max(e, FLOOR))) - math.log(0.5))
     return total, n
 
 
 def mean_likelihood(mind, z: Zemin, w: int, feats: Dict[int, float]) -> float:
-    """The geometric mean of P(value | w) over the unit's dimensions (1/2: the word says nothing of it)."""
+    """The weighted geometric mean of P(value | w) over the unit's dimensions (1/2: the word says nothing of it)."""
     total, n = likelihood(mind, z, w, feats)
-    return math.exp(total / n) if n else 0.5
+    return 0.5 * math.exp(total / n) if n else 0.5
 
 
 def speaking_line(mind) -> float:
@@ -227,10 +247,10 @@ def left_open(mind, z: Zemin, head: int, feats: Dict[int, float]) -> Dict[int, f
 
 
 def fit(mind, z: Zemin, w: int, feats: Dict[int, float]) -> float:
-    """How much better than knowing nothing the word predicts the unit: the mean over its dimensions of
-    ln P(value | word) - ln 1/2."""
+    """How much better than knowing nothing the word predicts the unit, per unit of what its values tell: the
+    weighted mean over its dimensions of ln P(value | word) - ln 1/2."""
     total, n = likelihood(mind, z, w, feats)
-    return (total / n - math.log(0.5)) if n else 0.0
+    return total / n if n else 0.0
 
 
 # ----------------------------------------------------------------------------------------------------- writing
@@ -331,10 +351,10 @@ def _align(mind, z: Zemin, words, speaker, zeta, present, pointed) -> None:
     if not wunits:
         return
     ev = z.event if zeta is not None else None
-    if ev is not None:
-        about = {i: u for i, u in present.items() if i in ev["parts"]}
-    elif pointed is not None and pointed in present:
+    if pointed is not None and pointed in present:    # joint attention: what is pointed at is what is talked about
         about = {pointed: present[pointed]}
+    elif ev is not None:
+        about = {i: u for i, u in present.items() if i in ev["parts"]}
     else:
         about = dict(present)
     talked: List[Tuple[int, Dict[int, float]]] = [(u, _features(mind, u)) for u in about.values()]   # then the event
@@ -342,34 +362,59 @@ def _align(mind, z: Zemin, words, speaker, zeta, present, pointed) -> None:
     if ev is not None:
         pair = _pair(mind, z, zeta)
         talked.append(pair)
+    _count(mind, talked)
     share = _name(mind, z, wunits, talked)
-    _construction(mind, z, wunits, about, ev, zeta, talked, share, speaker)
+    _construction(mind, z, wunits, about, ev, zeta, talked, share, speaker, present)
 
 
 def _align_words(mind, z: Zemin, wunits: List[int], talked) -> List[List[float]]:
-    """The share of each referent (and of nothing, the last column) each distinct word refers to: the product of
-    P(referent | word) (among the referents and nothing) and P(word | referent) (among the words), each read from
-    how much better than knowing nothing the word's meaning so far predicts the referent: the likelihood ratio
-    over its dimensions, prod P(value | word) / (1/2) (nothing is 1: the word predicts nothing)."""
+    """Which word refers to what: a soft one-to-one assignment (Sinkhorn's balancing) of the distinct words to the
+    referents, every word to one referent or to nothing, every referent to one word or to none (it was not named),
+    from how much better than knowing nothing each word's meaning so far predicts each referent (``likelihood``: the
+    likelihood ratio over its dimensions, each weighted by what its value tells). The rows and columns are balanced
+    in turn until nothing changes. Returns, per word, its share of each referent (each referent's shares over the
+    words and none sum to one) and, last, of nothing."""
     U = list(dict.fromkeys(wunits))
-    g = []
+    R = len(talked)
+    A = []
     for w in U:
-        row = []
-        for _, feats in talked:
-            total, n = likelihood(mind, z, w, feats)
-            row.append(math.exp(max(-60.0, min(60.0, total - n * math.log(0.5)))))
-        g.append(row + [1.0])
-    rows = [[x / sum(r) for x in r] for r in g]                          # P(referent | word)
-    n = len(talked)
-    cols = [sum(g[i][j] for i in range(len(U))) for j in range(n)]
-    out = []
-    for i in range(len(U)):
-        out.append([rows[i][j] * (g[i][j] / cols[j]) for j in range(n)] + [rows[i][n]])
-    for j in range(n):                                                   # each referent's share sums to one
-        total = sum(out[i][j] for i in range(len(U)))
-        for i in range(len(U)):
-            out[i][j] = out[i][j] / total if total > 0 else 0.0
-    return out
+        A.append([math.exp(max(-60.0, min(60.0, likelihood(mind, z, w, feats)[0]))) for _, feats in talked] + [1.0])
+    A.append([1.0] * R + [1.0])                      # no word: a referent not named
+    W = len(U)
+    for _ in range(200):
+        moved = 0.0
+        for i in range(W):                           # each word refers to one thing, or to nothing
+            total = sum(A[i])
+            for j in range(R + 1):
+                x = A[i][j] / total
+                moved = max(moved, abs(x - A[i][j]))
+                A[i][j] = x
+        for j in range(R):                           # each referent is named by one word, or by none
+            total = sum(A[i][j] for i in range(W + 1))
+            for i in range(W + 1):
+                x = A[i][j] / total
+                moved = max(moved, abs(x - A[i][j]))
+                A[i][j] = x
+        if moved < 1e-9:
+            break
+    return [A[i] for i in range(W)]
+
+
+def _count(mind, talked) -> None:
+    """What is talked about is met in talk: each of its values counts for itself and against the other values of
+    its dimension met before (so the unit of what is talked about at all holds how often each value is the one)."""
+    S = mind.S
+    general = _unit(mind, GENERAL, "context", "*")
+    v = S._np()
+    for _, feats in talked:
+        by_dim = _by_dimension(feats, mind)
+        ids, dst, _ = _out(mind, general, SAHIP, 0)
+        for ch, (f, a) in by_dim.items():
+            _add(mind, W_POS, SENSED, S.tie(general, f, SAHIP, 0), 1.0)
+        for tie, g in zip(ids, dst):
+            ch = int(v.channel[g])
+            if ch in by_dim and by_dim[ch][0] != g:
+                _add(mind, W_NEG, SENSED, int(tie), 1.0)
 
 
 def _name(mind, z: Zemin, wunits: List[int], talked) -> List[List[float]]:
@@ -425,45 +470,48 @@ def _role_fit(mind, profile: Dict[int, Dict[int, float]], feats: Dict[int, float
     return total
 
 
-def _places(mind, z: Zemin, wunits, about: Dict[int, int], talked, share) -> Tuple[list, Dict[int, int]]:
-    """The kind of each place of an utterance, by what its word refers to (the alignment): the head of a participant
-    (the word with the greatest share of it), a modifier (a further word whose referent is that participant), the
-    action (the word with the greatest share of the event), or a fixed word (it refers to nothing). Returns (places,
-    {place: tracked index of the participant it heads})."""
+def _places(mind, z: Zemin, wunits, about: Dict[int, int], talked, share, present=None) -> Tuple[list, Dict[int, int]]:
+    """The kind of each place of an utterance: the head of a participant (the word with the greatest share of it),
+    the action (the word with the greatest share of the event), a modifier (a further word that tells its head's
+    participant apart from another thing in view its head's word could name, on what that word leaves open), or a
+    fixed word. Returns (places, {place: tracked index of the participant it heads})."""
     U = list(dict.fromkeys(wunits))
     index_of = list(about.keys())                     # talked[j] for j < len(about) are the things, then the event
     n = len(talked)
-    best = {}
-    for i, w in enumerate(U):
-        j = max(range(n + 1), key=lambda c: share[i][c])
-        best[w] = j
+    word_head: Dict[int, int] = {}                    # a referent's head: the word that names it most, where that
+    for j in range(n):                                # is more than no word does (it was named by that word)
+        top, i = max((share[i][j], i) for i in range(len(U)))
+        if top > 1.0 - sum(share[k][j] for k in range(len(U))) and \
+                (i not in word_head or share[i][word_head[i]] < top):
+            word_head[i] = j                          # (a word heads one referent: the one it names most)
     places: list = list(wunits)
     heads: Dict[int, int] = {}
-    head_word: Dict[int, int] = {}
-    for j in range(n):
-        cands = [(share[i][j], i) for i, w in enumerate(U) if best[w] == j]
-        if not cands:
-            continue
-        w = U[max(cands)[1]]
-        head_word[j] = w
     taken = set()
     for jj, w in enumerate(wunits):
-        j = best[w]
-        if j == n:
-            continue                                  # refers to nothing: a fixed word
-        if head_word.get(j) == w and w not in taken:
-            taken.add(w)
-            if j < len(index_of):
-                places[jj] = HEAD
-                heads[jj] = index_of[j]
-            else:
-                places[jj] = ACTION
-    for jj, w in enumerate(wunits):                   # modifiers: further words referring to a participant
-        j = best[w]
-        if j < len(index_of) and places[jj] == w and head_word.get(j) not in (None, w):
-            head_place = next((p for p, i in heads.items() if i == index_of[j]), None)
-            if head_place is not None:
-                places[jj] = ("M", head_place)
+        i = U.index(w)
+        if i not in word_head or w in taken:
+            continue
+        taken.add(w)
+        j = word_head[i]
+        if j < len(index_of):
+            places[jj] = HEAD
+            heads[jj] = index_of[j]
+        else:
+            places[jj] = ACTION
+    view = present if present is not None else about
+    feats = {i: _features(mind, u) for i, u in view.items()}
+    for jj, w in enumerate(wunits):                   # modifiers: a word that tells a participant apart
+        if places[jj] != w:
+            continue
+        for hp, i in heads.items():
+            head = wunits[hp]
+            mine = left_open(mind, z, head, feats[i])
+            here = fit(mind, z, w, mine)
+            rivals = [x for x in feats if x != i and x not in heads.values() and fit(mind, z, head, feats[x]) > 0.0]
+            if here > 0.0 and rivals and all(fit(mind, z, w, left_open(mind, z, head, feats[x])) < here
+                                             for x in rivals):
+                places[jj] = ("M", hp)
+                break
     return places, heads
 
 
@@ -471,9 +519,9 @@ def _key(places) -> tuple:
     return tuple(p if isinstance(p, (str, tuple)) else ("w", int(p)) for p in places)
 
 
-def _construction(mind, z: Zemin, wunits, about, ev, zeta, talked, share, speaker) -> None:
+def _construction(mind, z: Zemin, wunits, about, ev, zeta, talked, share, speaker, present=None) -> None:
     S = mind.S
-    places, heads = _places(mind, z, wunits, about, talked, share)
+    places, heads = _places(mind, z, wunits, about, talked, share, present)
     kappa = _unit(mind, CONS, "context", _key(places))
     if ev is not None:
         for j, i in heads.items():                   # the place holds the participation profile of what filled it
@@ -599,6 +647,48 @@ def _names_it(mind, z: Zemin, w: int, thing: int, feats: Dict[int, float]) -> in
     return int(own is not None and values.get(own, 0.0) > 0.5)
 
 
+def _event_word(mind, z: Zemin, q: dict) -> Optional[int]:
+    """The word of a question that says most of an event: its action word, else the word not naming a participant
+    whose meaning expects the most of the dimensions events are perceived on (a verb kept as a fixed word of the
+    construction still says what was asked for)."""
+    if q["action"] is not None:
+        return q["action"]
+    kinds = _event_dimensions(mind, z)
+    rare = _rarity(mind, z)
+    time_ch = _channel(mind, _unit(mind, TIME, "context", BEFORE)) if mind.ch.has(TIME) else -1
+    best, best_w = 0.0, None
+    for j, w in enumerate(q["words"]):
+        if w < 0 or j in q["heads"]:
+            continue
+        mass = 0.0
+        for ch, values in _word_profile(mind, z, w).items():
+            if ch in kinds and ch != time_ch:
+                f, e = max(values.items(), key=lambda fe: fe[1])
+                mass += rare.get(f, 0.5) * hat(e)
+        if mass > best:
+            best, best_w = mass, w
+    return best_w
+
+
+def _names_of(mind, z: Zemin, feats: Dict[int, float]) -> List[int]:
+    """The words that name this very thing: those that expect its identity (a person's name is hers whatever is
+    said about her, so it is found from her, not from where the word was lived)."""
+    if not mind.ch.has(IDENTITY):
+        return []
+    ident = mind.ch.id(IDENTITY)
+    own = next((f for f in feats if _channel(mind, f) == ident), None)
+    if own is None:
+        return []
+    S = mind.S
+    v = S._np()
+    ties = S.inc.get((own, ADLANDIRIR)) or []
+    out = []
+    for tie in ties:
+        if v.alive[tie] and int(v.lag[tie]) == 0 and _e(mind, int(tie)) > 0.5:
+            out.append(int(v.src[tie]))
+    return out
+
+
 def _answer_turns(mind, q_turn: int) -> List[Tuple[float, int, tuple, str]]:
     """What followed this turn from another speaker, most expected first (over 1/2): (e, construction unit, its key,
     time relation)."""
@@ -615,10 +705,11 @@ def _answer_turns(mind, q_turn: int) -> List[Tuple[float, int, tuple, str]]:
     return out
 
 
-def _fillers(mind, kappa: int, act: Optional[int], place: int) -> List[int]:
-    """The words lived in a place of a construction: with this action word when it has any, else with any."""
+def _fillers(mind, kappa: int, act: Optional[int], place: int, every: bool = False) -> List[int]:
+    """The words lived in a place of a construction: with this action word when it has any, else (or with
+    ``every``) with any."""
     out = []
-    if act is not None:
+    if act is not None and not every:
         island = mind.unit_of(ISLAND, (kappa, act))
         if island >= 0:
             out = [int(w) for w in _out(mind, island, DOLGU, place)[1]]
@@ -649,7 +740,7 @@ def answer(mind, z: Zemin, words: List[str], when: Optional[str] = None) -> Opti
     if when is not None:                             # when the question was heard, against the event
         zeta_q = when
     else:
-        zeta_q = DURING if ev is not None else (BEFORE if q["action"] is not None else "-")
+        zeta_q = DURING if ev is not None else (BEFORE if _event_word(mind, z, q) is not None else "-")
     tried, seen = [], set()                          # what was said back: to these very words, else to this
     island = mind.unit_of(ISLAND, (q["kappa"], q["action"] if q["action"] is not None else -1))   # construction with
     said = tuple(q["words"]) if all(w >= 0 for w in q["words"]) else None                          # this action word,
@@ -669,7 +760,7 @@ def answer(mind, z: Zemin, words: List[str], when: Optional[str] = None) -> Opti
     if ev is not None:
         parts = {i: _features(mind, pu) for i, pu in ev["parts"].items()}
         action = {f: 1.0 for f in ev["action"]}
-    elif q["action"] is not None:
+    elif _event_word(mind, z, q) is not None:
         parts = {}
         for j, i in q["heads"].items():              # each participant with the profile of its place in the question
             parts[i] = {}
@@ -679,14 +770,18 @@ def answer(mind, z: Zemin, words: List[str], when: Optional[str] = None) -> Opti
         action = {}                                  # what the action word names of an event (the dimensions
         kinds = _event_dimensions(mind, z)           # events are perceived on), the time left to the answer
         time_ch = _channel(mind, _unit(mind, TIME, "context", BEFORE))
-        for ch, values in _word_profile(mind, z, q["action"]).items():
+        for ch, values in _word_profile(mind, z, _event_word(mind, z, q)).items():
             f, e = max(values.items(), key=lambda fe: fe[1])
             if e > 0.5 and ch in kinds and ch != time_ch:
                 action[f] = e
     else:
         return None
+    things = [_features(mind, z.present[i]) for i in parts if i in z.present]
     for _, kappa_a, key_a, zeta_a in tried:
-        out = _fill(mind, z, q, kappa_a, key_a, zeta_a, parts, action)
+        if any(isinstance(p, tuple) and p[0] == "w" and things and
+               all(contradicts(mind, z, p[1], f) for f in things) for p in key_a):
+            continue                                 # a fixed word that names none of them (a form kept from
+        out = _fill(mind, z, q, kappa_a, key_a, zeta_a, parts, action)   # before the word meant anything)
         if out is not None:
             wc = mind.ch.id(z.words)
             return [str(mind.ch.symbol(wc, int(mind.S._np().symbol[w]))) for w in out]
@@ -730,14 +825,21 @@ def _fill(mind, z: Zemin, q: dict, kappa_a: int, key_a: tuple, zeta_a: str, part
             if thing is None:
                 return None
             tf = _features(mind, thing)
-            cands = _fillers(mind, kappa_a, act_word, j)   # the words lived in this place, and the word the question
-            if i in named and named[i] not in cands:       # called it by: the one that names it best ("ali" before
-                cands = cands + [named[i]]                 # "kim", which names any doer)
-            ranked = sorted(((_names_it(mind, z, w, thing, tf), fit(mind, z, w, tf), w) for w in cands
-                             if not contradicts(mind, z, w, tf)), reverse=True)
-            if not ranked or ranked[0][1] <= 0.0:
+            island_words = _fillers(mind, kappa_a, act_word, j)
+            every_word = _fillers(mind, kappa_a, None, j, every=True)
+            asked = [named[i]] if i in named else []
+            word = None
+            own_names = [w for w in dict.fromkeys(every_word + asked + _names_of(mind, z, tf))
+                         if _names_it(mind, z, w, thing, tf)]
+            for cands in (own_names, list(dict.fromkeys(island_words + asked)), every_word):
+                ranked = sorted(((fit(mind, z, w, tf), w) for w in cands if not contradicts(mind, z, w, tf)),
+                                reverse=True)       # its own name, whatever the action (a proper name); else the
+                if ranked and ranked[0][0] > 0.0:   # words lived here with this action word and the question's word
+                    word = ranked[0][1]             # (a kind word's form goes with the verb); else any lived here
+                    break
+            if word is None:
                 return None
-            out[j] = ranked[0][2]
+            out[j] = word
     qmods = {q["heads"].get(qp[1]): q["words"][m] for m, qp in enumerate(q["key"])
              if isinstance(qp, tuple) and qp[0] == "M"}
     for j, p in enumerate(key_a):                    # a modifier tells its head's thing apart, as the question did

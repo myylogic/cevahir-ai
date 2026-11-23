@@ -25,12 +25,12 @@ from zihin.__main__ import CHANNEL, STUDIED, SOMEONE, Session, VARIANTS
 from zihin.zemin import Zemin, answer, contradicts, understand, _features, _word_profile
 
 PEOPLE = {"ali": 1, "ayşe": 2, "can": 3}
-KINDS = {  # word in the dative (the target of "bak"/"koş"), its features
-    "kediye": {"d0": "v1", "d1": "v2", "d2": "v3", "d3": "v9"},
-    "topa": {"d0": "v4", "d1": "v5", "d2": "v6", "d3": "v9"},
-    "eve": {"d0": "v4", "d1": "v7", "d2": "v8", "d3": "v9"},
+KINDS = {  # word in the dative (the target of "bak"/"koş"), its features (eight dimensions, as a world's things have)
+    "kediye": {"d0": "v1", "d1": "v2", "d2": "v3", "d3": "v9", "d4": "v13", "d5": "v0", "d6": "v0", "d7": "v0"},
+    "topa": {"d0": "v4", "d1": "v5", "d2": "v6", "d3": "v9", "d4": "v0", "d5": "v14", "d6": "v0", "d7": "v0"},
+    "eve": {"d0": "v4", "d1": "v7", "d2": "v8", "d3": "v9", "d4": "v0", "d5": "v0", "d6": "v15", "d7": "v0"},
 }
-PERSON = {"d0": "v1", "d1": "v10", "d2": "v11", "d3": "v12"}
+PERSON = {"d0": "v1", "d1": "v10", "d2": "v11", "d3": "v12", "d4": "v0", "d5": "v0", "d6": "v0", "d7": "v16"}
 VERBS = {"bak": ("bakıyor", {"a0": "u1", "a1": "u0"}), "koş": ("koşuyor", {"a0": "u0", "a1": "u1"})}
 DOER = {"p0": 1, "p1": 0}
 OTHER = {"p0": 0, "p1": 1}
