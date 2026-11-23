@@ -642,6 +642,16 @@ At each moment, roughly each word, the mind lives these steps:
   from the first question; the value it could not look up asserted 9 -> 1 times; no cost where a frame holds but
   for one thing. What remains: 40 wrong against 29 without silent claims, because the other ways that claim the
   same word each fail once of their own (notes of 2026-11-22, section 31).
+- **The whole mind on real text (a measurement, not a mechanism).** Minds that lived only the owner's documents,
+  cued with the first two words of a sentence they read (200 cues): the speaking configuration 90 exact, 146
+  valid, 31 silent; the whole mind without silent claims 89, 151, 34. Three minds from nothing on the first 2,000
+  sentences (100 cues): 55 / 81 / 16, 56 / 84 / 13, and with silent claims 56 / 83 / 15. The mechanisms built
+  since the speaking configuration answer other things than this measure asks; on the plain recall of read text
+  they add little, and they cost forty times the answering on the big mind. Silent claims make the reading itself
+  dear: a young mind makes its full reading at four moments of five, and a reading costs in proportion to what
+  the mind holds (44.9 ms a moment after 24,000 moments, 1.7 without). They are worth it where what is watched
+  is what the mind will be asked about; on running text they are nearly all cost, and telling the two apart by
+  itself is a mechanism not built (notes of 2026-11-22, section 32).
 - **What the whole mind costs (not a mechanism: the same computation, shared).** On a mind raised on running
   text an answer of the whole mind reads every frame of the family that fits through every member, and F37 reads
   what a word's classes go on with again for every sentence. Keeping every read-only reading across moments, with

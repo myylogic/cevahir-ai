@@ -3975,3 +3975,84 @@ docstring.
     python research/living_mind_2026_11_22/t_turn.py half
     python research/living_mind_2026_11_22/t_turn.py exception
     python research/living_mind_2026_11_22/t_turn.py watched
+
+## 32. The whole mind on real text: the first measurements side by side
+
+Asked (the second of the three items): raise the whole mind on the owner's documents and measure it beside the
+configuration it replaced. The documents are 11 files, 13,290 sentences, about 186,000 moments; nothing of them
+and nothing a mind said of them is in this repository, only counts and times (`results/documents.jsonl`). The
+measure is that of `recall_once.py` (the notes of 2026-11-15): a mind that lived only the documents is cued with
+the first two words of a sentence it read and its thought is scored: exact (the sentence), valid (some sentence it
+read that begins so goes on so), silent.
+
+### 32.1 The first 2,000 sentences, three configurations from nothing (`t_documents.py`; 23,594 moments, 100 cues)
+
+    configuration                           reading, s    answering, s    exact    valid    silent    words in place    word F1
+    speaking                                33.4          9.6             55       81       16        0.575             0.602
+    the whole mind without silent claims    35.8          145.2           56       84       13        0.585             0.613
+    the whole mind                          543.5         163.0           56       83       15        0.588             0.612
+
+(Processor seconds of each process; the three ran at the same time on a busy machine.) What the whole mind adds
+to going on from a cue in text it has read is small: one sentence more exact, two or three more valid of a
+hundred, one to three fewer silences. What it costs is not small: fifteen times the answering, and with silent
+claims sixteen times the reading at this size.
+
+### 32.2 All the documents (200 cues)
+
+    configuration                           reading        answering                 exact    valid    silent    words in place    word F1
+    speaking                                349 s          69.5 s                    90       146      31        0.483             0.519
+    the whole mind without silent claims    309 s          2,746 s (13.7 a thought)  89       151      34        0.483             0.524
+    the whole mind                          still reading when this was written (32.4)
+
+The same picture at eight times the size: five more valid answers of 200, one fewer exact, three more silences,
+and forty times the answering (with the code of section 30, which is 1.7 times sooner than before it). The mechanisms built
+since the speaking configuration answer other things than this measure asks (what was never said, questions,
+kinds, its own errors, what it does not know); on the plain recall of read text they neither help much nor hurt.
+
+Correction of 28.6: it said the build of the whole mind without silent claims "was still running after 40
+minutes". Its reading had ended after 309 s; what was still running was the answering that follows it in the
+same process (thirty seconds a thought then).
+
+### 32.3 The teacher's questions (the mind raised with the speaking configuration on the documents and the teacher's dialogues; 200 held-out questions in the taught form)
+
+    switches the mind is read with          answering                   exact    silent    words in place    word F1    answers that ran on
+    speaking                                181 s (0.9 an answer)       120      0         0.705             0.744      6
+    the whole mind's (with F69)             3,551 s (17.8 an answer)    123      0         0.706             0.737      2
+
+Three more exact answers of 200, four fewer that run on past the end, a word F1 a little lower (its answers are a
+word longer, 9.3 against 8.4), and twenty times the answering.
+
+### 32.4 What reading costs the whole mind, and a correction of 30.5
+
+Section 30.5 said that reading the documents with everything on would take "up to an hour and a half" by the
+rate measured there (23 ms a moment). That rate was measured by turning silent claims on in a mind that had been
+raised without them, and it does not describe a mind raised with them. Measured from nothing (32.1, by fifths of
+the 2,000 sentences):
+
+    moments lived                                 4,310    9,628    14,523    19,118    23,594
+    ms a moment, the whole mind                   4.5      11.2     23.0      32.8      44.9
+    the full reading made in this share of them   0.80     0.80     0.79      0.76      0.76
+    ms a full reading                             3.9      11.6     26.4      39.8      55.3
+    ms a moment without silent claims             1.2      1.4      1.7       1.6       1.7
+
+While it listens the mind makes the reading it would have decided with wherever the context has no record of
+its own, and in a young mind that is four moments of five; one such reading costs in proportion to what the
+mind holds (F37 reads the places of every word of the sentence, the family its frames), about 2.7 ms more for
+every thousand moments lived over these 23,594. On the big mind raised without silent claims the same reading is made in one moment of
+six to nine (more of its contexts have a record of their own) and costs 110 to 200 ms: 17 ms a moment on
+sentences it has never read, 23 on sentences it has. So the cost a moment rises steeply while the mind is young
+and then more slowly; the whole run from nothing had used two hours of processor time (2 h 39 min by the clock, on a busy machine) when this was written and had not saved its
+mind. Its rows will be appended when it ends.
+
+Reading large texts with silent claims on is not practical. The program's default is the whole mind; for reading
+documents `--kapat silent_claims` (or `--variant speaking`, as before) reads them at 1.7 ms a moment and loses
+nothing this section could measure.
+
+### 32.5 What follows
+
+1. Silent claims are worth their cost where what is watched is dialogue the mind will be asked about (the lawful
+   frames of section 31, the worlds of 12 and 27); on running text they are almost all cost. Whether the mind
+   itself can tell the two apart (make the reading where its ways' records are still moving, not where they have
+   settled or where nothing is ever asked) is a mechanism to be designed and measured, not a default to flip.
+2. The answering cost of the whole mind on a big mind (13.7 s a thought) is in F53's vote over every frame of a
+   family and F37 once a run (section 30.5); it is a change of what is computed.
