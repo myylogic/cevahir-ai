@@ -4559,3 +4559,43 @@ What it shows: what the mind is told, it keeps, word for word, across a large li
 reaches: the examination lines ask for a sentence assembled from facts told apart, which a mind computing over word
 sequences does not do. That diagnosis, measured, is where the deepened model of `research/living_mind_2026_11_23/`
 begins (MODEL.md, section 0).
+
+## 43. Additions to sections 40 to 42, and the school examination (`t_school.py`)
+
+**The race (section 40).** The Transformer was trained on one thread, with other runs beside it on the same
+machine. A clean run on four threads was planned and not made: the owner asked to leave testing and grow the mind by
+study instead. Its curve in section 40 is that of one thread.
+
+**The study (section 42), from the logs.** The largest mind answered every lesson dialogue right in the first round
+(284 of 284: 158 in the first twelve lessons, 126 in the other twelve), so no attempt of it had to be taken back.
+The examination lines after each lesson: 8 of 41 (6 of 25, 2 of 16); after all of them, 11 of 41. The small mind
+(25,546 moments before the lessons) did need it. In coding, its wrong answers were taken back exactly (the moments of
+the attempt retracted) and the answer shown, round after round, and it answered 20, 20, then 19 of 22; in the trial
+lesson 2, 2, 2 of 3. Taking back a wrong attempt exactly leaves the mind as it was before the attempt; the wrong
+answers came again, so one showing of the answer a round did not outweigh what had led to them.
+
+**The school examination (`t_school.py`; its docstring says section 41, its results are here; rows in
+`results/school.jsonl`).** Seven subjects taught as a teacher gives them (biology, physics, chemistry, mathematics,
+coding, music, drawing) and asked only what was never asked. Right / asked:
+
+    one whole mind, every subject, one seed (224.7 s)   a whole mind for each subject, three seeds
+    biology    recall 8/8, deduction 12/12              recall 24/24, deduction 36/36
+    physics    recall 6/6, deduction 9/9                recall 18/18, deduction 27/27
+    chemistry  recall 10/10, a new pair 6/6,            recall 30/30, a new pair 18/18,
+               an element seen only alone 18/18         an element seen only alone 54/54
+    maths      recall 9/9, plus one 8/10,               recall 27/27, plus one 29/30,
+               what follows 3/10, a sum never added 0/8 what follows 17/30, a sum never added 0/24
+    coding     recall 7/7, a new name 6/6,              recall 21/21, a new name 18/18,
+               a new pair 6/6                           a new pair 16/18
+    music      recall 3/3, three notes up 0/2           recall 9/9, three notes up 0/6
+    drawing    a new combination 2/2,                   a new combination 6/6,
+               a shape seen only alone 1/3              a shape seen only alone 3/9
+
+What it shows: what was asked is recalled; deduction from facts read apart and composition of parts never shown
+together are answered; a relation along a lived sequence is reached only in part ("4 sonrası nedir ?" answered
+"10" by one mind and "4" by another); three notes up from a note is not (the one mind says the first note, the
+separate mind the whole scale); a shape seen only alone, drawn after another, comes with one move too many ("ileri
+sol ileri ileri ileri" for "ileri sol ileri ileri"); a sum never added is answered by neither, as expected (nothing
+lived says it). On the one seed measured, the one mind holding seven subjects answered recall, deduction and
+composition as the separate minds did. **Not done**: the one mind over three seeds, the Transformer on the same
+lessons, and the drawings and the melody as files; they were left when the owner asked to stop testing.
