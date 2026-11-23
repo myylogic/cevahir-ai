@@ -807,8 +807,10 @@ def settle_look(mind, filler: int, looked: bool = True):
                 thoughts = mind.add_channel(THINK_CHANNEL, "knob")
                 tie = S.tie(mind._atom(thoughts, WONDER), mind.feel_unit["relief"], EXPECT, 1)
                 add_evidence1(mind, W_POS if met else W_NEG, ACTED, tie, 1.0, relief=False)
-    finally:
-        S.end()
+        elif met:                                                 # F51: what it asked itself and could not answer it
+            getattr(mind, "wondered", {}).pop(filler, None)       # can now say (it learned it meanwhile): the want
+    finally:                                                      # has ended, and nothing was looked up to judge
+        S.end()                                                   # the asking by
     return None if claim is None else met
 
 

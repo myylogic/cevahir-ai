@@ -174,7 +174,7 @@ def load(path: str, live_log: str = None, ledger: bool = True) -> Mind:
                           ("claimed", dict), ("faults", list), ("_held_back", list), ("open_plain", dict),
                           ("met_once", dict), ("wondering", lambda: None), ("wondered", dict),
                           ("called", dict), ("trial_base", dict), ("trial_changes", list), ("trial_cases", list),
-                          ("trial_mark", dict), ("pairs_tried", list),
+                          ("trial_mark", dict), ("pairs_tried", list), ("owner_off", list), ("own_taken", dict), ("told_in", dict), ("own_waited", dict),
                           ("pondering", dict), ("linked", dict), ("waiting", dict), ("conjectures", dict),
                           ("supposing", lambda: None),
                           ("relations", tuple), ("relations_tried", list), ("relation_paths", list),

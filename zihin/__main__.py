@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
 """Living with a Zihin mind from the terminal.
 
-    python -m zihin [--load PATH] [--variant members] [--dil tr|diger] [--pencere N] [--ac wholes,told_apart]
+    python -m zihin [--load PATH] [--variant full|speaking] [--kapat a,b] [--ac a,b] [--dil tr|diger] [--pencere N]
+
+A mind of the program lives with everything that was built (--variant full, the default): a new mind is raised so,
+and a loaded mind is given every mechanism it was raised without (said in one line). --kapat keeps mechanisms off by
+name (remembered with the mind until --ac names them again); a way of reading the mind's own trials put away stays
+put away. --variant speaking is the configuration before those mechanisms (a loaded mind then keeps its own settings
+and --ac turns single mechanisms on). What leaves this machine stays the owner's choice of each run: the mind reads
+the web by itself only with --ag, a folder of documents with --kaynak.
 
 The mind of this computer is kept in $CEVAHIR_HOME/zihin/cevahir.zihin (default ~/.cevahir/zihin; --kayit elsewhere).
 A session's experience ledger (what makes !unut exact) is written next to it as defter-<ms>-<pid>.log and deleted at a
@@ -45,15 +52,15 @@ Commands (Turkish, with English aliases):
                                     it is now, in a process of its own (as many as the machine has processors); the
                                     answers are exactly what it would give one after another, and none is lived
     !dusun_hepsi a, b, c / !think_all  the same for thoughts: what it thinks about each topic now, at the same time
-    !hata                / !faults  (with --ac faults) what the mind has learned about its own ways of reading (how
+    !hata                / !faults  (F49) what the mind has learned about its own ways of reading (how
                                     often each held against what it claimed) and where its last faults were: the
                                     context, the word it said or would have said, what was lived, the way that
                                     claimed it
-    !deney               / !trials  (with --ac trials) the trials of its own ways of reading: which it uses and
+    !deney               / !trials  (F57) the trials of its own ways of reading: which it uses and
                                     which sleep, how often each did better or worse than the mind without it, every
                                     way it took into use or put away, and the last cases (the context, what came,
                                     what it would have said with the way and without it)
-    !varsayim            / !conjectures  (with --ac conjectures) the statements it came to by itself: each with
+    !varsayim            / !conjectures  (F59) the statements it came to by itself: each with
                                     the link and the statement it was carried from, the record it rests on, and what
                                     became of it when it was told more (held, failed, not met yet)
     !ag                  / !net     what this machine can reach: one small request to each service the mind reads
@@ -62,14 +69,14 @@ Commands (Turkish, with English aliases):
                                     read in the order given; the site's robots.txt is obeyed, every page is printed
     !kendini_gelistir [n] / !improve  the n topics it most wants to know by its own evidence (telling and not yet well
                                     known: tau x drive) are researched; it measures what each way of reading gave it
-                                    and chooses its way by that. With --ac open_claims, what it was asked about and
+                                    and chooses its way by that. With open claims (F46), what it was asked about and
                                     found it did not know comes first
-    !bak / !bakma        / !look, !nolook  with --ac look the mind decides by itself, in the silences of its online
+    !bak / !bakma        / !look, !nolook  the mind decides by itself (F47), in the silences of its online
                                     life, to look up what it found it did not know (every page read is printed);
-                                    !bakma stops that for this session, !bak allows it again. With --ac find_out it
+                                    !bakma stops that for this session, !bak allows it again. With F50 it
                                     also looks in the turn it is asked in, before it says a word that rests only on
                                     what others share: what it sends for is fetched while it goes on living, and it
-                                    answers when it has read it. With --ac wonder it asks itself, in a silence, the
+                                    answers when it has read it. With F51 it asks itself, in a silence, the
                                     question it knows about what was new in what it was told, and looks up what it
                                     cannot answer (each inner question is printed and is an entry of the history)
     !dogru / !yanlis     / !good / !bad   right after its answer: how its answer was received (a value signal;
@@ -180,7 +187,19 @@ def speaking(folder: str = None) -> Config:
                           exclusive_world=True, log_path=_log_path(folder) if folder else _log_path())
 
 
-VARIANTS = {"speaking": speaking,
+def full(folder: str = None) -> Config:
+    """The whole mind: the speaking configuration with every mechanism that was built and measured (STUDIED) in use.
+    A mind of the program is raised with it and lives with it (--variant full, the default). ``speaking`` is the
+    configuration before those mechanisms: the one every published measurement names its switches from, kept as it
+    was so that each of them can be run again."""
+    cfg = speaking(folder)
+    for name in STUDIED:
+        setattr(cfg, name, True)
+    return cfg
+
+
+VARIANTS = {"full": full,
+            "speaking": speaking,
             "members": lambda folder=None: Config.changed(support="members"),
             "changed": lambda folder=None: Config.changed()}          # folder: where the session ledger is kept
 
@@ -188,10 +207,117 @@ NEWER = ("backoff", "resemblance", "race", "situations", "explore", "starts", "e
          "exact_relations", "analogy", "corroborate", "paradigmatic", "bind_relations",      # lack these (--ac)
          "company", "replies", "purpose", "forms", "echo", "exclusive_world")
 
-STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # measured and off by default: no mind
-           "told_apart", "open_claims", "look", "think", "faults",           # is raised with them; --ac turns one on
-           "silent_claims", "find_out", "wonder", "echo_exact", "families", "lived_apart",
-           "asked_place", "whole_kinds", "trials", "built_relations", "conjectures", "unseen_share")
+STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # built and measured after the speaking
+           "told_apart", "open_claims", "look", "think", "faults",           # configuration: in use in the full one
+           "silent_claims", "find_out", "wonder", "echo_exact", "families", "lived_apart",   # (the program's
+           "asked_place", "whole_kinds", "trials", "built_relations", "conjectures", "unseen_share",   # default)
+           "own_race", "echo_told", "relied_on", "shares_tested", "unknown_outside")
+
+NEEDS = (("find_out", ("faults", "look")), ("wonder", ("look",)), ("silent_claims", ("faults",)),   # what does not
+         ("built_relations", ("trials",)), ("unseen_share", ("families",)), ("look", ("open_claims",)),   # work
+         ("echo_told", ("echo_exact",)), ("relied_on", ("silent_claims",)), ("shares_tested", ("told_apart",)),
+         ("told_apart", ("wholes",)), ("whole_kinds", ("wholes",)))
+                                                                                                    # without what
+
+
+
+def _needs(name: str) -> set:
+    """Everything a mechanism cannot work without (``NEEDS``, followed through)."""
+    out, todo = set(), [name]
+    while todo:
+        k = todo.pop()
+        for need, wants in NEEDS:
+            for w in wants if need == k else ():
+                if w not in out:
+                    out.add(w)
+                    todo.append(w)
+    return out
+
+
+def configure(mind, variant: str = "full", on=(), off=(), loaded: bool = False, look: bool = False,
+              say=print) -> bool:
+    """Which mechanisms this mind lives with from now on (the program calls it once, for a new mind and for a
+    loaded one).
+
+    * ``variant`` "full" (the default): the mind lives with everything that was built. A new mind is raised so; a
+      loaded mind is given every mechanism it was raised without, said in one line. Two things stand against it:
+      what its owner keeps off (``off``: --kapat, remembered with the mind in ``Mind.owner_off`` until --ac names
+      it), and a way of reading the mind's own trials put away (F57: that decision is the mind's; --ac overrules).
+    * any other variant: a loaded mind keeps its own settings, and only what ``on`` names (--ac) is turned on.
+    * what a mechanism in use cannot work without is turned on with it (``NEEDS``); what is kept off takes with it
+      what cannot work without it. ``look``: the owner gave it somewhere to look (--kaynak, --ag).
+
+    A way of reading that is on trial (``deney.WAYS``) is changed through the trials' own record, so that the mind's
+    record of its configuration stays whole (``deney.set_from_outside``). Returns whether anything was changed
+    (the program then keeps a loaded mind even when nothing was lived in the session)."""
+    from . import deney
+    cfg = mind.cfg
+    names = NEWER + STUDIED
+    before = ([bool(getattr(cfg, k, False)) for k in names], sorted(getattr(mind, "owner_off", ())))
+    for k in list(on) + list(off):
+        if k not in names:
+            say("  (--ac / --kapat: bilinmeyen mekanizma '%s'; seçenekler: %s)" % (k, ", ".join(names)))
+    on = [k for k in on if k in names]
+    named = (set(getattr(mind, "owner_off", ())) | set(k for k in off if k in names)) - set(on)
+    if look:
+        named.discard("look")
+    for k in on + (["look"] if look else []):            # asked for now: what it cannot work without stays
+        for w in sorted(_needs(k) & named):
+            named.discard(w)
+            say("  (%s kapatılmadı: %s onsuz çalışmaz)" % (w, k))
+    kept_off = named | set(k for k in names if _needs(k) & named)   # ... and what needs one kept off goes with it
+
+    def put(k: str, value: bool) -> None:
+        if k in deney.WAYS:
+            deney.set_from_outside(mind, {k: value})
+        else:
+            setattr(cfg, k, value)
+
+    given, own, without = [], [], []
+    for k in names:
+        if getattr(cfg, k, False) or k in kept_off:
+            continue
+        if k in on:
+            put(k, True)
+            say("  açıldı: %s (senin isteğinle açıldı)" % k)
+        elif variant == "full":
+            if k in deney.WAYS and deney.own_choice(mind, k) is False:
+                own.append(k)                            # put away by its own trials
+            else:
+                put(k, True)
+                given.append(k)
+        elif loaded and variant == "speaking" and k in NEWER:
+            without.append(k)
+    closed = [k for k in names if k in kept_off and getattr(cfg, k, False)]
+    for k in closed:
+        put(k, False)
+    if look and not getattr(cfg, "look", False):
+        cfg.look = True                                  # giving it somewhere to look is letting it look: what it
+        say("  açıldı: look (ona bakabileceği bir yer verdin; neye, ne zaman bakacağına kendisi karar verir)")
+    for k in names:
+        for w in sorted(_needs(k)) if getattr(cfg, k, False) else ():
+            if not getattr(cfg, w, False):
+                put(w, True)
+                say("  açıldı: %s (%s onsuz çalışmaz)" % (w, k))
+    mind.owner_off = sorted(named)
+    if given and loaded:
+        say("  tam yapı: bu zihin şu mekanizmalarla büyümedi, şimdi açıldı: %s (birini kapalı tutmak için --kapat ad; "
+            "zihnin eski ayarlarıyla yaşaması için --variant speaking)" % ", ".join(given))
+    if own:
+        say("  (kendi denemeleriyle bıraktığı yollar kapalı kaldı: %s; yine de açmak için --ac %s)" % (
+            ", ".join(own), ",".join(own)))
+    if closed:
+        say("  kapatıldı: %s (senin isteğinle)" % ", ".join(closed))
+    if kept_off:
+        rest = sorted(kept_off - named)
+        say("  (senin isteğinle kapalı: %s%s; açmak için --ac %s)" % (
+            ", ".join(sorted(named)), "; onlarsız çalışmadığı için: " + ", ".join(rest) if rest else "",
+            ",".join(sorted(named))))
+    if without:
+        say("  (bu zihin şu mekanizmalarla büyümedi ve onlarsız yaşar: %s; açmak için --ac %s)" % (
+            ", ".join(without), ",".join(without)))
+    return before != ([bool(getattr(cfg, k, False)) for k in names], mind.owner_off)
+
 
 DIL = ("tr", "diger")       # how the text adapter lower-cases: Turkish rules (I -> ı, İ -> i) or plain str.lower
 
@@ -631,9 +757,26 @@ class Session:
             self.owed.pop(looking[0], None)
             self.company(self.partner)
             return self.recall(context) if context is not None else []
-        acts = self.mind.step([])
+        can = self.mind.__dict__.get("can_look")
+        if can and getattr(self.mind.cfg, "own_race", False) and (
+                self.fetching is not None or time.time() - self.looked_at < self.look_gap):
+            self.mind.__dict__["can_look"] = False       # F61: not in this moment (one look at a time, none in a
+        try:                                             # burst): the look takes no part in the race
+            acts = self.mind.step([])
+        finally:
+            if can is not None:
+                self.mind.__dict__["can_look"] = can
         if acts:
             return acts
+        self.mind.__dict__["_carrying"] = True           # F61: what it decided is carried out: the pauses of that are
+        try:                                             # no moments of its own time (nothing is decided in them)
+            return self._carry_out(acts, say)
+        finally:
+            self.mind.__dict__.pop("_carrying", None)
+
+    def _carry_out(self, acts: List[Event], say=print) -> List[Event]:
+        """What the mind decided about its own time in a silent moment is let happen (``silent_moment``)."""
+        import time
         looking = getattr(self.mind, "looking", None)
         if looking is not None and self.may_look and self.fetching is None \
                 and time.time() - self.looked_at >= self.look_gap:   # (one look at a time: none while one is on its way)
@@ -1420,13 +1563,16 @@ def main(argv=None) -> None:
     ap.add_argument("--dil", choices=DIL, help="how a NEW mind's text is lower-cased: 'tr' (default; Turkish rules, "
                                                "I -> ı, İ -> i) or 'diger' (plain lower case, for other languages); "
                                                "a mind keeps the convention it was raised with")
-    ap.add_argument("--variant", default="speaking", choices=sorted(VARIANTS))
-    ap.add_argument("--ac", default="", help="switch on, for a loaded mind, mechanisms that new minds are raised with "
-                    "but it was not (comma separated, e.g. situations,explore); a mind otherwise keeps its own "
-                    "settings. Also the mechanisms that were measured and are off by default (inherit, witness, "
-                    "difference, urge, known, wholes, told_apart, open_claims, look, think, faults, silent_claims, "
-                    "find_out, wonder, echo_exact, families, lived_apart, asked_place, whole_kinds, trials, built_relations, "
-                    "conjectures, unseen_share), for a loaded or a new mind")
+    ap.add_argument("--variant", default="full", choices=sorted(VARIANTS),
+                    help="'full' (default): the mind lives with every mechanism that was built; a loaded mind is "
+                         "given those it was raised without (but for what --kapat keeps off and the ways of reading "
+                         "its own trials put away). 'speaking': the configuration before the mechanisms of --ac; a "
+                         "loaded mind keeps its own settings")
+    ap.add_argument("--ac", default="", help="switch on mechanisms by name (comma separated), for a loaded or a new "
+                    "mind: with --variant speaking any of those the full configuration has (%s); with the full "
+                    "configuration, one that --kapat or the mind's own trials had put off" % ", ".join(NEWER + STUDIED))
+    ap.add_argument("--kapat", default="", help="keep mechanisms off by name (comma separated): remembered with the "
+                    "mind, until --ac names them again; what cannot work without one of them is kept off with it")
     ap.add_argument("--pencere", type=int, help="how many items a NEW mind holds at once (its window, 3 to 15; "
                     "default 7); a mind keeps the window it has")
     args = ap.parse_args(argv)
@@ -1441,21 +1587,6 @@ def main(argv=None) -> None:
             mind.cfg.keep_log, mind.cfg.log_path = True, _log_path(ledgers)
             mind.S.keep_log = True
             mind.S.log = DiskLog(mind.cfg.log_path, keep=max(4, mind.cfg.undo_depth + 2))
-        newer = [k for k in NEWER if args.variant == "speaking" and not getattr(mind.cfg, k, False)]  # speaking has all
-        asked = [k.strip() for k in args.ac.split(",") if k.strip()]
-        for k in asked:
-            if k in STUDIED:
-                continue                                 # turned on below, for a loaded or a new mind alike
-            if k not in NEWER:
-                print("  (--ac: bilinmeyen mekanizma '%s'; seçenekler: %s; ölçülmüş ve varsayılan olarak kapalı "
-                      "olanlar: %s)" % (k, ", ".join(NEWER), ", ".join(STUDIED)))
-            elif not getattr(mind.cfg, k, False):
-                setattr(mind.cfg, k, True)
-                print("  açıldı: %s (bu zihin onunla büyümedi; senin isteğinle açıldı)" % k)
-        rest = [k for k in newer if k not in asked]
-        if rest:
-            print("  (bu zihin şu mekanizmalarla büyümedi ve onlarsız yaşar: %s; açmak için --ac %s)" % (
-                ", ".join(rest), ",".join(rest)))
         if args.dil and args.dil != getattr(mind, "dil", "tr"):
             print("  (bu zihin '%s' harf kuralıyla büyüdü ve onu korur; --dil %s yeni bir zihin içindir)" % (
                 getattr(mind, "dil", "tr"), args.dil))
@@ -1471,23 +1602,13 @@ def main(argv=None) -> None:
         if args.no_ledger:
             mind.S.log, mind.S.keep_log, mind.cfg.keep_log, mind.cfg.log_path = {}, False, False, None
         mind.add_channel(CHANNEL, "act")
-    for k in (k.strip() for k in args.ac.split(",")):    # studied mechanisms: off by default, on by the owner's choice
-        if k in STUDIED and not getattr(mind.cfg, k, False):
-            setattr(mind.cfg, k, True)
-            print("  açıldı: %s (ölçülmüş, varsayılan olarak kapalı bir mekanizma; senin isteğinle açıldı)" % k)
-    for need, wants in (("find_out", ("faults", "look")), ("wonder", ("look",)), ("silent_claims", ("faults",)),
-                        ("built_relations", ("trials",)), ("unseen_share", ("families",))):
-        for k in wants if getattr(mind.cfg, need, False) else ():
-            if not getattr(mind.cfg, k, False):
-                setattr(mind.cfg, k, True)
-                print("  açıldı: %s (%s onsuz çalışmaz)" % (k, need))
-    asked_look = "look" in [k.strip() for k in args.ac.split(",")]
-    if (args.ag or args.kaynak) and not getattr(mind.cfg, "look", False):
-        mind.cfg.look = True                             # giving it somewhere to look is letting it look: what it
-        print("  açıldı: look (ona bakabileceği bir yer verdin; neye, ne zaman bakacağına kendisi karar verir)")
-    if getattr(mind.cfg, "look", False) and not getattr(mind.cfg, "open_claims", False):
-        mind.cfg.open_claims = True                      # what it looks up is what a claim was left open for
-        print("  açıldı: open_claims (look onsuz çalışmaz)")
+    asked = [k.strip() for k in args.ac.split(",") if k.strip()]
+    reconfigured = configure(mind, args.variant, asked, [k.strip() for k in args.kapat.split(",") if k.strip()],
+                             loaded=bool(source), look=bool(args.ag or args.kaynak))
+    asked_look = "look" in asked
+    if args.saatli and getattr(mind.cfg, "think", False):
+        mind.cfg.think = False                           # the program's clock decides when it thinks (the order before
+        print("  (--saatli: bu oturumda ne zaman düşüneceğine programın saati karar verir, zihnin kendisi değil)")  # F48)
     session = Session(mind, pieces_for(mind, args.parca))
     from .ag import Net                                  # the one way out to the network: polite, retrying, kept
     session.net = Net(cache=None if args.onbelleksiz else os.path.join(home_folder(), "ag"), offline=args.cevrimdisi)
@@ -1507,7 +1628,8 @@ def main(argv=None) -> None:
                   "" if session.may_look else "; şimdi bakmaz (yaşam saati kapalı ya da bakacak yer yok)"))
     session.explain = True                               # !neden explains the last answer word by word
     interactive = sys.stdin.isatty()
-    if interactive and not args.yasamsiz and not args.saatli and not getattr(mind.cfg, "think", False):
+    if interactive and not args.yasamsiz and not args.saatli and not getattr(mind.cfg, "think", False) \
+            and "think" not in mind.owner_off:
         mind.cfg.think = True                            # F48: in its online life, when to think is its own decision
         print("  (sessizlikte ne zaman düşüneceğine bu zihin kendisi karar verir: beklediğine aykırı bir şey "
               "duyduğunda düşünür, düşüncelerinin neye vardığından öğrenir; program saati kullanılmaz, --saatli eski "
@@ -1521,7 +1643,8 @@ def main(argv=None) -> None:
     autosave = not args.kaydetme
     turns_since_save = 0
 
-    saved_at = [mind.t]
+    saved_at = [-1 if source and reconfigured else mind.t]   # (a loaded mind whose mechanisms were changed is kept
+                                                             # even when nothing was lived)
 
     def keep(reason: str) -> bool:
         """Save what was learned (the substance as it is now, without the ledger). A save that does not finish

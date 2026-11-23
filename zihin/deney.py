@@ -408,6 +408,37 @@ def trial(mind, items) -> None:
                 mind.trial_mark[other] = record(mind, other)
 
 
+def own_choice(mind, way) -> Optional[bool]:
+    """What the mind's own trials last decided about a way (taken into use: True, put away: False); None when it
+    never changed it, or when its owner changed it after: how the way stands then was set from outside."""
+    choice = None
+    for change in getattr(mind, "trial_changes", ()):
+        if change["way"] == way or (is_pair(change["way"]) and way in change["way"][1:]):
+            choice = None if change.get("owner") else bool(change["on"])
+    return choice
+
+
+def set_from_outside(mind, changed: Dict[object, bool]) -> None:
+    """The mind's owner changed which ways it uses (the program: at loading, --ac, --kapat). The ways are set; where
+    the trials have begun the change is an entry of their record, marked as the owner's (``sync`` rebuilds the
+    configuration from that record after a moment was undone); and the question has changed, as it does when the
+    mind changes a way itself: what a way did against the configuration that is no more says nothing about the one
+    there is now, so the trial of every way that sleeps, and of every way that was changed, begins again."""
+    changed = {way: bool(on) for way, on in changed.items() if in_use(mind, way) != bool(on)}
+    if not changed:
+        return
+    for way, on in changed.items():
+        _set(mind, way, on)
+        if mind.trial_base:
+            mind.trial_changes.append({"t": mind.t, "way": way, "on": on, "better": 0.0, "worse": 0.0,
+                                       "owner": True})
+    for way in ways(mind):
+        if way in changed or not in_use(mind, way):
+            was = record(mind, way)
+            if was != (0.0, 0.0) or way in mind.trial_mark:
+                mind.trial_mark[way] = was
+
+
 def sync(mind) -> None:
     """The configuration as the mind's own record of its changes says it is (after a moment was undone)."""
     state = dict(getattr(mind, "trial_base", {}) or {})
@@ -441,6 +472,10 @@ def report(mind, most: int = 8) -> List[str]:
             way_name(mind, way), "kullanımda" if in_use(mind, way) else "uykuda", w_pos, w_neg,
             "" if now == (w_pos, w_neg) else " (şimdiki yapıya karşı: daha iyi %g, daha kötü %g)" % now))
     for change in mind.trial_changes[-most:]:
+        if change.get("owner"):                            # set from outside (the program, at its owner's word)
+            lines.append("  an %d: %s: sahibi %s" % (change["t"], way_name(mind, change["way"]),
+                                                    "açtı" if change["on"] else "kapattı"))
+            continue
         lines.append("  an %d: %s %s (daha iyi %g, daha kötü %g)" % (
             change["t"], way_name(mind, change["way"]), "kullanıma alındı" if change["on"] else "bırakıldı",
             change["better"], change["worse"]))

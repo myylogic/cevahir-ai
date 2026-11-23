@@ -19,6 +19,12 @@ single experience can be taken back exactly.
 
 Training and use are not separate phases: **to learn is to live**. The model learns in every conversation.
 
+**The whole mind.** A mind of the program (`python -m zihin`) lives with every mechanism described here: the
+full configuration. In the entries below "off by default" means off in the core's own configuration and in the
+speaking configuration, the two that every measurement names its switches from: each mechanism was measured
+alone, or with the few it was built on. What they do together, and what had to be built for them to live
+together, is the entry "The whole mind" at the end of section 5.
+
 ## 1. Basic entities
 
 **Channels** are how the mind touches the world and itself. There are eight channel kinds:
@@ -553,6 +559,53 @@ At each moment, roughly each word, the mind lives these steps:
   is against; one statement told in each of two fields, neither enough alone, is enough together (270 of 270). It
   does not believe of another word for the link what one word carried. Links in other shapes, running text, and a
   conjecture as the premise of another are not there.
+- **The whole mind (the program's default), and what it took: F61 to F65.** Every mechanism above was measured
+  alone or with the few it was built on. All together had never been measured. The first time (the committed
+  scripts unchanged, every mind made with all of them), the whole did worse than its parts in eight of the
+  worlds they were measured in: no conjecture where F59 alone makes 44; 0 of 8 right where four mechanisms give
+  8 of 8; 13 of 16 with three wrong values where F50 looks first and gives 16; 4 of 12 where the three of the
+  last round give 12. Each case was traced by running the whole with one mechanism left out, for every
+  mechanism: in each world one or two lines of that table stood out. Four were faults of putting things
+  together; a fifth was found when the battery was run with those four in. Each has a mechanism now (switches
+  like the others, on in the full configuration):
+  - *One Race for Its Own Time (F61).* Looking something up (F47), thinking (F48), asking itself (F51) and
+    thinking a thing over (F59) are each an act with a rate of its own (the drive + what it led to before). Which
+    of them the mind took in a silent moment was the order they were written in: each gave way to those before
+    it, and a mind that always had something new to ask itself about never thought anything over. Now they race:
+    each adds its rate up over the silent moments it has itself waited since it was last taken, and is ready
+    when that reaches the line (at once when ceil(theta / rate) <= T, else after ceil(theta / rate) moments of
+    its own waiting). Of the ready, the one ready for longest is decided, then the one not taken for longest,
+    then the higher rate; one act a moment. An act that pays takes turns with the others that pay; one that
+    rarely paid gets the mind's time as rarely as its record says, and none is given up for good (a look whose
+    rate is over nothing waits its time too; before, one that did not reach the line within T was left out).
+    Nothing is decided while an act is being carried out, and a look it has nowhere to carry out takes no part.
+  - *The Sentence Being Told (F62, with F52).* F52 made the echo rule exact (a continuation is an echo only where
+    it followed these very words in what is present) and was measured in one world. Elsewhere it lets the mind
+    carry on whatever once followed its last word, though the partner just said it ("dal taşır" for "dal").
+    F62 holds it to the case it was built for: where the mind's utterance, from its beginning, is how a
+    sequence it lived began, the word is carried on; where only its last words once went on so, the partner's
+    words are echoes as before F52.
+  - *On Trial Where It Is Relied On (F63, with silent claims).* While it listens the mind's ways are judged by
+    what they would have claimed. Where the word it would say is something it lived of the very thing spoken
+    of, the ways that only carry over what others share are not what it goes by: that they agree with what it
+    already knew is not a prediction that held. Only the claims that read the thing's own record are kept
+    there. Without it a generalisation was "proven" by eight things the mind had itself read of, and of the
+    ninth, of which it had read nothing, it asserted what they share instead of looking it up.
+  - *A Share Is Tested Before It Is Carried (F64, with F45).* What a word was told apart to answer with was
+    found in one place. Each time it is told apart in a place new for it, what it answered with before was a
+    prediction: it held or it did not. In an utterance never answered, a word that was only told apart stands
+    as a whole with its share only where a record has decided that shares carry (the word's own, then any
+    word's; by more than k). "left" answers alike after every move and is carried from its second place on;
+    what an animal eats is not said for what it bears.
+  - *Not Knowing Is of the World (F65, with L7).* L7 keeps the amount the mind does not know when the world has
+    just done something and it decided nothing, and a silent moment later perceives that as an inner event. The
+    end of a question the mind asked itself (F51) is imagined: it was taken for the world's, and the inner event
+    was then lived as the beginning of the next thing it heard (every watched question as what follows not
+    knowing: a young mind never learned the question it was watching). Only what was lived counts now; what the
+    world leaves it without an answer to is felt as before.
+  Measured, the full configuration, the same for every world: of the 38 measured lines it equals or betters the configuration each was measured with in 31 (conjectures 223, all holding, every statement that holds reached; asking itself 30 of 30, the young mind too; looking before it asserts 80 of 80; the one-life world 220 of 220; a new kind of question right at first sight from two mastered kinds, 40 of 40; the fault loop 79 of 80 at the first answer where it was 4; its own curriculum 16 of 16 at every stage; and, beside the older scripts as they were written, deduction from facts read apart 48 of 48 (2), long answers 162 of 162 (68), telling what it knows 46 of 113 (2), where-questions 31 of 31 (1)).
+  What is a trade and was not repaired: seven lines are worse, each traced by leaving one mechanism out. Silent claims (learning by only watching) give a generalisation that held on what was watched a record before the first question, which costs where what is then asked is not like what was watched: 66 wrong answers against 29 in the misled world, 9 wrong values in 40 against 1 where the library is half empty, the narrower reading of F49 found late or not at all in the kinds world, an exception two steps away answered 0 of 3 against 3 of 3. F49's read-back raises the cause probe (0.765 against 0.548), two unseen single forms of the chat-like world are held back, and after forty looks that found nothing the mind looks rarely (35 of 50 found in sixty silent moments against 50). `--kapat silent_claims` gives the whole mind without them; the first of these has a mechanism measured in a scratch copy already (next section).
+  Cost: about 2 times a moment in the chat-like world (2.34 ms against 1.24), 4 to 8 times in the teacher's loops, 2.9 times over the 21 older runs. Nothing was made faster in this section.
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
@@ -811,6 +864,11 @@ The models were small and the data scarce; with far more data the gap may close.
 | Built Relations | Kurulan İlişkiler | F58, off by default (with trials) | program / relation induction by composition; multi-hop inference found from a failure; library learning (what was built becomes a building block) |
 | The Unseen Share | Görülmemiş Pay | F60, off by default (with families) | the missing mass of a sample (Good-Turing: what was never seen is as likely as the items seen once are many); type-token variety of a slot; productivity of a construction |
 | Conjectures | Varsayımlar | F59, off by default | hypothesis formation; property induction over a learned relation (which links license inference); abduction kept apart from knowledge by provenance; hypothesis testing against later evidence; default reasoning with exceptions |
+| One Race for Its Own Time | Kendi Zamanının Yarışı | F61, off by default | action selection among internal goals; competition of drives (behaviour systems); scheduling of attention by learned value |
+| The Sentence Being Told | Anlatılan Cümle | F62, off by default (with F52) | echoic responding against recall; whether a repeated word is knowledge or repetition (source monitoring) |
+| On Trial Where It Is Relied On | Dayanıldığı Yerde Sınanır | F63, off by default (with silent claims) | out-of-sample validation; counting evidence twice; explaining away |
+| A Share Is Tested Before It Is Carried | Pay Taşınmadan Önce Sınanır | F64, off by default (with F45) | context-free against context-bound meaning; compositionality as a claim to be tested, not assumed; transfer |
+| Not Knowing Is of the World | Bilmemek Dünyaya Dairdir | F65, off by default (with L7) | reality monitoring (what was imagined against what was perceived); metacognitive feelings and what they are about |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |
@@ -846,6 +904,11 @@ pip install torch numpy
 Start it inside the `cevahir-ai` folder. The program speaks Turkish: it first asks "Seninle konuşan kim?" (who is
 talking to you?; type your name). On first start the mind is empty and knows no language; it learns by living with
 you. Commands are typed at the program's prompt, not in the shell; each has an English alias.
+
+A mind of the program lives with everything described above (the full configuration). `--kapat a,b` keeps
+mechanisms off by name (remembered with the mind until `--ac` names them again); `--variant speaking` starts the
+configuration before the studied mechanisms, and a mind loaded with it keeps its own settings. The mind reads
+the web by itself only with `--ag`, and a folder of your documents with `--kaynak`.
 
 ```
 !oku my_documents/                # !read: .txt .md .docx .pdf documents, .json/.tsv dialogues, source code

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Zihin persist: a mind keeps the configuration it was raised with. Loading switches nothing on; a newer mechanism
-is turned on only by an explicit choice of the owner (the program's --ac)."""
+"""Zihin persist: a saved mind keeps the configuration it was raised with: ``persist.load`` switches nothing on.
+Which mechanisms a mind then lives with is the program's to settle (``configure``): with --variant speaking a newer
+mechanism is turned on only by an explicit choice of the owner (--ac); with the full configuration (the program's
+default) a loaded mind is given every mechanism it was raised without (tests/evolution/test_zihin_full.py)."""
 from __future__ import annotations
 
 from zihin import Config, Mind
@@ -33,7 +35,9 @@ def test_the_owner_can_switch_on_a_newer_mechanism(tmp_path, monkeypatch, capsys
     path = raised(tmp_path, situations=False, explore=False)
     monkeypatch.setenv("CEVAHIR_HOME", str(tmp_path / "home"))
     monkeypatch.setattr("sys.stdin", __import__("io").StringIO("!cik\n"))
-    main(["--load", path, "--kaydetme", "--yasamsiz", "--ac", "situations", "--kim", "test"])
+    main(["--load", path, "--kaydetme", "--yasamsiz", "--variant", "speaking", "--ac", "situations", "--kim", "test"])
     out = capsys.readouterr().out
     assert "açıldı: situations" in out
-    assert "explore" in out                          # named as one the mind lives without
+    line = [x for x in out.splitlines() if "onlarsız yaşar" in x][0]
+    assert "explore" in line and "situations" not in line.split("açmak için")[0]   # named as one it lives without
+    assert "tam yapı" not in out

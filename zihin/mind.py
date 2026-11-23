@@ -135,6 +135,13 @@ class Config:
                                     # one another's words (aile.repeated): where every member went on with a word of
                                     # its own, a word never seen there is what is to be expected, and the family's
                                     # claim is not lowered by it
+    own_race: bool = False          # F61 (One Race for Its Own Time): in a silent moment in which nothing was said
+                                    # the acts of its own time (looking something up F47, asking itself F51, thinking
+                                    # a thing over F59, thinking about what it took in F48) race as its words do, each
+                                    # with its own rate (the drive + what it led to before): the one that reaches the
+                                    # line first is decided, among equals the firmer, then the one not taken for
+                                    # longest; the others wait for the next silent moment. Without it they are taken
+                                    # in the order they were built, each giving way to those before it (act.own_time)
     conjectures: bool = False       # F59 (Conjectures): a thing told to go on with an item that is itself told about
                                     # is linked to it; what is told of that item, with the thing in its place, is a
                                     # candidate; where the thing was told that too the link carried it, where it was
@@ -147,6 +154,11 @@ class Config:
                                     # order ("walk twice and walk" answers like "walk thrice"): without it such a
                                     # lived command had no form, stood as a bare whole and took what an action
                                     # phrase takes ("[walk twice and walk] right"); zihin/butun.py (form, align)
+    shares_tested: bool = False     # F64 (A Share Is Tested Before It Is Carried; with told_apart): what a word was
+                                    # told apart to answer with is its reply in an utterance never answered only
+                                    # where the mind's record has decided that shares carry: each time a word is
+                                    # told apart in a place new for it, what it answered with before held there or
+                                    # did not (butun.share_carries)
     told_apart: bool = False        # F45 (Told Apart; with wholes): when two lived dialogues differ in one word of
                                     # the utterance and their answers differ in one pair of words, each of the two
                                     # words answers with its own (Mill's method of difference): a word never said
@@ -203,6 +215,11 @@ class Config:
                                     # (F16) a continuation is an echo only where it followed these very words in
                                     # what is present; without it every word the partner just said is left out,
                                     # wherever it stood (read.continuation_backoff)
+    echo_told: bool = False         # F62 (The Sentence Being Told; with echo_exact): the exact form of the echo
+                                    # rule holds only where the mind's utterance, from its beginning, is how a
+                                    # sequence it lived began: there a word the partner said is carried on; where
+                                    # only its last words once went on so, the partner's words are echoes as before
+                                    # F52 (read.continuation_backoff)
     wonder: bool = False            # F51 (Asking Itself; with open_claims, look): an item the mind has met in one
                                     # run of items only is an unknown. In a silent moment it may decide to ask
                                     # itself about it: rate = (2u - 1) + (2 e_wonder - 1), u = 1 (it has lived one
@@ -216,6 +233,16 @@ class Config:
                                     # its ways claim there is kept and settled by what comes next like any claim:
                                     # everything new it watches or reads is then a test of its ways. Costs the full
                                     # reading at every new context it listens to (hata.watch)
+    relied_on: bool = False         # F63 (On Trial Where It Is Relied On; with silent_claims): while the mind only
+                                    # listens, where something it lived of the very thing spoken of speaks in its
+                                    # reading, the ways that only carry over what others share are not on trial:
+                                    # agreeing with what it already knew is no prediction that held (hata.relied_on)
+    unknown_outside: bool = False   # F65 (Not Knowing Is of the World; with L7): the amount the mind does not know
+                                    # is kept when the *world* has just done something and it decided nothing. An
+                                    # end of a turn that only came to mind (the question it asked itself, a
+                                    # conjecture its inner voice thought: imagined) is not the world doing
+                                    # something: without this the inner event "not knowing" follows such a thought
+                                    # and is lived as the beginning of whatever the mind hears next
     urge: bool = False              # F40 (Urge to Go On): when the leading word's rival is itself expected, it races
                                     # against silence as far as the two are things known about the same item (their
                                     # share of that item's lived continuations): another thing to say, not a rival
@@ -388,6 +415,11 @@ class Mind:
         self.supposing = None                        # F59: the thing it decided, in this moment, to think over
         self.pairs_tried: List[tuple] = []           # F57: the pairs of ways it found to do together what neither
                                                      # does alone, and tries
+        self.own_taken: Dict[str, int] = {}          # F61: when it last took each act of its own time
+        self.own_waited: Dict[str, int] = {}         # F61: the silent moments each act that wants has waited since
+        self.told_in: Dict[object, tuple] = {}       # F64: word -> the places (the words before, after) it was told apart in
+        self.owner_off: List[str] = []               # the mechanisms its owner told the program to keep off (--kapat):
+                                                     # the full configuration leaves them off when the mind is loaded
         self.relations: tuple = ()                   # F58: the relations it built itself that are in use (chains)
         self.relations_tried: List[tuple] = []       # F58: those it has proposed and tries
         self.relation_paths: List[tuple] = []        # F58: every chain it ever proposed (a chain's code is its place)
@@ -567,14 +599,18 @@ class Mind:
             for event in acts:
                 self.pending.append(event)
             free = not items and not acts and not listening   # a silent moment in which nothing was said
-            self.looking = act_mod.look(self) if free and getattr(cfg, "look", False) else None   # F47
+            race = getattr(cfg, "own_race", False)         # F61: the acts of its own time race (below)
+            self.looking = act_mod.look(self) if free and getattr(cfg, "look", False) and not race else None   # F47
             if sought is not None:
                 self.looking = sought[:3]                  # F50: decided in the moment it was called on
             if listening and items and "_sought" in self.__dict__ and any(
                     prov not in (ACTED, IMAGINED) for _, prov in items):
                 del self.__dict__["_sought"]               # F50: called on anew from outside
+            in_summary = self.__dict__.get("_in_summary")  # F43: a moment lived in summary: its items are the mind's
+                                                           # own wholes and pointers, not words it was told (nothing
+                                                           # of it is new to ask about, or told to think over)
             if getattr(cfg, "wonder", False):              # F51: the items met in one run of items only; and, free
-                if items and listening:                    # and with nothing else decided, whether it asks itself
+                if items and listening and not in_summary:   # and with nothing else decided, whether it asks itself
                     born, act_ch = mv_view(self, "u_birth"), kind_masks(self)[5]   # about one of them
                     channel, met = mv_view(self, "u_channel"), self.met_once
                     for unit, prov in items:
@@ -586,14 +622,15 @@ class Mind:
                             del met[unit]                  # lived again in another run: it is no longer new
                     while len(met) > 64:
                         del met[next(iter(met))]
-                self.wondering = act_mod.wonder(self) if free and getattr(self, "thinking", None) is None \
+                self.wondering = act_mod.wonder(self) if free and not race \
+                    and getattr(self, "thinking", None) is None \
                     and (self.looking is None or not self.__dict__.get("can_look", True)) else None   # (a look it
                                                                     # cannot carry out does not stand in the way)
             if getattr(cfg, "conjectures", False):         # F59: what it was told is something to think over; and,
                 from . import varsayim                     # free and with nothing else decided, whether it does
-                if items and listening:
+                if items and listening and not in_summary:
                     varsayim.took_in(self, items)
-                self.supposing = act_mod.suppose(self) if free and self.looking is None \
+                self.supposing = act_mod.suppose(self) if free and not race and self.looking is None \
                     and getattr(self, "wondering", None) is None else None
             if getattr(cfg, "think", False):               # F48: how surprised it was by what it is taking in (and
                 if items and listening:                    # where most: the item its failed expectation was of), and
@@ -604,7 +641,14 @@ class Mind:
                 elif not items and self.taking[1]:
                     self.heard, self.about = self.taking[0] / self.taking[1], self.taking[3]
                     self.taking = (0.0, 0, 0.0, None)
-                self.thinking = act_mod.think_now(self) if free else None
+                self.thinking = act_mod.think_now(self) if free and not race else None
+            if race:
+                if sought is None:
+                    self.looking = None
+                self.wondering = self.supposing = self.thinking = None
+                if free and not self.__dict__.get("_carrying"):   # (not in a moment of an act being carried out:
+                    act_mod.own_time(self)                 # F61: the one of them it decides in this moment    its
+                                                           # pauses are not moments of the mind's own time)
             self._feel(surprise)                           # step 6
         finally:
             self._read_memo = None
@@ -642,7 +686,9 @@ class Mind:
         inner = self.ch.id(INNER_CHANNEL)
         acted = any(self.ch.has(e.channel) and self.ch.kind(self.ch.id(e.channel)) == "act" for e in acts)
         channels = mv_view(self, "u_channel")
-        outer = any(channels[u] != inner and self.ch.kind(channels[u]) == "sense" for u, _ in items)
+        lived = getattr(self.cfg, "unknown_outside", False)   # F65: what only came to mind is not the world's doing
+        outer = any(channels[u] != inner and self.ch.kind(channels[u]) == "sense" and not (lived and p == IMAGINED)
+                    for u, p in items)
         if outer:
             act = kind_masks(self)[5]
             best = max((e for u, e in self.predicted.items() if act[channels[u]]), default=0.5)
@@ -1192,7 +1238,8 @@ class Mind:
                   "predicted", "act_hope", "hoping", "chunked", "idle", "knob", "felt", "babbled", "imagined", "prov_of",
                   "unknown", "voice", "witnesses", "episode_start", "company", "topic", "open_where", "taking",
                   "heard", "about", "claimed", "faults", "_held_back", "open_plain", "met_once", "wondered",
-                  "called", "trial_base", "trial_changes", "trial_cases", "trial_mark", "relations",
+                  "called", "trial_base", "trial_changes", "trial_cases", "trial_mark", "relations", "own_taken",
+                  "told_in", "own_waited",
                   "relations_tried", "relation_paths", "pondering", "linked", "waiting", "conjectures",
                   "pairs_tried")
 

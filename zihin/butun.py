@@ -38,6 +38,19 @@ Nothing here is told to the mind; all of it is read from what it lived.
   is assigned only when what the two answers share is what the shared words answer with, and a word of the answer
   that a shared word answers with is not the differing word's share. A word told apart in several ways, none of
   them most of the evidence, has no reply.
+* A share is tested before it is carried (F64, ``Config.shares_tested``; with told_apart). What a word was told
+  apart to answer with was found in one place: between these words. Whether it is the word's reply in another
+  place is not known by that: "what X eats" and "what X bears" are two places, and what a thing answered with in
+  the one is not what it answers with in the other, while "left" answers alike after every word it follows. So
+  each time a word is told apart in a place new for it, what it answered with before is a prediction for that
+  place, and it held or it did not: one experience on the word's own record and on the record of any share
+  (``_share_settle``). In an utterance never answered (``reading``) a word that was only told apart, never said
+  alone, stands as a whole with its share only where a record has decided that shares carry (the word's own, then
+  any word's: for or against by more than k); else it is the word it is, and the utterance is answered as it
+  would be without the share. Where the answer is given (a watched dialogue's summary, ``align``) a share is
+  used as before: there the answer itself says whether it fits. Found when everything was turned on together: a
+  mind that was asked one kind of question of each animal answered another kind with what the animal had answered
+  the first with.
 
 The window bounds each level, not the answer: "jump around left thrice and walk twice" is five items and its answer
 two, and each of the two is answered in a few items of its own.
@@ -52,7 +65,7 @@ from __future__ import annotations
 import copy
 from typing import Dict, List, Optional, Tuple
 
-from .events import ACTED, IMAGINED, INFERRED, SENSED, TOLD, Event
+from .events import ACTED, IMAGINED, IMITATED, INFERRED, SENSED, TOLD, Event
 from .evidence import expectation
 from .form import mv_view
 
@@ -62,6 +75,10 @@ REPLY = "reply"                 # ("reply", j): "the reply of the whole at place
 LEVEL = "ozet"                  # the channel of the summaries' items: wholes, pointers, and the words that stand in them
 LEVEL_END = "⏎⏎"                # the end of a turn as a summary lives it (on the turn channel)
 DEPTH = 8                       # how deep a part may be answered in parts (a safety cap)
+SHARE = "pay"                   # F64: the mind's own channel for what its told-apart shares came to
+CARRIES = "taşınır"             # ... the unit their ties point at: (a word's share | any share) -> carries
+ANY_SHARE = ("pay",)            # ... the general level: any word's share
+HOLES = 64                      # ... the places a word was told apart in that are kept (the oldest stay)
 CHOICES = 4096                  # how many choices of wholes are read for one utterance (a safety cap)
 # the working state of the present episode (Mind._TRANSIENT without the clock, the knobs and what is not the episode's)
 WORKING = ("focus", "last_focus", "gens", "last_gens", "carry", "episode", "trace", "context", "pending", "predicted",
@@ -142,6 +159,49 @@ def _reply(mind, words, memo) -> Optional[tuple]:
     if key not in memo:
         memo[key] = lived_reply(mind, words)
     return memo[key]
+
+
+def _share_record(mind, key) -> Tuple[float, float]:
+    from .form import mass1
+    from .store import EXPECT
+    unit = mind.unit_of(SHARE, key)
+    if unit < 0:
+        return 0.0, 0.0
+    tie = mind.S.find_tie(unit, mind.unit_of(SHARE, CARRIES), EXPECT, 0)
+    return mass1(mind, tie) if tie >= 0 else (0.0, 0.0)
+
+
+def _share_settle(mind, word, held: bool) -> None:
+    """One share met another place: the word's own record and the record of any share, the mind's own percept."""
+    from .learn import add_evidence1
+    from .store import EXPECT, W_NEG, W_POS
+    channel = mind.add_channel(SHARE, "knob")
+    for key in (("w", word), ANY_SHARE):
+        tie = mind.S.tie(mind._atom(channel, key), mind._atom(channel, CARRIES), EXPECT, 0)
+        add_evidence1(mind, W_POS if held else W_NEG, ACTED, tie, 1.0, relief=False)
+
+
+def share_carries(mind, word) -> bool:
+    """F64 (``Config.shares_tested``): whether what a word was told apart to answer with is its reply in a place it
+    was never told apart in. Read level by level, the most specific that has decided speaks: the word's own record
+    (the other places it was told apart in: the same share there, or another), then the record of any word's
+    share. A level has decided when it is for or against by more than k (one agreement is not knowledge). With
+    nothing decided the share is not carried: it is what the word answered with where it was found."""
+    k = mind.cfg.k
+    for key in (("w", word), ANY_SHARE):
+        w_pos, w_neg = _share_record(mind, key)
+        if abs(w_pos - w_neg) > k:
+            return w_pos > w_neg
+    return False
+
+
+def _inferred_share(mind, word) -> Optional[tuple]:
+    """What a word was told apart to answer with so far (the strongest of what was inferred of it), or None."""
+    best = None
+    for symbol, (p, n) in went_on(mind, [said((word,))], without=(SENSED, TOLD, IMITATED)).items():
+        if is_said(symbol) and expectation(p, n, mind.cfg.k) > 0.5 and (best is None or p > best[0]):
+            best = (p, symbol[1:])
+    return None if best is None else best[1]
 
 
 def _spans(n: int) -> List[Tuple[int, int]]:
@@ -292,9 +352,13 @@ def reading(mind, words: tuple, F: int, memo: dict):
         return memo[key]
     memo[key] = None                                     # (a run is never read through itself)
     forms = {}
+    tested = getattr(mind.cfg, "shares_tested", False) and getattr(mind.cfg, "told_apart", False)
     for span in _spans(len(words)):
         part = words[span[0]:span[1]]
         reply = _reply(mind, part, memo)
+        if reply is not None and tested and len(part) == 1 and not said_alone(mind, part[0]) \
+                and not share_carries(mind, part[0]):
+            reply = None                                 # F64: a share told apart elsewhere, not found to carry
         if reply is not None:
             forms[span] = form(mind, part, reply, F, memo)
         elif len(part) > 1 and reading(mind, part, F, memo) is not None:
@@ -366,11 +430,15 @@ def _hear(s, items, prov: int, speaker: str = None) -> None:
     mind.add_channel(LEVEL, "act")
     theta = mind.knob["theta"]
     mind.knob["theta"] = 1e9
+    before = mind.__dict__.get("_in_summary")
+    mind.__dict__["_in_summary"] = True                  # (these moments are lived in summary: Mind.step)
     try:
         for symbol in items:
             mind.step([Event(LEVEL, symbol, prov)] + ([Event(PERSON, speaker, SENSED)] if speaker else []))
     finally:
         mind.knob["theta"] = theta
+        if before is None:
+            mind.__dict__.pop("_in_summary", None)
 
 
 def _end(s, prov: int, tone: str, listening: bool = True):
@@ -381,6 +449,8 @@ def _end(s, prov: int, tone: str, listening: bool = True):
     theta = mind.knob["theta"]
     if listening:
         mind.knob["theta"] = 1e9
+    before = mind.__dict__.get("_in_summary")
+    mind.__dict__["_in_summary"] = True
     try:
         events = [Event(TURN, LEVEL_END, prov)]
         if tone and s.tones:
@@ -388,6 +458,8 @@ def _end(s, prov: int, tone: str, listening: bool = True):
         return mind.step(events)
     finally:
         mind.knob["theta"] = theta
+        if before is None:
+            mind.__dict__.pop("_in_summary", None)
 
 
 def _live(s, first, answer, prov: int, asker: Optional[str], tones) -> None:
@@ -456,6 +528,7 @@ def tell_apart(s, words: tuple, answered: tuple, tones) -> None:
     mind = s.mind
     if len(words) < 2 or len(words) + 1 + len(answered) > mind.knob["F"] or not mind.ch.has(LEVEL):
         return
+    tested = getattr(mind.cfg, "shares_tested", False)
     holes = _holes(mind)
     for i, word in enumerate(words):
         rest, known = words[:i] + words[i + 1:], None
@@ -476,7 +549,16 @@ def tell_apart(s, words: tuple, answered: tuple, tones) -> None:
             for w, a in ((word, mine), (other, its)):
                 if (a,) in known or said_alone(mind, w):
                     continue                             # (the residue: what another word of the utterance answers
-                _live(s, (said((w,)),), (said((a,)),), INFERRED, None, tones)    # with is not this word's share)
+                if tested:                               # with is not this word's share)
+                    hole = (words[:i], words[i + 1:])    # F64: the place it is told apart in. What it answered
+                    seen = mind.told_in.get(w, ())       # with where it was told apart before was a prediction
+                    if hole not in seen:                 # for this place: it held, or it did not
+                        prior = _inferred_share(mind, w) if seen else None
+                        if prior is not None:
+                            _share_settle(mind, w, prior == (a,))
+                        if len(seen) < HOLES:
+                            mind.told_in[w] = seen + (hole,)
+                _live(s, (said((w,)),), (said((a,)),), INFERRED, None, tones)
 
 
 def consolidate(s, first: str, answer: str, prov: int, asker: str) -> None:

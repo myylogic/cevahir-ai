@@ -620,6 +620,78 @@ def suppose(mind) -> Optional[int]:
     return None
 
 
+OWN = ("look", "wonder", "suppose", "think")     # the acts of its own time, in the order they were built
+_OWN_SLOT = {"look": "looking", "wonder": "wondering", "suppose": "supposing", "think": "thinking"}
+
+
+def own_time(mind) -> None:
+    """F61 (One Race for Its Own Time, ``Config.own_race``): in a silent moment in which nothing was said, the
+    acts of the mind's own time race as its words do.
+
+    Each of them was built as an act like any other: a candidate by its own rule, with its own rate (the drive +
+    what it led to before): looking up an item a claim was left open for (F47, ``look``), asking itself about an
+    item it met once (F51, ``wonder``), thinking over a thing it was told something of (F59, ``suppose``), thinking
+    about what it last took in (F48, ``think_now``). But which of them the mind took in a moment was the order
+    they were written in: each gave way to those before it, so with all of them a mind that always had something
+    new to ask itself about never thought anything over.
+
+    Here they race. An act that wants the moment (it has a candidate and a rate over nothing) adds its rate up
+    over the silent moments it has waited since it was last taken (``Mind.own_waited``), and is ready when that
+    reaches the line: at once when its rate reaches it within a moment (ceil(theta / rate) <= T, as for any act),
+    else when it has waited ceil(theta / rate) moments. (Before, an act that had rarely paid waited for an
+    unbroken silence of that length and was then taken at every moment of it; its waiting is its own now, and it
+    waits again after each time it is taken.) Of the acts that are ready, the one that has been ready for longest
+    is decided; among those the one the mind has not taken for longest (``Mind.own_taken``), then the one with
+    the higher rate, then the order they were built in. One act a moment, the others keep waiting: an act that
+    pays gets a turn among the others that pay, one that rarely paid gets a turn as rarely as its record says, and
+    none is given up for good. An act that wants nothing waits for nothing (its count starts when it wants
+    again). A look the mind has nowhere to carry out takes no part; a look whose rate is over nothing waits its
+    time like the others (``look``: without the race one that does not reach the line within T is left out).
+    Nothing is decided in the pauses of an act that is being carried out (an inner question, a thought, a reading:
+    ``Mind.step``). Sets one of Mind.looking / wondering / supposing / thinking."""
+    cfg = mind.cfg
+    wants = []
+    idle = mind.idle
+    mind.idle = 1 << 30                                    # (each act's own rule, its patience left to the race)
+    try:
+        if getattr(cfg, "look", False) and mind.__dict__.get("can_look", True):
+            found = look(mind)
+            if found is not None:
+                wants.append(("look", found[2], found))
+        if getattr(cfg, "wonder", False):
+            found = wonder(mind)
+            if found is not None:
+                wants.append(("wonder", found[2], found))
+        if getattr(cfg, "conjectures", False):
+            unit = suppose(mind)
+            if unit is not None:
+                from . import varsayim
+                wants.append(("suppose", 1.0 + (2.0 * varsayim.worth(mind) - 1.0), unit))
+        if getattr(cfg, "think", False):
+            rate = think_now(mind)
+            if rate is not None:
+                wants.append(("think", rate, rate))
+    finally:
+        mind.idle = idle
+    theta, T, taken, waited = mind.knob["theta"], cfg.T, mind.own_taken, mind.own_waited
+    wanting = {name for name, _, _ in wants}
+    for name in [name for name in waited if name not in wanting]:
+        del waited[name]
+    ready = []
+    for name, rate, value in wants:
+        latency = math.ceil(theta / rate - 1e-12)
+        since = waited.get(name, 0) - (latency if latency > T else 0)   # the moments it has been ready
+        if since >= 0:
+            ready.append((-since, taken.get(name, -1), -rate, OWN.index(name), name, value))
+    chosen = None
+    if ready:
+        chosen = min(ready)[4:]
+        taken[chosen[0]] = mind.t
+        setattr(mind, _OWN_SLOT[chosen[0]], chosen[1])
+    for name in wanting:
+        waited[name] = 0 if chosen is not None and name == chosen[0] else waited.get(name, 0) + 1
+
+
 def holds_back(mind, items, acts) -> bool:
     """F50: whether the word the mind is about to say is one it does not assert: it rests on what others share
     (``rests_on_others``), the way that claims it is not proven to hold by its own record (``hata.proven`` at most
@@ -714,6 +786,7 @@ def look(mind) -> Optional[tuple]:
     v = S.arrays()
     found = []
     asked = getattr(mind, "wondered", None) if getattr(mind.cfg, "wonder", False) else None
+    race = getattr(mind.cfg, "own_race", False)
     for filler, context in where.items():
         if filler >= S.n_units or not v.ualive[filler]:
             continue
@@ -728,9 +801,9 @@ def look(mind) -> Optional[tuple]:
         if rate <= 0.0:
             continue
         latency = math.ceil(theta / rate - 1e-12)
-        if latency > (max(T, getattr(mind, "idle", 0)) if own else T):
-            continue
-        found.append((latency, -e_open, filler, symbol, rate))
+        if latency > (max(T, getattr(mind, "idle", 0)) if own or race else T):   # F61: in the race every want waits
+            continue                                       # its own time (``own_time``): one that rarely paid is
+        found.append((latency, -e_open, filler, symbol, rate))   # looked up rarely, not never
     plain = getattr(mind, "open_plain", ())
     for latency, _, filler, symbol, rate in sorted(found, key=lambda entry: entry[:3]):
         if filler in plain or claim_again(mind, where[filler], filler) is not None:   # (nothing claims it there

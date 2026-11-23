@@ -3157,3 +3157,402 @@ wholes) are bit-identical to the references. Tests: 469 passed (5 new: `test_zih
 
     python research/living_mind_2026_11_22/t_whole.py life [--same]
     python -m zihin --ac faults,trials,built_relations,conjectures        (!deney names a pair it took)
+
+## 27. The whole mind: everything on by default, what that broke, and the five mechanisms that came of it (F61 to F65)
+
+### 27.1 What was asked
+
+The owner: everything that was built should be on by default and be an active part of the mind; the mind should be
+able to live at its full capacity.
+
+Until here every mechanism after the speaking configuration was a studied switch: measured alone, or with the few it
+was built on, and turned on by hand (`--ac`). No row of this folder measures them all together. This section does
+that, reports what was found as it was found, and what was built because of it.
+
+### 27.2 What "on by default" is
+
+* **The configuration.** `VARIANTS["full"]` (`zihin/__main__.py`) is the speaking configuration with every
+  studied mechanism in use; it is the program's default (`python -m zihin`). `Config()` and `VARIANTS["speaking"]`
+  are as they were: every published row names its switches from them, and the gates and all the committed scripts
+  run on them unchanged.
+* **A new mind** of the program is raised with all of it.
+* **A loaded mind** is given every mechanism it was raised without, said in one line, and kept so (also when
+  nothing was lived in the session). Two things stand against that: what its owner keeps off (`--kapat a,b`:
+  remembered with the mind, `Mind.owner_off`, until `--ac` names it again; what cannot work without one of them
+  goes with it and comes back with it), and a way of reading the mind's own trials put away (F57: that decision is
+  the mind's; `--ac` overrules it). `--variant speaking` is the old order: a loaded mind keeps its own settings and
+  `--ac` turns single mechanisms on.
+* **The trials' record stays whole.** A way that is on trial and is changed from outside is changed through the
+  trials' own record (`deney.set_from_outside`): where the trials have begun the owner's change is an entry of
+  that record (so the configuration is rebuilt rightly after a moment is undone), and the trials of the ways that
+  sleep, and of the way that was changed, begin again, as they do when the mind changes a way itself.
+* **What leaves the machine stays the owner's choice of each run.** With everything on the mind decides by itself to
+  look things up (F47, F50, F51); it has somewhere to look only when it is given a folder (`--kaynak`) or the web
+  (`--ag`). Nothing is sent anywhere by default.
+
+### 27.3 The first measurement of everything together (one life each, the committed scripts unchanged)
+
+`t_full.py` runs a script of the research folders unchanged, in one process, with the one thing replaced that
+all of them build their minds from: `VARIANTS["speaking"]` returns the full configuration. (`--base speaking`
+replaces nothing: the same script with the configuration it was written with.) The first pass, one seed each,
+with the full configuration as it was then (the 23 studied switches of sections 1 to 26):
+
+    the world (script)                     as it was measured             everything on
+    a new kind of question, the value      8 right of 8 at first sight    0 right, 8 wrong ("dal taşır")
+      alone (t_asked forms, k = 2)
+    conjectures (t_conj fields)            44 conjectures, 44 hold        0 conjectures
+    asking itself, a chain (t_wonder)      6 of 6 afterwards              4 of 6
+    looking before it asserts (t_find_out) 16 right of 16, 16 looks       13 right, 3 wrong, 11 looks
+    its own faults (t_fault misled)        7 wrong in the loops           12 wrong
+    the three of sections 23 to 26         12 / 16 / 16 right             0 right, 8 wrong / 0 / 0
+      together (t_whole life)
+    cause and intervention (t_cause)       rain 0.548, fine 0.580         rain 0.765, fine 0.529
+                                           after its own acts
+    the chat-like world (meaning)          answers two unseen forms       silent to both; one wrong word
+
+So the sum of the mechanisms was worse than each of them: every one of these worlds had been measured with a
+configuration that did well in it, and none with the others beside it.
+
+**How each was traced.** For each world the full configuration was run again with one mechanism left out, for every
+mechanism (a leave-one-out table; the scratch tool is the same replacement as `t_full.py --off`). In every world
+one line of the table, or two, stood out; the rest changed nothing.
+
+    the world                    what left out restored it     what was wrong
+    conjectures                  (any of look, wonder, think,  the acts of the mind's own time were taken in the
+                                 find_out)                     order they were built, each giving way to the ones
+                                                               before it: asking itself took every silent moment
+    a new kind of question;      echo_exact (F52)              F52 carries on whatever once followed the mind's
+      asking itself                                            last word, though the partner just said it
+    looking before it asserts    silent_claims                 a generalisation that agreed with what the mind had
+                                                               itself read of a thing was booked as proven
+    the three together           wholes, or told_apart         what a thing answered one kind of question with was
+                                 (F43, F45)                    said for another kind (F45's share, carried)
+    its own faults               silent_claims                 (a trade, not a fault: 27.10)
+    cause and intervention       faults (F49)                  (not repaired: 27.10)
+    the chat-like world          find_out (F50); faults        (a trade, and the same as the line above: 27.10)
+
+Four of them are faults of putting things together, and each has a mechanism now. A fifth was found when the
+battery was run with those four in (27.8). They are switches like all the others (off in `Config()`, on in the
+full configuration), so every earlier row can still be run as it was.
+
+### 27.4 F61, One Race for Its Own Time (`Config.own_race`; `act.own_time`)
+
+The acts of the mind's own time were each built as an act like any other, a candidate by its own rule with its own
+rate (the drive + what it led to before): looking up an item a claim was left open for (F47), thinking about what
+it took in (F48), asking itself about an item it met once (F51), thinking a thing over (F59). Which of them the
+mind took in a silent moment was not decided by those rates but by the order the code was written in: each gave way
+to those before it. With all of them on, a mind that always has something new to ask itself about never thinks
+anything over: no conjecture in a life in which the same mind without F51 makes 44.
+
+Now they race. In a silent moment in which nothing was said, the candidates are the acts that want the moment (a
+candidate by their own rule, a rate over nothing). Each adds its rate up over the silent moments it has itself
+waited since it was last taken (`Mind.own_waited`) and is ready when that reaches the line: at once when its rate
+reaches it within a moment's time (ceil(theta / rate) <= T, as for any act), else when it has waited
+ceil(theta / rate) moments. Of the acts that are ready, the one that has been ready for longest is decided; among
+those the one not taken for longest (`Mind.own_taken`), then the higher rate. One act a moment; the others keep
+waiting. So an act that pays takes turns with the others that pay, an act that rarely paid gets the mind's time as
+rarely as its record says, and none is given up for good.
+
+Three versions of this rule were measured before this one, and are reported because each failed in a way that
+shows what the rule has to do:
+
+* *The shortest latency wins, among equals the higher rate* (the first version, as the mind's words race): repairs
+  the conjectures; but the patience F51 gives an act that rarely paid was an unbroken silence of that length,
+  which never comes while other acts are taken. After looks that failed the mind hardly looked again
+  (t_wonder dead: 15 of 50 where the committed order finds 50).
+* *Each act counts its own waiting, the shortest latency still wins among the ready*: an act that has waited out
+  its twenty moments still loses every moment to an act that is ready at once (a unit test: 0 turns in 45
+  moments).
+* *The one ready for longest wins* (this one), with the nested pauses of an act being carried out counted as
+  moments of waiting: the counts ran ahead of the mind's real silent moments. Now nothing is decided about its own
+  time while an act it decided is being carried out (the pauses of an inner question, a thought, a reading are
+  not silent moments of its own time: `Session.silent_moment` marks them, `Mind.step` reads the mark).
+
+A look takes part like the others: one whose rate is over nothing waits its time (before, a look that did not
+reach the line within T was left out for good: after a run of looks that found nothing the mind sat through forty
+silent moments with twenty open questions and looked at none; 27.9). A look the mind has nowhere to carry out
+takes no part (and none while one is on its way or the session's gap between looks has not passed).
+
+### 27.5 F62, The Sentence Being Told (`Config.echo_told`, with F52; `read.continuation_backoff`)
+
+F16 reads, when nothing else speaks, the lived continuation of the mind's own last words, and leaves out what the
+partner just said ("an echo, not knowledge"). F52 made that exact: a continuation is an echo only where it
+followed these very words in what is present. It was measured in F50's world only, where it completes the answer
+with the verb the question holds, and section 14.5 said: "not run on the whole battery; nothing is claimed for it
+elsewhere". Run elsewhere, it does harm: asked a kind of question it never watched, the mind says the value and
+then the question's own verb ("panda ne taşır ?" -> "dal taşır"; the watched kinds are answered "V ."), and asked
+by itself about a thing of which it knows nothing it says "martı yer", which hides that it could not answer.
+
+In both, what was carried on is what once followed the mind's last word somewhere, taken out of its sentence. In
+F50's world it is something else: the mind's utterance, from its beginning, is how a sentence it lived began, and
+the word carries that sentence on. That difference is F26's (how sequences that began so went on, read before what
+followed a word anywhere) and F50's own (`lived_so`). F62 holds F52 to it: where the reading is that of the whole
+utterance as a sequence's start, a word the partner said is carried on unless it followed these very words in what
+is present; where it is only what followed the utterance's last words somewhere (a later suffix, or a word's
+continuation wherever it stood), nothing the mind lived is being told, and the partner's words are echoes as
+before F52.
+
+Measured (5 seeds). The full configuration without F62 answers a new kind of question at first sight 0 right, 40
+wrong (`t_asked.py forms`, k = 2, n = 0; with it 40 right), and in the chain of section 14 it says the question's
+verb of the last thing in 5 of 5 lives ("kanguru ne yer" -> "kanguru yer"; with it the mind says the asked word
+and holds, 5 of 5). What F52 was built for is untouched: F50's world with the exact echo gives 75/5/0/0 and
+36/4/1/39 with and without F62 (the configuration of section 14.5).
+
+### 27.6 F63, On Trial Where It Is Relied On (`Config.relied_on`, with silent claims; `hata.relied_on`)
+
+With silent claims (section 13) the mind's ways are judged also while it only listens. In F50's world it reads a
+sentence of each of eight things, which share what they eat, and then watches them asked. At each watched answer
+its generalisation ("what the others eat") claims the word, the mind's own record of that very thing claims it
+too, and the word comes: one claim that held, booked for the generalisation. Six such, nothing against: proven
+(F50's measure), and of the next thing, of which it has read nothing, the mind asserts what the eight share
+instead of looking it up. It is wrong three times in sixteen before its record turns.
+
+A way of reading is judged by what its claims came to when the mind went by them. Where the word the mind would
+say is something it lived of the very thing spoken of (a relation of the frame that reads the thing's own record
+claims it; or it is how a sentence the mind lived of that thing went on), the mind knows, and the ways that only
+carry over what others share are not what it would go by: that they agree with what it already knew is not a
+prediction that held, and that they differ from it is not one that failed. There only the claims that read the
+thing's own record are kept (those are tested: what the mind knows of a thing can be wrong). Where the word it
+would say rests on what others share, or it would say nothing, every claim is kept as before.
+
+What silent claims were built for is untouched by it (things of which nothing was read: section 13's two worlds,
+count for count: 27.9).
+
+### 27.7 F64, A Share Is Tested Before It Is Carried (`Config.shares_tested`, with F45; `butun.share_carries`)
+
+F45 tells apart what a word never said alone answers with, between the words it stood between ("left" after a
+move). Section 16 of the earlier notes named the limit: "an inference can be wrong: ... a filler lived in one
+[frame] is answered in the other by analogy". With F43 and F45 on in a life of questions it shows: every animal
+is asked one kind of question; "aslan ne yer ?" and "kedi ne yer ?" differ in one word and their answers in one
+pair, so "aslan" is told apart to answer with what it eats; and "aslan ne doğurur ?", never answered, is heard in
+its summary and answered with that share: what the animal eats, for what it bears (8 wrong of 12).
+
+What a word was told apart to answer with was found in one place. Whether it is the word's reply in another place
+is not known by that, and it is learned: each time a word is told apart in a place new for it, what it answered
+with before was a prediction for that place, and it held or it did not (one experience on the word's own record
+and on the record of any share, the mind's own channel `pay`). In an utterance never answered a word that was
+only told apart stands as a whole with its share only where a record has decided that shares carry (the word's
+own, then any word's; for or against by more than k); else it is the word it is. Where the answer is given (the
+summary of a watched dialogue) a share is used as before: there the answer itself says whether it fits.
+
+So "left" and "right", which answer alike after every move, are carried from their second place on, and what an
+animal eats is not said for what it bears; where the same things are asked two kinds, the record is against
+(what a thing eats is not what it drinks).
+
+### 27.8 F65, Not Knowing Is of the World (`Config.unknown_outside`, with L7), and two repairs of the mind's own time
+
+Found by the battery with F61 to F64 in: the young mind of section 14 (three silent moments after every lesson,
+`t_wonder.py young`: 30 of 30 as committed) answered 5 of 30. Leaving one mechanism out restored it for three of
+them (silent claims, conjectures, F63), which said only that it took all of them to show. The moments of one life,
+written out, showed what it was:
+
+    t=43..46  it asks itself "koyun kurbağa yer" (imagined), and has no answer
+    t=47      the pause that ends the thought
+    t=49      the inner event "not knowing" is perceived
+    t=50..53  it watches "kurbağa ne yer ?"      lived as: [not knowing] kurbağa ne yer
+
+L7 keeps the amount the mind does not know "when the world has just done something and the mind, free to answer,
+decides nothing", and a silent moment later that is perceived as an inner event, so that what one says then can be
+learned. The end of the question the mind asked itself is an end of a turn, imagined: it was taken for the world's.
+The inner event followed, in the next pause, which was the beginning of the next thing it heard: every watched
+question was lived as what follows not knowing, the question "X ne yer" never became a question the mind knows
+(its first read sentence stayed that: it asked itself "koyun X yer" of every new thing), and once it said a word
+aloud after the event because a word had once followed it. With the old order of acts the inner question was asked
+in the first silent moment and two more followed, so the event fell in a silent moment; with the race it can be
+the last one.
+
+F65: only what was lived counts for L7: a moment whose items only came to mind (imagined) is not the world doing
+something. What the world leaves the mind without an answer to is felt as before. (That the mind does not know
+what it asked itself is already written, as F51's open claim.)
+
+Two repairs that are not switches (they are wrong in every configuration, and no committed row is changed by them:
+27.9):
+
+* *What it can now say is no longer wondered about.* F51 keeps an item the mind asked itself about and could not
+  answer as certainly unknown until it has looked. When it came to look and found it could say it already (it had
+  learned it meanwhile) nothing was fetched, and the item stayed: the same look was decided again in every silent
+  moment after (34 looks at one word in one life). The want ends there now (`learn.settle_look`).
+* *A moment lived in summary is not something new it was told* (F43 with F51 and F59): the wholes and pointers
+  the mind lives when an utterance is heard in summary were collected as new items to ask itself about, and as
+  things it was told, to think over (6 of 12 items it asked itself about in one chat were such). They are the
+  mind's own (`butun._hear`, `Mind.step`).
+
+### 27.9 Measured: the battery with everything on (code md5 117512686535c12d17e27ae9cd4f2ea0; rows in `results/full.jsonl`)
+
+The committed scripts, unchanged, through `t_full.py`; the seeds of the committed rows unless said. "As
+measured" is the committed row of the configuration each world did best with (set by hand, or taken by the mind's
+own trials); "everything on" is the full configuration, the same for every world.
+
+    the world (script, seeds)                       as measured                         everything on
+    --- this folder ---
+    conjectures, three fields (t_conj fields, 5)    227 conjectures, all hold;          223, all hold; 60/60 80/80 80/80
+                                                    60/60 80/80 80/80 of what holds
+      one statement in each of two fields           270, all hold                       270, all hold
+      what they came to (settled)                   held 142, failed 10, open 80        held 138, failed 10, open 80
+      asked what was told of no thing (asked)       60/80/80 right (with F59)           60/80/80
+    asking itself, a chain (t_wonder chain, 5)      30/0/0                              30/0/0
+      two chains (chains)                           30/0/0                              30/0/0
+      a young mind (young)                          30/0/0 and 30/0/0                   30/0/0 and 30/0/0
+      looks that found nothing, then a library      50/0/0, 170 looks                   35/0/15, 80 looks          (27.10)
+        that holds them (dead)
+    looking before it asserts (t_find_out, 5)       80/0/0/0, 80 looks (with F41)       80/0/0/0, 80 looks
+      the library holds every second thing (half)   40/0/1/39                           40/1/9/30                  (27.10)
+    one life, three fields (t_whole life, 5)        60/80/80 (the three together)       60/80/80
+      every kind asked of the same six (--same)     60/80/80                            60/80/80
+    a new kind of question (t_asked forms, 5)       k >= 2, n = 0: 40/0/0 (the four)    40/0/0 from k = 2
+      the answer names the thing (echo)             k = 4: 40/0/0                       40/0/0
+      a fact that was never read (unknown)          read 20 right; never read 20 silent the same
+      two facts of the asked kind (twice)           one of the two 36, another word 4   one of the two 40
+    growth (t_grow forms, 5)                        k >= 2, n = 0: 40/0/0 (F41 + F53)   40/0/0 from k = 2
+    its own faults, misled (t_fault misled, 5)      29 wrong, 12 right, 49 silent       66 wrong, 24 right, 0 silent (27.10)
+                                                    in the V loops (F49 on)             (as F49 off)
+      regular                                       all right                           all right
+      two readings that disagree (two)              n=0 14/0/26, n=4 20/0/20, n=8 40;   40/0/0 at every n; loop 80/0/0
+                                                    in the loop 60/0/20
+      the loop by itself (loop)                     first answers 4/0/10/66; after its  79/0/1/0; 80/0/0/0
+                                                    own looking 16/6/1/57
+      kinds of things (t_fault_kinds, 5)            40/0/0 from n = 8; rounds 80/5/35   n=8 16/24/0, n=16 8/2/30,  (27.10)
+                                                                                        n=24 8/0/32; rounds 52/48/20
+      only watching (t_fault_watch, 5)              40/0/0 from n = 8; 1/0/39 at n=16   the same
+    thinking by its own decision (t_own_time, 3)    thought about 0 / 24 / 15 of 24     8 / 24 / 21 of 24 (expected /
+                                                                                        against / nothing)
+    its own curriculum (t_self curriculum, 2 of 5   after stage 5 every kind 40/0/0     every kind 16/0/0 after every
+      seeds; the configuration its trials found)    but one (32/8/0); a kind never      stage; a kind never asked 16/0/0;
+                                                    asked 40/0/0 at first sight;        the things taught, asked another
+                                                    asked another kind 198/2/0          kind 80/0/0
+    --- the folder before (living_mind_2026_11_15): beside the same script as it was written, both run now ---
+    compose (t_compose, 3)                          75/75                               75/75
+    deduction from facts read apart (t_deduce, 3)   2/48; the exception 2 of 3          48/48; the exception 3 of 3
+    two steps away (t_chain, inherit on, 3)         27/27, 9/9; the exception 3/3       27/27, 9/9; the exception 0/3 (27.10)
+    cause and intervention (t_cause_context, 2)     sunny + umbrella after its own      rain 0.765                 (27.10)
+                                                    acts: rain 0.548
+    long answers (t_long, 9)                        68/162 whole, 6 confabulated        162/162, none
+      with F41                                      162/162                             162/162
+      the facts told in any order                   0/162, 54 unfinished                82/162, 26 unfinished
+    telling and answering (t_tell, 9)               facts whole 2/113; whole answers    46/113; 12/36; where 31/31;
+                                                    0/36; where 1/31; does 2/23         does 15/23
+    whose word holds (t_trust, 3)                   0.569, 0.956, 0.638                 the same
+    acting for what acts lead to (t_purpose, 3)     9/9 and 8/9                         9/9 and 9/9
+    one mind, four people (t_relations, 3)          own 1.00, leak 0.00                 the same, reply for reply
+    the task world (t_gorev, 1)                     164/164                             164/164
+    the chat-like world (meaning_switches, 3)       (below)                             (below)
+
+The chat-like world, the forms never watched (share of 3 lives answered as meant; as written -> everything on):
+"merhabalar" 1.00 -> 0.33 and "nasılsınız ?" 1.00 -> 0.33 (27.10); "ismin ne ?" and "senin ismin ne ?" 0.33 -> 0.67;
+"selamlar , adın ne ?" 0 -> 1.00; "hello , nasılsın ?" 0 -> 1.00; "keyfin nasıl ?" 0 -> 0, and a wrong word
+("hava") where it was silent; the rest alike. The greetings it lived and the questions with a word in front are
+answered alike.
+
+Rows named "off" or "without ..." in a script's own table are not that under `t_full.py`: the script leaves a
+switch as its configuration has it, and the configuration is now the full one. They are in the rows as they came.
+
+**Each repair left out of the whole** (the full configuration without the one mechanism, in the world it was
+found in):
+
+    left out            the world                         with it                 without it
+    F61 own_race        conjectures (t_conj fields)       223 conjectures;        90; 24/60 32/80 32/80;
+                                                          60/60 80/80 80/80;      none from one statement in each
+                                                          270 from two fields     of two fields
+                        a young mind (t_wonder young)     30/0/0                  10/0/20
+                        looks that found nothing (dead)   35/0/15, 80 looks       50/0/0, 165 looks      (27.10)
+    F62 echo_told       a new kind (t_asked forms, k=2)   n=0 40/0/0              n=0 0/40/0
+                        the chain (t_wonder chain)        the asked word 5 of 5   0 of 5
+    F63 relied_on       looking first (t_find_out asked)  80/0/0/0, 80 looks      66/0/14/0, 61 looks
+    F64 shares_tested   one life (t_whole life)           animals 60/0/0          animals 4/56/0
+    F65 unknown_outside a young mind (t_wonder young)     30/0/0; while raised    30/0/0; 100 questions (40),
+                                                          75 questions (40 it     25 looks: the questions are the
+                                                          could not answer),      malformed ones of 27.8; the score
+                                                          10 looks                is held by the repair of wondering
+
+F64 on SCAN (the published around_right split, 100 sampled commands, section 16's script): 100 of 100 exact with
+and without it, no answer different.
+
+### 27.10 What is a trade and was not repaired
+
+Seven lines of the table are worse with everything on than in the configuration each was measured with. Each was
+traced by leaving one mechanism out of the whole.
+
+* **Silent claims (section 13) are behind four of them.** With them a way of reading is judged at every moment the
+  mind listens, so a generalisation that held on what the mind watched comes to the first question with a record.
+  What they were built for needs that (only watching: 40/0/0 where the whole mind without them stays at 10/30/0,
+  `t_fault_watch.py`). The cost shows where what was watched is not like what is then asked:
+  - *misled* (the eight watched things share a value the others do not): the generalisation has credit from the
+    watched eight, and six failures a loop do not outweigh it: 66 wrong answers in the V loops, as with F49 off
+    (29 without silent claims, as committed).
+  - *the library holds every second thing*: where the look finds nothing the mind goes by what it expects, and the
+    generalisation is proven by then: 9 wrong values in 40 (two a life, then its record has turned), 1 without.
+  - *kinds of things*: F49 splits a frame's category by a narrower place when the frame's own vote is "wanting"
+    (its claims held less often than it claimed). With the credit of the watched eight the vote is calibrated on
+    the whole (it claims 0.60 and holds 0.61) and wrong in each part (always right for one kind, never for the
+    others): the split comes late or not at all, and the mind ends saying what it read of the thing ("serçe
+    yırtıcı") instead of what it eats. Without silent claims the whole mind does better than the committed row
+    (40/0/0 from n = 8, rounds 100/10/10). A criterion that does not depend on the whole record is the next
+    mechanism (already measured in a scratch copy: 8 of 8 from n = 8 with silent claims on).
+  - *the exception two steps away*: "penguen yüzer" (its own) and "penguen uçar" (its class's) are both named by
+    relations that read the thing's own record; the inherited one is believed more with a record (0.796 against
+    0.811), the two tie and the mind stops after the name. 3 of 3 without silent claims.
+  Without silent claims the whole mind gives the committed numbers in the first two (29 wrong; 40/0/1/39).
+* **Cause and intervention** (F49): after one of its own acts confirmed a claim, the read-back of the way's
+  record counts that one experience at two nested general levels: rain after its own umbrella on a sunny day
+  0.765 (0.726 without silent claims; 0.548 as written, where no way has a record).
+* **The chat-like world** (F50, and the same records): asked a single unseen form ("merhabalar", "nasılsınız ?")
+  the word it would say rests on what others share, there is nowhere to look, and it holds back (1.00 -> 0.33).
+  The same mechanisms answer four other forms it did not answer before.
+* **Looks that found nothing** (F61): in the committed order a look took every silent moment once it was due; in
+  the race it takes turns with asking and thinking, and after forty failures looking is expected to pay 0.02, so
+  each look waits long. In sixty silent moments it finds 35 of 50 (nothing wrong; the rest are still open) where
+  the old order finds 50 with twice the looks.
+
+None of these is hidden by the default: `--kapat silent_claims` gives the whole mind without them (and without F63,
+which needs them).
+
+### 27.11 What it costs
+
+The whole mind does more at every moment. The 21 runs of the second half of the battery took 2,641 s with
+everything on and 918 s as written (2.9 times): the chat-like world 2.34 ms a moment against 1.24 (1.9 times, with
+half again as many moments lived: its own time), the teacher's loops 4.4 to 8 times (the trials read a context
+once more for every way they try, the silent claims once for every moment of listening), the long answers 2.5
+times, the task world 2 times. Nothing was made faster in this section.
+
+### 27.12 What it does not do
+
+* The full configuration is one configuration for every life. What the mind's own trials (F57) change in it they
+  change only where an outcome is shown and only among the ways of reading they try; they cannot yet see an
+  answer that went on where it should have ended (an end is not an outcome for them), and the acts of the mind's
+  own time, silent claims and the wholes are not on trial at all.
+* F62 keeps the mind from going on by an echo; it does not make the end of an answer something the mind expects
+  for a kind of question it never watched (the form of the rest of an answer is not carried from the kinds it
+  knows to a new one: a family of frames whose later places are bound by what it claimed is not read yet).
+* F63 is about claims made while listening. A claim the mind says aloud is still booked for every way that
+  claimed the word.
+* F64 reads two levels (the word, any word). Kinds of words whose shares carry and kinds whose shares do not, in
+  one mind, are not told apart.
+* F61 gives every act of its own time a turn by its rate. In a world where most looks fail the mind looks rarely,
+  and what it could have found by looking sooner it finds late (27.9, t_wonder dead).
+* The trades of 27.10 stand as they are measured.
+
+### 27.13 The work queue after this section
+
+1. The trades of 27.10. First the two already measured in scratch copies of this code: a frame's category split
+   where its vote failed in part, whatever the whole record says (the kinds of things: 8 of 8 from n = 8 with
+   silent claims on), and an end as an outcome for the trials (a way that makes the mind go on past an answer is
+   put away by the mind itself in 5 of 5 lives, and the next new kind of question is right at first sight). Then
+   the nearer record against the inherited one (the exception), what a way's record is worth for a claim of
+   another kind (F49's general levels on one experience; reference classes), and whether holding back is right
+   for an utterance that asks nothing.
+2. Trials while the mind only watches; the rest of 21.11. The owner's documents with everything on (running).
+3. The form of the rest of an answer for a new kind of question (families with bound later places); more than two
+   places at once (17.10).
+4. Cost: the trials and the silent claims read the same context many times.
+5. Links in other shapes, conjectures on running text (23.9); more questions of its own, asking its partner, a
+   sense of the clock, the long life and the web (17.12).
+
+### 27.14 Gates, tests, reproduce
+
+With every studied switch off the lesson-free gate, the 17 configurations and the scripted life (plain and with
+wholes) are bit-identical to the references. Tests: 510 passed (41 new: `test_zihin_full.py`,
+`test_zihin_own_race.py`, `test_zihin_shares.py`).
+
+    python -m zihin                         (everything on; --kapat a,b keeps mechanisms off; --variant speaking)
+    python research/living_mind_2026_11_22/t_full.py -- research/living_mind_2026_11_22/t_conj.py fields --out /tmp/x.jsonl
+    python research/living_mind_2026_11_22/t_full.py --off own_race -- research/living_mind_2026_11_22/t_conj.py fields --out /tmp/x.jsonl

@@ -296,7 +296,40 @@ def watch(mind) -> None:
         cfg = mind.cfg                                     # race on the same reading; nothing is said)
         candidates = {unit: e for unit, e in reading.items() if act[channels[unit]] and (e > 0.5 or cfg.race)}
         would = _race(mind, candidates, cfg.theta, cfg.T, dry=True) if cfg.race else []
-        note(mind, found[1], would, listening=True)
+        src = found[1]
+        if getattr(cfg, "relied_on", False):               # F63: where the thing's own record speaks, what the
+            src = relied_on(mind, context, src, would)     # others share is not what the mind would go by
+        note(mind, src, would, listening=True)
+
+
+def relied_on(mind, context: int, src: Dict[int, list], would: List[int]) -> Dict[int, list]:
+    """F63 (On Trial Where It Is Relied On, ``Config.relied_on``; with silent claims): the claims of a moment in
+    which the mind only listens that are a test of their way.
+
+    A way of reading is judged by what its claims came to when the mind went by them. While it listens the mind
+    goes by nothing aloud; what it would go by is the word it would say were it its turn. Where that word is
+    something it lived of the very thing spoken of (a relation of the frame that reads the thing's own record
+    claims it, more for than against; or it is how a sentence the mind lived of that thing went on), the mind
+    knows, and the ways that only carry over what others share are not what it would go by there: that they agree
+    with what it already knew is not a prediction that held, and that they differ from it is not one that failed.
+    So only the claims that read the thing's own record are kept (they are tested: what the mind knows of a thing
+    can be wrong). Where the word it would say rests on what others share, or it would say nothing, every claim is
+    kept, as before: there the mind would have to go by what others share, and what it hears next says how far
+    that holds.
+
+    Found when everything was turned on together: a mind that had read a sentence of each of eight things and
+    then watched them asked took the agreement of its generalisation with what it had read as that generalisation
+    proven, and of the next thing, of which it had read nothing, it asserted what the eight share instead of
+    looking it up (F50)."""
+    from .act import grounded, lived_so
+    if not any(grounded(src.get(unit, ())) or lived_so(mind, context, unit) for unit in would):
+        return src
+    kept: Dict[int, list] = {}
+    for unit, made in src.items():
+        mine = [entry for entry in made if grounded([entry])]
+        if mine:
+            kept[unit] = mine
+    return kept
 
 
 def note(mind, src: Dict[int, list], said: List[int], listening: bool = False) -> None:

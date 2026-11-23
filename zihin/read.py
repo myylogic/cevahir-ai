@@ -2952,7 +2952,13 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
     the partner's utterance is read as a continuation, wherever it stood there. With it a continuation is an echo
     only where it followed these very words in what is present (the same rule F42 holds for one item over the
     whole episode): a sentence the mind read elsewhere is carried on although the question holds one of its
-    words."""
+    words.
+    F62 (``echo_told``, with F52): the exact form holds only for the sentence being told: where the mind's utterance,
+    from its beginning, is how a sequence it lived began (the reading of the whole utterance as a sequence's start),
+    a word the partner said is carried on unless it followed these very words in what is present. Where the reading
+    is only what followed the utterance's last words somewhere (a later suffix, or a word's continuation wherever
+    it stood), nothing the mind lived is being told, and every word of the partner's utterance is an echo, as
+    before F52."""
     S, cfg = mind.S, mind.cfg
     if not mv_view(mind, "u_kind")[unit] & COMPOSED:
         return {}
@@ -2964,7 +2970,9 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
             start = j + 1
     tail = parts[start:]
     exact = getattr(cfg, "echo_exact", False)
-    heard = set() if exact else set(parts[:start])      # what the partner just said is an echo, not knowledge
+    partner = set(parts[:start])
+    heard = set() if exact else partner                 # what the partner just said is an echo, not knowledge
+    told_only = exact and getattr(cfg, "echo_told", False)   # F62: ... the exact form for the sentence being told
     first = 1 if len(tail) == len(parts) else 0         # the whole tuple is the unit itself, read already
     starts = getattr(cfg, "starts", False)
     for i in range(first, len(tail)):
@@ -2975,9 +2983,9 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
             n = len(suffix)                             # the partner said, wherever it stood)
             heard = {parts[j + n] for j in range(len(parts) - n) if parts[j:j + n] == suffix}
         if len(suffix) == 1:
-            readings = [own_mass(mind, suffix[0], 1, trust)]
+            readings = [(own_mass(mind, suffix[0], 1, trust), False)]
             if starts and i == 0:                       # the whole utterance so far is this one item
-                readings.insert(0, start_mass(mind, suffix[0], trust))
+                readings.insert(0, (start_mass(mind, suffix[0], trust), True))
             if (getattr(cfg, "echo", False) or getattr(cfg, "known", False)) and unit == mind.context:
                 heard = heard | episode_said(mind, suffix[0])   # F42: what followed the item earlier in this episode
                                                                 # is an echo too
@@ -2985,8 +2993,10 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
             piece = S.tuple_index.get(suffix)
             if piece is None:
                 continue
-            readings = [own_mass(mind, piece, 1, trust)]
-        for mass in readings:
+            readings = [(own_mass(mind, piece, 1, trust), i == 0)]   # (a sequence that began with these items)
+        for mass, telling in readings:
+            if told_only and not telling:
+                heard = heard | partner                 # F62: not the sentence being told: the partner's words echo
             out = {}
             for target, (w_pos, w_neg) in mass.items():
                 if _world(mind, target) and w_pos > 0.0 and target not in heard:
