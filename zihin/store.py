@@ -431,6 +431,8 @@ class Substance:
         self._out_ids: Dict[Tuple[int, int, int], tuple] = {}  # out key -> (count, ids, dst) as tensors
         self._parts: Dict[int, tuple] = {}     # composed unit -> (its PART list, its length, parts), see ``parts``
         self._abstract_in = None               # (ties counted, ABSTRACT in-degree of every unit), ``abstract_sizes``
+        self.__dict__.pop("_starts", None)     # (``read._start_ties``: kept by the lists of ``inc``)
+        self.__dict__.pop("_place_words", None)
 
     def _index_tie(self, tie: int, src: int, dst: int, form: int, lag: int, lookup: bool = True) -> None:
         # Compact indices (exact: the same ids in the same order). A tie's key is one packed integer instead of a
@@ -514,7 +516,8 @@ class Substance:
     _UNIT_ARRAYS = ("u_kind", "u_channel", "u_symbol", "u_arity", "u_birth", "u_use", "u_alive")
     _TIE_ARRAYS = ("t_src", "t_dst", "t_form", "t_lag", "t_cls", "t_row", "t_use", "t_last", "t_birth", "t_alive")
     _ROW_ARRAYS = ("r_tie", "r_was")
-    _CACHES = ("_out_ids", "_views", "_class_ids", "_npv", "_parts", "_slot_keys", "_lut", "_abstract_in")
+    _CACHES = ("_out_ids", "_views", "_class_ids", "_npv", "_parts", "_slot_keys", "_lut", "_abstract_in", "_starts",
+               "_place_words")
 
     def __getstate__(self):
         """Saved and copied without the spare capacity (the rows beyond n_units / n_ties / n_rows are zeros); the
@@ -1246,6 +1249,8 @@ class Substance:
         """Take the units >= units0 and the ties >= ties0 (the newest rows) out of every cache."""
         v = self._np()
         self._abstract_in = None
+        self.__dict__.pop("_starts", None)       # (read.start_mass's lists: kept while the PART lists only grow)
+        self.__dict__.pop("_place_words", None)  # (read._place_words: kept while the units live)
         for unit in range(units0, self.n_units):
             if not v.ualive[unit]:
                 continue

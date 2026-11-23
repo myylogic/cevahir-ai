@@ -3736,3 +3736,104 @@ rows will be appended when they come out. "add jump" has no answer that F56 chan
 section 22) and was not run again.
 
     python research/living_mind_2026_11_22/t_scan_kinds.py run --scan <the published SCAN folder> --split length --workers 2
+
+## 30. What the whole mind costs: kept readings tried and eliminated, readings shared where they are provably the same
+
+Section 28 ended with the cost as the first open point: on the mind raised on the owner's documents one answer of
+the whole mind took about thirty seconds where the speaking configuration takes a third of one, and reading the
+documents with everything on did not finish. Asked: bring the cost down with nothing changed (bit for bit).
+Everything here is measured on that mind (the whole mind without silent claims, 186,470 moments, 2.3 million ties;
+only timings and counts leave the machine) and on the small worlds; rows in `results/cost.jsonl`.
+
+### 30.1 Where the time went
+
+An answer (three thoughts from two-word cues, 23 moments, 64.6 s): the reading is made 48 times, each time the
+family that fits the context is read through its frames (13,289 frame readings, 277 a reading; 5,811 distinct
+frames under a trust) and each frame through its members. Inside that, two readings were made again for every
+frame although only the frame's fixed words differ between them: F37's `inherited` (34,549 times not in the
+moment's memo; 5.98 million entries of the items' own records gone through) and what a member goes on with (NEXT,
+START); `start_mass` looked through every unit that holds the word to find the two-item units that begin with it
+(5.9 million units looked at), and a third of its calls were made between moments, where the moment's memo is not
+open and nothing was kept at all (the inner voice reads between the moments it lives).
+
+Listening with silent claims (30 sentences, 514 moments): 26.8 ms a moment against 3.3 without them on the same
+mind. The full reading is made in 58 of those moments (twice a sentence: where the mind would be free to speak),
+and 70% of it is F37: what the classes of a word go on with is read once a run of items, a sentence is a run,
+and every sentence reads its words' places again (447 first calls of `_inheritance` made 19,043 with the class
+words they led to, 13,941 class profiles, the forms of 33,896 class words).
+
+### 30.2 Kept readings: exact, slower, put away
+
+The first attempt was the general one: keep every read-only reading across moments, record which lists of the
+store each one looked at, let the store stamp a list when a tie in it is made or its evidence changes, and use
+a kept reading again only while nothing it noted was stamped (and, across runs, nothing since the run it was
+made in began). It is exact: the same lives with and without it gave the same outputs and store digests (10
+small worlds with stamps by unit, 5 with stamps by list). It is slower everywhere: the small worlds by 30 to
+55% (chain 4.5 s to 6.2, kinds 30 to 40, the whole life 23 to 37), and ten answers on the big mind took 59 to
+115 s each against about 30 (144,388 kept readings used, 314,554 made, 208,436 found no longer to hold).
+
+Why they did not hold was counted (from the third answer on): in four of five cases the list of the units that
+hold one of the most frequent words (held by more than 10,000 units) had changed. That dependency is real. F37
+weighs the fixed words of a place's frame by how telling each is, `1 / (1 + the units that hold it)`, and takes
+the most telling word's share of their sum. Every sentence makes contexts that hold "bir", "ve", "."; the share
+of every frame with such a word among its fixed words is another number after every sentence, in its last
+digits. A reading that is exact cannot be used again there, and one that is used again is not exact. The module
+and its hooks are kept as a record in `eliminated_kept_readings/`, not in the mind.
+
+### 30.3 What was done instead
+
+Each of these is the same computation with the same numbers in the same order; where a reading is kept, what it
+rests on cannot have changed.
+
+1. **`inherited` from a summary of the run.** F37's reading of an item is already made once a run
+   (`_inheritance`). What `inherited` does with it for a frame depends on the frame only through which values are
+   its fixed words. The deduced values that are not the item's own, best first, and the item's own values by the
+   expectation each has over the deduced evidence (strongest first, of equals the one lived first) are made once a
+   run (`_inherited_of`); a frame reads the first of each that is not one of its fixed words. The item's whole own
+   mass is summed once and summed again, in the same order, only when a fixed word is among its own values.
+2. **`start_mass` from a list that grows.** The two-item units that begin with a unit are kept with the store in
+   the order of the unit's list (`_start_ties`); only what was appended since is looked at. What a tie and a unit
+   are made of never changes while they live; undoing a moment takes ties out of lists and drops what was kept.
+3. **What a member goes on with, once.** NEXT and START are read for the member whatever the frame
+   (`_goes_on`: the expectations, the strongest, whether another is as strong); a frame's fixed words are left out
+   only where one of them is among them.
+4. **Between moments.** The readings of the moment's memo (`_memo_key`: a unit's own evidence, its world
+   continuations, how sequences began with it, its generalisations) are kept between moments too, under the
+   store's count of writes, so a reading is used again only while nothing at all was written; never inside a
+   moment, and never where evidence is recalled in present company (who is present is not the store's to count).
+5. **F37's readings of a run.** The fixed words of a place's frame that can name a class are kept with the
+   store (`_place_words`: a frame's parts never change). A class word's own inheritance is read by the class
+   profile alone, for its values and their evidence: only that is made (its own record, the order and the
+   expectations were made and never read); what its class-mates went on with is still read there, because the run
+   keeps such a reading as it was when first read and reading it later could read another. Class-mates that share
+   a value are counted until half of them do. The lexicon of a run is rebuilt from the store's memory, not through
+   tensors.
+
+### 30.4 Measured
+
+The code of section 28 (md5 7504d0f5...) and of this section (12017e06...) one after the other on the same mind
+(`t_cost.py`; the machine was busy with other runs, so the processor seconds of each process are what to compare):
+
+    on the mind raised on the owner's documents              section 28      this section     the same?
+    six answers (thoughts from two-word cues), s             136.1           79.7  (1.7x)     the words of every thought and the store digest: yes
+    listening with silent claims, 30 sentences, ms a moment  27.4            23.0  (-16%)     the store digest: yes
+
+Exactness beyond those two: with every studied switch off the lesson-free gate, the 17 configurations and the
+scripted life (plain and with wholes) are bit-identical to the references; the whole mind's probe lives (chain,
+asked, find, half, misled, kinds, conj, wonder, whole, young, dead, cause, meaning; kinds and find again with
+another seed, with and without one mechanism: 15 runs) give the same results and the same store digest of every
+mind made. Six new tests compare each shared reading with the reading it replaces, made the long way, on a small
+mind (`test_zihin_cost.py`).
+
+### 30.5 What this does not change
+
+The growth is the same: an answer still reads every frame of the family through every member (1.7 times sooner,
+not another law), and F37 is still read again for every sentence. Listening with silent claims on that mind costs
+23 ms a moment against 3.3 without them: by that rate reading the owner's documents with everything on takes up
+to an hour and a half where it takes five minutes without silent claims. What can be shared without
+changing a number has been shared; what remains is in the mechanisms themselves (F37's weights move with every
+sentence; the family's vote is taken from all its frames every time). Changing those is a change of what the mind
+computes, to be measured as one, not a faster way to compute the same.
+
+    python research/living_mind_2026_11_22/t_cost.py answer --mind <a saved mind> --data <its documents' folder> --codes <old code> <new code>
+    python research/living_mind_2026_11_22/t_cost.py listen --mind <a saved mind> --data <its documents' folder> --codes <old code> <new code> --set silent_claims=1,relied_on=1

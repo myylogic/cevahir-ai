@@ -1,0 +1,281 @@
+diff --git a/zihin/aile.py b/zihin/aile.py
+index adf0775..9ff3785 100644
+--- a/zihin/aile.py
++++ b/zihin/aile.py
+@@ -184,9 +184,11 @@ def votes(mind, unit: int, trust: Optional[torch.Tensor] = None):
+     """The family that speaks for a context, as (c, {kind: vote}, the filler's positions, the varying word's
+     positions, the frame with the most members), or None. Of several families the one that agrees most speaks
+     (conviction x its strongest vote), as among frames."""
++    from .onbellek import kept
+     from .read import member_votes
+     cfg = mind.cfg
+     best = None
++    shade = None if trust is None else trust.numpy().tobytes()   # (the trust it is read with: part of what is kept)
+     parts = parts_of(mind, unit) if mv_view(mind, "u_kind")[unit] & COMPOSED else ()
+     channels = mv_view(mind, "u_channel")
+     for first, second, frames in families(mind, unit):
+@@ -195,7 +197,10 @@ def votes(mind, unit: int, trust: Optional[torch.Tensor] = None):
+         widest = None
+         channel = channels[parts[first[0]]]                # the members of the filler's kind of item vote
+         for frame, word in frames:
+-            mass, members, _, _, _ = member_votes(mind, frame, None, trust, channel=channel)
++            def read(frame=frame, word=word):              # the frame's own vote: the same for every context of the
++                mass, members, _, _, _ = member_votes(mind, frame, None, trust, channel=channel)   # family
++                return mass, members, (linked_share(mind, frame, word, trust, channel) if mass else 0.0)
++            mass, members, share = kept(mind, ("aile", frame, word, channel, shade), read)
+             if not mass:
+                 continue
+             c_frame = conviction(members, cfg.k)
+@@ -203,7 +208,6 @@ def votes(mind, unit: int, trust: Optional[torch.Tensor] = None):
+             for key, (w_pos, w_neg) in mass.items():
+                 kind = SECOND if key == word else key
+                 num[kind] = num.get(kind, 0.0) + c_frame * frequency(w_pos, w_neg)
+-            share = linked_share(mind, frame, word, trust, channel)
+             if share > 0.0:
+                 num[LINK] = num.get(LINK, 0.0) + c_frame * share
+             if widest is None or members > widest[0]:
+diff --git a/zihin/mind.py b/zihin/mind.py
+index d831a7f..4829760 100644
+--- a/zihin/mind.py
++++ b/zihin/mind.py
+@@ -489,6 +489,9 @@ class Mind:
+     def step(self, events: Iterable[Event] = ()) -> List[Event]:
+         """Live one moment with the given outside events; returns the acts the mind emits."""
+         S, cfg = self.S, self.cfg
++        if S.__dict__.get("_kept") is not None and S.__dict__["_kept"].stack:
++            from .onbellek import reset                    # (a reading was interrupted: no recorder stays)
++            reset(self)
+         undo = self._snapshot()
+         self.__dict__.pop("_between_memo", None)           # what was read between moments is read afresh
+         self.t += 1
+diff --git a/zihin/read.py b/zihin/read.py
+index 5306788..9bb7ceb 100644
+--- a/zihin/read.py
++++ b/zihin/read.py
+@@ -812,6 +812,8 @@ def stem_mates(mind, p: int, since: int) -> List[Tuple[int, float]]:
+                     by_head.setdefault(entry[0][:3], []).append(entry)
+                 index = mind.__dict__["_lexicon_index"] = (lexicon[0], by_head)
+             shared = []
++            from .onbellek import head                      # (kept while the lived words that begin so are these)
++            head(mind, channels[p], word[:3], tuple(u for _, u, _ in index[1].get(word[:3], ())))
+             for text, u, _ in index[1].get(word[:3], ()):
+                 if u == p:
+                     continue
+@@ -1186,7 +1188,8 @@ def _episode_memo(mind) -> dict:
+     since = getattr(mind, "episode_start", mind.t)
+     held = mind.__dict__.get("_episode_memo")
+     if held is None or held[0] != since:
+-        held = mind.__dict__["_episode_memo"] = (since, {})
++        from .onbellek import run_memo                      # (what holds from an earlier run is not read again)
++        held = mind.__dict__["_episode_memo"] = (since, run_memo(mind, since))
+     return held[1]
+ 
+ 
+@@ -2449,17 +2452,35 @@ def _lexicon(mind, cid: int, since: int) -> list:
+     lexicon = mind.__dict__.get("_lexicon")
+     size = len(mind.ch.symbols[cid])
+     if lexicon is None or lexicon[0] != (cid, size, since):
++        from .onbellek import paused
+         S = mind.S
+         words = []
+-        for index, sym in enumerate(mind.ch.symbols[cid]):
+-            u = S.atom_index.get((cid, index), -1)
+-            text = str(sym)
+-            if u >= 0 and text.isalpha() and int(S.u_birth[u]) < since and float(S.u_use[u]) > 0.0:
+-                words.append((text, u, float(S.u_use[u])))
++        with paused(mind):                                 # (read as a whole: what rests on it is guarded by what
++            for index, sym in enumerate(mind.ch.symbols[cid]):   # it took of it, ``onbellek.head`` / ``bind``)
++                u = S.atom_index.get((cid, index), -1)
++                text = str(sym)
++                if u >= 0 and text.isalpha() and int(S.u_birth[u]) < since and float(S.u_use[u]) > 0.0:
++                    words.append((text, u, float(S.u_use[u])))
+         lexicon = mind.__dict__["_lexicon"] = ((cid, size, since), words)
+     return lexicon[1]
+ 
+ 
++def head_units(mind, cid: int, text: str, since: int) -> tuple:
++    """The lived words of a channel (before ``since``) that begin as ``text`` (three letters) does, as units: what
++    ``stem_mates`` reads of the lexicon for a word that begins so."""
++    _lexicon(mind, cid, since)
++    lexicon = mind.__dict__.get("_lexicon")
++    if lexicon is None or lexicon[0][0] != cid:
++        return ()
++    index = mind.__dict__.get("_lexicon_index")
++    if index is None or index[0] != lexicon[0]:
++        by_head: Dict[str, list] = {}
++        for entry in lexicon[1]:
++            by_head.setdefault(entry[0][:3], []).append(entry)
++        index = mind.__dict__["_lexicon_index"] = (lexicon[0], by_head)
++    return tuple(u for _, u, _ in index[1].get(text, ()))
++
++
+ def form_base(mind, w: int, since: int):
+     """F36 (Word Forms): the lived word a word never met is a form of, and how far: (base, f, c) or None.
+ 
+@@ -2479,6 +2500,8 @@ def form_base(mind, w: int, since: int):
+     channel = channels[w]
+     word = str(mind.ch.symbol(channel, symbols[w]))
+     if word.isalpha() and len(word) >= 3:
++        from .onbellek import bind                         # (how much each word was used: not kept between moments)
++        bind(mind)
+         words = _lexicon(mind, channel, since)
+         best = None
+         for text, u, use in words:
+diff --git a/zihin/store.py b/zihin/store.py
+index b96ff77..531d066 100644
+--- a/zihin/store.py
++++ b/zihin/store.py
+@@ -514,7 +514,8 @@ class Substance:
+     _UNIT_ARRAYS = ("u_kind", "u_channel", "u_symbol", "u_arity", "u_birth", "u_use", "u_alive")
+     _TIE_ARRAYS = ("t_src", "t_dst", "t_form", "t_lag", "t_cls", "t_row", "t_use", "t_last", "t_birth", "t_alive")
+     _ROW_ARRAYS = ("r_tie", "r_was")
+-    _CACHES = ("_out_ids", "_views", "_class_ids", "_npv", "_parts", "_slot_keys", "_lut", "_abstract_in")
++    _CACHES = ("_out_ids", "_views", "_class_ids", "_npv", "_parts", "_slot_keys", "_lut", "_abstract_in",
++               "_kept", "_kid", "_kst", "_uw", "_rev_begin", "find_tie")   # (the last: kept readings, ``onbellek``)
+ 
+     def __getstate__(self):
+         """Saved and copied without the spare capacity (the rows beyond n_units / n_ties / n_rows are zeros); the
+@@ -532,6 +533,10 @@ class Substance:
+         state["_cu"], state["_ct"], state["_cr"] = max(n, 1), max(t, 1), r
+         for name in self._CACHES:
+             state.pop(name, None)
++        for name in ("inc", "out", "tuple_index", "frame_of", "frame_first", "atom_index"):
++            real = getattr(state[name], "real", None)      # (copied while a reading was being noted: the index itself)
++            if real is not None and not isinstance(state[name], dict):
++                state[name] = real
+         return state
+ 
+     def __setstate__(self, state) -> None:
+@@ -955,6 +960,75 @@ class Substance:
+         v.row[ties] = rows
+         self.n_rows += k
+ 
++    # ---- kept readings (``onbellek``): which of the store's adjacency lists changed, and when
++    # A reading notes the lists it looked up: the ties out of a unit of one form and lag, or into a unit of one form
++    # (``key_out`` / ``key_in``, one packed integer each). A noted list gets a place in ``_kst`` (its "stamp": the
++    # store's version when a tie of the list was last made or its evidence last changed). Only noted lists are
++    # stamped, only units that have a noted list are looked at when something is written (``_uw``), and nothing of
++    # this is saved or copied.
++    @staticmethod
++    def key_out(unit: int, form: int, lag: int) -> int:
++        return (((unit << 6) | form) << 6 | ((-1 if form == PART else lag) + 2)) << 1
++
++    @staticmethod
++    def key_in(unit: int, form: int) -> int:
++        return (((unit << 6) | form) << 1) | 1
++
++    def key_id(self, key: int) -> int:
++        """The place of a noted list's stamp (given one, stamped now, when it is noted for the first time: it may
++        have changed at any moment before)."""
++        kid = self.__dict__.get("_kid")
++        if kid is None:
++            kid = self.__dict__["_kid"] = {}
++            self.__dict__["_kst"] = np.zeros(4096, dtype=np.int64)
++            self.__dict__["_uw"] = np.zeros(self._cu, dtype=bool)
++        i = kid.get(key)
++        if i is None:
++            i = kid[key] = len(kid)
++            if i == self._kst.shape[0]:
++                grown = np.zeros(2 * i, dtype=np.int64)
++                grown[:i] = self._kst
++                self.__dict__["_kst"] = grown
++            self._kst[i] = self.version
++            unit = key >> 7 if key & 1 else key >> 13
++            if unit >= self._uw.shape[0]:
++                grown = np.zeros(max(self._cu, unit + 1), dtype=bool)
++                grown[:self._uw.shape[0]] = self._uw
++                self.__dict__["_uw"] = grown
++            self._uw[unit] = True
++        return i
++
++    def _changed(self, src: int, dst: int, form: int, lag: int) -> None:
++        """A tie was made or its evidence changed: the noted lists it is in are stamped."""
++        uw, n = self._uw, self._uw.shape[0]
++        if src < n and uw[src]:
++            i = self._kid.get(self.key_out(src, form, lag))
++            if i is not None:
++                self._kst[i] = self.version
++        if dst < n and uw[dst]:
++            i = self._kid.get(self.key_in(dst, form))
++            if i is not None:
++                self._kst[i] = self.version
++
++    def _changed_many(self, ties: np.ndarray) -> None:
++        v, uw = self._np(), self._uw
++        n = uw.shape[0]
++        src, dst = v.src[ties], v.dst[ties]
++        seen = np.zeros(ties.shape[0], dtype=bool)
++        inside = src < n
++        seen[inside] = uw[src[inside]]
++        inside = dst < n
++        seen[inside] |= uw[dst[inside]]
++        if seen.any():
++            form, lag = v.form[ties], v.lag[ties]
++            for a, b, f, l in zip(src[seen].tolist(), dst[seen].tolist(), form[seen].tolist(), lag[seen].tolist()):
++                self._changed(a, b, f, l)
++
++    def _drop_kept(self) -> None:
++        """A moment was undone or retracted: nothing kept holds."""
++        for name in ("_kept", "_kid", "_kst", "_uw", "_rev_begin"):
++            self.__dict__.pop(name, None)
++
+     def new_unit(self, kind: int, channel: int = -1, symbol: int = -1, arity: int = 0) -> int:
+         if self.n_units == self._cu:
+             self._grow_units()
+@@ -988,6 +1062,8 @@ class Substance:
+         v.birth[tie], v.alive[tie], v.last[tie] = self.now, True, 0
+         self.n_ties += 1
+         self._index_tie(tie, src, dst, form, lag)
++        if "_kid" in self.__dict__:
++            self._changed(src, dst, form, lag)
+         return tie
+ 
+     # ------------------------------------------------------------------ additive changes (all logged)
+@@ -1011,6 +1087,8 @@ class Substance:
+             keep = snapped != 0
+             live_i, live = i[keep], snapped[keep]
+         self._put_np(table, slot, live_i, live)
++        if "_kid" in self.__dict__:
++            self._changed_many(live_i)
+         if table <= W_NEG:
+             self._touch.append(live_i)
+         if self.cur is not None and self.keep_log:
+@@ -1031,6 +1109,9 @@ class Substance:
+             else:
+                 r = v.row[tie] if c == WIDE else self._widen(tie)
+                 self._np().ex[table, r, slot] += amount
++            if "_kid" in self.__dict__:
++                v = self._np()
++                self._changed(int(v.src[tie]), int(v.dst[tie]), int(v.form[tie]), int(v.lag[tie]))
+             if table <= W_NEG:
+                 self._touch1.append(tie)
+             if self.cur is not None and self.keep_log:
+@@ -1091,6 +1172,12 @@ class Substance:
+     # ------------------------------------------------------------------ moments
+     def begin(self, m: int, alpha: List[int]) -> None:
+         self.now = m
++        if "_kept" in self.__dict__:                    # (``onbellek``: the version each recent moment began at)
++            began = self.__dict__.setdefault("_rev_begin", {})
++            began[m] = self.version
++            if len(began) > 8192:
++                for old in list(began)[:4096]:
++                    del began[old]
+         self._touch, self._touch1 = [], []
+         self.cur = MomentLog(m, self.n_units, self.n_ties, alpha, self.n_rows)
+ 
+@@ -1155,6 +1242,7 @@ class Substance:
+ 
+     def _subtract(self, entry: MomentLog) -> None:
+         self.version += 1
++        self._drop_kept()
+         for table, slot, ids, amounts in entry.ev:
+             self._put(table, slot, ids, -amounts)
+         for ids, amounts in entry.tie_use:
+@@ -1246,6 +1334,7 @@ class Substance:
+         """Take the units >= units0 and the ties >= ties0 (the newest rows) out of every cache."""
+         v = self._np()
+         self._abstract_in = None
++        self._drop_kept()
+         for unit in range(units0, self.n_units):
+             if not v.ualive[unit]:
+                 continue

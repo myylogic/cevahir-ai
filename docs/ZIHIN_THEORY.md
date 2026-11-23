@@ -625,6 +625,18 @@ At each moment, roughly each word, the mind lives these steps:
     deduction names r and the narrower vote another word v: e_v <- (1 - c_r) e_v, c_r = max(0, 2 e_r - 1).
     Measured: the exception two steps away is answered 3 of 3 (0 of 3 in the last section).
   The battery again: 34 of the 37 lines the same as before, count for count; the three that changed are these. Five lines stay worse than the configurations they were measured with (the misled world, the half-empty library, the cause probe, two unseen forms, rare looks after looks that failed). And reading large running text with everything on is not practical yet: building a mind from the owner's documents did not finish in 110 minutes where the earlier configuration takes 6 (on a small mind the whole mind costs 4.8 times a moment on running text, nearly all of it silent claims: 1.1 times without them; on the large one that is not enough). `--variant speaking` reads large texts as before; this is the first item of the work queue.
+- **What the whole mind costs (not a mechanism: the same computation, shared).** On a mind raised on running
+  text an answer of the whole mind reads every frame of the family that fits through every member, and F37 reads
+  what a word's classes go on with again for every sentence. Keeping every read-only reading across moments, with
+  what it read recorded and the store stamping what changes, was built and measured: exact, and slower (two
+  thirds of what was kept no longer held: F37 weighs a frame's fixed words by how many units hold each, a number
+  every sentence changes for the frequent words), so it was put away (`eliminated_kept_readings/`). What is shared
+  instead is what is provably the same: an item's F37 reading for any frame from one summary a run; the units that
+  begin with a word from a list kept as they are made; what a member goes on with once for every frame; the
+  moment's readings between moments too, under the store's count of writes. Measured on the mind raised on the
+  owner's documents (186,470 moments): six answers 136.1 s to 79.7 s of processor time, listening with silent
+  claims 27.4 to 23.0 ms a moment, every word thought and the store digests identical; the gates bit-identical.
+  The law of growth is the same (notes of 2026-11-22, section 30).
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
