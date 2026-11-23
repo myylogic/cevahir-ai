@@ -13,6 +13,8 @@ What is pinned here
   is right for one kind and wrong for the others, calibrated on the whole. With F67 the category is split rounds
   sooner (in the measured world of the notes, where without it it is not split at all in 24 rounds).
 * Where nothing ever failed the switch changes nothing.
+* With F69 (its own turn read last, section 31) the same life is split as soon without F67: the vote's own failures
+  find it wanting.
 """
 from __future__ import annotations
 
@@ -99,13 +101,24 @@ def test_failed_is_not_wanting():
 
 
 def test_a_vote_calibrated_on_the_whole_and_wrong_in_each_part_is_split_sooner():
-    without, marks_without, fresh_without = life(split_failed=False)
-    split, marks_split, fresh_split = life()
+    """(With the records of the two conditions pooled, as when F67 was built: ``own_turn`` off.)"""
+    without, marks_without, fresh_without = life(split_failed=False, own_turn=False)
+    split, marks_split, fresh_split = life(own_turn=False)
     assert marks_without == "RWWWRWWW"                       # right for the watched kind, wrong for the others,
     assert marks_split == "RWWWRWRR"                         # to the end of the loop; split after the sixth round
     assert fresh_split == "R" * len(FRESH)                   # every kind answered by its kind
     frame = [line for line in hata.report(without.mind) if "X ne yer" in line and "/" in line][0]
     assert "üyelerin aynı kelimesi" in frame                 # (the frame's own vote: it held and it failed)
+
+
+def test_with_its_own_turn_read_last_the_vote_is_found_wanting_as_soon():
+    """F69 (section 31): what the vote came to on the mind's own turn is read over what it came to while it
+    listened, so its own failures find it wanting where the pooled record was calibrated on the whole: the category
+    is split after the sixth round with F67 and without it."""
+    _, marks_without, fresh_without = life(split_failed=False)
+    _, marks_split, fresh_split = life()
+    assert marks_without == marks_split == "RWWWRWRR"
+    assert fresh_without == fresh_split == "R" * len(FRESH)
 
 
 def test_where_nothing_failed_the_switch_changes_nothing():

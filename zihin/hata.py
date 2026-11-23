@@ -64,6 +64,13 @@ it (F46: what it may look up by itself, F47).
   error showed it had to be, by a place the mind lived. That claim is a way of its own (kind ``NARROWER``), settled
   and read back like the others, so the split is kept only as far as its claims hold.
 
+* **Its own turn comes last (F69, ``Config.own_turn``; with silent claims).** While the mind only listens it is
+  shown things; when it is its turn it is asked about things. What a way's claims came to in the two conditions
+  is booked apart (its own turn as its own act, listening as what it inferred and did not act on) and read
+  general -> specific like every other level: what they came to while it listened, then what they came to on its
+  own turn. What it said or held back at a context stays kept when it then listens at that context (the teacher
+  shows the dialogue it has just answered), and a moment of listening is not being called on again.
+
 Nothing here names a word, a frame or a domain; no number is chosen (one experience per settled claim, the core's
 k, the line the mind already speaks at). ``report`` says what the mind has learned about its own ways and where its
 last faults were.
@@ -72,7 +79,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Tuple
 
-from .events import ACTED, IMAGINED
+from .events import ACTED, IMAGINED, INFERRED
 from .evidence import conviction, frequency
 from .store import EXPECT, W_NEG, W_POS
 
@@ -125,6 +132,9 @@ def failed(mind, ways) -> bool:
     by more than the weight of no record, is what says the category may have to be split."""
     if not mind.ch.has(CHANNEL):
         return False
+    if _apart(mind, "record"):                             # (F69: an experience against it, in either condition)
+        turn, listening = _cells(mind, ways[-1])
+        return turn[1] + listening[1] > mind.cfg.k
     return _mass(mind, ways[-1])[1] > mind.cfg.k
 
 
@@ -141,9 +151,57 @@ def _mass(mind, symbol, target: Optional[int] = None) -> Tuple[float, float]:
     return mass1(mind, tie) if tie >= 0 else (0.0, 0.0)
 
 
+def _apart(mind, part: str) -> bool:
+    """F69 (Its Own Turn Comes Last, ``Config.own_turn``; with silent claims): whether what the mind's ways came to
+    when it was its turn is kept apart from what they came to while it only listened. ``part``: "record" (the
+    records of its ways) or "held" (what holding a claim back came to). (Research: ``mind._own_turn`` names the one
+    part that is on.)"""
+    if not getattr(mind.cfg, "own_turn", False):
+        return False
+    only = mind.__dict__.get("_own_turn")
+    return only is None or only == part
+
+
+def _cells(mind, symbol, target: Optional[int] = None):
+    """F69: (W+, W-) of the tie (way -> holds), or (way -> ``target``), by the condition its claims were made in:
+    ((when it was the mind's turn: said, held back or tried), (while it only listened)). Each as it was lived (no
+    trust weighs the mind's own percept of its ways)."""
+    unit = mind.unit_of(CHANNEL, symbol)
+    tie = mind.S.find_tie(unit, mind.holds if target is None else target, EXPECT, 0) if unit >= 0 else -1
+    if tie < 0:
+        return (0.0, 0.0), (0.0, 0.0)
+    cell = mind.S.cell
+    return ((cell(W_POS, tie, ACTED), cell(W_NEG, tie, ACTED)),
+            (cell(W_POS, tie, INFERRED), cell(W_NEG, tie, INFERRED)))
+
+
+def _levels(mind, symbol, expected: int) -> list:
+    """F69: the record of one way by the condition its claims were made in, general -> specific: what they came to
+    while the mind only listened, then what they came to when it was its turn; each (conviction, how often its
+    claims held, the mean of what it claimed), only where it was judged so."""
+    out = []
+    held = _cells(mind, symbol)
+    claimed = _cells(mind, symbol, expected) if expected >= 0 else ((0.0, 0.0), (0.0, 0.0))
+    for (w_pos, w_neg), (x_pos, x_neg) in ((held[1], claimed[1]), (held[0], claimed[0])):
+        if w_pos + w_neg > 0.0:
+            out.append((conviction(w_pos + w_neg, mind.cfg.k), frequency(w_pos, w_neg),
+                        frequency(x_pos, x_neg) if x_pos + x_neg > 0.0 else 0.5))
+    return out
+
+
 def _own(mind, symbol, expected: int) -> Optional[Tuple[float, float, float]]:
     """The record of one way that has ties of its own (a frame's claim of a kind, or a reading): (conviction, how
-    often its claims held, the mean of what it claimed), or None when it was never judged."""
+    often its claims held, the mean of what it claimed), or None when it was never judged. F69: where it was judged
+    in both conditions, what it came to on the mind's own turn takes its conviction's share and what it came to
+    while listening the rest: conviction 1 - (1 - c_turn)(1 - c_listening), as evidence that nests is held."""
+    if _apart(mind, "record"):
+        levels = _levels(mind, symbol, expected)
+        if len(levels) < 2:
+            return levels[0] if levels else None
+        (c_l, h_l, x_l), (c_t, h_t, x_t) = levels
+        rest = (1.0 - c_t) * c_l
+        c = c_t + rest
+        return c, (c_t * h_t + rest * h_l) / c, (c_t * x_t + rest * x_l) / c
     w_pos, w_neg = _mass(mind, symbol)
     if w_pos + w_neg <= 0.0:
         return None
@@ -200,7 +258,10 @@ def record(mind, ways, levels=None) -> list:
         if n > 1e-12:
             out.append((conviction(n, k), h / n, x / n))
     if own is not None and (levels is None or len(ways) - 1 in levels):
-        out.append(own)
+        if _apart(mind, "record"):                         # F69: what it came to while listening, then on its own
+            out.extend(_levels(mind, ways[-1], mind.unit_of(CHANNEL, EXPECTED)))   # turn (its own turn comes last)
+        else:
+            out.append(own)
     return out
 
 
@@ -218,8 +279,12 @@ def proven(mind, ways) -> float:
     (way -> holds), the frequency with which its claims held, held with the conviction of that record (c f: what
     the record does not yet say counts for nothing). 0 while none of its claims was ever settled; over 1/2 only
     when they held more often than they failed by more than one experience (the weight of having no record)."""
+    k = mind.cfg.k
+    if _apart(mind, "record"):                             # F69: its own turn's record, and for the share that record
+        (t_pos, t_neg), (l_pos, l_neg) = _cells(mind, ways[-1])   # does not yet hold, what it came to while listening
+        return t_pos / (t_pos + t_neg + k) + (1.0 - conviction(t_pos + t_neg, k)) * l_pos / (l_pos + l_neg + k)
     w_pos, w_neg = _mass(mind, ways[-1])
-    return w_pos / (w_pos + w_neg + mind.cfg.k)
+    return w_pos / (w_pos + w_neg + k)
 
 
 def withheld(mind, context: int) -> None:
@@ -386,7 +451,8 @@ def note(mind, src: Dict[int, list], said: List[int], listening: bool = False) -
             return                                         # the context was lived to go on: its own record speaks
     claimed = mind.claimed
     waiting = mind.__dict__.get("_held_back")
-    if waiting and not mind.__dict__.get("_came_to_mind"):   # called on again: what it held back in an earlier run
+    if waiting and not mind.__dict__.get("_came_to_mind") and not (listening and _apart(mind, "held")):
+                                                           # called on again: what it held back in an earlier run
         start = getattr(mind, "episode_start", 0)          # of items and is still waiting was not answered (F50: not
                                                            # in a run that only comes to mind: no one called on it)
         still = [(c, t) for c, t in waiting if t >= start]
@@ -394,7 +460,9 @@ def note(mind, src: Dict[int, list], said: List[int], listening: bool = False) -
             if t < start and any(claim[2] is False for claim in claimed.get(c, ())):
                 _held(mind, False)
         mind.__dict__["_held_back"] = still
-    claimed.pop(context, None)
+    if listening and _apart(mind, "held") and any(claim[2] is not None for claim in claimed.get(context, ())):
+        return                                             # F69: what it said or held back here when it was its turn
+    claimed.pop(context, None)                             # is what is on trial at this context: it stays as kept
     claimed[context] = tuple(claims)
     if any(claim[2] is False for claim in claims):
         mind.__dict__.setdefault("_held_back", []).append((context, mind.t))
@@ -411,21 +479,23 @@ def _held(mind, was_answered: bool) -> None:
     add_evidence1(mind, W_POS if was_answered else W_NEG, ACTED, tie, 1.0, relief=False)
 
 
-def settle(mind, ways, held: bool, e0: float, amount: float = 1.0) -> None:
+def settle(mind, ways, held: bool, e0: float, amount: float = 1.0, turn: bool = True) -> None:
     """One claim of this way met reality. On the way's own ties (the frame's claim of that kind, or the reading):
     (way -> holds) gets W+ (it held) or W- (it failed), and (way -> claimed) what it had claimed: W+ by e0, W- by
     1 - e0 (so the mean of what the way claimed can be read beside how often it held). The general levels have no
     ties: they are the vote of these (``votes``). Booked as the mind's own percept (acted: self-produced, it judges
-    nothing the mind was told) and no relief."""
+    nothing the mind was told) and no relief. F69: a claim made while the mind only listened (``turn`` False) is
+    booked as what it inferred and did not act on, so the two conditions can be read apart."""
     from .learn import add_evidence1
     S = mind.S
     channel = mind.add_channel(CHANNEL, "knob")
     expected = mind._atom(channel, EXPECTED)
     unit = mind._atom(channel, ways[-1])
-    add_evidence1(mind, W_POS if held else W_NEG, ACTED, S.tie(unit, mind.holds, EXPECT, 0), amount, relief=False)
+    slot = ACTED if turn or not _apart(mind, "record") else INFERRED
+    add_evidence1(mind, W_POS if held else W_NEG, slot, S.tie(unit, mind.holds, EXPECT, 0), amount, relief=False)
     tie = S.tie(unit, expected, EXPECT, 0)
-    add_evidence1(mind, W_POS, ACTED, tie, amount * e0, relief=False)
-    add_evidence1(mind, W_NEG, ACTED, tie, amount * (1.0 - e0), relief=False)
+    add_evidence1(mind, W_POS, slot, tie, amount * e0, relief=False)
+    add_evidence1(mind, W_NEG, slot, tie, amount * (1.0 - e0), relief=False)
     memo = mind.__dict__.get("_read_memo")
     if memo:
         for key in [key for key in memo if type(key) is tuple and key and key[0] in ("ways", "record")]:
@@ -460,7 +530,7 @@ def judge(mind, items) -> None:
             rest.append(claim)
             continue
         before = _read_now(mind, ways, e0)
-        settle(mind, ways, v == target, e0)
+        settle(mind, ways, v == target, e0, turn=said is not None)
         if said is False:
             _held(mind, True)                              # what it held back was answered by what it lives
         if v != target:
@@ -571,10 +641,17 @@ def report(mind, most: int = 12) -> List[str]:
                  "nasıl okunuyor):")
     for key in own[:most]:
         ways = (ALL, key[:2], key) if key[0] == "g" else (ALL, key)
-        w_pos, w_neg = _mass(mind, key)
-        lines.append("    %-58s %4.1f / %-4.1f  %.2f -> %.2f  şimdi %.2f" % (
+        apart = ""
+        if _apart(mind, "record"):                         # F69: by the condition the claims were made in
+            (w_pos, w_neg), (l_pos, l_neg) = _cells(mind, key)
+            if l_pos + l_neg > 0.0:
+                apart = "  (kendi sırasında %.1f / %.1f, dinlerken %.1f / %.1f)" % (w_pos, w_neg, l_pos, l_neg)
+            w_pos, w_neg = w_pos + l_pos, w_neg + l_neg
+        else:
+            w_pos, w_neg = _mass(mind, key)
+        lines.append("    %-58s %4.1f / %-4.1f  %.2f -> %.2f  şimdi %.2f%s" % (
             way_name(mind, ways), w_pos, w_neg, found[key][2], found[key][1],
-            read_as(record(mind, ways), found[key][2])))
+            read_as(record(mind, ways), found[key][2]), apart))
     if len(own) > most:
         lines.append("    ... ve %d yol daha" % (len(own) - most))
     if mind.faults:

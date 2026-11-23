@@ -625,6 +625,23 @@ At each moment, roughly each word, the mind lives these steps:
     deduction names r and the narrower vote another word v: e_v <- (1 - c_r) e_v, c_r = max(0, 2 e_r - 1).
     Measured: the exception two steps away is answered 3 of 3 (0 of 3 in the last section).
   The battery again: 34 of the 37 lines the same as before, count for count; the three that changed are these. Five lines stay worse than the configurations they were measured with (the misled world, the half-empty library, the cause probe, two unseen forms, rare looks after looks that failed). And reading large running text with everything on is not practical yet: building a mind from the owner's documents did not finish in 110 minutes where the earlier configuration takes 6 (on a small mind the whole mind costs 4.8 times a moment on running text, nearly all of it silent claims: 1.1 times without them; on the large one that is not enough). `--variant speaking` reads large texts as before; this is the first item of the work queue.
+- **Its Own Turn Comes Last (F69, with silent claims; on in the full configuration).** With silent claims a
+  way of reading earns a record from everything the mind watches. Two things were wrong with how that record was
+  kept. When the mind had answered and the true dialogue was then shown to it, it listened at the context it had
+  just spoken at, and the silent claim of that moment replaced the claim it had kept from its own turn: what it
+  said or held back was settled as "not its turn", so holding back was never seen to be answered (and each such
+  moment counted as being called on with the claim still waiting), and the mind learned to assert. And one record
+  pooled two conditions: what a way's claims came to while the mind was shown things, and what they came to when
+  it was asked. Now what it kept from its own turn at a context stays; a moment of listening is not being called
+  on; and the two are booked apart on the way's own ties (its own turn as its own act, listening as what it
+  inferred and did not act on) and read general -> specific like every level:
+  e <- c_listening e_listening + (1 - c_listening) e; e <- c_turn e_turn + (1 - c_turn) e. Among the ways like it
+  a way votes with weight 1 - (1 - c_turn)(1 - c_listening), its own turn first. A way that only ever listened,
+  and a mind that is never asked, read exactly as before. Measured (5 seeds): in the misled world wrong answers
+  66 -> 40 in the loops and 82 -> 13 on things never asked about (as without silent claims), lawful frames right
+  from the first question; the value it could not look up asserted 9 -> 1 times; no cost where a frame holds but
+  for one thing. What remains: 40 wrong against 29 without silent claims, because the other ways that claim the
+  same word each fail once of their own (notes of 2026-11-22, section 31).
 - **What the whole mind costs (not a mechanism: the same computation, shared).** On a mind raised on running
   text an answer of the whole mind reads every frame of the family that fits through every member, and F37 reads
   what a word's classes go on with again for every sentence. Keeping every read-only reading across moments, with
@@ -903,6 +920,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | An End Is an Outcome | Bitiş de Bir Sonuçtur | F66, off by default (with F57) | omission against commission errors; learning when to stop; the outcome of saying nothing |
 | The Category Is Split Where It Failed | Kategori Başarısız Olduğu Yerde Bölünür | F67, off by default (with F49) | calibration against resolution (a forecast right on the whole and wrong in each part); mixtures hidden in an average; error-driven category splitting |
 | Deduction Stands Against the Co-members' Vote | Çıkarım, Sınıf Arkadaşlarının Oyuna Karşı Durur | F68, off by default (with F37 and F49) | default reasoning with exceptions; specificity; deduction against induction |
+| Its Own Turn Comes Last | Kendi Sırası En Son Okunur | F69, off by default (with silent claims) | what one was shown against what one is asked (a shift between the two samples); learning by watching against learning by one's own trials; source monitoring of one's own claims; nested (hierarchical) evidence |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

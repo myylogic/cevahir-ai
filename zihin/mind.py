@@ -252,6 +252,12 @@ class Config:
                                     # own record last) and F49's narrower vote (what its co-members went on with)
                                     # proposes another, the deduction stands against that vote
                                     # (read._deduced_against_co_members)
+    own_turn: bool = False          # F69 (Its Own Turn Comes Last; with silent_claims): what a way's claims came
+                                    # to while the mind only listened (what it was shown) and what they came to
+                                    # when it was its turn (what it was asked) are kept apart, and its own turn's
+                                    # record is read last, over the other, as the more specific evidence is
+                                    # everywhere; and a moment in which it only listens is not being called on
+                                    # again (what it held back is not counted unanswered there) (hata._apart)
     unknown_outside: bool = False   # F65 (Not Knowing Is of the World; with L7): the amount the mind does not know
                                     # is kept when the *world* has just done something and it decided nothing. An
                                     # end of a turn that only came to mind (the question it asked itself, a

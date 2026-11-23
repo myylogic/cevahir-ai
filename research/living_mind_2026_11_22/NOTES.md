@@ -3837,3 +3837,141 @@ computes, to be measured as one, not a faster way to compute the same.
 
     python research/living_mind_2026_11_22/t_cost.py answer --mind <a saved mind> --data <its documents' folder> --codes <old code> <new code>
     python research/living_mind_2026_11_22/t_cost.py listen --mind <a saved mind> --data <its documents' folder> --codes <old code> <new code> --set silent_claims=1,relied_on=1
+
+## 31. Its own turn comes last (F69): what a way came to when the mind was asked, over what it came to while it watched
+
+Section 28 left two lines where the whole mind did worse than the configurations before it, both traced to
+silent claims (F49 while the mind only listens): in the misled world it went on asserting in frames that had
+misled it (66 wrong answers in the loops against 29), and with a library that holds every second thing it asserted
+a value it could not look up (9 against 1). Asked: handle it. Both lives were followed in the mind's own records
+(`hata.report`, the claims kept, the decision to hold back), and two things came out; neither is about those worlds.
+
+### 31.1 What was found
+
+**What it said was settled as if it had only listened.** In the teacher's loop the mind answers, and then the true
+dialogue is shown to it: it listens to the same question again. A silent claim is made wherever the mind listens
+at a context it has no record of from outside, and the claim of that moment was written over the claims the mind
+had kept from its own turn at that very context (`hata.note`: one set of claims a context). So every claim it
+had said or held back there reached reality marked "was not its turn". Two things followed. A claim it held back
+was never seen to be answered (F50 reads that mark), while every such moment of listening counted as being called
+on again with the claim still waiting: after two held-back claims the mind had learned that holding back is never
+answered, and it asserted instead (the half-empty library: `holds_back` returned no because `answered` was under
+1/2). And nothing in the record of a way could tell what it had come to when the mind went by it aloud.
+
+**The record pooled two conditions.** While the mind listens it is shown things; when it is its turn it is asked
+about things. In the misled world the eight things shown share a value and the things asked about do not: seven
+claims that held while it listened stood in one record with every failure of its own, and a record of 9 held and
+5 failed reads a claim made with 0.63 as worth 0.65, over the line the mind speaks at, for ever.
+
+### 31.2 The mechanism (`Config.own_turn`, with silent claims; on in the whole mind)
+
+1. What the mind said or held back at a context when it was its turn stays kept when it then listens at that
+   context; the silent claim of that moment is not made over it. A moment of listening is not being called on:
+   what it held back earlier is not counted unanswered there.
+2. The two conditions are booked apart, on the same ties of the way: a claim made on its own turn (said, held
+   back, tried by F57) as its own act, as before; a claim made while it only listened as what it inferred and did
+   not act on (the core's provenance classes; no trust weighs either, they are the mind's own percepts of its
+   ways). The way's record is read general -> specific as everything is read: every way, the kind of claim, then
+   what this way's claims came to while it listened, then what they came to on its own turn:
+   e <- c_listening e_listening + (1 - c_listening) e; e <- c_turn e_turn + (1 - c_turn) e. It is the rule of an
+   instance over its frame and of the person present over the others (F33): the more specific evidence is read
+   last. Among the ways like it a way votes with both, its own turn by its conviction and what it came to while
+   listening for the rest: weight 1 - (1 - c_turn)(1 - c_listening). `hata.proven` is its own turn's record first;
+   `hata.failed` (F67) counts an experience against a way in either condition.
+
+Nothing is chosen: no weight, no number, no rate of forgetting. A way that only ever listened is read exactly as
+before; so is a mind that is never asked.
+
+### 31.3 Measured (`t_turn.py`, the whole mind, 5 seeds; `results/turn.jsonl`)
+
+The misled world (`t_fault.py misled`: three frames whose eight watched things only happen to share a value, two
+lawful frames; the teacher's loop, 6 new things a frame; then 8 things never asked about); right / wrong / silent:
+
+    condition                                        loops, misleading   loops, lawful   fresh, misleading   fresh, lawful
+    the whole mind of section 28 (own_turn off)      24 / 66 / 0         60 / 0 / 0      36 / 82 / 2         80 / 0 / 0
+    F69                                              18 / 40 / 32        60 / 0 / 0      4 / 13 / 103        80 / 0 / 0
+    F69, only part 1 (what it kept stays)            24 / 66 / 0         60 / 0 / 0      36 / 82 / 2         80 / 0 / 0
+    F69, only part 2 (the records apart)             24 / 66 / 0         60 / 0 / 0      36 / 82 / 2         80 / 0 / 0
+    without silent claims (and what needs them)      12 / 29 / 49        54 / 0 / 6      4 / 13 / 103        80 / 0 / 0
+
+Wrong answers in the misleading frames fall from 66 to 40 in the loops, and at the end the mind is silent about
+things it was never asked of in those frames exactly as the mind without silent claims is (13 wrong, 82 before);
+the lawful frames are answered from their first question, which is what silent claims are for and what is lost
+without them (54 / 0 / 6). Either part alone changes nothing here: without part 1 nothing reaches the own turn's
+record, without part 2 nothing reads it.
+
+Not all of it: 40 wrong where the mind without silent claims has 29. Traced in the claims themselves (seed 0,
+the second misleading frame, every way that claimed each word it said): the wrong word is claimed by the frame's
+own vote alone. After its first failure the vote's record is "held 7 of 7 while it listened, failed 1 of 1 on its
+own turn". One experience has conviction 1/2 (k = 1), so the claim reads about 0.5 x 0.1 + 0.5 x 0.98 = 0.55: under
+the line at which the mind begins to speak (0.583), and still more for than against, which is enough for the next
+word of an answer it has begun. The second failure brings it under 0.4 and the frame is silent from then on
+(WW----). Without silent claims nothing stands against the first failure and one is enough (W-----). So a
+misleading frame costs one wrong answer more than without silent claims: that is what seven confirmations seen
+while watching are worth against one failure when asked, by the core's own rule for one experience. Of the 17
+more answers the mind gives in those frames than the mind without silent claims, 6 are right and 11 are wrong.
+
+The library that holds every second thing (`t_find_out.py half`: asked once about each of 16 things it has read
+nothing of; the whole answer / the right value only / another value / nothing):
+
+    the whole mind of section 28 (own_turn off)      40 / 1 / 9 / 30      of the things the library holds 40 / 0 / 0 / 0
+    F69                                              40 / 0 / 1 / 39      40 / 0 / 0 / 0
+    F69, only part 1                                 40 / 0 / 1 / 39      40 / 0 / 0 / 0
+    F69, only part 2                                 40 / 1 / 9 / 30      40 / 0 / 0 / 0
+    without silent claims                            40 / 0 / 1 / 39      40 / 0 / 0 / 0
+
+The value it could not find is asserted once in five lives (nine times before), as without silent claims. Here
+part 1 is the whole of it: holding back is seen to be answered again.
+
+What it costs where a frame holds but for one thing (the eight watched things and every thing asked about share
+the value, except the first asked): nothing. Loop 35 / 5 / 0 and fresh 40 / 0 / 0 with and without F69; without
+silent claims the exception costs a silence too (30 / 5 / 5).
+
+Never asked, only watching (`t_fault_watch.py`, both worlds): the same counts at every checkpoint with and
+without F69 (kinds 10/30/0, 10/0/30, 40/0/0, 40/0/0 after 0, 4, 8, 16 watched; shared 14/26/0, 14/26/0, 10/21/9,
+1/0/39): nothing was ever its turn.
+
+The life F67 was measured in (the kinds of things, `test_zihin_split.py`): with F69 the category is split after
+the sixth round with F67 and without it (loop RWWWRWRR both; without both, RWWWRWWW): the vote's own failures find
+it wanting where the pooled record was calibrated on the whole. F67 is no longer what that life needs.
+
+### 31.4 The battery again (the whole mind with F69; code md5 4832d698..., rows appended to `results/full.jsonl`)
+
+The 37 lines of sections 27 and 28, the same commands: 31 are the same count for count. The six that changed:
+
+    line                                   section 28                          with F69
+    the misled world (loops, V1-V3)        24 right / 66 wrong / 0 silent      18 / 40 / 32  (fresh at the end 36/82/2 -> 4/13/103)
+    the half-empty library                 40 / 1 / 9 / 30                     40 / 0 / 1 / 39
+    the kinds of things (24 rounds)        100 / 15 / 5                        100 / 10 / 10  (fresh after 4 rounds 10/0/30 -> 20/0/20)
+    the loop by itself (looks of its own)  97 looks, answers 79/0/1/0          86 looks, answers 79/0/1/0  (after looking 80/0/0/0 both)
+    its own curriculum (loops, 2 seeds)    doğurur 6/4/2, üretir 6/4/2         6/3/3, 6/2/4  (the same chains taken into use)
+    the cause probe                        0.765                               0.766
+
+No line is worse than in section 28. Of the five lines that section 28 left worse than the configurations they
+were first measured with, the half-empty library is now equal to it (40/0/1/39), the misled world is nearer
+(40 wrong against 29, and equal on things never asked about), and three are as they were: the cause probe
+(0.766 against 0.548), the two unseen single forms of the chat-like world, the rare looks after looks that failed
+(35 of 50).
+
+### 31.5 What it does not do
+
+* One more wrong answer in every misleading frame than without silent claims (31.3): seven confirmations while
+  watching against one failure when asked read as "more for than against" once.
+* It knows two conditions, its own turn and listening. What the mind read alone, what it thought, and who was
+  speaking when it listened are not told apart.
+* A frame silenced by its own failures gets its voice back through claims it held back that were then shown to
+  hold (as before); many confirmations while it only listens no longer do that by themselves.
+* The cause probe, the unseen forms and the rare looks are untouched.
+
+### 31.6 Gates, tests, reproduce
+
+With every studied switch off the lesson-free gate, the 17 configurations and the scripted life (plain and with
+wholes) are bit-identical to the references. Tests: 536 passed (14 new: `test_zihin_turn.py` 7, `test_zihin_cost.py`
+6, one in `test_zihin_split.py`; the life pinned for F67 is now pinned with `own_turn` off, as it was measured).
+The measured code is md5 4832d698...; the committed `zihin/hata.py` differs from it by one paragraph of its
+docstring.
+
+    python research/living_mind_2026_11_22/t_turn.py misled
+    python research/living_mind_2026_11_22/t_turn.py half
+    python research/living_mind_2026_11_22/t_turn.py exception
+    python research/living_mind_2026_11_22/t_turn.py watched
