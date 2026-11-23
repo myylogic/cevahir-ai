@@ -1,0 +1,26 @@
+# anatomi ileri: kalp, kan grupları, sindirim, hormonlar, duyular
+kalbin dört odacığı vardır .
+kalbin odacıkları iki kulakçık ve iki karıncıktır .
+atardamarlar kanı kalpten vücuda taşır .
+toplardamarlar kanı vücuttan kalbe taşır .
+kan grupları a b ab ve 0 dır .
+0 rh negatif genel vericidir .
+ab rh pozitif genel alıcıdır .
+sindirim ağızda başlar .
+besinler ağız yemek borusu mide ve bağırsaktan geçer .
+tiroit bezi metabolizmayı düzenler .
+insülin kan şekerini düşürür .
+nöron sinir hücresidir .
+beş duyu görme işitme koklama tatma ve dokunmadır .
+kalbin kaç odacığı vardır ?	kalbin dört odacığı vardır .
+atardamarlar ne yapar ?	atardamarlar kanı kalpten vücuda taşır .
+toplardamarlar ne yapar ?	toplardamarlar kanı vücuttan kalbe taşır .
+kan grupları nelerdir ?	a b ab ve 0 .
+genel verici kan grubu hangisidir ?	0 rh negatif genel vericidir .
+genel alıcı kan grubu hangisidir ?	ab rh pozitif genel alıcıdır .
+sindirim nerede başlar ?	sindirim ağızda başlar .
+tiroit bezi ne yapar ?	tiroit bezi metabolizmayı düzenler .
+insülin ne yapar ?	insülin kan şekerini düşürür .
+nöron nedir ?	nöron sinir hücresidir .
+beş duyu nelerdir ?	görme işitme koklama tatma ve dokunma .
+?kalbin odacıkları nelerdir ?	iki kulakçık ve iki karıncık .

@@ -1,0 +1,25 @@
+# kimya ileri: mol, bağlar, tepkimeler, organik kimya
+bir mol 6,02 çarpı 10 üzeri 23 tanecik içerir .
+avogadro sayısı 6,02 çarpı 10 üzeri 23 tür .
+iyonik bağ elektron alışverişiyle oluşur .
+kovalent bağ elektron ortaklaşmasıyla oluşur .
+tuz iyonik bağlı bir bileşiktir .
+su kovalent bağlı bir bileşiktir .
+yanma bir maddenin oksijenle tepkimesidir .
+asit ve baz tepkimeye girince tuz ve su oluşur .
+organik kimya karbon bileşiklerini inceler .
+metanın formülü ch4 tür .
+izotoplar aynı elementin farklı nötron sayılı atomlarıdır .
+katalizör tepkimeyi hızlandırır ama harcanmaz .
+bir mol kaç tanecik içerir ?	6,02 çarpı 10 üzeri 23 tanecik içerir .
+iyonik bağ nasıl oluşur ?	elektron alışverişiyle oluşur .
+kovalent bağ nasıl oluşur ?	elektron ortaklaşmasıyla oluşur .
+yanma nedir ?	yanma bir maddenin oksijenle tepkimesidir .
+asit ve baz tepkimeye girince ne oluşur ?	tuz ve su oluşur .
+organik kimya neyi inceler ?	organik kimya karbon bileşiklerini inceler .
+metanın formülü nedir ?	metanın formülü ch4 tür .
+izotop nedir ?	aynı elementin farklı nötron sayılı atomlarıdır .
+katalizör ne yapar ?	katalizör tepkimeyi hızlandırır ama harcanmaz .
+tuz nasıl bağlıdır ?	tuz iyonik bağlı bir bileşiktir .
+?su nasıl bağlıdır ?	su kovalent bağlı bir bileşiktir .
+?avogadro sayısı nedir ?	avogadro sayısı 6,02 çarpı 10 üzeri 23 tür .

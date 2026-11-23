@@ -1,0 +1,23 @@
+# algoritmalar ve veri yapıları
+ikili arama sıralı dizide ortadan bölerek arar .
+ikili aramanın karmaşıklığı log n dir .
+kabarcık sıralamanın karmaşıklığı n kare dir .
+hızlı sıralama ortalamada n log n dir .
+birleştirme sıralaması n log n dir .
+yığın son giren ilk çıkar yapısıdır .
+kuyruk ilk giren ilk çıkar yapısıdır .
+graf düğüm ve kenarlardan oluşur .
+genişlik öncelikli arama komşuları sırayla gezer .
+derinlik öncelikli arama bir yolda en derine iner .
+özyineleme bir fonksiyonun kendini çağırmasıdır .
+ikili arama nasıl çalışır ?	sıralı dizide ortadan bölerek arar .
+ikili aramanın karmaşıklığı nedir ?	log n dir .
+kabarcık sıralamanın karmaşıklığı nedir ?	n kare dir .
+hızlı sıralamanın karmaşıklığı nedir ?	ortalamada n log n dir .
+yığın nedir ?	yığın son giren ilk çıkar yapısıdır .
+kuyruk nedir ?	kuyruk ilk giren ilk çıkar yapısıdır .
+graf nedir ?	graf düğüm ve kenarlardan oluşur .
+özyineleme nedir ?	özyineleme bir fonksiyonun kendini çağırmasıdır .
+genişlik öncelikli arama nedir ?	komşuları sırayla gezer .
+?birleştirme sıralamasının karmaşıklığı nedir ?	n log n dir .
+?derinlik öncelikli arama nedir ?	bir yolda en derine iner .

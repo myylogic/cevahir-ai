@@ -1,0 +1,36 @@
+# kodlama: python, c#, java temelleri (zihnin metin okuyucusu harfleri küçültür)
+python yorumlanan bir programlama dilidir .
+c# microsoft un geliştirdiği nesne yönelimli bir dildir .
+java her yerde çalışan nesne yönelimli bir dildir .
+değişken bir değeri saklayan addır .
+döngü bir işi tekrar eder .
+fonksiyon bir işi yapan adlandırılmış kod bloğudur .
+liste birden çok değeri sırayla tutar .
+koşul ifadesi bir duruma göre karar verir .
+python ile ekrana merhaba yaz	print("merhaba")
+python ile ekrana dünya yaz	print("dünya")
+python ile ekrana selam yaz	print("selam")
+python ile x e 5 ata	x = 5
+python ile y ye 10 ata	y = 10
+python ile x ve y yi topla	x + y
+python ile 5 kez tekrarla	for i in range(5):
+python ile 3 kez tekrarla	for i in range(3):
+python ile x 3 ten büyükse	if x > 3:
+python ile topla adında fonksiyon tanımla	def topla(a, b):
+python ile listenin uzunluğu	len(liste)
+c# ile ekrana merhaba yaz	Console.WriteLine("merhaba");
+c# ile ekrana selam yaz	Console.WriteLine("selam");
+c# ile x e 5 ata	int x = 5;
+java ile ekrana merhaba yaz	System.out.println("merhaba");
+java ile ekrana selam yaz	System.out.println("selam");
+java ile x e 5 ata	int x = 5;
+değişken nedir ?	değişken bir değeri saklayan addır .
+döngü nedir ?	döngü bir işi tekrar eder .
+fonksiyon nedir ?	fonksiyon bir işi yapan adlandırılmış kod bloğudur .
+liste nedir ?	liste birden çok değeri sırayla tutar .
+python nedir ?	python yorumlanan bir programlama dilidir .
+?python ile ekrana nasılsın yaz	print("nasılsın")
+?c# ile ekrana dünya yaz	Console.WriteLine("dünya");
+?java ile ekrana dünya yaz	System.out.println("dünya");
+?python ile 7 kez tekrarla	for i in range(7):
+?python ile z ye 4 ata	z = 4

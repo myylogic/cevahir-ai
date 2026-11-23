@@ -1,0 +1,40 @@
+# matematik: sayılar, işlemler, geometri, cebir, analiz
+toplama iki sayıyı birleştirir .
+çıkarma bir sayıdan diğerini eksiltir .
+çarpma tekrarlı toplamadır .
+bölme bir sayıyı eşit parçalara ayırır .
+asal sayı yalnız bire ve kendisine bölünür .
+2 en küçük asal sayıdır .
+bir üçgenin iç açılarının toplamı 180 derecedir .
+bir karenin dört eşit kenarı vardır .
+bir dikdörtgenin karşılıklı kenarları eşittir .
+dairenin alanı pi çarpı yarıçapın karesidir .
+dairenin çevresi 2 çarpı pi çarpı yarıçaptır .
+pi yaklaşık 3,14 tür .
+pisagor teoremi dik üçgende a kare artı b kare eşittir c kare der .
+türev bir fonksiyonun değişim hızıdır .
+integral bir eğrinin altındaki alandır .
+denklem iki ifadenin eşitliğidir .
+olasılık bir olayın gerçekleşme şansıdır .
+logaritma üssün tersidir .
+2 artı 2 kaç eder ?	4 eder .
+3 artı 5 kaç eder ?	8 eder .
+10 eksi 4 kaç eder ?	6 eder .
+5 çarpı 6 kaç eder ?	30 eder .
+7 çarpı 8 kaç eder ?	56 eder .
+12 bölü 4 kaç eder ?	3 eder .
+9 un karekökü kaçtır ?	3 tür .
+en küçük asal sayı hangisidir ?	2 dir .
+üçgenin iç açılarının toplamı kaç derecedir ?	180 derecedir .
+karenin kaç kenarı vardır ?	dört kenarı vardır .
+dairenin alanı nasıl bulunur ?	pi çarpı yarıçapın karesi .
+pisagor teoremi nedir ?	a kare artı b kare eşittir c kare .
+türev nedir ?	türev bir fonksiyonun değişim hızıdır .
+integral nedir ?	integral bir eğrinin altındaki alandır .
+pi sayısı kaçtır ?	pi yaklaşık 3,14 tür .
+asal sayı nedir ?	yalnız bire ve kendisine bölünen sayıdır .
+x artı 3 eşittir 7 ise x kaçtır ?	x 4 tür .
+2 x eşittir 10 ise x kaçtır ?	x 5 tir .
+olasılık nedir ?	olasılık bir olayın gerçekleşme şansıdır .
+?denklem nedir ?	denklem iki ifadenin eşitliğidir .
+?6 çarpı 7 kaç eder ?	42 eder .

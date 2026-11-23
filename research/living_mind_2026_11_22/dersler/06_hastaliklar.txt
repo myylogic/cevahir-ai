@@ -1,0 +1,31 @@
+# hastalıklar: nedenleri, korunma (genel bilgi; tanı ve tedavi için hekime başvurulur)
+grip bir virüs hastalığıdır .
+nezle bir virüs hastalığıdır .
+kızamık bir virüs hastalığıdır .
+covid 19 bir virüs hastalığıdır .
+virüs hastalıklarına antibiyotik etki etmez .
+tüberküloz bir bakteri hastalığıdır .
+zatürre çoğunlukla bir bakteri hastalığıdır .
+bakteri hastalıkları antibiyotikle tedavi edilir .
+sıtma sivrisineklerin taşıdığı bir parazitle bulaşır .
+diyabet kan şekerinin yüksek olmasıdır .
+diyabette insülin yetersizdir ya da etkisizdir .
+hipertansiyon yüksek tansiyondur .
+astım hava yollarının daralmasıdır .
+aşılar bağışıklık kazandırır .
+el yıkamak mikropların bulaşmasını azaltır .
+tanı ve tedavi için hekime başvurulur .
+grip nedir ?	grip bir virüs hastalığıdır .
+kızamık nedir ?	kızamık bir virüs hastalığıdır .
+tüberküloz nedir ?	tüberküloz bir bakteri hastalığıdır .
+virüs hastalıklarına antibiyotik etki eder mi ?	hayır antibiyotik virüslere etki etmez .
+bakteri hastalıkları nasıl tedavi edilir ?	bakteri hastalıkları antibiyotikle tedavi edilir .
+sıtma nasıl bulaşır ?	sivrisineklerin taşıdığı bir parazitle bulaşır .
+diyabet nedir ?	diyabet kan şekerinin yüksek olmasıdır .
+hipertansiyon nedir ?	hipertansiyon yüksek tansiyondur .
+astım nedir ?	astım hava yollarının daralmasıdır .
+aşılar ne işe yarar ?	aşılar bağışıklık kazandırır .
+el yıkamak ne işe yarar ?	el yıkamak mikropların bulaşmasını azaltır .
+hastalanınca ne yapılır ?	tanı ve tedavi için hekime başvurulur .
+?nezle nedir ?	nezle bir virüs hastalığıdır .
+?covid 19 nedir ?	covid 19 bir virüs hastalığıdır .

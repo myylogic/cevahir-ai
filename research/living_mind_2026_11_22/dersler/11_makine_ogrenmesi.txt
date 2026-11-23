@@ -1,0 +1,20 @@
+# makine öğrenmesi
+makine öğrenmesi bilgisayarın veriden öğrenmesidir .
+denetimli öğrenme etiketli veriden öğrenir .
+denetimsiz öğrenme etiketsiz veride örüntü bulur .
+pekiştirmeli öğrenme ödül ve cezayla öğrenir .
+yapay sinir ağı katmanlı nöronlardan oluşur .
+geri yayılım ağırlıkları hatayı azaltacak yönde günceller .
+derin öğrenme çok katmanlı sinir ağlarıyla öğrenmedir .
+transformer dikkat mekanizmasıyla çalışan bir sinir ağıdır .
+aşırı öğrenme modelin eğitim verisini ezberlemesidir .
+büyük dil modelleri transformer mimarisiyle eğitilir .
+makine öğrenmesi nedir ?	makine öğrenmesi bilgisayarın veriden öğrenmesidir .
+denetimli öğrenme nedir ?	denetimli öğrenme etiketli veriden öğrenir .
+denetimsiz öğrenme nedir ?	denetimsiz öğrenme etiketsiz veride örüntü bulur .
+pekiştirmeli öğrenme nedir ?	pekiştirmeli öğrenme ödül ve cezayla öğrenir .
+yapay sinir ağı nedir ?	yapay sinir ağı katmanlı nöronlardan oluşur .
+geri yayılım nedir ?	geri yayılım ağırlıkları hatayı azaltacak yönde günceller .
+transformer nedir ?	transformer dikkat mekanizmasıyla çalışan bir sinir ağıdır .
+aşırı öğrenme nedir ?	aşırı öğrenme modelin eğitim verisini ezberlemesidir .
+?derin öğrenme nedir ?	derin öğrenme çok katmanlı sinir ağlarıyla öğrenmedir .

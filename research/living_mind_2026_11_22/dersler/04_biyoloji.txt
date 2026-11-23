@@ -1,0 +1,38 @@
+# biyoloji: hücre, kalıtım, enerji, canlıların sınıfları
+hücre canlının en küçük yapı birimidir .
+dna kalıtım bilgisini taşır .
+çekirdek hücrenin yönetim merkezidir .
+mitokondri hücrenin enerji santralidir .
+kloroplast fotosentez yapar .
+fotosentez ışık enerjisiyle besin üretimidir .
+bitkiler fotosentezle oksijen üretir .
+solunum besinden enerji elde etmektir .
+gen kalıtımın birimidir .
+evrim canlıların nesiller boyunca değişmesidir .
+kedi bir memelidir .
+köpek bir memelidir .
+balina bir memelidir .
+yunus bir memelidir .
+memeliler yavrularını sütle besler .
+kartal bir kuştur .
+serçe bir kuştur .
+penguen bir kuştur .
+kuşlar yumurtlar .
+hamsi bir balıktır .
+sazan bir balıktır .
+balıklar solungaçla solur .
+hücre nedir ?	hücre canlının en küçük yapı birimidir .
+dna ne taşır ?	dna kalıtım bilgisini taşır .
+mitokondri nedir ?	mitokondri hücrenin enerji santralidir .
+fotosentez nedir ?	fotosentez ışık enerjisiyle besin üretimidir .
+çekirdek nedir ?	çekirdek hücrenin yönetim merkezidir .
+gen nedir ?	gen kalıtımın birimidir .
+evrim nedir ?	evrim canlıların nesiller boyunca değişmesidir .
+kedi ne yapar ?	kedi yavrularını sütle besler .
+köpek ne yapar ?	köpek yavrularını sütle besler .
+kartal ne yapar ?	kartal yumurtlar .
+serçe ne yapar ?	serçe yumurtlar .
+hamsi ne yapar ?	hamsi solungaçla solur .
+?balina ne yapar ?	balina yavrularını sütle besler .
+?penguen ne yapar ?	penguen yumurtlar .
+?sazan ne yapar ?	sazan solungaçla solur .

@@ -1,0 +1,26 @@
+# biyoloji ileri: dna, protein, hücre bölünmesi, ekoloji
+dna çift sarmal yapıdadır .
+dnanın bazları adenin timin guanin ve sitozindir .
+adenin timinle eşleşir .
+guanin sitozinle eşleşir .
+rna da timin yerine urasil bulunur .
+ribozom protein sentezler .
+mitoz bir hücreden iki eş hücre oluşturur .
+mayoz üreme hücrelerini oluşturur .
+enzimler tepkimeleri hızlandıran proteinlerdir .
+besin zinciri üreticiyle başlar .
+bitkiler üreticidir .
+ayrışmacılar ölü canlıları çürütür .
+insanda 46 kromozom bulunur .
+dna nasıl bir yapıdadır ?	dna çift sarmal yapıdadır .
+dnanın bazları nelerdir ?	adenin timin guanin ve sitozin .
+adenin neyle eşleşir ?	adenin timinle eşleşir .
+guanin neyle eşleşir ?	guanin sitozinle eşleşir .
+rna da timin yerine ne bulunur ?	urasil bulunur .
+ribozom ne yapar ?	ribozom protein sentezler .
+mitoz nedir ?	mitoz bir hücreden iki eş hücre oluşturur .
+mayoz ne oluşturur ?	mayoz üreme hücrelerini oluşturur .
+enzim nedir ?	enzimler tepkimeleri hızlandıran proteinlerdir .
+insanda kaç kromozom vardır ?	insanda 46 kromozom bulunur .
+besin zinciri neyle başlar ?	besin zinciri üreticiyle başlar .
+?ayrışmacılar ne yapar ?	ayrışmacılar ölü canlıları çürütür .

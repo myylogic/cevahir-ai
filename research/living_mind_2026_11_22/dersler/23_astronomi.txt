@@ -1,0 +1,20 @@
+# astronomi: yıldızlar, galaksiler, evren
+ışık yılı ışığın bir yılda aldığı yoldur .
+samanyolu bizim galaksimizdir .
+evren yaklaşık 13,8 milyar yaşındadır .
+büyük patlama evrenin başlangıcıdır .
+kara delik ışığın bile kaçamadığı bölgedir .
+güneş yaklaşık 4,6 milyar yaşındadır .
+yıldızlar hidrojeni helyuma dönüştürerek parlar .
+süpernova büyük bir yıldızın patlamasıdır .
+ay ın dünyaya uzaklığı yaklaşık 384 bin kilometredir .
+dünyanın güneşe uzaklığı yaklaşık 150 milyon kilometredir .
+ışık yılı nedir ?	ışık yılı ışığın bir yılda aldığı yoldur .
+bizim galaksimiz hangisidir ?	samanyolu bizim galaksimizdir .
+evren kaç yaşındadır ?	evren yaklaşık 13,8 milyar yaşındadır .
+büyük patlama nedir ?	büyük patlama evrenin başlangıcıdır .
+kara delik nedir ?	kara delik ışığın bile kaçamadığı bölgedir .
+yıldızlar nasıl parlar ?	yıldızlar hidrojeni helyuma dönüştürerek parlar .
+süpernova nedir ?	süpernova büyük bir yıldızın patlamasıdır .
+dünyanın güneşe uzaklığı nedir ?	yaklaşık 150 milyon kilometredir .
+?güneş kaç yaşındadır ?	güneş yaklaşık 4,6 milyar yaşındadır .

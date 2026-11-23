@@ -1,0 +1,22 @@
+# cevahir zihin ve farkları
+cevahir zihin yaşayarak öğrenen bir zihindir .
+cevahir zihin bir transformer değildir .
+cevahir zihinde eğitim aşaması yoktur .
+cevahir zihin her anda öğrenir .
+cevahir zihinde ağırlık matrisi ve geri yayılım yoktur .
+cevahir zihin her bağın kanıtını kaynağına göre ayrı tutar .
+cevahir zihin tek bir deneyimi tam olarak geri alabilir .
+cevahir zihin beklentisini tek bir kuraldan okur .
+cevahir zihnin dikkati yedi yerli odaktır .
+cevahir zihin önce hatırlar gerekirse düşünür .
+transformer eğitimden sonra donar .
+cevahir zihin nedir ?	cevahir zihin yaşayarak öğrenen bir zihindir .
+cevahir zihin bir transformer mıdır ?	hayır cevahir zihin bir transformer değildir .
+cevahir zihin ne zaman öğrenir ?	cevahir zihin her anda öğrenir .
+cevahir zihinde eğitim aşaması var mıdır ?	hayır cevahir zihinde eğitim aşaması yoktur .
+cevahir zihin kanıtı nasıl tutar ?	her bağın kanıtını kaynağına göre ayrı tutar .
+cevahir zihin bir deneyimi geri alabilir mi ?	evet tek bir deneyimi tam olarak geri alabilir .
+cevahir zihnin dikkati nedir ?	cevahir zihnin dikkati yedi yerli odaktır .
+cevahir zihin nasıl düşünür ?	cevahir zihin önce hatırlar gerekirse düşünür .
+transformer ile cevahir zihin arasındaki fark nedir ?	transformer eğitimden sonra donar cevahir zihin her anda öğrenir .
+?cevahir zihinde geri yayılım var mıdır ?	hayır cevahir zihinde ağırlık matrisi ve geri yayılım yoktur .

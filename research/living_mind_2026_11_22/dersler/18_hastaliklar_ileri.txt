@@ -1,0 +1,23 @@
+# hastalıklar ileri (genel bilgi; tanı ve tedavi için hekime başvurulur)
+kanser hücrelerin kontrolsüz çoğalmasıdır .
+alzheimer hafızayı bozan bir beyin hastalığıdır .
+parkinson hareketi bozan bir beyin hastalığıdır .
+kalp krizi kalp kasının kansız kalmasıdır .
+inme beyne giden kanın kesilmesidir .
+anemi kansızlıktır .
+anemide kanda hemoglobin azdır .
+sigara akciğer kanseri riskini artırır .
+düzenli egzersiz kalp hastalığı riskini azaltır .
+kalp krizinde acil yardım çağrılır .
+türkiyede acil yardım numarası 112 dir .
+kanser nedir ?	kanser hücrelerin kontrolsüz çoğalmasıdır .
+alzheimer nedir ?	alzheimer hafızayı bozan bir beyin hastalığıdır .
+parkinson nedir ?	parkinson hareketi bozan bir beyin hastalığıdır .
+kalp krizi nedir ?	kalp krizi kalp kasının kansız kalmasıdır .
+inme nedir ?	inme beyne giden kanın kesilmesidir .
+anemi nedir ?	anemi kansızlıktır .
+sigara neyi artırır ?	sigara akciğer kanseri riskini artırır .
+egzersiz ne işe yarar ?	düzenli egzersiz kalp hastalığı riskini azaltır .
+acil yardım numarası kaçtır ?	türkiyede acil yardım numarası 112 dir .
+kalp krizinde ne yapılır ?	kalp krizinde acil yardım çağrılır .
+?anemide ne azdır ?	anemide kanda hemoglobin azdır .

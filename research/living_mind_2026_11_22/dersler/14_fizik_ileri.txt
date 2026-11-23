@@ -1,0 +1,25 @@
+# fizik ileri: momentum, iş, elektrik, termodinamik, dalgalar, modern fizik
+momentum kütle çarpı hızdır .
+iş kuvvet çarpı yoldur .
+güç işin zamana bölümüdür .
+ohm yasasına göre akım gerilimin dirence bölümüdür .
+12 volt gerilim ve 4 ohm dirençte akım 3 amperdir .
+termodinamiğin birinci yasası enerjinin korunumudur .
+termodinamiğin ikinci yasası entropinin artacağını söyler .
+mutlak sıfır eksi 273 santigrat derecedir .
+dalganın hızı frekans çarpı dalga boyudur .
+einstein e eşittir m c kare formülünü buldu .
+ışık hem dalga hem parçacık gibi davranır .
+foton ışığın parçacığıdır .
+yerçekimini newton açıkladı .
+momentum nedir ?	momentum kütle çarpı hızdır .
+iş nedir ?	iş kuvvet çarpı yoldur .
+güç nedir ?	güç işin zamana bölümüdür .
+12 volt ve 4 ohm da akım kaç amperdir ?	3 amperdir .
+termodinamiğin birinci yasası nedir ?	enerjinin korunumudur .
+termodinamiğin ikinci yasası nedir ?	entropinin artacağını söyler .
+mutlak sıfır kaç derecedir ?	eksi 273 santigrat derecedir .
+dalganın hızı nedir ?	frekans çarpı dalga boyudur .
+e eşittir m c kare formülünü kim buldu ?	einstein buldu .
+foton nedir ?	foton ışığın parçacığıdır .
+?ışık nasıl davranır ?	ışık hem dalga hem parçacık gibi davranır .

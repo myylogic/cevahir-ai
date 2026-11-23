@@ -1,0 +1,27 @@
+# matematik ileri: türev, integral, limit, matris, istatistik
+x üzeri n nin türevi n çarpı x üzeri n eksi 1 dir .
+sabit sayının türevi sıfırdır .
+sinüs x in türevi kosinüs x tir .
+e üzeri x in türevi e üzeri x tir .
+x in integrali x kare bölü 2 dir .
+limit bir fonksiyonun bir noktaya yaklaşırken aldığı değerdir .
+matris sayıların satır ve sütun düzenidir .
+birim matrisin köşegeni birlerden oluşur .
+vektörün büyüklüğü ve yönü vardır .
+aritmetik ortalama sayıların toplamının sayı adedine bölümüdür .
+medyan sıralanmış verinin ortasındaki değerdir .
+standart sapma verinin ortalamadan ne kadar dağıldığını gösterir .
+bir zarın bir yüzünün gelme olasılığı 1 bölü 6 dır .
+x kare nin türevi nedir ?	2 x .
+x küp ün türevi nedir ?	3 x kare .
+sabit sayının türevi nedir ?	sıfırdır .
+sinüs x in türevi nedir ?	kosinüs x .
+e üzeri x in türevi nedir ?	e üzeri x .
+x in integrali nedir ?	x kare bölü 2 .
+limit nedir ?	limit bir fonksiyonun bir noktaya yaklaşırken aldığı değerdir .
+matris nedir ?	matris sayıların satır ve sütun düzenidir .
+aritmetik ortalama nedir ?	sayıların toplamının sayı adedine bölümüdür .
+medyan nedir ?	medyan sıralanmış verinin ortasındaki değerdir .
+standart sapma nedir ?	verinin ortalamadan ne kadar dağıldığını gösterir .
+zarda bir yüzün gelme olasılığı nedir ?	1 bölü 6 dır .
+?vektör nedir ?	vektörün büyüklüğü ve yönü vardır .

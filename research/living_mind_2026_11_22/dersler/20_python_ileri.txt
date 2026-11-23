@@ -1,0 +1,24 @@
+# python ileri: koşul, döngü, fonksiyon, sözlük, sınıf, hata yakalama
+python da girinti blokları belirler .
+sözlük anahtar ve değer çiftleri tutar .
+fonksiyon return ile değer döndürür .
+sınıf nesnelerin şablonudur .
+try except hataları yakalar .
+import bir modülü içe aktarır .
+python ile x 3 ten büyükse değilse	if x > 3: ... else: ...
+python ile x 0 olana kadar tekrarla	while x != 0:
+python ile kare adında fonksiyon tanımla	def kare(x): return x * x
+python ile boş liste oluştur	liste = []
+python ile listeye 5 ekle	liste.append(5)
+python ile boş sözlük oluştur	sozluk = {}
+python ile kedi adında sınıf tanımla	class Kedi:
+python ile math modülünü içe aktar	import math
+python ile hatayı yakala	try: ... except Exception: ...
+python ile 1 den 10 a kadar sayıların karelerini listele	[i * i for i in range(1, 11)]
+python ile metni büyük harfe çevir	metin.upper()
+python ile kullanıcıdan girdi al	girdi = input()
+sözlük nedir ?	sözlük anahtar ve değer çiftleri tutar .
+sınıf nedir ?	sınıf nesnelerin şablonudur .
+try except ne yapar ?	try except hataları yakalar .
+?python ile köpek adında sınıf tanımla	class Kopek:
+?python ile listeye 7 ekle	liste.append(7)

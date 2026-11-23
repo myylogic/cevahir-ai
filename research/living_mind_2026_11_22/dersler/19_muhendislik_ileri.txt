@@ -1,0 +1,23 @@
+# mühendislik ileri: devre elemanları, kontrol, yazılım süreci, malzeme
+direnç akıma karşı koyar .
+kondansatör elektrik yükü depolar .
+bobin manyetik alanda enerji depolar .
+transistör akımı yükseltir ya da anahtarlar .
+seri bağlı dirençlerin toplam direnci dirençlerin toplamıdır .
+geri besleme bir sistemin çıkışını girişe bağlar .
+pid denetleyici oransal integral ve türevsel kontrol yapar .
+yazılım yaşam döngüsü analiz tasarım kodlama test ve bakımdır .
+çelik demir ve karbon alaşımıdır .
+beton çimento kum çakıl ve sudan oluşur .
+cad bilgisayar destekli tasarımdır .
+direnç ne yapar ?	direnç akıma karşı koyar .
+kondansatör ne yapar ?	kondansatör elektrik yükü depolar .
+bobin ne yapar ?	bobin manyetik alanda enerji depolar .
+transistör ne yapar ?	transistör akımı yükseltir ya da anahtarlar .
+seri dirençlerin toplamı nedir ?	dirençlerin toplamıdır .
+geri besleme nedir ?	geri besleme bir sistemin çıkışını girişe bağlar .
+pid nedir ?	oransal integral ve türevsel kontrol .
+yazılım yaşam döngüsü nedir ?	analiz tasarım kodlama test ve bakım .
+çelik nedir ?	çelik demir ve karbon alaşımıdır .
+beton neyden oluşur ?	çimento kum çakıl ve sudan oluşur .
+?cad nedir ?	cad bilgisayar destekli tasarımdır .

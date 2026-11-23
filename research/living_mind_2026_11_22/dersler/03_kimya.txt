@@ -1,0 +1,38 @@
+# kimya: elementler, atom, bileşikler, tepkimeler
+h hidrojenin simgesidir .
+o oksijenin simgesidir .
+c karbonun simgesidir .
+n azotun simgesidir .
+na sodyumun simgesidir .
+cl klorun simgesidir .
+fe demirin simgesidir .
+au altının simgesidir .
+atom proton nötron ve elektrondan oluşur .
+proton artı yüklüdür .
+elektron eksi yüklüdür .
+nötron yüksüzdür .
+suyun formülü h2o dur .
+tuzun formülü nacl dir .
+karbondioksitin formülü co2 dir .
+asitlerin ph değeri 7 den küçüktür .
+bazların ph değeri 7 den büyüktür .
+saf suyun ph değeri 7 dir .
+periyodik tablo elementleri atom numarasına göre dizer .
+h nin adı nedir ?	hidrojen .
+o nun adı nedir ?	oksijen .
+c nin adı nedir ?	karbon .
+na nın adı nedir ?	sodyum .
+fe nin adı nedir ?	demir .
+au nun adı nedir ?	altın .
+suyun formülü nedir ?	suyun formülü h2o dur .
+tuzun formülü nedir ?	tuzun formülü nacl dir .
+karbondioksitin formülü nedir ?	karbondioksitin formülü co2 dir .
+atom neyden oluşur ?	proton nötron ve elektrondan oluşur .
+proton nasıl yüklüdür ?	proton artı yüklüdür .
+elektron nasıl yüklüdür ?	elektron eksi yüklüdür .
+nötron nasıl yüklüdür ?	nötron yüksüzdür .
+asitlerin ph değeri nedir ?	asitlerin ph değeri 7 den küçüktür .
+saf suyun ph değeri nedir ?	saf suyun ph değeri 7 dir .
+periyodik tablo neye göre dizilir ?	atom numarasına göre .
+?bazların ph değeri nedir ?	bazların ph değeri 7 den büyüktür .
+?cl nin adı nedir ?	klor .

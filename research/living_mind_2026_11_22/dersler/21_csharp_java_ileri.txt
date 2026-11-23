@@ -1,0 +1,17 @@
+# c# ve java ileri (zihnin okuyucusu harfleri küçültür: console, system küçük yazılır)
+c# ve java da her satır noktalı virgülle biter .
+c# ve java da kod blokları süslü parantezle yazılır .
+c# ile tam sayı tanımla	int sayi = 0;
+c# ile metin tanımla	string ad = "ali";
+c# ile 5 kez tekrarla	for (int i = 0; i < 5; i++) { }
+c# ile x 3 ten büyükse	if (x > 3) { }
+c# ile topla metodu tanımla	int Topla(int a, int b) { return a + b; }
+java ile tam sayı tanımla	int sayi = 0;
+java ile metin tanımla	String ad = "ali";
+java ile 5 kez tekrarla	for (int i = 0; i < 5; i++) { }
+java ile x 3 ten büyükse	if (x > 3) { }
+java ile main metodu	public static void main(String[] args) { }
+c# ve java da satır neyle biter ?	noktalı virgülle biter .
+c# ve java da bloklar nasıl yazılır ?	süslü parantezle yazılır .
+?c# ile 3 kez tekrarla	for (int i = 0; i < 3; i++) { }
+?java ile 3 kez tekrarla	for (int i = 0; i < 3; i++) { }

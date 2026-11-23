@@ -1,0 +1,38 @@
+# fizik: hareket, kuvvet, enerji, elektrik, ışık, madde
+newton un birinci yasası eylemsizlik yasasıdır .
+bir cisim üzerine kuvvet etki etmezse durumunu korur .
+newton un ikinci yasası kuvvet eşittir kütle çarpı ivme der .
+newton un üçüncü yasası her etkiye eşit ve zıt bir tepki vardır der .
+yerçekimi ivmesi yaklaşık 9,8 metre bölü saniye karedir .
+kuvvetin birimi newton dur .
+enerjinin birimi joule dür .
+gücün birimi watt tır .
+elektrik akımının birimi amper dir .
+gerilimin birimi volt tur .
+direncin birimi ohm dur .
+ışık boşlukta saniyede yaklaşık 300 bin kilometre yol alır .
+enerji yoktan var edilemez ve vardan yok edilemez .
+kinetik enerji hareket enerjisidir .
+potansiyel enerji konum enerjisidir .
+ses boşlukta yayılmaz .
+su 100 derecede kaynar .
+su 0 derecede donar .
+madde katı sıvı ve gaz hâlinde bulunur .
+kuvvetin birimi nedir ?	kuvvetin birimi newton dur .
+enerjinin birimi nedir ?	enerjinin birimi joule dür .
+gücün birimi nedir ?	gücün birimi watt tır .
+gerilimin birimi nedir ?	gerilimin birimi volt tur .
+direncin birimi nedir ?	direncin birimi ohm dur .
+newton un ikinci yasası nedir ?	kuvvet eşittir kütle çarpı ivme .
+newton un üçüncü yasası nedir ?	her etkiye eşit ve zıt bir tepki vardır .
+eylemsizlik nedir ?	cismin durumunu koruma eğilimidir .
+yerçekimi ivmesi kaçtır ?	yaklaşık 9,8 metre bölü saniye karedir .
+ışığın hızı nedir ?	saniyede yaklaşık 300 bin kilometre .
+kinetik enerji nedir ?	kinetik enerji hareket enerjisidir .
+potansiyel enerji nedir ?	potansiyel enerji konum enerjisidir .
+su kaç derecede kaynar ?	su 100 derecede kaynar .
+su kaç derecede donar ?	su 0 derecede donar .
+ses boşlukta yayılır mı ?	hayır ses boşlukta yayılmaz .
+maddenin hâlleri nelerdir ?	katı sıvı ve gaz .
+?elektrik akımının birimi nedir ?	elektrik akımının birimi amper dir .
+?newton un birinci yasası nedir ?	newton un birinci yasası eylemsizlik yasasıdır .

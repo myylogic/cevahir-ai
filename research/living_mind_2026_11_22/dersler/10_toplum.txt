@@ -1,0 +1,21 @@
+# toplum 1.0 dan toplum 5.0 a
+toplum 1.0 avcı toplayıcı toplumdur .
+toplum 2.0 tarım toplumudur .
+toplum 3.0 sanayi toplumudur .
+toplum 4.0 bilgi toplumudur .
+toplum 5.0 süper akıllı toplumdur .
+toplum 5.0 kavramını japonya 2016 yılında ortaya koydu .
+toplum 5.0 sanal ve fiziksel dünyayı birleştirir .
+toplum 5.0 teknolojiyi insan refahı için kullanır .
+sanayi devrimi buhar makinesiyle başladı .
+bilgi toplumu bilgisayar ve internetle doğdu .
+toplum 1.0 nedir ?	toplum 1.0 avcı toplayıcı toplumdur .
+toplum 2.0 nedir ?	toplum 2.0 tarım toplumudur .
+toplum 3.0 nedir ?	toplum 3.0 sanayi toplumudur .
+toplum 4.0 nedir ?	toplum 4.0 bilgi toplumudur .
+toplum 5.0 nedir ?	toplum 5.0 süper akıllı toplumdur .
+toplum 5.0 kavramını kim ortaya koydu ?	japonya 2016 yılında ortaya koydu .
+toplum 5.0 neyi birleştirir ?	sanal ve fiziksel dünyayı birleştirir .
+sanayi devrimi neyle başladı ?	sanayi devrimi buhar makinesiyle başladı .
+bilgi toplumu neyle doğdu ?	bilgi toplumu bilgisayar ve internetle doğdu .
+?toplum 5.0 teknolojiyi ne için kullanır ?	toplum 5.0 teknolojiyi insan refahı için kullanır .

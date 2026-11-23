@@ -1,0 +1,28 @@
+# güneş sistemi ve gezegenler
+güneş bir yıldızdır .
+güneş sistemi güneş ve çevresinde dönen gök cisimlerinden oluşur .
+güneş sisteminde sekiz gezegen vardır .
+gezegenler güneşe yakınlık sırasıyla merkür venüs dünya mars jüpiter satürn uranüs ve neptündür .
+merkür güneşe en yakın gezegendir .
+jüpiter en büyük gezegendir .
+satürn halkalarıyla bilinir .
+mars kızıl gezegen olarak bilinir .
+venüs en sıcak gezegendir .
+dünya üzerinde yaşam olan tek bilinen gezegendir .
+ay dünyanın uydusudur .
+dünya güneşin çevresini bir yılda dolanır .
+dünya kendi çevresinde bir günde döner .
+plüton artık cüce gezegen sayılır .
+güneş nedir ?	güneş bir yıldızdır .
+güneş sisteminde kaç gezegen vardır ?	sekiz gezegen vardır .
+güneşe en yakın gezegen hangisidir ?	merkür güneşe en yakın gezegendir .
+en büyük gezegen hangisidir ?	jüpiter en büyük gezegendir .
+kızıl gezegen hangisidir ?	mars kızıl gezegen olarak bilinir .
+en sıcak gezegen hangisidir ?	venüs en sıcak gezegendir .
+halkalarıyla bilinen gezegen hangisidir ?	satürn halkalarıyla bilinir .
+ay nedir ?	ay dünyanın uydusudur .
+dünya güneşin çevresini ne kadar sürede dolanır ?	bir yılda dolanır .
+dünya kendi çevresinde ne kadar sürede döner ?	bir günde döner .
+gezegenlerin sırası nedir ?	merkür venüs dünya mars jüpiter satürn uranüs ve neptün .
+?plüton nedir ?	plüton artık cüce gezegen sayılır .
+?merkür nedir ?	merkür güneşe en yakın gezegendir .

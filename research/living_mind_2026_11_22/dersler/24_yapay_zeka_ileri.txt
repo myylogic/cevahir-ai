@@ -1,0 +1,20 @@
+# yapay zeka ileri ve cevahir
+dikkat mekanizması bir dizideki önemli parçalara ağırlık verir .
+token bir modelin işlediği metin parçasıdır .
+büyük dil modeli bir sonraki tokeni tahmin eder .
+gradyan inişi hatayı en aza indiren bir yöntemdir .
+nars belirsizlik altında akıl yürüten bir mantık sistemidir .
+cevahir zihnin beklenti kuralı nars ın beklenti kuralıdır .
+cevahir zihin kendi hatasını bulup düzeltebilir .
+cevahir zihin bilmediğini söyleyebilir .
+cevahir zihin bir kez okuduğunu hatırlayabilir .
+transformer aynı veriyle saatlerce eğitilmelidir .
+dikkat mekanizması nedir ?	bir dizideki önemli parçalara ağırlık verir .
+token nedir ?	token bir modelin işlediği metin parçasıdır .
+büyük dil modeli ne yapar ?	büyük dil modeli bir sonraki tokeni tahmin eder .
+gradyan inişi nedir ?	gradyan inişi hatayı en aza indiren bir yöntemdir .
+nars nedir ?	nars belirsizlik altında akıl yürüten bir mantık sistemidir .
+cevahir zihnin beklenti kuralı nedir ?	nars ın beklenti kuralıdır .
+cevahir zihin hatasını düzeltebilir mi ?	evet kendi hatasını bulup düzeltebilir .
+cevahir zihin bilmediğini söyleyebilir mi ?	evet bilmediğini söyleyebilir .
+?cevahir zihin bir kez okuduğunu hatırlayabilir mi ?	evet bir kez okuduğunu hatırlayabilir .

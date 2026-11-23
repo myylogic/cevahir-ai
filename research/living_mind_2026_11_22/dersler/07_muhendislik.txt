@@ -1,0 +1,25 @@
+# mühendislik: dallar ve temel kavramlar
+inşaat mühendisliği bina köprü ve yol tasarlar .
+makine mühendisliği makineleri ve motorları tasarlar .
+elektrik mühendisliği elektrik sistemlerini tasarlar .
+elektronik mühendisliği devreleri ve cihazları tasarlar .
+bilgisayar mühendisliği yazılım ve donanım geliştirir .
+kimya mühendisliği kimyasal üretim süreçlerini tasarlar .
+endüstri mühendisliği süreçleri verimli hâle getirir .
+yazılım mühendisliği büyük yazılımları planlı geliştirir .
+ohm yasası gerilim eşittir akım çarpı direnç der .
+algoritma bir problemi çözen adımlar dizisidir .
+mukavemet bir malzemenin kuvvete dayanmasıdır .
+termodinamik ısı ve iş ilişkisini inceler .
+inşaat mühendisliği ne yapar ?	inşaat mühendisliği bina köprü ve yol tasarlar .
+makine mühendisliği ne yapar ?	makine mühendisliği makineleri ve motorları tasarlar .
+elektrik mühendisliği ne yapar ?	elektrik mühendisliği elektrik sistemlerini tasarlar .
+bilgisayar mühendisliği ne yapar ?	bilgisayar mühendisliği yazılım ve donanım geliştirir .
+kimya mühendisliği ne yapar ?	kimya mühendisliği kimyasal üretim süreçlerini tasarlar .
+endüstri mühendisliği ne yapar ?	endüstri mühendisliği süreçleri verimli hâle getirir .
+ohm yasası nedir ?	gerilim eşittir akım çarpı direnç .
+algoritma nedir ?	algoritma bir problemi çözen adımlar dizisidir .
+mukavemet nedir ?	mukavemet bir malzemenin kuvvete dayanmasıdır .
+termodinamik neyi inceler ?	termodinamik ısı ve iş ilişkisini inceler .
+?elektronik mühendisliği ne yapar ?	elektronik mühendisliği devreleri ve cihazları tasarlar .
+?yazılım mühendisliği ne yapar ?	yazılım mühendisliği büyük yazılımları planlı geliştirir .

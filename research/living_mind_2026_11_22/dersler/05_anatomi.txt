@@ -1,0 +1,34 @@
+# insan anatomisi: organlar, sistemler, görevleri
+kalp kanı vücuda pompalar .
+akciğerler kana oksijen verir .
+beyin vücudu yönetir .
+karaciğer zehirli maddeleri temizler .
+böbrekler kanı süzer ve idrar üretir .
+mide besinleri sindirir .
+ince bağırsak besinleri emer .
+deri vücudu dış etkilerden korur .
+yetişkin insanda 206 kemik vardır .
+en uzun kemik uyluk kemiğidir .
+kırmızı kan hücreleri oksijen taşır .
+beyaz kan hücreleri vücudu mikroplara karşı korur .
+trombositler kanın pıhtılaşmasını sağlar .
+dolaşım sistemi kalp damarlar ve kandan oluşur .
+sinir sistemi beyin omurilik ve sinirlerden oluşur .
+solunum sistemi akciğerler ve hava yollarından oluşur .
+pankreas insülin üretir .
+kalp ne yapar ?	kalp kanı vücuda pompalar .
+akciğerler ne yapar ?	akciğerler kana oksijen verir .
+beyin ne yapar ?	beyin vücudu yönetir .
+karaciğer ne yapar ?	karaciğer zehirli maddeleri temizler .
+böbrekler ne yapar ?	böbrekler kanı süzer ve idrar üretir .
+mide ne yapar ?	mide besinleri sindirir .
+deri ne yapar ?	deri vücudu dış etkilerden korur .
+insanda kaç kemik vardır ?	yetişkin insanda 206 kemik vardır .
+en uzun kemik hangisidir ?	en uzun kemik uyluk kemiğidir .
+kırmızı kan hücreleri ne yapar ?	kırmızı kan hücreleri oksijen taşır .
+beyaz kan hücreleri ne yapar ?	beyaz kan hücreleri vücudu mikroplara karşı korur .
+trombositler ne yapar ?	trombositler kanın pıhtılaşmasını sağlar .
+dolaşım sistemi neyden oluşur ?	kalp damarlar ve kandan oluşur .
+sinir sistemi neyden oluşur ?	beyin omurilik ve sinirlerden oluşur .
+?pankreas ne yapar ?	pankreas insülin üretir .
+?ince bağırsak ne yapar ?	ince bağırsak besinleri emer .
