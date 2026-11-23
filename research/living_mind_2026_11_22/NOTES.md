@@ -4483,3 +4483,79 @@ when a saved mind was loaded with F74: it had none, and F74 did nothing). 555 te
 (`test_zihin_deliberate.py`, 7, is new).
 
     python research/living_mind_2026_11_22/t_race.py mind --data FOLDER --variant full --off silent_claims,relied_on,own_turn
+
+## 40. The race: the same machine, the same documents, the mind once against a Transformer from nothing
+
+Asked by the owner: an answer of the whole mind came forty times later than a Transformer's; measure both on the
+same machine and the same data. `t_race.py` (its docstring holds the protocol): the owner's documents (13,290
+sentences, 186,457 words as the mind counts them), the same 200 sentences of at least five words cued by their first
+two, scored as `recall_once.py` scores (exact: the rest of that sentence; valid: the rest of some sentence beginning
+with those two words; silent; word F1). The mind lives the folder once (one thread). The Transformer (the decoder of
+the earlier duel: 7.3 million parameters, d 256, 4 layers) is trained from random weights against the clock (one
+thread, beside other runs) and asked at each mark. Rows: `results/race.jsonl` (counts and times only).
+
+    learner                              processor s to learn   exact  valid  silent   F1      answer median / p90
+    the mind, speaking configuration     317.5 (one reading)      90    146     31     0.519   0.139 / 0.616 s
+    the whole mind (no silent claims)    326.1 (one reading)      89    151     34     0.524   3.961 / 6.333 s
+    Transformer, one pass                 85.3                     0      0     70     0.001   0.005 / 0.009 s
+      2 minutes                          118.4                     0      6    124     0.007
+      5 minutes                          296.0                     0      8     10     0.052
+      10 minutes                         586.6                     0     11      8     0.092
+      20 minutes                        1180.4                     0     11      1     0.104
+      40 minutes                        2093.3                     1     39      6     0.094
+      60 minutes (35 epochs)            2898.7                     1     47      2     0.102   0.036 / 0.090 s
+
+After an hour the Transformer says the rest of a read sentence in 47 of 200 (one of them the cued sentence itself),
+the mind after one reading in 146 to 151 (89 to 90 exact). The Transformer answers in a few hundredths of a second;
+the whole mind took 3.96 s at the median here, which F74 (section 39, measured after these rows) brings to 0.64 s
+with the same answers. Where a cue begins only one read sentence the mind says it in 60 of 61; where it begins four
+or more, in 7 or 8 of 100 (it stays silent where the documents go on several ways), the Transformer in 0 or 1.
+What is not claimed: a larger Transformer, a GPU or longer training would reach further; the Transformer was given
+a learning-rate schedule chosen for this size in the earlier duel and nothing tuned to these cues.
+
+## 41. The reach of a continuation (F75): measured, and not kept in the whole mind
+
+Found in the study (section 42): many untaught definitions were cut short after a few words. F49 (Fault Tracing)
+keeps one record for the way "devam" (a sentence carried on from the lived sequence its last items match): a
+continuation resting on one lived word and one resting on six were judged together, and where one-word continuations
+had misled, the six-word ones were believed less as well.
+
+**The mechanism (`Config.continuation_reach`, off by default).** The continuation is a way of its own for each length
+of the lived match it rests on ("devam" for one item, "devam2", "devam3", ...), so F49 keeps their records apart
+(`read.members_map`; `continuation_backoff` notes the length of the suffix it read).
+
+**Measured.**
+
+* The study's small mind (the first mind of the program raised on the 24 lessons; untaught lines asked after the
+  lessons, `etut.py`): 4 of 41 without it, 10 of 41 with it. The large mind of the owner's data: 11 of 41 either way.
+* The battery (`batt22.sh`, the whole mind with it on, 37 lines): one line changed, for the better ("hi ne demek ?"
+  answered "hi , merhaba demektir" in 3 of 3 seeds instead of 2 of 3); the rest the same.
+* A small world (`tests/evolution/test_zihin_reach.py`: four facts read twice, two asked and answered): without it
+  "mars nedir ?" is answered "mars kızıl bir gezegendir ve soğuktur"; with it the answer is not even begun. The ways
+  it opens are claimed with while the mind listens (F49's silent claims); each is one voice in the vote of every way,
+  where the one way "devam" was one voice; they failed there, the vote of every way fell, and every reading was
+  believed less.
+
+It is not lossless, so it is not in the whole mind (`STUDIED`), as F73 was not (section 37). What it would need: a
+way opened by splitting another to take its parent's record as its prior until it has its own (F53's principle, the
+general level as the specific level's prior), and to count as one voice with its parent in the vote of every way.
+With it off the gates are bit-identical (digest, plain, wholes, the 17 configurations).
+
+## 42. The study (etüt): a teacher's way of growing a mind, in counts
+
+Asked by the owner: grow the mind holding their data by studying with it, every subject, as a teacher would. `etut.py`
+holds the study (teach a lesson, ask its dialogues in a shuffled order, confirm what is right, take back exactly the
+moments of a wrong attempt and show the answer, round after round), `dersler/` the 24 lessons written for it (public
+knowledge: mathematics, physics, chemistry, biology, anatomy, diseases, engineering, coding, the solar system, the
+stages of society, machine learning, the mind itself, and twelve advanced ones). The minds raised on the owner's data
+stay on the machine they were raised on; only counts are written here.
+
+* The largest mind (the owner's documents, everyday dialogues and reports read in: 694,512 moments, 4.8 million ties):
+  the 284 dialogues of the 24 lessons, 284 right in the first round; asked again after all 24 lessons, 284 of 284.
+* The examination lines of the lessons (never taught; their answers follow from what the lesson told): 8 of 41 asked
+  right after each lesson, 11 of 41 after all of them.
+
+What it shows: what the mind is told, it keeps, word for word, across a large life. What it is not told it rarely
+reaches: the examination lines ask for a sentence assembled from facts told apart, which a mind computing over word
+sequences does not do. That diagnosis, measured, is where the deepened model of `research/living_mind_2026_11_23/`
+begins (MODEL.md, section 0).

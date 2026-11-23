@@ -271,8 +271,16 @@ class Config:
                                     # what it lived, recalled); when that decides within the first half of the
                                     # race (T/2 steps) the moment is settled so; when it decides nothing, or only
                                     # late, the same moment is read again with everything (Mind._recall_or_reason)
+    continuation_reach: bool = False   # F75 (The Reach of a Continuation): a sentence carried on from the lived
+                                    # sequence its last items match is a way of reading of its own for each
+                                    # length of that match (F49 keeps its record apart: "devam2", "devam3", ...)
     deep_only: tuple = ()           # F74: the switches only a moment the mind reasons in reads with (the program
                                     # sets them: the mechanisms built after the speaking configuration, STUDIED)
+    grounded: bool = False          # Zemin (the ground, MODEL.md of research/living_mind_2026_11_23): what is perceived
+                                    # (things, features, events, participations: ``mind.zemin.see``) and what is
+                                    # heard (``mind.zemin.heard``) meet in a moment: words name features, utterances
+                                    # become constructions whose places hold roles, answers are told from the meaning
+                                    # (zihin/zemin.py); lived at the end of the moment, kept in the ledger
     open_window: bool = False       # F70 (The Open Window): a family (F53) is read through the frames that come
                                     # to mind in the time the mind has: T frames (one a step of the moment),
                                     # the nearest to the context first, T more every later moment it has the
@@ -701,6 +709,9 @@ class Mind:
             for filler, (_, is_open) in claims:            # where the claim was left open (to be read again there)
                 if is_open and self.context is not None:
                     self.open_where[filler] = self.context
+        if cfg.grounded and self.__dict__.get("zemin") is not None and self.zemin.pending:
+            from .zemin import live                        # the ground: what was perceived and heard meets here
+            live(self)
         if "_personal_moment" in self.__dict__ or "personal_log" in self.__dict__:
             from .iliski import end_moment                 # F33: this moment's notes, kept for undo and retraction
             end_moment(self)

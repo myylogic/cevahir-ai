@@ -2087,7 +2087,9 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
             _take(mind, out, src, sequence_reading(mind, unit, trust), "dizi")   # stand in the way of what is known
                                                                                  # of the thing itself)
     if cfg.backoff and not any(e > 0.5 for t, e in _had(out, src) if _world(mind, t)):
-        _take(mind, out, src, continuation_backoff(mind, unit, trust), "devam")
+        carried = continuation_backoff(mind, unit, trust)
+        reach = _moment_memo(mind).get(("reach", unit), 1) if getattr(cfg, "continuation_reach", False) else 1
+        _take(mind, out, src, carried, "devam" if reach <= 1 else "devam%d" % reach)   # F75: a way of its own
     if getattr(cfg, "substitution", False) and not any(e > 0.5 for t, e in _had(out, src) if _world(mind, t)):
         _take(mind, out, src, substitute_backoff(mind, unit, trust), "yerine")
     line = 0.5 + mind.knob["theta"] / (2.0 * cfg.T)     # F36: when nothing would be said (the speaking line), a
@@ -3213,6 +3215,7 @@ def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) 
                     c = cfg.lam * conviction(w_pos + w_neg, cfg.k)
                     out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * 0.5
             if any(e > 0.5 for e in out.values()):
+                _moment_memo(mind)[("reach", unit)] = len(suffix)   # F75: how many lived items it rests on
                 return out
     return {}
 
