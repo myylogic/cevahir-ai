@@ -302,23 +302,36 @@ def pairs(mind, readers) -> List[tuple]:
     return out
 
 
-def _worth(said: Optional[int], came: int) -> int:
-    """What an answer was worth: what came (1), nothing (0), another word (-1)."""
+def _worth(said: Optional[int], came: Optional[int]) -> int:
+    """What an answer was worth: what came (1), nothing (0), another word (-1). F66: where nothing came (the other
+    ended there), saying nothing is what came (1) and a word is another word (-1)."""
+    if came is None:
+        return 1 if said is None else -1
     return 0 if said is None else (1 if said == came else -1)
 
 
 def trial(mind, items) -> None:
     """The context of the last moment goes on with ``items`` [(unit, provenance)], and they are not yet taken in.
     If the mind decided at that context and something came from outside on a channel it speaks on: the experiment
-    (see the module's text), the records, and the configuration follows."""
+    (see the module's text), the records, and the configuration follows.
+
+    F66 (An End Is an Outcome, ``Config.trial_ends``): where it went on from outside with no word on any channel the
+    mind speaks on (the other ended there: the end of a turn it watches), nothing is what came. The configuration
+    that would have said nothing there did better and one that would have said a word did worse, so a way that
+    makes the mind go on past the end of an answer is found by the trials like a way that makes it say a wrong
+    word. (Before, such a moment was no outcome, and the harm could only be repaired from outside: F62.)"""
     context = mind.context
     if context is None or context not in mind.called:
         return
     from . import read as R
     act, channels = R.kind_masks(mind)[5], R.mv_view(mind, "u_channel")
     came = {int(channels[u]): int(u) for u, prov in items if prov not in (ACTED, IMAGINED) and act[channels[u]]}
+    ended = False
     if not came:
-        return
+        if not getattr(mind.cfg, "trial_ends", False) or not any(prov not in (ACTED, IMAGINED) for _, prov in items):
+            return
+        ended = True                                       # F66: it went on from outside, and with no word: on
+        came = {c: None for c in range(len(act)) if act[c]}   # every channel the mind speaks on, nothing came
     del mind.called[context]
     faults = getattr(mind.cfg, "faults", False)
     chain_now: dict = {}
@@ -328,7 +341,7 @@ def trial(mind, items) -> None:
         return
     claimed_now = _claims(mind, chain_now, set(now.values())) if faults else {}
     asleep: Dict[tuple, Tuple[int, float]] = {}            # what only a sleeping way claims here (settled below)
-    if getattr(mind.cfg, "built_relations", False):
+    if getattr(mind.cfg, "built_relations", False) and not ended:   # (nothing came: there is nothing to name)
         propose(mind, context, came, now)
     if not mind.trial_base:
         mind.trial_base = {way: in_use(mind, way) for way in singles(mind)}

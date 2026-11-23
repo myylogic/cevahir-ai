@@ -606,6 +606,25 @@ At each moment, roughly each word, the mind lives these steps:
   Measured, the full configuration, the same for every world: of the 38 measured lines it equals or betters the configuration each was measured with in 31 (conjectures 223, all holding, every statement that holds reached; asking itself 30 of 30, the young mind too; looking before it asserts 80 of 80; the one-life world 220 of 220; a new kind of question right at first sight from two mastered kinds, 40 of 40; the fault loop 79 of 80 at the first answer where it was 4; its own curriculum 16 of 16 at every stage; and, beside the older scripts as they were written, deduction from facts read apart 48 of 48 (2), long answers 162 of 162 (68), telling what it knows 46 of 113 (2), where-questions 31 of 31 (1)).
   What is a trade and was not repaired: seven lines are worse, each traced by leaving one mechanism out. Silent claims (learning by only watching) give a generalisation that held on what was watched a record before the first question, which costs where what is then asked is not like what was watched: 66 wrong answers against 29 in the misled world, 9 wrong values in 40 against 1 where the library is half empty, the narrower reading of F49 found late or not at all in the kinds world, an exception two steps away answered 0 of 3 against 3 of 3. F49's read-back raises the cause probe (0.765 against 0.548), two unseen single forms of the chat-like world are held back, and after forty looks that found nothing the mind looks rarely (35 of 50 found in sixty silent moments against 50). `--kapat silent_claims` gives the whole mind without them; the first of these has a mechanism measured in a scratch copy already (next section).
   Cost: about 2 times a moment in the chat-like world (2.34 ms against 1.24), 4 to 8 times in the teacher's loops, 2.9 times over the 21 older runs. Nothing was made faster in this section.
+- **Three more mechanisms of the whole mind: F66 to F68.** (Switches like the others, on in the full
+  configuration; found by the measurements of the entry above.)
+  - *An End Is an Outcome (F66, with F57).* The trials judged a way of reading where the mind decided and the
+    world then went on from outside with a word. Where the other ended there, nothing was an outcome, and a
+    way that made the mind say a word more than the answer could not be found to do harm. Now, where it went on
+    from outside with no word on any channel the mind speaks on, nothing is what came: the configuration that
+    would have said nothing did better, one that would have said a word did worse. Measured: in a life where a way does that harm (answers that are the value alone, the exact echo without F62) the mind puts that way away by itself after two cases, in 5 of 5 lives, and the next new kind of question is right at first sight, 40 of 40 where it was 0 of 40; where the same way is what completes the answer it is kept.
+  - *The Category Is Split Where It Failed (F67, with F49).* F49 reads a frame's claim through a narrower place
+    of its filler when the frame's own vote was found wanting (its claims held less often than it claimed, on
+    the whole). A vote that always holds for some fillers and never for others is calibrated on the whole and
+    wrong in each part. With F67 the narrower vote is read as soon as the frame's own record holds more than
+    one experience against it, whatever it also got right; the narrower claim is believed by its own record,
+    as before. Measured: in the kinds-of-things world the whole mind answers 100 of 120 rounds right and every fresh thing from the eighth round on (52 of 120 and 16 of 40 in the last section; 80 of 120 as committed).
+  - *Deduction Stands Against the Co-members' Vote (F68, with F37 and F49).* F37 reads what was said of the
+    classes the filler was said to belong to, its own record last (deduction, with the exception); F49's
+    narrower vote reads what its co-members went on with (induction, which knows no exception). Where the
+    deduction names r and the narrower vote another word v: e_v <- (1 - c_r) e_v, c_r = max(0, 2 e_r - 1).
+    Measured: the exception two steps away is answered 3 of 3 (0 of 3 in the last section).
+  The battery again: 34 of the 37 lines the same as before, count for count; the three that changed are these. Five lines stay worse than the configurations they were measured with (the misled world, the half-empty library, the cause probe, two unseen forms, rare looks after looks that failed). And reading large running text with everything on is not practical yet: building a mind from the owner's documents did not finish in 110 minutes where the earlier configuration takes 6 (on a small mind the whole mind costs 4.8 times a moment on running text, nearly all of it silent claims: 1.1 times without them; on the large one that is not enough). `--variant speaking` reads large texts as before; this is the first item of the work queue.
 - **At the same time, with nothing lost (not a mechanism: a property).** What a moment writes depends on what the
   mind expected, so a life is lived in turn: copies of the mind that live different things at once and are added
   into one ("sibling minds") were measured and eliminated (no loss where the copies share a beginning that holds the
@@ -869,6 +888,9 @@ The models were small and the data scarce; with far more data the gap may close.
 | On Trial Where It Is Relied On | Dayanıldığı Yerde Sınanır | F63, off by default (with silent claims) | out-of-sample validation; counting evidence twice; explaining away |
 | A Share Is Tested Before It Is Carried | Pay Taşınmadan Önce Sınanır | F64, off by default (with F45) | context-free against context-bound meaning; compositionality as a claim to be tested, not assumed; transfer |
 | Not Knowing Is of the World | Bilmemek Dünyaya Dairdir | F65, off by default (with L7) | reality monitoring (what was imagined against what was perceived); metacognitive feelings and what they are about |
+| An End Is an Outcome | Bitiş de Bir Sonuçtur | F66, off by default (with F57) | omission against commission errors; learning when to stop; the outcome of saying nothing |
+| The Category Is Split Where It Failed | Kategori Başarısız Olduğu Yerde Bölünür | F67, off by default (with F49) | calibration against resolution (a forecast right on the whole and wrong in each part); mixtures hidden in an average; error-driven category splitting |
+| Deduction Stands Against the Co-members' Vote | Çıkarım, Sınıf Arkadaşlarının Oyuna Karşı Durur | F68, off by default (with F37 and F49) | default reasoning with exceptions; specificity; deduction against induction |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

@@ -211,11 +211,13 @@ STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # bu
            "told_apart", "open_claims", "look", "think", "faults",           # configuration: in use in the full one
            "silent_claims", "find_out", "wonder", "echo_exact", "families", "lived_apart",   # (the program's
            "asked_place", "whole_kinds", "trials", "built_relations", "conjectures", "unseen_share",   # default)
-           "own_race", "echo_told", "relied_on", "shares_tested", "unknown_outside")
+           "own_race", "echo_told", "relied_on", "shares_tested", "unknown_outside", "trial_ends",
+           "split_failed", "deduced_first")
 
 NEEDS = (("find_out", ("faults", "look")), ("wonder", ("look",)), ("silent_claims", ("faults",)),   # what does not
          ("built_relations", ("trials",)), ("unseen_share", ("families",)), ("look", ("open_claims",)),   # work
          ("echo_told", ("echo_exact",)), ("relied_on", ("silent_claims",)), ("shares_tested", ("told_apart",)),
+         ("trial_ends", ("trials",)), ("split_failed", ("faults",)), ("deduced_first", ("faults", "inherit")),
          ("told_apart", ("wholes",)), ("whole_kinds", ("wholes",)))
                                                                                                     # without what
 

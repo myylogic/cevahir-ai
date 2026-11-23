@@ -58,7 +58,8 @@ it (F46: what it may look up by itself, F47).
   then lives, W- whenever it is called on again and a claim it held back earlier is still waiting.
 
 * **Restructuring.** A frame's category is every item that ever filled its place. When the frame's own vote has
-  been found wanting (``wanting``: its claims held less often than it claimed), the vote is taken again among the
+  been found wanting (``wanting``: its claims held less often than it claimed; with F67, ``failed``: or its record
+  holds more than one experience against it, whatever it also got right), the vote is taken again among the
   members that share another lived place with the filler (``read.narrower_vote``): the category is split where the
   error showed it had to be, by a place the mind lived. That claim is a way of its own (kind ``NARROWER``), settled
   and read back like the others, so the split is kept only as far as its claims hold.
@@ -114,6 +115,17 @@ def wanting(mind, ways) -> bool:
         return False
     own = votes(mind).get(ways[-1])
     return own is not None and own[1] < own[2]
+
+
+def failed(mind, ways) -> bool:
+    """F67 (The Category Is Split Where It Failed, ``Config.split_failed``): whether this way's own record holds
+    more than one experience against it (W- over k), whatever it also got right. ``wanting`` asks whether the way
+    held less often than it claimed, on the whole; a vote that always holds for some fillers and never for others
+    can be calibrated on the whole (it claims 0.6 and holds 0.6) and wrong in each part. That it failed at all,
+    by more than the weight of no record, is what says the category may have to be split."""
+    if not mind.ch.has(CHANNEL):
+        return False
+    return _mass(mind, ways[-1])[1] > mind.cfg.k
 
 
 def reading_ways(name: str) -> tuple:

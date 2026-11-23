@@ -171,7 +171,8 @@ def test_what_the_owner_keeps_off_stays_off_and_is_remembered(tmp_path, monkeypa
     mind = load(at, ledger=False)
     assert mind.owner_off == ["faults", "known"]
     off = {name for name in NEWER + STUDIED if not getattr(mind.cfg, name)}
-    assert off == {"faults", "known", "find_out", "silent_claims", "relied_on"}   # ... and what cannot work
+    assert off == {"faults", "known", "find_out", "silent_claims", "relied_on", "split_failed",
+                   "deduced_first"}                           # ... and what cannot work
                                                                                   # without faults
     out = run(monkeypatch, capsys, ["--load", at, "--kayit", at])     # remembered: the default does not turn it on
     mind = load(at, ledger=False)

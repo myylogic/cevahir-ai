@@ -3556,3 +3556,161 @@ wholes) are bit-identical to the references. Tests: 510 passed (41 new: `test_zi
     python -m zihin                         (everything on; --kapat a,b keeps mechanisms off; --variant speaking)
     python research/living_mind_2026_11_22/t_full.py -- research/living_mind_2026_11_22/t_conj.py fields --out /tmp/x.jsonl
     python research/living_mind_2026_11_22/t_full.py --off own_race -- research/living_mind_2026_11_22/t_conj.py fields --out /tmp/x.jsonl
+
+## 28. Three more mechanisms of the whole mind: an end is an outcome (F66), the category is split where it failed (F67), deduction stands against the co-members' vote (F68)
+
+### 28.1 What this section is
+
+Section 27 turned everything on, repaired five faults of putting things together and reported seven lines that
+stayed worse than the configuration each world was measured with. This section takes up two of those seven, and
+one thing section 27 had repaired from outside. The three mechanisms are switches like the others (off in
+`Config()`, on in the full configuration), and the whole battery was run again with them.
+
+### 28.2 F66, An End Is an Outcome (`Config.trial_ends`, with F57; `deney.trial`)
+
+F57 tries each of the mind's ways of reading at the contexts where it decided and which then went on from outside
+*with a word*: saying what came is better than saying nothing, and saying nothing is better than saying another
+word. Where the other ended there (the end of a turn the mind watches) nothing was an outcome, so a way that makes
+the mind say a word more than the answer could not be found to do harm. F52's exact echo was such a way
+(27.5: "dal taşır" for "dal"), and section 27 repaired it from outside, by a rule of reading (F62).
+
+With F66 the end is what came. Where it went on from outside with no word on any channel the mind speaks on, the
+configuration that would have said nothing there did better and one that would have said a word did worse. (No
+relation is proposed there, F58: nothing came that a chain could name.)
+
+Measured (`t_ends.py loop`, 5 seeds; rows in `results/ends.jsonl`). Four kinds of fact are read of every thing;
+two kinds of question are watched twice of eight things; the third kind, never watched, is asked of eight other
+things in the teacher's loop; then, on copies, the fourth kind, never watched and never in a loop, of eight fresh
+things. Right / wrong / silent:
+
+    the answers are the value alone ("V .")           the loop   another new kind   put away (lives of 5)
+      the whole mind of section 27                    40/0/0     40/0/0             nothing
+      without F62 (the exact echo alone)              20/20/0    0/40/0             nothing
+      without F62, an end is an outcome               30/10/0    40/0/0             the exact echo, 5
+      the whole mind, an end is an outcome            40/0/0     40/0/0             nothing
+    the answers end with the verb ("X V Q .")
+      without F41 and F62 (the echo says the verb)    40/0/0     40/0/0             nothing
+      the same, an end is an outcome                  40/0/0     40/0/0             nothing
+      the whole mind, an end is an outcome            40/0/0     40/0/0             nothing
+
+Without F62 the mind is wrong four times in the loop of each life ("şerbet içer" for "şerbet"), learns that kind by
+being shown, and is wrong again at first sight of the next kind, 40 of 40: nothing told it which of its ways was
+at fault. With F66 the exact echo is put away after the second case of each life (0 better, 2 worse), the loop
+has two wrong answers instead of four, and the next kind is right at first sight, 40 of 40. (The looped kind and
+a watched kind, on fresh things, are right in every condition: 20 of 20.) In its own curriculum (`t_self.py`) the
+whole mind is the same with and without F66, line for line.
+
+So what section 27 built by hand the mind finds by itself, in two cases, at the place of the harm, and it holds for
+the next kind of question at first sight. Where the same way is what completes the answer (the answers end with
+the question's verb and nothing else says it) it is not put away. F62 stays on: it is right from the first answer,
+and F66 needs two wrong answers before it can know.
+
+### 28.3 F67, The Category Is Split Where It Failed (`Config.split_failed`, with F49; `hata.failed`)
+
+F49 reads a frame's claim through a narrower place of its filler (the members that share another lived place with
+it: the things said to be of one kind) when the frame's own vote was found *wanting*: its claims held less often
+than it claimed. That is a test of the record as a whole. In the whole mind the ways are judged while the mind
+watches too (silent claims), so in the world of section 12 (what a thing eats follows its kind; the eight watched
+things are of one kind) the frame's vote comes to the first question with eight claims that held. Asked about
+things of every kind it is then always right for one kind and never for the others, and on the whole it claims
+0.60 and holds 0.61: calibrated, not wanting, and wrong in each part. The category was split late or not at all
+(27.10), and the mind ended saying what it had read of the thing ("serçe yırtıcı") instead of what it eats.
+
+F67: the narrower vote is read as soon as the frame's own record holds more than one experience against it (W-
+over k: more than the weight of no record), whatever it also got right. Nothing else changes: the narrower claim
+is a way of its own, believed by its own record, so a split that does not hold is not kept (F49).
+
+Measured (`t_fault_kinds.py`, 5 seeds; 8 fresh things, two of each kind, after n rounds of the teacher's loop;
+right / wrong / silent):
+
+    F49 as committed (no silent claims)       n=4 0/0/40   n=8 40/0/0   n=16 40/0/0  n=24 40/0/0 ; rounds 80/5/35
+    the whole mind of section 27              n=4 10/30/0  n=8 16/24/0  n=16 8/2/30  n=24 8/0/32 ; rounds 52/48/20
+    the whole mind with F67                   n=4 10/0/30  n=8 40/0/0   n=16 40/0/0  n=24 40/0/0 ; rounds 100/15/5
+    the same without F67 (left out)           n=4 10/30/0  n=8 16/24/0  n=16 8/2/30  n=24 8/0/32 ; rounds 52/48/20
+
+With F67 the whole mind answers 100 of the 120 rounds right (80 as committed: it comes to the first question
+knowing the watched kind), and all the fresh things from n = 8. Only watching (`t_fault_watch.py`): after four
+watched dialogues the thirty wrong answers of section 27 are thirty silences (the frame has failed, the narrower
+vote is read and not yet believed); from n = 8 it is 40/0/0 as before. The misled world, where no narrower place
+separates the things, is the same with and without it (66 wrong answers).
+
+### 28.4 F68, Deduction Stands Against the Co-members' Vote (`Config.deduced_first`, with F37 and F49)
+
+The exception two steps away (27.10): "penguen bir kuştur", "kuşlar uçar", "penguen yüzer", asked "penguen ne
+yapar ?". Two of the frame's claims read that the thing is of a kind. F37 reads what was said of the classes the
+thing was said to belong to, the thing's own record last: deduction, with the exception where there is one
+("yüzer"). F49's narrower vote reads what the other members of such a place were lived to go on with: induction
+over its co-members, which knows no exception ("uçar"). As committed the deduction leads. In the whole mind both
+ways have records (they were judged while the mind listened), both are believed more, and they tie: 0.811 against
+0.796, less than the lead a word needs, and the mind stops after the thing's name.
+
+F68: where the deduction names a word r and the narrower vote proposes another word v of the same channel, the
+deduction stands against that vote as a context's own record stands against what a generalisation proposes there
+(F27), nested last: e_v <- (1 - c_r) e_v for the narrower vote's claim, c_r = max(0, 2 e_r - 1). A deduction the
+mind has learned not to believe excludes nothing; the frame's other claims of v are untouched.
+
+Measured (`t_chain.py` with F37, 3 seeds): the exception 3 of 3 (0 of 3 in section 27; 1 of 3 with F68 left out of
+this code; 3 of 3 as committed), two steps 27 of 27 and one step 9 of 9 as before.
+
+### 28.5 The battery again (code md5 7504d0f5e12977b3f9eb1c7d618f7ce3; rows appended to `results/full.jsonl`)
+
+The same runs as 27.9, everything on. The lines that changed:
+
+    the world                                     section 27                      now
+    kinds of things (t_fault_kinds, 5)            n=8 16/24/0; rounds 52/48/20    n=8 40/0/0; rounds 100/15/5
+    only watching (t_fault_watch, 5)              n=4 10/30/0                     n=4 10/0/30 (the rest the same)
+    two steps away, the exception (t_chain, 3)    0/3                             3/3
+
+Every other line of 27.9 is the same, count for count: the 16 runs of the first half of the battery and 18 of the
+21 of the second were compared with section 27's output line by line (times aside). The battery took 7,339 s
+(7,127 s in section 27).
+
+### 28.6 What is still worse
+
+Five of the seven lines of 27.10, as measured there: the misled world (66 wrong answers against 29), the library
+that holds every second thing (9 wrong values in 40 against 1), the cause probe (0.765 against 0.548), the two
+unseen single forms of the chat-like world, and the rare looks after looks that failed (35 of 50).
+
+**The cost on running text.** Building a mind from the owner's documents (11 files, 186,457 moments; aggregates
+only, nothing of them is in this repository) takes 345 s with the configuration it was measured with (1.8 ms a
+moment). With everything on it had not finished after 110 minutes and was stopped. The cause, measured on
+synthetic text (250 sentences of random words, a new mind, `ms` a moment): the speaking configuration 1.43; the
+whole mind 6.86 (4.8 times); the whole mind without silent claims 1.52; without frames of frames (F53) 2.35;
+without any other single mechanism 6.0 to 6.7. Silent claims make the reading the mind would have decided with
+at every moment it listens, and that reading is dear where F53 looks for a family for every context.
+On a mind of that size leaving silent claims out is not enough: the same build with the whole mind without them
+was still running after 40 minutes when this was written (what else grows with the mind is not yet measured).
+Reading large texts with the whole mind is not practical yet: `--variant speaking` reads them as before, and a
+mind raised so is given the rest when it is loaded (27.2). This is the first item of the queue.
+
+### 28.7 What it does not do
+
+* F66 knows an end only where the mind decided at that context and the world then went on from outside. In a
+  chat, where nobody shows what should have been said, an answer that went on too long is not an outcome (21.11).
+* F67 reads the narrower place when the frame failed; it does not find a place the mind never lived (a kind that
+  was never said), and it splits by one place at a time.
+* F68 orders two readings of the same membership. It is not a general rule of the nearer record: a deduction
+  through a class against the frame's plain vote, or two deductions against each other, are read as before.
+* The cause probe, the half-empty library, the misled world, the two unseen forms and the rare looks of 27.10
+  are as they were (28.6).
+
+### 28.8 The work queue after this section
+
+1. Cost: the whole mind on running text (28.6): silent claims with frames of frames on a small mind, and what
+   else grows with the mind on the owner's documents; the trials and the silent claims read the same context many
+   times.
+2. What a way's record is worth where what is asked is not like what was watched (misled, the half-empty
+   library); F49's nested levels on one experience (the cause probe).
+3. Whether holding back is right for an utterance that asks nothing; trials while the mind only watches; the
+   rest of 21.11 and 27.13.
+
+### 28.9 Gates, tests, reproduce
+
+With every studied switch off the lesson-free gate, the 17 configurations and the scripted life (plain and with
+wholes) are bit-identical to the references. Tests: 522 passed (12 new: `test_zihin_ends.py` 5,
+`test_zihin_split.py` 4, `test_zihin_deduced.py` 3).
+
+    python research/living_mind_2026_11_22/t_ends.py loop
+    python research/living_mind_2026_11_22/t_full.py -- research/living_mind_2026_11_22/t_fault_kinds.py kinds --out /tmp/x.jsonl
+    python research/living_mind_2026_11_22/t_full.py --off split_failed -- research/living_mind_2026_11_22/t_fault_kinds.py kinds --out /tmp/x.jsonl
+    python research/living_mind_2026_11_22/t_full.py --off deduced_first -- research/living_mind_2026_11_15/t_chain.py --set inherit=1 --out /tmp/x.jsonl

@@ -1869,7 +1869,9 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 out[target] = made[0][2]
                 if made[0][2] <= 0.5 < made[0][1]:
                     doubted = max(doubted, made[0][1])
-            if filler is not None and tail is None and hata.wanting(mind, hata.frame_ways(0, frame)) \
+            if filler is not None and tail is None and (
+                    hata.wanting(mind, hata.frame_ways(0, frame))
+                    or (getattr(cfg, "split_failed", False) and hata.failed(mind, hata.frame_ways(0, frame)))) \
                     and mind.__dict__.get("_fault_narrower", True):   # (research: False leaves this step out)
                 ways = hata.frame_ways(hata.NARROWER, frame)   # the frame's own vote was found wanting: read it
                 for target, e0 in narrower_vote(mind, frame, unit, filler, c, trust).items():   # through a
@@ -1877,6 +1879,9 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                     made.append((ways, e0, hata.believed(mind, ways, e0)))
                     made.sort(key=lambda claim: -claim[2])
                     out[target] = max(out.get(target, 0.0), made[0][2])
+            if getattr(cfg, "deduced_first", False) and filler is not None:
+                _deduced_against_co_members(mind, out, src)  # F68: what is deduced of the thing stands against
+                                                             # the vote of its co-members
             if getattr(cfg, "find_out", False) and filler is not None:
                 _own_record_against_shared(mind, out, src)   # F50: what was lived of the thing itself stands
                                                              # against what the others share (the members of a
@@ -1973,6 +1978,41 @@ def _own_record_against_shared(mind, out: Dict[int, float], src: Dict[int, list]
             continue
         src[target] = [(ways, e0, (1.0 - c) * e) for ways, e0, e in made]
         out[target] = (1.0 - c) * out[target]
+
+
+def _deduced_against_co_members(mind, out: Dict[int, float], src: Dict[int, list]) -> None:
+    """F68 (Deduction Stands Against the Co-members' Vote, ``Config.deduced_first``; with F37 and F49): two of a
+    frame's claims read the same thing, that the filler is of a kind. F37 (INHERIT) reads what was said of the
+    classes the filler was said to belong to, the filler's own record last: deduction, with the exception where
+    there is one. F49's narrower vote reads what the other members of such a place were lived to go on with:
+    induction over its co-members, which knows no exception. Where the deduction names a word r and the narrower
+    vote proposes another word v of the same channel, the deduction stands against it as a context's own record
+    stands against what a generalisation proposes there (F27), nested last:
+        e_v <- (1 - c_r) e_v for the narrower vote's claim of v,   c_r = max(0, 2 e_r - 1).
+    A deduction the mind has learned not to believe (e_r under 1/2) excludes nothing; the frame's other claims of
+    v are untouched. Before this the two tied where both had come to be believed (0.81 against 0.80 for an
+    exception two steps away) and the mind stopped after the thing's name (measured)."""
+    from .hata import NARROWER
+    channels = mv_view(mind, "u_channel")
+    deduced: Dict[int, float] = {}                           # channel -> the firmest deduction's conviction
+    named = set()
+    for target, made in src.items():
+        for ways, _, e in made:
+            kind = ways[1]
+            if len(kind) == 2 and kind[0] == "g" and kind[1] == INHERIT and e > 0.5:
+                named.add(target)
+                deduced[channels[target]] = max(deduced.get(channels[target], 0.0), 2.0 * e - 1.0)
+    if not deduced:
+        return
+    for target, made in src.items():
+        c = deduced.get(channels[target], 0.0)
+        if target in named or c <= 0.0:
+            continue
+        lowered = [(ways, e0, (1.0 - c) * e) if ways[1] == ("g", NARROWER) else (ways, e0, e) for ways, e0, e in made]
+        if lowered != made:
+            lowered.sort(key=lambda claim: -claim[2])
+            src[target] = lowered
+            out[target] = lowered[0][2]
 
 
 def narrower_vote(mind, frame: int, unit: int, y: int, c_frame: float, trust=None) -> Dict[int, float]:

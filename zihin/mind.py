@@ -237,6 +237,21 @@ class Config:
                                     # listens, where something it lived of the very thing spoken of speaks in its
                                     # reading, the ways that only carry over what others share are not on trial:
                                     # agreeing with what it already knew is no prediction that held (hata.relied_on)
+    trial_ends: bool = False        # F66 (An End Is an Outcome; with trials): where the mind decided and the other
+                                    # then went on with no word (the end of a turn it watches), nothing is what
+                                    # came: the configuration that would have said nothing did better than one
+                                    # that would have said a word (deney.trial)
+    split_failed: bool = False      # F67 (The Category Is Split Where It Failed; with faults): F49 reads a frame's
+                                    # claim through a narrower place of its filler when the frame's own vote was
+                                    # found wanting (it held less often than it claimed, on the whole). A vote that
+                                    # holds for some fillers and never for others is calibrated on the whole: with
+                                    # this the narrower vote is read as soon as the frame's own record holds more
+                                    # than one experience against it (hata.failed)
+    deduced_first: bool = False     # F68 (Deduction Stands Against the Co-members' Vote; with inherit and faults):
+                                    # where F37 names a word for the filler (what was said of its classes, its
+                                    # own record last) and F49's narrower vote (what its co-members went on with)
+                                    # proposes another, the deduction stands against that vote
+                                    # (read._deduced_against_co_members)
     unknown_outside: bool = False   # F65 (Not Knowing Is of the World; with L7): the amount the mind does not know
                                     # is kept when the *world* has just done something and it decided nothing. An
                                     # end of a turn that only came to mind (the question it asked itself, a
