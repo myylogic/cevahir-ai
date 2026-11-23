@@ -1,0 +1,80 @@
+--- zihin/read.py	2026-11-23 14:05:46.000000000 +0000
++++ zihin/read.py	2026-11-23 14:32:37.236184094 +0000
+@@ -1586,6 +1586,52 @@
+     return every
+ 
+ 
++def _members_in_mind(mind, parts, where, category: int, exclude, ties, of_channel, channel):
++    """F73 (Exemplars Come to Mind, ``Config.member_window``): the members of a frame's place that a reading reads,
++    as F70 reads the frames of a family: T for every moment the context has been in mind (``aile.depth``). Only
++    members whose instance was lived count at all; of them, first those that stand most where the context's own filler
++    stands (F31's interchangeability, 1/2 where they never shared a place), then the surest members, then the one
++    lived first; read in the place's own order. A place with no more such members than that is read whole, as
++    before."""
++    from .aile import depth
++    S = mind.S
++    src = mv_view(mind, "t_src")
++    budget = int(mind.cfg.T) * (depth(mind, mind.context) if getattr(mind, "context", None) is not None else 1)
++    if len(ties) <= budget:
++        return ties
++    lived = []
++    for i, tie in enumerate(ties):
++        x = src[tie]
++        if of_channel is not None and of_channel[x] != channel:
++            continue
++        instance = S.tuple_index.get(tuple(x if j in where else p for j, p in enumerate(parts)))
++        if instance is not None and instance != exclude:
++            lived.append((i, tie, x))
++    if len(lived) <= budget:
++        return [tie for _, tie, _ in lived]
++    memo = _moment_memo(mind)
++    key = ("exemplars", category, tuple(parts), exclude, channel, budget)
++    hit = memo.get(key)
++    if hit is not None:
++        return hit
++    k = mind.cfg.k
++    kinds = mv_view(mind, "u_kind")
++    near = {}
++    if exclude is not None and kinds[exclude] & COMPOSED and where:
++        held = parts_of(mind, exclude)
++        if len(held) > where[0]:
++            near = stand_ins(mind, held[where[0]], getattr(mind, "episode_start", mind.t))
++
++    def order(entry):
++        i, tie, x = entry
++        alike = near.get(x)
++        return (-(expectation(alike[0], alike[1], k) if alike is not None else 0.5),
++                -expectation(*mass1(mind, tie), k), i)
++    chosen = sorted(sorted(lived, key=order)[:budget])
++    hit = memo[key] = [tie for _, tie, _ in chosen]
++    return hit
++
++
+ def member_votes(mind, frame: int, exclude: int, trust: Optional[torch.Tensor] = None, tail: Optional[int] = None,
+                  channel: Optional[int] = None):
+     """``member_mass`` and, fifth, how many members voted (the numerosity of the voice, F24). ``tail`` (F32): each
+@@ -1633,7 +1679,10 @@
+         rivals = {src[t] for t in S.inc.get((category, ABSTRACT), ())}
+         may, may_share = [], 0.0
+     of_channel = mv_view(mind, "u_channel") if channel is not None else None
+-    for tie in S.inc.get((category, ABSTRACT), ()):
++    ties = S.inc.get((category, ABSTRACT), ())
++    if tail is None and getattr(mind.cfg, "member_window", False):   # F73: the members that come to mind
++        ties = _members_in_mind(mind, parts, where, category, exclude, ties, of_channel, channel)
++    for tie in ties:
+         x = src[tie]
+         if of_channel is not None and of_channel[x] != channel:
+             continue
+--- zihin/mind.py	2026-11-23 14:22:07.000000000 +0000
++++ zihin/mind.py	2026-11-23 14:30:27.135383714 +0000
+@@ -266,6 +266,10 @@
+                                     # which a thought held, that leaves open the place a frame has for that
+                                     # thought's subject, is heard again inwardly with the subject in that place
+                                     # (Session.carry_heard_subject)
++    member_window: bool = False     # F73 (Exemplars Come to Mind): a frame's vote is read through the members
++                                    # that come to mind in the time the mind has: T a step (with F70's depth),
++                                    # those that stand most where the context's filler stands first, then the
++                                    # surest (read.member_votes, read._members_in_mind)
+     open_window: bool = False       # F70 (The Open Window): a family (F53) is read through the frames that come
+                                     # to mind in the time the mind has: T frames (one a step of the moment),
+                                     # the nearest to the context first, T more every later moment it has the
