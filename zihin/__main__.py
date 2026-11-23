@@ -195,6 +195,7 @@ def full(folder: str = None) -> Config:
     cfg = speaking(folder)
     for name in STUDIED:
         setattr(cfg, name, True)
+    cfg.deep_only = STUDIED                              # F74: what a moment reads only when it reasons
     return cfg
 
 
@@ -212,7 +213,8 @@ STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # bu
            "silent_claims", "find_out", "wonder", "echo_exact", "families", "lived_apart",   # (the program's
            "asked_place", "whole_kinds", "trials", "built_relations", "conjectures", "unseen_share",   # default)
            "own_race", "echo_told", "relied_on", "shares_tested", "unknown_outside", "trial_ends",
-           "split_failed", "deduced_first", "own_turn", "open_window", "subject_carries", "subject_heard")
+           "split_failed", "deduced_first", "own_turn", "open_window", "subject_carries", "subject_heard",
+           "deliberate")
 
 NEEDS = (("find_out", ("faults", "look")), ("wonder", ("look",)), ("silent_claims", ("faults",)),   # what does not
          ("built_relations", ("trials",)), ("unseen_share", ("families",)), ("look", ("open_claims",)),   # work

@@ -941,7 +941,7 @@ def _inherited_of(mind, x: int, since: int):
     with the expectation each has over the deduced evidence, strongest first (of equals the one lived first; only
     those over 1/2: nothing else can be the answer); k)."""
     memo = _episode_memo(mind)
-    budget = _places_in_mind(mind, x, since)[1]
+    budget = _window_budget(mind)
     key = ("inherited_of", x, since) if not budget else ("inherited_of", x, since, budget)
     hit = memo.get(key)
     if hit is None:
@@ -980,6 +980,16 @@ def _may_inherit(mind, x: int, targets) -> bool:
         if any(v in named or v in own for v in targets):
             return True
     return False
+
+
+def _window_budget(mind) -> int:
+    """F70: how many places (or frames) the window allows at this moment: T for every moment the present context
+    has been in mind (``aile.depth``); 0 without the window (everything is read). What ``_places_in_mind`` returns
+    second, read without ranking the places (a run's readings are kept under it)."""
+    if not getattr(mind.cfg, "open_window", False):
+        return 0
+    from .aile import depth
+    return int(mind.cfg.T) * (depth(mind, mind.context) if getattr(mind, "context", None) is not None else 1)
 
 
 def _places_in_mind(mind, x: int, since: int):
@@ -1032,10 +1042,11 @@ def _inheritance(mind, x: int, since: int, depth: int = 2):
     At depth 1 (a class word's own inheritance, read by ``_class_profile`` alone) only the values and their evidence
     are made: (None, the values, None, None, k, their W+, their W-)."""
     memo = _episode_memo(mind)
-    places, budget = _places_in_mind(mind, x, since)
+    budget = _window_budget(mind)
     key = ("inheritance", x, since, depth) if not budget else ("inheritance", x, since, depth, budget)
     if key in memo:
         return memo[key]
+    places = _places_in_mind(mind, x, since)[0]
     S, k = mind.S, mind.cfg.k
     channels, world = mv_view(mind, "u_channel"), kind_masks(mind)[3]
     pieces = []

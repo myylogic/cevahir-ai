@@ -42,8 +42,10 @@ def _words(session, text: str) -> List[str]:
     return adapter(text)
 
 
-def think(session, topic: str, limit: int = 15, before: List[Event] = ()) -> Tuple[List[str], float]:
-    """Think about ``topic`` inwardly. Returns the inner words and the reality score R (mean over steps).
+def think(session, topic: str, limit: int = 15, before: List[Event] = (), reality: bool = True) -> Tuple[List[str], float]:
+    """Think about ``topic`` inwardly. Returns the inner words and the reality score R (mean over steps); with
+    ``reality`` False R is not read (0.0): it is a second reading of every step, by another trust, that what is
+    thought does not depend on (an answer that is only wanted for its words need not pay for it).
 
     The topic is brought to mind (imagined, not heard): a topic of several words is taken in word by word, the mind
     deciding nothing until its last word, as it takes in what it hears; ``before``: what comes to mind in a moment
@@ -62,12 +64,13 @@ def think(session, topic: str, limit: int = 15, before: List[Event] = ()) -> Tup
     def heard(words_: List[str]) -> None:                  # each word as it is decided, before its echo comes back
         for word in words_:
             unit = mind.unit_of(CHANNEL, word)
-            scores.append(_reality(mind, unit) if unit >= 0 else 0.5)
+            if reality:
+                scores.append(_reality(mind, unit) if unit >= 0 else 0.5)
             thought.append(word)
     go_on(mind, acts, heard, limit, imagined=True)
     mind.step([])                                          # the thought ends; the episode closes (a silent moment:
-    reality = sum(scores) / len(scores) if scores else 0.0  # no context, so nothing is decided in it)
-    return thought, reality
+    score = sum(scores) / len(scores) if scores else 0.0   # no context, so nothing is decided in it)
+    return thought, score
 
 
 def goes_to_an_end(mind, context: int, limit: int = 60):

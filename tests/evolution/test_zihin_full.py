@@ -82,6 +82,8 @@ def test_full_is_speaking_with_everything_that_was_built():
     for f in dataclasses.fields(Config):
         if f.name in STUDIED:
             assert getattr(full, f.name) is True and getattr(speaking, f.name) is False, f.name
+        elif f.name == "deep_only":                      # F74: what only a reasoned moment reads
+            assert full.deep_only == STUDIED and speaking.deep_only == (), f.name
         else:
             assert getattr(full, f.name) == getattr(speaking, f.name), f.name
     assert all(getattr(full, name) is True for name in NEWER + STUDIED)

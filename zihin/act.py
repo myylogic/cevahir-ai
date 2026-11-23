@@ -264,14 +264,19 @@ def _race(mind, candidates, theta: float, T: int, dry: bool = False) -> List[Eve
             u = _urge(mind, unit, ranked[1][2])        # F40: how far the two are things known about the same item
             rival = (1.0 - u) * rival + u * 0.5        # (another thing to say, not an alternative): against silence
         rate = 2.0 * (score - max(rival, 0.5 if score <= 0.5 else rival))
+        late = False
         if rate <= 0.0 or math.ceil(theta / rate - 1e-12) > T:
             tried = _explore(mind, ranked, theta, T) if getattr(mind.cfg, "explore", False) else None
             if tried is None:
                 continue
             score, e, unit = tried
+            late = True
         if dry:                                        # F49 (silent claims): only which unit it would say; nothing
             acts.append(unit)                          # is set and nothing is said
             continue
+        if "_latency" in mind.__dict__:                # F74: how many steps of the race the decision took (T + 1:
+            took = T + 1 if late else math.ceil(theta / rate - 1e-12)                          # found by looking
+            mind.__dict__["_latency"] = max(mind.__dict__["_latency"], took)                    # further)
         acts.append(Event(mind.ch.names[channel], mind.ch.symbol(channel, int(S.u_symbol[unit])), ACTED))
         mind.hoping = (unit, e)
         if getattr(mind.cfg, "known", False):          # F41: a thing known of a filler is said: the answer's topic

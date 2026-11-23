@@ -266,6 +266,13 @@ class Config:
                                     # which a thought held, that leaves open the place a frame has for that
                                     # thought's subject, is heard again inwardly with the subject in that place
                                     # (Session.carry_heard_subject)
+    deliberate: bool = False        # F74 (Recall or Reason): a moment in which the mind may speak is read first
+                                    # with the speaking configuration's reading alone (``deep_only`` left out:
+                                    # what it lived, recalled); when that decides within the first half of the
+                                    # race (T/2 steps) the moment is settled so; when it decides nothing, or only
+                                    # late, the same moment is read again with everything (Mind._recall_or_reason)
+    deep_only: tuple = ()           # F74: the switches only a moment the mind reasons in reads with (the program
+                                    # sets them: the mechanisms built after the speaking configuration, STUDIED)
     open_window: bool = False       # F70 (The Open Window): a family (F53) is read through the frames that come
                                     # to mind in the time the mind has: T frames (one a step of the moment),
                                     # the nearest to the context first, T more every later moment it has the
@@ -581,8 +588,11 @@ class Mind:
         listening = self.knob["theta"] >= 1e8              # spoken to: it cannot speak now
         self._read_memo = {}                               # nothing is written while predicting, deciding, feeling
         try:                                               # (read.py reads each unit once in this stretch)
-            self.predicted = predictions(self, "own" if listening else None)   # step 3 (cheap while listening)
-            acts = [] if listening else act_mod.decide(self)   # step 4: no decision to take while listening
+            if not listening and getattr(cfg, "deliberate", False) and getattr(cfg, "deep_only", ()):
+                self.predicted, acts = self._recall_or_reason()   # F74: steps 3 and 4, recalled or reasoned
+            else:
+                self.predicted = predictions(self, "own" if listening else None)   # step 3 (cheap while listening)
+                acts = [] if listening else act_mod.decide(self)   # step 4: no decision to take while listening
             if listening and items and getattr(cfg, "silent_claims", False) and getattr(cfg, "faults", False):
                 from . import hata                         # F49: what its ways claim of what it is about to hear
                 hata.watch(self)
@@ -736,6 +746,45 @@ class Mind:
             self.unknown = 0.0
         else:
             self.unknown = 0.0
+
+    def _recall_or_reason(self):
+        """F74 (Recall or Reason, ``Config.deliberate``): steps 3 and 4 of a moment the mind may speak in, as
+        (the predictions, the acts). First the moment is read as the speaking configuration reads it: the
+        mechanisms of ``Config.deep_only`` left out. The moment is recalled, and settled so, when that reading
+        says what this very context was lived to go on with (a word it went on with before: not one its frames
+        or classes suggest, which is already reasoning) and decides within the first half of the race (it reaches
+        the threshold in at most T/2 of the T steps: the evidence is clear). Otherwise (it decides nothing, or late,
+        or something the context itself never went on with) the mind has the rest of the moment's time to reason:
+        what the first reading set is put back and the moment is read again with every mechanism, as it is without
+        this switch. Nothing is written by either reading (the store is written after them)."""
+        cfg = self.cfg
+        names = [name for name in cfg.deep_only if name != "deliberate" and getattr(cfg, name, False)]
+        hoping, why = self.hoping, len(self.__dict__.get("_why", ()))
+        for name in names:
+            setattr(cfg, name, False)
+        try:
+            self.__dict__["_latency"] = 0
+            predicted = predictions(self, None)
+            acts = act_mod.decide(self)
+            latency = self.__dict__.pop("_latency", 0)
+        finally:
+            for name in names:
+                setattr(cfg, name, True)
+        counts = self.__dict__.setdefault("_recall_counts", [0, 0])    # (moments recalled, moments reasoned)
+        if acts and latency <= cfg.T / 2.0 and self.context is not None:
+            from .read import _world_pos
+            lived = set(_world_pos(self, self.context)[0])  # what this very context was lived to go on with
+            if all(self.unit_of(e.channel, e.symbol) in lived for e in acts):
+                counts[0] += 1
+                return predicted, acts
+        counts[1] += 1
+        self.hoping = hoping                               # what the first reading set is put back: the moment is
+        if "_why" in self.__dict__:                        # reasoned
+            del self.__dict__["_why"][why:]
+        self.__dict__.pop("_src_now", None)
+        self.__dict__.pop("_src_last", None)
+        self._read_memo = {}
+        return predictions(self, None), act_mod.decide(self)
 
     def _surprise(self, percepts) -> float:
         """Mean (1 - e) of what occurred plus mean e of what was expected on a reporting channel and failed."""
