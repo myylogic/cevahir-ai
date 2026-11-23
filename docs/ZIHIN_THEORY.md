@@ -664,6 +664,15 @@ At each moment, roughly each word, the mind lives these steps:
   about what is being spoken of; a listener holds the topic. Measured: 80 of 80 dropped-subject questions answered
   right (none without it), 60 of 60 dropped-subject sentences learned, nothing carried where there was nothing to
   carry (notes of 2026-11-22, section 36).
+- **Recall or Reason (F74; on in the full configuration).** A moment in which the mind may speak is read first as
+  the speaking configuration reads it (every mechanism built since left out). It is recalled, and settled so,
+  when that reading says what this very context was lived to go on with and decides within the first half of
+  the race (T/2 of its T steps); otherwise the moment is reasoned: read again with every mechanism, exactly as
+  without the switch. What frames or classes suggest of a context never lived is reasoning, not recall: the
+  first rule took any clear decision and lost a deduction ("levrek bir balıktır" for "levrek yüzer"). On the
+  owner's documents the whole mind thinks the same words in 199 of 200 answers, the median answer 2.70 s ->
+  0.64 s; recall alone is 0.10 s. Where a moment is recalled what reads the deep reading after the decision
+  (F50's looking) has nothing to read (notes of 2026-11-22, section 39).
 - **The whole mind on real text (a measurement, not a mechanism).** Minds that lived only the owner's documents,
   cued with the first two words of a sentence they read (200 cues): the speaking configuration 90 exact, 146
   valid, 31 silent; the whole mind without silent claims 89, 151, 34. Three minds from nothing on the first 2,000
@@ -955,6 +964,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | Its Own Turn Comes Last | Kendi Sırası En Son Okunur | F69, off by default (with silent claims) | what one was shown against what one is asked (a shift between the two samples); learning by watching against learning by one's own trials; source monitoring of one's own claims; nested (hierarchical) evidence |
 | The Open Window | Açılan Pencere | F70, off by default | cue-dependent retrieval; spreading activation with limited capacity; exemplar sampling; anytime reasoning (a deeper answer with more time) |
 | The Subject Carries | Konu Taşınır | F72, off by default (while listening: with silent claims) | the discourse topic held in working memory; zero anaphora (pro-drop); centering |
+| Recall or Reason | Hatırla ya da Düşün | F74, off by default (deep_only: what only a reasoned moment reads) | dual-process theories (fast retrieval, slow deliberation); the feeling of knowing as the signal to deliberate; metareasoning (computation spent where it can change the decision) |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |
 | Felt Not-Knowing | Bilmeme Hissi | L7 | feeling of knowing (metacognition) |

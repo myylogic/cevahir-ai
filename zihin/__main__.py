@@ -305,6 +305,8 @@ def configure(mind, variant: str = "full", on=(), off=(), loaded: bool = False, 
                 put(w, True)
                 say("  açıldı: %s (%s onsuz çalışmaz)" % (w, k))
     mind.owner_off = sorted(named)
+    if getattr(cfg, "deliberate", False) and not getattr(cfg, "deep_only", ()):
+        cfg.deep_only = STUDIED                          # F74: a loaded mind reasons with what the full one has
     if given and loaded:
         say("  tam yapı: bu zihin şu mekanizmalarla büyümedi, şimdi açıldı: %s (birini kapalı tutmak için --kapat ad; "
             "zihnin eski ayarlarıyla yaşaması için --variant speaking)" % ", ".join(given))

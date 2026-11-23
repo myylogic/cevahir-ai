@@ -4367,3 +4367,119 @@ right" 4,476 and "opposite right" 4,476 of as many (18,521 of 18,521); "add jump
 (Section 37 named the sections to come as 38 and 39: they are 39, recall or reason, and 40, the race.)
 
     python research/living_mind_2026_11_22/t_scan_kinds.py run --scan <the published SCAN folder> --split opposite_right --workers 2
+
+## 39. Recall or reason (F74): a moment reads what it lived first, and reasons where that does not settle it
+
+Asked by the owner after the first race rows (section 40): the whole mind answers forty times later than the
+Transformer; change the computation, the mathematics if need be, with advanced methods: a mind that thinks may take
+time, but the architecture should go further.
+
+### 39.1 Where an answer's time goes
+
+On the mind of section 32 (the owner's documents, 186,457 moments; the whole mind without silent claims, with F70),
+ten cues answered (thoughts of up to 60 words), processor seconds:
+
+    the whole mind                                  39.4
+    the speaking configuration's reading            6.3    the same ten thoughts, word for word
+    the whole mind with one mechanism off:
+      F37 inheritance                               17.3
+      F53 families                                  17.7
+      any one of the other 30                       37.2 to 45.1 (the spread of a busy machine)
+
+The rest of the time is spread over Python's own work (a dictionary lookup is a tenth of it). Two things were
+measured and found not to be the cause: no frame is read twice in a run with the same trust (558 family readings
+in six answers, none again), and the frame that speaks is rarely found early (a bound on each frame's score, read
+first, would have spared 0.06 of 9.49 seconds). The work is real: each moment reads the frames of its context and
+of their families through all their members, and F37 deduces, for every member, what its classes go on with.
+
+On the 200 cues of section 32 the speaking configuration's reading of the same mind thinks the same words as the
+whole mind in 183; where they part, it is always at the first moment where they can (the cue's last word, or a
+moment where the first reading has nothing to say), in two ways:
+
+* the first reading says nothing where the cue began several lived sentences (2 or 3 lived continuations): the
+  whole mind chooses one, and it was a valid sentence each of the 8 times;
+* the first reading says a word that only just clears the line (e 0.64 to 0.69, a decision in the second half of
+  the race) where the whole mind says nothing: 8 of those 9 words were not the sentence.
+
+### 39.2 The mechanism (`Config.deliberate`, with `Config.deep_only`; on in the whole mind; `Mind._recall_or_reason`)
+
+A moment in which the mind may speak is read first as the speaking configuration reads it: the mechanisms of
+`deep_only` (the program sets them: every studied mechanism) left out. The moment is **recalled**, and settled so,
+when that reading says what this very context was lived to go on with (a word that followed this context before)
+and decides within the first half of the race (it reaches the threshold in at most T/2 of the T steps). Otherwise
+(it decides nothing, or only late, or a word the context itself never went on with: one its frames or classes
+suggest, which is already reasoning) the mind has the rest of the moment's time to **reason**: what the first
+reading set is put back and the moment is read again with every mechanism, exactly as without the switch. Nothing
+is written by either reading. No number is chosen: T/2 is the half of the race the mind already runs, and what
+counts as recalled is what the context's own record holds.
+
+### 39.3 Measured
+
+The 200 cues (the same mind and sequence; only the words of the thought read, without the reality score, which is
+a second reading of every step that the words do not depend on; processor seconds on a busy machine):
+
+    reading                  all 200   an answer: mean / median / p90   exact / valid / silent   F1      differ
+    the whole mind           565.1     2.83 / 2.70 / 3.96               89 / 151 / 34            0.5242
+    recall only              30.5      0.15 / 0.10 / 0.33               90 / 146 / 31            0.5191  17
+    F74                      262.4     1.31 / 0.64 / 3.16               90 / 152 / 34            0.5259  1
+
+F74 thinks the whole mind's words in 199 of 200 (the one that differs is now the exact sentence), at less than half
+the time, a quarter at the median. Of its 2,128 moments 1,649 were recalled and 479 reasoned (2.4 an answer: the
+moment the cue ends in, when it is ambiguous, and the silence an answer ends in); the reasoned moments take most of
+the time. The world of `test_zihin_inherit` (facts read apart; two members of each class asked what
+they do): "serçe ne yapar ?", asked before, is recalled word by word ("serçe uçar"); "kartal", "levrek", "penguen"
+never asked are reasoned and answered as the whole mind answers them ("kartal uçar", "levrek yüzer", "penguen
+yüzer"; F37's deduction and the exception).
+
+The battery (the 37 lines, the whole mind with F74 against the whole mind of section 36): 32 lines the same, count for
+count. In five the outcomes are the same and the way there is not. The three worlds of the mind's own questions
+(`t_wonder.py`: chain, chains, young): it asked itself one question more (84 -> 85, 89 -> 90) and looked one thing
+up less (51 -> 50); what it answered afterwards (30 / 0 / 0) and what it held (5 of 5, 10 of 10) are the same. The
+meaning dialogue world: every answer the same, expectations a few thousandths lower (0.982 -> 0.976). The fault loop
+(`t_fault.py loop`): with F49 on, the whole mind as the program runs it, nothing changed (79 / 0 / 1 / 0, then
+80 / 0 / 0 / 0); with F49 off (an arm of the study) the mind looked things up of its own far less often (68 -> 30)
+and gave one wrong value more at first (61 -> 62 of 80). Where a moment is recalled the deep reading is not made, and
+what reads that reading after the decision (F50's looking, which needs the item the speaking frame was about) has
+nothing to read: the mind does not look up what it recalled. With F49 on, those moments are reasoned. The machine was
+restarted during the battery; the five lines it stopped in were run again from the start.
+
+### 39.4 Tried on the way and not kept
+
+* The first rule took any decision of the first reading within the first half of the race. On the 200 cues it was
+  3.15 times faster than the whole mind and as good (90 / 152 / 28), but in the world of inheritance it answered
+  "levrek bir balıktır" to "levrek ne yapar ?": the frames of the question suggested "bir" clearly, and F37's "yüzer"
+  never came. What frames suggest of a context never lived is generalisation, reasoning; recall is what followed the
+  context itself. The rule was narrowed to that (39.2).
+* A middle level (the first reading's mechanisms with every studied one but the two that read generalisations of
+  generalisations, F37 and F53, before the whole): it settled 6 of 480 moments; slower (258 s), not kept.
+* A lived end taken as recalled (the first reading silent where the context was lived and only ended): 272.9 to
+  263.4 s, the same answers; small, not kept.
+* A reasoned moment's expectation of what it will perceive kept from the first reading (only the decision reasoned):
+  248.3 s, the same answers on the 200 cues, but what the mind expects (and so learns from) differs; not kept.
+* The decision reusing the moment's prediction reading when the two trusts give the same numbers (no tie holds
+  evidence of the mind's own acts): exact, and no faster, because the mind writes its own decisions as acted
+  evidence from its first moment (2 reuses of 38).
+* F31's reading of what stands where an item stands kept for the run, checked by the store's stamp of when each
+  tie was last written: exact, 6% faster; left for a commit of its own.
+
+Two exact changes are kept (the same words and store digests): the reality score of a thought is read only when
+asked (`think(..., reality=False)`; the race and the recall measurements use it), and F37's kept readings are looked
+up before the places of an item are ranked (`read._window_budget`; 8%).
+
+### 39.5 What it does not do
+
+* The moments it reasons in cost what they cost: an answer of the whole mind is still 1.31 s on average here, 0.64 at
+  the median (the Transformer of section 40: 0.03 s). The reasoning itself (F37,
+  F53) was not made cheaper; that needs the readings of a frame kept as the store changes (compiled), which the
+  stamps of 39.4 begin.
+* Recall is the speaking configuration's reading: a mechanism that should overrule a clear lived continuation
+  (an exception learned after the fact) is not heard where recall settles the moment.
+
+### 39.6 Gates, tests, reproduce
+
+With every studied switch off the gates are bit-identical (code md5 9c182202b359742e541dd730bfebdaa6; the
+battery ran on 848e2afd..., which differs only in giving a mind loaded from disk the list `deep_only`, found
+when a saved mind was loaded with F74: it had none, and F74 did nothing). 555 tests pass
+(`test_zihin_deliberate.py`, 7, is new).
+
+    python research/living_mind_2026_11_22/t_race.py mind --data FOLDER --variant full --off silent_claims,relied_on,own_turn
