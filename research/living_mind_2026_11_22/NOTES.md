@@ -4350,3 +4350,20 @@ does: a sample chosen by likeness is not a sample of the place, and the mind bec
 minority read as a majority). It answered 1.86 times sooner and was not exact; the owner asked for what is gained
 without loss, so it is not part of the mind. What the time of an answer is spent on, and what was built instead,
 is section 38.
+
+## 38. The whole published "opposite right" file with F56
+
+The fifth whole published SCAN test file with F56 on (section 20.4; `t_scan_kinds.py run`, the code frozen with
+section 20, md5 4d33b86f...; one life, seed 0; the row appended to `results/scan_kinds.jsonl`):
+
+    the published split    watched twice (of the published training file)    exact with F56     without (section 22)
+    opposite right         1,087 of 15,225                                   4,476 of 4,476     4,476
+
+Nothing silent and nothing wrong, as without F56: no answer of this file is one F56 changes. The life is 94,919
+moments (308 s); the answers took 9,607 s with two processes on a busy machine. Five of the six published files
+have now been answered whole with F56: "right" 4,476, the length file 3,920, "jump around right" 1,173, "around
+right" 4,476 and "opposite right" 4,476 of as many (18,521 of 18,521); "add jump" has no answer that F56 changes.
+
+(Section 37 named the sections to come as 38 and 39: they are 39, recall or reason, and 40, the race.)
+
+    python research/living_mind_2026_11_22/t_scan_kinds.py run --scan <the published SCAN folder> --split opposite_right --workers 2

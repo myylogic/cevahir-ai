@@ -717,7 +717,7 @@ At each moment, roughly each word, the mind lives these steps:
   split (answers of 24 to 48 actions) **3,919 of 3,920**, "add jump" **7,706 of 7,706**: 26,223 of 26,227 over the
   six published test files, the four wrong answers one source that F56 closes (with it the whole "right" file is
   4,476 of 4,476, the length file 3,920 of 3,920, "jump around right" 1,173 of 1,173 and "around right" 4,476 of
-  4,476; "opposite right" with it is running) (`research/living_mind_2026_11_22`, notes sections 19, 20, 22, 29 and 34). In a world it was not developed on (T-dans:
+  4,476; "opposite right" 4,476 of 4,476) (`research/living_mind_2026_11_22`, notes sections 19, 20, 22, 29, 34 and 38). In a world it was not developed on (T-dans:
   Turkish moves said alone, directions never said alone and placed before the move, "iki kez" and "üç kez" between
   them; held out, one direction with both): the first run **600 of 600** over three seeds (0 of 600 without F45; a
   Transformer 108 of 200); when the new direction is met in **one dialogue only** ("geriye zıpla"), 600 of 600 of the
