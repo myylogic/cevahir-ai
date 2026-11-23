@@ -206,12 +206,6 @@ def likelihood(mind, z: Zemin, w: int, feats: Dict[int, float]) -> Tuple[float, 
     return total, n
 
 
-def mean_likelihood(mind, z: Zemin, w: int, feats: Dict[int, float]) -> float:
-    """The weighted geometric mean of P(value | w) over the unit's dimensions (1/2: the word says nothing of it)."""
-    total, n = likelihood(mind, z, w, feats)
-    return 0.5 * math.exp(total / n) if n else 0.5
-
-
 def speaking_line(mind) -> float:
     """e* = 1/2 + theta / (2T): the expectation the mind speaks at (the race reaches the threshold in T steps)."""
     return 0.5 + mind.cfg.theta / (2.0 * mind.cfg.T)
@@ -236,31 +230,6 @@ def contradicts(mind, z: Zemin, w: int, feats: Dict[int, float]) -> bool:
             continue                                 # it is not as sure that the others do not come: the dimension
         return True                                  # varies for this word (books come in colours)
     return False
-
-
-def _met(mind, z: Zemin, w: int) -> Dict[int, int]:
-    """How many values of each dimension the word has met: named with at least one whole observation's worth of
-    evidence (an alignment's share is a part of one)."""
-    key = ("met", w, mind.S.version)
-    hit = z.memo.get(key)
-    if hit is not None:
-        return hit
-    S = mind.S
-    lst = S.out.get((w, ADLANDIRIR, 0))
-    out: Dict[int, int] = {}
-    if lst:
-        ids = np.frombuffer(lst, dtype=np.int32).astype(np.int64)
-        v = S._np()
-        ids = ids[v.alive[ids]]
-        if len(ids):
-            p, _ = S.raw2(torch.from_numpy(ids))
-            pos = p.numpy().sum(axis=1) if p.dim() > 1 else p.numpy()
-            for tie, x in zip(ids, pos):
-                if x >= 1.0:                         # met: at least one whole observation's worth of evidence
-                    ch = int(v.channel[v.dst[tie]])
-                    out[ch] = out.get(ch, 0) + 1
-    z.memo[key] = out
-    return out
 
 
 def _sample(mind, z: Zemin) -> List[Dict[int, float]]:
