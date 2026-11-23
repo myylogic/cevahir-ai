@@ -1,0 +1,169 @@
+diff --git a/tests/evolution/test_zihin_full.py b/tests/evolution/test_zihin_full.py
+index dc9541f..4130169 100644
+--- a/tests/evolution/test_zihin_full.py
++++ b/tests/evolution/test_zihin_full.py
+@@ -172,7 +172,7 @@ def test_what_the_owner_keeps_off_stays_off_and_is_remembered(tmp_path, monkeypa
+     assert mind.owner_off == ["faults", "known"]
+     off = {name for name in NEWER + STUDIED if not getattr(mind.cfg, name)}
+     assert off == {"faults", "known", "find_out", "silent_claims", "relied_on", "split_failed",
+-                   "deduced_first", "own_turn"}               # ... and what cannot work
++                   "deduced_first", "own_turn", "latch"}               # ... and what cannot work
+                                                                                   # without faults
+     out = run(monkeypatch, capsys, ["--load", at, "--kayit", at])     # remembered: the default does not turn it on
+     mind = load(at, ledger=False)
+diff --git a/zihin/__main__.py b/zihin/__main__.py
+index 5bf6b83..3a6e734 100644
+--- a/zihin/__main__.py
++++ b/zihin/__main__.py
+@@ -212,13 +212,13 @@ STUDIED = ("inherit", "witness", "difference", "urge", "known", "wholes",   # bu
+            "silent_claims", "find_out", "wonder", "echo_exact", "families", "lived_apart",   # (the program's
+            "asked_place", "whole_kinds", "trials", "built_relations", "conjectures", "unseen_share",   # default)
+            "own_race", "echo_told", "relied_on", "shares_tested", "unknown_outside", "trial_ends",
+-           "split_failed", "deduced_first", "own_turn", "open_window")
++           "split_failed", "deduced_first", "own_turn", "open_window", "latch")
+ 
+ NEEDS = (("find_out", ("faults", "look")), ("wonder", ("look",)), ("silent_claims", ("faults",)),   # what does not
+          ("built_relations", ("trials",)), ("unseen_share", ("families",)), ("look", ("open_claims",)),   # work
+          ("echo_told", ("echo_exact",)), ("relied_on", ("silent_claims",)), ("shares_tested", ("told_apart",)),
+          ("trial_ends", ("trials",)), ("split_failed", ("faults",)), ("deduced_first", ("faults", "inherit")),
+-         ("own_turn", ("silent_claims",)),
++         ("own_turn", ("silent_claims",)), ("latch", ("silent_claims",)),
+          ("told_apart", ("wholes",)), ("whole_kinds", ("wholes",)))
+                                                                                                     # without what
+ 
+diff --git a/zihin/aile.py b/zihin/aile.py
+index 6f55e3e..d39c6cf 100644
+--- a/zihin/aile.py
++++ b/zihin/aile.py
+@@ -201,6 +201,12 @@ def depth(mind, unit: int) -> int:
+     return held[0]
+ 
+ 
++def reach(mind, unit: int) -> int:
++    """F70 with F71: how many steps of T the window has for a context: its depth, and, while the mind follows a
++    thought that has held (``hata.watch``), one more for every claim of the thought that held."""
++    return depth(mind, unit) + mind.__dict__.get("_reach", 0)
++
++
+ def in_window(mind, unit: int, word: int, frames: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+     """F70 (The Open Window, ``Config.open_window``): the frames of a family that come to mind for a context in the
+     time the mind has.
+@@ -216,7 +222,7 @@ def in_window(mind, unit: int, word: int, frames: List[Tuple[int, int]]) -> List
+     where they never met), of those equally near the one with the most members (the most familiar), then the one
+     made first. Nothing is weighed differently: the frames in the window vote as they always do, and the family's
+     conviction is that of the frames that were read."""
+-    budget = int(mind.cfg.T) * depth(mind, unit)
++    budget = int(mind.cfg.T) * reach(mind, unit)
+     if len(frames) <= budget:
+         return frames
+     from .read import _moment_memo, stand_ins
+diff --git a/zihin/hata.py b/zihin/hata.py
+index 724fddd..889a007 100644
+--- a/zihin/hata.py
++++ b/zihin/hata.py
+@@ -71,6 +71,13 @@ it (F46: what it may look up by itself, F47).
+   own turn. What it said or held back at a context stays kept when it then listens at that context (the teacher
+   shows the dialogue it has just answered), and a moment of listening is not being called on again.
+ 
++* **Latching (F71, ``Config.latch``; with silent claims).** While it only listens the mind does not read anew at
++  every context it has no record of whatever came before. A run of items (an utterance, a sentence) is one thought:
++  it is sought from the run's beginning until it claims something, followed to the next context as long as what
++  it claimed is what was then heard, and it reaches further with every claim that held (the window of F70 is that
++  many steps wider); where a claim of it failed, the thought is let go and the mind only listens until the next
++  run begins.
++
+ Nothing here names a word, a frame or a domain; no number is chosen (one experience per settled claim, the core's
+ k, the line the mind already speaks at). ``report`` says what the mind has learned about its own ways and where its
+ last faults were.
+@@ -357,6 +364,22 @@ def watch(mind) -> None:
+     context = mind.context
+     if context is None:
+         return
++    streak = 0
++    if getattr(mind.cfg, "latch", False):                  # F71: the thought of this run of items: sought until it
++        run = getattr(mind, "episode_start", -1)           # claims something, followed while what it claimed is
++        thought = mind.__dict__.get("_thought")            # heard, let go when it is not
++        if thought is None or thought[0] != run:
++            thought = [run, 0, False]                      # (the run, how many of its claims held, let go)
++        held = mind.__dict__.get("_held_now")
++        if held is not None and held[0] == mind.t:         # what it claimed at the last context was settled now
++            if held[1]:
++                thought[1] += 1
++            else:
++                thought[2] = True
++        mind.__dict__["_thought"] = thought
++        if thought[2]:
++            return                                         # the thought failed: it only listens until the next run
++        streak = thought[1]
+     trust = mind.trust.clone()
+     trust[ACTED] = 0.0
+     act = R.kind_masks(mind)[5]
+@@ -366,7 +389,11 @@ def watch(mind) -> None:
+     if any(w_pos > 0.0 and act[channels[v]] for v, (w_pos, _) in R.own_mass(mind, context, 1, outside).items()):
+         return                                             # it has lived this context: memory speaks, nothing to test
+     mind.__dict__.pop("_src_last", None)
+-    reading = R.members_map(mind, context, trust)
++    mind.__dict__["_reach"] = streak                       # F71: a thought that held reaches further (aile.reach)
++    try:
++        reading = R.members_map(mind, context, trust)
++    finally:
++        mind.__dict__.pop("_reach", None)
+     found = mind.__dict__.pop("_src_last", None)
+     if found is not None and found[0] == context:
+         from .act import _race                             # the word it would say here, were it its turn (the same
+@@ -523,12 +550,16 @@ def judge(mind, items) -> None:
+     if not lived:
+         return
+     rest = []
++    listened = held_any = False
+     for claim in claims:
+         ways, target, said, e0, _ = claim
+         v = lived.get(int(channels[target]))
+         if v is None:
+             rest.append(claim)
+             continue
++        if said is None:                                   # F71: the thought it followed while listening
++            listened = True
++            held_any = held_any or v == target
+         before = _read_now(mind, ways, e0)
+         settle(mind, ways, v == target, e0, turn=said is not None)
+         if said is False:
+@@ -539,6 +570,8 @@ def judge(mind, items) -> None:
+         mind.claimed[mind.context] = tuple(rest)
+     else:
+         del mind.claimed[mind.context]
++    if listened:
++        mind.__dict__["_held_now"] = (mind.t, held_any)
+ 
+ 
+ def valued(mind, sign: float) -> None:
+diff --git a/zihin/mind.py b/zihin/mind.py
+index 5cdf941..232efa9 100644
+--- a/zihin/mind.py
++++ b/zihin/mind.py
+@@ -258,6 +258,10 @@ class Config:
+                                     # record is read last, over the other, as the more specific evidence is
+                                     # everywhere; and a moment in which it only listens is not being called on
+                                     # again (what it held back is not counted unanswered there) (hata._apart)
++    latch: bool = False             # F71 (Latching; with silent claims): while it only listens, a run of items is
++                                    # one thought: sought until it claims something, followed while what it
++                                    # claimed is what was then heard, reaching further with every claim that
++                                    # held; when a claim fails it is let go until the next run (hata.watch)
+     open_window: bool = False       # F70 (The Open Window): a family (F53) is read through the frames that come
+                                     # to mind in the time the mind has: T frames (one a step of the moment),
+                                     # the nearest to the context first, T more every later moment it has the
+diff --git a/zihin/read.py b/zihin/read.py
+index ada563e..f83a7f5 100644
+--- a/zihin/read.py
++++ b/zihin/read.py
+@@ -993,8 +993,8 @@ def _places_in_mind(mind, x: int, since: int):
+     places = memberships_before(mind, x, since)
+     if not getattr(mind.cfg, "open_window", False):
+         return places.items(), 0
+-    from .aile import depth
+-    budget = int(mind.cfg.T) * (depth(mind, mind.context) if getattr(mind, "context", None) is not None else 1)
++    from .aile import reach
++    budget = int(mind.cfg.T) * (reach(mind, mind.context) if getattr(mind, "context", None) is not None else 1)
+     if len(places) <= budget:
+         return places.items(), budget
+     sure = [(place, e) for place, e in places.items() if e > 0.5]

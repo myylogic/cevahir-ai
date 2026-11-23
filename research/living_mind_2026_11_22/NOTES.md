@@ -4178,3 +4178,37 @@ machine busy with the batteries of sections 31 and 33. With "right", the length 
 right" (4,476 without) is running, and "add jump" has no answer that F56 changes.
 
     python research/living_mind_2026_11_22/t_scan_kinds.py run --scan <the published SCAN folder> --split around_right --workers 2
+
+## 35. Latching (F71): following the thought that holds, tried and not kept
+
+Asked, in the owner's words: thoughts do not grow by focus; the path is the path of thoughts; the mind locks onto
+the right thought and widens it; silent claims should work like that.
+
+Built: while the mind only listens, a run of items (an utterance, a sentence) is one thought, sought from the
+run's beginning until it claims something, followed to the next context while what it claimed is what was then
+heard, one step wider in the window of F70 for every claim that held, and let go where a claim failed; the mind
+then only listens until the next run begins.
+
+Measured (the whole mind with F70, code md5 ab1d4cc0..., the switch off and on; `t_turn.py`'s worlds, 5 seeds;
+`t_documents.py` on the first 2,000 sentences of the owner's documents, 100 cues):
+
+    measure                                                      without         latching        latching, no wider window
+    the misled world, loops in the misleading frames             18 / 39 / 33    18 / 39 / 33
+    the half-empty library                                       40/0/1/39       40/0/1/39
+    a frame that holds but for one thing                         35 / 5 / 0      35 / 5 / 0
+    only watching (two worlds, four checkpoints)                 the same        the same
+    the documents: share of moments with the full reading        0.76            0.56            0.56
+    ms a moment after 23,594 moments                             23.2            25.8            25.2
+    exact / valid / silent of 100                                56 / 83 / 15    55 / 82 / 16    55 / 82 / 16
+
+Every small world is the same, because in them a run is short and its thought is followed to the end either way.
+On running text a fifth of the readings were not made and the cost did not fall: what was let go was the cheap
+beginning of a thought that failed, and what was followed is where a reading costs (41 ms against 27). One exact
+and one valid answer were lost. It is not part of the mind; the record is in `eliminated_latch/`.
+
+What this says about the owner's picture: the mind already follows the thought that holds, where it counts. A
+reading's claim is settled by what comes next, the way that made it gains or loses credit (F49), and a way that
+keeps failing is not believed. What costs is not following the wrong thoughts but how much each reading reads,
+and that is what section 33's window bounds. Where the picture asks for more than was built here (a thought that
+widens by bringing in what the held thought is about, rather than by reading more frames) it is not yet a
+mechanism.
