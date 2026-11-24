@@ -649,14 +649,14 @@ are mended by the same store of episodes.
   change between the answer of the rest and the answer lived). That change is put into the answer of the asked rest.
   The part's own words map by their place in the part (each word to its relation, as in 12.5, alike by kind); the
   rest of the example maps through the alignment of the two rests' answers, read by what they say about the places
-  near the part (the numbers that name them, and the relations of the words that stand there). A token of an answer that is a whole number smaller than the utterance's length is read as a place of
-  it, and moves on with the places when a part is put in. One change can be written in several ways where the tokens
-  repeat; it is put in as far on as the tokens allow. What the example put at the very beginning of its answer goes
-  at the beginning, and where the answer lists runs of the same shape, a new run goes by its place among its
-  neighbours (a list keeps the order of what was said). The examples nearest the asked part vote (at most
-  eight); the plan's belief is the rest's belief times the share of the examples that agree. The most whole-like parts
-  are tried first, then the rightmost; a search tries at most 400 parts and takes out at most 16 one after another.
-
+  near the part (the numbers that name them, and the relations of the words that stand there). A token of an answer
+  that is a whole number smaller than the utterance's length is read as a place of it, and moves on with the places
+  when a part is put in. One change can be written in several ways where the tokens repeat; it is put in as far on
+  as the tokens allow. What the example put at the very beginning of its answer goes at the beginning, and where the
+  answer lists runs of the same shape, a new run goes by its place among its neighbours (a list keeps the order of
+  what was said). The examples nearest the asked part vote (at most eight); the plan's belief is the rest's belief
+  times the share of the examples that agree. The most whole-like parts are tried first, then the rightmost; a search
+  tries at most 400 parts and takes out at most 16 one after another.
 - **Exchanging a part.** Some parts cannot be taken out: what remains would not be an utterance ("Emma offered Lina to
   a girl" without "Lina"). Such a part is exchanged for the part lived most often between the same neighbours ("the
   cake"); the rest ("Emma offered the cake to a girl") is answered, and what that exchange changes in lived answers is
