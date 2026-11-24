@@ -31,6 +31,7 @@ import re
 from collections import Counter, defaultdict
 from typing import Dict, List, Optional, Sequence, Tuple
 
+from living.analogy import Episodes
 from living.fast import FastCortex
 
 TOKEN = re.compile(r"\w+|[^\w\s]", re.UNICODE)          # Zihin's tokens (zihin.__main__.words), on the raw text
@@ -102,6 +103,7 @@ class Cevahir:
         self.pending: Optional[Tuple[str, str]] = None           # the last turn, lived by the harmony once judged
         self.alphabets: Dict[str, set] = {self.channel: set()}   # every channel's own alphabet (MODEL.md 4)
         self.entries: Optional[List[dict]] = [] if ledger else None  # what was lived, entry by entry (to forget)
+        self.episodes = Episodes()                                   # the hippocampus: dialogues as lived
         self._open: Optional[dict] = None
         self.others: Dict[str, dict] = {}                        # channels born by the rule: a harmony each
 
@@ -330,7 +332,20 @@ class Cevahir:
         if getattr(self.mind.cfg, "wholes", False):          # F43: the dialogue lived once more as wholes
             from zihin.butun import consolidate
             consolidate(s, first, answer, prov, asker)
+        self.episodes.live(self._said(first), self._said(answer))   # the hippocampus keeps it as it was said
+        if self._open is not None:
+            self._open["episode"] = len(self.episodes) - 1
         return bits
+
+    @staticmethod
+    def _said(text: str) -> List[str]:
+        """An utterance's tokens as said (case kept), without its closing marks."""
+        from zihin.__main__ import FINAL
+        from living.analogy import tokens
+        out = tokens(text)
+        while out and out[-1] in FINAL:
+            out = out[:-1]
+        return out
 
     def read(self, text: str, code: bool = False) -> float:
         """Read a document: see ``_read`` (one entry of the history, with a ledger)."""
@@ -484,6 +499,18 @@ class Cevahir:
             partial = None
         return said
 
+    def choose_plan(self, question: str, plan: List[str], plan_e: List[float]) -> Tuple[List[str], List[float], str]:
+        """The prefrontal choice of the thought (MODEL.md 12.5): Zihin's plan, believed as its weakest decided word,
+        or the hippocampus's analogy, believed by the rule on its neighbours' vote; the one believed more, if it
+        reaches the speaking line. Returns (plan, beliefs, whose)."""
+        from living.evidence import SPEAKING_LINE
+        a_plan, a_e, _ = self.episodes.plan(self._said(question))
+        b_z = (min(plan_e) if plan_e else SPEAKING_LINE) if plan else 0.0
+        if a_plan and a_e >= SPEAKING_LINE and a_e > b_z:
+            low = [self.session.lower(t) for t in a_plan]
+            return low, [a_e] * len(low), "analogy"
+        return plan, plan_e, "zihin"
+
     def _heard_forms(self, question: str) -> None:
         """The written forms of a question's tokens, as heard (so that a word met first in it can be said back)."""
         for m in TOKEN.finditer(question):
@@ -519,6 +546,7 @@ class Cevahir:
         plan = [] if said == "(sessiz)" else self.session.words(said)
         es = [e for w, e in decided]
         plan_e = es if [w for w, _ in decided] == plan else []
+        plan, plan_e, _ = self.choose_plan(question, plan, plan_e)
         return self.speak(history, plan, plan_e, "\t", most=16 * limit).strip()
 
     def every_way(self, question: str, limit: int = 400) -> Dict[str, str]:
@@ -548,6 +576,9 @@ class Cevahir:
         plan = [] if said == "(sessiz)" else self.session.words(said)
         es = [e for w, e in decided]
         plan_e = es if [w for w, _ in decided] == plan else []
+        a_plan, _, _ = self.episodes.plan(self._said(question))
+        out["analogy"] = " ".join(a_plan) if a_plan else "(sessiz)"
+        plan, plan_e, out["thought"] = self.choose_plan(question, plan, plan_e)
         out["cevahir"] = self.speak(history, plan, plan_e, "\t", most=16 * limit).strip()
         return out
 
@@ -663,6 +694,8 @@ class Cevahir:
         moments = list(range(e["t0"], e.get("t1", e["t0"] - 1) + 1))
         for m in reversed(moments):
             self.mind.retract(m)
+        if "episode" in e:
+            self.episodes.forget(e["episode"])
         for where, gap, answer, token, raw in e["forms"]:
             self.gaps[where][gap] -= 1
             if self.gaps[where][gap] <= 0:
@@ -768,6 +801,7 @@ class Cevahir:
             "outcome_good": [[w, c, n] for (w, c), n in self.outcome_good.items()],
             "outcome_all": [[w, c, n] for (w, c), n in self.outcome_all.items()],
             "alphabets": {k: "".join(sorted(v)) for k, v in self.alphabets.items()},
+            "episodes": self.episodes.state(),
             "others": [[name, ch["won"], ch["seen"]] for name, ch in sorted(self.others.items())]}
         with open(os.path.join(folder, "cevahir.json"), "w", encoding="utf-8") as f:
             json.dump(state, f, ensure_ascii=False)
@@ -847,6 +881,7 @@ class Cevahir:
         self.outcome_all = Counter({(w, c): n for w, c, n in state.get("outcome_all", [])})
         self.last_leads, self.pending = [], None
         self.entries, self._open, self._pending_entry = None, None, None
+        self.episodes = Episodes.from_state(state.get("episodes", {}))
         self.alphabets = {k: set(v) for k, v in state.get("alphabets", {self.channel: ""}).items()}
         self.others = {}
         for i, (name, won, seen) in enumerate(state.get("others", [])):

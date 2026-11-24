@@ -246,3 +246,28 @@ def test_cevahir_forgets_an_entry_exactly_and_can_no_longer_say_it(FastCortex):
     assert c.cortex.digest() == d.cortex.digest()                     # the counts of a mind that never heard it
     said = c.answers(["şifre nedir ?"], way="every", workers=1)[0]
     assert all("kırmızı" not in said[w].lower() for w in said)
+
+
+def test_the_hippocampus_answers_an_utterance_that_differs_in_two_places_from_every_one_lived(FastCortex):
+    from living.analogy import Episodes
+    people = ["Ali", "Veli", "Ayşe", "Can", "Ece", "Zeynep"]
+    things = ["elma", "kitap", "top", "kalem", "çanta"]
+    ep = Episodes()
+    rng = random.Random(3)
+    lived = set()
+    for _ in range(60):
+        p, q, t = rng.choice(people), rng.choice(people), rng.choice(things)
+        lived.add((p, q, t))
+        ep.live([p, "verdi", q, "'", "ya", t, "."], ["ver", "(", p, ",", q, ",", t, ")"])
+    asked = [(p, q, t) for p in people for q in people for t in things if (p, q, t) not in lived][:30]
+    right = 0
+    for p, q, t in asked:
+        plan, e, n = ep.plan([p, "verdi", q, "'", "ya", t, "."])
+        right += plan == ["ver", "(", p, ",", q, ",", t, ")"]
+    assert right == len(asked)
+    i = len(ep) - 1                                                    # a dialogue taken back leaves no trace
+    before = dict(ep.with_w)
+    words = len(set(ep.said[i]))
+    ep.forget(i)
+    assert sum(before.values()) - sum(ep.with_w.values()) == words     # each of its words, once
+    assert all(i not in ids for ids in ep.index.values())
