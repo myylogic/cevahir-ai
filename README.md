@@ -14,6 +14,25 @@
 > told, imitated, its own act, inferred or imagined. It reads what to expect from a single rule:
 > `e = c·(f − ½) + ½`. The earlier Transformer engine described below is still in the repository.
 >
+> - **Cevahir: one layer (24 November 2026, new).** Everything built so far meets in one layer, and Cevahir is that
+>   mind (`living/cevahir.py`, `python -m living`). Zihin, the evidence mind with every one of its mechanisms, lives
+>   each word; the cortex of the Living Intelligence study lives each letter; they meet in the harmony, where Zihin's
+>   expectations are one more voice, trusted by the one rule on its own record. When Cevahir answers, Zihin's answer is
+>   the thought and a prefrontal decision says it token by token, trusting Zihin or the harmony where they differ by the
+>   record of who was right when they differed. The hippocampus keeps every dialogue and answers an utterance never
+>   lived from the lived ones it differs from in a few places at once, and one longer than any lived by its parts: a
+>   part is taken out, the rest answered, and the part's effect on lived answers put back. The amygdala keeps the
+>   outcomes of judged answers; a night's sleep forgets the contexts that did not recur (2 to 3.8 times fewer, for
+>   0.4–1.1 % more bits); a script never met opens a channel that is watched until it shows structure; any entry can be
+>   forgotten exactly; the whole mind is kept and loaded bit for bit.
+>
+>   Measured: on the six published SCAN splits it answers 1,199 of 1,200 test commands. Where an answer has to put
+>   together facts read apart, it answers every question, and a Transformer trained on the very stream it lived answers
+>   none. At school it answers 342 of 405 examination questions, every one of the 63 deductions among them (a
+>   Transformer trained on the same lessons: 203, and none of the deductions). On samples of COGS the hippocampus alone answers 296 of 300 in-distribution sentences and
+>   252 of 300 of the generalisation set, among them 16 of 18 with phrases nested deeper than any it lived, a kind
+>   on which published Transformers score 0 %.
+>   [The model, section 12](research/living_intelligence_2026_11_24/MODEL.md) · [the measurements, section 8](research/living_intelligence_2026_11_24/NOTES.md)
 > - **Living Intelligence, a new study (24 November 2026):** a new body for the mind, on the same rule. It keeps no list
 >   of words and no vector per word. It keeps a cortex of letter contexts that grows with what it lives, sublinearly.
 >   Words are paths that the mind numbers itself and spells back from the number, and the alphabet is its own: a
