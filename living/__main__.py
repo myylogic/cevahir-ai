@@ -31,8 +31,10 @@ def main() -> None:
     torch.set_num_threads(1)
     from living.cevahir import Cevahir
     c = Cevahir.load(a.load) if a.load else Cevahir(variant=a.variant, dil=a.dil, ledger=True)
-    if c.entries is None:                                    # a loaded mind: the history begins now
-        c.entries = []
+    if c.entries is None:                                    # a loaded mind: the history begins now, and Zihin's
+        c.entries = []                                       # ledger with it (in memory), so that what is lived
+        c.mind.S.log, c.mind.S.keep_log = {}, True           # from here on can be forgotten exactly (!unut)
+        c.mind.cfg.keep_log = True
     print("Cevahir %s. !cik ile çıkılır." % ("yüklendi: " + a.load if a.load else "doğdu"), flush=True)
     for raw in sys.stdin:
         line = raw.rstrip("\n")

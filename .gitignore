@@ -53,6 +53,9 @@ private_data/
 *.zihin
 *.zihin.json
 !minds/cevahir-open.zihin.json
+!minds/cevahir/zihin.zihin.json
+minds/cevahir/core.bin
+minds/cevahir/*.tmp
 *.zihin.tmp
 zihin_logs/
 *.zihin.log

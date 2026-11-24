@@ -1,0 +1,12 @@
+{
+  "format": "zihin-mind-v1",
+  "file": "zihin.zihin",
+  "sha256": "a6e8c9c0ae09ea13723668b1f4b72b59358d7432dc63a6c9ddbf332c3d70ab7a",
+  "substance_digest": "ed46276ac1fc1d8902ac7ce51660f46a058279d98eaba5ee15240f2211f8bdc1",
+  "moments": 16825,
+  "log_sha256": null,
+  "units": 14042,
+  "ties": 126050,
+  "core_tensors": 11647238,
+  "log": 0
+}

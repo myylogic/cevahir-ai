@@ -8,7 +8,9 @@ lessons of public knowledge. Cevahir (Zihin's whole mind and the cortex, meeting
 studied with research/living_intelligence_2026_11_24/m3_etut.py: each lesson taught, its questions answered by
 Cevahir in conversation, a right answer confirmed, a wrong one forgotten exactly and the answer shown, round after
 round (3 at most), then every dialogue asked again. It is kept compressed in ``OUT_FOLDER/cevahir`` (Cevahir.save),
-with the study's report (counts only) in ``OUT_FOLDER/study_cevahir.json``.
+with the study's report (counts only) in ``OUT_FOLDER/study_cevahir.json``. The study keeps Zihin's ledger in memory,
+so that a wrong answer can be forgotten exactly; a loaded mind has none (its history begins at loading), so the mind
+is then loaded once and kept again without it in ``OUT_FOLDER/release`` (the files of minds/cevahir/).
 """
 import glob
 import os
@@ -40,6 +42,13 @@ def main() -> None:
                            "--lessons", *lessons, "--rounds", "3", "--save", os.path.join(out, "cevahir"),
                            "--report", os.path.join(out, "study_cevahir.json")])
     print("done", done.returncode, round(time.time() - t0), "s", flush=True)
+    if done.returncode == 0:
+        import torch
+        torch.set_num_threads(1)
+        sys.path.insert(0, REPO)
+        from living.cevahir import Cevahir
+        kept = Cevahir.load(os.path.join(out, "cevahir")).save(os.path.join(out, "release"), compress=True)
+        print("kept without the ledger:", kept["files"], flush=True)
 
 
 if __name__ == "__main__":

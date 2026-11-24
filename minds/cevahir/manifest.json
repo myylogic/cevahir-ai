@@ -1,0 +1,22 @@
+{
+ "what": "Cevahir (living/cevahir.py)",
+ "files": {
+  "cevahir.json": "70aaf3a94242df07068ba08f796fdc6e60af2e64e9d2f0fcc2dbfc91e824302a",
+  "core.bin": "cd2606c3862f47b16808b4c71e87251ca024bd72f6d0a11a96ae06eae43ad840",
+  "zihin.zihin": "a6e8c9c0ae09ea13723668b1f4b72b59358d7432dc63a6c9ddbf332c3d70ab7a",
+  "zihin.zihin.json": "164850ba5c755e861f51c700d4555a62fa10182ab666fabbce37b9a5d9a4e542"
+ },
+ "zihin_moments": 16825,
+ "core": {
+  "nodes": 129132,
+  "entries": 157418,
+  "alphabet": 74,
+  "lived": 55971,
+  "situations": 485,
+  "episode_text": 56060
+ },
+ "compressed": [
+  "core.bin",
+  "zihin.zihin"
+ ]
+}
