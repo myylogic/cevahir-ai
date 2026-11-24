@@ -333,7 +333,7 @@ class Cevahir:
         if z is not None:
             z.heard(s.body(first), "soran")
             z.see(scene_answer or scene)
-        a_plan, _, _ = self.episodes.plan(self._said(first))     # the hippocampus foresees the answer
+        a_plan, _, _ = self.episodes.plan(self._said(first), parts=False)   # the hippocampus foresees the answer
         foreseen = [self.session.lower(t) for t in a_plan] if a_plan else None
         bits += self.hear(answer, prov, lead="\t", answer=True, foreseen=foreseen)
         s.end_of_turn(prov, tone=s.tone(answer))
@@ -597,8 +597,9 @@ class Cevahir:
         plan = [] if said == "(sessiz)" else self.session.words(said)
         es = [e for w, e in decided]
         plan_e = es if [w for w, _ in decided] == plan else []
-        a_plan, _, _ = self.episodes.plan(self._said(question))
-        out["analogy"] = " ".join(a_plan) if a_plan else "(sessiz)"
+        from living.evidence import SPEAKING_LINE
+        a_plan, a_e, _ = self.episodes.plan(self._said(question))
+        out["analogy"] = " ".join(a_plan) if a_plan and a_e >= SPEAKING_LINE else "(sessiz)"
         plan, plan_e, out["thought"] = self.choose_plan(question, plan, plan_e)
         out["cevahir"] = self.speak(history, plan, plan_e, "\t", most=16 * limit).strip()
         return out
@@ -933,6 +934,7 @@ class Cevahir:
             return []
         k = min(workers or os.cpu_count() or 1, len(questions))
         import multiprocessing
+        self.episodes.ready()                                    # the kinds and frames, read once for every process
         _ASKED = (self, way, limit)
         try:
             with multiprocessing.get_context("fork").Pool(k, maxtasksperchild=1) as pool:

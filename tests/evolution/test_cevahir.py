@@ -286,6 +286,62 @@ def test_two_roles_that_swap_places_are_filled_at_once(FastCortex):
     assert n == 1
 
 
+def _nested(rng, depth, gave=False):
+    """A small world of nested parts: "Ali saw the cup on the mat in the box ." and its answer, which names the places
+    of what was said (a form like COGS's, its words and marks made up here)."""
+    nouns = ["cat", "dog", "box", "cup", "mat", "bed", "car", "hat", "pen", "jar"]
+    name, (verb, lemma) = rng.choice(["Ali", "Can", "Ece", "Deniz"]), rng.choice([("saw", "see"), ("took", "take")])
+    if gave:
+        verb, lemma = rng.choice([("gave", "give"), ("sold", "sell"), ("sent", "send")])
+    things = [rng.choice(nouns) for _ in range(depth + 1)]
+    preps = [rng.choice(["on", "in", "beside"]) for _ in range(depth)]
+    said, places = [name, verb, "the", things[0]], [3]
+    for p, n in zip(preps, things[1:]):
+        said += [p, "the", n]
+        places.append(len(said) - 1)
+    answer = []
+    for n, i in zip(things, places):
+        answer += ["*", n, "(", "x", "_", str(i), ")", ";"]
+    answer += [lemma, ".", "agent", "(", "x", "_", "1", ",", name, ")", "AND",
+               lemma, ".", "theme", "(", "x", "_", "1", ",", "x", "_", "3", ")"]
+    if gave:
+        to = rng.choice(["Ali", "Can", "Ece", "Deniz"])
+        said += ["to", to]
+        answer += ["AND", lemma, ".", "recipient", "(", "x", "_", "1", ",", to, ")"]
+    for k, p in enumerate(preps):
+        answer += ["AND", things[k], ".", "nmod", ".", p, "(", "x", "_", str(places[k]), ",", "x", "_",
+                   str(places[k + 1]), ")"]
+    return said + ["."], answer
+
+
+def test_words_stand_for_each_other_only_if_their_relations_play_alike_parts_in_answers(FastCortex):
+    from living.analogy import Episodes
+    rng = random.Random(4)
+    ep = Episodes()
+    for _ in range(200):
+        ep.live(*_nested(rng, rng.choice([0, 1, 2]), gave=rng.random() < 0.3))
+    assert ep.relation("to") == "recipient" and ep.relation("on") == "on"
+    assert not ep.alike("recipient", "on")                            # after a verb, and after "nmod"
+    assert ep.alike("on", "in") and ep.alike("cup", "mat") and ep.alike("see", "take")
+
+
+def test_parts_answer_nesting_deeper_than_any_lived(FastCortex):
+    from living.analogy import Episodes
+    from living.evidence import SPEAKING_LINE
+    rng = random.Random(0)
+    ep = Episodes()
+    for _ in range(400):
+        ep.live(*_nested(rng, rng.choice([0, 1, 1, 2, 2])))               # one or two parts inside, never three
+    asked = [_nested(rng, depth) for depth in (3, 4, 6) for _ in range(5)]
+    right = 0
+    for said, answer in asked:
+        plan, e, n = ep.plan(said)
+        right += plan == answer and e >= SPEAKING_LINE
+        assert plan is None or e < SPEAKING_LINE or plan == answer          # silent, never wrong
+        assert ep.plan(said, parts=False)[0] is None                       # no lived utterance is that long
+    assert right >= 13
+
+
 def test_where_one_place_frames_cannot_answer_the_record_lets_the_analogy_lead(FastCortex):
     from living.cevahir import Cevahir
     people = ["Ali", "Veli", "Ayşe", "Can", "Ece", "Zeynep", "Deniz", "Selin"]

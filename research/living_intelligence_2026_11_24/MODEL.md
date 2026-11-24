@@ -622,6 +622,45 @@ Two constants enter, both bounds of a search: at most five places and eight neig
 many places is believed is not a constant: it is its record. A dialogue forgotten (`Cevahir.forget`) leaves the
 episodes exactly.
 
+### 12.6 Words of a kind, wholes, and answering by parts (`living/analogy.py`)
+
+The analogy of 12.5 fills places one for one. Two things it cannot do. It lets any two words with relations stand for
+each other, so "to" (its relation "recipient") may stand for "on" (its relation "on") because both sit at the same
+place of two utterances of the same length, and the answer it then says is wrong with a high belief. And it answers
+nothing longer than what was lived: an utterance with one more phrase inside it has no neighbour of its length. Both
+are mended by the same store of episodes.
+
+- **Words of a kind.** A relation's profile is the tokens of the lived answers around it: the two before it and the
+  one after it, every relation of a word read as one mark. Two relations are alike when their profiles share at least
+  half; a relation whose profile is not yet known is not held back. A place is filled only by a word whose relation
+  is alike to the one it replaces. "recipient" follows a verb's name and "on" follows "nmod", so the two never stand
+  for each other, while "on" and "in", or two verbs, do.
+- **Wholes.** A part of an utterance is read with its frame: its own tokens, the two before it and the one after it,
+  every word that has a relation read as one mark. A part of that frame is a whole of its own when taking a part of
+  the same frame out of lived utterances leaves utterances that are lived or that the analogy answers at the speaking
+  line: the rule on twelve such examples. This is Zihin's working memory (F43, wholes) read from the other side: there
+  the parts of a long command are answered and put together; here a part is known to be one because what remains
+  without it is still like what was lived.
+- **Answering by parts.** An utterance that no plan answers at the speaking line is answered by taking out a whole,
+  answering the rest (by the analogy, or again by parts), and putting the whole's effect back. Its effect is read from
+  the lived utterances that hold a part of the same frame: what taking their part out changes in their answers (the
+  change between the answer of the rest and the answer lived). That change is put into the answer of the asked rest.
+  The part's own words map by their place in the part (each word to its relation, as in 12.5, alike by kind); the
+  rest of the example maps through the alignment of the two rests' answers, read by what they say about the places
+  near the part. A token of an answer that is a whole number smaller than the utterance's length is read as a place of
+  it, and moves on with the places when a part is put in. One change can be written in several ways where the tokens
+  repeat; it is put in as far on as the tokens allow, and where the answer lists runs of the same shape, a new run
+  goes by its place (a list keeps the order of what was said). The examples nearest the asked part vote (at most
+  eight); the plan's belief is the rest's belief times the share of the examples that agree. The most whole-like parts
+  are tried first, then the rightmost; a search tries at most 400 parts and takes out at most 16 one after another.
+
+Nothing of COGS is named here: no word, mark or form of its answers. What the mechanism assumes is general: an answer
+may name the places of what was said by their numbers, and runs of the same shape in an answer keep the order in which
+what they name was said. Where an answer does neither, the change of a part cannot be put (the example gives nothing)
+or the examples disagree (the plan stays under the line). The analogy's own record (12.5) is kept by its plain form:
+while Cevahir lives a dialogue it foresees the answer by the analogy over places, without parts; answering by parts is
+done when Cevahir is asked.
+
 ## References
 
 - Cleary, J. G., and Witten, I. H. (1984). Data compression using adaptive coding and partial string matching. *IEEE
