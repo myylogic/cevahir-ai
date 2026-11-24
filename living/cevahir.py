@@ -1,0 +1,541 @@
+# -*- coding: utf-8 -*-
+"""Cevahir: one mind, one layer (research/living_intelligence_2026_11_24/MODEL.md, section 12).
+
+Two bodies of one mind meet in one place.
+
+- **Zihin** (``zihin/``, every mechanism it was built with) lives each word as a moment: its units and ties, its
+  frames, families and relations, its wholes, its inferences and conjectures, its ground. It is the mind that
+  generalises.
+- **The cortex** (``living/fast.py``) lives each letter: its contexts, its episodes, its lines, its short-term
+  memory, and the harmony that combines them bit by bit. It is the mind that predicts.
+
+They meet in the harmony. Before every token, what Zihin expects next is a **voice** of the harmony: its candidates,
+each in the forms it was lived in (the gap before it and its letters, so that case and spacing come from life, not
+from a rule), weighted by how far each is believed above not knowing (e − ½), with how much Zihin knows,
+2 (e_best − ½). The harmony trusts the voice by the one rule on the voice's own record (how often its top symbol
+was right, per sixth of knowing), and its gate, which learns from its own error, decides with every other origin
+how far to follow it. Nothing decides for the harmony: where Zihin is right and the cortex has never lived the
+case, Zihin carries the decision; where the cortex knows more (spelling, a line it has lived), the cortex does.
+
+When Cevahir answers, Zihin answers first, as it always did (its race, its speaking line, its wholes answered part
+by part): that is the plan, the thought. The harmony then says the answer letter by letter with the plan as the
+voice, trusted as Zihin's own decision. ``way`` chooses what speaks, for the measurements: ``"zihin"`` (Zihin
+alone), ``"harmony"`` (the cortex alone), ``"cevahir"`` (the one layer).
+
+Nothing here is a mechanism of a test world: no word, no language and no format is named in the code.
+"""
+from __future__ import annotations
+
+import os
+import re
+from collections import Counter, defaultdict
+from typing import Dict, List, Optional, Sequence, Tuple
+
+from living.fast import FastCortex
+
+TOKEN = re.compile(r"\w+|[^\w\s]", re.UNICODE)          # Zihin's tokens (zihin.__main__.words), on the raw text
+SEPARATOR = re.compile(r"(?<=[.!?…])\s+|\n+")             # Zihin's sentence split (zihin.__main__.sentences)
+CORTEX = dict(depth=8, episode=True, minlen=12, episode_bits=22, mix=True, lr=0.02, lr_min=0.002, words=True,
+              two_inputs=True, tree_prior=True, recent=6, lines=True)
+TAIL = 8192                                             # characters of the stream kept as the harmony's history
+
+
+def zihin_config(variant: str = "full", switches: Optional[Dict[str, bool]] = None):
+    """A configuration of Zihin as the chat program builds it (``zihin.__main__.VARIANTS``), without a ledger file."""
+    import zihin.__main__ as chat
+    made = chat._log_path
+    chat._log_path = lambda *a: None
+    try:
+        cfg = chat.VARIANTS[variant]()
+    finally:
+        chat._log_path = made
+    cfg.keep_log, cfg.log_path = False, None
+    for k, v in (switches or {}).items():
+        if not hasattr(cfg, k):
+            raise ValueError("no such switch: %s" % k)
+        setattr(cfg, k, v)
+    return cfg
+
+
+class Cevahir:
+    """One mind: Zihin and the cortex, meeting in the harmony.
+
+    ``variant`` and ``switches`` configure Zihin (``zihin_config``); ``window`` is Zihin's focus F (its window);
+    ``cortex`` changes the cortex's configuration (``CORTEX``); ``dil`` is Zihin's language convention."""
+
+    def __init__(self, variant: str = "full", switches: Optional[Dict[str, bool]] = None, window: int = 0,
+                 cortex: Optional[dict] = None, dil: str = "tr", seed: int = 0, top: int = 12, forms_per: int = 2,
+                 record: bool = True, keep_stream: bool = False):
+        import torch
+        from zihin import Mind
+        from zihin.__main__ import CHANNEL, Session
+        torch.manual_seed(seed)
+        self.mind = Mind(zihin_config(variant, switches))
+        self.mind.add_channel(CHANNEL, "act")
+        if window:
+            self.mind.knob["F"] = window
+        self.session = Session(self.mind)
+        self.session.dil = dil
+        self.channel = CHANNEL
+        cfg = dict(CORTEX)
+        cfg.update(cortex or {})
+        self.cortex = FastCortex(voice=True, **cfg)
+        self.written: Dict[bool, Dict[str, Counter]] = {False: defaultdict(Counter), True: defaultdict(Counter)}
+        #                                                        (in an answer) -> a token -> how it was written
+        self.gaps: Dict[Tuple[bool, bool], Counter] = defaultdict(Counter)   # (in an answer, first token) -> gaps
+        self.tail = ""                                           # the stream as lived, its last TAIL characters
+        self.stream: Optional[List[str]] = [] if keep_stream else None   # all of it, when asked (comparisons)
+        self.top, self.forms_per = top, forms_per
+        self.counts = Counter()                                  # tokens heard with the voice, without, unaligned
+        self.record = record                                     # keep the record of disagreements while living
+        self.dis_won = Counter()                                 # disagreements per situation: Zihin's token was it
+        self.dis_all = Counter()                                 # disagreements per situation (and agreements apart)
+        self.alone_right = Counter()                             # Zihin expected nothing: the harmony's guess was it
+        self.alone_all = Counter()                               # Zihin expected nothing, the harmony guessed
+
+    # ------------------------------------------------------------------------------------------------ the voice --
+    def candidates(self, token: str, partial: Optional[str] = None, weight: float = 1.0, gaps: int = 3,
+                   where: Tuple[bool, bool] = (False, False)) -> Tuple[List[str], List[float]]:
+        """The forms a token may take next: a gap lived before tokens in the same situation (``where``: in an
+        answer or not, the first token of the utterance or not) and a way the token was written, weighted by how
+        often each was lived. With ``partial`` (the gap already lived), only the written forms."""
+        ws = self.written[where[0]].get(token) or self.written[not where[0]].get(token)
+        if not ws:
+            return [], []
+        written = ws.most_common(self.forms_per)
+        wt = float(sum(n for _, n in written))
+        if partial is not None:
+            return [w for w, _ in written], [weight * n / wt for _, n in written]
+        lived = (self.gaps.get(where) or Counter({" ": 1})).most_common(gaps)
+        gt = float(sum(n for _, n in lived)) or 1.0
+        forms, weights = [], []
+        for g, gn in lived:
+            for w, n in written:
+                forms.append(g + w)
+                weights.append(weight * (gn / gt) * (n / wt))
+        return forms, weights
+
+    def voice_of_zihin(self, where: Tuple[bool, bool] = (False, False)) -> Tuple[Optional[str], float]:
+        """Set the voice from what Zihin expects next on its text channel; returns its top token and its e."""
+        expected = self.mind.expected(self.channel)
+        believed = sorted(((e, s) for s, e in expected.items() if e > 0.5 and isinstance(s, str)), reverse=True)
+        believed = believed[:self.top]
+        if not believed:
+            self.cortex.set_voice([], [], 0.0)
+            return None, 0.0
+        know = 2.0 * (believed[0][0] - 0.5)
+        forms, weights = [], []
+        for e, s in believed:
+            f, w = self.candidates(s, None, e - 0.5, where=where)
+            forms += f
+            weights += w
+        self.cortex.set_voice(forms, weights, know)
+        return believed[0][1], believed[0][0]
+
+    @staticmethod
+    def situation(answer: bool, first: bool, e: float) -> int:
+        """The class of a disagreement: in an answer or not, x the first token of the utterance or a later one,
+        x Zihin at the speaking line or below it."""
+        from living.evidence import SPEAKING_LINE
+        return (4 if answer else 0) + (0 if first else 2) + (1 if e >= SPEAKING_LINE else 0)
+
+    def trust_zihin(self, cell: int) -> float:
+        """The belief, by the one rule on the record of disagreements in this situation, that Zihin's token is
+        the one when the harmony's differs and one of the two is right."""
+        return (self.dis_won[cell] + 0.5) / (self.dis_all[cell] + 1.0)
+
+    def trust_alone(self, cell: int) -> float:
+        """The belief, by the one rule on its record in this situation, that the harmony's token is the one where
+        Zihin expects nothing above not knowing."""
+        return (self.alone_right[cell] + 0.5) / (self.alone_all[cell] + 1.0)
+
+    def _live_text(self, text: str) -> float:
+        bits, _ = self.cortex.stream(text)
+        self.tail = (self.tail + text)[-TAIL:]
+        if self.stream is not None:
+            self.stream.append(text)
+        return bits
+
+    def tell(self, sentence: str, prov: Optional[int] = None, scene: Optional[dict] = None,
+             tone: Optional[str] = None) -> float:
+        """A sentence of a document, read on its own line (as ``Session.read_path`` lives a sentence: heard, its
+        end perceived, a pause). With a ground and a ``scene``, what is seen while it is told is perceived."""
+        from zihin.__main__ import IMITATED
+        prov = IMITATED if prov is None else prov
+        s = self.session
+        z = getattr(self.mind, "zemin", None) if scene is not None else None
+        s.company(None)
+        if z is not None:
+            z.see(scene)
+        bits = self.hear(sentence, prov, lead=self._lead())
+        s.end_of_turn(prov, tone=tone or s.tone(sentence))
+        if z is not None:
+            z.heard(s.body(sentence), "anlatan")
+        self.mind.step([])
+        return bits
+
+    def ground(self) -> None:
+        """Give Zihin its ground (zihin/zemin.py): perception and words meet in the same calculus."""
+        from zihin.zemin import Zemin
+        self.mind.cfg.grounded = True
+        self.mind.zemin = Zemin(self.channel)
+
+    # --------------------------------------------------------------------------------------------- hearing ------
+    def hear(self, text: str, prov: int, speaker: Optional[str] = None, lead: str = "", answer: bool = False) -> float:
+        """One utterance heard while not speaking (Zihin's ``Session.listen``): before each of its tokens the
+        harmony is asked with Zihin's expectations as the voice and lives the token's form (its gap and its
+        letters); then Zihin lives the token as a moment. ``lead``: what comes before the first token (a line end,
+        a tab); ``answer``: the utterance answers the one before it. Returns the bits the harmony paid."""
+        s = self.session
+        body = s.body(text)                                  # what Zihin lives: its words, the closing mark apart
+        spans = [(m.start(), m.end()) for m in TOKEN.finditer(text)]
+        aligned = [s.lower(text[a:b]) for a, b in spans[:len(body)]] == list(body)
+        theta = self.mind.knob["theta"]
+        self.mind.knob["theta"] = 1e9                        # listening: the mind does not speak into it
+        bits = 0.0
+        try:
+            if not aligned:                                  # Zihin's words are not the raw tokens: no voice
+                self.counts["unaligned"] += 1
+                self.cortex.set_voice([], [], 0.0)
+                bits += self._live_text(lead + text)
+                for symbol in body:
+                    self.mind.step(s.events(symbol, prov, speaker))
+                return bits
+            prev = 0
+            for i, (a, b) in enumerate(spans):
+                form = (lead if i == 0 else "") + text[prev:a] + text[a:b]
+                if i < len(body):
+                    h_tok = None
+                    if self.record:                          # the harmony's own guess, before the voice is set
+                        h_form, _ = self.harmony_token(self.tail)
+                        found = TOKEN.findall(h_form)
+                        h_tok = s.lower(found[0]) if found else None
+                    where = (answer, i == 0)
+                    z_tok, z_e = self.voice_of_zihin(where)
+                    if self.record and z_tok is not None and h_tok is not None and z_tok != h_tok and \
+                            (z_tok == body[i]) != (h_tok == body[i]):    # they differ, and one of them is right
+                        cell = self.situation(answer, i == 0, z_e)
+                        self.dis_all[cell] += 1
+                        self.dis_won[cell] += 1 if z_tok == body[i] else 0
+                    if self.record and z_tok is None and h_tok is not None:
+                        cell = self.situation(answer, i == 0, 0.0)
+                        self.alone_all[cell] += 1
+                        self.alone_right[cell] += 1 if h_tok == body[i] else 0
+                    bits += self._live_text(form)
+                    self.gaps[where][form[:len(form) - (b - a)]] += 1
+                    self.written[answer][body[i]][text[a:b]] += 1
+                    self.mind.step(s.events(body[i], prov, speaker))
+                    self.counts["voiced"] += 1
+                else:                                        # the closing mark: heard as the end of the turn
+                    self.cortex.set_voice([], [], 0.0)
+                    bits += self._live_text(form)
+                prev = b
+            if not spans and lead:
+                bits += self._live_text(lead)
+            if text[prev:]:
+                self.cortex.set_voice([], [], 0.0)
+                bits += self._live_text(text[prev:])
+        finally:
+            self.mind.knob["theta"] = theta
+        return bits
+
+    def _lead(self) -> str:
+        return "\n" if self.tail else ""
+
+    def watch(self, first: str, answer: str, prov: Optional[int] = None, asker: Optional[str] = None,
+              scene: Optional[dict] = None, scene_answer: Optional[dict] = None) -> float:
+        """Two others talk (Zihin's ``Session.watch``): one says ``first``, another answers. The harmony lives the
+        dialogue as one line, the first utterance and the answer apart by a tab. With a ground (``mind.zemin``) and a
+        ``scene``, what is seen while each is said is perceived by the ground (``scene_answer`` while the answer is
+        said, if it differs), as research/living_mind_2026_11_23/t_m2.py lives its world."""
+        from zihin.__main__ import IMITATED, SOMEONE
+        prov = IMITATED if prov is None else prov
+        asker = SOMEONE if asker is None else asker
+        s = self.session
+        z = getattr(self.mind, "zemin", None) if scene is not None else None
+        s.company(asker)
+        if z is not None:
+            z.see(scene)
+        bits = self.hear(first, prov, speaker=asker, lead=self._lead())
+        s.end_of_turn(prov, tone=s.tone(first))
+        if z is not None:
+            z.heard(s.body(first), "soran")
+            z.see(scene_answer or scene)
+        bits += self.hear(answer, prov, lead="\t", answer=True)
+        s.end_of_turn(prov, tone=s.tone(answer))
+        if z is not None:
+            z.heard(s.body(answer), "cevaplayan")
+        self.mind.step([])
+        if getattr(self.mind.cfg, "wholes", False):          # F43: the dialogue lived once more as wholes
+            from zihin.butun import consolidate
+            consolidate(s, first, answer, prov, asker)
+        return bits
+
+    def read(self, text: str, code: bool = False) -> float:
+        """A document (Zihin's ``Session.read_path``): the harmony lives every character of it; Zihin lives each
+        sentence of at least two words (each line, for source code) as an utterance, its end and a pause."""
+        from zihin.__main__ import IMITATED
+        s = self.session
+        s.company(None)
+        bits = 0.0
+        pieces = []
+        if code:
+            pos = 0
+            for line in text.split("\n"):
+                pieces.append((pos, pos + len(line)))
+                pos += len(line) + 1
+        else:
+            pos = 0
+            for m in SEPARATOR.finditer(text):
+                pieces.append((pos, m.start()))
+                pos = m.end()
+            pieces.append((pos, len(text)))
+        done = 0
+        for a, b in pieces:
+            raw = text[a:b]
+            lead = text[done:a]
+            if len(s.words(raw)) >= 2 and raw.strip():
+                left = len(raw) - len(raw.lstrip())
+                sentence = raw.strip()
+                bits += self.hear(sentence, IMITATED, lead=lead + raw[:left])
+                s.end_of_turn(IMITATED, tone=s.tone(sentence))
+                self.mind.step([])
+                rest = raw[left + len(sentence):]
+                if rest:
+                    self.cortex.set_voice([], [], 0.0)
+                    bits += self._live_text(rest)
+            else:
+                self.cortex.set_voice([], [], 0.0)
+                bits += self._live_text(lead + raw)
+            done = b
+        if done < len(text):
+            self.cortex.set_voice([], [], 0.0)
+            bits += self._live_text(text[done:])
+        return bits
+
+    # --------------------------------------------------------------------------------------------- speaking -----
+    def belief(self, history: str, text: str) -> float:
+        """The harmony's belief in ``text`` coming next after ``history``: 2 to the minus its bits, nothing learned
+        (the voice silent)."""
+        self.cortex.set_voice([], [], 0.0)
+        bits, _ = self.cortex.stream(text, history, learn=False)
+        return 2.0 ** -bits
+
+    def harmony_token(self, history: str, most: int = 64) -> Tuple[str, float]:
+        """The harmony's own next token after ``history``: its most probable symbols (the voice silent) up to the end
+        of one token, with the gap before it. Returns (the form, its probability); ("\n", p) when the line ends
+        first, ("", 0) when it would say a symbol it never met."""
+        self.cortex.set_voice([], [], 0.0)
+        buf, probs = "", []
+        while len(buf) < most:
+            text, p = self.cortex.say(history + buf, most=1)
+            if not text:
+                return "", 0.0
+            if text == "\n" and not buf.strip():
+                return "\n", p[0]
+            buf += text
+            probs.append(p[0])
+            toks = list(TOKEN.finditer(buf))
+            if not toks:
+                continue
+            t = toks[0]
+            word = bool(re.match(r"\w", t.group()))
+            if not word or t.end() < len(buf):            # a mark is whole at once; a word when something follows
+                end = t.end()
+                prob = 1.0
+                for q in probs[:end]:
+                    prob *= q
+                return buf[:end], prob
+        prob = 1.0
+        for q in probs:
+            prob *= q
+        return buf, prob
+
+    def speak(self, history: str, plan: Sequence[str] = (), plan_e: Sequence[float] = (), start: str = "",
+              most: int = 400, line: Optional[float] = None) -> str:
+        """The prefrontal decision, one token at a time (MODEL.md 12). Zihin's next token (its decision, believed
+        with e) and the harmony's own next token (believed with the product of its symbols' probabilities):
+
+        - when they are the same token, it is said (in the harmony's form) if either belief reaches the line;
+        - when they differ, the one the record of disagreements in this situation trusts more leads (the one rule:
+          how often Zihin's token was the one when the two differed while Cevahir lived), and it is said if its
+          belief reaches the speaking line;
+        - when Zihin says nothing at all, the harmony speaks alone only if its record of speaking where Zihin
+          expected nothing, in this situation, is above one half; once Zihin's plan is said, the harmony adds no
+          word of its own (the plan is the thought; its end is part of it);
+        - otherwise nothing more is said.
+
+        How Zihin's token is written (its gap, its case) is the harmony's choice among the gaps and the ways it was
+        written that it has lived, never a line end: the answer is one line. ``start``: the gap already lived after
+        ``history``. Nothing is learned. Returns what was said, without ``start``."""
+        from living.evidence import SPEAKING_LINE
+        line = SPEAKING_LINE if line is None else line
+        said = ""
+        partial: Optional[str] = start
+        k = 0
+        while len(said) < most:
+            here = history + said
+            h_form, h_p = self.harmony_token(here)
+            h_found = TOKEN.findall(h_form)
+            h_tok = self.session.lower(h_found[0]) if h_found else None
+            z_tok = plan[k] if k < len(plan) else None
+            z_e = (plan_e[k] if k < len(plan_e) else line) if z_tok is not None else 0.0
+            if z_tok is not None and z_tok == h_tok:
+                if max(h_p, z_e) < line:
+                    break
+                said += h_form
+                k += 1
+            else:
+                z_form = ""
+                if z_tok is not None:
+                    forms, _ = self.candidates(z_tok, partial, gaps=6, where=(True, k == 0))
+                    forms = [f for f in forms if "\n" not in f]
+                    if forms:
+                        beliefs = [self.belief(here, f) for f in forms]
+                        z_form = forms[max(range(len(forms)), key=lambda i: beliefs[i])]
+                lead_z = bool(z_form) and (h_tok is None or
+                                           self.trust_zihin(self.situation(True, k == 0, z_e)) >= 0.5)
+                if lead_z and z_e >= line:
+                    said += z_form
+                    k += 1
+                elif h_tok is not None and h_p >= line and (z_tok is not None or (
+                        not plan and self.trust_alone(self.situation(True, k == 0, 0.0)) > 0.5)):
+                    said += h_form                           # alone only where Zihin said nothing at all, and only
+                    #                                          as far as its record when alone allows
+                else:
+                    break
+            partial = None
+        return said
+
+    def reply(self, question: str, way: str = "cevahir", limit: int = 400) -> str:
+        """Cevahir answers ``question`` (told); this lives Zihin's part of it (as Zihin's reply does). ``way``:
+        "zihin" (Zihin's answer), "harmony" (the cortex alone, under the speaking line), "cevahir" (the prefrontal
+        decision between Zihin's answer and the harmony, token by token). Returns the answer as said."""
+        history = self.tail + self._lead() + question + "\t"
+        if way == "harmony":
+            return self.speak(history, (), (), "\t", most=16 * limit).strip()
+        decided: List[Tuple[str, float]] = []
+        real = self.mind.step
+
+        def step(events):                                # Zihin's decisions, each with its belief e
+            acts = real(events)
+            if acts:
+                expected = self.mind.expected(self.channel)
+                for a in acts:
+                    if a.channel == self.channel:
+                        decided.append((a.symbol, float(expected.get(a.symbol, 0.0))))
+            return acts
+
+        self.mind.step = step
+        try:
+            said = self.session.reply(question, limit=limit)
+        finally:
+            del self.mind.step
+        if way == "zihin":
+            return said
+        plan = [] if said == "(sessiz)" else self.session.words(said)
+        es = [e for w, e in decided]
+        plan_e = es if [w for w, _ in decided] == plan else []
+        return self.speak(history, plan, plan_e, "\t", most=16 * limit).strip()
+
+    def every_way(self, question: str, limit: int = 400) -> Dict[str, str]:
+        """The answers of the three ways to one question (the harmony first: it changes nothing; then Zihin's
+        reply, which this lives, and the one layer from it)."""
+        out = {"harmony": self.reply(question, "harmony", limit)}
+        history = self.tail + self._lead() + question + "\t"
+        decided: List[Tuple[str, float]] = []
+        real = self.mind.step
+
+        def step(events):
+            acts = real(events)
+            if acts:
+                expected = self.mind.expected(self.channel)
+                for a in acts:
+                    if a.channel == self.channel:
+                        decided.append((a.symbol, float(expected.get(a.symbol, 0.0))))
+            return acts
+
+        self.mind.step = step
+        try:
+            said = self.session.reply(question, limit=limit)
+        finally:
+            del self.mind.step
+        out["zihin"] = said
+        plan = [] if said == "(sessiz)" else self.session.words(said)
+        es = [e for w, e in decided]
+        plan_e = es if [w for w, _ in decided] == plan else []
+        out["cevahir"] = self.speak(history, plan, plan_e, "\t", most=16 * limit).strip()
+        return out
+
+    def seen_answer(self, question: str, scene: dict, before: Optional[dict] = None) -> Optional[List[str]]:
+        """The ground's answer (research/living_mind_2026_11_23/t_m2.py ``ground_answer``): the scene perceived in a
+        moment, then the question understood and answered from what is perceived; None when it does not
+        understand. ``before``: the scene in which the question is heard, before the event of ``scene`` begins."""
+        from zihin.zemin import BEFORE, answer, understand
+        z = getattr(self.mind, "zemin", None)
+        if z is None or scene is None:
+            return None
+        z.pending, z.waiting, z.turn, z.event = [], None, None, None
+        body = self.session.body(question)
+        if before is not None:
+            z.see(before)
+            self.mind.step([])
+            if understand(self.mind, z, body) is None:
+                return None
+        z.see(scene)
+        self.mind.step([])
+        got = answer(self.mind, z, body, when=BEFORE if before is not None else None)
+        return list(got) if got else None
+
+    def every_way_seen(self, question: str, scene: Optional[dict], before: Optional[dict] = None,
+                       limit: int = 60) -> Dict[str, str]:
+        """The three ways with a scene: Zihin's plan is the ground's answer where it understands, else its reply
+        (t_m2.py "both"); the harmony alone; and the one layer from Zihin's plan."""
+        out = {"harmony": self.reply(question, "harmony", limit)}
+        history = self.tail + self._lead() + question + "\t"
+        seen = self.seen_answer(question, scene, before) if scene is not None else None
+        if seen is not None:
+            out["zihin"] = " ".join(seen)
+            plan, plan_e = seen, []
+        else:
+            grounded = getattr(self.mind.cfg, "grounded", False)
+            self.mind.cfg.grounded = False
+            said = self.session.reply(question, limit=limit)
+            self.mind.cfg.grounded = grounded
+            out["zihin"] = said
+            plan, plan_e = ([] if said == "(sessiz)" else self.session.words(said)), []
+        out["cevahir"] = self.speak(history, plan, plan_e, "\t", most=16 * 400).strip()
+        return out
+
+    def answers(self, questions: List[str], way: str = "cevahir", limit: int = 400,
+                workers: Optional[int] = None) -> List[str]:
+        """What Cevahir answers to each question as it stands now: each in a process that is this mind, which
+        answers and ends; nothing of the answers is lived by this mind (Zihin's ``paralel.answers``)."""
+        global _ASKED
+        if not questions:
+            return []
+        k = min(workers or os.cpu_count() or 1, len(questions))
+        import multiprocessing
+        _ASKED = (self, way, limit)
+        try:
+            with multiprocessing.get_context("fork").Pool(k, maxtasksperchild=1) as pool:
+                return pool.map(_pool_answer, questions, chunksize=1)
+        finally:
+            _ASKED = None
+
+
+_ASKED = None
+
+
+def _pool_answer(question: str) -> str:
+    import torch
+    torch.set_num_threads(1)
+    me, way, limit = _ASKED
+    me.mind.S.log = {}                                       # nothing reaches the ledger of the mind that asked
+    if way == "every":
+        return me.every_way(question, limit)
+    if way == "seen":                                        # (question, scene, before)
+        q, scene, before = question
+        with torch.no_grad():
+            return me.every_way_seen(q, scene, before)
+    return me.reply(question, way, limit)

@@ -100,6 +100,20 @@ typedef struct {
     uint64_t *set_updates;     /* updates per weight set, for the learning rate */
     uint32_t prev_code;
     double lr_min;
+    /* the word voice (MODEL.md 12): candidates for the next token (its gap and its letters, as lived), given by a
+     * word-level mind with weights and with how much that mind knows; one more origin of the harmony */
+    int voice_on;
+    uint32_t *vc_code;         /* the candidates' forms, concatenated (code points) */
+    uint32_t *vc_off, *vc_len;
+    double *vc_w;
+    uint8_t *vc_live;          /* still consistent with what was lived since the voice was set */
+    uint32_t vc_n, vc_ncap;
+    uint64_t vc_ccap;
+    uint32_t vc_pos;           /* symbols lived since the voice was set */
+    double vc_know;            /* how much the voice knows, in [0, 1]: 2 (e_best - 1/2) */
+    uint64_t vc_r[12], vc_a[12]; /* its record per (knowing in sixths, first symbol or not): top symbol right, asked */
+    uint32_t *vt_code, *vt_cp; double *vt_w; /* per symbol: the consistent candidates' next symbol and weight */
+    int i_voice;               /* index of its first input */
 } Core;
 
 static uint64_t mix64(uint64_t x) {
@@ -281,6 +295,8 @@ void core_free(Core *c) {
     free(c->w); free(c->dist); free(c->lv_code); free(c->lv_cnt); free(c->lv_len); free(c->ext_n1); free(c->ext_n);
     free(c->wkey); free(c->wval); free(c->apm_n1); free(c->apm_n); free(c->w2); free(c->set_updates); free(c->wg);
     free(c->rm_n1); free(c->rm_n); free(c->rm_tag);
+    free(c->vc_code); free(c->vc_off); free(c->vc_len); free(c->vc_w); free(c->vc_live);
+    free(c->vt_code); free(c->vt_cp); free(c->vt_w);
     free(c);
 }
 
@@ -583,9 +599,11 @@ static inline double squash(double x) {
     return sq_tab[i] + r * (sq_tab[i + 1] - sq_tab[i]);
 }
 
-void core_enable_mix(Core *c, double lr, double lr_min, int words, int two_inputs, int tree_prior, int recent) {
+void core_enable_mix(Core *c, double lr, double lr_min, int words, int two_inputs, int tree_prior, int recent,
+                     int voice) {
     if (!tabs_ready) make_tables();
     c->mix_on = 1;
+    c->voice_on = voice;
     c->tree_prior = tree_prior;
     c->recent = recent;
     if (recent) {
@@ -598,9 +616,18 @@ void core_enable_mix(Core *c, double lr, double lr_min, int words, int two_input
     c->words_on = words;
     c->two_inputs = two_inputs;
     int norig = (c->depth + 1) + (words ? 2 : 0);
-    c->nin = 1 + (norig + 1) * (two_inputs ? 2 : 1) + recent + 1 + 1 + 1;   /* a slot for the line context;
+    int nv = voice ? (two_inputs ? 2 : 1) : 0;                              /* the word voice's inputs */
+    c->nin = 1 + (norig + 1) * (two_inputs ? 2 : 1) + recent + nv + 1 + 1 + 1;   /* a slot for the line context;
                                                                            ..., line episode, episode, constant */
-    c->nsets = 8 * 2 * 3;
+    c->i_voice = c->nin - 3 - nv;
+    c->nsets = 8 * 2 * 3 * (voice ? 3 : 1);                                /* x the voice: absent, below, at e* */
+    if (voice) {
+        c->vc_ncap = 64; c->vc_ccap = 1024;
+        c->vc_code = malloc(c->vc_ccap * 4); c->vc_off = malloc(c->vc_ncap * 4); c->vc_len = malloc(c->vc_ncap * 4);
+        c->vc_w = malloc(c->vc_ncap * sizeof(double)); c->vc_live = calloc(c->vc_ncap, 1);
+        c->vt_code = malloc(c->vc_ncap * 4); c->vt_cp = malloc(c->vc_ncap * 4);
+        c->vt_w = malloc(c->vc_ncap * sizeof(double));
+    }
     c->w = calloc((size_t)c->nsets * c->nin, sizeof(double));
     for (int k = 0; k < c->nsets; k++) c->w[(size_t)k * c->nin] = 1.0;     /* trust the cortex first */
     c->set_updates = calloc(c->nsets, 8);
@@ -615,6 +642,51 @@ void core_enable_mix(Core *c, double lr, double lr_min, int words, int two_input
     for (int k = 0; k < 8; k++) { c->w2[k * 4] = 0.5; c->w2[k * 4 + 1] = 0.5; }
     c->wg = calloc((size_t)8 * c->nin, sizeof(double));
     for (int k = 0; k < 8; k++) c->wg[(size_t)k * c->nin] = 1.0;
+}
+
+/* the word voice: n candidates for the next token, each a form (its gap and its letters as lived: lens[i] code
+ * points of `codes`, one after another) with a weight; `know` is how much the voice knows. Replaces what it held. */
+void core_set_voice(Core *c, const uint32_t *codes, const uint32_t *lens, const double *weights, uint32_t n,
+                    double know) {
+    if (!c->voice_on) return;
+    uint64_t total = 0;
+    for (uint32_t i = 0; i < n; i++) total += lens[i];
+    if (n > c->vc_ncap) {
+        uint32_t cap = c->vc_ncap;
+        while (n > cap) cap *= 2;
+        c->vc_off = grow(c->vc_off, cap, 4); c->vc_len = grow(c->vc_len, cap, 4);
+        c->vc_w = grow(c->vc_w, cap, sizeof(double)); c->vc_live = grow(c->vc_live, cap, 1);
+        c->vt_code = grow(c->vt_code, cap, 4); c->vt_cp = grow(c->vt_cp, cap, 4);
+        c->vt_w = grow(c->vt_w, cap, sizeof(double));
+        c->vc_ncap = cap;
+    }
+    if (total > c->vc_ccap) {
+        uint64_t cap = c->vc_ccap;
+        while (total > cap) cap *= 2;
+        c->vc_code = grow(c->vc_code, cap, 4); c->vc_ccap = cap;
+    }
+    uint64_t off = 0;
+    for (uint32_t i = 0; i < n; i++) {
+        c->vc_off[i] = (uint32_t)off; c->vc_len[i] = lens[i]; c->vc_w[i] = weights[i];
+        c->vc_live[i] = lens[i] > 0 && weights[i] > 0;
+        for (uint32_t j = 0; j < lens[i]; j++) c->vc_code[off + j] = codes[off + j];
+        off += lens[i];
+    }
+    c->vc_n = n;
+    c->vc_pos = 0;
+    c->vc_know = know < 0 ? 0 : (know > 1 ? 1 : know);
+}
+
+/* the voice's state: out[0] candidates still consistent and unfinished, out[1] consistent and finished (a whole form
+ * was lived), out[2] symbols lived since it was set */
+void core_voice_info(Core *c, uint32_t *out) {
+    out[0] = out[1] = 0;
+    out[2] = c->vc_pos;
+    if (!c->voice_on) return;
+    for (uint32_t i = 0; i < c->vc_n; i++) if (c->vc_live[i]) {
+        if (c->vc_pos < c->vc_len[i]) out[0]++;
+        else if (c->vc_pos == c->vc_len[i]) out[1]++;
+    }
 }
 
 void core_enable_lines(Core *c, int bits) {
@@ -782,6 +854,30 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
                 if (lq > 1 - 1e-6) lq = 1 - 1e-6;
             }
         }
+        /* the word voice: the next symbol of every candidate still consistent, and the voice's trust by its record */
+        uint32_t vn = 0; int vcell = 0, vstate = 0; double vq = 0.5; uint32_t vtop = NONE;
+        if (c->voice_on && c->vc_n) {
+            for (uint32_t i = 0; i < c->vc_n; i++) {
+                if (!c->vc_live[i] || c->vc_pos >= c->vc_len[i]) continue;
+                uint32_t cp = c->vc_code[c->vc_off[i] + c->vc_pos];
+                c->vt_code[vn] = code8(symbol_number(c, cp)); c->vt_cp[vn] = cp; c->vt_w[vn] = c->vc_w[i]; vn++;
+            }
+            if (vn) {
+                double best = -1.0;                        /* the top symbol: the largest weight in sum */
+                for (uint32_t j = 0; j < vn; j++) {
+                    double sum = 0.0;
+                    for (uint32_t q = 0; q < vn; q++) if (c->vt_cp[q] == c->vt_cp[j]) sum += c->vt_w[q];
+                    if (sum > best) { best = sum; vtop = c->vt_cp[j]; }
+                }
+                int kb = (int)(c->vc_know * 6.0);
+                if (kb > 5) kb = 5;
+                vcell = kb * 2 + (c->vc_pos > 0 ? 1 : 0);
+                vq = ((double)c->vc_r[vcell] + 0.5) / ((double)c->vc_a[vcell] + 1.0);
+                if (vq < 1e-6) vq = 1e-6;
+                if (vq > 1 - 1e-6) vq = 1 - 1e-6;
+                vstate = kb == 0 ? 1 : 2;                  /* below the speaking line, or at it: 2 (e - 1/2) >= 1/6 */
+            }
+        }
         uint32_t xcode = code8(x);
         int dbucket = len <= 3 ? 0 : (len <= 6 ? 1 : 2);
         double b = 0.0;
@@ -849,7 +945,23 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
             s[c->nin - 1] = 1.0;
             int ln_here = ln_active && (lcode >> (k + 1)) == P;
             s[c->nin - 3] = ln_here ? (((lcode >> k) & 1) ? stretch(lq) : -stretch(lq)) : 0.0;
-            int set = k + 8 * (ep_here ? 1 : 0) + 16 * dbucket;
+            int v_here = 0;
+            if (vn) {                                    /* the voice: its candidates' share, trusted by its record */
+                double W = 0.0, W1 = 0.0;
+                for (uint32_t j = 0; j < vn; j++) if ((c->vt_code[j] >> (k + 1)) == P) {
+                    W += c->vt_w[j];
+                    if ((c->vt_code[j] >> k) & 1) W1 += c->vt_w[j];
+                }
+                if (W > 0) {
+                    double p1 = vq * (W1 / W) + (1.0 - vq) * 0.5;
+                    if (p1 < 1e-6) p1 = 1e-6;
+                    if (p1 > 1 - 1e-6) p1 = 1 - 1e-6;
+                    s[c->i_voice] = stretch(p1);
+                    if (c->two_inputs) s[c->i_voice + 1] = 2.0 * p1 - 1.0;
+                    v_here = vstate;
+                }
+            }
+            int set = k + 8 * (ep_here ? 1 : 0) + 16 * dbucket + 48 * v_here;
             double *w = c->w + (size_t)set * c->nin;
             double *wg = c->wg + (size_t)k * c->nin;
             double dot = 0.0, dotg = 0.0;
@@ -935,6 +1047,7 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
             for (int k = 0; k < nev; k++) { c->sit_total[ev[2 * k]]++; c->sit_new[ev[2 * k]] += ev[2 * k + 1]; }
             if (ep_active) { c->ep_a[eb]++; if (x != NONE && x == c->text[c->ep_ptr]) c->ep_r[eb]++; }
             if (ln_active) { c->ln_a[lb]++; if (x != NONE && code8(x) == lcode) c->ln_r[lb]++; }
+            if (vn) { c->vc_a[vcell]++; if (code_point == vtop) c->vc_r[vcell]++; }
             if (c->lines_on && c->episode) c->ln_table[ln_slot] = (uint32_t)c->text_len + 1;   /* where x will be */
             if (x == NONE) x = add_symbol(c, code_point);
             learn(c, chain, len, x);
@@ -962,6 +1075,12 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
             if (*code_out >= 254) return b;          /* never says a symbol it has not met, nor an escape */
             x = *code_out;
             code_point = c->acode[x];
+        }
+        if (c->voice_on && c->vc_n) {                /* the voice follows what was lived */
+            for (uint32_t i = 0; i < c->vc_n; i++)
+                if (c->vc_live[i] && (c->vc_pos >= c->vc_len[i] || c->vc_code[c->vc_off[i] + c->vc_pos] != code_point))
+                    c->vc_live[i] = 0;
+            c->vc_pos++;
         }
         if (c->words_on) {
             if (is_word_char(code_point)) c->cur_word = mix64(c->cur_word ^ (code_point + 0x100000000ull));

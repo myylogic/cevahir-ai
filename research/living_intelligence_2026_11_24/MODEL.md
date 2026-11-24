@@ -487,6 +487,94 @@ that is a finding to report, not a parameter to fit.
   0.99 (Dai et al. 2019). PPM-class models are well above both. The harmony (M2) is what has to close that gap, while
   learning online, exactly and with sublinear growth. Whether it can is the question of this study.
 
+## 12. Cevahir: one layer (M3)
+
+On 24 November 2026 the owner asked for everything built so far to meet in one layer, from which Cevahir emerges:
+the evidence mind of 14–24 November (Zihin, with every mechanism it was built with) and the cortex of this study.
+This section is the design as built (`living/cevahir.py`, `living/_core.c`); NOTES.md section 8 measures it.
+
+### 12.1 Two bodies, one place
+
+- **Zihin** lives each word as a moment: its units and ties with per-origin evidence, and the mechanisms F1–F75
+  (frames, families, relations, wholes, inheritance, conjectures, the ground). It is the part that generalises:
+  it answers the six published SCAN test files, deduces, and says who does what in scenes never described.
+- **The cortex** lives each letter (sections 3–5). It is the part that predicts: below PPMd and a character
+  Transformer on every corpus measured (NOTES.md 6), but alone it is a parrot. It says what usually follows what it
+  has lived.
+- **They meet in the harmony.** The harmony is the one layer. Every origin gives a belief for each bit of the next
+  symbol; the gate combines them; the calibration judges the result by the rule. Zihin becomes one more origin of
+  it, and nothing else changes in the harmony.
+
+### 12.2 Zihin as a voice of the harmony
+
+Before each token, Zihin's expectations on its text channel become the harmony's **voice**.
+
+- **Candidates.** The tokens c with e(c) > ½ (believed above not knowing), at most 12, each weighted e(c) − ½.
+- **How much it knows.** α = 2(e_best − ½), the complement of the evidence core's not-knowing measure u.
+- **Forms.** A token is offered in the forms it was lived in: a gap lived before tokens in the same situation (in
+  an answer or not, the first token of an utterance or not), times a way the token was written in the same role.
+  Case and spacing therefore come from life, not from a rule. Zihin's tokens are lower-cased; the harmony's symbols
+  are what was written.
+
+In the core, at each symbol the candidates still consistent with what was lived since the voice was set give the
+voice's belief that the next bit is 1, given the bits decided so far:
+
+    p₁ = q · W₁ / W + (1 − q) · ½
+
+- W is the weight of the candidates whose next symbol has the decided prefix, and W₁ the weight of those with a 1
+  next.
+- q is the one rule on the voice's own record: how often its top symbol was right, per sixth of α and per first
+  symbol of a form or a later one.
+- The gate gets stretch(p₁) and 2p₁ − 1 as inputs, and its weight sets are tripled by the voice's state: absent,
+  below the speaking line (α < 1/6, which is 2(e* − ½)), or at it.
+
+With the voice off, the core is bit-identical to M2 (tests/evolution/test_living_fast.py, and the recorded M2 rows).
+On a stream of random words that no context predicts, a voice that knows the next word takes the harmony from
+1.363 to 0.009 bits per character, and a voice that names a random word is ignored (1.355): the gate learns whom to
+follow.
+
+### 12.3 The prefrontal decision
+
+When Cevahir answers, Zihin answers first, as it always did: its race, its speaking line, its wholes answered part by
+part (F43). That is the **plan**, the thought, each word with its belief e. Then the answer is said one token at a
+time:
+
+1. **The same token.** The harmony's own next token (its most probable symbols up to the end of one token,
+   believed with the product of their probabilities) and Zihin's next token are compared. If they are the same
+   token, it is said in the harmony's form if either belief reaches e*.
+2. **Different tokens.** The record of disagreements in this situation decides who leads. That record is kept
+   while Cevahir lives: at each token heard, Zihin's top candidate and the harmony's guess are compared, and where
+   they differ and exactly one of them is right, the record counts whether it was Zihin. Its belief is the rule on
+   that count, per situation (in an answer or not) × (first token or later) × (Zihin at the line or below). The
+   leader is said if its own belief reaches e*.
+3. **Zihin has nothing to say.** When Zihin says nothing at all, the harmony speaks alone only as far as its record
+   when alone allows. That record counts how often its guess was right where Zihin expected nothing, in this
+   situation; the harmony speaks only if the rule on it is above ½. Once Zihin's plan is said, the harmony adds no
+   word of its own: the plan is the thought, and its end is part of it.
+4. **Neither.** Otherwise nothing more is said.
+
+How Zihin's token is written (its gap, its case) is the harmony's choice: of the gaps and written forms lived in
+this situation, the one it believes most here. A line end is never chosen, because an answer is one line.
+
+**Why a record and not the gate alone.** In a situation it never lived, the cortex escapes to a shorter context and
+can be confidently wrong. Having lived "zap" answered "ZAP .", it is sure that " ." follows "ZAP" also after
+"zap twice". Over a life where Zihin and the cortex are mostly both right, the gate cannot learn who generalises.
+That is learned where it shows: in the disagreements where one of the two was right. This is the evidence core's
+trust per origin, learned from what its claims came to, and F49's record per way of reading. In a small
+add-primitive world (NOTES.md 8.1), the first form, with the gate alone, answered 0 of 6 commands with the new
+primitive; with the record, 6 of 6, as Zihin does. The harmony alone answers 0 of them and is silent where it does
+not know.
+
+### 12.4 What is not yet one
+
+- **Two substances.** Zihin's units and ties and the cortex's contexts are two stores. They meet in the harmony and
+  in the forms lexicon, not in one table. Moving Zihin's readings into the core, one at a time and each measured
+  against the bridge, is the road to one substance.
+- **The amygdala and the hippocampus** are Zihin's value channel (feedback, consequences) and the cortex's episodes.
+  A salience weight on learning and a sleep that consolidates both stores are not built yet.
+- **Speed.** Zihin's moment is Python and costs milliseconds; the cortex's symbol costs microseconds. On text,
+  Cevahir reads at Zihin's speed.
+
 ## References
 
 - Cleary, J. G., and Witten, I. H. (1984). Data compression using adaptive coding and partial string matching. *IEEE

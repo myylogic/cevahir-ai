@@ -56,7 +56,10 @@ def _library() -> ctypes.CDLL:
     lib.core_say.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_double,
                              ctypes.c_void_p, ctypes.c_void_p]
     lib.core_enable_mix.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int,
-                                    ctypes.c_int]
+                                    ctypes.c_int, ctypes.c_int]
+    lib.core_set_voice.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint32,
+                                   ctypes.c_double]
+    lib.core_voice_info.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
     lib.core_stream_mix.restype = ctypes.c_double
     lib.core_stream_mix.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64, ctypes.c_int, ctypes.c_void_p]
     _lib = lib
@@ -76,7 +79,7 @@ class FastCortex:
     def __init__(self, depth: int = 8, update: str = "all", episode: bool = False, minlen: int = 12,
                  episode_bits: int = 22, mix: bool = False, lr: float = 0.02, lr_min: float = 0.002,
                  words: bool = True, two_inputs: bool = True, tree_prior: bool = True, recent: int = 0,
-                 episode_lengths: tuple = (), lines: bool = False):
+                 episode_lengths: tuple = (), lines: bool = False, voice: bool = False):
         if update not in ("all", "found"):
             raise ValueError("update is 'all' or 'found'")
         self.depth = depth
@@ -88,9 +91,10 @@ class FastCortex:
             lens = (ctypes.c_int * len(episode_lengths))(*sorted(episode_lengths, reverse=True))
             self._lib.core_set_episode_lengths(self._c, lens, len(episode_lengths))
         self.mix = mix
+        self.voice = bool(mix and voice)
         if mix:
             self._lib.core_enable_mix(self._c, lr, lr_min, 1 if words else 0, 1 if two_inputs else 0,
-                                      1 if tree_prior else 0, recent)
+                                      1 if tree_prior else 0, recent, 1 if self.voice else 0)
             if lines:
                 self._lib.core_enable_lines(self._c, episode_bits)
 
@@ -135,6 +139,27 @@ class FastCortex:
         locked = ctypes.c_int(0)
         n = self._lib.core_recall(self._c, h.ctypes.data, len(h), most, line, out.ctypes.data, ctypes.byref(locked))
         return out[:n].tobytes().decode("utf-32-le"), bool(locked.value)
+
+    def set_voice(self, forms, weights, know: float) -> None:
+        """The word voice (MODEL.md 12): candidates for the next token, each a form (its gap and its letters as they
+        were lived) with a weight, and how much the voice knows (0 to 1). Replaces what the voice held; an empty list
+        silences it."""
+        if not self.voice:
+            raise ValueError("the voice needs FastCortex(mix=True, voice=True)")
+        pairs = [(f, float(w)) for f, w in zip(forms, weights) if f and w > 0]
+        forms, weights = [f for f, _ in pairs], [w for _, w in pairs]
+        lens = np.array([len(codes(f)) for f in forms], dtype=np.uint32)
+        flat = codes("".join(forms)) if forms else np.zeros(1, dtype=np.uint32)
+        w = np.array(weights, dtype=np.float64) if forms else np.zeros(1, dtype=np.float64)
+        if not forms:
+            lens = np.zeros(1, dtype=np.uint32)
+        self._lib.core_set_voice(self._c, flat.ctypes.data, lens.ctypes.data, w.ctypes.data, len(forms), float(know))
+
+    def voice_info(self) -> tuple[int, int, int]:
+        """(candidates still consistent and unfinished, consistent and finished, symbols lived since it was set)."""
+        out = (ctypes.c_uint32 * 3)()
+        self._lib.core_voice_info(self._c, out)
+        return int(out[0]), int(out[1]), int(out[2])
 
     def size(self) -> dict:
         s = (ctypes.c_uint64 * 6)()
