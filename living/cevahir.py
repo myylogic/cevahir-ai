@@ -38,6 +38,7 @@ SEPARATOR = re.compile(r"(?<=[.!?…])\s+|\n+")             # Zihin's sentence s
 CORTEX = dict(depth=8, episode=True, minlen=12, episode_bits=22, mix=True, lr=0.02, lr_min=0.002, words=True,
               two_inputs=True, tree_prior=True, recent=6, lines=True)
 TAIL = 8192                                             # characters of the stream kept as the harmony's history
+SAY_TAIL = 4096                                         # of which the harmony reads, when it speaks (a whole line)
 
 
 def zihin_config(variant: str = "full", switches: Optional[Dict[str, bool]] = None):
@@ -388,7 +389,7 @@ class Cevahir:
         """The harmony's belief in ``text`` coming next after ``history``: 2 to the minus its bits, nothing learned
         (the voice silent)."""
         self.cortex.set_voice([], [], 0.0)
-        bits, _ = self.cortex.stream(text, history, learn=False)
+        bits, _ = self.cortex.stream(text, history, learn=False, tail=SAY_TAIL)
         return 2.0 ** -bits
 
     def harmony_token(self, history: str, most: int = 64) -> Tuple[str, float]:
@@ -398,7 +399,7 @@ class Cevahir:
         self.cortex.set_voice([], [], 0.0)
         buf, probs = "", []
         while len(buf) < most:
-            text, p = self.cortex.say(history + buf, most=1)
+            text, p = self.cortex.say(history + buf, most=1, tail=SAY_TAIL)
             if not text:
                 return "", 0.0
             if text == "\n" and not buf.strip():

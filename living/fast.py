@@ -116,11 +116,12 @@ class FastCortex:
             self._c = None
 
     def stream(self, text: str, history: str | None = None, learn: bool = True,
-               bits: bool = False) -> tuple[float, np.ndarray | None]:
+               bits: bool = False, tail: int = 256) -> tuple[float, np.ndarray | None]:
         """Predict each symbol of ``text`` and (if ``learn``) learn it; continue from the core's own history unless a
-        ``history`` is given. Returns the code length in bits and, if asked, the bits of each symbol."""
+        ``history`` is given (its last ``tail`` characters give the contexts, the word state and the current line).
+        Returns the code length in bits and, if asked, the bits of each symbol."""
         if history is not None:                       # its tail: contexts, the word state, the previous symbol
-            h = codes(history[-max(self.depth, 256):])
+            h = codes(history[-max(self.depth, tail):])
             self._lib.core_set_history(self._c, h.ctypes.data, len(h))
         x = codes(text)
         out = np.empty(len(x), dtype=np.float64) if bits else None
@@ -128,13 +129,13 @@ class FastCortex:
         total = run(self._c, x.ctypes.data, len(x), 1 if learn else 0, out.ctypes.data if bits else None)
         return total, out
 
-    def say(self, history: str, most: int = 40, line: float = 0.0) -> tuple[str, list[float]]:
+    def say(self, history: str, most: int = 40, line: float = 0.0, tail: int = 256) -> tuple[str, list[float]]:
         """Continue ``history`` with the most probable symbols (the harmony only), while their probability reaches
         ``line`` (0: always), at most ``most``. Nothing is learned and the mind is left as it was. Returns what was
         said and the probability of each symbol said, plus that of the first one not said (if any)."""
         if not self.mix:
             raise ValueError("saying needs the harmony (mix=True)")
-        h = codes(history[-max(self.depth, 256):])
+        h = codes(history[-max(self.depth, tail):])
         out = np.zeros(most, dtype=np.uint32)
         probs = np.zeros(most + 1, dtype=np.float64)
         n = self._lib.core_say(self._c, h.ctypes.data, len(h), most, line, out.ctypes.data, probs.ctypes.data)
