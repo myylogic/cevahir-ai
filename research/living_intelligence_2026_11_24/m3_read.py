@@ -16,6 +16,7 @@ import argparse
 import json
 import os
 import resource
+import subprocess
 import sys
 import time
 
@@ -25,6 +26,15 @@ sys.path.insert(0, HERE)
 import corpora  # noqa: E402
 from living.cevahir import CORTEX, Cevahir  # noqa: E402
 from living.fast import FastCortex  # noqa: E402
+
+
+def code_version() -> str:
+    """The commit of the code that wrote a row."""
+    try:
+        return subprocess.run(["git", "-C", HERE, "rev-parse", "--short", "HEAD"], capture_output=True,
+                              text=True).stdout.strip()
+    except OSError:
+        return ""
 
 
 def main() -> None:
@@ -42,7 +52,7 @@ def main() -> None:
         s = s[:a.chars]
     split = int(len(s) * 0.9)
     cut = s.rfind("\n", 0, split) + 1 or split                   # the last tenth begins at a line
-    row = {"corpus": a.corpus, "chars": len(s), "split": cut, "variant": a.variant, "record": a.record}
+    row = {"corpus": a.corpus, "code": code_version(), "chars": len(s), "split": cut, "variant": a.variant, "record": a.record}
     m2 = FastCortex(**CORTEX)
     t0 = time.time()
     b1, _ = m2.stream(s[:cut])

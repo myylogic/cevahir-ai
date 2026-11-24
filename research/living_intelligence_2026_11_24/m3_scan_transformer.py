@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -24,6 +25,15 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(REPO, "research", "living_mind_2026_11_22"))
 import m3_scan  # noqa: E402
 import m3_transformer as MT  # noqa: E402
+
+
+def code_version() -> str:
+    """The commit of the code that wrote a row."""
+    try:
+        return subprocess.run(["git", "-C", HERE, "rev-parse", "--short", "HEAD"], capture_output=True,
+                              text=True).stdout.strip()
+    except OSError:
+        return ""
 
 
 def main() -> None:
@@ -51,7 +61,7 @@ def main() -> None:
                 w = w[:-1]
             exact += w == words(" ".join(ans))
             silent += not w
-        row = {"test": "m3_scan", "split": split, "seed": args.seed, "who": "transformer",
+        row = {"test": "m3_scan", "code": code_version(), "split": split, "seed": args.seed, "who": "transformer",
                "train_watched": len(lived), "asked": len(test),
                "transformer": {"exact": exact, "silent": silent, "wrong": len(test) - exact - silent},
                "transformer_run": {k: got[k] for k in ("params", "steps", "train_s", "answer_s", "final_loss", "chars")}}

@@ -16,6 +16,7 @@ import argparse
 import hashlib
 import json
 import os
+import subprocess
 import sys
 import time
 
@@ -71,11 +72,20 @@ def run(seed: int, lang: str, workers: int) -> dict:
         ex = examples.setdefault(label, [])
         if len(ex) < 3:
             ex.append({"want": " ".join(want), **got})
-    return {"test": "m3_ground", "seed": seed, "lang": lang, "world": digest, "lines": len(train),
+    return {"test": "m3_ground", "code": code_version(), "seed": seed, "lang": lang, "world": digest, "lines": len(train),
             "zihin_moments": c.mind.t, "learn_cpu_s": round(lived, 1), "answer_wall_s": round(time.time() - t1, 1),
             "workers": workers, "scores": scores, "examples": examples,
             "disagreements": {str(k): [c.dis_won[k], c.dis_all[k]] for k in sorted(c.dis_all)},
             "alone": {str(k): [c.alone_right[k], c.alone_all[k]] for k in sorted(c.alone_all)}}
+
+
+def code_version() -> str:
+    """The commit of the code that wrote a row."""
+    try:
+        return subprocess.run(["git", "-C", HERE, "rev-parse", "--short", "HEAD"], capture_output=True,
+                              text=True).stdout.strip()
+    except OSError:
+        return ""
 
 
 def main() -> None:

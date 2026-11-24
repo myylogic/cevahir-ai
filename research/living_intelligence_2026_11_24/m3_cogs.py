@@ -18,6 +18,7 @@ import argparse
 import json
 import os
 import random
+import subprocess
 import sys
 import time
 from collections import Counter
@@ -31,6 +32,15 @@ from living.cevahir import Cevahir  # noqa: E402
 def read(path):
     with open(path, encoding="utf-8") as f:
         return [line.rstrip("\n").split("\t") for line in f if line.strip()]
+
+
+def code_version() -> str:
+    """The commit of the code that wrote a row."""
+    try:
+        return subprocess.run(["git", "-C", HERE, "rev-parse", "--short", "HEAD"], capture_output=True,
+                              text=True).stdout.strip()
+    except OSError:
+        return ""
 
 
 def main() -> None:
@@ -59,7 +69,7 @@ def main() -> None:
     asked = test + gen
     t1 = time.time()
     said = c.answers([s for s, _, _ in asked], way="every", limit=120, workers=a.workers)
-    row = {"test": "m3_cogs", "train_lines": len(train), "zihin_moments": c.mind.t, "episodes": len(c.episodes),
+    row = {"test": "m3_cogs", "code": code_version(), "train_lines": len(train), "zihin_moments": c.mind.t, "episodes": len(c.episodes),
            "life_s": round(lived_s, 1), "answers_s": round(time.time() - t1, 1), "workers": a.workers,
            "thought": dict(Counter(s.get("thought", "?") for s in said))}
     for part, rows, got in (("test", test, said[:len(test)]), ("gen", gen, said[len(test):])):

@@ -24,6 +24,7 @@ import argparse
 import json
 import os
 import random
+import subprocess
 import sys
 import time
 
@@ -72,7 +73,7 @@ def run(args, split):
     said = c.answers([" ".join(cmd) for cmd, _ in test], way="every", limit=400, workers=args.workers)
     answered_s = time.time() - t0
     truth = [c.session.words(" ".join(a)) for _, a in test]
-    row = {"test": "m3_scan", "split": split, "seed": args.seed, "train_watched": len(lived),
+    row = {"test": "m3_scan", "code": code_version(), "split": split, "seed": args.seed, "train_watched": len(lived),
            "train_published": len(train), "asked": len(test), "zihin_moments": c.mind.t,
            "cortex": c.cortex.size(), "life_s": round(lived_s, 1), "answers_s": round(answered_s, 1),
            "workers": args.workers, "voiced_tokens": c.counts["voiced"], "unaligned": c.counts["unaligned"],
@@ -94,6 +95,15 @@ def run(args, split):
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+def code_version() -> str:
+    """The commit of the code that wrote a row."""
+    try:
+        return subprocess.run(["git", "-C", HERE, "rev-parse", "--short", "HEAD"], capture_output=True,
+                              text=True).stdout.strip()
+    except OSError:
+        return ""
 
 
 def main() -> None:
