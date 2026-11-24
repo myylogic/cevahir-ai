@@ -728,7 +728,8 @@ if its belief reaches the speaking line.
 | words of a kind, by half their answer contexts (kinds read at 16,384 dialogues) | 279 / 18 / 3 | 154 / 127 / 19 |
 | words of a kind, by one answer context shared | 285 / 13 / 2 | 209 / 82 / 9 |
 | and answering by parts | 294 / 0 / 6 | 246 / 35 / 19 |
-| **and what an example put first goes first; words near the part aligned by their place** | **296 / 0 / 4** | **252 / 32 / 16** |
+| and what an example put first goes first; words near the part aligned by their place | 296 / 0 / 4 | 252 / 32 / 16 |
+| **and a part that cannot be taken out exchanged for one lived in its place** | **296 / 0 / 4** | **264 / 14 / 22** |
 
 (The third row was first written as 279 / 19 / 2 from an intermediate version; measured again with the code that
 followed it, 280 / 19 / 1. A further change, putting a new run among all the runs of its kind by its place, gave
@@ -741,32 +742,32 @@ followed it, 280 / 19 / 1. A further change, putting a new run among all the run
 
 By kind, on the generalisation sample (the same 300; right of those asked):
 
-| kind (asked) | analogy over places (all at once) | with words of a kind | and by parts (last row above) |
-|---|---|---|---|
-| active to passive (27) | 27 | 27 | 27 |
-| cp recursion (9) | 0 | 0 | 4 |
-| do dative to pp dative (8) | 7 | 7 | 7 |
-| obj omitted transitive to transitive (10) | 9 | 9 | 10 |
-| obj pp to subj pp (11) | 0 | 0 | 0 |
-| obj to subj common (11) | 9 | 9 | 10 |
-| obj to subj proper (9) | 9 | 9 | 9 |
-| only seen as transitive subj as unacc subj (18) | 8 | 8 | 11 |
-| only seen as unacc subj as obj omitted transitive subj (20) | 7 | 8 | 18 |
-| only seen as unacc subj as unerg subj (8) | 5 | 6 | 7 |
-| passive to active (15) | 15 | 15 | 15 |
-| pp dative to do dative (11) | 10 | 10 | 11 |
-| pp recursion (18) | 0 | 0 | 16 |
-| prim to inf arg (13) | 13 | 13 | 13 |
-| prim to obj common (11) | 10 | 9 | 11 |
-| prim to obj proper (20) | 10 | 11 | 11 |
-| prim to subj common (13) | 11 | 12 | 13 |
-| prim to subj proper (19) | 17 | 17 | 19 |
-| subj to obj common (13) | 12 | 12 | 13 |
-| subj to obj proper (16) | 7 | 7 | 7 |
-| unacc to transitive (20) | 19 | 20 | 20 |
+| kind (asked) | analogy over places (all at once) | with words of a kind | and by parts | and exchanges |
+|---|---|---|---|---|
+| active to passive (27) | 27 | 27 | 27 | 27 |
+| cp recursion (9) | 0 | 0 | 4 | 4 |
+| do dative to pp dative (8) | 7 | 7 | 7 | 7 |
+| obj omitted transitive to transitive (10) | 9 | 9 | 10 | 10 |
+| obj pp to subj pp (11) | 0 | 0 | 0 | 0 |
+| obj to subj common (11) | 9 | 9 | 10 | 10 |
+| obj to subj proper (9) | 9 | 9 | 9 | 9 |
+| only seen as transitive subj as unacc subj (18) | 8 | 8 | 11 | 11 |
+| only seen as unacc subj as obj omitted transitive subj (20) | 7 | 8 | 18 | 19 |
+| only seen as unacc subj as unerg subj (8) | 5 | 6 | 7 | 7 |
+| passive to active (15) | 15 | 15 | 15 | 15 |
+| pp dative to do dative (11) | 10 | 10 | 11 | 11 |
+| pp recursion (18) | 0 | 0 | 16 | 16 |
+| prim to inf arg (13) | 13 | 13 | 13 | 13 |
+| prim to obj common (11) | 10 | 9 | 11 | 11 |
+| prim to obj proper (20) | 10 | 11 | 11 | 16 |
+| prim to subj common (13) | 11 | 12 | 13 | 13 |
+| prim to subj proper (19) | 17 | 17 | 19 | 19 |
+| subj to obj common (13) | 12 | 12 | 13 | 13 |
+| subj to obj proper (16) | 7 | 7 | 7 | 13 |
+| unacc to transitive (20) | 19 | 20 | 20 | 20 |
 
-- **Where it stands.** On these samples the hippocampus alone answers 296 of 300 in distribution (98.7 %) and 252 of
-  300 of the generalisation set (84 %), silent on 32 and wrong on 16. Kim and Linzen (2020) report 96–99 % in
+- **Where it stands.** On these samples the hippocampus alone answers 296 of 300 in distribution (98.7 %) and 264 of
+  300 of the generalisation set (88 %), silent on 14 and wrong on 22. Kim and Linzen (2020) report 96–99 % in
   distribution and at most 35 % on the generalisation set for the Transformers and LSTMs they trained on the same
   file ([arXiv:2010.05465](https://arxiv.org/abs/2010.05465)); with careful choices of embedding scale, early stopping
   and positional encoding, Transformers reach about 81 % (Csordás, Irie and Schmidhuber 2021,
@@ -778,9 +779,10 @@ By kind, on the generalisation sample (the same 300; right of those asked):
   [arXiv:2303.13716](https://arxiv.org/abs/2303.13716)).
 - **What it does not do.** A phrase on a subject, when phrases were lived only on objects: 0 of 11, silent (no lived
   frame holds a phrase right after a sentence's first noun). A name where the lived utterances had a noun phrase
-  (subj to obj proper, prim to obj proper): 7 of 16 and 11 of 20; a phrase exchanged for a name is not one of its
-  parts. And it is not silent everywhere it should be: 4 answers in distribution and 16 on the generalisation set are
-  wrong, most of them a run of the answer put in the wrong place.
+  (subj to obj proper, prim to obj proper): 13 of 16 and 16 of 20 by exchange, against 7 and 11 before it; the ones
+  missed are mostly a name after a noun phrase ("gave the crocodile Paula"), where the examples' change is put into
+  the wrong run. And it is not silent everywhere it should be: 4 answers in distribution and 22 on the generalisation
+  set are wrong; the exchanges brought 12 right answers and 6 wrong ones.
 - **Alone on SCAN** the analogy (before words of a kind and parts) answered 27, 0, 0, 24, 0 and 0 of the 200 test
   commands of the six splits (a word there changes how often an action is repeated, which one substitution cannot
   carry), where Zihin answers 199–200. This is why Cevahir chooses between the two thoughts by the record of their
@@ -861,9 +863,9 @@ studied in conversation, in four conditions; the other half (nine per seed) is a
 - **Text.** On running text Zihin's voice takes 0.1–1.2 % of the harmony's bits (8.6): what Cevahir knows of a text,
   the harmony mostly knows already. Its gains are in answers that text does not hold.
 - **What the hippocampus cannot answer** (8.7): a phrase on a subject when phrases were lived only on objects (silent),
-  a name put where noun phrases were lived, and parts longer than four tokens. Answering by parts has no record of its
+  a name after a noun phrase where only noun phrases were lived, and parts longer than four tokens. Answering by parts has no record of its
   own: while Cevahir lives, the analogy foresees by places only, and a plan by parts is believed by its examples'
-  agreement and the rest's belief. On COGS that leaves 16 wrong answers in 300 on the generalisation set.
+  agreement and the rest's belief. On COGS that leaves 22 wrong answers in 300 on the generalisation set.
 - **Scale.** Every measurement here is at most ten million characters on one machine with four cores; no standard
   large benchmark was run (enwik8 could not be downloaded, section 6.6).
 - **Samples.** COGS was measured on samples of 300 of each file, and SCAN on 200 commands of each split, not on the
