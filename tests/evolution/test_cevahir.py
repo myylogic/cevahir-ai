@@ -271,3 +271,27 @@ def test_the_hippocampus_answers_an_utterance_that_differs_in_two_places_from_ev
     ep.forget(i)
     assert sum(before.values()) - sum(ep.with_w.values()) == words     # each of its words, once
     assert all(i not in ids for ids in ep.index.values())
+
+
+def test_where_one_place_frames_cannot_answer_the_record_lets_the_analogy_lead(FastCortex):
+    from living.cevahir import Cevahir
+    people = ["Ali", "Veli", "Ayşe", "Can", "Ece", "Zeynep", "Deniz", "Selin"]
+    lemma = {"elmayı": "elma", "kitabı": "kitap", "topu": "top", "kalemi": "kalem", "çantayı": "çanta"}
+    rng = random.Random(1)
+    seen, life = set(), []
+    for _ in range(90):
+        p, q = rng.sample(people, 2)
+        t = rng.choice(sorted(lemma))
+        seen.add((p, q, t))
+        life.append(("%s %s %s'ya verdi ." % (p, t, q), "ver ( %s , %s , %s )" % (p, q, lemma[t])))
+    asked = [("%s %s %s'ya verdi ." % (p, t, q), "ver ( %s , %s , %s )" % (p, q, lemma[t]))
+             for p in people for q in people for t in sorted(lemma) if p != q and (p, q, t) not in seen][:12]
+    c = Cevahir(variant="speaking")
+    for q, a in life:
+        c.watch(q, a)
+    c.session.close_turn()
+    said = c.answers([q for q, _ in asked], way="every", workers=2)
+    exact = {w: sum(s[w] == a for s, (_, a) in zip(said, asked)) for w in ("zihin", "analogy", "cevahir")}
+    assert exact["analogy"] == len(asked) and exact["cevahir"] == len(asked)    # written as the answers were
+    assert exact["zihin"] < len(asked)
+    assert c.trust_analogy() > 0.5 and all(s["thought"] == "analogy" for s in said)
