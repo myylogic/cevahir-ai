@@ -1400,3 +1400,132 @@ uint64_t core_sleep(Core *c, uint32_t keep_min) {
     free(keep); free(nid);
     return N - m;
 }
+
+/* ---------------------------------------------------------------------------------------------------------------- */
+/* Retraction (MODEL.md 2.5, for the core): take back exactly the counts that living `codes` after the history `hist`
+ * added, in the cortex (growth m = 1, update "all") and in the word and line contexts; and overwrite the episode text
+ * of that stretch (from position `text_from`), so that it can never be recalled or completed again. What depends on
+ * the order of life (the situations' records, the gate's weights, the calibration, the short-term memory) is not
+ * taken back. A symbol first met in that stretch keeps its number, with no count. Returns 1, or 0 if the core cannot
+ * retract exactly (update "found"). */
+static void table_delete(uint64_t *keys, uint32_t *vals, uint64_t mask, uint64_t slot) {
+    uint64_t i = slot;
+    keys[i] = 0;
+    for (uint64_t j = (i + 1) & mask; keys[j]; j = (j + 1) & mask) {      /* backward shift of the probe run */
+        uint64_t home = mix64(keys[j]) & mask;
+        int between = i <= j ? (home > i && home <= j) : (home > i || home <= j);
+        if (!between) { keys[i] = keys[j]; vals[i] = vals[j]; keys[j] = 0; i = j; }
+    }
+}
+
+static uint64_t table_find(uint64_t *keys, uint64_t mask, uint64_t key) {
+    uint64_t h = mix64(key) & mask;
+    while (keys[h]) { if (keys[h] == key) return h; h = (h + 1) & mask; }
+    return (uint64_t)-1;
+}
+
+static void untake(Core *c, uint32_t v, uint32_t x) {    /* one count of x less at node v */
+    c->n[v] -= 1;
+    uint32_t prev = 0;
+    for (uint32_t e = c->head[v]; e; prev = e, e = c->enext[e]) if (c->esym[e] == x) {
+        if (--c->ecnt[e] == 0) {
+            if (prev) c->enext[prev] = c->enext[e]; else c->head[v] = c->enext[e];
+            if (c->tail[v] == e) c->tail[v] = prev;
+            c->t[v] -= 1;
+        }
+        return;
+    }
+}
+
+int core_retract(Core *c, const uint32_t *codes, uint64_t n, const uint32_t *hist, uint64_t nh, uint64_t text_from) {
+    if (c->update_found) return 0;
+    uint32_t *save_hist = malloc((c->depth + 1) * 4);
+    memcpy(save_hist, c->hist, c->hlen * 4);
+    int save_hlen = c->hlen;
+    uint64_t save_cw = c->cur_word, save_pw = c->prev_word, save_lh = c->line_h;
+    uint32_t save_ll = c->line_len, save_pc = c->prev_code;
+    core_set_history(c, hist, nh);
+    uint32_t *chain = malloc((c->depth + 2) * 4);
+    for (uint64_t i = 0; i < n; i++) {
+        uint32_t x = symbol_number(c, codes[i]);
+        if (x == NONE) continue;                         /* never lived: nothing to take back */
+        int len = chain_of(c, chain);
+        for (int d = len - 1; d >= 0; d--) {             /* the deepest first, so a node left empty can go */
+            uint32_t v = chain[d];
+            untake(c, v, x);
+            if (d > 0 && c->n[v] == 0) {
+                uint64_t key = (((uint64_t)chain[d - 1] << 21) | c->hist[c->hlen - d]) + 1;
+                uint64_t slot = table_find(c->ckey, c->cmask, key);
+                if (slot != (uint64_t)-1) { table_delete(c->ckey, c->cval, c->cmask, slot); c->cused--; }
+            }
+        }
+        if (c->mix_on && c->wkey) {
+            uint64_t keys[3]; int nk = 0;
+            if (c->words_on) {
+                keys[nk++] = mix64(0x5751 ^ c->cur_word);
+                keys[nk++] = mix64(0x5752 ^ mix64(c->prev_word) ^ c->cur_word);
+            }
+            if (c->lines_on) keys[nk++] = mix64(0x4C494E45ull ^ c->line_h ^ ((uint64_t)c->line_len << 40));
+            for (int k = 0; k < nk; k++) {
+                uint64_t key = keys[k] ? keys[k] : 1;
+                uint64_t slot = table_find(c->wkey, c->wmask, key);
+                if (slot == (uint64_t)-1) continue;
+                uint32_t v = c->wval[slot];
+                untake(c, v, x);
+                if (c->n[v] == 0) { table_delete(c->wkey, c->wval, c->wmask, slot); c->wused--; }
+            }
+        }
+        c->lived -= 1;
+        uint32_t cp = codes[i];
+        if (c->words_on) {
+            if (is_word_char(cp)) c->cur_word = mix64(c->cur_word ^ (cp + 0x100000000ull));
+            else if (c->cur_word) { c->prev_word = c->cur_word; c->cur_word = 0; }
+        }
+        if (c->lines_on) {
+            if (cp == 10) { c->line_h = 0x6C696E65ull; c->line_len = 0; }
+            else { c->line_h = mix64(c->line_h ^ cp); c->line_len++; }
+        }
+        push_history(c, x);
+    }
+    if (c->episode)                                       /* the stretch can no longer be recalled */
+        for (uint64_t p = text_from; p < text_from + n && p < c->text_len; p++) c->text[p] = 0xFFFFFFFEu;
+    memcpy(c->hist, save_hist, save_hlen * 4); c->hlen = save_hlen;
+    c->cur_word = save_cw; c->prev_word = save_pw; c->line_h = save_lh; c->line_len = save_ll; c->prev_code = save_pc;
+    free(save_hist); free(chain);
+    return 1;
+}
+
+/* a digest of the substance: every context reachable from the root with its count and its entries (sorted), and every
+ * word and line context with its count and entries; independent of node numbers and of the order entries were made */
+static uint64_t node_digest(Core *c, uint32_t v) {
+    uint64_t acc = mix64(0x6E6F6465ull ^ c->n[v]);
+    uint64_t sum = 0;                                    /* entries in any order: a commutative sum of their hashes */
+    for (uint32_t e = c->head[v]; e; e = c->enext[e]) sum += mix64(((uint64_t)c->acode[c->esym[e]] << 32) | c->ecnt[e]);
+    return mix64(acc ^ sum);
+}
+
+uint64_t core_digest(Core *c) {
+    /* contexts: each child edge is hashed with its path from the root, so a context is identified by its symbols */
+    uint64_t total = node_digest(c, 0);
+    uint64_t N = c->nodes;
+    uint64_t *path = calloc(N ? N : 1, 8);               /* the hash of each node's context */
+    uint8_t *done = calloc(N ? N : 1, 1);
+    done[0] = 1; path[0] = 0x726F6F74ull;
+    for (int changed = 1; changed;) {                    /* parents before children */
+        changed = 0;
+        for (uint64_t i = 0; i <= c->cmask; i++) if (c->ckey[i]) {
+            uint64_t k = c->ckey[i] - 1;
+            uint32_t parent = (uint32_t)(k >> 21), sym = (uint32_t)(k & ((1u << 21) - 1)), v = c->cval[i];
+            if (done[parent] && !done[v]) {
+                path[v] = mix64(path[parent] ^ (0x5000000000ull + c->acode[sym]));
+                done[v] = 1; changed = 1;
+                total += mix64(path[v] ^ node_digest(c, v));
+            }
+        }
+    }
+    if (c->wkey)
+        for (uint64_t i = 0; i <= c->wmask; i++) if (c->wkey[i])
+            total += mix64(c->wkey[i] ^ node_digest(c, c->wval[i]) ^ 0x776F7264ull);
+    free(path); free(done);
+    return total;
+}

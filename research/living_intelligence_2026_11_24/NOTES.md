@@ -490,7 +490,10 @@ The harmony reads the sentences once, one a line, in 32 seconds of one core, and
 - On a cue shared by several sentences, the lock takes the latest one: that is valid, but exact only by chance.
   This is why exact is 14 of 41 and 2 of 93 for starts shared by 2–3 and 4 or more sentences.
 
-The word-level Transformer of t_race.py (60 minutes, four cores, asked at 2 to 60 minutes) and Zihin (t_race.py `mind`) on the same folder are running; their rows follow.
+The word-level Transformer of t_race.py and Zihin (t_race.py `mind`) were not run again here: that run was stopped to
+give the machine to M3 (section 8). On the same documents in the earlier study (PAPER.md 7.2), the Transformer
+(7.3 million parameters, an hour of training) said a valid sentence in 47 of 200, and Zihin in 146 to 151 after one
+reading; the harmony's recall lock says one in 190.
 
 ### 6.6 What M2 does not show
 

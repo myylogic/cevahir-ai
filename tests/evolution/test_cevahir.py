@@ -227,3 +227,22 @@ def test_a_word_first_met_in_the_question_is_said_back_as_it_was_written(FastCor
         if s["zihin"] != "(sessiz)":
             assert c.session.words(s["cevahir"]) == c.session.words(s["zihin"])
             assert s["cevahir"].startswith(name)                        # the case as it was heard
+
+
+def test_cevahir_forgets_an_entry_exactly_and_can_no_longer_say_it(FastCortex):
+    from living.cevahir import Cevahir
+    life, _ = _world()
+    c = Cevahir(variant="speaking", ledger=True)
+    d = Cevahir(variant="speaking", ledger=True)
+    for q, a in life[:30]:
+        c.watch(q, a + " .")
+        d.watch(q, a + " .")
+    c.watch("şifre nedir ?", "şifre kırmızı elma .")
+    c.watch("şifre nedir ?", "şifre kırmızı elma .")
+    assert c.cortex.digest() != d.cortex.digest()
+    got = c.forget(len(c.entries) - 1)
+    got2 = c.forget(len(c.entries) - 2)
+    assert got["forgotten"] and got2["forgotten"]
+    assert c.cortex.digest() == d.cortex.digest()                     # the counts of a mind that never heard it
+    said = c.answers(["şifre nedir ?"], way="every", workers=1)[0]
+    assert all("kırmızı" not in said[w].lower() for w in said)

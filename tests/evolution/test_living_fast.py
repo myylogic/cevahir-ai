@@ -143,3 +143,20 @@ def test_sleep_forgets_what_did_not_recur_and_keeps_what_did(FastCortex, tmp_pat
     a.save(path)
     b = FastCortex.load(path)
     assert b.stream("the mind keeps", learn=False) == a.stream("the mind keeps", learn=False)
+
+
+@pytest.mark.parametrize("cfg", [dict(depth=6), dict(depth=6, episode=True, minlen=8, mix=True, recent=4, lines=True)])
+def test_retraction_leaves_the_substance_of_a_store_that_never_read_it(FastCortex, cfg):
+    x = TEXT
+    y = "a secret line: the code of the door is mind keeps evler.\n" * 2      # symbols all met in x
+    a = FastCortex(**cfg)
+    a.stream(x)
+    a.stream(y)
+    b = FastCortex(**cfg)
+    b.stream(x)
+    assert a.digest() != b.digest()
+    a.retract(y, x, len(x))
+    assert a.digest() == b.digest()
+    if cfg.get("lines"):                                              # and the line can no longer be recalled
+        said, locked = a.recall("\na secret line: ")
+        assert not (locked and said.startswith("the code"))

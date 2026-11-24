@@ -8,6 +8,9 @@ Every line you type is said to Cevahir; it answers (or stays silent: "(sessiz)")
     !oku PATH        read a text file, or every .txt/.md/.py file under a folder (each sentence; code line by line)
     !ogret PATH      watch the dialogues of a .tsv file ("what is said<TAB>the answer", one per line)
     !kaydet FOLDER   keep Cevahir in FOLDER (Zihin, the core, what Cevahir learned, a manifest of digests)
+    !dogru / !yanlis how its last answer was received (the amygdala's record; a wrong answer is not lived as right)
+    !gecmis          the entries of this session's history;  !unut N  forget entry N exactly
+    !uyu             a night: the cortex forgets what did not recur, Zihin dreams
     !durum           what Cevahir holds
     !cik             leave (unsaved life is lost)
 """
@@ -27,7 +30,9 @@ def main() -> None:
     import torch
     torch.set_num_threads(1)
     from living.cevahir import Cevahir
-    c = Cevahir.load(a.load) if a.load else Cevahir(variant=a.variant, dil=a.dil)
+    c = Cevahir.load(a.load) if a.load else Cevahir(variant=a.variant, dil=a.dil, ledger=True)
+    if c.entries is None:                                    # a loaded mind: the history begins now
+        c.entries = []
     print("Cevahir %s. !cik ile çıkılır." % ("yüklendi: " + a.load if a.load else "doğdu"), flush=True)
     for raw in sys.stdin:
         line = raw.rstrip("\n")
@@ -38,6 +43,22 @@ def main() -> None:
         if line.startswith("!kaydet "):
             m = c.save(line[len("!kaydet "):].strip())
             print("  kaydedildi: %d dosya, %d an" % (len(m["files"]), m["zihin_moments"]), flush=True)
+            continue
+        if line.startswith("!dogru") or line.startswith("!yanlis"):
+            c.feedback(line.startswith("!dogru"))
+            print("  kaydedildi", flush=True)
+            continue
+        if line.startswith("!gecmis"):
+            for i, e in enumerate(c.entries):
+                print("  %d %s %s%s" % (i, e["kind"], e["text"][:60].replace("\n", " ").replace("\t", " | "),
+                                        " (unutuldu)" if e["forgotten"] else ""), flush=True)
+            continue
+        if line.startswith("!unut "):
+            got = c.forget(int(line.split()[1]))
+            print("  unutuldu: %s" % got, flush=True)
+            continue
+        if line.startswith("!uyu"):
+            print("  %s" % c.sleep(), flush=True)
             continue
         if line.startswith("!durum"):
             print("  Zihin %d an; korteks %s; ses ile yaşanan %d kelime" % (

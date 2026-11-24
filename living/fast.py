@@ -67,6 +67,11 @@ def _library() -> ctypes.CDLL:
     lib.core_config.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
     lib.core_sleep.restype = ctypes.c_uint64
     lib.core_sleep.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+    lib.core_retract.restype = ctypes.c_int
+    lib.core_retract.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64, ctypes.c_void_p, ctypes.c_uint64,
+                                 ctypes.c_uint64]
+    lib.core_digest.restype = ctypes.c_uint64
+    lib.core_digest.argtypes = [ctypes.c_void_p]
     lib.core_stream_mix.restype = ctypes.c_double
     lib.core_stream_mix.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64, ctypes.c_int, ctypes.c_void_p]
     _lib = lib
@@ -193,6 +198,20 @@ class FastCortex:
         extending it, and the word and line contexts met fewer times); what recurred stays exactly. Returns how many
         nodes were forgotten."""
         return int(self._lib.core_sleep(self._c, keep_min))
+
+    def retract(self, text: str, history: str, text_from: int) -> None:
+        """Take back exactly the counts that living ``text`` after ``history`` added (the cortex, the word and line
+        contexts), and overwrite the episode text of that stretch from position ``text_from`` so that it can never be
+        recalled. What depends on the order of life (situations, gate, calibration, short-term memory) stays."""
+        x = codes(text)
+        h = codes(history[-max(self.depth, 4096):]) if history else np.zeros(1, dtype=np.uint32)
+        if not self._lib.core_retract(self._c, x.ctypes.data, len(x), h.ctypes.data, len(history[-max(self.depth, 4096):]) if history else 0, text_from):
+            raise ValueError("exact retraction needs update='all'")
+
+    def digest(self) -> int:
+        """A digest of the substance: every context with its count and entries, and every word and line context;
+        independent of node numbers and of the order things were made."""
+        return int(self._lib.core_digest(self._c))
 
     def size(self) -> dict:
         s = (ctypes.c_uint64 * 6)()

@@ -65,12 +65,15 @@ class Cevahir:
 
     def __init__(self, variant: str = "full", switches: Optional[Dict[str, bool]] = None, window: int = 0,
                  cortex: Optional[dict] = None, dil: str = "tr", seed: int = 0, top: int = 12, forms_per: int = 2,
-                 record: bool = True, keep_stream: bool = False):
+                 record: bool = True, keep_stream: bool = False, ledger: bool = False):
         import torch
         from zihin import Mind
         from zihin.__main__ import CHANNEL, Session
         torch.manual_seed(seed)
-        self.mind = Mind(zihin_config(variant, switches))
+        cfg_z = zihin_config(variant, switches)
+        if ledger:                                       # Zihin keeps its ledger (in memory): it can forget exactly
+            cfg_z.keep_log = True
+        self.mind = Mind(cfg_z)
         self.mind.add_channel(CHANNEL, "act")
         if window:
             self.mind.knob["F"] = window
@@ -97,6 +100,8 @@ class Cevahir:
         self.last_leads: List[Tuple[str, int]] = []              # who led each token of the last answer, and where
         self.pending: Optional[Tuple[str, str]] = None           # the last turn, lived by the harmony once judged
         self.alphabets: Dict[str, set] = {self.channel: set()}   # every channel's own alphabet (MODEL.md 4)
+        self.entries: Optional[List[dict]] = [] if ledger else None  # what was lived, entry by entry (to forget)
+        self._open: Optional[dict] = None
         self.others: Dict[str, dict] = {}                        # channels born by the rule: a harmony each
 
     # ------------------------------------------------------------------------------------------------ the voice --
@@ -161,8 +166,26 @@ class Cevahir:
         return (self.alone_right[cell] + self.outcome_good[("alone", cell)] + 0.5) / \
             (self.alone_all[cell] + self.outcome_all[("alone", cell)] + 1.0)
 
+    def _begin(self, kind: str) -> Optional[dict]:
+        """Open an entry of the history (with a ledger): what is lived until ``_end`` can be forgotten as one."""
+        if self.entries is None or self._open is not None:
+            return None
+        self._open = {"kind": kind, "t0": self.mind.t + 1, "text_from": self.cortex.size()["episode_text"],
+                      "history": self.tail[-4096:], "text": [], "forms": [], "forgotten": False}
+        return self._open
+
+    def _end(self, entry: Optional[dict]) -> None:
+        if entry is None:
+            return
+        entry["t1"] = self.mind.t
+        entry["text"] = "".join(entry["text"])
+        self.entries.append(entry)
+        self._open = None
+
     def _live_text(self, text: str) -> float:
         bits, _ = self.cortex.stream(text)
+        if self._open is not None:
+            self._open["text"].append(text)
         self.alphabets[self.channel].update(text)
         self.tail = (self.tail + text)[-TAIL:]
         if self.stream is not None:
@@ -170,6 +193,16 @@ class Cevahir:
         return bits
 
     def tell(self, sentence: str, prov: Optional[int] = None, scene: Optional[dict] = None,
+             tone: Optional[str] = None) -> float:
+        """Read a sentence: see ``_tell`` (one entry of the history, with a ledger)."""
+        self.flush()
+        entry = self._begin("tell")
+        try:
+            return self._tell(sentence, prov, scene, tone)
+        finally:
+            self._end(entry)
+
+    def _tell(self, sentence: str, prov: Optional[int] = None, scene: Optional[dict] = None,
              tone: Optional[str] = None) -> float:
         """A sentence of a document, read on its own line (as ``Session.read_path`` lives a sentence: heard, its
         end perceived, a pause). With a ground and a ``scene``, what is seen while it is told is perceived."""
@@ -238,6 +271,8 @@ class Cevahir:
                     bits += self._live_text(form)
                     self.gaps[where][form[:len(form) - (b - a)]] += 1
                     self.written[answer][body[i]][text[a:b]] += 1
+                    if self._open is not None:
+                        self._open["forms"].append((where, form[:len(form) - (b - a)], answer, body[i], text[a:b]))
                     self.mind.step(s.events(body[i], prov, speaker))
                     self.counts["voiced"] += 1
                 else:                                        # the closing mark: heard as the end of the turn
@@ -257,6 +292,16 @@ class Cevahir:
         return "\n" if self.tail else ""
 
     def watch(self, first: str, answer: str, prov: Optional[int] = None, asker: Optional[str] = None,
+              scene: Optional[dict] = None, scene_answer: Optional[dict] = None) -> float:
+        """Watch a dialogue: see ``_watch`` (one entry of the history, with a ledger)."""
+        self.flush()
+        entry = self._begin("watch")
+        try:
+            return self._watch(first, answer, prov, asker, scene, scene_answer)
+        finally:
+            self._end(entry)
+
+    def _watch(self, first: str, answer: str, prov: Optional[int] = None, asker: Optional[str] = None,
               scene: Optional[dict] = None, scene_answer: Optional[dict] = None) -> float:
         """Two others talk (Zihin's ``Session.watch``): one says ``first``, another answers. The harmony lives the
         dialogue as one line, the first utterance and the answer apart by a tab. With a ground (``mind.zemin``) and a
@@ -287,6 +332,15 @@ class Cevahir:
         return bits
 
     def read(self, text: str, code: bool = False) -> float:
+        """Read a document: see ``_read`` (one entry of the history, with a ledger)."""
+        self.flush()
+        entry = self._begin("read")
+        try:
+            return self._read(text, code)
+        finally:
+            self._end(entry)
+
+    def _read(self, text: str, code: bool = False) -> float:
         """A document (Zihin's ``Session.read_path``): the harmony lives every character of it; Zihin lives each
         sentence of at least two words (each line, for source code) as an utterance, its end and a pause."""
         self.flush()
@@ -542,8 +596,13 @@ class Cevahir:
         Zihin lives them as its reply does (what it heard, told; what it said, its own act), the harmony lives the
         line (what it heard, a tab, what it answered)."""
         self.flush()
+        entry = self._begin("converse")
         answer = self.reply(said_to_it, "cevahir", limit)
         self.pending = (self._lead() + said_to_it, "\t" + answer)
+        self._pending_entry = entry
+        if entry is not None:
+            entry["t1"] = self.mind.t
+            self._open = None
         return answer
 
     def flush(self) -> None:
@@ -552,7 +611,7 @@ class Cevahir:
             heard, said = self.pending
             self.pending = None
             self.cortex.set_voice([], [], 0.0)
-            self._live_text(heard + said)
+            self._live_judged(heard + said)
 
     def feedback(self, good: bool) -> None:
         """The amygdala (MODEL.md 12.4): how Cevahir's last answer was received. Zihin learns it as it always did
@@ -569,7 +628,49 @@ class Cevahir:
             heard, said = self.pending
             self.pending = None
             self.cortex.set_voice([], [], 0.0)
-            self._live_text(heard + (said if good else "\t"))
+            self._live_judged(heard + (said if good else "\t"))
+
+    def _live_judged(self, text: str) -> None:
+        """The harmony lives a conversation turn (into that turn's entry, with a ledger)."""
+        entry = getattr(self, "_pending_entry", None)
+        self._pending_entry = None
+        if entry is not None:
+            entry["text_from"] = self.cortex.size()["episode_text"]
+            entry["history"] = self.tail[-4096:]
+            self._open = entry
+            entry["text"] = []
+            self._live_text(text)
+            entry["text"] = "".join(entry["text"])
+            self._open = None
+            self.entries.append(entry)
+        else:
+            self._live_text(text)
+
+    def forget(self, k: int) -> dict:
+        """Forget entry ``k`` of the history exactly (with a ledger): Zihin takes back every increment of its moments
+        (``Mind.retract``, its ledger), the core takes back the counts its text added and overwrites its episode text
+        (``FastCortex.retract``), and the forms it taught are taken back. What depends on the order of life (the
+        harmony's gate and calibration, the situations, the records of disagreements) is not taken back."""
+        if self.entries is None:
+            raise ValueError("Cevahir keeps no ledger (Cevahir(ledger=True))")
+        self.flush()
+        e = self.entries[k]
+        if e["forgotten"]:
+            return {"forgotten": False}
+        if e["text"]:
+            self.cortex.retract(e["text"], e["history"], e["text_from"])
+        moments = list(range(e["t0"], e.get("t1", e["t0"] - 1) + 1))
+        for m in reversed(moments):
+            self.mind.retract(m)
+        for where, gap, answer, token, raw in e["forms"]:
+            self.gaps[where][gap] -= 1
+            if self.gaps[where][gap] <= 0:
+                del self.gaps[where][gap]
+            self.written[answer][token][raw] -= 1
+            if self.written[answer][token][raw] <= 0:
+                del self.written[answer][token][raw]
+        e["forgotten"] = True
+        return {"forgotten": True, "moments": len(moments), "characters": len(e["text"])}
 
     # ------------------------------------------------------------------------------------------------- channels ---
     def newness(self, segment: str) -> Dict[str, float]:
@@ -726,6 +827,7 @@ class Cevahir:
         self.outcome_good = Counter({(w, c): n for w, c, n in state.get("outcome_good", [])})
         self.outcome_all = Counter({(w, c): n for w, c, n in state.get("outcome_all", [])})
         self.last_leads, self.pending = [], None
+        self.entries, self._open, self._pending_entry = None, None, None
         self.alphabets = {k: set(v) for k, v in state.get("alphabets", {self.channel: ""}).items()}
         self.others = {}
         for i, (name, won, seen) in enumerate(state.get("others", [])):
