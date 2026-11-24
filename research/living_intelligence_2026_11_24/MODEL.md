@@ -33,7 +33,8 @@ that a mind of evidence with no network can learn by living: SCAN's six publishe
 real-text recall after one reading, grounded meaning. It also showed its limits.
 
 - **Its unit is the whole word.** A word never met is an unknown symbol. The mind cannot tell "evler" from "ev" + "ler"
-  except by a separate mechanism, and it cannot read a new script at all.
+  except by a separate mechanism, and a word in a new script is a new symbol that shares nothing with the words it
+  knows.
 - **It stores what it lives.** Every sentence writes ties between its words: 12.3 ties per word of natural text, 73 % of
   them written once and never used again. Growth is linear in experience: one trillion words would need about 840 TB
   at 68 B per tie (PAPER.md, section 10). The data of the world is not something a mind can keep a copy of.
@@ -59,8 +60,9 @@ With k = 1 this is (W⁺ + ½)/(W + 1). That is the **Krichevsky–Trofimov (KT)
 Bernoulli rate under the Jeffreys prior Beta(½, ½) (Krichevsky and Trofimov 1981). The theory's rule is therefore a
 known estimator, and it comes with a known guarantee. For any binary sequence of length n, its sequential code length
 exceeds that of the best fixed rate chosen in hindsight by at most ½ log₂ n + 1 bits; this is why context-tree
-weighting uses it (Willems, Shtarkov and Tjalkens 1995). We did not know this when the rule was written; it is a
-strength, not a loss of originality, and it is said here so that it is never claimed as new.
+weighting uses it (Willems, Shtarkov and Tjalkens 1995). The theory already names NARS as the source of the rule
+(docs/ZIHIN_THEORY.md, section 2). The identity with KT adds a guarantee from information theory, and it is stated here
+so that the rule is never presented as new.
 
 ### 2.2 Many outcomes: the novelty event
 
@@ -86,8 +88,11 @@ context that was in the same situation, meaning
 
 - the same length d;
 - whether longer contexts were excluded before it;
-- how varied its record is (t, bucketed);
-- how much it has lived (n, bucketed).
+- how varied its record is (t: 1, 2, 3, 4–7, 8 or more);
+- how much it has lived (n: 1, 2, 3, 4, 5–7, then doubling up to 64 or more).
+
+The buckets follow powers of two. They are a partition chosen once, before any measurement, not a parameter fitted to
+a text.
 
 The situation keeps its own record of the novelty event, W⁺_σ (times what followed was new) and W_σ (times it was
 asked), and
@@ -246,6 +251,10 @@ surprising is
 with b̄_c the channel's typical bits per symbol. The mind can report that it is watching something it does not know
 (u ≥ e*), and it can watch that belief fall as it learns.
 
+The margin of 2 bits (a symbol a quarter as likely as a typical one) is a constant of this report, not of the theory.
+No decision of the mind depends on it: which channel a stream goes to depends on η, and speaking depends on the
+structure belief and e*.
+
 ### 4.4 Watching and speaking
 
 Before each symbol arrives, the mind holds its best guess ŷ = argmax P(· | h). It would say ŷ only if both hold:
@@ -312,8 +321,8 @@ evidence core.
 - **Goal.** A unit set by a question, or chosen by the mind, is held with a lock: it does not decay until the goal is
   reached (the answer said) or abandoned.
 
-**The focus as an expert.** Word numbers u, v carry association evidence: W⁺(u → v) counts the times v came within a
-span after u, consolidated only for pairs that recurred or mattered (section 8). With ρ(u → v) the rule on that
+**The focus as an expert.** Word numbers u, v carry association evidence: W⁺(u → v) counts the times v came within
+the next F = 7 units after u, consolidated only for pairs that recurred or mattered (section 8). With ρ(u → v) the rule on that
 record,
 
     P_P(v) ∝ Σ_i a_i ρ(u_i → v).
