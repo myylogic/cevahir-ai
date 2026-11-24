@@ -26,11 +26,11 @@ with several places at once, done on the episodes the hippocampus keeps.
   the share of the neighbours that agree. An analogy over many places that was seldom right stays below the
   speaking line.
 
-- **Words of a kind.** Two words stand for each other only if their relations play alike parts in the answers lived:
-  the answers' tokens around a relation (two before it, one after it, with the relations of words read as one
-  mark) make its profile, and two relations are alike when their profiles share at least half (a relation whose
-  profile is not yet known is not held back). "to" (its relation "recipient", after a verb) and "on" (after "nmod")
-  are not alike, though both are words with relations.
+- **Words of a kind.** Two words stand for each other only if their relations have played a like part in the answers
+  lived: the places a relation has held (the two tokens before it and the one after it, with the relations of words
+  read as one mark and numbers as another) make its profile, and two relations are alike when they have held at least
+  one same place (a relation not yet met in an answer of more than one token is not held back). "to" (its relation
+  "recipient", after a verb) and "on" (after "nmod") are not alike, though both are words with relations.
 - **Wholes.** A part of an utterance (one to four tokens at a place, read with its frame: the two tokens before it,
   the one after it, a word with a relation read as one mark) is a whole of its own when taking a part of that frame
   out of the lived utterances leaves utterances that can still be answered: the rule on those examples, at the
@@ -92,6 +92,7 @@ class Episodes:
         self._frames: Dict[tuple, List[int]] = {}
         self._units: Dict[tuple, float] = {}
         self._asked: Dict[tuple, tuple] = {}
+        self._alike: Dict[Tuple[str, str], bool] = {}
         self._forgotten = 0
 
     def __len__(self) -> int:
@@ -253,6 +254,8 @@ class Episodes:
                     return "^"
                 if k >= n:
                     return "$"
+                if a[k].isdigit():
+                    return "#"
                 return "\u25a1" if a[k] in related else a[k]
             for j, t in enumerate(a):
                 if t in related:
@@ -267,6 +270,7 @@ class Episodes:
                     frames[self._frame(u, p, m)].append(i * 1024 + p)
         self._frames = dict(frames)
         self._units = {}
+        self._alike = {}
 
     def ready(self) -> None:
         """Read the kinds and the frames again if anything was lived since they were last read (before answering)."""
@@ -279,11 +283,14 @@ class Episodes:
         if a == b:
             return True
         self._make()
-        pa, pb = self._kinds.get(a), self._kinds.get(b)
-        if not pa or not pb:
-            return True
-        na, nb = sum(pa.values()), sum(pb.values())
-        return sum(min(c / na, pb[f] / nb) for f, c in pa.items()) >= 0.5
+        key = (a, b) if a < b else (b, a)
+        if key not in self._alike:
+            pa, pb = self._kinds.get(a), self._kinds.get(b)
+            if not pa or not pb:
+                self._alike[key] = True
+            else:
+                self._alike[key] = any(f in pb for f in pa)          # seen at least once in the same place
+        return self._alike[key]
 
     def _shape(self, w: str) -> str:
         return "\u25a1" if self.relation(w) is not None else w

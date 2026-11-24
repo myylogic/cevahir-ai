@@ -630,11 +630,13 @@ place of two utterances of the same length, and the answer it then says is wrong
 nothing longer than what was lived: an utterance with one more phrase inside it has no neighbour of its length. Both
 are mended by the same store of episodes.
 
-- **Words of a kind.** A relation's profile is the tokens of the lived answers around it: the two before it and the
-  one after it, every relation of a word read as one mark. Two relations are alike when their profiles share at least
-  half; a relation whose profile is not yet known is not held back. A place is filled only by a word whose relation
-  is alike to the one it replaces. "recipient" follows a verb's name and "on" follows "nmod", so the two never stand
-  for each other, while "on" and "in", or two verbs, do.
+- **Words of a kind.** A relation's profile is the places it has held in the lived answers: the two tokens before it
+  and the one after it, every relation of a word read as one mark and every number as another. Two relations are
+  alike when they have held at least one same place; a relation not yet met in an answer of more than one token is
+  not held back. A place is filled only by a word whose relation is alike to the one it replaces. "recipient" has
+  followed only a verb's name and "on" only "nmod", so the two never stand for each other, while "on" and "in", two
+  verbs or two nouns do. (Asking for half of the places shared was tried first: it kept apart what COGS asks to put
+  together, a noun met only as a subject and the nouns met as objects; NOTES.md 8.7.)
 - **Wholes.** A part of an utterance is read with its frame: its own tokens, the two before it and the one after it,
   every word that has a relation read as one mark. A part of that frame is a whole of its own when taking a part of
   the same frame out of lived utterances leaves utterances that are lived or that the analogy answers at the speaking
