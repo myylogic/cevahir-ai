@@ -570,8 +570,13 @@ not know.
 - **Two substances.** Zihin's units and ties and the cortex's contexts are two stores. They meet in the harmony and
   in the forms lexicon, not in one table. Moving Zihin's readings into the core, one at a time and each measured
   against the bridge, is the road to one substance.
-- **The amygdala and the hippocampus** are Zihin's value channel (feedback, consequences) and the cortex's episodes.
-  A salience weight on learning and a sleep that consolidates both stores are not built yet.
+- **The amygdala, a first form: the record of outcomes.** When an answer is judged (``Cevahir.feedback``), Zihin
+  learns it as it always did (a value at the end of the episode), and every token of the answer counts for the voice
+  that led it, in its situation, in the records the prefrontal decision trusts by: an answer judged right counts for
+  the one that led, one judged wrong against it. The turn waits to be judged before the harmony lives it, and a wrong
+  answer is not lived as something said rightly (the question alone is). No constant enters: trust stays the one
+  rule on counts. A salience weight on learning, and the hippocampus's sleep that consolidates both stores, are not
+  built yet.
 - **Speed.** Zihin's moment is Python and costs milliseconds; the cortex's symbol costs microseconds. On text,
   Cevahir reads at Zihin's speed.
 

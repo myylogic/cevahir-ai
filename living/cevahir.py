@@ -92,6 +92,10 @@ class Cevahir:
         self.dis_all = Counter()                                 # disagreements per situation (and agreements apart)
         self.alone_right = Counter()                             # Zihin expected nothing: the harmony's guess was it
         self.alone_all = Counter()                               # Zihin expected nothing, the harmony guessed
+        self.outcome_good = Counter()                            # the amygdala: answers judged, per (who led, situation)
+        self.outcome_all = Counter()
+        self.last_leads: List[Tuple[str, int]] = []              # who led each token of the last answer, and where
+        self.pending: Optional[Tuple[str, str]] = None           # the last turn, lived by the harmony once judged
 
     # ------------------------------------------------------------------------------------------------ the voice --
     def candidates(self, token: str, partial: Optional[str] = None, weight: float = 1.0, gaps: int = 3,
@@ -140,14 +144,20 @@ class Cevahir:
         return (4 if answer else 0) + (0 if first else 2) + (1 if e >= SPEAKING_LINE else 0)
 
     def trust_zihin(self, cell: int) -> float:
-        """The belief, by the one rule on the record of disagreements in this situation, that Zihin's token is
-        the one when the harmony's differs and one of the two is right."""
-        return (self.dis_won[cell] + 0.5) / (self.dis_all[cell] + 1.0)
+        """The belief, by the one rule, that Zihin's token is the one when the harmony's differs. Its record: the
+        disagreements lived in this situation where one of the two was right (counted for Zihin when it was
+        Zihin), and the outcomes of answers (the amygdala, ``feedback``): an answer judged right counts for the one
+        that led there, an answer judged wrong counts against it."""
+        won = self.dis_won[cell] + self.outcome_good[("zihin", cell)] + \
+            (self.outcome_all[("harmony", cell)] - self.outcome_good[("harmony", cell)])
+        seen = self.dis_all[cell] + self.outcome_all[("zihin", cell)] + self.outcome_all[("harmony", cell)]
+        return (won + 0.5) / (seen + 1.0)
 
     def trust_alone(self, cell: int) -> float:
         """The belief, by the one rule on its record in this situation, that the harmony's token is the one where
-        Zihin expects nothing above not knowing."""
-        return (self.alone_right[cell] + 0.5) / (self.alone_all[cell] + 1.0)
+        Zihin expects nothing above not knowing (with the outcomes of the answers it gave alone)."""
+        return (self.alone_right[cell] + self.outcome_good[("alone", cell)] + 0.5) / \
+            (self.alone_all[cell] + self.outcome_all[("alone", cell)] + 1.0)
 
     def _live_text(self, text: str) -> float:
         bits, _ = self.cortex.stream(text)
@@ -160,6 +170,7 @@ class Cevahir:
              tone: Optional[str] = None) -> float:
         """A sentence of a document, read on its own line (as ``Session.read_path`` lives a sentence: heard, its
         end perceived, a pause). With a ground and a ``scene``, what is seen while it is told is perceived."""
+        self.flush()
         from zihin.__main__ import IMITATED
         prov = IMITATED if prov is None else prov
         s = self.session
@@ -248,6 +259,7 @@ class Cevahir:
         dialogue as one line, the first utterance and the answer apart by a tab. With a ground (``mind.zemin``) and a
         ``scene``, what is seen while each is said is perceived by the ground (``scene_answer`` while the answer is
         said, if it differs), as research/living_mind_2026_11_23/t_m2.py lives its world."""
+        self.flush()
         from zihin.__main__ import IMITATED, SOMEONE
         prov = IMITATED if prov is None else prov
         asker = SOMEONE if asker is None else asker
@@ -274,6 +286,7 @@ class Cevahir:
     def read(self, text: str, code: bool = False) -> float:
         """A document (Zihin's ``Session.read_path``): the harmony lives every character of it; Zihin lives each
         sentence of at least two words (each line, for source code) as an utterance, its end and a pause."""
+        self.flush()
         from zihin.__main__ import IMITATED
         s = self.session
         s.company(None)
@@ -373,6 +386,7 @@ class Cevahir:
         said = ""
         partial: Optional[str] = start
         k = 0
+        self.last_leads = []
         while len(said) < most:
             here = history + said
             h_form, h_p = self.harmony_token(here)
@@ -397,11 +411,17 @@ class Cevahir:
                                            self.trust_zihin(self.situation(True, k == 0, z_e)) >= 0.5)
                 if lead_z and z_e >= line:
                     said += z_form
+                    if h_tok is not None:
+                        self.last_leads.append(("zihin", self.situation(True, k == 0, z_e)))
                     k += 1
                 elif h_tok is not None and h_p >= line and (z_tok is not None or (
                         not plan and self.trust_alone(self.situation(True, k == 0, 0.0)) > 0.5)):
                     said += h_form                           # alone only where Zihin said nothing at all, and only
                     #                                          as far as its record when alone allows
+                    if z_tok is not None:
+                        self.last_leads.append(("harmony", self.situation(True, k == 0, z_e)))
+                    else:
+                        self.last_leads.append(("alone", self.situation(True, k == 0, 0.0)))
                 else:
                     break
             partial = None
@@ -511,10 +531,35 @@ class Cevahir:
         """A turn of a conversation: Cevahir hears what is said to it and answers (the one layer), and lives both:
         Zihin lives them as its reply does (what it heard, told; what it said, its own act), the harmony lives the
         line (what it heard, a tab, what it answered)."""
+        self.flush()
         answer = self.reply(said_to_it, "cevahir", limit)
-        self.cortex.set_voice([], [], 0.0)
-        self._live_text(self._lead() + said_to_it + "\t" + answer)
+        self.pending = (self._lead() + said_to_it, "\t" + answer)
         return answer
+
+    def flush(self) -> None:
+        """The harmony lives the last turn as it was (nobody judged it)."""
+        if self.pending is not None:
+            heard, said = self.pending
+            self.pending = None
+            self.cortex.set_voice([], [], 0.0)
+            self._live_text(heard + said)
+
+    def feedback(self, good: bool) -> None:
+        """The amygdala (MODEL.md 12.4): how Cevahir's last answer was received. Zihin learns it as it always did
+        (a value at the end of the episode, ``Session.feedback``); every token of the answer counts for the voice
+        that led it, in its situation, in the record the prefrontal decision trusts by (``trust_zihin``,
+        ``trust_alone``); and the harmony lives the turn with the answer only if it was right (a wrong answer is
+        not kept as something said rightly: the question alone is lived)."""
+        self.session.feedback(good)
+        for who, cell in self.last_leads:
+            self.outcome_all[(who, cell)] += 1
+            self.outcome_good[(who, cell)] += 1 if good else 0
+        self.last_leads = []
+        if self.pending is not None:
+            heard, said = self.pending
+            self.pending = None
+            self.cortex.set_voice([], [], 0.0)
+            self._live_text(heard + (said if good else "\t"))
 
     # ------------------------------------------------------------------------------------------------- keeping -----
     def save(self, folder: str) -> Dict[str, object]:
@@ -525,6 +570,7 @@ class Cevahir:
         import hashlib
         import json
         from zihin import persist
+        self.flush()
         os.makedirs(folder, exist_ok=True)
         persist.save(self.mind, os.path.join(folder, "zihin.zihin"))
         self.cortex.save(os.path.join(folder, "core.bin"))
@@ -534,7 +580,9 @@ class Cevahir:
             "written": {str(int(k)): {t: dict(c) for t, c in v.items()} for k, v in self.written.items()},
             "gaps": [[int(a), int(f), dict(c)] for (a, f), c in self.gaps.items()],
             "dis_won": dict(self.dis_won), "dis_all": dict(self.dis_all),
-            "alone_right": dict(self.alone_right), "alone_all": dict(self.alone_all), "counts": dict(self.counts)}
+            "alone_right": dict(self.alone_right), "alone_all": dict(self.alone_all), "counts": dict(self.counts),
+            "outcome_good": [[w, c, n] for (w, c), n in self.outcome_good.items()],
+            "outcome_all": [[w, c, n] for (w, c), n in self.outcome_all.items()]}
         with open(os.path.join(folder, "cevahir.json"), "w", encoding="utf-8") as f:
             json.dump(state, f, ensure_ascii=False)
         files = {}
@@ -591,6 +639,9 @@ class Cevahir:
         self.alone_right = Counter({int(k): v for k, v in state["alone_right"].items()})
         self.alone_all = Counter({int(k): v for k, v in state["alone_all"].items()})
         self.counts = Counter(state["counts"])
+        self.outcome_good = Counter({(w, c): n for w, c, n in state.get("outcome_good", [])})
+        self.outcome_all = Counter({(w, c): n for w, c, n in state.get("outcome_all", [])})
+        self.last_leads, self.pending = [], None
         return self
 
     def answers(self, questions: List[str], way: str = "cevahir", limit: int = 400,

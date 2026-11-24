@@ -137,3 +137,30 @@ def test_a_kept_cevahir_answers_and_lives_as_the_one_kept(FastCortex, tmp_path):
         f.write(" ")
     with pytest.raises(IOError):
         Cevahir.load(folder)
+
+
+def test_feedback_is_kept_by_the_amygdala_and_a_wrong_answer_is_not_lived_as_right(FastCortex):
+    from living.cevahir import Cevahir
+    life, tests = _world()
+    c = Cevahir(variant="speaking", switches={"wholes": True, "told_apart": True}, window=13)
+    for q, a in life:
+        c.watch(q, a + " .")
+    c.session.close_turn()
+    lived = c.cortex.size()["lived"]
+    answer = c.converse("zap twice")
+    assert answer == "ZAP ZAP"
+    assert c.cortex.size()["lived"] == lived                         # the turn waits to be judged
+    leads = list(c.last_leads)
+    c.feedback(False)
+    after_bad = c.cortex.size()["lived"]
+    assert after_bad == lived + len("\nzap twice\t")                 # a wrong answer is not lived as said rightly
+    for who, cell in leads:
+        assert c.outcome_all[(who, cell)] == 1 and c.outcome_good[(who, cell)] == 0
+    if leads:
+        who, cell = leads[0]
+        before = c.trust_zihin(cell)
+        c.outcome_all[(who, cell)] += 5                               # five more answers led by it, judged wrong
+        assert (c.trust_zihin(cell) < before) == (who == "zihin")
+    c.converse("zap thrice")
+    c.feedback(True)
+    assert c.cortex.size()["lived"] == after_bad + len("\nzap thrice\tZAP ZAP ZAP")
