@@ -4,7 +4,7 @@
 
 [English](README.md) · [Türkçe](README-TR.md)
 
-[Research archive DOI (always the latest version): 10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660) · [Research reports](docs/publications/README.md) · [The paper: Cevahir Zihin, a Living Evidence Mind](docs/research/living_evidence_mind_2026_11_24/PAPER.md)
+[Research archive DOI (always the latest version): 10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660) · [v7: 10.5281/zenodo.24494960](https://doi.org/10.5281/zenodo.24494960) · [Research reports](docs/publications/README.md) · [The paper: Cevahir Zihin, a Living Evidence Mind](docs/research/living_evidence_mind_2026_11_24/PAPER.md)
 
 > **Latest update — November 2026: Cevahir Zihin, a mind that learns by living. Not a Transformer.**
 >

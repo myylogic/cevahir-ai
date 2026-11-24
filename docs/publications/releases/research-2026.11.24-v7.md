@@ -1,7 +1,9 @@
 # Research release 2026.11.24 (v7)
 
-- Git tag: `research-2026.11.24-v7`, a GitHub Release from main. It is made by the author; Zenodo archives it and
-  gives the version DOI, which is then recorded in [release.json](../release.json) and CITATION.cff.
+- Git tag: `research-2026.11.24-v7`, a GitHub Release from main (commit 701a496), published by the author on
+  2026-11-24. Zenodo archived it as record 24494960, DOI
+  [10.5281/zenodo.24494960](https://doi.org/10.5281/zenodo.24494960); the archived zip matches the tag file by file
+  (2,143 of 2,143, [verification](../evidence/zenodo_archive_verification_v7.json)).
 - All versions: DOI [10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660). The previous version is v6,
   DOI [10.5281/zenodo.24279940](https://doi.org/10.5281/zenodo.24279940); its record is in
   [research-2026.11.16-v6.json](research-2026.11.16-v6.json).

@@ -6,7 +6,7 @@ authors:
   - family-names: "Yılmaz"
     given-names: "Muhammed Yasin"
 version: "2026.11.24"
-doi: 10.5281/zenodo.22864660
+doi: 10.5281/zenodo.24494960
 date-released: 2026-11-24
 repository-code: "https://github.com/myylogic/cevahir-ai"
 url: "https://github.com/myylogic/cevahir-ai/tree/main/docs/publications"
@@ -27,6 +27,6 @@ abstract: >-
   origin, reads it with one rule, learns at every moment and can retract one
   experience exactly; the implementation, reproducible experiments with their
   result rows, preserved negative results, and an open mind raised on public
-  material only. The DOI above identifies all versions; the version DOI is
-  recorded once this version is published. Reports are not peer reviewed. AI
+  material only. The DOI above identifies this version; all versions are
+  10.5281/zenodo.22864660. Reports are not peer reviewed. AI
   assistance was used in code, experiments and drafting.

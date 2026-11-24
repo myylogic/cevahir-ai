@@ -3,14 +3,14 @@
   "tag": "research-2026.11.24-v7",
   "author": "Muhammed Yasin Yılmaz",
   "github_url": "https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.11.24-v7",
-  "status": "prepared",
-  "doi": null,
+  "status": "published",
+  "doi": "10.5281/zenodo.24494960",
   "concept_doi": "10.5281/zenodo.22864660",
   "previous_release": "releases/research-2026.11.16-v6.json",
   "scope": "Cevahir Zihin described in full in English (CEV-2026-11, a living evidence mind): the work since v6 (F41 to F75, the whole mind, the published SCAN files 26,227 of 26,227, COGS measured at 0, recall and a race on real text, the study and the school examination, the grounded meaning layer), an open mind raised on public material only, English editions of the ten earlier reports, and the withdrawal of the Turkish documents (their full texts remain in v6). Not separate paper DOIs.",
-  "zenodo_url": null,
-  "source_commit": null,
+  "zenodo_url": "https://zenodo.org/records/24494960",
+  "source_commit": "701a49672cbb56163d27bf3f959a952014999170",
   "date": "2026-11-24",
-  "archive_verification": null,
-  "doi_resolution": null
+  "archive_verification": "evidence/zenodo_archive_verification_v7.json",
+  "doi_resolution": "evidence/doi_resolution_v7.json"
 }

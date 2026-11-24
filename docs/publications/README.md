@@ -2,8 +2,10 @@
 
 **Muhammed Yasin Yılmaz** · research reports and preprints · release v7, 24 November 2026
 
-**DOI of all versions: [10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660)** · the DOI of this
-version is recorded in [release.json](release.json) once the archive is published.
+**DOI of this version: [10.5281/zenodo.24494960](https://doi.org/10.5281/zenodo.24494960)** · [Zenodo
+record](https://zenodo.org/records/24494960) · [DOI of all versions](https://doi.org/10.5281/zenodo.22864660). The
+archived zip was compared with the tag file by file: 2,143 of 2,143 identical
+([verification](evidence/zenodo_archive_verification_v7.json)).
 
 This series collects the papers of the Cevahir research, with their negative results and reproducible
 computations. Its question is still open: **how can a system change its future computation and behaviour through the
