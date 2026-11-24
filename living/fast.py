@@ -65,6 +65,8 @@ def _library() -> ctypes.CDLL:
     lib.core_load.restype = ctypes.c_void_p
     lib.core_load.argtypes = [ctypes.c_char_p]
     lib.core_config.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+    lib.core_sleep.restype = ctypes.c_uint64
+    lib.core_sleep.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
     lib.core_stream_mix.restype = ctypes.c_double
     lib.core_stream_mix.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64, ctypes.c_int, ctypes.c_void_p]
     _lib = lib
@@ -185,6 +187,12 @@ class FastCortex:
         self.depth, self.update = int(cfg[0]), "found" if cfg[1] else "all"
         self.episode, self.mix, self.voice = bool(cfg[2]), bool(cfg[3]), bool(cfg[4])
         return self
+
+    def sleep(self, keep_min: int = 2) -> int:
+        """Sleep (MODEL.md 8): forget every context met fewer than ``keep_min`` times (with the longer contexts
+        extending it, and the word and line contexts met fewer times); what recurred stays exactly. Returns how many
+        nodes were forgotten."""
+        return int(self._lib.core_sleep(self._c, keep_min))
 
     def size(self) -> dict:
         s = (ctypes.c_uint64 * 6)()

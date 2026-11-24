@@ -618,6 +618,21 @@ class Cevahir:
         text, _ = self.others[channel]["cortex"].say(prompt, most=most, line=SPEAKING_LINE)
         return text
 
+    # ---------------------------------------------------------------------------------------------------- sleep ---
+    def sleep(self, keep_min: int = 2, dream: bool = True, cycles: int = 3) -> Dict[str, object]:
+        """The hippocampus's night (MODEL.md 8): the cortex of every channel forgets the contexts met fewer than
+        ``keep_min`` times (what recurred stays exactly), and Zihin dreams and sorts its dreams against what is real
+        (``zihin.dusunce.sleep``, F20–F22) if ``dream``. Returns what was forgotten and dreamt."""
+        self.flush()
+        out = {"forgotten": {self.channel: self.cortex.sleep(keep_min)}}
+        for name, ch in self.others.items():
+            out["forgotten"][name] = ch["cortex"].sleep(keep_min)
+        if dream:
+            from zihin.dusunce import sleep as night
+            got = night(self.session, cycles)
+            out["dreams"] = len(got.get("dreams", []))
+        return out
+
     # ------------------------------------------------------------------------------------------------- keeping -----
     def save(self, folder: str) -> Dict[str, object]:
         """Keep Cevahir in ``folder``: Zihin (``zihin.persist.save``, with its manifest and digests), the core

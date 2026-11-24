@@ -195,3 +195,17 @@ def test_a_language_never_met_opens_a_channel_is_watched_and_then_spoken_noise_n
     c.save(folder)
     d = Cevahir.load(folder)
     assert d.structure(a) == c.structure(a) and d.say_on(a, alien[-256:]) == c.say_on(a, alien[-256:])
+
+
+def test_cevahir_sleeps_forgets_one_off_contexts_and_still_answers(FastCortex):
+    from living.cevahir import Cevahir
+    life, tests = _world()
+    c = Cevahir(variant="speaking", switches={"wholes": True, "told_apart": True}, window=13)
+    for q, a in life:
+        c.watch(q, a + " .")
+    c.session.close_turn()
+    nodes = c.cortex.size()["nodes"]
+    night = c.sleep(dream=False)
+    assert night["forgotten"][c.channel] > 0 and c.cortex.size()["nodes"] < nodes
+    said = c.answers([q for q, _ in tests], way="every", workers=2)
+    assert sum(c.session.body(s["cevahir"]) == c.session.words(a) for s, (_, a) in zip(said, tests)) == len(tests)

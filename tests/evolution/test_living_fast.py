@@ -120,3 +120,26 @@ def test_a_saved_core_goes_on_as_the_one_never_saved(FastCortex, cfg, tmp_path):
         f.write(b"x")
     with pytest.raises(IOError):
         FastCortex.load(path)
+
+
+def test_sleep_forgets_what_did_not_recur_and_keeps_what_did(FastCortex, tmp_path):
+    cfg = dict(depth=6, episode=True, minlen=8, mix=True, recent=4, lines=True)
+    a = FastCortex(**cfg)
+    a.stream(TEXT[:len(TEXT) // 2] + "a line met only once: qzxv wplk mnbv.\n")
+    before = a.size()
+    gone = a.sleep(2)
+    assert gone > 0 and a.size()["nodes"] == before["nodes"] - gone
+    assert a.sleep(2) == 0                                             # nothing more to forget
+    bits_once, _ = a.stream("qzxv wplk", TEXT[:200], learn=False)     # the one-off line is no longer known
+    keep = FastCortex(**cfg)
+    keep.stream(TEXT[:len(TEXT) // 2] + "a line met only once: qzxv wplk mnbv.\n")
+    bits_kept, _ = keep.stream("qzxv wplk", TEXT[:200], learn=False)
+    assert bits_once > bits_kept
+    rec_a, _ = a.stream(TEXT[:60], TEXT[:200], learn=False)           # what recurred is predicted much as before
+    rec_k, _ = keep.stream(TEXT[:60], TEXT[:200], learn=False)
+    assert abs(rec_a - rec_k) < 0.25 * rec_k + 5
+    a.stream(TEXT[len(TEXT) // 2:])                                    # it goes on living, and can be kept
+    path = str(tmp_path / "slept.bin")
+    a.save(path)
+    b = FastCortex.load(path)
+    assert b.stream("the mind keeps", learn=False) == a.stream("the mind keeps", learn=False)

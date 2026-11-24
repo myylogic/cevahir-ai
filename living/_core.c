@@ -1326,3 +1326,77 @@ void core_config(Core *c, int *out) {
     out[0] = c->depth; out[1] = c->update_found; out[2] = c->episode; out[3] = c->mix_on; out[4] = c->voice_on;
     out[5] = c->lines_on;
 }
+
+/* ---------------------------------------------------------------------------------------------------------------- */
+/* Sleep (MODEL.md 8): every context met fewer than `keep_min` times is forgotten, with the longer contexts that
+ * extend it (a longer context is never met more often than its suffix), and so are the word and line contexts met
+ * fewer times. What recurred stays exactly as it was: its counts, its entries in their order. The situations, the
+ * episodes, the history and every learned weight stay. The store is then compacted. Returns how many nodes were
+ * forgotten. */
+uint64_t core_sleep(Core *c, uint32_t keep_min) {
+    uint64_t N = c->nodes;
+    if (N <= 1 || keep_min <= 1) return 0;
+    uint8_t *keep = malloc(N);
+    for (uint64_t v = 0; v < N; v++) keep[v] = v == 0 || c->n[v] >= keep_min;
+    for (int changed = 1; changed;) {
+        changed = 0;
+        for (uint64_t i = 0; i <= c->cmask; i++) if (c->ckey[i]) {
+            uint32_t parent = (uint32_t)((c->ckey[i] - 1) >> 21), v = c->cval[i];
+            if (keep[v] && !keep[parent]) { keep[v] = 0; changed = 1; }
+        }
+    }
+    uint32_t *nid = malloc(N * 4);
+    uint64_t m = 0, ecount = 1;
+    for (uint64_t v = 0; v < N; v++) {
+        nid[v] = keep[v] ? (uint32_t)m++ : NONE;
+        if (keep[v]) ecount += c->t[v];
+    }
+    uint64_t cap_n = 1 << 16, cap_e = 1 << 16;
+    while (cap_n < m) cap_n *= 2;
+    while (cap_e < ecount) cap_e *= 2;
+    uint32_t *n2 = malloc(cap_n * 4), *t2 = malloc(cap_n * 4), *h2 = malloc(cap_n * 4), *tl2 = malloc(cap_n * 4);
+    uint32_t *es2 = malloc(cap_e * 4), *ec2 = malloc(cap_e * 4), *en2 = malloc(cap_e * 4);
+    es2[0] = ec2[0] = en2[0] = 0;
+    uint64_t e2 = 1;
+    for (uint64_t v = 0; v < N; v++) if (keep[v]) {
+        uint32_t w = nid[v];
+        n2[w] = c->n[v]; t2[w] = c->t[v]; h2[w] = tl2[w] = 0;
+        for (uint32_t q = c->head[v]; q; q = c->enext[q]) {
+            es2[e2] = c->esym[q]; ec2[e2] = c->ecnt[q]; en2[e2] = 0;
+            if (tl2[w]) en2[tl2[w]] = (uint32_t)e2; else h2[w] = (uint32_t)e2;
+            tl2[w] = (uint32_t)e2;
+            e2++;
+        }
+    }
+    uint64_t edges = 0;
+    for (uint64_t i = 0; i <= c->cmask; i++) if (c->ckey[i] && keep[c->cval[i]]) edges++;
+    uint64_t ccap = 1 << 16;
+    while ((edges + 1) * 5 > ccap * 3) ccap *= 2;
+    uint64_t *ck2 = calloc(ccap, 8); uint32_t *cv2 = malloc(ccap * 4);
+    for (uint64_t i = 0; i <= c->cmask; i++) if (c->ckey[i] && keep[c->cval[i]]) {
+        uint64_t old = c->ckey[i] - 1;
+        uint32_t parent = (uint32_t)(old >> 21), sym = (uint32_t)(old & ((1u << 21) - 1));
+        uint64_t key = (((uint64_t)nid[parent] << 21) | sym) + 1;
+        uint64_t h = mix64(key) & (ccap - 1);
+        while (ck2[h]) h = (h + 1) & (ccap - 1);
+        ck2[h] = key; cv2[h] = nid[c->cval[i]];
+    }
+    if (c->wkey) {                                      /* word and line contexts */
+        uint64_t wcap = c->wmask + 1, wused = 0;
+        uint64_t *wk2 = calloc(wcap, 8); uint32_t *wv2 = malloc(wcap * 4);
+        for (uint64_t i = 0; i < wcap; i++) if (c->wkey[i] && keep[c->wval[i]]) {
+            uint64_t h = mix64(c->wkey[i]) & c->wmask;
+            while (wk2[h]) h = (h + 1) & c->wmask;
+            wk2[h] = c->wkey[i]; wv2[h] = nid[c->wval[i]]; wused++;
+        }
+        free(c->wkey); free(c->wval);
+        c->wkey = wk2; c->wval = wv2; c->wused = wused;
+    }
+    free(c->n); free(c->t); free(c->head); free(c->tail); free(c->esym); free(c->ecnt); free(c->enext);
+    free(c->ckey); free(c->cval);
+    c->n = n2; c->t = t2; c->head = h2; c->tail = tl2; c->nodes = m; c->cap_nodes = cap_n;
+    c->esym = es2; c->ecnt = ec2; c->enext = en2; c->entries = e2; c->cap_entries = cap_e;
+    c->ckey = ck2; c->cval = cv2; c->cmask = ccap - 1; c->cused = edges;
+    free(keep); free(nid);
+    return N - m;
+}
