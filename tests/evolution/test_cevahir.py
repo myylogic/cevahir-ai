@@ -273,6 +273,19 @@ def test_the_hippocampus_answers_an_utterance_that_differs_in_two_places_from_ev
     assert all(i not in ids for ids in ep.index.values())
 
 
+def test_two_roles_that_swap_places_are_filled_at_once(FastCortex):
+    from living.analogy import Episodes
+    people = ["Ali", "Veli", "Ayşe", "Can", "Ece", "Zeynep"]
+    ep = Episodes()
+    for verb, lemma in (("koştu", "koş"), ("uyudu", "uyu")):      # each name's relation: the name itself
+        for p in people:
+            ep.live([p, verb, "."], [lemma, "(", p, ")"])
+    ep.live(["Ali", "'", "nin", "babası", "Veli", "."], ["baba", "(", "Veli", ",", "Ali", ")"])   # the only neighbour
+    plan, e, n = ep.plan(["Veli", "'", "nin", "babası", "Ali", "."])
+    assert plan == ["baba", "(", "Ali", ",", "Veli", ")"]              # one place at a time gave "( Ali , Ali )"
+    assert n == 1
+
+
 def test_where_one_place_frames_cannot_answer_the_record_lets_the_analogy_lead(FastCortex):
     from living.cevahir import Cevahir
     people = ["Ali", "Veli", "Ayşe", "Can", "Ece", "Zeynep", "Deniz", "Selin"]

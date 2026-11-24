@@ -598,8 +598,10 @@ as a frame, done on the episodes the hippocampus keeps.
   reaches the speaking line. On equal evidence the word itself is preferred (Zihin's F34, the asked word itself),
   then the token that shares the longest beginning with it (F36, word forms).
 - **The plan.** For a neighbour (U′, A′), each place where U and U′ differ (u in U′, v in U) is filled: every token of
-  A′ that is u's relation becomes v's relation, or v itself where u's relation is u itself and v has none yet. A
-  neighbour with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first,
+  A′ that is u's relation becomes v's relation, or v itself where u's relation is u itself and v has none yet. All
+  places are filled at once, so two roles that swap places ("Veli'nin babası Ali" from "Ali'nin babası Veli") are
+  read as a swap; one token that would have to become two gives nothing. A neighbour with a place that cannot be
+  filled gives nothing. The nearest neighbours vote (the fewest places first,
   at most eight), and the plan is the answer most of them give.
 - **Its belief: its own record.** Every dialogue lived is first foreseen by the analogy from the episodes already
   kept, and the record of how often an answer foreseen over d places was right is the analogy's own: the evidence

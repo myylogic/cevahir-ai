@@ -16,8 +16,9 @@ with several places at once, done on the episodes the hippocampus keeps.
   speaking line e*. On equal evidence the word itself is preferred, then the token sharing the longest beginning
   with it (its stem: Zihin's F34, the asked word itself, and F36, word forms).
 - **The plan.** For a neighbour (U', A'), each place where U and U' differ (u in U', v in U) is filled: every token of
-  A' that is u's relation becomes v's relation (v itself where u's relation is u itself and v has none yet). A
-  neighbour with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first,
+  A' that is u's relation becomes v's relation (v itself where u's relation is u itself and v has none yet). All
+  places are filled at once, so two roles that swap places are read as a swap; one token that would have to become
+  two gives nothing. A neighbour with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first,
   at most ``k``), and the plan is the answer most of them give.
 - **Its belief.** Every dialogue lived is first foreseen by the analogy from the episodes already kept; the record
   of how often an answer foreseen over d places was right is the analogy's own (the evidence core's trust in a way of
@@ -180,7 +181,8 @@ class Episodes:
         first: Dict[Tuple[str, ...], int] = {}
         filled = 0
         for i, places in self.neighbours(said):
-            other, answer = self.said[i], list(self.answers[i])
+            other = self.said[i]
+            mapping: Dict[str, str] = {}                       # every place filled at once (two roles may swap)
             ok = True
             for j in places:
                 u, v = other[j], said[j]
@@ -195,9 +197,13 @@ class Episodes:
                     else:
                         ok = False
                         break
-                answer = [rv if t == ru else t for t in answer]
+                if mapping.get(ru, rv) != rv:                  # one token cannot become two
+                    ok = False
+                    break
+                mapping[ru] = rv
             if not ok:
                 continue
+            answer = [mapping.get(t, t) for t in self.answers[i]]
             votes[tuple(answer)] += 1
             first.setdefault(tuple(answer), len(places))
             filled += 1
