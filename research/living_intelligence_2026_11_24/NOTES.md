@@ -652,19 +652,19 @@ minutes.
 
 **The grounded world** (`m3_ground.py`, `results/m3_ground.jsonl`). The world of the earlier study's ground (t_m2.py,
 unchanged): what is seen while a line is said is perceived by Zihin's ground, and the questions name what is in view
-(T1, asked twice), what a thing is (T2), its colour (T3), its name (T4) and the situation (T6). In Turkish, three seeds
-(code 72ee8ca), Cevahir answers exactly as Zihin's ground does, on every test and seed; the harmony alone answers
-none:
+(T1, asked twice), what a thing is (T2), its colour (T3), its name (T4) and the situation (T6). Cevahir answers exactly
+as Zihin's ground does, on every test and seed; the harmony alone answers none:
 
-| Turkish, three seeds | Zihin | the harmony alone | Cevahir |
+| three seeds each | Turkish: Zihin = Cevahir | English: Zihin = Cevahir | the harmony alone |
 |---|---|---|---|
-| T1, new and seen, as heard and as it goes on (4 × 158) | 151, 151, 158, 158 | 0 | 151, 151, 158, 158 |
-| T2 what it is | 0 / 15 | 0 | 0 / 15 |
-| T3 colour | 31 / 45 | 0 | 31 / 45 |
-| T4 name | 16 / 23 | 0 | 16 / 23 |
-| T6 situation | 48 / 72 | 0 | 48 / 72 |
+| T1, new and seen, as heard and as it goes on (4 × 158) | 151, 151, 158, 158 | 152, 152, 158, 158 | 0 |
+| T2 what it is | 0 / 15 | 0 / 15 | 0 |
+| T3 colour | 31 / 45 | 26 / 45 | 0 |
+| T4 name | 16 / 23 | 19 / 23 | 0 |
+| T6 situation | 48 / 72 | 54 / 72 | 0 |
 
-The same world in English, and both languages with the final code, are running again; their rows follow.
+The Turkish run was made again with the code of 8.7 (bf0d7e8), and the English run with it: the Turkish rows are the
+same answer for answer, and in both languages Cevahir answers as Zihin's ground does on every test and seed.
 
 **The school** (`m3_school.py`, `results/m3_school.jsonl`, code 79a2e77). The teacher's seven subjects of the earlier
 study (biology, physics, chemistry, mathematics, coding, music, drawing), every lesson three times in shuffled order,
