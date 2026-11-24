@@ -9,7 +9,7 @@ with several places at once, done on the episodes the hippocampus keeps.
 
 - **Episodes.** Every dialogue lived is kept as it was said: the tokens of what was said and of the answer.
 - **Neighbours.** For an utterance U, the lived utterances of the same length that differ from U in at most ``most``
-  places (3), found through an index of (length, place, token).
+  places (5), found through an index of (length, place, token).
 - **The relation of a word to the answer.** For a word w, the answer token t that came with it: the one rule on the
   dialogues w was said in, e(t | w) = (W⁺ + ½) / (W + 1) with W⁺ the answers holding t; tokens held by half of all
   answers or more are the answers' own structure, not any word's. A relation is believed when e reaches the
@@ -18,8 +18,12 @@ with several places at once, done on the episodes the hippocampus keeps.
 - **The plan.** For a neighbour (U', A'), each place where U and U' differ (u in U', v in U) is filled: every token of
   A' that is u's relation becomes v's relation (v itself where u's relation is u itself and v has none yet). A
   neighbour with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first,
-  at most ``k``), and the plan is the answer most of them give, believed with the rule on that vote:
-  e = (W⁺ + ½) / (W + 1), W⁺ the neighbours agreeing, W those that could be filled.
+  at most ``k``), and the plan is the answer most of them give.
+- **Its belief.** Every dialogue lived is first foreseen by the analogy from the episodes already kept; the record
+  of how often an answer foreseen over d places was right is the analogy's own (the evidence core's trust in a way of
+  reading, learned from what its claims came to). A plan is believed by the rule on the record for its places, times
+  the share of the neighbours that agree. An analogy over many places that was seldom right stays below the
+  speaking line.
 
 Nothing here names a language, a word or a format: tokens are what was said, split as Zihin splits (words and marks).
 """
@@ -48,8 +52,10 @@ def shared_beginning(a: str, b: str) -> int:
 class Episodes:
     """The dialogues lived, and the analogy that answers from them."""
 
-    def __init__(self, most: int = 3, k: int = 8):
+    def __init__(self, most: int = 5, k: int = 8):
         self.most, self.k = most, k
+        self.k_right: Counter = Counter()                      # its own record: answers foreseen right ...
+        self.k_asked: Counter = Counter()                      # ... and foreseen, by the places of the nearest
         self.said: List[Tuple[str, ...]] = []
         self.answers: List[Tuple[str, ...]] = []
         self.index: Dict[Tuple[int, int, str], List[int]] = defaultdict(list)
@@ -61,10 +67,17 @@ class Episodes:
     def __len__(self) -> int:
         return len(self.said)
 
-    def live(self, said: Sequence[str], answer: Sequence[str]) -> None:
-        """Keep a dialogue (its tokens, as said)."""
-        i = len(self.said)
+    def live(self, said: Sequence[str], answer: Sequence[str], judge: bool = True) -> None:
+        """Keep a dialogue (its tokens, as said). With ``judge``, the answer is first foreseen from the episodes
+        already kept, and the record of the analogy (by the places of its nearest neighbour) says whether it was
+        right: that record is how far an analogy over that many places is believed."""
         said, answer = tuple(said), tuple(answer)
+        if judge and self.said:
+            plan, _, _, d = self._plan(said)
+            if plan is not None:
+                self.k_asked[d] += 1
+                self.k_right[d] += tuple(plan) == answer
+        i = len(self.said)
         self.said.append(said)
         self.answers.append(answer)
         for j, w in enumerate(said):
@@ -98,17 +111,21 @@ class Episodes:
 
     def state(self) -> dict:
         return {"most": self.most, "k": self.k, "dialogues": [[list(s), list(a)] if s is not None else None
-                                                              for s, a in zip(self.said, self.answers)]}
+                                                              for s, a in zip(self.said, self.answers)],
+                "k_right": {str(k): v for k, v in self.k_right.items()},
+                "k_asked": {str(k): v for k, v in self.k_asked.items()}}
 
     @classmethod
     def from_state(cls, state: dict) -> "Episodes":
-        ep = cls(state.get("most", 3), state.get("k", 8))
+        ep = cls(state.get("most", 5), state.get("k", 8))
         for d in state.get("dialogues", []):
             if d is None:
                 ep.said.append(None)
                 ep.answers.append(None)
             else:
-                ep.live(d[0], d[1])
+                ep.live(d[0], d[1], judge=False)
+        ep.k_right = Counter({int(k): v for k, v in state.get("k_right", {}).items()})
+        ep.k_asked = Counter({int(k): v for k, v in state.get("k_asked", {}).items()})
         return ep
 
     def relation(self, w: str) -> Optional[str]:
@@ -149,8 +166,18 @@ class Episodes:
         return out
 
     def plan(self, said: Sequence[str]) -> Tuple[Optional[List[str]], float, int]:
-        """The analogy's answer to ``said``: (tokens or None, its belief, how many neighbours could be filled)."""
+        """The analogy's answer to ``said``: (tokens or None, its belief, how many neighbours could be filled). Its
+        belief is the rule on the analogy's own record for that many places (how often an answer foreseen so was
+        right), times the share of the neighbours that agree."""
+        plan, agree, filled, d = self._plan(said)
+        if plan is None:
+            return None, 0.0, 0
+        record = (self.k_right[d] + 0.5) / (self.k_asked[d] + 1.0)
+        return plan, record * agree / filled, filled
+
+    def _plan(self, said: Sequence[str]) -> Tuple[Optional[List[str]], int, int, int]:
         votes: Counter = Counter()
+        first: Dict[Tuple[str, ...], int] = {}
         filled = 0
         for i, places in self.neighbours(said):
             other, answer = self.said[i], list(self.answers[i])
@@ -172,10 +199,11 @@ class Episodes:
             if not ok:
                 continue
             votes[tuple(answer)] += 1
+            first.setdefault(tuple(answer), len(places))
             filled += 1
             if filled >= self.k:
                 break
         if not votes:
-            return None, 0.0, 0
+            return None, 0, 0, 0
         best, agree = votes.most_common(1)[0]
-        return list(best), (agree + 0.5) / (filled + 1.0), filled
+        return list(best), agree, filled, first[best]

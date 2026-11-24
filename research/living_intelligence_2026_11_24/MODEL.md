@@ -590,7 +590,7 @@ Generalising several places at once is therefore what a mind that has lived enou
 as a frame, done on the episodes the hippocampus keeps.
 
 - **Episodes.** Every dialogue lived is kept as it was said: the tokens of the utterance and of the answer.
-- **Neighbours.** For an utterance U, the lived utterances of the same length that differ from U in at most three
+- **Neighbours.** For an utterance U, the lived utterances of the same length that differ from U in at most five
   places, found through an index of (length, place, token).
 - **The relation of a word to the answer.** For a word w, the answer token t that came with it, believed by the one
   rule on the dialogues w was said in: e(t | w) = (W⁺ + ½) / (W + 1), with W⁺ the answers that held t. Tokens held
@@ -600,13 +600,19 @@ as a frame, done on the episodes the hippocampus keeps.
 - **The plan.** For a neighbour (U′, A′), each place where U and U′ differ (u in U′, v in U) is filled: every token of
   A′ that is u's relation becomes v's relation, or v itself where u's relation is u itself and v has none yet. A
   neighbour with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first,
-  at most eight), and the plan is the answer most of them give, believed by the rule on the vote.
+  at most eight), and the plan is the answer most of them give.
+- **Its belief: its own record.** Every dialogue lived is first foreseen by the analogy from the episodes already
+  kept, and the record of how often an answer foreseen over d places was right is the analogy's own: the evidence
+  core's trust in a way of reading, learned from what its claims came to (F49). A plan is believed by the rule on the
+  record for its places, times the share of the neighbours that agree. Living the COGS training file, the record
+  reads 98.5 % right over one place, 98.3 % over two, 96.1 % over three, 91.8 % over four and 78.1 % over five.
 - **The prefrontal choice of the thought.** Zihin's plan is believed as its weakest decided word; the analogy's plan
   by its vote. The one believed more is the thought, if it reaches the speaking line. It is then said token by token
   as in 12.3.
 
-Two constants enter, both bounds of a search: at most three places and eight neighbours. A dialogue forgotten
-(`Cevahir.forget`) leaves the episodes exactly.
+Two constants enter, both bounds of a search: at most five places and eight neighbours. How far an analogy over
+many places is believed is not a constant: it is its record. A dialogue forgotten (`Cevahir.forget`) leaves the
+episodes exactly.
 
 ## References
 
