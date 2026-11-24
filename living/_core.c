@@ -1424,10 +1424,10 @@ static uint64_t table_find(uint64_t *keys, uint64_t mask, uint64_t key) {
     return (uint64_t)-1;
 }
 
-static void untake(Core *c, uint32_t v, uint32_t x) {    /* one count of x less at node v */
-    c->n[v] -= 1;
+static void untake(Core *c, uint32_t v, uint32_t x) {    /* one count of x less at node v (never below zero) */
     uint32_t prev = 0;
     for (uint32_t e = c->head[v]; e; prev = e, e = c->enext[e]) if (c->esym[e] == x) {
+        if (c->n[v] > 0) c->n[v] -= 1;
         if (--c->ecnt[e] == 0) {
             if (prev) c->enext[prev] = c->enext[e]; else c->head[v] = c->enext[e];
             if (c->tail[v] == e) c->tail[v] = prev;

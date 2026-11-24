@@ -176,7 +176,8 @@ class Cevahir:
         if self.entries is None or self._open is not None:
             return None
         self._open = {"kind": kind, "t0": self.mind.t + 1, "text_from": self.cortex.size()["episode_text"],
-                      "history": self.tail[-4096:], "text": [], "forms": [], "forgotten": False}
+                      "history": self.tail[-4096:], "text": [], "forms": [], "forgotten": False,
+                      "night": getattr(self, "nights", 0)}
         return self._open
 
     def _end(self, entry: Optional[dict]) -> None:
@@ -709,15 +710,19 @@ class Cevahir:
         """Forget entry ``k`` of the history exactly (with a ledger): Zihin takes back every increment of its moments
         (``Mind.retract``, its ledger), the core takes back the counts its text added and overwrites its episode text
         (``FastCortex.retract``), and the forms it taught are taken back. What depends on the order of life (the
-        harmony's gate and calibration, the situations, the records of disagreements) is not taken back."""
+        harmony's gate and calibration, the situations, the records of disagreements) is not taken back. Exact in
+        the core for an entry lived since the last sleep; after a night, ``core_exact`` is False: the contexts the
+        sleep forgot are not there to take back, and a context made again by a later text loses the counts the
+        entry's text gives it (never below zero). Its episode text is overwritten either way."""
         if self.entries is None:
             raise ValueError("Cevahir keeps no ledger (Cevahir(ledger=True))")
         self.flush()
         e = self.entries[k]
         if e["forgotten"]:
             return {"forgotten": False}
-        if e["text"]:
-            self.cortex.retract(e["text"], e["history"], e["text_from"])
+        exact = e.get("night", 0) == getattr(self, "nights", 0)  # a night since: contexts it made may be gone, and
+        if e["text"]:                                            # made again by later texts (taken back as far as
+            self.cortex.retract(e["text"], e["history"], e["text_from"])   # they stand, never below zero)
         moments = list(range(e["t0"], e.get("t1", e["t0"] - 1) + 1))
         for m in reversed(moments):
             self.mind.retract(m)
@@ -731,7 +736,7 @@ class Cevahir:
             if self.written[answer][token][raw] <= 0:
                 del self.written[answer][token][raw]
         e["forgotten"] = True
-        return {"forgotten": True, "moments": len(moments), "characters": len(e["text"])}
+        return {"forgotten": True, "moments": len(moments), "characters": len(e["text"]), "core_exact": exact}
 
     # ------------------------------------------------------------------------------------------------- channels ---
     def newness(self, segment: str) -> Dict[str, float]:
@@ -793,6 +798,7 @@ class Cevahir:
         ``keep_min`` times (what recurred stays exactly), and Zihin dreams and sorts its dreams against what is real
         (``zihin.dusunce.sleep``, F20–F22) if ``dream``. Returns what was forgotten and dreamt."""
         self.flush()
+        self.nights = getattr(self, "nights", 0) + 1
         out = {"forgotten": {self.channel: self.cortex.sleep(keep_min)}}
         for name, ch in self.others.items():
             out["forgotten"][name] = ch["cortex"].sleep(keep_min)
