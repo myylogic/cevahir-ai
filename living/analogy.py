@@ -39,10 +39,11 @@ with several places at once, done on the episodes the hippocampus keeps.
   out, answering the rest (by the analogy, or again by parts), and putting the whole's effect back. The effect is
   read from lived utterances holding a part of the same frame: what taking their part out changes in their answers.
   The change is put into the rest's answer: the part's own words and places by their place in the part, everything
-  else through the alignment of the two rests' answers (read by what they say about the places near the part); a
-  token of an answer that is a whole number smaller than the utterance's length is read as a place of it, and
-  moves with the places. Where an answer lists runs of the same shape, a new run goes by its place (a list keeps the
-  order of what was said). The examples vote; the plan's belief is the rest's belief times the share of the
+  else through the alignment of the two rests' answers (read by what they say about the places near the part: the
+  numbers that name them and the relations of the words there); a token of an answer that is a whole number
+  smaller than the utterance's length is read as a place of it, and moves with the places. What the example put at
+  the very beginning goes at the beginning; where an answer lists runs of the same shape, a new run goes by its
+  place among its neighbours (a list keeps the order of what was said). The examples vote; the plan's belief is the rest's belief times the share of the
   examples that agree. The most whole-like parts are tried first, then the rightmost; the search is bounded.
 
 Nothing here names a language, a word or a format: tokens are what was said, split as Zihin splits (words and marks).
@@ -390,11 +391,16 @@ class Episodes:
                     break
             if votes:
                 best, agree = votes.most_common(1)[0]
-                e = rest_e * agree / filled
+                e = rest_e * self._agreement(agree, filled)
                 if e >= SPEAKING_LINE:
                     memo[u] = (list(best), e, agree)
                     return memo[u]
         return memo[u]
+
+    @staticmethod
+    def _agreement(agree: int, filled: int) -> float:
+        """How far the examples' votes carry a plan by parts: the share of them that agree."""
+        return agree / filled
 
     @staticmethod
     def _shift(a: Sequence[str], p: int, m: int, n: int) -> List[str]:
@@ -421,13 +427,17 @@ class Episodes:
                 return "L%d" % (pp - k) if pp - k <= 3 else "L"
             return "R%d" % (k - pp - m) if k - pp - m <= 3 else "R"
         def read(a: List[str], w: Tuple[str, ...], pp: int) -> List[str]:
-            content = {self.relation(x) for x in w} - {None}
+            near: Dict[str, int] = {}                          # each relation, by the place of its word nearest the part
+            for k, x in enumerate(w):
+                r = self.relation(x)
+                if r is not None and (r not in near or abs(k - pp) < abs(near[r] - pp)):
+                    near[r] = k
             out = []
             for t in a:
                 if t.isdigit() and int(t) < len(w):
                     out.append(cls(int(t), pp))
-                elif t in content:
-                    out.append("\u25a1")
+                elif t in near:
+                    out.append("\u25a1" + cls(near[t], pp))
                 else:
                     out.append(t)
             return out
@@ -440,7 +450,7 @@ class Episodes:
                 t2, t = a2s[bi + d], a_s[bj + d]
                 if r2[bi + d][0] in "LR" and t2.isdigit() and t.isdigit():
                     places[t2][t] += 1
-                elif r2[bi + d] == "\u25a1":
+                elif r2[bi + d].startswith("\u25a1"):
                     words[t2][t] += 1
         own: Dict[str, str] = {}
         for k in range(m):
@@ -473,6 +483,8 @@ class Episodes:
                 return words[t].most_common(1)[0][0]
             return None if t in theirs else t
         def at(i: int) -> int:
+            if i == 0:                                         # put first where the example put it first
+                return 0
             if i == len(a2s):
                 return len(a_s)
             for bi, bj, size in blocks:
@@ -517,8 +529,8 @@ class Episodes:
                         where -= size
             edits.append((where, len(old), new))
         out = list(a_s)
-        for where, k, new in sorted(edits, key=lambda x: -x[0]):
-            out[where:where + k] = new
+        for _, (where, k, new) in sorted(enumerate(edits), key=lambda x: (-x[1][0], -x[0])):
+            out[where:where + k] = new                         # from the end, so that each place still holds
         return out
 
     def _plan(self, said: Sequence[str]) -> Tuple[Optional[List[str]], int, int, int]:
