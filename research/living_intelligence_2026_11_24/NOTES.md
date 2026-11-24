@@ -395,17 +395,19 @@ On code-pystdlib, the cortex alone holds 1.431 / 1.482, with the episode 1.287 /
 | xz -9e | 2.101 / 1.700 | 1.544 / 1.532 | 2.044 / 1.747 | 1.843 / 2.067 | 1.316 / 1.431 |
 | bzip2 -9 | 2.025 / 1.941 | 1.607 / 1.518 | 2.217 / 1.999 | 1.730 / 1.984 | 1.460 / 1.619 |
 | gzip -9 | 2.692 / 2.764 | 2.262 / 2.111 | 2.174 / 1.917 | 2.376 / 2.516 | 1.832 / 1.939 |
-| Transformer, online (living) | 2.896 / 2.349 | 2.654 / 1.811 | 4.030 / 3.432 | 2.880 / 3.076 | (running) |
-| Transformer, offline, frozen test | 2.907 | 2.047 | 3.610 | 3.549 | (running) |
+| Transformer, online (living) | 2.896 / 2.349 | 2.654 / 1.811 | 4.030 / 3.432 | 2.880 / 3.076 | 1.772 / 1.375 |
+| Transformer, offline, frozen test | 2.907 | 2.047 | 3.610 | 3.549 | 2.263 |
 
-The Transformer's rows for code-pystdlib (60 minutes offline and 60 minutes online, four cores) are running.
+On code-pystdlib the Transformer was trained for 60 minutes on four cores: 1,863 steps offline (frozen on the test
+part: 2.263) and 10,065 steps online (1.772 on the whole stream, 1.375 on the last tenth).
 
 - **Against PPMd at order 16,** the strongest compressor measured, the harmony is ahead on nine of the ten cells. It
   leads by 0.07–0.14 bits per character on the whole streams of the four larger texts, and on every last tenth. The
   one cell lost is the whole stream of tr-lessons (section 6.6).
 - **Against the Transformer:**
-  - living through the stream, the harmony is ahead of the online Transformer by 1.2–2.3 bits per character on the
-    whole streams and by 0.6–2.0 on the last tenths;
+  - living through the stream, the harmony is ahead of the online Transformer by 0.73–2.28 bits per character on
+    the whole streams and by 0.26–1.97 on the last tenths (the least on code-pystdlib, the longest text, where the
+    Transformer had 10,065 steps);
   - frozen at the split, it is ahead of the Transformer trained offline by 0.37–1.33 on the last tenths;
   - the Transformer trained offline for 60 minutes on en-repo reached 2.152 on the last tenth (section 2.6), and the
     harmony, frozen at the split, holds 1.669 there.
@@ -457,7 +459,20 @@ last tenth, with the 256 characters before each, and goes on for up to 40 charac
 | tr-private | 3.71 | 8.6 % | 4.77 | 3.09 | 64.9 % |
 | code-pystdlib | 2.97 | 6.8 % | 2.93 | 1.97 | 67.1 % |
 
-The Transformer's runs on the same places (trained offline for 20 minutes, 8 on tr-lessons) are running; their row follows.
+The Transformer on the same places, trained offline from scratch on the same training part (20 minutes on four
+threads, 8 on tr-lessons; the machine was shared with other runs, so it made 1,200 steps on en-repo, 207 on en-pydoc,
+214 on tr-private and 150 on tr-lessons; it was not run on code-pystdlib):
+
+| corpus | free: right before the first mistake | free: 10 or more right | line: said per place | line: right per place | line: right of said |
+|---|---|---|---|---|---|
+| en-repo | 0.94 | 0.0 % | 0.71 | 0.39 | 55.2 % |
+| en-pydoc | 2.16 | 8.0 % | 5.37 | 1.66 | 30.8 % |
+| tr-lessons | 0.45 | 0.0 % | 0.02 | 0.02 | (9 of 9) |
+| tr-private | 0.25 | 0.0 % | 0.03 | 0.02 | (10 of 15) |
+
+These are small Transformers trained for minutes on a shared machine: the comparison says what one trained on the
+same text for the same time does here, not what a long-trained one does. Its belief under the line is not its record:
+on en-pydoc it says 5.4 characters per place and 31 % of them are right, where the harmony's 6.2 are 54 % right.
 
 Under the line, 51–67 % of what the harmony says is right. Its belief is at least e* ~ 0.583 at each symbol, and
 the share right is near that belief, a little below it on the texts most unlike what it lived (the new lessons of
