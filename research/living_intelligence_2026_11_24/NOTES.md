@@ -185,6 +185,7 @@ Transformer it is frozen.
 | gzip -9 | 2.692 | 2.764 | 2.262 | 2.111 | 2.174 | 1.917 | 2.376 | 2.516 |
 | Transformer, online (living) | 2.896 | 2.349 | 2.654 | 1.811 | 4.030 | 3.432 | 2.880 | 3.076 |
 | Transformer, offline, frozen test | | 2.907 | | 2.047 | | 3.610 | | 3.549 |
+| Transformer, offline for 60 minutes, frozen test | | 2.152 | | | | | | |
 
 **What each side had.**
 
@@ -200,6 +201,11 @@ Transformer it is frozen.
   lessons). That gave 1,609–2,033 steps of 16 × 256 characters. On tr-private, one step per block is the floor, and
   the run took 983 s.
 - **Both Transformers** were given the vocabulary of the whole stream in advance.
+- **A longer run.** One offline run on en-repo had 60 minutes: 3,990 steps. Its held-out bits were still falling
+  slowly (1.948, 1.943 and 1.937 at steps 3,600, 3,800 and 3,990). On the last 10 % it reached 2.152, against 1.978
+  for the cortex frozen at the split and 1.741 for the cortex living.
+- **A shared machine.** The 20-minute en-repo run shared the four cores with the cortex's single-core runs for a few
+  minutes. It made 1,232 steps where the 60-minute run's pace would give about 1,330.
 
 On these texts and with these budgets, the cortex codes every stream and every last tenth better than the
 Transformer, offline or online, and it does so in seconds instead of minutes. It is no evidence about large data and
