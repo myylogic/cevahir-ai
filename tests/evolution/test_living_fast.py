@@ -98,3 +98,25 @@ def test_recall_locks_onto_the_lived_line_that_began_so(FastCortex):
     mind.recall("\n" + "a cat ")
     after, _ = mind.stream("a cat sat", "\n", learn=False)
     assert before == after                                            # recalling leaves the mind as it was
+
+
+@pytest.mark.parametrize("cfg", [dict(depth=6), dict(depth=6, episode=True, minlen=8, mix=True, recent=4, lines=True,
+                                                     episode_lengths=(16, 8, 5)),
+                                 dict(depth=6, episode=True, minlen=8, mix=True, recent=4, lines=True, voice=True)])
+def test_a_saved_core_goes_on_as_the_one_never_saved(FastCortex, cfg, tmp_path):
+    split = len(TEXT) * 2 // 3
+    a = FastCortex(**cfg)
+    a.stream(TEXT[:split])
+    path = str(tmp_path / "core.bin")
+    a.save(path)
+    b = FastCortex.load(path)
+    assert b.size() == a.size()
+    la, bits_a = a.stream(TEXT[split:], bits=True)
+    lb, bits_b = b.stream(TEXT[split:], bits=True)
+    assert la == lb and (bits_a == bits_b).all()
+    if cfg.get("mix"):
+        assert a.say(TEXT[:split], most=20) == b.say(TEXT[:split], most=20)
+    with open(path, "ab") as f:                                      # a file with anything after the core is refused
+        f.write(b"x")
+    with pytest.raises(IOError):
+        FastCortex.load(path)

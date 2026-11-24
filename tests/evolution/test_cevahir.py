@@ -113,3 +113,27 @@ def test_cevahir_says_what_zihin_generalised_where_the_harmony_alone_cannot(Fast
     assert exact["harmony"] == 0
     assert all(s["cevahir"] == a for s, (_, a) in zip(said, tests))      # written as the answers were: "ZAP ZAP"
     assert c.counts["unaligned"] == 0
+
+
+def test_a_kept_cevahir_answers_and_lives_as_the_one_kept(FastCortex, tmp_path):
+    from living.cevahir import Cevahir
+    life, tests = _world()
+    c = Cevahir(variant="speaking", switches={"wholes": True, "told_apart": True}, window=13)
+    for q, a in life[:len(life) // 2]:
+        c.watch(q, a + " .")
+    folder = str(tmp_path / "cevahir")
+    c.save(folder)
+    d = Cevahir.load(folder)
+    rest = life[len(life) // 2:]
+    for q, a in rest:
+        assert c.watch(q, a + " .") == d.watch(q, a + " .")          # the same bits, dialogue by dialogue
+    c.session.close_turn()
+    d.session.close_turn()
+    qs = [q for q, _ in tests]
+    assert c.answers(qs, way="every", workers=2) == d.answers(qs, way="every", workers=2)
+    import json
+    import os
+    with open(os.path.join(folder, "cevahir.json"), "a", encoding="utf-8") as f:
+        f.write(" ")
+    with pytest.raises(IOError):
+        Cevahir.load(folder)

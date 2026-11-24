@@ -60,6 +60,11 @@ def _library() -> ctypes.CDLL:
     lib.core_set_voice.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint32,
                                    ctypes.c_double]
     lib.core_voice_info.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+    lib.core_save.restype = ctypes.c_int
+    lib.core_save.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+    lib.core_load.restype = ctypes.c_void_p
+    lib.core_load.argtypes = [ctypes.c_char_p]
+    lib.core_config.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
     lib.core_stream_mix.restype = ctypes.c_double
     lib.core_stream_mix.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64, ctypes.c_int, ctypes.c_void_p]
     _lib = lib
@@ -160,6 +165,26 @@ class FastCortex:
         out = (ctypes.c_uint32 * 3)()
         self._lib.core_voice_info(self._c, out)
         return int(out[0]), int(out[1]), int(out[2])
+
+    def save(self, path: str) -> None:
+        """Write the whole core (every count, record and weight, and the history) to ``path``."""
+        if not self._lib.core_save(self._c, os.fsencode(path)):
+            raise IOError("the core could not be written to %s" % path)
+
+    @classmethod
+    def load(cls, path: str) -> "FastCortex":
+        """A core read back from ``path``: it goes on exactly as the one saved would have."""
+        lib = _library()
+        c = lib.core_load(os.fsencode(path))
+        if not c:
+            raise IOError("not a core of this version, or a broken one: %s" % path)
+        self = cls.__new__(cls)
+        self._lib, self._c = lib, c
+        cfg = (ctypes.c_int * 6)()
+        lib.core_config(c, cfg)
+        self.depth, self.update = int(cfg[0]), "found" if cfg[1] else "all"
+        self.episode, self.mix, self.voice = bool(cfg[2]), bool(cfg[3]), bool(cfg[4])
+        return self
 
     def size(self) -> dict:
         s = (ctypes.c_uint64 * 6)()

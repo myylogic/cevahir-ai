@@ -1207,3 +1207,122 @@ void core_stats(Core *c, uint64_t *out) {
     out[4] = s;
     out[5] = c->text_len;
 }
+
+/* ---------------------------------------------------------------------------------------------------------------- */
+/* Keeping a core: every count, record, weight and the history, written to a file and read back into a new core that
+ * goes on exactly as the one saved would have (tested: the bits after a load are the bits without one). What is
+ * scratch (the distribution, the filtered entries, the exclusion stamps) and the voice's current candidates (set
+ * again before every token) are not kept. */
+#include <stdio.h>
+
+typedef struct { FILE *f; int writing; int ok; } Ser;
+
+static void ser_bytes(Ser *s, void *p, size_t n) {
+    if (!s->ok || n == 0) return;
+    if (s->writing) { if (fwrite(p, 1, n, s->f) != n) s->ok = 0; }
+    else { if (fread(p, 1, n, s->f) != n) s->ok = 0; }
+}
+#define SV(s, x) ser_bytes((s), &(x), sizeof(x))
+
+/* an array of `cap` elements of which the first `count` are kept; allocated (zeroed) when reading */
+static void ser_arr(Ser *s, void **pp, uint64_t count, uint64_t cap, size_t size) {
+    if (!s->ok) return;
+    if (!s->writing) {
+        free(*pp);
+        *pp = calloc(cap ? cap : 1, size);
+        if (!*pp) { s->ok = 0; return; }
+    }
+    ser_bytes(s, *pp, count * size);
+}
+#define SA(s, p, count, cap) ser_arr((s), (void **)&(p), (count), (cap), sizeof(*(p)))
+#define SZ(s, p, cap) do { if (!(s)->writing) { free(p); (p) = calloc((cap) ? (cap) : 1, sizeof(*(p))); \
+                           if (!(p)) (s)->ok = 0; } } while (0)
+
+static void ser_core(Ser *s, Core *c) {
+    uint64_t magic = 0x31455243564C4ull, version = 1;          /* "LVCRE1" */
+    uint64_t m = magic, v = version;
+    SV(s, m); SV(s, v);
+    if (m != magic || v != version) { s->ok = 0; return; }
+    SV(s, c->nodes); SV(s, c->cap_nodes); SV(s, c->entries); SV(s, c->cap_entries);
+    SV(s, c->cmask); SV(s, c->cused); SV(s, c->amask); SV(s, c->aused); SV(s, c->asize); SV(s, c->acap);
+    SV(s, c->nsit); SV(s, c->depth); SV(s, c->hlen); SV(s, c->stamp_cap);
+    SV(s, c->update_found); SV(s, c->found); SV(s, c->lived);
+    SV(s, c->episode); SV(s, c->minlen); SV(s, c->text_len); SV(s, c->text_cap); SV(s, c->ep_mask);
+    SV(s, c->lines_on); SV(s, c->line_h); SV(s, c->line_len); SV(s, c->nl_num); SV(s, c->ln_mask);
+    SV(s, c->ln_r); SV(s, c->ln_a); SV(s, c->ep_n); SV(s, c->ep_L); SV(s, c->ep_ptr); SV(s, c->ep_len);
+    SV(s, c->verdict_cells);
+    SV(s, c->mix_on); SV(s, c->nin); SV(s, c->nsets); SV(s, c->lr); SV(s, c->lr_min);
+    SV(s, c->dist_cap); SV(s, c->lv_cap); SV(s, c->ep_r); SV(s, c->ep_a); SV(s, c->mix_bits_new);
+    SV(s, c->mix_bits_ext); SV(s, c->words_on); SV(s, c->wmask); SV(s, c->wused); SV(s, c->cur_word);
+    SV(s, c->prev_word); SV(s, c->two_inputs); SV(s, c->tree_prior); SV(s, c->recent); SV(s, c->rm_mask);
+    SV(s, c->prev_code); SV(s, c->voice_on); SV(s, c->vc_ncap); SV(s, c->vc_ccap); SV(s, c->vc_r); SV(s, c->vc_a);
+    SV(s, c->i_voice);
+    if (!s->ok) return;
+    SA(s, c->n, c->nodes, c->cap_nodes); SA(s, c->t, c->nodes, c->cap_nodes);
+    SA(s, c->head, c->nodes, c->cap_nodes); SA(s, c->tail, c->nodes, c->cap_nodes);
+    SA(s, c->esym, c->entries, c->cap_entries); SA(s, c->ecnt, c->entries, c->cap_entries);
+    SA(s, c->enext, c->entries, c->cap_entries);
+    SA(s, c->ckey, c->cmask + 1, c->cmask + 1); SA(s, c->cval, c->cmask + 1, c->cmask + 1);
+    SA(s, c->akey, c->amask + 1, c->amask + 1); SA(s, c->aval, c->amask + 1, c->amask + 1);
+    SA(s, c->acode, c->asize, c->acap);
+    SA(s, c->sit_new, c->nsit, c->nsit); SA(s, c->sit_total, c->nsit, c->nsit);
+    SA(s, c->hist, (uint64_t)c->hlen, (uint64_t)(c->depth > 0 ? c->depth : 1));
+    SZ(s, c->stamp, c->stamp_cap);
+    if (!s->writing) c->cur_stamp = 0;
+    SA(s, c->text, c->text_len, c->text_cap);
+    SA(s, c->ep_table, c->ep_mask + 1, c->ep_mask + 1);
+    if (c->lines_on) SA(s, c->ln_table, c->ln_mask + 1, c->ln_mask + 1);
+    for (int k = 0; k < c->ep_n; k++) SA(s, c->ep_tabs[k], c->ep_mask + 1, c->ep_mask + 1);
+    SA(s, c->v_right, c->verdict_cells, c->verdict_cells); SA(s, c->v_asked, c->verdict_cells, c->verdict_cells);
+    if (c->mix_on) {
+        if (!s->writing && !tabs_ready) make_tables();
+        SA(s, c->w, (uint64_t)c->nsets * c->nin, (uint64_t)c->nsets * c->nin);
+        SA(s, c->set_updates, (uint64_t)c->nsets, (uint64_t)c->nsets);
+        SZ(s, c->dist, c->dist_cap);
+        SZ(s, c->lv_code, c->lv_cap); SZ(s, c->lv_cnt, c->lv_cap);
+        SZ(s, c->lv_len, (uint64_t)c->depth + 4);
+        SA(s, c->ext_n1, 1u << 17, 1u << 17); SA(s, c->ext_n, 1u << 17, 1u << 17);
+        SA(s, c->wkey, c->wmask + 1, c->wmask + 1); SA(s, c->wval, c->wmask + 1, c->wmask + 1);
+        SA(s, c->apm_n1, (uint64_t)65536 * 24, (uint64_t)65536 * 24);
+        SA(s, c->apm_n, (uint64_t)65536 * 24, (uint64_t)65536 * 24);
+        SA(s, c->w2, 32, 32);
+        SA(s, c->wg, (uint64_t)8 * c->nin, (uint64_t)8 * c->nin);
+        if (c->recent) {
+            SA(s, c->rm_n1, c->rm_mask + 1, c->rm_mask + 1); SA(s, c->rm_n, c->rm_mask + 1, c->rm_mask + 1);
+            SA(s, c->rm_tag, c->rm_mask + 1, c->rm_mask + 1);
+        }
+        if (c->voice_on) {
+            SZ(s, c->vc_code, c->vc_ccap); SZ(s, c->vc_off, c->vc_ncap); SZ(s, c->vc_len, c->vc_ncap);
+            SZ(s, c->vc_w, c->vc_ncap); SZ(s, c->vc_live, c->vc_ncap);
+            SZ(s, c->vt_code, c->vc_ncap); SZ(s, c->vt_cp, c->vc_ncap); SZ(s, c->vt_w, c->vc_ncap);
+            if (!s->writing) { c->vc_n = 0; c->vc_pos = 0; c->vc_know = 0.0; }
+        }
+    }
+}
+
+int core_save(Core *c, const char *path) {
+    FILE *f = fopen(path, "wb");
+    if (!f) return 0;
+    Ser s = {f, 1, 1};
+    ser_core(&s, c);
+    if (fclose(f) != 0) s.ok = 0;
+    return s.ok;
+}
+
+Core *core_load(const char *path) {
+    FILE *f = fopen(path, "rb");
+    if (!f) return 0;
+    Core *c = calloc(1, sizeof(Core));
+    Ser s = {f, 0, 1};
+    ser_core(&s, c);
+    int extra = fgetc(f);                                    /* the file must end where the core ends */
+    fclose(f);
+    if (!s.ok || extra != EOF) { core_free(c); return 0; }
+    return c;
+}
+
+/* what a loaded core is: depth, update "found", episode, harmony, voice, lines */
+void core_config(Core *c, int *out) {
+    out[0] = c->depth; out[1] = c->update_found; out[2] = c->episode; out[3] = c->mix_on; out[4] = c->voice_on;
+    out[5] = c->lines_on;
+}

@@ -507,6 +507,92 @@ class Cevahir:
         out["cevahir"] = self.speak(history, plan, plan_e, "\t", most=16 * 400).strip()
         return out
 
+    def converse(self, said_to_it: str, limit: int = 80) -> str:
+        """A turn of a conversation: Cevahir hears what is said to it and answers (the one layer), and lives both:
+        Zihin lives them as its reply does (what it heard, told; what it said, its own act), the harmony lives the
+        line (what it heard, a tab, what it answered)."""
+        answer = self.reply(said_to_it, "cevahir", limit)
+        self.cortex.set_voice([], [], 0.0)
+        self._live_text(self._lead() + said_to_it + "\t" + answer)
+        return answer
+
+    # ------------------------------------------------------------------------------------------------- keeping -----
+    def save(self, folder: str) -> Dict[str, object]:
+        """Keep Cevahir in ``folder``: Zihin (``zihin.persist.save``, with its manifest and digests), the core
+        (``core.bin``) and what Cevahir itself learned (the forms lexicon, the records, the stream's tail:
+        ``cevahir.json``), and a manifest with the SHA-256 of every file (``manifest.json``). Pickle executes code
+        when loaded (Zihin's file): load only minds you saved yourself."""
+        import hashlib
+        import json
+        from zihin import persist
+        os.makedirs(folder, exist_ok=True)
+        persist.save(self.mind, os.path.join(folder, "zihin.zihin"))
+        self.cortex.save(os.path.join(folder, "core.bin"))
+        state = {
+            "version": 1, "channel": self.channel, "dil": self.session.dil, "top": self.top,
+            "forms_per": self.forms_per, "record": self.record, "tail": self.tail,
+            "written": {str(int(k)): {t: dict(c) for t, c in v.items()} for k, v in self.written.items()},
+            "gaps": [[int(a), int(f), dict(c)] for (a, f), c in self.gaps.items()],
+            "dis_won": dict(self.dis_won), "dis_all": dict(self.dis_all),
+            "alone_right": dict(self.alone_right), "alone_all": dict(self.alone_all), "counts": dict(self.counts)}
+        with open(os.path.join(folder, "cevahir.json"), "w", encoding="utf-8") as f:
+            json.dump(state, f, ensure_ascii=False)
+        files = {}
+        for name in sorted(os.listdir(folder)):
+            if name == "manifest.json":
+                continue
+            h = hashlib.sha256()
+            with open(os.path.join(folder, name), "rb") as f:
+                for block in iter(lambda: f.read(1 << 20), b""):
+                    h.update(block)
+            files[name] = h.hexdigest()
+        manifest = {"what": "Cevahir (living/cevahir.py)", "files": files, "zihin_moments": self.mind.t,
+                    "core": self.cortex.size()}
+        with open(os.path.join(folder, "manifest.json"), "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=1)
+        return manifest
+
+    @classmethod
+    def load(cls, folder: str) -> "Cevahir":
+        """Cevahir read back from ``folder`` after every file is checked against the manifest."""
+        import hashlib
+        import json
+        from zihin import persist
+        from zihin.__main__ import Session
+        with open(os.path.join(folder, "manifest.json"), encoding="utf-8") as f:
+            manifest = json.load(f)
+        for name, digest in manifest["files"].items():
+            h = hashlib.sha256()
+            with open(os.path.join(folder, name), "rb") as f:
+                for block in iter(lambda: f.read(1 << 20), b""):
+                    h.update(block)
+            if h.hexdigest() != digest:
+                raise IOError("%s does not match its manifest" % name)
+        with open(os.path.join(folder, "cevahir.json"), encoding="utf-8") as f:
+            state = json.load(f)
+        self = cls.__new__(cls)
+        self.mind = persist.load(os.path.join(folder, "zihin.zihin"), ledger=False)
+        self.session = Session(self.mind)
+        self.session.dil = state["dil"]
+        self.channel = state["channel"]
+        self.cortex = FastCortex.load(os.path.join(folder, "core.bin"))
+        self.top, self.forms_per, self.record = state["top"], state["forms_per"], state["record"]
+        self.tail = state["tail"]
+        self.stream = None
+        self.written = {False: defaultdict(Counter), True: defaultdict(Counter)}
+        for k, v in state["written"].items():
+            for t, c in v.items():
+                self.written[bool(int(k))][t] = Counter(c)
+        self.gaps = defaultdict(Counter)
+        for a, fst, c in state["gaps"]:
+            self.gaps[(bool(a), bool(fst))] = Counter(c)
+        self.dis_won = Counter({int(k): v for k, v in state["dis_won"].items()})
+        self.dis_all = Counter({int(k): v for k, v in state["dis_all"].items()})
+        self.alone_right = Counter({int(k): v for k, v in state["alone_right"].items()})
+        self.alone_all = Counter({int(k): v for k, v in state["alone_all"].items()})
+        self.counts = Counter(state["counts"])
+        return self
+
     def answers(self, questions: List[str], way: str = "cevahir", limit: int = 400,
                 workers: Optional[int] = None) -> List[str]:
         """What Cevahir answers to each question as it stands now: each in a process that is this mind, which
