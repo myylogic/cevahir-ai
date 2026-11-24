@@ -174,7 +174,55 @@ Bits per character (`results/m1_baselines.jsonl`, `results/m1_transformer.jsonl`
 once; "test" is the last 10 %. For the compressors, "test" is size(all) − size(first 90 %); for the offline
 Transformer it is frozen.
 
-The Transformer runs are in progress; their rows and this table are added when they finish.
+| | en-repo all | en-repo test | en-pydoc all | en-pydoc test | tr-lessons all | tr-lessons test | tr-private all | tr-private test |
+|---|---|---|---|---|---|---|---|---|
+| **cortex, D = 8, living** | **1.976** | **1.741** | **1.591** | **1.548** | **1.946** | **1.658** | **1.616** | **1.989** |
+| cortex, D = 8, frozen at the split | | 1.978 | | 1.898 | | 2.809 | | 2.578 |
+| PPMd, order 8 | 1.793 | 1.573 | 1.429 | 1.392 | 1.763 | 1.531 | 1.474 | 1.781 |
+| PPMd, order 16 | 1.751 | 1.444 | 1.312 | 1.307 | 1.733 | 1.486 | 1.448 | 1.744 |
+| xz -9e | 2.101 | 1.700 | 1.544 | 1.532 | 2.044 | 1.747 | 1.843 | 2.067 |
+| bzip2 -9 | 2.025 | 1.941 | 1.607 | 1.518 | 2.217 | 1.999 | 1.730 | 1.984 |
+| gzip -9 | 2.692 | 2.764 | 2.262 | 2.111 | 2.174 | 1.917 | 2.376 | 2.516 |
+| Transformer, online (living) | 2.896 | 2.349 | 2.654 | 1.811 | 4.030 | 3.432 | 2.880 | 3.076 |
+| Transformer, offline, frozen test | | 2.907 | | 2.047 | | 3.610 | | 3.549 |
+
+**What each side had.**
+
+- **The cortex** read each stream once, in order. It took 0.3 s (tr-lessons) to 17.6 s (tr-private) of one processor
+  core, learned from nothing, and paid for every new symbol.
+- **The offline Transformer** (`m1_transformer.py --mode offline`) trained on the first 90 % minus a held-out 5 %,
+  for 20 minutes of four processor cores (8 on the Turkish lessons). That is 834–1,382 steps of 32 × 256 characters.
+  The checkpoint with the best held-out bits was then evaluated on the last 10 %, frozen. On the three larger texts,
+  its held-out bits were still falling when the time ran out (en-repo: 2.97, 2.84, 2.77, 2.76 at steps 800, 1,000,
+  1,200 and 1,232).
+- **The online Transformer** lived through the stream in blocks of 1,024 characters. It predicted each block first,
+  then trained on everything seen so far, with the steps spread so that the run took 15 minutes (8 on the Turkish
+  lessons). That gave 1,609–2,033 steps of 16 × 256 characters. On tr-private, one step per block is the floor, and
+  the run took 983 s.
+- **Both Transformers** were given the vocabulary of the whole stream in advance.
+
+On these texts and with these budgets, the cortex codes every stream and every last tenth better than the
+Transformer, offline or online, and it does so in seconds instead of minutes. It is no evidence about large data and
+large compute, where Transformers are far ahead of every model here (MODEL.md, section 11). It is evidence about the
+regime this study is about, learning while living, where a mind has to make use of what it met once or twice.
+
+**Learning a word while living.** Bits per character of a word at its k-th meeting in the stream: the cortex against
+the online Transformer, which lived the same stream in the same order.
+
+| k | 1 | 2 | 3 | 4 | 5 | 6–10 | 11–100 | 101+ |
+|---|---|---|---|---|---|---|---|---|
+| en-repo, cortex | 4.35 | 2.59 | 2.33 | 2.23 | 2.16 | 2.08 | 1.87 | 1.76 |
+| en-repo, Transformer | 4.70 | 4.44 | 4.28 | 4.20 | 4.14 | 4.02 | 3.33 | 2.25 |
+| en-pydoc, cortex | 4.00 | 1.99 | 1.85 | 1.71 | 1.70 | 1.59 | 1.38 | 1.38 |
+| en-pydoc, Transformer | 4.47 | 4.28 | 4.11 | 3.94 | 3.87 | 3.64 | 2.85 | 1.93 |
+| tr-lessons, cortex | 4.24 | 1.12 | 1.42 | 1.34 | 1.36 | 1.25 | 1.35 | 1.56 |
+| tr-lessons, Transformer | 4.77 | 4.58 | 4.61 | 4.45 | 4.48 | 4.30 | 3.45 | 1.90 |
+| tr-private, cortex | 2.85 | 1.77 | 1.61 | 1.53 | 1.49 | 1.42 | 1.27 | 1.28 |
+| tr-private, Transformer | 3.64 | 3.45 | 3.36 | 3.28 | 3.22 | 3.13 | 2.72 | 1.96 |
+
+The cortex pays for a word once. By its second meeting a word costs 26–62 % of its first. The Transformer pays almost
+the full price again at the second meeting (94–96 % of the first). After more than a hundred meetings it comes to
+1.90–2.25, about where the cortex is at the second meeting (1.12–2.59).
 
 ## 3. A new channel, a language outside the world's languages, and noise
 

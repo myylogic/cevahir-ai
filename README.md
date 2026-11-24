@@ -14,6 +14,20 @@
 > told, imitated, its own act, inferred or imagined. It reads what to expect from a single rule:
 > `e = c·(f − ½) + ½`. The earlier Transformer engine described below is still in the repository.
 >
+> - **Living Intelligence, a new study (24 November 2026):** a new body for the mind, on the same rule. It keeps no list
+>   of words and no vector per word. It keeps a cortex of letter contexts that grows with what it lives, sublinearly.
+>   Words are paths that the mind numbers itself and spells back from the number, and the alphabet is its own: a
+>   stream new to every channel it has becomes a new channel. A language it does not know is watched in silence until
+>   the evidence reaches the speaking line. On a made-up language in an unused script, it was silent for 302 symbols,
+>   then right 83.5 % of the time it spoke; on noise, it never spoke. The rule `e = c·(f − ½) + ½` turns out to be the
+>   Krichevsky–Trofimov estimator.
+>
+>   On four texts (two English, two Turkish) the cortex alone, reading once, beat gzip and bzip2 on all four and xz on
+>   three, and was 0.14–0.18 bits per character behind PPMd. It beat a character Transformer trained from scratch on
+>   every text, both offline (20 minutes of four cores) and living through the text in order. A new word costs the
+>   cortex 26–62 % of its first price at its second meeting; the Transformer still pays 94–96 %. Retracting a document
+>   leaves a store byte for byte identical to one that never read it.
+>   [The model](research/living_intelligence_2026_11_24/MODEL.md) · [the notes](research/living_intelligence_2026_11_24/NOTES.md)
 > - **The whole mind (new):** `python -m zihin` raises a mind with every mechanism below in use, and gives a mind you
 >   load the ones it was raised without (`--kapat name` keeps one off; `--variant speaking` is the earlier default; the
 >   `--ac name` in the entries below is the name of each mechanism). All of them together had never been measured:
@@ -458,6 +472,8 @@ A comma-separated `CORS_ORIGINS` replaces the default origins; each entry is an 
 | [chatting_management/](chatting_management) | Sessions, conversation history and context |
 | [api/](api), [database/](database) | HTTP services, authentication and persistence |
 | [benchmarks/](benchmarks), [tests/](tests), [scripts/](scripts) | Measurements, behavior verification and standalone diagnostic tools |
+| [zihin/](zihin) | Cevahir Zihin, the Living Evidence Mind (`python -m zihin`) |
+| [living/](living) | Living Intelligence: the cortex of letter contexts, the lexicon of numbered words, the channels ([study](research/living_intelligence_2026_11_24/MODEL.md)) |
 | [research/](research) | Isolated research experiments, including the deterministic representation witness audit |
 | [docs/](docs) | Architecture, module guides and development history |
 
