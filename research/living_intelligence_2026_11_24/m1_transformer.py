@@ -102,6 +102,32 @@ def batch(data: torch.Tensor, limit: int, n: int, gen: torch.Generator) -> tuple
     return x, y
 
 
+def say_test(model: GPT, data: torch.Tensor, vocab: list[str], s: str, places: list[int], line: float) -> dict:
+    """The continuation test of m2_say.py on this model, frozen: greedy, free and under the speaking line."""
+    import m2_say
+    model.eval()
+    ctx = [data[p - (CTX - 1):p].tolist() for p in places]
+    free = [[] for _ in places]
+    said = [[] for _ in places]
+    alive = [True] * len(places)
+    with torch.no_grad():
+        for _ in range(40):
+            x = torch.tensor([c[-(CTX - 1):] for c in ctx], dtype=torch.long)
+            probs = F.softmax(model(x)[:, -1, :].float(), dim=-1)
+            top_p, top_i = probs.max(-1)
+            for j in range(len(places)):
+                i = int(top_i[j])
+                free[j].append(vocab[i])
+                if alive[j] and float(top_p[j]) >= line:
+                    said[j].append(vocab[i])
+                else:
+                    alive[j] = False
+                ctx[j].append(i)
+    model.train()
+    return m2_say.score([("".join(f), s[p:p + 40]) for f, p in zip(free, places)],
+                        [("".join(d), s[p:p + 40]) for d, p in zip(said, places)])
+
+
 def word_stats(s: str, bits: list[float], split: int, offset: int) -> dict:
     """Bits of seen and unseen words in the test part, and (if bits cover the stream) by meeting."""
     seen_train: set[str] = set()
@@ -143,6 +169,7 @@ def main() -> None:
     ap.add_argument("--minutes", type=float, default=12.0)
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--say", type=int, default=0, help="offline only: the continuation test on this many places")
     ap.add_argument("--out", default=os.path.join(HERE, "results", "m1_transformer.jsonl"))
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
@@ -200,6 +227,10 @@ def main() -> None:
                     "train_seconds": round(train_seconds), "test_seconds": round(time.time() - t1),
                     "bpc_test_frozen": round(sum(tb) / len(tb), 4)})
         row.update(word_stats(s, tb, split, split))
+        if a.say:
+            t2 = time.time()
+            row["say"] = say_test(model, data, vocab, s, corpora.say_positions(s, split, a.say), 0.5 + 1.0 / 12)
+            row["say"]["seconds"] = round(time.time() - t2)
     else:
         B = 1024
         blocks = list(range(0, len(s), B))

@@ -9,6 +9,9 @@
   the seven school subjects of ``t_school.subjects(0)`` and the 24 lessons of ``dersler/``.
 - ``tr-private``: the author's own Turkish documents (``education/ozel-dokumanlar`` in the author's checkout). They are
   read locally only, if present; nothing of them leaves the machine and only counts are reported.
+- ``code-pystdlib``: the source of Python 3.13's standard library as installed with it (``/usr/lib/python3.13``,
+  without its tests and third-party packages): 537 files, about 10 million characters, sorted by path. Code, the
+  largest text on the machine.
 
 Each corpus is a list of documents. The measurements join them with a blank line into one stream.
 """
@@ -93,8 +96,26 @@ def tr_private() -> list[str]:
     return docs
 
 
-CORPORA = {"en-repo": en_repo, "en-pydoc": en_pydoc, "tr-lessons": tr_lessons, "tr-private": tr_private}
-PUBLIC = ("en-repo", "en-pydoc", "tr-lessons")
+def code_pystdlib() -> list[str]:
+    root = "/usr/lib/python3.13"
+    if sys.version_info[:2] != (3, 13) or not os.path.isdir(root):
+        raise RuntimeError("code-pystdlib is defined on Python 3.13's installed standard library")
+    paths = []
+    for d, dirs, files in os.walk(root):
+        parts = set(d[len(root):].split(os.sep))
+        if parts & {"test", "tests", "site-packages", "dist-packages"}:
+            continue
+        paths += [os.path.join(d, f) for f in files if f.endswith(".py")]
+    docs = []
+    for path in sorted(paths):
+        with open(path, encoding="utf-8", errors="surrogateescape") as f:
+            docs.append(f.read())
+    return docs
+
+
+CORPORA = {"en-repo": en_repo, "en-pydoc": en_pydoc, "tr-lessons": tr_lessons, "tr-private": tr_private,
+           "code-pystdlib": code_pystdlib}
+PUBLIC = ("en-repo", "en-pydoc", "tr-lessons", "code-pystdlib")
 
 
 def load(name: str) -> list[str]:
@@ -103,6 +124,16 @@ def load(name: str) -> list[str]:
 
 def stream(name: str) -> str:
     return SEP.join(load(name))
+
+
+def say_positions(s: str, split: int, n: int = 500, before: int = 256, after: int = 40) -> list[int]:
+    """Where the continuation test asks a mind to go on: n places spread evenly over the last tenth, each with
+    ``before`` characters of the test text behind it and ``after`` ahead."""
+    lo, hi = split + before, len(s) - after
+    if hi <= lo:
+        return []
+    step = (hi - lo) / n
+    return sorted({lo + int(i * step) for i in range(n)})
 
 
 def describe(name: str) -> dict:

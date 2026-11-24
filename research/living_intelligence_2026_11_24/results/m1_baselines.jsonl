@@ -22,3 +22,9 @@
 {"corpus": "tr-private", "compressor": "ppmd-o4", "chars": 1951426, "bpc_all": 1.7316, "bpc_test_living": 2.0163}
 {"corpus": "tr-private", "compressor": "ppmd-o8", "chars": 1951426, "bpc_all": 1.4738, "bpc_test_living": 1.7813}
 {"corpus": "tr-private", "compressor": "ppmd-o16", "chars": 1951426, "bpc_all": 1.4479, "bpc_test_living": 1.7441}
+{"corpus": "code-pystdlib", "compressor": "gzip-9", "chars": 10302143, "bpc_all": 1.832, "bpc_test_living": 1.9387}
+{"corpus": "code-pystdlib", "compressor": "bzip2-9", "chars": 10302143, "bpc_all": 1.4596, "bpc_test_living": 1.6188}
+{"corpus": "code-pystdlib", "compressor": "xz-9e", "chars": 10302143, "bpc_all": 1.3164, "bpc_test_living": 1.4308}
+{"corpus": "code-pystdlib", "compressor": "ppmd-o4", "chars": 10302143, "bpc_all": 1.5217, "bpc_test_living": 1.6057}
+{"corpus": "code-pystdlib", "compressor": "ppmd-o8", "chars": 10302143, "bpc_all": 1.281, "bpc_test_living": 1.349}
+{"corpus": "code-pystdlib", "compressor": "ppmd-o16", "chars": 10302143, "bpc_all": 1.1852, "bpc_test_living": 1.2662}

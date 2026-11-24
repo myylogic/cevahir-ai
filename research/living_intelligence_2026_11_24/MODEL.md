@@ -274,38 +274,82 @@ in an unused script, the same language in Latin letters, and noise.
 
 ## 5. The harmony of the next symbol (M2)
 
-The next symbol is not recalled; it is the point where several parts of the mind agree. Each part is an origin (an
-expert) that gives a distribution over the next symbol.
+The next symbol is not recalled; it is the point where several parts of the mind agree. Each part is an origin with
+a record. The harmony combines their beliefs. This section describes the harmony as built in M2 (`living/_core.c`,
+`living/fast.py`) and measured in NOTES.md, section 6.
 
-- **C, the cortex** (section 3).
-- **L, the lexicon.** Inside a word with prefix p, the candidates are the words that extend p. They are weighted by a
-  word-level cortex: the same store, run on the channel of word numbers, with the previous words as context. The
-  distribution over the next letter is the sum, over candidates, of their weights at the letter that continues p, with
-  the word's end as a letter. This is the word level, without a closed vocabulary: its symbols are the numbers the
-  mind gave.
-- **E, the episode.** The longest earlier occurrence of the current context, beyond the cortex's depth (found through
-  an index of the last 12, 16, 24 or 32 symbols), predicts the symbol that followed it. This is the induction behaviour
-  of attention heads (Olsson et al. 2022), done as a lookup.
-- **P, the focus.** The units held by the prefrontal working memory vote for the words associated with them
-  (section 6).
+### 5.1 The origins
 
-**The harmony by the rule.** The experts are first pooled as a product, P₀(x) ∝ Π_o P_o(x), and the top candidate
-ŷ = argmax P₀ is taken. Its belief is then judged by the record of the harmony's situation σ. The situation says:
+- **C, the cortex** (section 3), with its whole distribution after the walk with exclusion.
+- **Every context of the history**, d = 0 … 8, each as an origin of its own. The cortex uses only the longest
+  context and its escapes; here every length speaks.
+- **W, the word contexts.** Two origins:
+  - the beginning of the current word;
+  - the beginning of the current word after the previous word.
 
-- which experts agree on ŷ;
-- how sure each of them is (bucketed);
-- how long the episode's match is.
+  Their records are counts of the symbols that followed, keyed by 64-bit hashes of the exact strings. This is the
+  word level without a closed vocabulary. A full word-level cortex over word numbers is left for M3.
+- **E, the episode.** The longest earlier occurrence of the last 12 symbols, found through a hash and verified symbol
+  by symbol, predicts the symbol that followed it. Its record counts how often that was right, per match length. This
+  is the induction behaviour of attention heads (Olsson et al. 2022), done as a lookup.
+- **S, the short-term memory.** Contexts of length 1 to 6, with records that decay by 1 − 1/F at each update, F = 7.
+  This is the context decay of the evidence core, whose time constant is the span of the focus. The cortex keeps
+  everything exactly; the short-term memory keeps what happened lately, and forgets.
+- **P, the focus** of the prefrontal working memory (section 6) is left for M3.
 
-That record counts how often the top candidate was right in this situation, and
+### 5.2 One decision at a time
 
-    P(ŷ) = (R_σ + ½) / (A_σ + 1).
+A symbol is decided in 8 binary steps of a code:
 
-The rest, 1 − P(ŷ), is shared among the other symbols in proportion to P₀. This is the one rule, in a calibration stage
-of the kind compressors use (Mahoney 2005). Its output is a calibrated belief, which is what the speaking line needs.
+- its number in the mind's alphabet, if below 254;
+- 254 for a symbol never met, followed by its code point at the root's price, log₂(1,114,112 − |A|);
+- 255 for numbers from 254 up, followed by the number in 16 binary steps with an order-0 record.
 
-**A borrowed alternative.** Mixing weights learned by online gradient descent on the code length (logistic mixing, a
-one-layer network) is kept as a measured alternative. It enters the mind only if M2 shows that it is truly needed,
-meaning it beats the rule by a margin that matters.
+At each step every origin gives its belief that the next bit is 1. Its record is restricted to the codes with the
+prefix decided so far: n of them, n₁ with a 1 next. The belief is the rule with the coarser origin as prior
+(section 2.2):
+
+    e = (n₁ + p₀) / (n + 1),
+
+with p₀ the belief of the next shorter context (½ for the root), and the word contexts leaning on the root and on
+each other. With p₀ = ½ this is the rule itself. The cortex gives its belief from its distribution, summed over the
+codes with each prefix. The episode gives the bit of its predicted symbol, with the belief of its record.
+
+### 5.3 The gate (borrowed)
+
+The gate adds the beliefs' log-odds with weights, p = σ(Σ_o w_o · logit(e_o)). It holds one weight set per bit
+position, episode state and depth of the history (48 sets), and a second gate with one set per bit position, which
+learns fast while the first has little record. Each set learns online by the gradient of the code length,
+w ← w + λ (y − p) logit(e).
+
+This is the one method of a network the harmony borrows: a one-layer gate trained by its own error. The learning rate
+λ falls from 0.02 to 0.002 as a set is used (as 1/√(1 + u/1024) for its u updates). These are constants of the
+borrowed method, not of the theory.
+
+M2 measured the alternative that uses only the rule: the episode's verdict calibrated by the record of its situation
+(step B of NOTES.md 6.2). On the four texts, the gate (step C) does better than it by 0.13–0.18 bits per character.
+That is the margin the owner asked for before borrowing ("Transformer methods used because they are truly
+needed").
+
+### 5.4 The calibration by the rule
+
+The gate's belief is judged once more by a record: the previous symbol's code and the bit prefix, times 24 buckets
+of the gate's log-odds. Its belief is the rule on that record, interpolated between the two nearest buckets. A last
+gate (per bit position, learned likewise) combines the two gates and the calibration. This is the calibration stage of
+context-mixing compressors (Mahoney 2005), with the rule in place of an adaptive rate.
+
+### 5.5 What stays exact
+
+The knowledge of the mind is still the cortex's counts and the word contexts' counts: integers, written by every
+symbol lived. A text can be taken back exactly from them, and the cortex alone remains bit-identical to the Python
+cortex of M1 (tests/evolution/test_living_fast.py). Three things are learned from the mind's own predictions and
+depend on the order of life, as learned trust does in Zihin:
+
+- the gate's weights;
+- the calibration's records;
+- the short-term memory, which forgets by design.
+
+A pass that does not learn leaves all three, and the episodes, untouched (tested).
 
 ## 6. The prefrontal cortex: focus, goal and lock (M3)
 
@@ -399,15 +443,16 @@ difference from a mind that never read the text.
 - a fixed context window as the only memory;
 - training separated from living.
 
-A learned gradient gate enters only if M2 measures that it is needed (section 5).
+M2 measured the learned gradient gate as needed (0.13–0.18 bits per character over the rule-only verdict) and uses it
+as the harmony's gate (section 5.3).
 
 ## 10. Milestones and measures
 
 | | what | measures | status |
 |---|---|---|---|
 | M1 | cortex, lexicon, channels | prequential bits per character against PPMd, xz, bzip2, gzip and a character Transformer (offline and online); growth and its exponent; seen and unseen words; bits at a word's k-th meeting; exact retraction; a new channel, a made-up language and noise | built and measured, [NOTES.md](NOTES.md) |
-| M2 | harmony: lexicon at the word level, episode expert, verdict by the rule | bits per character below PPMd on the same texts; each expert's share; rule against gradient gate | next |
-| M3 | PFC and amygdala | sentences said to the end and their coherence; retention of salient facts after interference; the earlier dialogue and school tests through the new architecture | |
+| M2 | the harmony: every context, the word contexts, the episode and a short-term memory, combined bit by bit by a learned gate and calibrated by the rule; the cortex in C | bits per character below PPMd on the same texts; each part's share; the rule against the gradient gate | built and measured, [NOTES.md](NOTES.md) 6 |
+| M3 | PFC and amygdala; the word-level cortex over word numbers | sentences said to the end and their coherence; retention of salient facts after interference; the earlier dialogue and school tests through the new architecture | next |
 | M4 | hippocampus and sleep | memory bounded by B; the cost in bits of forgetting; growth with forgetting; retraction after consolidation | |
 | M5 | meaning and dialogue | the ground of Zihin on the new cortex; a standard benchmark (enwik8 or text8; downloaded only with the owner's permission) | |
 
