@@ -43,8 +43,13 @@ with several places at once, done on the episodes the hippocampus keeps.
   numbers that name them and the relations of the words there); a token of an answer that is a whole number
   smaller than the utterance's length is read as a place of it, and moves with the places. What the example put at
   the very beginning goes at the beginning; where an answer lists runs of the same shape, a new run goes by its
-  place among its neighbours (a list keeps the order of what was said). The examples vote; the plan's belief is the rest's belief times the share of the
-  examples that agree. The most whole-like parts are tried first, then the rightmost; the search is bounded.
+  place among its neighbours (a list keeps the order of what was said). The examples vote; the plan's belief is the
+  rest's belief times the share of the examples that agree. The most whole-like parts are tried first, then the
+  rightmost; the search is bounded.
+- **Exchanging a part.** A part that cannot be taken out (what remains would not be an utterance) is exchanged for the
+  part lived most often between the same neighbours; the rest is answered, and what such an exchange changes in
+  lived answers (wherever a part of the asked part's shape was lived where a part of the other's shape was too) is
+  put back the same way. Taking a part out is the exchange for nothing.
 
 Nothing here names a language, a word or a format: tokens are what was said, split as Zihin splits (words and marks).
 """
@@ -60,6 +65,7 @@ from living.evidence import SPEAKING_LINE
 TOKEN = re.compile(r"\w+|[^\w\s]", re.UNICODE)
 PARTS_BUDGET = 400                                             # parts tried, at most, for one utterance
 PARTS_DEPTH = 16                                               # parts taken out, at most, one after another
+PART = "\u27e8%d\u27e9"                                         # a place of a part put in for another, while it stands
 
 
 def tokens(text: str) -> List[str]:
@@ -91,6 +97,8 @@ class Episodes:
         self._made_at = -1                                     # the kinds and the frames, read again as life doubles
         self._kinds: Dict[str, Counter] = {}
         self._frames: Dict[tuple, List[int]] = {}
+        self._slots: Dict[tuple, list] = {}
+        self._shapes: Dict[tuple, list] = {}
         self._units: Dict[tuple, float] = {}
         self._asked: Dict[tuple, tuple] = {}
         self._alike: Dict[Tuple[str, str], bool] = {}
@@ -270,6 +278,16 @@ class Episodes:
                 for p in range(0, min(len(u) - m, 1024)):      # never the utterance's last token
                     frames[self._frame(u, p, m)].append(i * 1024 + p)
         self._frames = dict(frames)
+        slots: Dict[tuple, list] = defaultdict(list)            # the parts lived between the same neighbours
+        for fr, codes in self._frames.items():
+            slots[(fr[1], fr[3])].append((len(codes), fr[0], fr[2], codes[0]))
+        shapes: Dict[tuple, list] = defaultdict(list)           # the frames a part of each shape was lived in
+        for fr in self._frames:
+            shapes[(fr[0], fr[2])].append(fr)
+        for v in slots.values():
+            v.sort(key=lambda x: (-x[0], x[1], x[2]))
+        self._slots = dict(slots)
+        self._shapes = dict(shapes)
         self._units = {}
         self._alike = {}
 
@@ -395,7 +413,85 @@ class Episodes:
                 if e >= SPEAKING_LINE:
                     memo[u] = (list(best), e, agree)
                     return memo[u]
+        if depth == 0:                                         # the asked utterance's own parts, on their own budget
+            got = self._by_exchange(u, memo, [PARTS_BUDGET // 4], depth)
+            if got[0] is not None:
+                memo[u] = got
         return memo[u]
+
+    def _by_exchange(self, u: Tuple[str, ...], memo: dict, budget: list, depth: int
+                     ) -> Tuple[Optional[List[str]], float, int]:
+        """A part that cannot be taken out (what remains would not be an utterance) is exchanged for the part lived
+        most often between the same neighbours; the rest is answered, and what such an exchange changes in lived
+        answers, wherever a part of the asked part's shape was lived where a part of the other's shape was lived
+        too, is put back, as for a part taken out."""
+        slots = getattr(self, "_slots", None) or {}
+        shapes = getattr(self, "_shapes", None) or {}
+        n = len(u)
+        tries = []
+        for m in range(1, 5):
+            for p in range(0, n - m):
+                fr = self._frame(u, p, m)
+                alts = [a for a in slots.get((fr[1], fr[3]), ()) if (a[1], a[2]) != (m, fr[2])][:2]
+                if alts and (m, fr[2]) in shapes:
+                    tries.append((-alts[0][0], -(p + m), p, m, fr, alts))
+        tries.sort(key=lambda x: x[:4])
+        for _, _, p, m, fr, alts in tries:
+            for count, m2, shape2, code in alts:
+                budget[0] -= 1
+                if budget[0] < 0:
+                    return None, 0.0, 0
+                i0, q0 = divmod(code, 1024)
+                y = self.said[i0][q0:q0 + m2] if self.said[i0] is not None else None
+                if not y:
+                    continue
+                rest_plan, rest_e, _ = self._by_parts(u[:p] + y + u[p + m:], memo, budget, depth + 1)
+                if rest_plan is None:
+                    continue
+                places = []                                    # where both kinds of part were lived; like ones first
+                for fr2 in shapes[(m, fr[2])]:
+                    if any((a[1], a[2]) == (m2, shape2) for a in slots.get((fr2[1], fr2[3]), ())):
+                        places.append(((fr2[1] != fr[1]) + (fr2[3] != fr[3]), -len(self._frames[fr2]), fr2))
+                places.sort(key=lambda x: x[:2])
+                codes: List[int] = []
+                for _, _, fr2 in places:
+                    codes.extend(self._frames[fr2][:4 * self.k])
+                    if len(codes) >= 16 * self.k:
+                        break
+                def near(c: int) -> int:
+                    i, p2 = divmod(c, 1024)
+                    o = self.said[i]
+                    if o is None:
+                        return 0
+                    return -sum(1 for r in range(-3, m + 3)
+                                if 0 <= p + r < n and 0 <= p2 + r < len(o) and u[p + r] == o[p2 + r])
+                votes: Counter = Counter()
+                filled = 0
+                for c in sorted(codes, key=near)[:4 * self.k]:
+                    i, p2 = divmod(c, 1024)
+                    o = self.said[i]
+                    if o is None:
+                        continue
+                    rest2 = o[:p2] + y + o[p2 + m:]
+                    if rest2 in self.where:
+                        a2_rest = list(self.answers[self.where[rest2]])
+                    else:
+                        a2_rest, e2, _ = self._plain(rest2)
+                        if a2_rest is None or e2 < SPEAKING_LINE:
+                            continue
+                    got = self._transplant(o, p2, m, a2_rest, list(self.answers[i]), u, p, rest_plan, instead=y)
+                    if got is None:
+                        continue
+                    votes[tuple(got)] += 1
+                    filled += 1
+                    if filled >= self.k:
+                        break
+                if votes:
+                    best, agree = votes.most_common(1)[0]
+                    e = rest_e * self._agreement(agree, filled)
+                    if e >= SPEAKING_LINE:
+                        return list(best), e, agree
+        return None, 0.0, 0
 
     @staticmethod
     def _agreement(agree: int, filled: int) -> float:
@@ -403,23 +499,26 @@ class Episodes:
         return agree / filled
 
     @staticmethod
-    def _shift(a: Sequence[str], p: int, m: int, n: int) -> List[str]:
-        """The places of an answer to an utterance of n tokens without a part of m tokens at p, read as places of
-        the utterance with the part: those at p or after move on by m."""
+    def _shift(a: Sequence[str], p: int, m: int, n: int, y: int = 0) -> List[str]:
+        """The places of an answer to an utterance of n tokens in which a part of m tokens at p was exchanged for
+        one of y tokens (y = 0: taken out), read as places of the utterance with its own part: those after the
+        exchanged part move on by m - y, and the exchanged part's own places are marked as its."""
         out = []
         for t in a:
             if t.isdigit() and p <= int(t) < n:
-                out.append(str(int(t) + m))
+                k = int(t)
+                out.append(PART % (k - p) if k < p + y else str(k - y + m))
             else:
                 out.append(t)
         return out
 
     def _transplant(self, o: Tuple[str, ...], p2: int, m: int, a2_rest: List[str], a2: List[str],
-                    u: Tuple[str, ...], p: int, rest_plan: List[str]) -> Optional[List[str]]:
-        """What taking the part out of the example (o, its part at p2) changed in its answer, put into the answer
-        of the asked utterance's rest (u, its part at p). None where the change cannot be put."""
-        a2s = self._shift(a2_rest, p2, m, len(o) - m)
-        a_s = self._shift(rest_plan, p, m, len(u) - m)
+                    u: Tuple[str, ...], p: int, rest_plan: List[str], instead: Sequence[str] = ()) -> Optional[List[str]]:
+        """What taking the part out of the example (o, its part at p2), or exchanging it for ``instead``, changed in its
+        answer, put into the answer of the asked utterance's rest (u, its part at p, likewise taken out or
+        exchanged). None where the change cannot be put, or where it leaves anything of ``instead`` in the answer."""
+        a2s = self._shift(a2_rest, p2, m, len(o) - m + len(instead), len(instead))
+        a_s = self._shift(rest_plan, p, m, len(u) - m + len(instead), len(instead))
         def cls(k: int, pp: int) -> str:
             if pp <= k < pp + m:
                 return "S%d" % (k - pp)
@@ -531,6 +630,8 @@ class Episodes:
         out = list(a_s)
         for _, (where, k, new) in sorted(enumerate(edits), key=lambda x: (-x[1][0], -x[0])):
             out[where:where + k] = new                         # from the end, so that each place still holds
+        if instead and any(t.startswith("\u27e8") for t in out):
+            return None                                        # the part put in for the asked one is still named
         return out
 
     def _plan(self, said: Sequence[str]) -> Tuple[Optional[List[str]], int, int, int]:

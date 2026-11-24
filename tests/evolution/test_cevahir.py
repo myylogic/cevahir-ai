@@ -342,6 +342,45 @@ def test_parts_answer_nesting_deeper_than_any_lived(FastCortex):
     assert right >= 13
 
 
+def test_a_part_that_cannot_be_taken_out_is_exchanged_for_one_lived_in_its_place(FastCortex):
+    from living.analogy import Episodes
+    from living.evidence import SPEAKING_LINE
+    names, things = ["Ali", "Can", "Ece", "Deniz", "Selin", "Mert"], ["cup", "box", "pen", "hat", "jar", "map"]
+    def saw(rng):                                                        # "Ali saw Can ." or "Ali saw the cup ."
+        a = rng.choice(names)
+        if rng.random() < 0.5:
+            n = rng.choice(names)
+            return [a, "saw", n, "."], ["see", ".", "agent", "(", "x", "_", "1", ",", a, ")", "AND", "see", ".",
+                                          "theme", "(", "x", "_", "1", ",", n, ")"]
+        t = rng.choice(things)
+        return [a, "saw", "the", t, "."], ["*", t, "(", "x", "_", "3", ")", ";", "see", ".", "agent", "(", "x",
+                                              "_", "1", ",", a, ")", "AND", "see", ".", "theme", "(", "x", "_",
+                                              "1", ",", "x", "_", "3", ")"]
+    def gave(rng, name):                                                 # a name is never given in what is lived
+        a, r = rng.choice(names), rng.choice(names)
+        head = ["give", ".", "agent", "(", "x", "_", "1", ",", a, ")", "AND", "give", ".", "theme", "(", "x", "_",
+                "1", ","]
+        tail = [")", "AND", "give", ".", "recipient", "(", "x", "_", "1", ",", r, ")"]
+        if name:
+            n = rng.choice(names)
+            return [a, "gave", n, "to", r, "."], head + [n] + tail
+        t = rng.choice(things)
+        return [a, "gave", "the", t, "to", r, "."], ["*", t, "(", "x", "_", "3", ")", ";"] + head + \
+            ["x", "_", "3"] + tail
+    rng = random.Random(0)
+    ep = Episodes()
+    for _ in range(300):
+        ep.live(*(saw(rng) if rng.random() < 0.5 else gave(rng, False)))
+    right = 0
+    for _ in range(10):
+        said, answer = gave(rng, True)
+        assert ep.plan(said, parts=False)[0] is None or ep.plan(said, parts=False)[1] < SPEAKING_LINE
+        plan, e, n = ep.plan(said)
+        assert plan is None or e < SPEAKING_LINE or plan == answer          # silent, never wrong
+        right += plan == answer and e >= SPEAKING_LINE
+    assert right >= 8                                                    # "the cup" for the name, and back
+
+
 def test_where_one_place_frames_cannot_answer_the_record_lets_the_analogy_lead(FastCortex):
     from living.cevahir import Cevahir
     people = ["Ali", "Veli", "Ayşe", "Can", "Ece", "Zeynep", "Deniz", "Selin"]

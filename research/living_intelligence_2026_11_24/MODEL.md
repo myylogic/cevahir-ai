@@ -657,6 +657,16 @@ are mended by the same store of episodes.
   eight); the plan's belief is the rest's belief times the share of the examples that agree. The most whole-like parts
   are tried first, then the rightmost; a search tries at most 400 parts and takes out at most 16 one after another.
 
+- **Exchanging a part.** Some parts cannot be taken out: what remains would not be an utterance ("Emma offered Lina to
+  a girl" without "Lina"). Such a part is exchanged for the part lived most often between the same neighbours ("the
+  cake"); the rest ("Emma offered the cake to a girl") is answered, and what that exchange changes in lived answers is
+  put back. The change is read wherever a part of the asked part's shape was lived where a part of the other's shape
+  was lived too ("Emma saw Liam" and "Emma saw the cake"), the like places first: there the answer loses the run of
+  the noun phrase and names the name where it named the phrase's place. The places of the part put in are marked
+  while it stands, and a change that leaves any of them named is not put. Taking a part out is an exchange for
+  nothing; exchanges are tried for the asked utterance's own parts only, after the parts that can be taken out, on a
+  quarter of the search's bound.
+
 Nothing of COGS is named here: no word, mark or form of its answers. What the mechanism assumes is general: an answer
 may name the places of what was said by their numbers, and runs of the same shape in an answer keep the order in which
 what they name was said. Where an answer does neither, the change of a part cannot be put (the example gives nothing)
