@@ -550,3 +550,350 @@ full updates, and the current code reproduces them (en-pydoc, D = 8: 1.5907).
 
 Dawid, A. P. (1984). Present position and potential developments: some personal views. Statistical theory: the
 prequential approach. *Journal of the Royal Statistical Society A*, 147(2), 278–292.
+
+## 8. M3: Cevahir, one layer
+
+The owner asked, on 24 November 2026, for everything built so far to meet in one layer and for Cevahir to emerge
+from it (MODEL.md, section 12). This section measures what was built that day.
+
+### 8.1 What was built
+
+- **The voice** (`living/_core.c`): one more origin of the harmony, through which a word-level mind gives its
+  candidates for the next token. Off or silent, the core is bit-identical to M2.
+- **Cevahir** (`living/cevahir.py`):
+  - Zihin, with every mechanism of `zihin/`, lives each word as a moment; the cortex lives each letter. Before
+    every token, Zihin's expectations are the voice.
+  - Answering: Zihin answers first (the plan); the prefrontal decision says the answer token by token, trusting
+    Zihin or the harmony where they differ by the record of who was right when they differed while Cevahir lived.
+  - The hippocampus keeps every dialogue as it was said and answers by analogy over several places at once, with
+    words of a kind, and an utterance longer than any lived by its parts (`living/analogy.py`); the prefrontal
+    choice of the thought takes Zihin's plan or the analogy's, by the record of their disagreements.
+  - The amygdala's first form: the outcomes of judged answers move the records the decision trusts by; a wrong
+    answer is not lived as said rightly.
+  - Sleep: the cortex forgets the contexts that did not recur; Zihin dreams.
+  - Channels born by the rule (M1), watched and then spoken.
+  - Keeping and loading the whole mind (compressed), exact forgetting of an entry, a study session (etüt), and
+    `python -m living`.
+
+### 8.2 The voice
+
+On a stream of 20,000 random words drawn from 300 (`depth 8`, the M2 configuration), no context predicts the next
+word, and the harmony pays 1.363 bits per character. With a voice that knows each next word it pays 0.009; with a
+voice that names a random word, 1.355: the gate follows a voice that knows and ignores one that does not
+(tests/evolution/test_cevahir.py checks both, and that a silent voice leaves the harmony bit-identical).
+
+### 8.3 A small world, and why a record
+
+Four primitives ("walk", "run", "look", "zap") and five templates ("X twice", "X thrice", "X left", "X right",
+"X and Y"); "zap" is lived only alone ("zap" → "ZAP"), the others in every template; 50 dialogues watched twice. Six
+questions use "zap" in a template.
+
+| | exact (of 6) |
+|---|---|
+| Zihin alone | 6 |
+| the harmony alone | 0 (silent in every one: below the speaking line) |
+| the first Cevahir, the gate alone deciding | 0 |
+| Cevahir, with the record of disagreements | 6 ("ZAP ZAP", written as the answers were) |
+
+The first form failed for a reason worth keeping. Having lived "zap" answered "ZAP .", the cortex is sure that " ."
+follows "ZAP", also after "zap twice"; over a life in which Zihin and the cortex are mostly both right, the gate cannot
+learn who generalises. The record learns it where it shows: in the dialogues where they differed and one was right
+(here Zihin, 15 of 15 on the first token of an answer and 10 of 10 on later ones).
+
+### 8.4 The published SCAN files
+
+`m3_scan.py` (`results/m3_scan.jsonl`): the life of the earlier study's `t_scan_official.py` (every training command
+without a connective and 1,000 sampled with one, watched twice), lived by Cevahir; 200 commands of each published test
+file, each answered by a process that is the mind as it stands. These rows were written by the code of commit d0b5a98
+(before the hippocampus's analogy existed).
+
+| split | Zihin alone | the harmony alone | Cevahir | Cevahir right where Zihin was not / wrong where Zihin was right |
+|---|---|---|---|---|
+| add jump | 200 | 0 (200 silent) | 200 | 0 / 0 |
+| around right | 199 | 0 (200 silent) | 199 | 0 / 0 |
+| length (24–48 actions) | 200 | 0 (200 silent) | 200 | 0 / 0 |
+| jump around right | 200 | 0 (200 silent) | 200 | 0 / 0 |
+| opposite right | 200 | 0 (200 silent) | 200 | 0 / 0 |
+| right | 200 | 0 (200 silent) | 200 | 0 / 0 |
+| **all six** | **1,199 of 1,200** | **0 (1,200 silent)** | **1,199** | **0 / 0** |
+
+The harmony alone, a parrot, is silent on every test command: it knows that it does not know. Cevahir answers what
+Zihin answers, written by the harmony. The records it kept while living say why: on the first token of an answer
+Zihin was right in every disagreement with the harmony where one of them was, on all six splits (347 of 347 on add
+jump, 383 of 383 on around right, 382 of 382 on length, 410, 376 and 373 on the others), and on later tokens in 79–96 %
+of them. The earlier study's Transformers, trained from scratch on generated SCAN dialogues, answered 0 of 844 add-jump
+commands within the window and 1 of 7,706 at every length (PAPER.md 6); a Transformer trained on exactly these lives
+is part of the battery (m3_scan_transformer.py, 8.13).
+
+### 8.5 Worlds a parrot cannot answer
+
+**Deduction and chains** (`m3_worlds.py`, `results/m3_worlds.jsonl`, code f4f0de1). The worlds of the earlier study,
+unchanged. In `deduce`, a property is stated of a class only, membership of each member only, the facts read as
+documents in a shuffled order and never two facts of one chain together; three members of each class are asked what
+they do while Cevahir lives (watched), the other three never, and one member is an exception. Asked "kartal ne
+yapar ?", the answer follows only by putting together two facts read apart. `chain` adds a step (a member, its
+class, the class's kind, the kind's property), a class with a nearer property of its own, and the exception. The
+Transformer (m3_transformer.py) is trained from scratch, for five minutes, on exactly the characters Cevahir's
+harmony lived (3,749–4,274 of them; 280–313 steps), and asked the same questions on a new line.
+
+| three seeds each | Zihin alone | the harmony alone | Cevahir | Transformer, same stream |
+|---|---|---|---|---|
+| deduce: two facts read apart | 45 / 45 | 0 (45 silent) | 45 / 45 | 0 (45 wrong) |
+| deduce: the exception | 3 / 3 | 0 (3 silent) | 3 / 3 | 0 (3 wrong) |
+| chain: one step | 9 / 9 | 0 (9 silent) | 9 / 9 | 0 (9 wrong) |
+| chain: two steps | 27 / 27 | 0 (27 silent) | 27 / 27 | 0 (27 wrong) |
+| chain: the exception | 3 / 3 | 0 (3 silent) | 3 / 3 | 0 (3 wrong) |
+
+The Transformer answers every question with a fragment of the stream ("kar ? kar"); the harmony, which has lived the
+same stream, says nothing (it is under the speaking line); Zihin puts the facts together, and Cevahir says what
+Zihin decided. A larger Transformer trained for longer on more such worlds may do better; what these rows show is
+that the same characters, lived once, are enough for Cevahir and are not for a Transformer trained on them for five
+minutes.
+
+**The grounded world** (`m3_ground.py`, `results/m3_ground.jsonl`). The world of the earlier study's ground (t_m2.py,
+unchanged): what is seen while a line is said is perceived by Zihin's ground, and the questions name what is in view
+(T1, asked twice), what a thing is (T2), its colour (T3), its name (T4) and the situation (T6). In Turkish, three seeds
+(code 72ee8ca), Cevahir answers exactly as Zihin's ground does, on every test and seed; the harmony alone answers
+none:
+
+| Turkish, three seeds | Zihin | the harmony alone | Cevahir |
+|---|---|---|---|
+| T1, new and seen, as heard and as it goes on (4 × 158) | 151, 151, 158, 158 | 0 | 151, 151, 158, 158 |
+| T2 what it is | 0 / 15 | 0 | 0 / 15 |
+| T3 colour | 31 / 45 | 0 | 31 / 45 |
+| T4 name | 16 / 23 | 0 | 16 / 23 |
+| T6 situation | 48 / 72 | 0 | 48 / 72 |
+
+The same world in English, and both languages with the final code, are running again; their rows follow.
+
+**The school** (`m3_school.py`, `results/m3_school.jsonl`, code 79a2e77). The teacher's seven subjects of the earlier
+study (biology, physics, chemistry, mathematics, coding, music, drawing), every lesson three times in shuffled order,
+told and watched; the examination asks only what was never asked, of three kinds (deduction, composition, relation),
+a control that nothing lived can answer (a sum never added), and again what the lessons asked (recall). The
+Transformer is the earlier study's own: a decoder trained from scratch on the same lessons (word units, 8,000 steps);
+it answers every question the lessons asked it (144 of 144).
+
+| three seeds, 405 questions | Zihin alone | the harmony alone | Cevahir | Transformer, same lessons |
+|---|---|---|---|---|
+| recall (asked in the lessons) | 129 / 129 | 0 | 129 / 129 | 129 / 129 |
+| deduction (two things taught apart) | 63 / 63 | 0 | 63 / 63 | 0 / 63 |
+| composition (a new combination) | 117 / 123 | 0 | 117 / 123 | 62 / 123 |
+| relation (what follows, plus one, three notes up) | 33 / 66 | 0 | 33 / 66 | 11 / 66 |
+| control (a sum never added; nothing lived answers it) | 0 / 24 | 0 | 0 / 24 | 1 / 24 |
+| **all** | **342 / 405** | **0** | **342 / 405** | **203 / 405** |
+
+The Transformer learns the lessons whole and says them back: its recall is as good as Cevahir's. Where an answer
+has to be put together from two things taught apart (deduction) it answers none, and it answers half as many new
+combinations and a third as many relations. Cevahir answers what Zihin answers in every seed; the harmony alone says
+nothing to any question (it stays under the speaking line). Neither mind answers the control, as neither should; the
+Transformer's one is a guess that happened to be right.
+
+### 8.6 Text: does Zihin's voice help the harmony?
+
+`m3_read.py` (`results/m3_read.jsonl`): the corpus stream of 6.3, read by Cevahir as Zihin reads a document (the
+harmony lives every character; Zihin lives each sentence, and before each of its words its expectations are the
+voice), and by the harmony alone (M2's configuration). Both learn as they read; bits per character over the whole
+stream and its last tenth.
+
+| corpus | the harmony alone | Cevahir (the harmony with Zihin's voice) | time, harmony → Cevahir |
+|---|---|---|---|
+| tr-lessons | 1.7534 / 1.4654 | 1.7392 / 1.4485 | 0.5 s → 11 s |
+| en-repo | 1.6780 / 1.3826 | 1.6762 / 1.3787 | 21 s → 439 s |
+| en-pydoc | 1.2448 / 1.2057 | 1.2431 / 1.2038 | 10 s → 250 s |
+
+Zihin's voice helps a little, on all three texts: 0.8–1.2 % fewer bits on the lessons, 0.1–0.3 % on the two English
+texts, at Zihin's pace (twenty to twenty-five times slower). The gate trusts the voice where its record earns it:
+Zihin knows what follows a word it has lived in a frame; on running text, most of what it could say the cortex's
+contexts already say. Its part is in what text does not hold: answers to questions never lived (8.4, 8.5, 8.7).
+
+### 8.7 The hippocampus's analogy, answering by parts, and COGS
+
+COGS (Kim and Linzen 2020) asks for a sentence's logical form and tests 21 kinds of generalisation the training file
+leaves out. Zihin answered none of 100 in-distribution test sentences in the earlier study, with 1,155 training lines
+lived; most of what it was asked was two or more words away from everything it had lived. With the whole training
+file (24,155 lines), 53 % of a sample of 300 in-distribution test sentences are one word away from a lived sentence
+of the same length and 89 % at most three; of 300 generalisation sentences, 75 % at most three.
+
+The hippocampus (MODEL.md 12.5 and 12.6) was measured on its own, outside Cevahir, with the whole training file as
+its episodes and the same seeded samples throughout (`random.Random(0)`: 300 of test.tsv, then 300 of gen.tsv). Each
+row is one change to the mechanism, in the order they were made; exact / silent / wrong, where an answer is said only
+if its belief reaches the speaking line.
+
+| | in distribution | generalisation |
+|---|---|---|
+| first form (three places, the most co-occurring token) | 222 / 38 / 40 | 29 / 86 / 185 |
+| on equal evidence the word itself, then its stem; only places that can be filled | 261 / 38 / 1 | 192 / 86 / 22 |
+| five places, believed by its own record, under the speaking line | 280 / 19 / 1 | 203 / 77 / 20 |
+| every place filled at once (two roles may swap) | 283 / 16 / 1 | 205 / 73 / 22 |
+| words of a kind, by half their answer contexts (kinds read at 16,384 dialogues) | 279 / 18 / 3 | 154 / 127 / 19 |
+| words of a kind, by one answer context shared | 285 / 13 / 2 | 209 / 82 / 9 |
+| and answering by parts | 294 / 0 / 6 | 246 / 35 / 19 |
+| **and what an example put first goes first; words near the part aligned by their place** | **296 / 0 / 4** | **252 / 32 / 16** |
+
+(The third row was first written as 279 / 19 / 2 from an intermediate version; measured again with the code that
+followed it, 280 / 19 / 1. A further change, putting a new run among all the runs of its kind by its place, gave
+292 / 0 / 8 and 227 / 34 / 39 and was not kept.)
+
+- **Words of a kind, too strict at first.** Asking that two relations share half their answer contexts blocked what
+  COGS tests: a noun met only as a subject is asked as an object, and its relation's contexts are all of a subject's.
+  The generalisation set fell from 205 to 154. A kind is now one shared context: "recipient" (after a verb's name)
+  and "on" (after "nmod") share none, two nouns share at least one.
+
+By kind, on the generalisation sample (the same 300; right of those asked):
+
+| kind (asked) | analogy over places (all at once) | with words of a kind | and by parts (last row above) |
+|---|---|---|---|
+| active to passive (27) | 27 | 27 | 27 |
+| cp recursion (9) | 0 | 0 | 4 |
+| do dative to pp dative (8) | 7 | 7 | 7 |
+| obj omitted transitive to transitive (10) | 9 | 9 | 10 |
+| obj pp to subj pp (11) | 0 | 0 | 0 |
+| obj to subj common (11) | 9 | 9 | 10 |
+| obj to subj proper (9) | 9 | 9 | 9 |
+| only seen as transitive subj as unacc subj (18) | 8 | 8 | 11 |
+| only seen as unacc subj as obj omitted transitive subj (20) | 7 | 8 | 18 |
+| only seen as unacc subj as unerg subj (8) | 5 | 6 | 7 |
+| passive to active (15) | 15 | 15 | 15 |
+| pp dative to do dative (11) | 10 | 10 | 11 |
+| pp recursion (18) | 0 | 0 | 16 |
+| prim to inf arg (13) | 13 | 13 | 13 |
+| prim to obj common (11) | 10 | 9 | 11 |
+| prim to obj proper (20) | 10 | 11 | 11 |
+| prim to subj common (13) | 11 | 12 | 13 |
+| prim to subj proper (19) | 17 | 17 | 19 |
+| subj to obj common (13) | 12 | 12 | 13 |
+| subj to obj proper (16) | 7 | 7 | 7 |
+| unacc to transitive (20) | 19 | 20 | 20 |
+
+- **Where it stands.** On these samples the hippocampus alone answers 296 of 300 in distribution (98.7 %) and 252 of
+  300 of the generalisation set (84 %), silent on 32 and wrong on 16. Kim and Linzen (2020) report 96–99 % in
+  distribution and at most 35 % on the generalisation set for the Transformers and LSTMs they trained on the same
+  file ([arXiv:2010.05465](https://arxiv.org/abs/2010.05465)); with careful choices of embedding scale, early stopping
+  and positional encoding, Transformers reach about 81 % (Csordás, Irie and Schmidhuber 2021,
+  [arXiv:2108.12284](https://arxiv.org/abs/2108.12284)). These are samples of 300 of the 3,000 test and 21,000
+  generalisation sentences, not the whole files: a sample of 300 leaves two or three points of chance either way.
+- **Recursion deeper than lived.** PP and CP recursion ask for depths 3 to 12 where training reaches 2. Answered by
+  parts, a phrase taken out at a time and its effect put back, the hippocampus answers 16 of 18 and 4 of 9. The
+  Transformer of Kim and Linzen answers 0 % of both (as tabulated by Wu et al. 2023,
+  [arXiv:2303.13716](https://arxiv.org/abs/2303.13716)).
+- **What it does not do.** A phrase on a subject, when phrases were lived only on objects: 0 of 11, silent (no lived
+  frame holds a phrase right after a sentence's first noun). A name where the lived utterances had a noun phrase
+  (subj to obj proper, prim to obj proper): 7 of 16 and 11 of 20; a phrase exchanged for a name is not one of its
+  parts. And it is not silent everywhere it should be: 4 answers in distribution and 16 on the generalisation set are
+  wrong, most of them a run of the answer put in the wrong place.
+- **Alone on SCAN** the analogy (before words of a kind and parts) answered 27, 0, 0, 24, 0 and 0 of the 200 test
+  commands of the six splits (a word there changes how often an action is repeated, which one substitution cannot
+  carry), where Zihin answers 199–200. This is why Cevahir chooses between the two thoughts by the record of their
+  disagreements (MODEL.md 12.5).
+
+**Cevahir on COGS** (`m3_cogs.py`, `results/m3_cogs.jsonl`): the whole mind lives the training file (Zihin each
+word, the harmony each character, the hippocampus each dialogue) and answers the same samples in four ways (Zihin,
+the harmony alone, the analogy alone, Cevahir). The run is in progress; its row follows.
+
+### 8.8 Sleep
+
+`m3_sleep.py` (`results/m3_sleep.jsonl`): the harmony (M2's configuration) lives each corpus in order, and with
+sleep it forgets, after every 100,000 characters of the first nine tenths, the contexts met fewer than two times
+(after every quarter of the first nine tenths on tr-lessons). The last tenth is lived awake.
+
+| corpus | nodes at the end, awake → sleeping | entries | bits per character, all (awake → sleeping) | last tenth |
+|---|---|---|---|---|
+| tr-lessons | 131,808 → 65,286 (2.0×) | 158,458 → 90,012 | 1.7534 → 1.7642 | 1.4655 → 1.4893 |
+| en-pydoc | 1,056,429 → 369,805 (2.9×) | 1,334,220 → 619,455 | 1.2448 → 1.2492 | 1.2055 → 1.2096 |
+| en-repo | 2,268,053 → 602,775 (3.8×) | 2,861,315 → 1,088,372 | 1.6780 → 1.6870 | 1.3826 → 1.4015 |
+| tr-private | 4,268,276 → 1,138,546 (3.7×) | 5,174,651 → 1,873,218 | 1.3614 → 1.3725 | 1.6204 → 1.6277 |
+| code-pystdlib | 11,916,461 → 4,078,689 (2.9×) | 15,207,775 → 6,789,139 | 1.0440 → 1.0502 | 1.1154 → 1.1228 |
+
+A night forgets two thirds of the contexts or more and costs 0.4–1.1 % more bits; the store then grows with what
+recurs. It also lives faster (on the code, 196 s instead of 302 s), having fewer contexts to keep.
+
+### 8.9 Keeping, forgetting, channels, outcomes
+
+Each of these is a test in tests/evolution/test_cevahir.py and test_living_fast.py; none is a benchmark.
+
+- **Keeping.** A Cevahir kept and loaded lives the rest of a life with the same bits, dialogue by dialogue, and gives
+  the same answers; a tampered file is refused. Compressed, a small mind's core (about 100 MB of mostly empty tables)
+  is 0.36 MB.
+- **Forgetting.** After two secret dialogues are forgotten, the substance of the core (every context with its count,
+  every word and line context) is that of a Cevahir that never heard them, Zihin's evidence is taken back by its
+  ledger, the hippocampus drops the dialogues, and no way of answering says the secret.
+- **Channels.** A made-up language in an unused script opens a channel, noise another; the language passes the
+  structure line and is spoken, noise never; Turkish stays on its channel.
+- **Outcomes (the amygdala).** A judged answer moves the records the prefrontal decision trusts by, and a wrong answer
+  is not lived as said rightly. Measured in 8.10.
+
+### 8.10 Does an outcome change what Cevahir says?
+
+`m3_amygdala.py` (`results/m3_amygdala.jsonl`). Birds are watched in dialogues ("serçe ne yapar ?" → "serçe uçar ."),
+and three other classes are only read about ("hamsi bir balıktır .", "balıklar yüzer ."). Asked of a fish, the
+hippocampus's analogy answers like a bird ("hamsi uçar"), and Zihin, which has not lived a dialogue about any fish,
+gives only the name; so before any study Cevahir answers none of them. Half of the other classes' members are then
+studied in conversation, in four conditions; the other half (nine per seed) is asked before and after, on copies.
+
+| condition | held-out members right, before → after (3 seeds, 27 asked) |
+|---|---|
+| judged: each answer judged; a wrong one forgotten, the right one shown | 0 → 27 |
+| judged and shown, the wrong attempt kept | 0 → 27 |
+| shown only: nothing judged, the right answer shown after every attempt | 0 → 0 |
+| nothing judged, nothing shown | 0 → 0 |
+
+- **The judgement is what changes it.** Shown the right answer after its own wrong one, with nothing judged, Cevahir
+  learns nothing it uses: its own act, lived as it was, outweighs the answer shown after it (the earlier study's etüt
+  found the same of Zihin). Judged, it answers every held-out member, in all three seeds.
+- **Through what.** In both judged conditions Zihin's own answer becomes whole and right ("hamsi yüzer") and is
+  the thought; the analogy, which foresaw every shown dialogue of the other classes wrong, falls below the speaking
+  line by its own record. Shown only, the analogy falls below the line just the same, but Zihin still gives only the
+  name ("hamsi"): its own act, the name and then silence, stands as the surest evidence it has. The judgement acts
+  through Zihin's value at the end of the episode (its consequences, L5) and through the harmony not living the wrong
+  answer; forgetting the attempt was not needed for it. The record that chooses between the two thoughts moved little
+  (one of two).
+
+### 8.11 What M3 does not show
+
+- **Two substances.** Zihin's units and ties, the cortex's contexts and the hippocampus's episodes are three stores
+  that meet in the harmony, the forms lexicon and the prefrontal decisions; they are not one table. The road to one
+  substance is to move Zihin's readings into the core one at a time, each measured against this bridge.
+- **Speed.** Cevahir lives at Zihin's pace: a moment of Zihin costs about 2 ms in Python, a symbol of the cortex a few
+  microseconds. Profiled over 200 SCAN dialogues, 88 % of the time is Zihin's moments, and half of all the time is F43
+  living each dialogue a second time as wholes; the cortex, the voice and the records take the rest. A SCAN life takes
+  200–230 s, an answer 1–7 s of one core; answering by parts adds up to a few seconds where it is needed. The
+  Transformer answers in hundredths of a second.
+- **Text.** On running text Zihin's voice takes 0.1–1.2 % of the harmony's bits (8.6): what Cevahir knows of a text,
+  the harmony mostly knows already. Its gains are in answers that text does not hold.
+- **What the hippocampus cannot answer** (8.7): a phrase on a subject when phrases were lived only on objects (silent),
+  a name put where noun phrases were lived, and parts longer than four tokens. Answering by parts has no record of its
+  own: while Cevahir lives, the analogy foresees by places only, and a plan by parts is believed by its examples'
+  agreement and the rest's belief. On COGS that leaves 16 wrong answers in 300 on the generalisation set.
+- **Scale.** Every measurement here is at most ten million characters on one machine with four cores; no standard
+  large benchmark was run (enwik8 could not be downloaded, section 6.6).
+- **Samples.** COGS was measured on samples of 300 of each file, and SCAN on 200 commands of each split, not on the
+  whole files.
+
+### 8.12 Reproduce
+
+From this folder (a C compiler and Python 3.13; the published SCAN and COGS repositories as found, not kept here):
+
+```
+python m3_scan.py --scan SCAN_FOLDER --test 200                # 8.4
+python m3_worlds.py deduce chain --seeds 3 --minutes 5          # 8.5
+python m3_ground.py --lang tr --seeds 0 1 2                     # 8.5
+python m3_ground.py --lang en --seeds 0 1 2
+python m3_school.py --seeds 3                                   # 8.5
+python m3_read.py tr-lessons                                    # 8.6 (and en-repo, en-pydoc)
+python m3_cogs.py --cogs COGS_FOLDER/data --test 300 --gen 300  # 8.7, Cevahir
+python m3_sleep.py                                              # 8.8
+python m3_amygdala.py                                           # 8.10
+python m3_scan_transformer.py --scan SCAN_FOLDER --minutes 15   # 8.13
+python ../../minds/raise_cevahir.py OUT_FOLDER                  # the open Cevahir (m3_etut.py)
+python -m pytest ../../tests/evolution/test_cevahir.py ../../tests/evolution/test_living_fast.py
+```
+
+The hippocampus alone on COGS (the rows of the table in 8.7) is the module itself: live every line of train.tsv with
+`living.analogy.Episodes.live`, call `ready()`, and ask `plan(tokens(sentence))` of the same samples; a plan is said
+when its belief reaches the speaking line.
+
+### 8.13 SCAN: a Transformer trained on the same lives, and the final code
+
+A Transformer trained from scratch on exactly the dialogues Cevahir lived for each SCAN split (`m3_scan_transformer.py`,
+15 minutes of three cores per split) and the six splits again with the final code (`m3_scan.py --test 50`) are
+running; their rows follow.
