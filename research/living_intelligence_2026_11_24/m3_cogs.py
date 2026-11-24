@@ -43,6 +43,8 @@ def code_version() -> str:
         return ""
 
 
+CODE = code_version()                                   # the code that runs, read when it starts
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cogs", required=True)
@@ -69,7 +71,7 @@ def main() -> None:
     asked = test + gen
     t1 = time.time()
     said = c.answers([s for s, _, _ in asked], way="every", limit=120, workers=a.workers)
-    row = {"test": "m3_cogs", "code": code_version(), "train_lines": len(train), "zihin_moments": c.mind.t, "episodes": len(c.episodes),
+    row = {"test": "m3_cogs", "code": CODE, "train_lines": len(train), "zihin_moments": c.mind.t, "episodes": len(c.episodes),
            "life_s": round(lived_s, 1), "answers_s": round(time.time() - t1, 1), "workers": a.workers,
            "thought": dict(Counter(s.get("thought", "?") for s in said))}
     for part, rows, got in (("test", test, said[:len(test)]), ("gen", gen, said[len(test):])):

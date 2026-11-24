@@ -36,6 +36,8 @@ def code_version() -> str:
         return ""
 
 
+CODE = code_version()                                   # the code that runs, read when it starts
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--scan", required=True)
@@ -61,7 +63,7 @@ def main() -> None:
                 w = w[:-1]
             exact += w == words(" ".join(ans))
             silent += not w
-        row = {"test": "m3_scan", "code": code_version(), "split": split, "seed": args.seed, "who": "transformer",
+        row = {"test": "m3_scan", "code": CODE, "split": split, "seed": args.seed, "who": "transformer",
                "train_watched": len(lived), "asked": len(test),
                "transformer": {"exact": exact, "silent": silent, "wrong": len(test) - exact - silent},
                "transformer_run": {k: got[k] for k in ("params", "steps", "train_s", "answer_s", "final_loss", "chars")}}

@@ -72,7 +72,7 @@ def run(seed: int, lang: str, workers: int) -> dict:
         ex = examples.setdefault(label, [])
         if len(ex) < 3:
             ex.append({"want": " ".join(want), **got})
-    return {"test": "m3_ground", "code": code_version(), "seed": seed, "lang": lang, "world": digest, "lines": len(train),
+    return {"test": "m3_ground", "code": CODE, "seed": seed, "lang": lang, "world": digest, "lines": len(train),
             "zihin_moments": c.mind.t, "learn_cpu_s": round(lived, 1), "answer_wall_s": round(time.time() - t1, 1),
             "workers": workers, "scores": scores, "examples": examples,
             "disagreements": {str(k): [c.dis_won[k], c.dis_all[k]] for k in sorted(c.dis_all)},
@@ -87,6 +87,8 @@ def code_version() -> str:
     except OSError:
         return ""
 
+
+CODE = code_version()                                   # the code that runs, read when it starts
 
 def main() -> None:
     ap = argparse.ArgumentParser()

@@ -73,7 +73,7 @@ def run(args, split):
     said = c.answers([" ".join(cmd) for cmd, _ in test], way="every", limit=400, workers=args.workers)
     answered_s = time.time() - t0
     truth = [c.session.words(" ".join(a)) for _, a in test]
-    row = {"test": "m3_scan", "code": code_version(), "split": split, "seed": args.seed, "train_watched": len(lived),
+    row = {"test": "m3_scan", "code": CODE, "split": split, "seed": args.seed, "train_watched": len(lived),
            "train_published": len(train), "asked": len(test), "zihin_moments": c.mind.t,
            "cortex": c.cortex.size(), "life_s": round(lived_s, 1), "answers_s": round(answered_s, 1),
            "workers": args.workers, "voiced_tokens": c.counts["voiced"], "unaligned": c.counts["unaligned"],
@@ -105,6 +105,8 @@ def code_version() -> str:
     except OSError:
         return ""
 
+
+CODE = code_version()                                   # the code that runs, read when it starts
 
 def main() -> None:
     ap = argparse.ArgumentParser()

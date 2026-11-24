@@ -112,6 +112,8 @@ def run(seed: int, judged: str) -> dict:
                                 "analogy": s["analogy"]} for s, (m, _) in zip(after, held)][:4]}
 
 
+CODE = code_version()                                   # the code that runs, read when it starts
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", type=int, default=3)
@@ -120,7 +122,7 @@ def main() -> None:
     for seed in range(a.seeds):
         for judged in ("judged", "judged, kept", "shown", "none"):
             row = run(seed, judged)
-            row["test"], row["code"] = "m3_amygdala", code_version()
+            row["test"], row["code"] = "m3_amygdala", CODE
             print(json.dumps({k: row[k] for k in ("seed", "judged", "held_out", "right_before", "right_after",
                                                   "record_before", "record_after")}), flush=True)
             with open(a.out, "a", encoding="utf-8") as f:

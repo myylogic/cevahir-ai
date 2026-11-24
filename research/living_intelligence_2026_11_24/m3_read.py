@@ -37,6 +37,8 @@ def code_version() -> str:
         return ""
 
 
+CODE = code_version()                                   # the code that runs, read when it starts
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("corpus")
@@ -52,7 +54,7 @@ def main() -> None:
         s = s[:a.chars]
     split = int(len(s) * 0.9)
     cut = s.rfind("\n", 0, split) + 1 or split                   # the last tenth begins at a line
-    row = {"corpus": a.corpus, "code": code_version(), "chars": len(s), "split": cut, "variant": a.variant, "record": a.record}
+    row = {"corpus": a.corpus, "code": CODE, "chars": len(s), "split": cut, "variant": a.variant, "record": a.record}
     m2 = FastCortex(**CORTEX)
     t0 = time.time()
     b1, _ = m2.stream(s[:cut])

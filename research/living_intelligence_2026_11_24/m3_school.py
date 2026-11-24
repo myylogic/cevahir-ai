@@ -55,7 +55,7 @@ def run(seed: int, steps: int, workers: int) -> dict:
         cell["asked"] += 1
         for way in ("zihin", "harmony", "cevahir"):
             cell[way] += got[way] != "(sessiz)" and c.session.body(got[way]) == want
-    row = {"test": "m3_school", "code": code_version(), "seed": seed, "lessons": len(S.course(seed)), "zihin_moments": c.mind.t,
+    row = {"test": "m3_school", "code": CODE, "seed": seed, "lessons": len(S.course(seed)), "zihin_moments": c.mind.t,
            "learn_cpu_s": round(lived, 1), "answer_wall_s": round(answered, 1), "workers": workers}
     if steps > 0:
         tf = S.run_transformer(seed, steps)
@@ -76,6 +76,8 @@ def code_version() -> str:
     except OSError:
         return ""
 
+
+CODE = code_version()                                   # the code that runs, read when it starts
 
 def main() -> None:
     ap = argparse.ArgumentParser()

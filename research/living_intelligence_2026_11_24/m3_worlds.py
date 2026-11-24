@@ -119,7 +119,7 @@ def run(world: str, seed: int, args, switches) -> dict:
     lived_s = time.time() - t0
     said = c.answers([q for q, _, _ in probes], way="every", workers=args.workers)
     stream = "".join(c.stream)
-    row = {"test": "m3_worlds", "code": code_version(), "world": world, "seed": seed, "variant": args.variant, "switches": switches,
+    row = {"test": "m3_worlds", "code": CODE, "world": world, "seed": seed, "variant": args.variant, "switches": switches,
            "life_items": len(life), "stream_chars": len(stream), "life_s": round(lived_s, 1), "asked": len(probes)}
     ways = {}
     for way in ("zihin", "harmony", "cevahir"):
@@ -149,6 +149,8 @@ def code_version() -> str:
     except OSError:
         return ""
 
+
+CODE = code_version()                                   # the code that runs, read when it starts
 
 def main() -> None:
     ap = argparse.ArgumentParser()
