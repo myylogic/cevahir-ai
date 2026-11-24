@@ -338,11 +338,14 @@ harmony of MODEL.md section 5 and adds a fifth, larger corpus.
   symbol for symbol, in both update modes; the tests check equality of the floating-point totals. It is about 12
   times faster: 0.34 s instead of 4.1 s for 504,052 characters.
 - **The harmony** on top of it, as specified in MODEL.md section 5:
-  - the origins: the cortex, every context d = 0 … 8, two word contexts, the episode, and a short-term memory of
-    contexts 1–6 decaying by 1 − 1/F;
+  - the origins: the cortex, every context d = 0 … 8, two word contexts, the episode, the line episode and the line
+    context (the latest line, and the counts of every line, that began as the current line began), and a short-term
+    memory of contexts 1–6 decaying by 1 − 1/F;
   - each origin's belief per bit by the rule with the coarser origin as prior;
   - two gates learned by the gradient of the code length;
-  - the calibration by the rule, and a last gate.
+  - the calibration by the rule, and a last gate;
+  - two ways to speak without learning: saying (each symbol the most probable, while it reaches the speaking line
+    or always), and recalling (locking onto the lived line that began as the cue begins, MODEL.md 6 and 8).
 - **`code-pystdlib`, a fifth corpus.** The source of Python 3.13's standard library as installed: 537 files,
   10,302,143 characters, 252 symbols. It is the largest public text on the machine, ten times en-repo. The standard
   benchmark enwik8 could not be downloaded (section 6.6).
@@ -365,15 +368,18 @@ harmony of MODEL.md section 5 and adds a fifth, larger corpus.
 | C, the harmony (every context and the episode, the gates, the calibration) | 1.807 / 1.518 | 1.311 / 1.281 | 1.749 / 1.458 | 1.457 / 1.774 |
 | D, + the word contexts | 1.777 / 1.494 | 1.289 / 1.265 | 1.729 / 1.442 | 1.438 / 1.756 |
 | E, + a second input per origin, the coarser origin as prior | 1.779 / 1.486 | 1.284 / 1.260 | 1.718 / 1.428 | 1.425 / 1.739 |
-| **F, + the short-term memory (M2)** | **1.756 / 1.467** | **1.248 / 1.209** | **1.679 / 1.383** | **1.364 / 1.622** |
+| F, + the short-term memory | 1.756 / 1.467 | 1.248 / 1.209 | 1.679 / 1.383 | 1.364 / 1.622 |
+| **G, + the line episode and the line context (M2)** | **1.754 / 1.466** | **1.245 / 1.205** | **1.678 / 1.383** | **1.361 / 1.620** |
 
 - **The gate is what pays most.** It gains 0.13–0.18 bits per character over the episode with only the verdict by
   the rule (B to C). This is the measure by which the gate, the one borrowed method, earns its place (MODEL.md 5.3).
 - **The short-term memory** adds 0.02–0.06, most on the texts whose topics change (en-repo, tr-private).
-- **From the cortex alone to M2,** the whole streams fall by 0.19 to 0.34 bits per character.
+- **The line episode and line context** add little to the bits (0.001–0.003), but they are what recall rests on
+  (section 6.8).
+- **From the cortex alone to M2,** the whole streams fall by 0.19 to 0.35 bits per character.
 
 On code-pystdlib, the cortex alone holds 1.431 / 1.482, with the episode 1.287 / 1.365, and the full harmony
-1.059 / 1.135: 0.37 bits per character less than the cortex alone.
+1.044 / 1.115: 0.39 bits per character less than the cortex alone.
 
 ### 6.3 Against compressors and a Transformer
 
@@ -381,8 +387,8 @@ On code-pystdlib, the cortex alone holds 1.431 / 1.482, with the episode 1.287 /
 
 | | en-repo | en-pydoc | tr-lessons | tr-private | code-pystdlib |
 |---|---|---|---|---|---|
-| **harmony (M2), living** | **1.679 / 1.383** | **1.248 / 1.209** | **1.756 / 1.467** | **1.364 / 1.622** | **1.059 / 1.135** |
-| harmony, frozen at the split | 1.668 | 1.675 | 2.710 | 2.222 | 1.901 |
+| **harmony (M2), living** | **1.678 / 1.383** | **1.245 / 1.205** | **1.754 / 1.466** | **1.361 / 1.620** | **1.044 / 1.115** |
+| harmony, frozen at the split | 1.669 | 1.678 | 2.705 | 2.218 | 1.874 |
 | cortex alone (M1), living | 1.976 / 1.741 | 1.591 / 1.548 | 1.946 / 1.658 | 1.616 / 1.989 | 1.431 / 1.482 |
 | PPMd, order 16 | 1.751 / 1.444 | 1.312 / 1.307 | 1.733 / 1.486 | 1.448 / 1.744 | 1.185 / 1.266 |
 | PPMd, order 8 | 1.793 / 1.573 | 1.429 / 1.392 | 1.763 / 1.531 | 1.474 / 1.781 | 1.281 / 1.349 |
@@ -395,14 +401,14 @@ On code-pystdlib, the cortex alone holds 1.431 / 1.482, with the episode 1.287 /
 The Transformer's rows for code-pystdlib (60 minutes offline and 60 minutes online, four cores) are running.
 
 - **Against PPMd at order 16,** the strongest compressor measured, the harmony is ahead on nine of the ten cells. It
-  leads by 0.06–0.13 bits per character on the whole streams of the four larger texts, and on every last tenth. The
+  leads by 0.07–0.14 bits per character on the whole streams of the four larger texts, and on every last tenth. The
   one cell lost is the whole stream of tr-lessons (section 6.6).
 - **Against the Transformer:**
   - living through the stream, the harmony is ahead of the online Transformer by 1.2–2.3 bits per character on the
     whole streams and by 0.6–2.0 on the last tenths;
   - frozen at the split, it is ahead of the Transformer trained offline by 0.37–1.33 on the last tenths;
   - the Transformer trained offline for 60 minutes on en-repo reached 2.152 on the last tenth (section 2.6), and the
-    harmony, frozen at the split, holds 1.668 there.
+    harmony, frozen at the split, holds 1.669 there.
 
 ### 6.4 Words
 
@@ -410,11 +416,11 @@ The harmony's bits per character on the words of the last tenth, and by a word's
 
 | corpus | seen, living | unseen, living | unseen, frozen | k = 1 | k = 2 | k = 3 | 6–10 | 101+ |
 |---|---|---|---|---|---|---|---|---|
-| en-pydoc | 1.285 | 2.619 | 3.686 | 3.67 | 1.74 | 1.57 | 1.25 | 0.99 |
-| en-repo | 1.207 | 2.758 | 3.842 | 3.99 | 2.40 | 2.12 | 1.82 | 1.42 |
-| tr-lessons | 1.187 | 1.885 | 3.733 | 3.95 | 1.05 | 1.27 | 1.04 | 1.12 |
-| tr-private | 1.306 | 2.277 | 3.436 | 2.50 | 1.55 | 1.39 | 1.18 | 1.04 |
-| code-pystdlib | 1.290 | 1.545 | 4.110 | 3.45 | 1.90 | 1.67 | 1.34 | 1.08 |
+| en-pydoc | 1.284 | 2.619 | 3.691 | 3.67 | 1.74 | 1.57 | 1.25 | 0.98 |
+| en-repo | 1.207 | 2.757 | 3.841 | 3.99 | 2.40 | 2.12 | 1.82 | 1.42 |
+| tr-lessons | 1.182 | 1.884 | 3.752 | 3.95 | 1.05 | 1.27 | 1.04 | 1.10 |
+| tr-private | 1.304 | 2.278 | 3.422 | 2.50 | 1.55 | 1.39 | 1.18 | 1.04 |
+| code-pystdlib | 1.271 | 1.544 | 4.116 | 3.44 | 1.90 | 1.67 | 1.33 | 1.06 |
 
 Against the cortex alone (section 2.5), every column falls. A word met for the first time costs 0.29–0.36 bits per
 character less, because the word contexts and the gate guess more of a new word from its beginning and its
@@ -422,17 +428,69 @@ neighbours.
 
 ### 6.5 Cost
 
-| corpus | characters | seconds to live the first 90 % (one core) | nodes | peak memory |
+| corpus | characters | seconds to live the first 90 % (one core) | nodes (with the word and line contexts) | peak memory |
 |---|---|---|---|---|
-| tr-lessons | 39,188 | 0.4 | 99,459 | (interpreter) |
-| en-pydoc | 560,058 | 8.4 | 722,106 | 169 MB |
-| en-repo | 943,651 | 17.0 | 1,417,372 | 231 MB |
-| tr-private | 1,951,426 | 30.0 | 2,519,837 | 444 MB |
-| code-pystdlib | 10,302,143 | 229.4 | 7,106,330 | 990 MB |
+| tr-lessons | 39,188 | 0.5 | 131,808 | (interpreter) |
+| en-pydoc | 560,058 | 8.7 | 1,056,429 | 300 MB |
+| en-repo | 943,651 | 17.9 | 2,268,053 | 392 MB |
+| tr-private | 1,951,426 | 32.6 | 4,268,276 | 707 MB |
+| code-pystdlib | 10,302,143 | 246.0 | 11,916,461 | 1,367 MB |
 
 The harmony lives about 40,000–60,000 characters a second on one core, against about 1.5 million for the cortex
 alone. code-pystdlib's run shared the machine with the Transformer's. A hundred million characters would take 30–40
 minutes and, at this pace of growth, a few gigabytes.
+
+### 6.7 Going on with a text never seen
+
+`m2_say.py` (`results/m2_say.jsonl`); the Transformer's side is `m1_transformer.py --say 500`
+(`results/m2_say_transformer.jsonl`). Both minds are frozen at the split. Each is given the same 500 places in the
+last tenth, with the 256 characters before each, and goes on for up to 40 characters.
+
+- **free**: always the most probable symbol; counted are the characters right before the first mistake;
+- **speaking line**: silent from the first symbol below e*; counted are the characters said and those right.
+
+| corpus | free: right before the first mistake | free: 10 or more right | line: said per place | line: right per place | line: right of said |
+|---|---|---|---|---|---|
+| en-repo | 6.36 | 18.8 % | 6.15 | 4.13 | 67.1 % |
+| en-pydoc | 4.40 | 12.2 % | 6.22 | 3.38 | 54.4 % |
+| tr-lessons | 1.55 | 3.0 % | 1.64 | 0.84 | 51.4 % |
+| tr-private | 3.71 | 8.6 % | 4.77 | 3.09 | 64.9 % |
+| code-pystdlib | 2.97 | 6.8 % | 2.93 | 1.97 | 67.1 % |
+
+The Transformer's runs on the same places (trained offline for 20 minutes, 8 on tr-lessons) are running; their row follows.
+
+Under the line, 51–67 % of what the harmony says is right. Its belief is at least e* ~ 0.583 at each symbol, and
+the share right is near that belief, a little below it on the texts most unlike what it lived (the new lessons of
+tr-lessons, the new topics of en-pydoc).
+
+### 6.8 Recall after one reading: the race of the earlier study
+
+`m2_race.py` (`results/m2_race.jsonl`) asks exactly what research/living_mind_2026_11_22/t_race.py asked (its
+section 40), on the author's documents (`education/ozel-dokumanlar`; counts only):
+
+- the program's own split into sentences: 22,601 sentences, 1,907,184 characters;
+- 200 sentences of at least five words drawn with `random.Random(0)`, each cued by its first two words;
+- scoring: exact (the rest of that sentence), valid (the rest of some sentence that begins with the same two
+  words), silent, words in place, word F1.
+
+The harmony reads the sentences once, one a line, in 32 seconds of one core, and answers in three ways:
+
+| way | exact | valid | silent | words in place | word F1 | unique starts exact |
+|---|---|---|---|---|---|---|
+| free (always its most probable symbol) | 9 | 23 | 0 | 0.116 | 0.124 | 7 / 66 |
+| under the speaking line | 1 | 9 | 136 | 0.032 | 0.050 | 0 / 66 |
+| **recall (locked onto the lived line that began so)** | **73** | **190** | 0 | 0.410 | 0.447 | 57 / 66 |
+
+- **Predicting is not recalling.** In free speech the harmony says what usually follows the cue's words in these
+  documents, not the sentence it read. Lines that begin alike part soon in this text, and the harmony learned that.
+- **Recall needs a goal.** With the goal of recalling, the prefrontal lock of MODEL.md section 6 holds the lived
+  line that began as the cue begins (found and verified by the line episode, MODEL.md section 8) and says it to its
+  end. That gives 190 valid answers of 200, and 57 of the 66 cues whose start is unique say exactly their own
+  sentence. It locked on 186 cues; the other 14 went on freely.
+- On a cue shared by several sentences, the lock takes the latest one: that is valid, but exact only by chance.
+  This is why exact is 14 of 41 and 2 of 93 for starts shared by 2–3 and 4 or more sentences.
+
+The word-level Transformer of t_race.py (60 minutes, four cores, asked at 2 to 60 minutes) and Zihin (t_race.py `mind`) on the same folder are running; their rows follow.
 
 ### 6.6 What M2 does not show
 
@@ -442,7 +500,7 @@ minutes and, at this pace of growth, a few gigabytes.
 - **Against Transformers trained offline with large compute on large data,** M2 has not been measured. The published
   enwik8 numbers (0.99 bits per character, a 277-million-parameter Transformer-XL on GPUs) remain the reference for
   that regime.
-- **One cell is still lost to PPMd:** the whole stream of the smallest text (tr-lessons, 39,188 characters: 1.756
+- **One cell is still lost to PPMd:** the whole stream of the smallest text (tr-lessons, 39,188 characters: 1.754
   against 1.733). PPMd's built-in priors win the first few thousand characters; the harmony wins the last tenth.
 - **Prediction is one area.** Answering, holding a dialogue and reasoning through the new architecture come with the
   prefrontal focus and the word-level cortex (M3).

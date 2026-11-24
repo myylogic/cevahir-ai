@@ -47,6 +47,11 @@ def _library() -> ctypes.CDLL:
     lib.core_stream.restype = ctypes.c_double
     lib.core_stream.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64, ctypes.c_int, ctypes.c_void_p]
     lib.core_stats.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+    lib.core_recall.restype = ctypes.c_uint64
+    lib.core_recall.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_double,
+                                ctypes.c_void_p, ctypes.c_void_p]
+    lib.core_enable_lines.argtypes = [ctypes.c_void_p, ctypes.c_int]
+    lib.core_set_episode_lengths.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int]
     lib.core_say.restype = ctypes.c_uint64
     lib.core_say.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint64, ctypes.c_uint64, ctypes.c_double,
                              ctypes.c_void_p, ctypes.c_void_p]
@@ -70,7 +75,8 @@ class FastCortex:
 
     def __init__(self, depth: int = 8, update: str = "all", episode: bool = False, minlen: int = 12,
                  episode_bits: int = 22, mix: bool = False, lr: float = 0.02, lr_min: float = 0.002,
-                 words: bool = True, two_inputs: bool = True, tree_prior: bool = True, recent: int = 0):
+                 words: bool = True, two_inputs: bool = True, tree_prior: bool = True, recent: int = 0,
+                 episode_lengths: tuple = (), lines: bool = False):
         if update not in ("all", "found"):
             raise ValueError("update is 'all' or 'found'")
         self.depth = depth
@@ -78,10 +84,15 @@ class FastCortex:
         self.episode = episode
         self._lib = _library()
         self._c = self._lib.core_new(depth, 1 if update == "found" else 0, 1 if episode else 0, minlen, episode_bits)
+        if episode_lengths:                          # several lengths, the longest first
+            lens = (ctypes.c_int * len(episode_lengths))(*sorted(episode_lengths, reverse=True))
+            self._lib.core_set_episode_lengths(self._c, lens, len(episode_lengths))
         self.mix = mix
         if mix:
             self._lib.core_enable_mix(self._c, lr, lr_min, 1 if words else 0, 1 if two_inputs else 0,
                                       1 if tree_prior else 0, recent)
+            if lines:
+                self._lib.core_enable_lines(self._c, episode_bits)
 
     def __del__(self):
         if getattr(self, "_c", None):
@@ -113,6 +124,17 @@ class FastCortex:
         n = self._lib.core_say(self._c, h.ctypes.data, len(h), most, line, out.ctypes.data, probs.ctypes.data)
         text = out[:n].tobytes().decode("utf-32-le")
         return text, [float(p) for p in probs[:min(n + 1, most)]]
+
+    def recall(self, history: str, most: int = 400, line: float = 0.0) -> tuple[str, bool]:
+        """Recall what began as the current line began: lock onto the lived line that began so and say it to its end;
+        if none, go on as say() does. Returns what was said and whether it was a lived line (locked)."""
+        if not self.mix:
+            raise ValueError("recall needs the harmony (mix=True)")
+        h = codes(history[-max(self.depth, 4096):])
+        out = np.zeros(most, dtype=np.uint32)
+        locked = ctypes.c_int(0)
+        n = self._lib.core_recall(self._c, h.ctypes.data, len(h), most, line, out.ctypes.data, ctypes.byref(locked))
+        return out[:n].tobytes().decode("utf-32-le"), bool(locked.value)
 
     def size(self) -> dict:
         s = (ctypes.c_uint64 * 6)()

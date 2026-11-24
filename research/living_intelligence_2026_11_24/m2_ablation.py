@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """M2: what each part of the harmony adds (NOTES.md, 6.2).
 
-    python m2_ablation.py [CORPUS ...] [--steps ABCDEF] [--out results/m2_ablation.jsonl]
+    python m2_ablation.py [CORPUS ...] [--steps ABCDEFG] [--out results/m2_ablation.jsonl]
 
 The parts are added one at a time, in this order:
 
@@ -11,7 +11,8 @@ The parts are added one at a time, in this order:
   calibration by the rule;
 - D, the word contexts;
 - E, a second input per origin and the coarser origin as prior;
-- F, the short-term memory (the full M2).
+- F, the short-term memory;
+- G, the line episode and the line context (the full M2).
 
 Each row has the whole stream, the last tenth living and the last tenth frozen, as in m2_harmony.py.
 """
@@ -38,15 +39,18 @@ STEPS = [
                                tree_prior=False, recent=0)),
     ("E + second input, coarser prior", dict(depth=8, episode=True, minlen=12, mix=True, words=True, two_inputs=True,
                                              tree_prior=True, recent=0)),
-    ("F + short-term memory (M2)", dict(depth=8, episode=True, minlen=12, mix=True, words=True, two_inputs=True,
-                                        tree_prior=True, recent=6)),
+    ("F + short-term memory", dict(depth=8, episode=True, minlen=12, mix=True, words=True, two_inputs=True,
+                                   tree_prior=True, recent=6)),
+    ("G + line episode and line context (M2)", dict(depth=8, episode=True, minlen=12, episode_bits=24, mix=True,
+                                                    words=True, two_inputs=True, tree_prior=True, recent=6,
+                                                    lines=True)),
 ]
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("corpora", nargs="*", default=["tr-lessons", "en-pydoc", "en-repo", "tr-private", "code-pystdlib"])
-    ap.add_argument("--steps", default="ABCDEF", help="which steps to run, by letter")
+    ap.add_argument("--steps", default="ABCDEFG", help="which steps to run, by letter")
     ap.add_argument("--out", default=os.path.join(HERE, "results", "m2_ablation.jsonl"))
     a = ap.parse_args()
     for name in a.corpora:

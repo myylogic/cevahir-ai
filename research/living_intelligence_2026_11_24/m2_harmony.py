@@ -6,8 +6,8 @@
 The same protocol as m1_cortex.py: one pass in order, each symbol predicted before it is learned, the stream split
 at 90 %; the last tenth measured living (learning on) and frozen (the mind as it was at the split, learning nothing,
 not even into its episodes or its short-term memory). The mind is living/fast.py's FastCortex: the cortex in C
-(bit-identical to living/cortex.py), the episode, the word contexts, the short-term memory and the harmony that
-combines them.
+(bit-identical to living/cortex.py), the episode, the line episode and line context, the word contexts, the
+short-term memory and the harmony that combines them.
 
 For the author's private corpus only counts are written.
 """
@@ -27,8 +27,8 @@ import corpora  # noqa: E402
 from living.fast import FastCortex  # noqa: E402
 from living.lexicon import words  # noqa: E402
 
-DEFAULT = dict(depth=8, episode=True, minlen=12, mix=True, lr=0.02, lr_min=0.002, words=True, two_inputs=True,
-               tree_prior=True, recent=6)
+DEFAULT = dict(depth=8, episode=True, minlen=12, episode_bits=24, mix=True, lr=0.02, lr_min=0.002, words=True,
+               two_inputs=True, tree_prior=True, recent=6, lines=True)
 MEETINGS = [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 10), (11, 100), (101, 10 ** 12)]
 
 

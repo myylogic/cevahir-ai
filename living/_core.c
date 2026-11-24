@@ -59,6 +59,14 @@ typedef struct {
     uint32_t *text;            /* every symbol lived, as numbers */
     uint64_t text_len, text_cap;
     uint32_t *ep_table;        /* hash of the last minlen symbols -> position after them + 1 */
+    int lines_on;              /* the line episode: the latest line that began as the current line began */
+    uint64_t line_h; uint32_t line_len;
+    uint32_t nl_num;           /* the number of the line end, NONE until met */
+    uint32_t *ln_table; uint64_t ln_mask;
+    uint64_t ln_r[8], ln_a[8];
+    int ep_n;                  /* several lengths (longest first), 0 for the one length minlen */
+    int ep_L[8];
+    uint32_t *ep_tabs[8];
     uint64_t ep_mask;
     uint64_t ep_ptr;           /* position of the predicted symbol in text, valid if ep_len > 0 */
     uint32_t ep_len;           /* length of the current match */
@@ -223,6 +231,7 @@ static uint32_t add_symbol(Core *c, uint32_t code) {
     while (c->akey[h]) h = (h + 1) & c->amask;
     uint32_t num = (uint32_t)c->asize;
     c->akey[h] = key; c->aval[h] = num; c->aused++;
+    if (code == 10) c->nl_num = num;
     if (c->asize == c->acap) { c->acap *= 2; c->acode = grow(c->acode, c->acap, 4); }
     c->acode[c->asize++] = code;
     if (c->asize > c->stamp_cap) {
@@ -251,6 +260,7 @@ Core *core_new(int depth, int update_found, int episode, int minlen, int ep_bits
     c->nsit = (uint64_t)(((depth << 1) | 1) * 6 + 5) * 10 + 10;
     c->sit_new = calloc(c->nsit, 8); c->sit_total = calloc(c->nsit, 8);
     c->hist = calloc(depth > 0 ? depth : 1, 4);
+    c->nl_num = NONE;
     new_node(c);                                            /* the root, n = 0 until the first symbol */
     c->episode = episode;
     c->minlen = minlen > 0 ? minlen : 12;
@@ -267,6 +277,7 @@ void core_free(Core *c) {
     free(c->ckey); free(c->cval); free(c->akey); free(c->aval); free(c->acode);
     free(c->stamp); free(c->sit_new); free(c->sit_total); free(c->hist);
     free(c->text); free(c->ep_table); free(c->v_right); free(c->v_asked);
+    for (int k = 0; k < c->ep_n; k++) free(c->ep_tabs[k]);
     free(c->w); free(c->dist); free(c->lv_code); free(c->lv_cnt); free(c->lv_len); free(c->ext_n1); free(c->ext_n);
     free(c->wkey); free(c->wval); free(c->apm_n1); free(c->apm_n); free(c->w2); free(c->set_updates); free(c->wg);
     free(c->rm_n1); free(c->rm_n); free(c->rm_tag);
@@ -292,6 +303,10 @@ void core_set_history(Core *c, const uint32_t *codes, uint64_t n) {
     }
     uint32_t num = n ? symbol_number(c, codes[n - 1]) : NONE;
     c->prev_code = n ? (num == NONE ? 254u : (num < 254 ? num : 255u)) : 0;
+    c->line_h = 0x6C696E65ull; c->line_len = 0;          /* the line so far: what follows the last line end */
+    uint64_t start = 0;
+    for (uint64_t i = n; i > 0; i--) if (codes[i - 1] == 10) { start = i; break; }
+    for (uint64_t i = start; i < n; i++) { c->line_h = mix64(c->line_h ^ codes[i]); c->line_len++; }
 }
 
 /* the nodes on the path of the history: root first */
@@ -385,6 +400,23 @@ static uint64_t ep_hash(Core *c, uint64_t end) {   /* hash of text[end - minlen,
     return h;
 }
 
+static uint64_t ep_hash_len(Core *c, uint64_t end, int L) {   /* hash of text[end - L, end), salted by L */
+    uint64_t h = (uint64_t)L * 0x9E37ull;
+    for (uint64_t i = end - L; i < end; i++) h = mix64(h ^ c->text[i]);
+    return h;
+}
+
+/* the episode looks for its match at several lengths, the longest first */
+void core_set_episode_lengths(Core *c, const int *lens, int n) {
+    for (int k = 0; k < c->ep_n; k++) free(c->ep_tabs[k]);
+    c->ep_n = n > 8 ? 8 : n;
+    for (int k = 0; k < c->ep_n; k++) {
+        c->ep_L[k] = lens[k];
+        c->ep_tabs[k] = calloc(c->ep_mask + 1, 4);
+        if (!c->ep_tabs[k]) abort();
+    }
+}
+
 static void text_push(Core *c, uint32_t x) {
     if (c->text_len == c->text_cap) { c->text_cap *= 2; c->text = grow(c->text, c->text_cap, 4); }
     c->text[c->text_len++] = x;
@@ -396,6 +428,24 @@ static void ep_after(Core *c, int learning) {
     if (c->ep_len > 0) {
         if (c->text[c->ep_ptr] == c->text[L - 1]) { c->ep_ptr++; c->ep_len++; }
         else c->ep_len = 0;
+    }
+    if (c->ep_n) {
+        uint64_t hs[8];
+        for (int k = 0; k < c->ep_n; k++) hs[k] = L >= (uint64_t)c->ep_L[k] ? ep_hash_len(c, L, c->ep_L[k]) & c->ep_mask : 0;
+        if (c->ep_len == 0) {
+            for (int k = 0; k < c->ep_n; k++) {
+                if (L < (uint64_t)c->ep_L[k]) continue;
+                uint32_t cand = c->ep_tabs[k][hs[k]];
+                if (!cand) continue;
+                uint64_t p = cand - 1;
+                uint32_t len = 0;
+                while (len < 400 && len < p && c->text[p - 1 - len] == c->text[L - 1 - len]) len++;
+                if (len >= (uint32_t)c->ep_L[k]) { c->ep_ptr = p; c->ep_len = len; break; }
+            }
+        }
+        if (learning)
+            for (int k = 0; k < c->ep_n; k++) if (L >= (uint64_t)c->ep_L[k]) c->ep_tabs[k][hs[k]] = (uint32_t)L + 1;
+        return;
     }
     if (L >= (uint64_t)c->minlen) {
         uint64_t h = ep_hash(c, L) & c->ep_mask;
@@ -410,6 +460,17 @@ static void ep_after(Core *c, int learning) {
         }
         if (learning) c->ep_table[h] = (uint32_t)L + 1;   /* a newer episode takes the place of an older one */
     }
+}
+
+static int len_bucket_abs(uint32_t len) {          /* several lengths: by the length itself */
+    if (len < 8) return 0;
+    if (len < 12) return 1;
+    if (len < 16) return 2;
+    if (len < 24) return 3;
+    if (len < 32) return 4;
+    if (len < 64) return 5;
+    if (len < 128) return 6;
+    return 7;
 }
 
 static int len_bucket(uint32_t len, int minlen) {
@@ -448,7 +509,7 @@ double core_stream(Core *c, const uint32_t *codes, uint64_t n, int learning, dou
         if (c->episode && c->ep_len > 0) {
             uint32_t y = c->text[c->ep_ptr];
             double py = p_excl(c, chain, len, y, 0, 0);      /* the cortex's own belief in the episode's symbol */
-            int cell = len_bucket(c->ep_len, c->minlen) * 16 + p_bucket(py);
+            int cell = (c->ep_n ? len_bucket_abs(c->ep_len) : len_bucket(c->ep_len, c->minlen)) * 16 + p_bucket(py);
             double q = ((double)c->v_right[cell] + 0.5) / ((double)c->v_asked[cell] + 1.0);
             if (x == y) p = q;
             else p = (1.0 - q) * p / (1.0 - py);
@@ -537,7 +598,8 @@ void core_enable_mix(Core *c, double lr, double lr_min, int words, int two_input
     c->words_on = words;
     c->two_inputs = two_inputs;
     int norig = (c->depth + 1) + (words ? 2 : 0);
-    c->nin = 1 + norig * (two_inputs ? 2 : 1) + recent + 1 + 1;
+    c->nin = 1 + (norig + 1) * (two_inputs ? 2 : 1) + recent + 1 + 1 + 1;   /* a slot for the line context;
+                                                                           ..., line episode, episode, constant */
     c->nsets = 8 * 2 * 3;
     c->w = calloc((size_t)c->nsets * c->nin, sizeof(double));
     for (int k = 0; k < c->nsets; k++) c->w[(size_t)k * c->nin] = 1.0;     /* trust the cortex first */
@@ -553,6 +615,23 @@ void core_enable_mix(Core *c, double lr, double lr_min, int words, int two_input
     for (int k = 0; k < 8; k++) { c->w2[k * 4] = 0.5; c->w2[k * 4 + 1] = 0.5; }
     c->wg = calloc((size_t)8 * c->nin, sizeof(double));
     for (int k = 0; k < 8; k++) c->wg[(size_t)k * c->nin] = 1.0;
+}
+
+void core_enable_lines(Core *c, int bits) {
+    c->lines_on = 1;
+    c->ln_mask = (1ull << (bits > 0 ? bits : 22)) - 1;
+    c->ln_table = calloc(c->ln_mask + 1, 4);
+    c->line_h = 0x6C696E65ull; c->line_len = 0;
+    c->nl_num = symbol_number(c, 10);
+}
+
+static int line_bucket(uint32_t n) {
+    if (n < 4) return 0;
+    if (n < 8) return 1;
+    if (n < 16) return 2;
+    if (n < 32) return 3;
+    if (n < 64) return 4;
+    return 5;
 }
 
 /* word contexts: a separate table from 64-bit keys (hashes of exact strings) to nodes */
@@ -633,7 +712,7 @@ static uint32_t gather(Core *c, uint32_t v, uint64_t off) {
  * code, *prob_out the probability of the whole path, and the symbol is lived without learning. */
 static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, int say, uint32_t *code_out,
                       double *prob_out, uint32_t *chain, uint32_t *orig, int *ev, double *s, uint64_t *lv_off) {
-    int nlev = c->depth + 1 + (c->words_on ? 2 : 0);
+    int nlev = c->depth + 1 + (c->words_on ? 2 : 0) + (c->lines_on ? 1 : 0);
     double tree[512];
     double path = 1.0;
         int len = chain_of(c, chain);
@@ -655,6 +734,11 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
             orig[c->depth + 1] = word_node(c, wk1, 0);
             orig[c->depth + 2] = word_node(c, wk2, 0);
         }
+        uint64_t lk = 0;
+        if (c->lines_on) {                           /* the line context: the exact beginning of the current line */
+            lk = mix64(0x4C494E45ull ^ c->line_h ^ ((uint64_t)c->line_len << 40));
+            orig[nlev - 1] = word_node(c, lk, 0);
+        }
         uint64_t tot = 0;
         for (int o = 0; o < nlev; o++) if (orig[o] != NONE) tot += c->t[orig[o]];
         if (tot > c->lv_cap) {
@@ -672,8 +756,31 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
         uint32_t ycode = 0; double eq = 0.5; int eb = 0;
         if (ep_active) {
             ycode = code8(c->text[c->ep_ptr]);
-            eb = len_bucket(c->ep_len, c->minlen);
+            eb = c->ep_n ? len_bucket_abs(c->ep_len) : len_bucket(c->ep_len, c->minlen);
             eq = ((double)c->ep_r[eb] + 0.5) / ((double)c->ep_a[eb] + 1.0);
+        }
+        /* the line episode */
+        int ln_active = 0; uint32_t lcode = 0; double lq = 0.5; int lb = 0; uint64_t ln_slot = 0;
+        if (c->lines_on) {
+            ln_slot = mix64(c->line_h ^ c->line_len) & c->ln_mask;
+            uint32_t cand = c->ln_table[ln_slot];
+            int ok = 0;
+            uint64_t p = cand ? cand - 1 : 0;
+            if (cand && p < c->text_len && p >= c->line_len) {
+                /* the same beginning: the symbols before p are the current line, and a line end (or the start) before them */
+                ok = p == c->line_len || c->text[p - c->line_len - 1] == c->nl_num;
+                uint32_t m = c->line_len < 64 ? c->line_len : 64;
+                for (uint32_t q = 1; ok && q <= m; q++)
+                    if (c->text[p - q] != c->text[c->text_len - q]) ok = 0;
+            }
+            if (ok) {
+                ln_active = 1;
+                lcode = code8(c->text[p]);
+                lb = line_bucket(c->line_len);
+                lq = ((double)c->ln_r[lb] + 0.5) / ((double)c->ln_a[lb] + 1.0);
+                if (lq < 1e-6) lq = 1e-6;
+                if (lq > 1 - 1e-6) lq = 1 - 1e-6;
+            }
         }
         uint32_t xcode = code8(x);
         int dbucket = len <= 3 ? 0 : (len <= 6 ? 1 : 2);
@@ -689,6 +796,7 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
         for (int k = 7; k >= 0; k--) {
             uint32_t P = node - (1u << (7 - k));               /* the prefix decided so far */
             int yk = say ? -1 : (int)((xcode >> k) & 1);
+            memset(s, 0, c->nin * sizeof(double));             /* origins absent here give nothing */
             double sp = tree[node], sp1 = tree[2 * node + 1];
             double pc = sp > 0 ? sp1 / sp : 0.5;
             if (pc < 1e-6) pc = 1e-6;
@@ -706,6 +814,7 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
                 double p0 = 0.5;
                 if (c->tree_prior) {
                     if (o <= c->depth) p0 = prior;                       /* the next shorter context */
+                    else if (c->lines_on && o == nlev - 1) p0 = root_e;  /* the line's beginning */
                     else p0 = (o == c->depth + 1) ? root_e : word_prior; /* word beginning, then with the word before */
                 }
                 int has = np > 0 || (c->tree_prior && o <= c->depth && o < len);
@@ -738,6 +847,8 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
             if (eq > 1 - 1e-6) eq = 1 - 1e-6;
             s[c->nin - 2] = ep_here ? (((ycode >> k) & 1) ? stretch(eq) : -stretch(eq)) : 0.0;
             s[c->nin - 1] = 1.0;
+            int ln_here = ln_active && (lcode >> (k + 1)) == P;
+            s[c->nin - 3] = ln_here ? (((lcode >> k) & 1) ? stretch(lq) : -stretch(lq)) : 0.0;
             int set = k + 8 * (ep_here ? 1 : 0) + 16 * dbucket;
             double *w = c->w + (size_t)set * c->nin;
             double *wg = c->wg + (size_t)k * c->nin;
@@ -823,8 +934,17 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
         if (learning) {
             for (int k = 0; k < nev; k++) { c->sit_total[ev[2 * k]]++; c->sit_new[ev[2 * k]] += ev[2 * k + 1]; }
             if (ep_active) { c->ep_a[eb]++; if (x != NONE && x == c->text[c->ep_ptr]) c->ep_r[eb]++; }
+            if (ln_active) { c->ln_a[lb]++; if (x != NONE && code8(x) == lcode) c->ln_r[lb]++; }
+            if (c->lines_on && c->episode) c->ln_table[ln_slot] = (uint32_t)c->text_len + 1;   /* where x will be */
             if (x == NONE) x = add_symbol(c, code_point);
             learn(c, chain, len, x);
+            if (c->lines_on) {
+                uint32_t v = word_node(c, lk, 1);
+                c->n[v] += 1;
+                uint32_t e;
+                for (e = c->head[v]; e; e = c->enext[e]) if (c->esym[e] == x) { c->ecnt[e] += 1; break; }
+                if (!e) add_entry(c, v, x);
+            }
             if (c->words_on) {
                 uint64_t keys[2] = {wk1, wk2};
                 for (int j = 0; j < 2; j++) {
@@ -848,13 +968,17 @@ static double mix_one(Core *c, uint32_t x, uint32_t code_point, int learning, in
             else if (c->cur_word) { c->prev_word = c->cur_word; c->cur_word = 0; }
         }
         c->prev_code = code8(x);
+        if (c->lines_on) {
+            if (code_point == 10) { c->line_h = 0x6C696E65ull; c->line_len = 0; }
+            else { c->line_h = mix64(c->line_h ^ code_point); c->line_len++; }
+        }
         push_history(c, x);
         if (c->episode) { text_push(c, x); ep_after(c, learning); }
     return b;
 }
 
 double core_stream_mix(Core *c, const uint32_t *codes, uint64_t n, int learning, double *bits_out) {
-    int nlev = c->depth + 1 + (c->words_on ? 2 : 0);   /* origins with records: contexts, then word contexts */
+    int nlev = c->depth + 1 + (c->words_on ? 2 : 0) + (c->lines_on ? 1 : 0);   /* origins with records */
     uint32_t *chain = malloc((c->depth + 2) * 4);
     uint32_t *orig = malloc((nlev + 1) * 4);           /* node of each origin, NONE if absent */
     int *ev = malloc((c->depth + 2) * 2 * sizeof(int));
@@ -877,7 +1001,7 @@ double core_stream_mix(Core *c, const uint32_t *codes, uint64_t n, int learning,
 /* continue a history: say the most probable symbol while its probability reaches `line` (0: always), at most `most`
  * symbols; nothing is learned and the mind is left as it was. Returns how many symbols were said. */
 uint64_t core_say(Core *c, const uint32_t *hist, uint64_t nh, uint64_t most, double line, uint32_t *out, double *probs) {
-    int nlev = c->depth + 1 + (c->words_on ? 2 : 0);
+    int nlev = c->depth + 1 + (c->words_on ? 2 : 0) + (c->lines_on ? 1 : 0);
     uint32_t *chain = malloc((c->depth + 2) * 4);
     uint32_t *orig = malloc((nlev + 1) * 4);
     int *ev = malloc((c->depth + 2) * 2 * sizeof(int));
@@ -888,6 +1012,7 @@ uint64_t core_say(Core *c, const uint32_t *hist, uint64_t nh, uint64_t most, dou
     int save_hlen = c->hlen;
     uint64_t save_cw = c->cur_word, save_pw = c->prev_word, save_text = c->text_len, save_ptr = c->ep_ptr;
     uint32_t save_pc = c->prev_code, save_len = c->ep_len;
+    uint64_t save_lh = c->line_h; uint32_t save_ll = c->line_len;
     core_set_history(c, hist, nh);
     if (c->episode) {                                    /* the history is the recent episode */
         uint64_t from = nh > 64 ? nh - 64 : 0;
@@ -906,8 +1031,51 @@ uint64_t core_say(Core *c, const uint32_t *hist, uint64_t nh, uint64_t most, dou
     memcpy(c->hist, save_hist, save_hlen * 4); c->hlen = save_hlen;
     c->cur_word = save_cw; c->prev_word = save_pw; c->prev_code = save_pc;
     c->text_len = save_text; c->ep_ptr = save_ptr; c->ep_len = save_len;
+    c->line_h = save_lh; c->line_len = save_ll;
     free(chain); free(orig); free(ev); free(s); free(lv_off); free(save_hist);
     return said;
+}
+
+/* recall (MODEL.md 6, the lock; 8, completion): the goal is to recall what began as the current line began. If a
+ * lived line began so (the line episode, verified), the mind locks onto it and says it to its end; otherwise it goes
+ * on as core_say does. Returns how many symbols were said; *locked tells which way it went. Nothing is learned. */
+uint64_t core_recall(Core *c, const uint32_t *hist, uint64_t nh, uint64_t most, double line, uint32_t *out,
+                     int *locked) {
+    *locked = 0;
+    if (c->lines_on && c->episode && nh) {
+        uint64_t save_lh = c->line_h; uint32_t save_ll = c->line_len, save_pc = c->prev_code;
+        uint64_t save_cw = c->cur_word, save_pw = c->prev_word;
+        uint32_t *save_hist = malloc((c->depth + 1) * 4);
+        memcpy(save_hist, c->hist, c->hlen * 4);
+        int save_hlen = c->hlen;
+        uint64_t save_text = c->text_len;
+        core_set_history(c, hist, nh);
+        uint64_t from = nh > c->line_len ? nh - c->line_len : 0;   /* the current line, as the episode's tail */
+        for (uint64_t i = from; i < nh; i++) { uint32_t num = symbol_number(c, hist[i]); text_push(c, num == NONE ? 0xFFFFFFFEu : num); }
+        uint64_t slot = mix64(c->line_h ^ c->line_len) & c->ln_mask;
+        uint32_t cand = c->ln_table[slot];
+        uint64_t p = cand ? cand - 1 : 0;
+        int ok = 0;
+        if (cand && p < save_text && p >= c->line_len) {
+            ok = p == c->line_len || c->text[p - c->line_len - 1] == c->nl_num;
+            uint32_t m = c->line_len < 64 ? c->line_len : 64;
+            for (uint32_t q = 1; ok && q <= m; q++)
+                if (c->text[p - q] != c->text[c->text_len - q]) ok = 0;
+        }
+        uint64_t said = 0;
+        if (ok) {
+            *locked = 1;
+            while (said < most && p < save_text && c->text[p] != c->nl_num && c->text[p] < c->asize)
+                out[said++] = c->acode[c->text[p++]];
+        }
+        c->text_len = save_text;
+        memcpy(c->hist, save_hist, save_hlen * 4); c->hlen = save_hlen;
+        c->line_h = save_lh; c->line_len = save_ll; c->prev_code = save_pc;
+        c->cur_word = save_cw; c->prev_word = save_pw;
+        free(save_hist);
+        if (ok) return said;
+    }
+    return core_say(c, hist, nh, most, line, out, 0);
 }
 
 void core_stats(Core *c, uint64_t *out) {

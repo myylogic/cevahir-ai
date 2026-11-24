@@ -292,6 +292,10 @@ a record. The harmony combines their beliefs. This section describes the harmony
 - **E, the episode.** The longest earlier occurrence of the last 12 symbols, found through a hash and verified symbol
   by symbol, predicts the symbol that followed it. Its record counts how often that was right, per match length. This
   is the induction behaviour of attention heads (Olsson et al. 2022), done as a lookup.
+- **L, the line episode and the line context.** The beginning of the current line, from the last line end, is a cue.
+  - The line episode is the latest lived line that began exactly so, found through a hash and verified symbol by
+    symbol; it predicts the symbol that followed there.
+  - The line context counts what followed every lived line that began so, an origin like the word contexts.
 - **S, the short-term memory.** Contexts of length 1 to 6, with records that decay by 1 − 1/F at each update, F = 7.
   This is the context decay of the evidence core, whose time constant is the span of the focus. The cortex keeps
   everything exactly; the short-term memory keeps what happened lately, and forgets.
@@ -384,6 +388,11 @@ are their associations. Each held unit's weight is its activation times the evid
 
 A commitment holds until its word is complete; the mind does not switch in mid-word. The next word is the harmony the
 PFC locks onto, not a sentence recalled.
+
+**A first form, built in M2: the lock of recall.** When the goal is to recall what began as a cue begins, the mind
+locks onto the lived line that began so (the line episode) and says it to its end, instead of saying what usually
+follows. If no lived line began so, it speaks by the harmony. On the earlier study's recall race this is the
+difference between 23 and 190 valid answers of 200 (NOTES.md 6.8).
 
 ## 7. The amygdala: what matters (M3)
 

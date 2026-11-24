@@ -53,7 +53,9 @@ def test_per_symbol_bits_add_up_and_runs_repeat(FastCortex):
 
 
 @pytest.mark.parametrize("cfg", [dict(depth=6), dict(depth=6, episode=True, minlen=8),
-                                 dict(depth=6, episode=True, minlen=8, mix=True, recent=4)])
+                                 dict(depth=6, episode=True, minlen=8, mix=True, recent=4),
+                                 dict(depth=6, episode=True, minlen=8, mix=True, recent=4, lines=True,
+                                      episode_lengths=(16, 8, 5))])
 def test_a_pass_that_does_not_learn_leaves_nothing_behind(FastCortex, cfg):
     split = len(TEXT) * 2 // 3
     a = FastCortex(**cfg)
@@ -77,3 +79,22 @@ def test_the_harmony_learns_a_repeated_text_far_below_the_cortex(FastCortex):
     again, _ = first.stream(TEXT[:len(TEXT) // 6])                   # the same lines a second time
     assert again < once / 4
     assert not math.isnan(h)
+
+
+def test_recall_locks_onto_the_lived_line_that_began_so(FastCortex):
+    lines = ["the river runs to the sea\n", "the river of stars is old\n", "a cat sat on the warm stone\n",
+             "kanıt kaydı kesin tutulur\n"]
+    mind = FastCortex(depth=6, episode=True, minlen=8, mix=True, recent=4, lines=True)
+    mind.stream("\n" + "".join(lines * 2))
+    said, locked = mind.recall("\n" + "a cat ")
+    assert locked and said == "sat on the warm stone"
+    said, locked = mind.recall("\n" + "kanıt ")
+    assert locked and said == "kaydı kesin tutulur"
+    said, locked = mind.recall("\n" + "the river ")                  # two lines begin so: the latest one
+    assert locked and said == "of stars is old"
+    _, locked = mind.recall("\n" + "no line began so ")
+    assert not locked
+    before, _ = mind.stream("a cat sat", "\n", learn=False)
+    mind.recall("\n" + "a cat ")
+    after, _ = mind.stream("a cat sat", "\n", learn=False)
+    assert before == after                                            # recalling leaves the mind as it was
