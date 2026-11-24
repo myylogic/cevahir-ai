@@ -97,6 +97,8 @@ class Cevahir:
         self.dis_all = Counter()                                 # disagreements per situation (and agreements apart)
         self.alone_right = Counter()                             # Zihin expected nothing: the harmony's guess was it
         self.alone_all = Counter()                               # Zihin expected nothing, the harmony guessed
+        self.az_won = 0                                          # Zihin and the analogy differed, one was right:
+        self.az_all = 0                                          # ... the analogy's token was it (per token)
         self.outcome_good = Counter()                            # the amygdala: answers judged, per (who led, situation)
         self.outcome_all = Counter()
         self.last_leads: List[Tuple[str, int]] = []              # who led each token of the last answer, and where
@@ -231,7 +233,8 @@ class Cevahir:
         self.mind.zemin = Zemin(self.channel)
 
     # --------------------------------------------------------------------------------------------- hearing ------
-    def hear(self, text: str, prov: int, speaker: Optional[str] = None, lead: str = "", answer: bool = False) -> float:
+    def hear(self, text: str, prov: int, speaker: Optional[str] = None, lead: str = "", answer: bool = False,
+             foreseen: Optional[List[str]] = None) -> float:
         """One utterance heard while not speaking (Zihin's ``Session.listen``): before each of its tokens the
         harmony is asked with Zihin's expectations as the voice and lives the token's form (its gap and its
         letters); then Zihin lives the token as a moment. ``lead``: what comes before the first token (a line end,
@@ -267,6 +270,11 @@ class Cevahir:
                         cell = self.situation(answer, i == 0, z_e)
                         self.dis_all[cell] += 1
                         self.dis_won[cell] += 1 if z_tok == body[i] else 0
+                    a_tok = foreseen[i] if foreseen is not None and i < len(foreseen) else None
+                    if a_tok is not None and z_tok is not None and a_tok != z_tok and \
+                            (a_tok == body[i]) != (z_tok == body[i]):    # the analogy and Zihin, one of them right
+                        self.az_all += 1
+                        self.az_won += 1 if a_tok == body[i] else 0
                     if self.record and z_tok is None and h_tok is not None:
                         cell = self.situation(answer, i == 0, 0.0)
                         self.alone_all[cell] += 1
@@ -324,7 +332,9 @@ class Cevahir:
         if z is not None:
             z.heard(s.body(first), "soran")
             z.see(scene_answer or scene)
-        bits += self.hear(answer, prov, lead="\t", answer=True)
+        a_plan, _, _ = self.episodes.plan(self._said(first))     # the hippocampus foresees the answer
+        foreseen = [self.session.lower(t) for t in a_plan] if a_plan else None
+        bits += self.hear(answer, prov, lead="\t", answer=True, foreseen=foreseen)
         s.end_of_turn(prov, tone=s.tone(answer))
         if z is not None:
             z.heard(s.body(answer), "cevaplayan")
@@ -499,16 +509,22 @@ class Cevahir:
             partial = None
         return said
 
+    def trust_analogy(self) -> float:
+        """The belief, by the one rule, that the analogy's token is the one where it and Zihin's differ while
+        Cevahir lives a dialogue and one of the two is right."""
+        return (self.az_won + 0.5) / (self.az_all + 1.0)
+
     def choose_plan(self, question: str, plan: List[str], plan_e: List[float]) -> Tuple[List[str], List[float], str]:
-        """The prefrontal choice of the thought (MODEL.md 12.5): Zihin's plan, believed as its weakest decided word,
-        or the hippocampus's analogy, believed by the rule on its neighbours' vote; the one believed more, if it
-        reaches the speaking line. Returns (plan, beliefs, whose)."""
+        """The prefrontal choice of the thought (MODEL.md 12.5): Zihin's plan or the hippocampus's analogy. The
+        analogy is a thought only if its own belief reaches the speaking line. Where Zihin has no plan, it is the
+        thought; where the two plans differ, the record of their disagreements decides (``trust_analogy``).
+        Returns (plan, beliefs, whose)."""
         from living.evidence import SPEAKING_LINE
         a_plan, a_e, _ = self.episodes.plan(self._said(question))
-        b_z = (min(plan_e) if plan_e else SPEAKING_LINE) if plan else 0.0
-        if a_plan and a_e >= SPEAKING_LINE and a_e > b_z:
+        if a_plan and a_e >= SPEAKING_LINE:
             low = [self.session.lower(t) for t in a_plan]
-            return low, [a_e] * len(low), "analogy"
+            if not plan or (low != list(plan) and self.trust_analogy() >= 0.5):
+                return low, [a_e] * len(low), "analogy"
         return plan, plan_e, "zihin"
 
     def _heard_forms(self, question: str) -> None:
@@ -801,7 +817,7 @@ class Cevahir:
             "outcome_good": [[w, c, n] for (w, c), n in self.outcome_good.items()],
             "outcome_all": [[w, c, n] for (w, c), n in self.outcome_all.items()],
             "alphabets": {k: "".join(sorted(v)) for k, v in self.alphabets.items()},
-            "episodes": self.episodes.state(),
+            "episodes": self.episodes.state(), "az": [self.az_won, self.az_all],
             "others": [[name, ch["won"], ch["seen"]] for name, ch in sorted(self.others.items())]}
         with open(os.path.join(folder, "cevahir.json"), "w", encoding="utf-8") as f:
             json.dump(state, f, ensure_ascii=False)
@@ -882,6 +898,7 @@ class Cevahir:
         self.last_leads, self.pending = [], None
         self.entries, self._open, self._pending_entry = None, None, None
         self.episodes = Episodes.from_state(state.get("episodes", {}))
+        self.az_won, self.az_all = state.get("az", [0, 0])
         self.alphabets = {k: set(v) for k, v in state.get("alphabets", {self.channel: ""}).items()}
         self.others = {}
         for i, (name, won, seen) in enumerate(state.get("others", [])):

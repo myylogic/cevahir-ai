@@ -606,9 +606,15 @@ as a frame, done on the episodes the hippocampus keeps.
   core's trust in a way of reading, learned from what its claims came to (F49). A plan is believed by the rule on the
   record for its places, times the share of the neighbours that agree. Living the COGS training file, the record
   reads 98.5 % right over one place, 98.3 % over two, 96.1 % over three, 91.8 % over four and 78.1 % over five.
-- **The prefrontal choice of the thought.** Zihin's plan is believed as its weakest decided word; the analogy's plan
-  by its vote. The one believed more is the thought, if it reaches the speaking line. It is then said token by token
-  as in 12.3.
+- **The prefrontal choice of the thought.** The analogy is a thought only if its own belief reaches the speaking
+  line. Where Zihin has no plan, the analogy's is the thought. Where the two plans differ, a record decides, kept
+  while Cevahir lives: before a dialogue's answer is heard, the analogy foresees it, and at each token of the answer
+  where the analogy's token and Zihin's expected one differ and exactly one of them is right, the record counts
+  whether it was the analogy's. The analogy leads if the rule on that record is at least one half. The thought is
+  then said token by token as in 12.3. Measured alone, the analogy answers 0 to 27 of 200 test commands of each
+  published SCAN split (a word there changes how often an action is repeated, which one substitution cannot carry),
+  where Zihin answers 199 or 200; on COGS it is the other way round. Each mechanism covers structure the other does
+  not, and the record says which to follow.
 
 Two constants enter, both bounds of a search: at most five places and eight neighbours. How far an analogy over
 many places is believed is not a constant: it is its record. A dialogue forgotten (`Cevahir.forget`) leaves the
