@@ -164,3 +164,34 @@ def test_feedback_is_kept_by_the_amygdala_and_a_wrong_answer_is_not_lived_as_rig
     c.converse("zap thrice")
     c.feedback(True)
     assert c.cortex.size()["lived"] == after_bad + len("\nzap thrice\tZAP ZAP ZAP")
+
+
+def test_a_language_never_met_opens_a_channel_is_watched_and_then_spoken_noise_never(FastCortex, tmp_path):
+    import os
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "research", "living_intelligence_2026_11_24"))
+    from m1_channels import alien_language
+    from living.cevahir import Cevahir
+    c = Cevahir(variant="speaking")
+    c.read("Kuşlar uçar. Balıklar yüzer. Kediler miyavlar. Köpekler havlar. " * 20)
+    alien = alien_language(12000, "pua", sentences=3)
+    rng = random.Random(5)
+    noise = "".join(chr(0xF000 + rng.randrange(22)) for _ in range(12000))
+    names = set()
+    for i in range(0, 12000, 256):
+        names.add(c.perceive(alien[i:i + 256]))
+    seen_noise = set()
+    for i in range(0, 12000, 256):
+        seen_noise.add(c.perceive(noise[i:i + 256]))
+    assert len(names) == 1 and c.channel not in names                 # one new channel for the new script
+    assert len(seen_noise) == 1 and not (seen_noise & names) and c.channel not in seen_noise
+    a, n = names.pop(), seen_noise.pop()
+    from living.evidence import SPEAKING_LINE
+    assert c.structure(a) >= SPEAKING_LINE and c.structure(n) < SPEAKING_LINE
+    assert c.say_on(n, noise[-256:]) == ""                            # noise is watched, never spoken
+    assert c.say_on(a, alien[-256:]) != ""
+    assert c.perceive("Kuşlar uçar. ") == c.channel                    # the known language stays on its channel
+    folder = str(tmp_path / "kept")
+    c.save(folder)
+    d = Cevahir.load(folder)
+    assert d.structure(a) == c.structure(a) and d.say_on(a, alien[-256:]) == c.say_on(a, alien[-256:])

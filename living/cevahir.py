@@ -96,6 +96,8 @@ class Cevahir:
         self.outcome_all = Counter()
         self.last_leads: List[Tuple[str, int]] = []              # who led each token of the last answer, and where
         self.pending: Optional[Tuple[str, str]] = None           # the last turn, lived by the harmony once judged
+        self.alphabets: Dict[str, set] = {self.channel: set()}   # every channel's own alphabet (MODEL.md 4)
+        self.others: Dict[str, dict] = {}                        # channels born by the rule: a harmony each
 
     # ------------------------------------------------------------------------------------------------ the voice --
     def candidates(self, token: str, partial: Optional[str] = None, weight: float = 1.0, gaps: int = 3,
@@ -161,6 +163,7 @@ class Cevahir:
 
     def _live_text(self, text: str) -> float:
         bits, _ = self.cortex.stream(text)
+        self.alphabets[self.channel].update(text)
         self.tail = (self.tail + text)[-TAIL:]
         if self.stream is not None:
             self.stream.append(text)
@@ -561,6 +564,60 @@ class Cevahir:
             self.cortex.set_voice([], [], 0.0)
             self._live_text(heard + (said if good else "\t"))
 
+    # ------------------------------------------------------------------------------------------------- channels ---
+    def newness(self, segment: str) -> Dict[str, float]:
+        """For every channel: the belief that ``segment`` is new to it, the rule on its symbols outside the
+        channel's alphabet (living/mind.py)."""
+        n = len(segment)
+        return {name: (sum(1 for x in segment if x not in a) + 0.5) / (n + 1.0) for name, a in self.alphabets.items()}
+
+    def perceive(self, segment: str, channel: Optional[str] = None) -> str:
+        """A segment of a stream (MODEL.md 4): on the channel it is told, or on the one the rule decides. A segment
+        new to every channel (each belief at the speaking line) is the first of a new channel, born with a harmony
+        of its own and an order-0 store beside it (for the structure belief); otherwise it goes to the channel it is
+        least new to. The main channel is the whole of Cevahir (``read``: Zihin and the harmony with Zihin's
+        voice); a channel born so is lived by its harmony. Returns the channel's name."""
+        from living.evidence import SPEAKING_LINE
+        if channel is None:
+            new = self.newness(segment)
+            if min(new.values()) >= SPEAKING_LINE:
+                channel = "kanal-%d" % (len(self.others) + 1)
+            else:
+                channel = min(new, key=lambda k: (new[k], k != self.channel))
+        if channel == self.channel:
+            self.read(segment)
+            return channel
+        if channel not in self.others:
+            cfg = dict(CORTEX)
+            self.others[channel] = {"cortex": FastCortex(**cfg), "plain": FastCortex(depth=0), "won": 0, "seen": 0}
+            self.alphabets[channel] = set()
+        ch = self.others[channel]
+        _, ctx = ch["cortex"].stream(segment, bits=True)
+        _, plain = ch["plain"].stream(segment, bits=True)
+        ch["won"] += int((ctx < plain).sum())
+        ch["seen"] += len(segment)
+        self.alphabets[channel].update(segment)
+        return channel
+
+    def structure(self, channel: str) -> float:
+        """The belief that a channel's context predicts: the rule on how many of its symbols the harmony
+        predicted better than the order-0 store living the same stream (noise never passes the speaking line)."""
+        ch = self.others.get(channel)
+        if ch is None:
+            return 0.5
+        return (ch["won"] + 0.5) / (ch["seen"] + 1.0)
+
+    def say_on(self, channel: str, prompt: str, most: int = 40) -> str:
+        """What Cevahir says on a channel born by the rule: nothing while the channel has shown no structure (it
+        watches); then its harmony's guesses, as long as each reaches the speaking line."""
+        from living.evidence import SPEAKING_LINE
+        if channel == self.channel:
+            return self.reply(prompt)
+        if self.structure(channel) < SPEAKING_LINE:
+            return ""
+        text, _ = self.others[channel]["cortex"].say(prompt, most=most, line=SPEAKING_LINE)
+        return text
+
     # ------------------------------------------------------------------------------------------------- keeping -----
     def save(self, folder: str) -> Dict[str, object]:
         """Keep Cevahir in ``folder``: Zihin (``zihin.persist.save``, with its manifest and digests), the core
@@ -574,6 +631,9 @@ class Cevahir:
         os.makedirs(folder, exist_ok=True)
         persist.save(self.mind, os.path.join(folder, "zihin.zihin"))
         self.cortex.save(os.path.join(folder, "core.bin"))
+        for i, (name, ch) in enumerate(sorted(self.others.items())):
+            ch["cortex"].save(os.path.join(folder, "channel-%d.bin" % i))
+            ch["plain"].save(os.path.join(folder, "channel-%d-plain.bin" % i))
         state = {
             "version": 1, "channel": self.channel, "dil": self.session.dil, "top": self.top,
             "forms_per": self.forms_per, "record": self.record, "tail": self.tail,
@@ -582,7 +642,9 @@ class Cevahir:
             "dis_won": dict(self.dis_won), "dis_all": dict(self.dis_all),
             "alone_right": dict(self.alone_right), "alone_all": dict(self.alone_all), "counts": dict(self.counts),
             "outcome_good": [[w, c, n] for (w, c), n in self.outcome_good.items()],
-            "outcome_all": [[w, c, n] for (w, c), n in self.outcome_all.items()]}
+            "outcome_all": [[w, c, n] for (w, c), n in self.outcome_all.items()],
+            "alphabets": {k: "".join(sorted(v)) for k, v in self.alphabets.items()},
+            "others": [[name, ch["won"], ch["seen"]] for name, ch in sorted(self.others.items())]}
         with open(os.path.join(folder, "cevahir.json"), "w", encoding="utf-8") as f:
             json.dump(state, f, ensure_ascii=False)
         files = {}
@@ -642,6 +704,12 @@ class Cevahir:
         self.outcome_good = Counter({(w, c): n for w, c, n in state.get("outcome_good", [])})
         self.outcome_all = Counter({(w, c): n for w, c, n in state.get("outcome_all", [])})
         self.last_leads, self.pending = [], None
+        self.alphabets = {k: set(v) for k, v in state.get("alphabets", {self.channel: ""}).items()}
+        self.others = {}
+        for i, (name, won, seen) in enumerate(state.get("others", [])):
+            self.others[name] = {"cortex": FastCortex.load(os.path.join(folder, "channel-%d.bin" % i)),
+                                 "plain": FastCortex.load(os.path.join(folder, "channel-%d-plain.bin" % i)),
+                                 "won": won, "seen": seen}
         return self
 
     def answers(self, questions: List[str], way: str = "cevahir", limit: int = 400,
