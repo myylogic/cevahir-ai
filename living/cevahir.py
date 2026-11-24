@@ -372,10 +372,11 @@ class Cevahir:
         """The prefrontal decision, one token at a time (MODEL.md 12). Zihin's next token (its decision, believed
         with e) and the harmony's own next token (believed with the product of its symbols' probabilities):
 
-        - when they are the same token, it is said (in the harmony's form) if either belief reaches the line;
-        - when they differ, the one the record of disagreements in this situation trusts more leads (the one rule:
-          how often Zihin's token was the one when the two differed while Cevahir lived), and it is said if its
-          belief reaches the speaking line;
+        - when they are the same token, it is said (in the harmony's form): Zihin decided it and the harmony agrees;
+        - when they differ, Zihin's token is said (Zihin decided it: it is the plan) unless the harmony's own token
+          reaches the speaking line and the record of disagreements in this situation trusts the harmony more (the
+          one rule: how often Zihin's token was the one when the two differed while Cevahir lived, with the
+          outcomes of judged answers);
         - when Zihin says nothing at all, the harmony speaks alone only if its record of speaking where Zihin
           expected nothing, in this situation, is above one half; once Zihin's plan is said, the harmony adds no
           word of its own (the plan is the thought; its end is part of it);
@@ -397,9 +398,7 @@ class Cevahir:
             h_tok = self.session.lower(h_found[0]) if h_found else None
             z_tok = plan[k] if k < len(plan) else None
             z_e = (plan_e[k] if k < len(plan_e) else line) if z_tok is not None else 0.0
-            if z_tok is not None and z_tok == h_tok:
-                if max(h_p, z_e) < line:
-                    break
+            if z_tok is not None and z_tok == h_tok:          # Zihin decided it and the harmony agrees
                 said += h_form
                 k += 1
             else:
@@ -410,9 +409,9 @@ class Cevahir:
                     if forms:
                         beliefs = [self.belief(here, f) for f in forms]
                         z_form = forms[max(range(len(forms)), key=lambda i: beliefs[i])]
-                lead_z = bool(z_form) and (h_tok is None or
+                lead_z = bool(z_form) and (h_tok is None or h_p < line or
                                            self.trust_zihin(self.situation(True, k == 0, z_e)) >= 0.5)
-                if lead_z and z_e >= line:
+                if lead_z:
                     said += z_form
                     if h_tok is not None:
                         self.last_leads.append(("zihin", self.situation(True, k == 0, z_e)))
@@ -429,6 +428,11 @@ class Cevahir:
                     break
             partial = None
         return said
+
+    def _heard_forms(self, question: str) -> None:
+        """The written forms of a question's tokens, as heard (so that a word met first in it can be said back)."""
+        for m in TOKEN.finditer(question):
+            self.written[False][self.session.lower(m.group())][m.group()] += 1
 
     def reply(self, question: str, way: str = "cevahir", limit: int = 400) -> str:
         """Cevahir answers ``question`` (told); this lives Zihin's part of it (as Zihin's reply does). ``way``:
@@ -456,6 +460,7 @@ class Cevahir:
             del self.mind.step
         if way == "zihin":
             return said
+        self._heard_forms(question)
         plan = [] if said == "(sessiz)" else self.session.words(said)
         es = [e for w, e in decided]
         plan_e = es if [w for w, _ in decided] == plan else []
@@ -484,6 +489,7 @@ class Cevahir:
         finally:
             del self.mind.step
         out["zihin"] = said
+        self._heard_forms(question)
         plan = [] if said == "(sessiz)" else self.session.words(said)
         es = [e for w, e in decided]
         plan_e = es if [w for w, _ in decided] == plan else []
@@ -516,6 +522,7 @@ class Cevahir:
         (t_m2.py "both"); the harmony alone; and the one layer from Zihin's plan."""
         out = {"harmony": self.reply(question, "harmony", limit)}
         history = self.tail + self._lead() + question + "\t"
+        self._heard_forms(question)
         seen = self.seen_answer(question, scene, before) if scene is not None else None
         if seen is not None:
             out["zihin"] = " ".join(seen)

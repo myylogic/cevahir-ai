@@ -209,3 +209,21 @@ def test_cevahir_sleeps_forgets_one_off_contexts_and_still_answers(FastCortex):
     assert night["forgotten"][c.channel] > 0 and c.cortex.size()["nodes"] < nodes
     said = c.answers([q for q, _ in tests], way="every", workers=2)
     assert sum(c.session.body(s["cevahir"]) == c.session.words(a) for s, (_, a) in zip(said, tests)) == len(tests)
+
+
+def test_a_word_first_met_in_the_question_is_said_back_as_it_was_written(FastCortex):
+    from living.cevahir import Cevahir
+    rng = random.Random(0)
+    names = ["Ali", "Veli", "Ayşe", "Fatma", "Mehmet", "Zeynep", "Can", "Ece", "Deniz", "Selin", "Kerem", "Elif"]
+    places = ["evde", "okulda", "parkta", "bahçede"]
+    life = [("%s nerede ?" % n, "%s %s ." % (n, rng.choice(places))) for _ in range(3) for n in names]
+    rng.shuffle(life)
+    c = Cevahir(variant="full")
+    for q, a in life:
+        c.watch(q, a)
+    c.session.close_turn()
+    said = c.answers(["Zorbek nerede ?", "Yıldız nerede ?"], way="every", workers=2)
+    for s, name in zip(said, ["Zorbek", "Yıldız"]):
+        if s["zihin"] != "(sessiz)":
+            assert c.session.words(s["cevahir"]) == c.session.words(s["zihin"])
+            assert s["cevahir"].startswith(name)                        # the case as it was heard
