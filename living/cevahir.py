@@ -743,7 +743,7 @@ class Cevahir:
         return out
 
     # ------------------------------------------------------------------------------------------------- keeping -----
-    def save(self, folder: str) -> Dict[str, object]:
+    def save(self, folder: str, compress: bool = False) -> Dict[str, object]:
         """Keep Cevahir in ``folder``: Zihin (``zihin.persist.save``, with its manifest and digests), the core
         (``core.bin``) and what Cevahir itself learned (the forms lexicon, the records, the stream's tail:
         ``cevahir.json``), and a manifest with the SHA-256 of every file (``manifest.json``). Pickle executes code
@@ -781,7 +781,17 @@ class Cevahir:
                     h.update(block)
             files[name] = h.hexdigest()
         manifest = {"what": "Cevahir (living/cevahir.py)", "files": files, "zihin_moments": self.mind.t,
-                    "core": self.cortex.size()}
+                    "core": self.cortex.size(), "compressed": []}
+        if compress:                                     # the stores as .gz (their digests are of what they hold)
+            import gzip
+            import shutil
+            for name in list(files):
+                if name.endswith((".bin", ".zihin")):
+                    src = os.path.join(folder, name)
+                    with open(src, "rb") as fi, gzip.open(src + ".gz", "wb", compresslevel=9) as fo:
+                        shutil.copyfileobj(fi, fo, 1 << 20)
+                    os.remove(src)
+                    manifest["compressed"].append(name)
         with open(os.path.join(folder, "manifest.json"), "w", encoding="utf-8") as f:
             json.dump(manifest, f, indent=1)
         return manifest
@@ -795,6 +805,14 @@ class Cevahir:
         from zihin.__main__ import Session
         with open(os.path.join(folder, "manifest.json"), encoding="utf-8") as f:
             manifest = json.load(f)
+        for name in manifest.get("compressed", []):     # a compressed store is unpacked beside it, once
+            path = os.path.join(folder, name)
+            if not os.path.exists(path):
+                import gzip
+                import shutil
+                with gzip.open(path + ".gz", "rb") as fi, open(path + ".tmp", "wb") as fo:
+                    shutil.copyfileobj(fi, fo, 1 << 20)
+                os.replace(path + ".tmp", path)
         for name, digest in manifest["files"].items():
             h = hashlib.sha256()
             with open(os.path.join(folder, name), "rb") as f:
