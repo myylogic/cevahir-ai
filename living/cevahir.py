@@ -521,10 +521,14 @@ class Cevahir:
         Returns (plan, beliefs, whose)."""
         from living.evidence import SPEAKING_LINE
         a_plan, a_e, _ = self.episodes.plan(self._said(question))
+        self.last_choice = None
         if a_plan and a_e >= SPEAKING_LINE:
             low = [self.session.lower(t) for t in a_plan]
-            if not plan or (low != list(plan) and self.trust_analogy() >= 0.5):
+            differ = bool(plan) and low != list(plan)
+            if not plan or (differ and self.trust_analogy() >= 0.5):
+                self.last_choice = ("analogy", differ)
                 return low, [a_e] * len(low), "analogy"
+            self.last_choice = ("zihin", differ)
         return plan, plan_e, "zihin"
 
     def _heard_forms(self, question: str) -> None:
@@ -665,9 +669,16 @@ class Cevahir:
         """The amygdala (MODEL.md 12.4): how Cevahir's last answer was received. Zihin learns it as it always did
         (a value at the end of the episode, ``Session.feedback``); every token of the answer counts for the voice
         that led it, in its situation, in the record the prefrontal decision trusts by (``trust_zihin``,
-        ``trust_alone``); and the harmony lives the turn with the answer only if it was right (a wrong answer is
-        not kept as something said rightly: the question alone is lived)."""
+        ``trust_alone``); where Zihin's plan and the analogy's differed, the outcome counts in the record that
+        chose between them (``trust_analogy``): for the one chosen if right, for the other if wrong; and the harmony
+        lives the turn with the answer only if it was right (a wrong answer is not kept as something said rightly:
+        the question alone is lived)."""
         self.session.feedback(good)
+        choice = getattr(self, "last_choice", None)
+        if choice is not None and choice[1]:                 # the two thoughts differed: the outcome is evidence
+            self.az_all += 1                                 # for the one chosen (right) or the other (wrong)
+            self.az_won += 1 if (choice[0] == "analogy") == bool(good) else 0
+        self.last_choice = None
         for who, cell in self.last_leads:
             self.outcome_all[(who, cell)] += 1
             self.outcome_good[(who, cell)] += 1 if good else 0
