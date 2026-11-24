@@ -140,7 +140,7 @@ def main() -> None:
     report = {"who": "cevahir", "lessons": rows, "review": rev, "moments": c.mind.t, "core": c.cortex.size(),
               "seconds": round(time.time() - t0, 1)}
     if a.save:
-        report["saved"] = c.save(a.save)["files"]
+        report["saved"] = c.save(a.save, compress=True)["files"]
     if a.report:
         with open(a.report, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=1)
