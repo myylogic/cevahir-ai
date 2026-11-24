@@ -461,8 +461,8 @@ as the harmony's gate (section 5.3).
 |---|---|---|---|
 | M1 | cortex, lexicon, channels | prequential bits per character against PPMd, xz, bzip2, gzip and a character Transformer (offline and online); growth and its exponent; seen and unseen words; bits at a word's k-th meeting; exact retraction; a new channel, a made-up language and noise | built and measured, [NOTES.md](NOTES.md) |
 | M2 | the harmony: every context, the word contexts, the episode and a short-term memory, combined bit by bit by a learned gate and calibrated by the rule; the cortex in C | bits per character below PPMd on the same texts; each part's share; the rule against the gradient gate | built and measured, [NOTES.md](NOTES.md) 6 |
-| M3 | PFC and amygdala; the word-level cortex over word numbers | sentences said to the end and their coherence; retention of salient facts after interference; the earlier dialogue and school tests through the new architecture | next |
-| M4 | hippocampus and sleep | memory bounded by B; the cost in bits of forgetting; growth with forgetting; retraction after consolidation | |
+| M3 | PFC and amygdala; the word-level cortex over word numbers | sentences said to the end and their coherence; retention of salient facts after interference; the earlier dialogue and school tests through the new architecture | built as Cevahir, one layer (section 12): Zihin as a voice of the harmony, the prefrontal decision by records, the amygdala's record of outcomes; measured in [NOTES.md](NOTES.md) 8 (the word-level cortex is Zihin's) |
+| M4 | hippocampus and sleep | memory bounded by B; the cost in bits of forgetting; growth with forgetting; retraction after consolidation | built: the hippocampus's episodes and analogy (12.5), sleep (the cortex forgets what did not recur), exact forgetting; measured in [NOTES.md](NOTES.md) 8 |
 | M5 | meaning and dialogue | the ground of Zihin on the new cortex; a standard benchmark (enwik8 or text8; downloaded only with the owner's permission) | |
 
 Every milestone keeps the earlier gates. The rule is not changed to win a measure; if a measure needs a new constant,
