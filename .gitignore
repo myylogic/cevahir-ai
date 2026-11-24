@@ -52,6 +52,7 @@ desktop.ini
 private_data/
 *.zihin
 *.zihin.json
+!minds/cevahir-open.zihin.json
 *.zihin.tmp
 zihin_logs/
 *.zihin.log

@@ -37,6 +37,12 @@ def main():
     for path, sha in prior.get("newline_normalized_files", {}).items():
         normalized = (ROOT / path).read_bytes().replace(b"\r\n", b"\n")
         _require(hashlib.sha256(normalized).hexdigest() == sha, f"preserved file changed: {path}")
+    for path, entry in prior.get("withdrawn", {}).items():   # withdrawn by the author: exactly the note, which names
+        _require((ROOT / path).read_text(encoding="utf-8") == build_publications.withdrawal_note(path),   # where the full text is archived
+                 f"withdrawn file is not its note: {path}")
+        _require(entry["archived_in"] == build_publications.WITHDRAWN_ARCHIVE_TAG and \
+                 entry["doi"] == build_publications.WITHDRAWN_ARCHIVE_DOI,
+                 f"withdrawn file without its archive: {path}")
     result = json.loads((ROOT / "research/living_learning_query_state_2026_09_21/results/query_state.json").read_text())
     source = ROOT / "research/living_learning_query_state_2026_09_21/query_state.py"
     _require(result["source_sha256"] == hashlib.sha256(source.read_bytes()).hexdigest(), "query_state source digest")
@@ -65,7 +71,8 @@ def main():
         _require(re.fullmatch(r"10\.5281/zenodo\.\d+", release["doi"]), "release DOI format")
         _require(f'doi: {release["doi"]}' in cff, "CITATION.cff DOI")
     print(json.dumps({"status": "passed", "papers": len(catalog["papers"]),
-                      "preserved_prior_files": len(prior["files"]), "local_links": links,
+                      "preserved_prior_files": len(prior["files"]), "withdrawn_files": len(prior.get("withdrawn", {})),
+                      "local_links": links,
                       "doi_status": release["status"]}))
 
 

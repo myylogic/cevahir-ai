@@ -4,7 +4,7 @@
 
 [English](README.md) · [Türkçe](README-TR.md)
 
-[Research archive DOI (always the latest version): 10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660) · [Research reports](docs/publications/README.md)
+[Research archive DOI (always the latest version): 10.5281/zenodo.22864660](https://doi.org/10.5281/zenodo.22864660) · [Research reports](docs/publications/README.md) · [The paper: Cevahir Zihin, a Living Evidence Mind](docs/research/living_evidence_mind_2026_11_24/PAPER.md)
 
 > **Latest update — November 2026: Cevahir Zihin, a mind that learns by living. Not a Transformer.**
 >
@@ -67,8 +67,8 @@
 >
 > **There is no separate training phase; the model learns in every conversation. Please speak to it kindly.**
 >
-> Theory and architecture: [docs/ZIHIN_THEORY.md](docs/ZIHIN_THEORY.md) · guide (Turkish):
-> [docs/ZIHIN_KILAVUZ.md](docs/ZIHIN_KILAVUZ.md) · measurements and negative results:
+> Theory and architecture: [docs/ZIHIN_THEORY.md](docs/ZIHIN_THEORY.md) · the paper:
+> [PAPER.md](docs/research/living_evidence_mind_2026_11_24/PAPER.md) · measurements and negative results:
 > [research/living_mind_2026_11_15/NOTES.md](research/living_mind_2026_11_15/NOTES.md)
 
 ### Run Cevahir Zihin on your computer
@@ -198,7 +198,7 @@ In November 2026 I started a new core, separate from the Transformer: **Zihin** 
 
 **Not yet:** learning to learn gave only a small gain, in one direction (F24). Curiosity, imagination and dreams are first forms: the reality score cannot yet tell a plausible construction from a weak leap. Scaling is partly solved: the cost per moment now grows little with memory and memory per tie is 3.5x smaller, but memory still grows linearly with lived data; measurements and the plan are [here](research/living_mind_2026_11_15/NOTES.md). It has no voice of its own (no speech output). On real data its chat is mostly imitation; it answers questions about itself with the true things it was told, and its self unit does not steer what it says yet. The worlds are small and the Transformer comparison covers only the small-data regime. This is not a claim of consciousness or of general intelligence; neither can be measured for any machine today. The aim and the road map are explicit: a mind that learns by living, builds its own concepts, makes sense of what it acquired and knows itself. The design layers (deliberate focus, automatic reflexes, inner and outer voice, drives and will, knowing itself) are [here](research/living_mind_2026_11_14/LAYERS.md), the vision [here](research/living_mind_2026_11_14/design/VISION.md), the latest work (sleep and dreams, hearing) [here](research/living_mind_2026_11_15/NOTES.md).
 
-**Try it** (full guide in Turkish: [docs/ZIHIN_KILAVUZ.md](docs/ZIHIN_KILAVUZ.md); from PowerShell: `.\cevahir.ps1`):
+**Try it** (from PowerShell: `.\cevahir.ps1`; a mind raised on public material only: `python -m zihin --load minds/cevahir-open.zihin`, see [minds/README.md](minds/README.md)):
 
 ```
 python -m zihin                      # a new mind
@@ -214,7 +214,7 @@ python -m zihin                      # a new mind
 
 **[Cevahir AI — Anatomy of an AI Engine: table of contents](docs/book/README.md)**
 
-The modular Turkish book connects AI fundamentals to the real Cevahir implementation: tokenization, neural computation, Transformer blocks, training, checkpoints, generation, memory, cognition, tools and open research. Each chapter follows actual callers, inputs, outputs, configuration gates and evidence. [English reading guide](docs/book/README-en.md) · [Source map](docs/book/KAYNAK_HARITASI.md) · [Keeping code and documentation aligned](docs/book/BAKIM.md).
+The Turkish chapters of this book were withdrawn by their author on 20 November 2026; their full text is in release v6 ([DOI 10.5281/zenodo.24279940](https://doi.org/10.5281/zenodo.24279940)). The book connected AI fundamentals to the real Cevahir implementation: tokenization, neural computation, Transformer blocks, training, checkpoints, generation, memory, cognition, tools and open research. Each chapter follows actual callers, inputs, outputs, configuration gates and evidence. [English reading guide](docs/book/README-en.md) · [Source map](docs/book/KAYNAK_HARITASI.md) · [Keeping code and documentation aligned](docs/book/BAKIM.md).
 
 The [research laboratory](docs/book/tr/11-arastirma-laboratuvari.md) preserves successful and negative experiments. The [research publication series](docs/publications/README.md) presents nine reports by Muhammed Yasin Yılmaz, with English abstracts, full methods, evidence and limitations. The [latest future-query study](docs/research/living_learning_query_state_2026_09_21/REPORT_TR.md) distinguishes the information needed for future queries and corrections. These bounded results do not solve the general living-learning problem. [Version and DOI record](docs/publications/release.json).
 

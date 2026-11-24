@@ -1,0 +1,12 @@
+{
+  "format": "zihin-mind-v1",
+  "file": "cevahir-open.zihin",
+  "sha256": "c9cbafbebbf27c0c61484c5510617e1696766a68199f7485ee0cc9809cb9ef6a",
+  "substance_digest": "ba5be963d6315a5d716fc70258c21e4cf603172d573f61c7a40b261419d194e2",
+  "moments": 19040,
+  "log_sha256": null,
+  "units": 14107,
+  "ties": 132229,
+  "core_tensors": 12167380,
+  "log": 0
+}

@@ -1,0 +1,774 @@
+{
+ "mind": "empty.zihin",
+ "saved": "cevahir-open.zihin",
+ "moments_before": 0,
+ "ties_before": 4,
+ "read": [],
+ "lessons": [
+  {
+   "lesson": "first_dialogues",
+   "lines": 5,
+   "asked": 5,
+   "rounds": [
+    5
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 0.6,
+   "moments": 95
+  },
+  {
+   "lesson": "feedback_dialogues",
+   "lines": 4,
+   "asked": 4,
+   "rounds": [
+    4
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 0.3,
+   "moments": 183
+  },
+  {
+   "lesson": "school_text",
+   "lines": 5,
+   "asked": 0,
+   "rounds": [
+    0
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 0.1,
+   "moments": 220
+  },
+  {
+   "lesson": "school_questions",
+   "lines": 3,
+   "asked": 3,
+   "rounds": [
+    3
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 0.2,
+   "moments": 287
+  },
+  {
+   "lesson": "imagination_text",
+   "lines": 5,
+   "asked": 0,
+   "rounds": [
+    0
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 0.1,
+   "moments": 324
+  },
+  {
+   "lesson": "school_biyoloji",
+   "lines": 36,
+   "asked": 8,
+   "rounds": [
+    6,
+    8
+   ],
+   "went_on": [
+    0,
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 1.6,
+   "moments": 694
+  },
+  {
+   "lesson": "school_fizik",
+   "lines": 27,
+   "asked": 6,
+   "rounds": [
+    6
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 1.0,
+   "moments": 919
+  },
+  {
+   "lesson": "school_kimya",
+   "lines": 46,
+   "asked": 46,
+   "rounds": [
+    46
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 16.9,
+   "moments": 4223
+  },
+  {
+   "lesson": "school_kodlama",
+   "lines": 26,
+   "asked": 26,
+   "rounds": [
+    26
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 5.9,
+   "moments": 4781
+  },
+  {
+   "lesson": "school_matematik",
+   "lines": 39,
+   "asked": 36,
+   "rounds": [
+    36
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 23.5,
+   "moments": 6927
+  },
+  {
+   "lesson": "school_müzik",
+   "lines": 6,
+   "asked": 3,
+   "rounds": [
+    3
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 1.1,
+   "moments": 7023
+  },
+  {
+   "lesson": "school_çizim",
+   "lines": 19,
+   "asked": 19,
+   "rounds": [
+    19
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    0
+   ],
+   "seconds": 8.2,
+   "moments": 7567
+  },
+  {
+   "lesson": "01_matematik",
+   "lines": 37,
+   "asked": 19,
+   "rounds": [
+    19
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    2
+   ],
+   "seconds": 9.3,
+   "moments": 8146
+  },
+  {
+   "lesson": "02_fizik",
+   "lines": 35,
+   "asked": 16,
+   "rounds": [
+    16
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    2
+   ],
+   "seconds": 9.4,
+   "moments": 8667
+  },
+  {
+   "lesson": "03_kimya",
+   "lines": 35,
+   "asked": 16,
+   "rounds": [
+    16
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    2,
+    2
+   ],
+   "seconds": 11.1,
+   "moments": 9213
+  },
+  {
+   "lesson": "04_biyoloji",
+   "lines": 34,
+   "asked": 12,
+   "rounds": [
+    7,
+    12
+   ],
+   "went_on": [
+    0,
+    0
+   ],
+   "exam": [
+    0,
+    3
+   ],
+   "seconds": 32.5,
+   "moments": 9736
+  },
+  {
+   "lesson": "05_anatomi",
+   "lines": 31,
+   "asked": 14,
+   "rounds": [
+    14
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    1,
+    2
+   ],
+   "seconds": 9.9,
+   "moments": 10178
+  },
+  {
+   "lesson": "06_hastaliklar",
+   "lines": 28,
+   "asked": 12,
+   "rounds": [
+    12
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    2
+   ],
+   "seconds": 10.2,
+   "moments": 10555
+  },
+  {
+   "lesson": "07_muhendislik",
+   "lines": 22,
+   "asked": 10,
+   "rounds": [
+    10
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    1,
+    2
+   ],
+   "seconds": 9.3,
+   "moments": 10894
+  },
+  {
+   "lesson": "08_kodlama",
+   "lines": 30,
+   "asked": 22,
+   "rounds": [
+    22
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    5
+   ],
+   "seconds": 20.4,
+   "moments": 11535
+  },
+  {
+   "lesson": "09_gunes_sistemi",
+   "lines": 25,
+   "asked": 11,
+   "rounds": [
+    11
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    2
+   ],
+   "seconds": 12.3,
+   "moments": 11897
+  },
+  {
+   "lesson": "10_toplum",
+   "lines": 19,
+   "asked": 9,
+   "rounds": [
+    9
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    1
+   ],
+   "seconds": 8.8,
+   "moments": 12223
+  },
+  {
+   "lesson": "11_makine_ogrenmesi",
+   "lines": 18,
+   "asked": 8,
+   "rounds": [
+    8
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    1
+   ],
+   "seconds": 8.0,
+   "moments": 12496
+  },
+  {
+   "lesson": "12_cevahir",
+   "lines": 20,
+   "asked": 9,
+   "rounds": [
+    9
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    1
+   ],
+   "seconds": 10.1,
+   "moments": 12828
+  },
+  {
+   "lesson": "13_matematik_ileri",
+   "lines": 25,
+   "asked": 12,
+   "rounds": [
+    12
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    1
+   ],
+   "seconds": 14.2,
+   "moments": 13225
+  },
+  {
+   "lesson": "14_fizik_ileri",
+   "lines": 23,
+   "asked": 10,
+   "rounds": [
+    10
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    1
+   ],
+   "seconds": 11.3,
+   "moments": 13546
+  },
+  {
+   "lesson": "15_kimya_ileri",
+   "lines": 22,
+   "asked": 10,
+   "rounds": [
+    10
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    1,
+    2
+   ],
+   "seconds": 12.1,
+   "moments": 13882
+  },
+  {
+   "lesson": "16_biyoloji_ileri",
+   "lines": 24,
+   "asked": 11,
+   "rounds": [
+    11
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    1
+   ],
+   "seconds": 14.3,
+   "moments": 14208
+  },
+  {
+   "lesson": "17_anatomi_ileri",
+   "lines": 24,
+   "asked": 11,
+   "rounds": [
+    11
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    1
+   ],
+   "seconds": 15.8,
+   "moments": 14555
+  },
+  {
+   "lesson": "18_hastaliklar_ileri",
+   "lines": 21,
+   "asked": 10,
+   "rounds": [
+    10
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    1
+   ],
+   "seconds": 14.0,
+   "moments": 14861
+  },
+  {
+   "lesson": "19_muhendislik_ileri",
+   "lines": 21,
+   "asked": 10,
+   "rounds": [
+    10
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    1
+   ],
+   "seconds": 14.9,
+   "moments": 15179
+  },
+  {
+   "lesson": "20_python_ileri",
+   "lines": 21,
+   "asked": 15,
+   "rounds": [
+    15
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    2
+   ],
+   "seconds": 20.7,
+   "moments": 15614
+  },
+  {
+   "lesson": "21_csharp_java_ileri",
+   "lines": 14,
+   "asked": 12,
+   "rounds": [
+    12
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    2
+   ],
+   "seconds": 22.4,
+   "moments": 15996
+  },
+  {
+   "lesson": "22_algoritmalar",
+   "lines": 20,
+   "asked": 9,
+   "rounds": [
+    9
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    2
+   ],
+   "seconds": 15.4,
+   "moments": 16290
+  },
+  {
+   "lesson": "23_astronomi",
+   "lines": 18,
+   "asked": 8,
+   "rounds": [
+    8
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    1,
+    1
+   ],
+   "seconds": 14.3,
+   "moments": 16554
+  },
+  {
+   "lesson": "24_yapay_zeka_ileri",
+   "lines": 18,
+   "asked": 8,
+   "rounds": [
+    8
+   ],
+   "went_on": [
+    0
+   ],
+   "exam": [
+    0,
+    1
+   ],
+   "seconds": 15.0,
+   "moments": 16839
+  }
+ ],
+ "review": {
+  "first_dialogues": [
+   3,
+   5
+  ],
+  "feedback_dialogues": [
+   4,
+   4
+  ],
+  "school_text": [
+   0,
+   0
+  ],
+  "school_questions": [
+   3,
+   3
+  ],
+  "imagination_text": [
+   0,
+   0
+  ],
+  "school_biyoloji": [
+   3,
+   8
+  ],
+  "school_fizik": [
+   6,
+   6
+  ],
+  "school_kimya": [
+   46,
+   46
+  ],
+  "school_kodlama": [
+   26,
+   26
+  ],
+  "school_matematik": [
+   36,
+   36
+  ],
+  "school_müzik": [
+   3,
+   3
+  ],
+  "school_çizim": [
+   19,
+   19
+  ],
+  "01_matematik": [
+   19,
+   19
+  ],
+  "02_fizik": [
+   16,
+   16
+  ],
+  "03_kimya": [
+   16,
+   16
+  ],
+  "04_biyoloji": [
+   12,
+   12
+  ],
+  "05_anatomi": [
+   14,
+   14
+  ],
+  "06_hastaliklar": [
+   12,
+   12
+  ],
+  "07_muhendislik": [
+   10,
+   10
+  ],
+  "08_kodlama": [
+   22,
+   22
+  ],
+  "09_gunes_sistemi": [
+   11,
+   11
+  ],
+  "10_toplum": [
+   9,
+   9
+  ],
+  "11_makine_ogrenmesi": [
+   8,
+   8
+  ],
+  "12_cevahir": [
+   9,
+   9
+  ],
+  "13_matematik_ileri": [
+   12,
+   12
+  ],
+  "14_fizik_ileri": [
+   10,
+   10
+  ],
+  "15_kimya_ileri": [
+   10,
+   10
+  ],
+  "16_biyoloji_ileri": [
+   11,
+   11
+  ],
+  "17_anatomi_ileri": [
+   11,
+   11
+  ],
+  "18_hastaliklar_ileri": [
+   10,
+   10
+  ],
+  "19_muhendislik_ileri": [
+   10,
+   10
+  ],
+  "20_python_ileri": [
+   15,
+   15
+  ],
+  "21_csharp_java_ileri": [
+   12,
+   12
+  ],
+  "22_algoritmalar": [
+   9,
+   9
+  ],
+  "23_astronomi": [
+   8,
+   8
+  ],
+  "24_yapay_zeka_ileri": [
+   8,
+   8
+  ]
+ },
+ "moments_after": 19040,
+ "ties_after": 132229,
+ "seconds": 1005.5
+}

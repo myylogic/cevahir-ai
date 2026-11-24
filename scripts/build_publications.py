@@ -10,6 +10,29 @@ ROOT = Path(__file__).resolve().parents[1]
 PUB = ROOT / "docs/publications"
 
 
+# A document withdrawn by its author (release v7) is replaced by this note, which names the release holding its full
+# text and the English paper describing the work; check_publications.py requires each withdrawn preserved file to be
+# exactly its note.
+WITHDRAWN_PAPER = "docs/research/living_evidence_mind_2026_11_24/PAPER.md"
+WITHDRAWN_ARCHIVE_TAG = "research-2026.11.16-v6"
+WITHDRAWN_ARCHIVE_DOI = "10.5281/zenodo.24279940"
+WITHDRAWN_NOTE = """# Withdrawn
+
+This document was withdrawn from the repository on 20 November 2026 by its author. Its full text is archived in
+release v6 (tag `{tag}`, the same path), DOI
+[{doi}](https://doi.org/{doi}).
+
+The work is described in English in [Cevahir Zihin: a Living Evidence Mind]({link}).
+"""
+
+
+def withdrawal_note(path):
+    """The note for a repository path (POSIX, relative to the repository root)."""
+    folder = os.path.dirname(path) or "."
+    link = Path(os.path.relpath(WITHDRAWN_PAPER, folder)).as_posix()
+    return WITHDRAWN_NOTE.format(tag=WITHDRAWN_ARCHIVE_TAG, doi=WITHDRAWN_ARCHIVE_DOI, link=link)
+
+
 def relative(source, destination):
     return Path(os.path.relpath(source, destination)).as_posix()
 
@@ -26,46 +49,40 @@ def edition(paper, catalog):
         target = relative((source.parent / path).resolve(), parent)
         return f"[{label}]({target}{marker}{anchor})"
     text = re.sub(r"\[([^\]\n]+)\]\(([^\s)]+)\)", rebase, text)
-    text = re.sub(r"\A# ([^\n]+)", r"## Araştırma kaydı: \1", text)
+    text = re.sub(r"\A# ([^\n]+)", r"## Research record: \1", text)
     return f'''# {paper["title"]}
 
 **{catalog["author"]}**
 
-{paper["id"]} · Sürüm {catalog["version"]} · Yayın tarihi {catalog["date"]}
+{paper["id"]} · Version {catalog["version"]} · Published {catalog["date"]}
 
-Araştırma raporu / ön baskı. Dış hakem değerlendirmesinden geçmemiştir.
-
-## Özet
-
-{paper["abstract"]}
+Research report / preprint. Not peer reviewed.
 
 ## Abstract
 
-{paper["abstract_en"]}
+{paper["abstract"]}
 
-## Bulguların yorumu
+## Interpretation of the findings
 
 {paper["finding"]}
 
 {paper["limit"]}
 
-## Yayın ve kanıt bilgisi
+## Publication and evidence
 
-Bu makale düzenindeki edisyon, aşağıda özgün araştırma raporunun tam metnini yöntem,
-sonuç, negatif kontrol ve kaynak bağlantılarıyla birlikte içerir. Orijinal dosya
-[{paper["source"]}]({relative(source, parent)}) olarak korunur. Bağlantı yolları bu
-edisyonun konumuna uyarlanmıştır. Rapordaki çalışma tarihi ve geçmiş yayın durumu
-ifadeleri tarihsel kayda aittir; bu edisyonun tarihi yukarıdadır.
+This edition presents the research record below with its method, results, negative controls and source links, or
+where that record was withdrawn, the note that says where its full text is archived. The original file is kept as
+[{paper["source"]}]({relative(source, parent)}); links are rebased to this edition's location. Dates and earlier
+publication statuses inside the record belong to the historical record; this edition's date is above.
 
-Bu çalışma [yayın dizisi](../README.md) içindeki ayrı bir metindir. DOI, bütün
-metinleri, teknik kitabı ve kodu içeren sürüm arşivini tanımlar; her makaleye ayrı
-DOI verildiği anlamına gelmez. Atıfta çalışma kimliği ve sürüm DOI'si birlikte
-kullanılmalıdır. Hesaplamalı denetimlerin kapsamı [doğrulama kaydında](../evidence/validation.json)
-ve [yayın ilkelerinde](../PUBLISHING.md) açıklanır.
+This work is a separate text in the [publication series](../README.md). The DOI identifies the release archive that
+holds every text and the code; it does not mean that each paper has a DOI of its own. Cite the work's identifier
+together with the release DOI. The scope of the computational checks is described in the
+[validation record](../evidence/validation.json) and the [publishing principles](../PUBLISHING.md).
 
-Proje ve araştırma yönü Muhammed Yasin Yılmaz'a aittir. Kod, hesaplamalı deney,
-literatür incelemesi ve metin hazırlığında yapay zekâ desteği kullanılmıştır.
-Bu katkı açıklaması, DOI kaydı veya otomatik testler dış bilimsel hakemlik sayılmaz.
+The project and its research direction are Muhammed Yasin Yılmaz's. AI assistance was used for code, computational
+experiments, literature review and text preparation. Neither this statement, the DOI record nor the automated tests
+are external scientific peer review.
 
 ---
 

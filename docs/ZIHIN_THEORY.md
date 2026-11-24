@@ -2,8 +2,9 @@
 
 *Muhammed Yasin Yılmaz, November 2026. This text describes the theory and architecture of the `zihin/` core in this
 repository. Measurements and negative results for every claim are in the notes and result files under
-`research/living_mind_2026_11_14/` and `research/living_mind_2026_11_15/`. Turkish original:
-[ZIHIN_KURAM.md](ZIHIN_KURAM.md).*
+`research/living_mind_2026_11_14/` and `research/living_mind_2026_11_15/`. The whole work is described in the paper
+[Cevahir Zihin: a Living Evidence Mind](research/living_evidence_mind_2026_11_24/PAPER.md). The Turkish original of
+this text was withdrawn on 20 November 2026; it is in release v6 (DOI 10.5281/zenodo.24279940).*
 
 ## In short
 

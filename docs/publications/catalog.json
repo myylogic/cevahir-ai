@@ -1,109 +1,108 @@
 {
-  "version": "2026.11.16",
-  "release_tag": "research-2026.10.13-v4",
+  "version": "2026.11.24",
+  "release_tag": "research-2026.11.24-v7",
   "author": "Muhammed Yasin Yılmaz",
-  "date": "2026-11-16",
+  "date": "2026-11-24",
   "status": "Research reports / preprints; not peer reviewed",
   "papers": [
     {
       "id": "CEV-2026-01",
       "file": "01-experience-conditioned-computation.md",
-      "title": "Deneyimle koşullanan hesaplama: kaynaklı geri bildirim ve yürütme sınırları",
       "source": "docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md",
-      "abstract": "Çalışma sırasında edinilen dış geri bildirimin daha sonraki hesaplama stratejisini değiştirmesi için kaynaklı deneyim, ortak istek bütçesi ve strateji tercihi uygulanmıştır. Kalıcı deneyim istatistikleri ağırlık eğitiminden ayrılır. Sentetik tablo replay'i mekanizmayı sınar; gerçek model kalitesi veya maliyet kazancı gösterilmiş değildir. Görev, model ve tokenizer kimlikleri ile geri bildirim düzeltmeleri deneyim karşılaştırmasının sınırını belirler.",
-      "abstract_en": "We implement provenance-aware feedback, a shared request budget, and experience-conditioned strategy selection. Persistent experience statistics are distinct from weight training. Synthetic table replay tests mechanism behavior, not real-model quality or efficiency. Model, tokenizer, task and feedback identities constrain admissible comparisons.",
-      "finding": "Deneyim gelecekteki hesaplama seçimini kalıcı bir kayıt üzerinden etkileyebilir. Bu etkiyi genel öğrenme veya gerçek görev başarımı artışı olarak sunmak için kanıt yoktur.",
-      "limit": "Yönlendirme grupları sezgiseldir; denenmemiş eylemlerin sonuçları seçilmiş eylem loglarından çıkarılamaz. Sabit MoE prior'ı öğrenilmiş uzman anlamı değildir."
+      "title": "Experience-conditioned computation: provenance-aware feedback and execution limits",
+      "abstract": "We implement provenance-aware feedback, a shared request budget, and experience-conditioned strategy selection. Persistent experience statistics are distinct from weight training. Synthetic table replay tests mechanism behavior, not real-model quality or efficiency. Model, tokenizer, task and feedback identities constrain admissible comparisons.",
+      "finding": "Experience can influence the choice of future computation through a persistent record. There is no evidence for presenting this effect as general learning or as a gain in real task performance.",
+      "limit": "The routing groups are heuristic; the outcomes of untried actions cannot be inferred from the logs of chosen actions. A fixed MoE prior is not a learned expert meaning."
     },
     {
       "id": "CEV-2026-02",
       "file": "02-representation-witness-negative.md",
-      "title": "Temsil aramasında yetersizlik tanıkları: deterministik eşdeğerlik ve negatif sonuç",
       "source": "docs/research/REPRESENTATION_WITNESS_AUDIT.md",
-      "abstract": "Aynı aday dili, aday sırası ve tam tutarlılık ölçütü altında yetersizlik tanığıyla filtrelenen temsil araması ile doğrudan arama karşılaştırılır. Tutarlılık tanık koşulunu zaten gerektirdiğinden, tamamlanan aramalar aynı çözümü seçer. On beş sonlu karşılaştırmanın tamamı bu eşdeğerliği doğrulamıştır. Bazı hesap maliyetleri değişse de yeni bilgi veya gözlem tasarrufu gösterilmemiştir.",
-      "abstract_en": "Witness filtering and direct representation search are equivalent when they share candidate language, order and complete deterministic consistency checking. All 15 finite comparisons yield identical selected representations, predictions and abstentions. Filtering changes some search costs but provides no additional learning information under this contract.",
-      "finding": "Tanıkla filtrelemenin bu koşullarda yeni öğrenme avantajı sağladığı hipotezi elendi; negatif sonuç korunmuştur.",
-      "limit": "Sonuç, farklı bilgi erişimi, açık uçlu ifade üretimi, yaklaşık tutarlılık veya kesilen hesap bütçeleri için aynı üstünlük/eşdeğerlik iddiasını kurmaz."
+      "title": "Insufficiency witnesses in representation search: deterministic equivalence and a negative result",
+      "abstract": "Witness filtering and direct representation search are equivalent when they share candidate language, order and complete deterministic consistency checking. All 15 finite comparisons yield identical selected representations, predictions and abstentions. Filtering changes some search costs but provides no additional learning information under this contract.",
+      "finding": "The hypothesis that witness filtering gives a new learning advantage under these conditions was eliminated; the negative result is kept.",
+      "limit": "The result makes no claim of superiority or equivalence for other information access, open-ended expression generation, approximate consistency or truncated computation budgets."
     },
     {
       "id": "CEV-2026-03",
       "file": "03-persistence-transfer-retesting.md",
-      "title": "Kalıcı yordam, aktarım ve yeniden sınama: yaşarken öğrenmenin ilk ayrıştırmaları",
       "source": "docs/research/living_learning_2026_09_20/REPORT_TR.md",
-      "abstract": "Sonlu affine dünyalarda deneyimden edinilen yordamın kalıcılığı, yeni girdilere aktarımı ve hesap bütçesi altında kullanımı araştırılır. Aynı çıkarım yeteneğine sahip güçlü ham-kayıt rakibi temel doğrulukta eşleşir. Önceki yaşamlardan taşınan güncelleme bilgisi aynı ailede yarar, değişen ailede zarar verebilir. Kapalı döngü deneyleri kalıcı ve geçici çevre değişimini ayırır; yeniden sınama genel yaşarken öğrenme probleminin yalnız bir alt alanıdır.",
-      "abstract_en": "Finite affine worlds separate persistence, transfer and budgeted execution of experience-derived procedures. A strong raw-history baseline with the same inference capability matches accuracy. Transferred adaptation knowledge helps within a family and can hurt under shift. Closed-loop retesting is examined as one subproblem rather than a general solution to lifelong learning.",
-      "finding": "Kalıcı doğru cevap, çıkarım maliyeti, güncelleme aktarımı ve değişim altında fayda aynı ölçü değildir; güçlü rakipler birçok ilk üstünlük yorumunu sınırlar.",
-      "limit": "Fonksiyon dili ve ortam aileleri verilmiştir. Beklenen faydalı yeniden sınama, yeni hesaplama dilini edinmeyi veya genel kontrollü öğrenmeyi çözmez."
+      "title": "Persistent procedures, transfer and retesting: first separations in learning while living",
+      "abstract": "Finite affine worlds separate persistence, transfer and budgeted execution of experience-derived procedures. A strong raw-history baseline with the same inference capability matches accuracy. Transferred adaptation knowledge helps within a family and can hurt under shift. Closed-loop retesting is examined as one subproblem rather than a general solution to lifelong learning.",
+      "finding": "A persistent right answer, inference cost, update transfer and benefit under change are not the same measure; strong baselines limit many first interpretations of superiority.",
+      "limit": "The function language and the environment families are given. The expected benefit of retesting does not solve the acquisition of a new computational language or general controlled learning."
     },
     {
       "id": "CEV-2026-04",
       "file": "04-representation-credit-state-transport.md",
-      "title": "Temsil büyümesi, geçmişe kredi atama ve öğrenme durumunun taşınması",
       "source": "docs/research/living_learning_reassessment_2026_09_20/REPORT_TR.md",
-      "abstract": "Araştırma yeniden sınama dışına açılarak temsil büyütme, gecikmeli geri bildirim ve koordinat değişimi altında güncelleme durumunu inceler. Ürün dilindeki büyüme 6.000 örnekte doğru sonuç verir; baştan genişletilmiş güçlü temsil aynı sonucu bulur. Eski bilgiyi koruyan tekrar veya toplu istatistikler değişen hedeflerde zararlı olabilir. Bugünkü tahmini koruyan parametre dönüşümünün gelecekteki öğrenme dinamiğini koruması için ek durum taşınması gerekir.",
-      "abstract_en": "We investigate representation growth, delayed credit assignment and transport of learning state across coordinate changes. A fixed expanded representation matches growth on 6,000 cases. Replay and sufficient statistics can preserve obsolete targets. Preserving current predictions under reparameterization does not by itself preserve subsequent learning dynamics.",
-      "finding": "Yürütme eşdeğerliği ile gelecekteki güncelleme eşdeğerliği ayrıdır; büyümenin yararı verilen ifade dili ve toplam maliyetle değerlendirilmelidir.",
-      "limit": "Üretim grameri ve geri bildirim kimlikleri dışarıdan verilir. Eski özet yeni özelliğin ayrımlarını kaybetmişse evrensel bir durum taşıma dönüşümü yoktur."
+      "title": "Representation growth, credit assignment to the past and transport of learning state",
+      "abstract": "We investigate representation growth, delayed credit assignment and transport of learning state across coordinate changes. A fixed expanded representation matches growth on 6,000 cases. Replay and sufficient statistics can preserve obsolete targets. Preserving current predictions under reparameterization does not by itself preserve subsequent learning dynamics.",
+      "finding": "Equivalence of execution and equivalence of future updates are distinct; the benefit of growth must be judged against the given expression language and the total cost.",
+      "limit": "The production grammar and the feedback identities are supplied from outside. If an old summary has lost the distinctions of a new feature, there is no universal state-transport transformation."
     },
     {
       "id": "CEV-2026-05",
       "file": "05-joint-lifetime-temporal-relations.md",
-      "title": "Tek yaşam akışında temsil, bellek ve zamansal ilişkiler",
       "source": "docs/research/living_learning_joint_2026_09_20/REPORT_TR.md",
-      "abstract": "Temsil genişletme, bölgesel bellek ve değişen hedefler tek yaşam akışında birleştirilir. Yirmi dört yaşamda incelenen yöntem sabit geniş temsilin doğruluğuyla eşleşirken daha az yeniden çözüm yapar; bu genel maliyet üstünlüğü değildir. Hatalı etiket patlaması ve eski istatistiklerin korunması olumsuz kontrollerdir. Ayrı zamansal görevde hazır gecikme özellikleri uygun dağılımda başarılı, ayırt etmeyen akıştan yeni dağılıma geçişte başarısızdır.",
-      "abstract_en": "A joint stream combines representation expansion, regional memory and target change across 24 lives. A fixed expanded baseline matches final accuracy; fewer solves do not establish total efficiency. Label corruption and stale statistics remain negative controls. Temporal prediction with supplied lag features succeeds on informative input but fails after an uninformative training stream shifts.",
-      "finding": "Bileşenlerin ayrı ayrı çalışması tek bir yaşamın bütün koşullarında güvenilir öğrenme garantisi sağlamaz; veri akışının ayırt ediciliği belirleyicidir.",
-      "limit": "Hazır gecikmelerde iyi tahmin, zamansal ilişkinin veya nedensel yapının genel keşfi değildir. Sonradan hatalı veri patlamasının çıkarıldığı koşul ayrı tutulmuştur."
+      "title": "Representation, memory and temporal relations in one lifetime stream",
+      "abstract": "A joint stream combines representation expansion, regional memory and target change across 24 lives. A fixed expanded baseline matches final accuracy; fewer solves do not establish total efficiency. Label corruption and stale statistics remain negative controls. Temporal prediction with supplied lag features succeeds on informative input but fails after an uninformative training stream shifts.",
+      "finding": "Components that work separately do not guarantee reliable learning under all the conditions of one life; the informativeness of the data stream is decisive.",
+      "limit": "Good prediction with supplied lags is not a general discovery of temporal relations or causal structure. The condition from which a later burst of corrupted data was removed is reported separately."
     },
     {
       "id": "CEV-2026-06",
       "file": "06-learned-update-transfer.md",
-      "title": "Deneyimden edinilen güncelleme davranışı: aktarımın yararı ve tersine dönmesi",
       "source": "docs/research/living_learning_update_2026_09_20/REPORT_TR.md",
-      "abstract": "Kaynak yaşamlardan öğrenilen küçük bir güncelleme matrisi, tahmin parametreleri sıfırlanmış yeni yaşamlara taşınır. Böylece başlangıç tahminleri aynıyken gelecekteki öğrenme eğrilerinin değişmesi sınanır. Aynı geometride taşınan matris yararlıdır; ters geometride yeni öğrenmeye göre belirgin zarar verir. Güncellemeyi sürdürmek bu zararı azaltır fakat ortadan kaldırmaz. Moment hesabına dayalı ayrı analitik risk denetimi sayısal yorumu kontrol eder.",
-      "abstract_en": "An update matrix learned across source lives is transferred while prediction weights are reset. Identical initial predictions can therefore lead to different future learning curves. Transfer helps in the same geometry and hurts under reversal; continued adaptation only partly repairs the damage. A separate moment-based risk calculation checks the interpretation.",
-      "finding": "Deneyim gelecekte nasıl öğrenileceğini değiştirebilir; bu kapasite sabit başlangıç cevabından ölçülemez ve dağılım değişiminde kendi zararını da taşıyabilir.",
-      "limit": "Küçük doğrusal geometri ve dışarıdan verilmiş üst güncelleme ailesi kullanılır. IDBD ve ilgili literatürle eşleşme nedeniyle yeni genel öğrenme ilkesi iddiası yoktur."
+      "title": "Update behaviour acquired from experience: the benefit of transfer and its reversal",
+      "abstract": "An update matrix learned across source lives is transferred while prediction weights are reset. Identical initial predictions can therefore lead to different future learning curves. Transfer helps in the same geometry and hurts under reversal; continued adaptation only partly repairs the damage. A separate moment-based risk calculation checks the interpretation.",
+      "finding": "Experience can change how learning will happen in the future; this capacity cannot be measured from a fixed initial answer, and it can carry its own harm under distribution change.",
+      "limit": "A small linear geometry and an externally given meta-update family are used. Because it matches IDBD and related literature, no new general learning principle is claimed."
     },
     {
       "id": "CEV-2026-07",
       "file": "07-acquired-recurrent-state.md",
-      "title": "Deneyimden edinilen yinelemeli durum yordamı ve yeniden öğrenme belleği",
       "source": "docs/research/living_learning_state_2026_09_20/REPORT_TR.md",
-      "abstract": "İkili dizilerden sonlu geçiş grafikleri edinilerek görülmemiş uzun dizilerde yürütme, ayrı süreçte devam ve sonradan öğrenme ayrıştırılır. Temiz koşullarda uzun dizilere aktarım gerçekleşir; aynı küçük model ailesindeki güçlü sayımlı rakip çevrimiçi hatada daha iyidir. Bozuk etiketler büyük ve kötü genelleyen grafikler oluşturur. Küçük yürütme grafiğiyle devam etmek, yeni etiketlerden yeniden öğrenmek için tutulan örnek arşivinin gereksiz olduğunu göstermez.",
-      "abstract_en": "Finite transition graphs acquired from binary strings are tested on long unseen strings, fresh-process continuation and later relearning. Clean conditions generalize, while a strong bounded enumeration baseline has fewer online errors. Corrupted labels induce larger, poorly generalizing graphs. Compact execution state does not remove the archive used for subsequent learning.",
-      "finding": "Deneyimden yürütülebilir bir durum yordamı edinilebilir; yürütme belleği, öğrenme belleği ve hatayı teşhis etme bilgisi birbirinden farklıdır.",
-      "limit": "Boş dizi değerlendirmesi ile boş olmayan dillerin değerlendirmesi ayrı raporlanmıştır. Gerçek etiketlerin dışarıdan verilerek düzeltilmesi kendi kendine hata teşhisi sayılmaz."
+      "title": "A recurrent state procedure acquired from experience, and a memory for relearning",
+      "abstract": "Finite transition graphs acquired from binary strings are tested on long unseen strings, fresh-process continuation and later relearning. Clean conditions generalize, while a strong bounded enumeration baseline has fewer online errors. Corrupted labels induce larger, poorly generalizing graphs. Compact execution state does not remove the archive used for subsequent learning.",
+      "finding": "An executable state procedure can be acquired from experience; execution memory, learning memory and the knowledge needed to diagnose an error are different things.",
+      "limit": "The evaluation of the empty string and that of non-empty languages are reported separately. Correction with true labels supplied from outside does not count as self-diagnosis of errors."
     },
     {
       "id": "CEV-2026-08",
       "file": "08-correctable-learning-state.md",
-      "title": "Düzeltilebilir öğrenme durumu: bugünkü tam aday kümesinin sınırı",
       "source": "docs/research/living_learning_correction_2026_09_20/REPORT_TR.md",
-      "abstract": "Aynı bugünkü tutarlı aday kümesini veren iki geçmiş, aynı geçerli etiket düzeltmesinden sonra farklı ve boş olmayan kümeler gerektirir. Bütün adayların ihlal çokluklarını koruyan özet, doğru eski içerik verildiğinde tam replay ile eşleşir. 1.507.050 sınıf–düzeltme durumunda sıfır uyuşmazlık bulunmuştur; gözlem histogramı da eşleşir. Yalnız olay kimliği veya sonradan genişleyen aday dili, daha dar özetlerin yeterliliğini bozabilir.",
-      "abstract_en": "Two histories with the same complete current version space can require different nonempty spaces after the same valid correction. Violation multiplicities match replay when truthful old contents are supplied, with zero mismatches over 1,507,050 projected class-correction cases. Histograms also match. ID-only edits and expanding hypothesis languages expose additional information requirements.",
-      "finding": "Bugünkü bütün doğru adayları korumak, yarın geçmiş deneyimi doğru düzeltmeye yetmez; korunacak durum izinli gelecekteki işlemlere bağlıdır.",
-      "limit": "Düzeltmenin doğruluğu dış varsayımdır. Sayaçlar sabit sayıda olsa bile bit belleği geçmiş uzunluğuyla büyür. Alt sınıf projeksiyonları bağımsız deney dünyaları değildir."
+      "title": "Correctable learning state: the limit of today's complete candidate set",
+      "abstract": "Two histories with the same complete current version space can require different nonempty spaces after the same valid correction. Violation multiplicities match replay when truthful old contents are supplied, with zero mismatches over 1,507,050 projected class-correction cases. Histograms also match. ID-only edits and expanding hypothesis languages expose additional information requirements.",
+      "finding": "Keeping all of today's consistent candidates is not enough to correct past experience correctly tomorrow; the state to be kept depends on the future operations allowed.",
+      "limit": "The correctness of a correction is an external assumption. Even with a fixed number of counters, bit memory grows with the length of the history. Subclass projections are not independent experimental worlds."
     },
     {
       "id": "CEV-2026-09",
       "file": "09-future-query-state-classes.md",
-      "title": "Gelecekteki öğrenme işlemlerine göre gerekli durum: kesin sonlu bir denetim",
       "source": "docs/research/living_learning_query_state_2026_09_21/REPORT_TR.md",
-      "abstract": "Aynı sonlu geçmişlerde bütün Boolean ihlal sorguları, bütün gözlem çoklukları ve kimlikli etiket düzeltmeleri için gereken durum sınıfları karşılaştırılır. Toplam uzunluk ve işaretli etiket farkları bütün gelecekteki Boolean ihlal sorgularına yeterken, kimlikli düzeltme ayrı bir doğrusal bilgi alt sınırı getirir. 61.575 geçmiş, 712.632 etiket yazımı ve 358.020 ekleme tam sayılarla denetlenmiştir. Üç sınıf sayısı formülünde veya replay eşitliğinde uyuşmazlık bulunmamıştır.",
-      "abstract_en": "We compare state classes for all Boolean loss queries, observation counts and identity-only label edits on the same finite histories. Length plus signed label differences suffices for all future Boolean loss queries; identity edits impose a separate linear information bound. Exact enumeration checks 61,575 histories, 712,632 label writes and 358,020 appends with no count-formula or replay mismatches.",
-      "finding": "Bilinmeyen gelecekteki hipotezler her zaman tam histogram gerektirmez. Gerekli bilgi, hipotezlerin bilinip bilinmemesinden önce hangi sorgu ve işlemlerin destekleneceğine bağlıdır.",
-      "limit": "Sabit sonlu alan, bütün Boolean riskleri ve tam doğruluk kullanılır. Sınıf sayısı verimli kodlayıcı veya gerçek dünya öğrenme başarımı değildir; genel living-learning sorusu açık kalır."
+      "title": "The state required by future learning operations: an exact finite audit",
+      "abstract": "We compare state classes for all Boolean loss queries, observation counts and identity-only label edits on the same finite histories. Length plus signed label differences suffices for all future Boolean loss queries; identity edits impose a separate linear information bound. Exact enumeration checks 61,575 histories, 712,632 label writes and 358,020 appends with no count-formula or replay mismatches.",
+      "finding": "Unknown future hypotheses do not always require the full histogram. The information required depends on which queries and operations are to be supported, before whether the hypotheses are known.",
+      "limit": "A fixed finite domain, all Boolean risks and exact correctness are used. A class count is not an efficient encoder or real-world learning performance; the general living-learning question remains open."
     },
     {
       "id": "CEV-2026-10",
       "file": "10-living-learning-campaign-wave1.md",
-      "title": "Yaşarken öğrenme için çok yönlü deney kampanyası: ilk dalga",
       "source": "docs/research/living_learning_campaign_2026_09_24/REPORT_TR.md",
-      "abstract": "Dört deney motorunda bellek, temsil, güncelleme ve eylemle deneyim üretimi karşılaştırıldı. On aileye yayılan 200 katalog kaydının 48 koşullu karşılaştırması, 24 keşif ve 48 doğrulama tohumu ile 3.456 eşleştirilmiş sonuç üretti. 30 iddia desteklendi, 9 ters sonuç verdi ve 9 belirsiz kaldı. Güçlü kontroller, öğrenilen temsil ve güncelleme davranışının dağılım değişiminde sınırlı ve bazen zararlı olabildiğini gösterdi.",
-      "abstract_en": "A first broad campaign compares memory, representation, update behavior and action-produced experience in four local engines. Of 200 catalog entries across ten families, 48 conditional comparisons yielded 3,456 paired outcomes over discovery and untouched confirmation seeds. Thirty claims were supported, nine contradicted and nine inconclusive under the preregistered synthetic decision rule. Strong controls show that learned representation and update behavior can be conditional and harmful under shift; the general living-learning problem remains open.",
+      "title": "A multi-directional experimental campaign for learning while living: the first wave",
+      "abstract": "A first broad campaign compares memory, representation, update behavior and action-produced experience in four local engines. Of 200 catalog entries across ten families, 48 conditional comparisons yielded 3,456 paired outcomes over discovery and untouched confirmation seeds. Thirty claims were supported, nine contradicted and nine inconclusive under the preregistered synthetic decision rule. Strong controls show that learned representation and update behavior can be conditional and harmful under shift; the general living-learning problem remains open.",
       "finding": "The campaign maps conditional mechanisms and negative controls rather than discovering a general computational principle. Experience can change later computation in these supplied languages, but a stronger pre-supplied representation or a shifted environment can remove the apparent advantage.",
       "limit": "The worlds, languages, actions, metrics and candidate families are finite and researcher supplied. Catalog entries overlap and are not 200 independent mechanisms. The results are local synthetic evidence, not external peer review, biological validation, AGI evidence or proof of novelty."
+    },
+    {
+      "id": "CEV-2026-11",
+      "file": "11-living-evidence-mind.md",
+      "source": "docs/research/living_evidence_mind_2026_11_24/PAPER.md",
+      "title": "Cevahir Zihin: a Living Evidence Mind",
+      "abstract": "A learning system with no neural network, weight matrix, embedding or gradient: whatever it perceives becomes a unit, every relation a tie that keeps graded evidence for and against it per origin, read by one rule (the NARS expectation, k = 1) and learned at every moment, with the evidence of any single experience exactly retractable. On this core 75 mechanisms were built and measured one at a time. Having watched about 1,090 published SCAN training commands twice, it answers all six published SCAN test files exactly (26,227 of 26,227); COGS stays at 0 with its causes measured. On 13,290 Turkish sentences it says a read sentence for 146 to 151 of 200 two-word cues after one reading, a 7.3M-parameter Transformer after an hour of training for 47. A grounded layer answers who does what in situations never described 48 and 54 of 72 (Turkish, English) against 29 and 42 for a Transformer given the scene.",
+      "finding": "Evidence accounting with one reading rule gives learning without a training phase, without interference and with exact retraction, and compositional generalisation wherever an answer is made of the replies its parts were lived with; the mechanisms that examine and extend the mind itself are switches measured with their failures.",
+      "limit": "The worlds are small and generated, the Transformer baselines small and trained on one processor, a frame generalises one place (COGS), the cost of the whole mind grows with what it holds, and the grounded world gives its features as opaque codes. Not peer reviewed; no claim of general intelligence."
     }
   ]
 }

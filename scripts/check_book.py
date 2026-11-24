@@ -164,7 +164,7 @@ def inspect_book():
     for chapter in sorted((BOOK / "tr").glob("*.md")):
         if chapter.relative_to(BOOK).as_posix() not in registered:
             errors.append(f"No symbol evidence for chapter {chapter.name}")
-    for name in ("README.md", "README-TR.md"):
+    for name in ("README.md",):            # README-TR.md is its author's own since v7 and is not checked
         if "docs/book/README" not in read(ROOT / name):
             errors.append(f"{name}: missing prominent book entry")
 

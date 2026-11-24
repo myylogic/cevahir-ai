@@ -1,16 +1,8 @@
 {
   "format_version": 1,
   "files": {
-    "README-TR.md": {
-      "sha256": "375b6952dd2b6f746306a45922ab0010437dc039ed6ab42d76606cdb160b82d4",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "README.md",
-        "tr/01-motor-ve-ogrenme.md"
-      ]
-    },
     "README.md": {
-      "sha256": "41574d9fd455679a0eb93f737908244b72d5170832bc47af340f371ffcb4d5a9",
+      "sha256": "a536784be20526ed080b07ad127267d37ec53aac69d8f51076d68b0cb6f0d95a",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "README-en.md"
@@ -37,34 +29,10 @@
         "tr/10-uctan-uca-sistem.md"
       ]
     },
-    "benchmarks/README.md": {
-      "sha256": "856421a55534f4b81bdbd200abb8ac3051fcff52468af350154ad50d623f6f46",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/02-metin-tokenizer.md"
-      ]
-    },
-    "benchmarks/research/experience_replay.py": {
-      "sha256": "a26ac4ccc7adcec58e55e4ee64d8cb206f4fddc8644264f1574d923a7290b696",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "benchmarks/tokenizer_benchmark.py": {
-      "sha256": "feb00db4a1bef6d5006dc10f7b7ed9bff70b20d01a8dd74c381f3a185ec4d5c8",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/02-metin-tokenizer.md"
-      ]
-    },
     "chatting_management/chatting_manager.py": {
       "sha256": "d42c11ee99d2de4fa9af5ca17080a4a2d68a42050dba3f7c78e83ff3f7199f8b",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/10-uctan-uca-sistem.md"
       ]
     },
@@ -86,7 +54,6 @@
       "sha256": "57c36cb66e02940a8f757b49766b0306c887410e89d5845304cc1cf2f2775902",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/09-bellek-bilis-araclar.md"
       ]
     },
@@ -101,7 +68,6 @@
       "sha256": "78c046c45e0fa8cdff2250cd1136ef49b45d0da96bd460d65e633fede3bfd403",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/11-arastirma-laboratuvari.md"
       ]
     },
@@ -189,20 +155,6 @@
         "tr/09-bellek-bilis-araclar.md"
       ]
     },
-    "cognitive_management/v2/components/vector_store/base.py": {
-      "sha256": "e12a0e0921636afc4348c2ee40904915c2d45a5e348e6853cf55bdd9bc86791e",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/09-bellek-bilis-araclar.md"
-      ]
-    },
-    "cognitive_management/v2/components/vector_store/chroma_vector_store.py": {
-      "sha256": "86afefe65f24de8d0a27353523ccc541a643903375339518e177c78d0b10af49",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/09-bellek-bilis-araclar.md"
-      ]
-    },
     "cognitive_management/v2/components/vector_store/memory_vector_store.py": {
       "sha256": "ed64078b1cfa76c392a56b9efd39fc4c6d2057e2db01152ea86eba6cd84a1c82",
       "fingerprint_mode": "utf8-lf",
@@ -246,34 +198,6 @@
         "tr/10-uctan-uca-sistem.md"
       ]
     },
-    "cognitive_management/v2/utils/turkish_text.py": {
-      "sha256": "cc3139e960b8e365c0f7ecafbabd1084048afc29f527903f7d9e7d22f06590f7",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/09-bellek-bilis-araclar.md"
-      ]
-    },
-    "cognitive_management/v2/utils/verdict_parsing.py": {
-      "sha256": "06739fdb4f2dff1b916ae6505473a26e5f08c938935958279296ba1c1c110a92",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/09-bellek-bilis-araclar.md"
-      ]
-    },
-    "data/merges_lib/merges.txt": {
-      "sha256": "b5b0b9fcc04a73ea79ed1d3cee5f4f96860204cad6b020364ec9f20af4b080b1",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/02-metin-tokenizer.md"
-      ]
-    },
-    "data/vocab_lib/vocab.json": {
-      "sha256": "c4c635b175abbb077054884e5c7acaa1c1ebe03ecb9d9c133bd31d003da10f20",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/02-metin-tokenizer.md"
-      ]
-    },
     "database/unit_of_work.py": {
       "sha256": "41776ed8ad609ad266da3fef459f97084a9c703411f8b3d021d1eba4cc597c2d",
       "fingerprint_mode": "utf8-lf",
@@ -281,345 +205,77 @@
         "tr/10-uctan-uca-sistem.md"
       ]
     },
-    "docs/architecture/CEVAHIR_ARCHITECTURE_SPEC.md": {
-      "sha256": "c8f5762775edfdd588a5e12135a9a3c2e16a075d27b7433f48ec0502f4d9c4c3",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "README.md"
-      ]
-    },
-    "docs/architecture/LIFECYCLE_CONSOLIDATION.md": {
-      "sha256": "c096e2e937e6f4f8489d92108a67e2bb052081b3619f938484a21909ace3f4ca",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "README.md",
-        "tr/07-model-yasam-dongusu.md",
-        "tr/10-uctan-uca-sistem.md"
-      ]
-    },
-    "docs/architecture/LOWER_CORE_CONTRACTS.md": {
-      "sha256": "8aa5fc2779a334f1b66bdca62db9868fb933ccc4c0869869e6296866eec40c96",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "README.md",
-        "tr/07-model-yasam-dongusu.md",
-        "tr/08-uretim.md"
-      ]
-    },
-    "docs/architecture/NEXT_DEVELOPMENT_ROADMAP.md": {
-      "sha256": "da71d519db8f257c50a15583340a5dc9017fe9403dfb73f0b0cb9ae35c7593d4",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md"
-      ]
-    },
-    "docs/architecture/SYSTEM_OVERVIEW.md": {
-      "sha256": "6b7b48af0c35b25d67b4c8faabcac0b6ad706ba68f266a92a39aa05bcec3b099",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "README.md"
-      ]
-    },
-    "docs/development/EVOLUTION_LOG.md": {
-      "sha256": "f992e24e7de2ebf4f890b96cedc7412de089cb3930b7799f73219a74a9e61eac",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md"
-      ]
-    },
-    "docs/module_audits/4_attention_audit.md": {
-      "sha256": "1d29ddf488bf5ddc6eefd78a448009be42ea50191267c2c7eef8fa8d2979797d",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/04-attention.md"
-      ]
-    },
     "docs/modules/README.md": {
-      "sha256": "04fce6b197e5bb3c024063386f2b2cb585d9ba9fdf85c2ae6ef1ba93592f6d82",
+      "sha256": "98215b6d23cc6b57a80636a34d0fe25933a3525dbd62271dbe2724367690a134",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
-        "README-en.md",
-        "README.md",
-        "tr/01-motor-ve-ogrenme.md"
+        "README-en.md"
       ]
     },
     "docs/modules/cognitive_management/README-en.md": {
       "sha256": "37e9066dd16f6885cb11095c6e9ff8c4fb4c166949759f15e1ac7da9cae1728a",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "README-en.md"
-      ]
-    },
-    "docs/modules/cognitive_management/README.md": {
-      "sha256": "d19e93245d4f05cfc5ab60c5dcf670282b3c05c773238d25a07fdf4cf564360d",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md"
-      ]
-    },
-    "docs/modules/cognitive_management/architecture/README.md": {
-      "sha256": "3ff9f9c4607a75cda9c6d62ae17a9ca6c789b409dc563cedb5dd6d55a0d5b393",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/09-bellek-bilis-araclar.md"
       ]
     },
     "docs/modules/model_management/README-en.md": {
       "sha256": "2e85e1c0bf9e53b2efff5d763bf8a0a777553e0051b7ffe723ed89018b99f7b4",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "README-en.md"
-      ]
-    },
-    "docs/modules/model_management/README.md": {
-      "sha256": "e19099fc9698d980965c9542c4a87a2a4150f0f3519a3f9d0d4d562ef5fc66c8",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/07-model-yasam-dongusu.md"
       ]
     },
     "docs/modules/neural_network/README-en.md": {
       "sha256": "8ef82a1f91d0fc3bd86e03136668a0d67159f467a52bffec622e0b3af6473478",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "README-en.md"
-      ]
-    },
-    "docs/modules/neural_network/README.md": {
-      "sha256": "41494413cbc985ad63a76aca23908dff3c316da61a7e722594e6ea247bd55f17",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/03-sinir-aglari.md",
-        "tr/04-attention.md",
-        "tr/05-transformer.md"
       ]
     },
     "docs/modules/tokenizer_management/README-en.md": {
       "sha256": "f6865d2b00a8002042ff0a2f9c10eaf6ffb32af9015fe2bec7036dfdc4338788",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "README-en.md"
-      ]
-    },
-    "docs/modules/tokenizer_management/README.md": {
-      "sha256": "981a90af4018d94a501cf0c9c6ebf03005893176f61145302d3fd1657cf7916e",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/02-metin-tokenizer.md"
       ]
     },
     "docs/modules/training_management/README-en.md": {
       "sha256": "3bf99dfe92a57eb8fa216a1f76cd99d2f7a94474d511fb92f58d3a500e167a61",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "README-en.md"
-      ]
-    },
-    "docs/modules/training_management/README.md": {
-      "sha256": "f639a53ce54ca007d8889692705fb324d4f90691cb59e93304574a34ad7bed13",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/06-egitim.md"
       ]
     },
     "docs/modules/training_system/README-en.md": {
       "sha256": "dd2fa5d766f08cdebd8e46d0097b8e6f89b5ec03cc60fff347d43f455a45d207",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "README-en.md"
       ]
     },
-    "docs/modules/training_system/README.md": {
-      "sha256": "cac781dbc8524b3e1d37a435cf29b1e5ffd983223b194dfd77691ef4971983a7",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/06-egitim.md"
-      ]
-    },
-    "docs/publications/PUBLISHING.md": {
-      "sha256": "ae2d2d3021be6030ce7508cade2335fece797b55592474d460bb5b4047bbe9bd",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "BAKIM.md"
-      ]
-    },
-    "docs/publications/README.md": {
-      "sha256": "f98832f7cb9c1c9c25fb0a29313f584b34620f4bf81c68a87e2373a6fcdd1a12",
+    "docs/research/living_evidence_mind_2026_11_24/PAPER.md": {
+      "sha256": "88362d5a073f8a2ac9a1753e1c1c2b6dedfe62ac89b82fa130f0075a14b5852b",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "AKADEMIK_OKUMA.md",
+        "AYRINTILI_ICINDEKILER.md",
         "BAKIM.md",
-        "tr/11-arastirma-laboratuvari.md",
-        "tr/12-acik-sorular.md"
-      ]
-    },
-    "docs/publications/working-notes/future-state-review.md": {
-      "sha256": "68f8fc167df35559daa26e1359311e8b0db8345ea4ec90911cec224f3fc82458",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/12-acik-sorular.md"
-      ]
-    },
-    "docs/research/EXPERIENCE_CONDITIONED_COMPUTE.md": {
-      "sha256": "b943b9d4e7595de76100143250551f0611426949c9def6d87e3cac41de1d0c60",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
+        "BUTUNLESTIRICI_CALISMA.md",
         "KAYNAK_HARITASI.md",
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/REPRESENTATION_WITNESS_AUDIT.md": {
-      "sha256": "121406c5acd679d75ff76a87c0c1106abd208fc7167cd9346cc038d85db85926",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_2026_09_20/AFFINE_EXPERIMENT.md": {
-      "sha256": "cc04ac21fd127498d3721fa77c66d9a9f3205ebb3325959d72e4a6f3d043e908",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_2026_09_20/REPORT_TR.md": {
-      "sha256": "336760e0157ca7a76d4eec6eb73cc6c938740def3725dfd8821be65f0d8f4384",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_2026_09_20/UNKNOWN_CHANGE.md": {
-      "sha256": "16b677a08c5dc6957a1b00f983a28662011fbe8fd0a0cd74235afd608f43928c",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_correction_2026_09_20/REPORT_TR.md": {
-      "sha256": "a4b812eb06ffdf03e38679e97c5934f1b5b8aefb746a6e7ed2b601b3a01224bd",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md",
-        "tr/12-acik-sorular.md"
-      ]
-    },
-    "docs/research/living_learning_joint_2026_09_20/JOINT_STREAM.md": {
-      "sha256": "7ef2491d3bb7b7161e3df794e5059f08cbfe3a5e989aac48a8ad5fb18059f9fe",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_joint_2026_09_20/REPORT_TR.md": {
-      "sha256": "d4331132892dd9d634ac16a8c08efc33ec5ff7040995a375e58afcf951ab07bf",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_joint_2026_09_20/TEMPORAL_RELATION.md": {
-      "sha256": "e4f88a4720996ede9ee4b20828708bad6d8651e435d2dcee15b2f98f50be3800",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_query_state_2026_09_21/REPORT_TR.md": {
-      "sha256": "2fd46be3ff567f719a932d2b04eb84c8cfa6b8fe25b0c7203ee2f3ab038f874f",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md",
-        "tr/12-acik-sorular.md"
-      ]
-    },
-    "docs/research/living_learning_reassessment_2026_09_20/CREDIT_ASSIGNMENT.md": {
-      "sha256": "884f4f7cbccdda8ae36b056e574e1c6a34ab09655ed6b3e5d948fac36befeef6",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_reassessment_2026_09_20/REPORT_TR.md": {
-      "sha256": "711ed33f3f445dd0c722f0528d08be8064e820717cfac9baa2650ccc1eb912cf",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_reassessment_2026_09_20/REPRESENTATION_GROWTH.md": {
-      "sha256": "a79baf2b7147de50e97d22c388dfcfb65a9ea9bc736f38676670b3ffc5cb6947",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_reassessment_2026_09_20/STATE_TRANSPORT.md": {
-      "sha256": "475b28de07edd47e63614cc2b3acdcce114cf80997f8092fb9eaf0c0a7f2755c",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_state_2026_09_20/EXPERIMENT.md": {
-      "sha256": "b06ffdf88b758da38cc29d3812ec8ca8cde1acffe4a06368c41cf04dff9d66f4",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_state_2026_09_20/FAILURE_IDENTIFIABILITY.md": {
-      "sha256": "d6c6fb17ce925f5c3dff93e2c71523017003aeffb7f158e52c0ccb1e5300c39b",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md",
-        "tr/12-acik-sorular.md"
-      ]
-    },
-    "docs/research/living_learning_state_2026_09_20/REPORT_TR.md": {
-      "sha256": "8c24fb204959603fd07ff3e309614897b8f71922d9f3145480c392a6c70c0ca5",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
+        "README.md",
+        "TAMAMLANMA.md",
+        "TERIMLER.md",
+        "tr/01-motor-ve-ogrenme.md",
+        "tr/02-metin-tokenizer.md",
+        "tr/03-sinir-aglari.md",
+        "tr/04-attention.md",
+        "tr/05-transformer.md",
+        "tr/06-egitim.md",
         "tr/07-model-yasam-dongusu.md",
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_state_2026_09_20/STATE_DISCOVERY_LITERATURE.md": {
-      "sha256": "ddb63f8389dcdf432f41f8ab142a7ca85c4b5581cdcf3be6aa26a45281759b9f",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_update_2026_09_20/EXPERIMENT.md": {
-      "sha256": "19ce0937349384207e92b51bc72f33211c14f190b0eeaaf3d01d68340ec2a77c",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "docs/research/living_learning_update_2026_09_20/REPORT_TR.md": {
-      "sha256": "838e9c07c17125a57fb65398155e6d4b669d103a1be17b110d1b91558c6f2195",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
+        "tr/08-uretim.md",
+        "tr/09-bellek-bilis-araclar.md",
+        "tr/10-uctan-uca-sistem.md",
         "tr/11-arastirma-laboratuvari.md",
         "tr/12-acik-sorular.md"
       ]
@@ -628,7 +284,6 @@
       "sha256": "3e563ca2921426ccb54dbc6b8181f0f504e9fa5a3a184191bf083216cf619c80",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/01-motor-ve-ogrenme.md",
         "tr/08-uretim.md",
         "tr/09-bellek-bilis-araclar.md",
@@ -639,7 +294,6 @@
       "sha256": "b274257d873e693ed6af454cc9ee1a8426f45f686e0a11432d262db17f1e8302",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/07-model-yasam-dongusu.md"
       ]
     },
@@ -648,8 +302,7 @@
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/01-motor-ve-ogrenme.md",
-        "tr/05-transformer.md",
-        "tr/07-model-yasam-dongusu.md"
+        "tr/05-transformer.md"
       ]
     },
     "model_management/model_initializer.py": {
@@ -670,7 +323,6 @@
       "sha256": "fcca2c0b4042fa61545a649c9fc7ebfce70f033872ff22228353553d85ce6fd0",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/01-motor-ve-ogrenme.md",
         "tr/02-metin-tokenizer.md",
         "tr/03-sinir-aglari.md",
@@ -701,13 +353,6 @@
         "tr/11-arastirma-laboratuvari.md"
       ]
     },
-    "research/living_learning/results/verification.json": {
-      "sha256": "356a74d09b69bbba0aaa1abcd40971d8541274ec76255dceff770e06dfa31528",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
     "research/living_learning/unknown_change_experiment.py": {
       "sha256": "69d6ab972594ec54ef70880d71b207919ca3dc2f1f2ad2d9eb2ae50189132fc0",
       "fingerprint_mode": "utf8-lf",
@@ -723,22 +368,8 @@
         "tr/12-acik-sorular.md"
       ]
     },
-    "research/living_learning_correction_2026_09_20/results/correction_state.json": {
-      "sha256": "6fa7c31a656de0c8205cdc5e4ce92e41672e8a33f3c3b860957e3e9ce942e51e",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/12-acik-sorular.md"
-      ]
-    },
     "research/living_learning_joint_2026_09_20/joint_stream.py": {
       "sha256": "783ea7dcc17f2923a957bb7874955a452a6444bd3cf96be3bc815aa22672a9fc",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "research/living_learning_joint_2026_09_20/results/verification.json": {
-      "sha256": "f27d93fe43274098abdade7b158a604714489a43e16454ef833f6718e63d6985",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/11-arastirma-laboratuvari.md"
@@ -773,13 +404,6 @@
         "tr/11-arastirma-laboratuvari.md"
       ]
     },
-    "research/living_learning_reassessment/results/verification.json": {
-      "sha256": "5c7ec3a1a3f885a0eb8feb9c837633913a9157bd690306ec7a7ae5f5207a3658",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
     "research/living_learning_reassessment/state_transport.py": {
       "sha256": "b8f48c93aa0ae2ff69ed02f872d9c54459ea5e2c1116f5219e435228acffd8bd",
       "fingerprint_mode": "utf8-lf",
@@ -796,13 +420,6 @@
     },
     "research/living_learning_state_2026_09_20/recurrent_state.py": {
       "sha256": "a3effab9dcea5cfbd75de29d9aadba8b46e2e8734b46eb015016eb1ade65e681",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
-    "research/living_learning_state_2026_09_20/results/verification.json": {
-      "sha256": "3b6657cd73466692d7e1d1541049f19f01d5e4bcdec5e977ffeb590faa86aec7",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/11-arastirma-laboratuvari.md"
@@ -829,13 +446,6 @@
         "tr/11-arastirma-laboratuvari.md"
       ]
     },
-    "research/living_learning_update_2026_09_20/results/verification.json": {
-      "sha256": "74fa4d920910706672d0fc013185dae4347ed759c3d1ae278aa3f337e34e72fa",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/11-arastirma-laboratuvari.md"
-      ]
-    },
     "research/representation_discovery/witness_audit.py": {
       "sha256": "8ea98b0e840d5ba1451998eec3028a89ee1d601517b780c41b281274377d9e30",
       "fingerprint_mode": "utf8-lf",
@@ -847,7 +457,6 @@
       "sha256": "cce0f0a25d567187efff3c1b4bb452ac4cc5709371fd633cc74b51f9c4a92a2d",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "BUTUNLESTIRICI_CALISMA.md",
         "tr/07-model-yasam-dongusu.md"
       ]
     },
@@ -855,7 +464,6 @@
       "sha256": "e80d093c53321af360fa553b45d8c7666fd0eb0a8e8ed69702908f9bbc09bb58",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "BUTUNLESTIRICI_CALISMA.md",
         "tr/03-sinir-aglari.md",
         "tr/04-attention.md",
         "tr/05-transformer.md",
@@ -866,8 +474,6 @@
       "sha256": "a455a844c9b569e730b2416abfea2283dba680e256f5fc33f65357af61093cff",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "BUTUNLESTIRICI_CALISMA.md",
-        "KAYNAK_HARITASI.md",
         "tr/11-arastirma-laboratuvari.md",
         "tr/12-acik-sorular.md"
       ]
@@ -876,7 +482,6 @@
       "sha256": "e863cadba038f33251659b099229addfa32b72fa71e708b5fc6504e9788bcd42",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "BUTUNLESTIRICI_CALISMA.md",
         "tr/08-uretim.md",
         "tr/09-bellek-bilis-araclar.md"
       ]
@@ -885,8 +490,6 @@
       "sha256": "6da0275aa48a6a31cf64a1a65edabbe64a6fe38dcabaf1ca679fc4d67cbb94f4",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "BUTUNLESTIRICI_CALISMA.md",
-        "KAYNAK_HARITASI.md",
         "tr/10-uctan-uca-sistem.md"
       ]
     },
@@ -894,22 +497,13 @@
       "sha256": "fca3b8b43a125aa5114a0b3b5ebe8c67b7f19b34bd42ee3532d7192e2405e3b7",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "BUTUNLESTIRICI_CALISMA.md",
         "tr/02-metin-tokenizer.md"
-      ]
-    },
-    "scripts/check_book.py": {
-      "sha256": "2b168f77d46de893f705e3a78037808dc17b1b5307576601f1fb6607b9d58549",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "AKADEMIK_OKUMA.md"
       ]
     },
     "src/neural_network.py": {
       "sha256": "9ba2cdb45fcef4b2d1207bce02f92f42777689570586bd8a3746de6447bbba0a",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/01-motor-ve-ogrenme.md",
         "tr/03-sinir-aglari.md",
         "tr/05-transformer.md",
@@ -948,7 +542,6 @@
       "sha256": "8460b53bfa86c63ca13c26f23c0882c5002622548942384cdd98e712c8937d10",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/03-sinir-aglari.md",
         "tr/04-attention.md"
       ]
@@ -1002,8 +595,7 @@
       "sha256": "b610607c49dc7ab1e7b232228d1b0d9464a1338657a812b89ed392172b4b9118",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "tr/09-bellek-bilis-araclar.md",
-        "tr/10-uctan-uca-sistem.md"
+        "tr/09-bellek-bilis-araclar.md"
       ]
     },
     "tests/evolution/test_api_contracts.py": {
@@ -1017,7 +609,6 @@
       "sha256": "1ff0d41e45ddbba2e2830c058dda8136bc1bc18c4ed71efdc6cf08374a0ebd1c",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/04-attention.md",
         "tr/05-transformer.md",
         "tr/08-uretim.md"
@@ -1028,28 +619,6 @@
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/04-attention.md"
-      ]
-    },
-    "tests/evolution/test_checkpoint_lifecycle.py": {
-      "sha256": "5753551502c1c631c43e445b924d47525119a776f0cac49b364ac78e33d88e22",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/07-model-yasam-dongusu.md"
-      ]
-    },
-    "tests/evolution/test_cognitive_correctness.py": {
-      "sha256": "54ee3c4264a2a2a93ba95a67804b437ea2194e64894a96619998f446de82e72d",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/09-bellek-bilis-araclar.md"
-      ]
-    },
-    "tests/evolution/test_cognitive_defaults.py": {
-      "sha256": "0713e6cac18e8205aba8a69d360ed483ee68d88c3694d7c87e3a3de5904faed0",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/09-bellek-bilis-araclar.md"
       ]
     },
     "tests/evolution/test_config_generation.py": {
@@ -1067,78 +636,19 @@
         "tr/05-transformer.md"
       ]
     },
-    "tests/evolution/test_data_cache_contracts.py": {
-      "sha256": "da6a449bcb0e707226af5f3c894071ef3d1bdd1a479c16bdb406ccb4600f7f95",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/06-egitim.md"
-      ]
-    },
     "tests/evolution/test_lower_layer_contracts.py": {
       "sha256": "5d9eaf368f4c093b1e8e0699d0e5b09b9b873f97294b70c688a444ab0a5c55e4",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/03-sinir-aglari.md",
         "tr/05-transformer.md"
-      ]
-    },
-    "tests/evolution/test_research_experience.py": {
-      "sha256": "f93440ca260e794529fc8b0ce557f4ebc13f972c8049a949d4636620572623d2",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/09-bellek-bilis-araclar.md"
       ]
     },
     "tests/evolution/test_runtime_lifecycle.py": {
       "sha256": "d6d82475865705e3ee9d5ad8e93140ecd5e387a36f84b48c34e92997b7bca430",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/07-model-yasam-dongusu.md",
-        "tr/09-bellek-bilis-araclar.md",
         "tr/10-uctan-uca-sistem.md"
-      ]
-    },
-    "tests/evolution/test_tokenizer_contracts.py": {
-      "sha256": "016c84cd0a0dd8f999d910e2fbc81a5aeb11130cd00b679296e301187e524fcd",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/02-metin-tokenizer.md"
-      ]
-    },
-    "tests/evolution/test_tokenizer_read_only.py": {
-      "sha256": "8bda88f5fd574d7a46566ad191e686e95a7d97f3f2e03549d0f5e4574edfcf3c",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/02-metin-tokenizer.md"
-      ]
-    },
-    "tests/evolution/test_training_contracts.py": {
-      "sha256": "574691a6128a5b97beeb4bcdb2b0fc97f2791ab0bc4c09484ec6b6c2667c48d4",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/06-egitim.md",
-        "tr/07-model-yasam-dongusu.md"
-      ]
-    },
-    "tests/evolution/test_training_loop_correctness.py": {
-      "sha256": "22b2d4a66c2443ad484394632291f7fa3959b51d38c23549ef5cd43721bd6ed9",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/06-egitim.md",
-        "tr/07-model-yasam-dongusu.md"
-      ]
-    },
-    "tests/test_model_manager_checkpoint_loading.py": {
-      "sha256": "1b504c4e70c0ea7b252606c1edd79c3c341c33deedbd20546ced3e806acd05a1",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/07-model-yasam-dongusu.md"
       ]
     },
     "tokenizer_management/bpe/bpe_decoder.py": {
@@ -1162,13 +672,6 @@
         "tr/02-metin-tokenizer.md"
       ]
     },
-    "tokenizer_management/bpe/bpe_tokenizer.py": {
-      "sha256": "1ec89eff27c7212bb0152f299903cc153f7ef7563fb6152f9ef14c04bc14f3e5",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/02-metin-tokenizer.md"
-      ]
-    },
     "tokenizer_management/bpe/bpe_trainer.py": {
       "sha256": "bd5c181e6a2b5a3600eb2552b5bbac8cfa9300c4c6679f17b6e389e3b03c6897",
       "fingerprint_mode": "utf8-lf",
@@ -1187,24 +690,14 @@
       "sha256": "3f31dd1ab227148a53beaf52ad43653d121e151491517b7da99a70121156bef3",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
-        "tr/01-motor-ve-ogrenme.md",
         "tr/02-metin-tokenizer.md",
         "tr/06-egitim.md"
-      ]
-    },
-    "tokenizer_management/train_bpe.py": {
-      "sha256": "afe4b31cbb79fd985e0d01c5bfb23ed5e70c98055209310f16d3a9fa912f75c7",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/02-metin-tokenizer.md"
       ]
     },
     "training_management/contracts.py": {
       "sha256": "96db2236dd8dbaacccdf97b345b771318ac2f01c9c0e933126e61dce4732b3bc",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "tr/05-transformer.md",
         "tr/06-egitim.md"
       ]
     },
@@ -1220,7 +713,6 @@
       "sha256": "04c251587d87cfede7c4ba547860b92ecd922956eeb3804bbff1a1cba43b4efa",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/03-sinir-aglari.md",
         "tr/06-egitim.md"
       ]
@@ -1252,7 +744,6 @@
       "fingerprint_mode": "utf8-lf",
       "chapters": [
         "tr/02-metin-tokenizer.md",
-        "tr/06-egitim.md",
         "tr/07-model-yasam-dongusu.md"
       ]
     },
@@ -1260,7 +751,6 @@
       "sha256": "19204111a63c4a31433f8e659aa2c1bcf1eb912ba770edb422341be74582bfe3",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/06-egitim.md"
       ]
     },
@@ -1268,7 +758,6 @@
       "sha256": "35e91782e129d97f4b4f2ca5035f18676f72b74bc16eff6ef67b240c4c918b29",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/02-metin-tokenizer.md",
         "tr/06-egitim.md"
       ]
@@ -1280,18 +769,10 @@
         "tr/06-egitim.md"
       ]
     },
-    "training_system/train.py": {
-      "sha256": "1b2adea98ef87917ac0487f18565b734c6cbdca0b78d19f80dec40b70a216da9",
-      "fingerprint_mode": "utf8-lf",
-      "chapters": [
-        "tr/06-egitim.md"
-      ]
-    },
     "training_system/v3/core/training_service_v3.py": {
       "sha256": "fcc29f2a08781906ab7c928ae91f86cd693501d5962101492ebdb950ffbf22c6",
       "fingerprint_mode": "utf8-lf",
       "chapters": [
-        "KAYNAK_HARITASI.md",
         "tr/06-egitim.md",
         "tr/07-model-yasam-dongusu.md"
       ]

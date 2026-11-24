@@ -18,7 +18,7 @@ import pytest
 
 from cevahir_ai.console import completion, registry, repl
 from cevahir_ai.console.format import format_list, format_table, render
-from cevahir_ai.console.help import help_text, overview, syntax, topic_text, topics
+from cevahir_ai.console.help import LABELS, help_text, overview, syntax, topic_text, topics
 from cevahir_ai.console.lineedit_win import LineEditor
 from cevahir_ai.console.parser import parse
 from cevahir_ai.console.runtime import Session
@@ -239,8 +239,9 @@ def test_help_text_golden_and_cultures(tmp_path):
     assert run(tmp_path, "Get-Help Get-CvModel")[1].startswith("NAME\n    Get-Model")
     assert "Get-Checkpoint" in overview("en") and "Komutlar:" in overview("tr") and run(tmp_path, "Get-Help")[1] == overview("en")
     assert topics() == ["about_Cevahir_Registry", "about_Cevahir_Subset"]
-    for name in topics():
-        assert topic_text(name, "en").startswith("TOPIC") and topic_text(name, "tr").startswith("KONU")
+    for name in topics():                    # the Turkish topic files were withdrawn (v7): Turkish falls back to English
+        assert topic_text(name, "en").startswith("TOPIC")
+        assert topic_text(name, "tr").startswith(LABELS["tr"]["fallback"]) and "TOPIC" in topic_text(name, "tr")
     assert "NotInCevahirSubset" in run(tmp_path, "Get-Help about_cevahir_subset")[1]
     assert run(tmp_path, "Get-Help about_Nothing")[0] == 1 and run(tmp_path, "Get-Help Get-Nothing")[0] == 1
     assert run(tmp_path, "Get-Help Get-Model -Parameter Nope")[0] == 1

@@ -1,0 +1,16 @@
+{
+  "version": "2026.11.16",
+  "tag": "research-2026.11.16-v6",
+  "author": "Muhammed Yasin Yılmaz",
+  "github_url": "https://github.com/myylogic/cevahir-ai/releases/tag/research-2026.11.16-v6",
+  "status": "published",
+  "doi": "10.5281/zenodo.24279940",
+  "concept_doi": "10.5281/zenodo.22864660",
+  "previous_release": "releases/research-2026.11.14-v5.json",
+  "scope": "The Cevahir Zihin theory (a Living Evidence Mind) and the work since v5: sleep and dream sorting, hearing, felt not-knowing, think-then-speak, situation resemblance, online life, exploration, learning to learn (mixed), one-shot evidence (off), a faster bit-identical core and a smaller tie layout; recall of what was read once; exact relations; analogy and corroboration; paradigmatic relation and binding; relational memory; the reply relation (compositional generalisation: SCAN 789/844 within a window of 11 and 844/844 with a window of 12, against a Transformer's 0/844); generalised consequences; word forms; deduction with exceptions in one and two steps (off by default); witness reliability (off); replacement witness (Mill's method of difference, off); urge to go on (off); attribution with contradictions (!neden); a Turkish audit with negative results. Not separate paper DOIs.",
+  "zenodo_url": "https://zenodo.org/records/24279940",
+  "source_commit": "b5b591ed438d24e2e4bcc83a02c1b8a5204ab804",
+  "date": "2026-11-16",
+  "archive_verification": "evidence/zenodo_archive_verification_v6.json",
+  "doi_resolution": "evidence/doi_resolution_v6.json"
+}

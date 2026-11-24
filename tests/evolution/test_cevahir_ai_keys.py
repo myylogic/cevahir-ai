@@ -152,7 +152,8 @@ def test_file_utf8lf_key_equals_the_book_fingerprint_of_every_reviewed_source():
         scheme = "utf8lf-v1" if entry.get("fingerprint_mode") == "utf8-lf" else "bytes-v1"
         assert file_scheme.file_key(ROOT / path, scheme).digest == entry["sha256"], path
         checked += 1
-    assert checked == len(entries) >= 150                                               # every reviewed source
+    assert checked == len(entries) >= 100   # every reviewed source (104 since v7: the Turkish chapters were
+                                            # withdrawn by their author and link no sources)
     merges = file_scheme.file_key(ROOT / "data/merges_lib/merges.txt")
     assert str(merges) == "cev:file:utf8lf-v1:b5b0b9fcc04a73ea79ed1d3cee5f4f96860204cad6b020364ec9f20af4b080b1"
 
