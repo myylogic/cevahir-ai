@@ -71,8 +71,11 @@ How much a tie is expected is read from its evidence, weighted by the trust in e
 - conviction `c = W / (W + k)`, with `k = 1`;
 - expectation `e = c · (f − ½) + ½`.
 
-This is the expectation of a truth value in NARS (Pei Wang's Non-Axiomatic Reasoning System) with `k = 1`. This core
-reads it from evidence kept per origin and weighted by learned trust. With no evidence the expectation is ½, which
+This is the expectation of a truth value in NARS (Pei Wang's Non-Axiomatic Reasoning System) with `k = 1`. As a
+number it equals `(W+ + ½) / (W + 1)`: the Krichevsky–Trofimov estimator, the posterior mean under the Jeffreys prior.
+Its sequential code length stays within ½ log₂ n + 1 bits of the best fixed rate chosen in hindsight
+([research/living_intelligence_2026_11_24/MODEL.md](../research/living_intelligence_2026_11_24/MODEL.md), 2.1). This
+core reads it from evidence kept per origin and weighted by learned trust. With no evidence the expectation is ½, which
 means "I don't know". Conviction grows with evidence. Every reading rests on this rule: what to say, what to expect,
 what to be surprised by.
 
@@ -931,7 +934,7 @@ The models were small and the data scarce; with far more data the gap may close.
 |---|---|---|---|
 | Living Evidence Mind | Yaşayan Kanıt Zihni | the architecture | |
 | Provenance Evidence | Köken Kanıtı | W+/W− per six origins | source monitoring in psychology |
-| Conviction-weighted Expectation | Kanaat Beklentisi | e = c(f − ½) + ½, the one rule | the NARS truth-value expectation |
+| Conviction-weighted Expectation | Kanaat Beklentisi | e = c(f − ½) + ½, the one rule | the NARS truth-value expectation; as a number, the Krichevsky–Trofimov estimator |
 | Trust Judgment | Güven Yargısı | trust in the four indirect origins learned from direct experience | |
 | Seven-Place Focus / Focus Settling | Yedili Odak / Odak Yerleşmesi | the attention mechanism | k-winners-take-all |
 | Exact Retraction | Kesin Unutma | an experience's evidence removed exactly through the ledger (named in v5, T9) | exact machine unlearning |
