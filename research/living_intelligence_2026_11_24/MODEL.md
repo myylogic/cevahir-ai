@@ -565,6 +565,34 @@ add-primitive world (NOTES.md 8.1), the first form, with the gate alone, answere
 primitive; with the record, 6 of 6, as Zihin does. The harmony alone answers 0 of them and is silent where it does
 not know.
 
+### 12.5 The hippocampus's analogy: several places at once (`living/analogy.py`)
+
+Zihin's frames generalise one place: a lived utterance with one item replaced by a category. Most utterances a mind
+meets differ from every one it lived in two or three places at once. With a thousand lines of COGS lived, 85 % of
+its test sentences are two or more words away from all of them, and Zihin answered none. With the whole training
+file lived, 53 % of the in-distribution test sentences are one word away from a lived one and 89 % at most three.
+Generalising several places at once is therefore what a mind that has lived enough needs, and it is the same reading
+as a frame, done on the episodes the hippocampus keeps.
+
+- **Episodes.** Every dialogue lived is kept as it was said: the tokens of the utterance and of the answer.
+- **Neighbours.** For an utterance U, the lived utterances of the same length that differ from U in at most three
+  places, found through an index of (length, place, token).
+- **The relation of a word to the answer.** For a word w, the answer token t that came with it, believed by the one
+  rule on the dialogues w was said in: e(t | w) = (W⁺ + ½) / (W + 1), with W⁺ the answers that held t. Tokens held
+  by half of all answers or more are the answers' own structure, not any word's. A relation is believed when e
+  reaches the speaking line. On equal evidence the word itself is preferred (Zihin's F34, the asked word itself),
+  then the token that shares the longest beginning with it (F36, word forms).
+- **The plan.** For a neighbour (U′, A′), each place where U and U′ differ (u in U′, v in U) is filled: every token of
+  A′ that is u's relation becomes v's relation, or v itself where u's relation is u itself and v has none yet. A
+  neighbour with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first,
+  at most eight), and the plan is the answer most of them give, believed by the rule on the vote.
+- **The prefrontal choice of the thought.** Zihin's plan is believed as its weakest decided word; the analogy's plan
+  by its vote. The one believed more is the thought, if it reaches the speaking line. It is then said token by token
+  as in 12.3.
+
+Two constants enter, both bounds of a search: at most three places and eight neighbours. A dialogue forgotten
+(`Cevahir.forget`) leaves the episodes exactly.
+
 ### 12.4 What is not yet one
 
 - **Two substances.** Zihin's units and ties and the cortex's contexts are two stores. They meet in the harmony and
