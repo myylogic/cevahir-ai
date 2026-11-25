@@ -1793,3 +1793,37 @@ Tried and not taken:
   and a search cut short by the bound not counted as failed (so a part tried again later may finish it). On the whole
   file eight silent clause chains become right and four right ones silent (20,894 / 104 / 2), the shares spent before
   the parts whose chains were right are reached; asking takes a third longer.
+
+### 8.27 An exchange's rest, read one step on
+
+Of the 108 sentences left silent on the whole generalisation file (8.26), 28 are names met only as subjects or alone,
+asked as the second object of a verb inside one clause or two: "Emma believed that Noah gave Liam Lina .", "Lucas
+meant that the child passed Emma Paula .". A name asked so is answered by exchanging it for a thing lived in its
+place (8.20), and the rest, "Emma believed that Noah gave Liam the cake .", was read as the exchange's record read the
+rests of its examples: the one lived, or the analogy's own at the speaking line. Nothing lived is near a clause around
+a double object, so the analogy is silent; and exchanges are made only for the asked utterance, so the clause cannot
+be taken out first.
+
+What was built (MODEL.md 12.6): **an exchange's rest is read one step on** (06123df), as a frame's record reads its
+examples' rests since 8.23: the one lived, the analogy's own at the speaking line, or by parts with one part taken out
+(at most RECORD_STEP tried); and the exchange's record reads the rests of its own examples so too. The answers of the
+analogy kept for rests now keep their beliefs, which an exchange's step takes the least of.
+
+The hippocampus alone (right / silent / wrong; rows of `results/m3_analogy.jsonl` written by 06123df):
+
+| | 8.26 (bd2255e) | 8.27 (06123df) |
+|---|---|---|
+| COGS generalisation, the whole file (21,000) | 20,890 / 108 / 2 | **20,914 / 82 / 4** |
+| COGS in distribution, the whole test file (3,000) | 2,999 / 1 / 0 | **3,000 / 0 / 0** |
+| COGS in distribution and generalisation, the samples of 300 | 299 / 1 / 0 and 299 / 1 / 0 | 300 / 0 / 0 and 299 / 1 / 0 |
+| SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same |
+
+Of the 28 names asked so, 20 are answered right (1,990 of the 2,000 names asked as objects), and four more sentences
+of other kinds: twelve of the 21 kinds are now answered whole, and every sentence of the in-distribution file. Two
+silent sentences become wrong, each believed at the line or just over it: "The girl noticed that a hippo noticed ."
+(0.583: "notice . theme" for the agent of a verb said without its object, a hippo met only as the subject of a verb
+without an agent), and "A teacher proved that a girl hoped that the patient respected that William was promised the
+leaf by Olivia ." (0.623: the clause of "hoped" hung on "was promised", past "respected"'s). Reading the rests of
+exchanges by parts costs time: every shard of the whole file took 942 s to 967 s (560 s for 8.26), the in-distribution
+file the same as before.
+

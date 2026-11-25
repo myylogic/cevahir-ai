@@ -212,6 +212,19 @@ A rough projection goes from the same rows (1.15 million nodes and 1.64 million 
 Seven orders of magnitude of extrapolation from one small corpus is not a measurement. The point is the shape: counts
 in contexts that recur grow sublinearly, while copies of sentences grow linearly.
 
+**Directions not yet built (noted 25 November 2026).** Three ways to keep a large life within a machine, each keeping
+forgetting exact:
+
+- *Zihin's night.* The cortex's night forgets the contexts met once and keeps what recurred (NOTES.md 8.8: the store
+  2–3.8 times smaller for 0.4–1.1 % more bits); Zihin's sleep dreams but forgets no tie, though 73 % of its ties are
+  written once and never used again. A night that forgets the ties never used, without losing what one reading taught
+  (recall by a question), is the first.
+- *A store on disk.* Each moment touches a small part of the store, and most of it is touched once: the contexts in
+  use can be held in memory and the rest on disk, so that a life is bounded by the disk and not by memory.
+- *What was lived kept in the cortex's own code.* A text, or a dialogue the hippocampus keeps, can be kept coded under
+  the cortex's predictions, about 1.5–2 bits a character instead of 8, and given back byte for byte (the code is
+  lossless; a vector space alone would not be).
+
 ### 3.5 What is kept, and what is not
 
 The mind does not choose which of the world's sentences to keep; it keeps none of them. It keeps three things.
