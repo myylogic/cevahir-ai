@@ -752,7 +752,9 @@ are mended by the same store of episodes.
   that names places is given back by it from its items in any order (by the first place alone, with ties left as
   they came, 11,157 of the 24,012; by the numbers alone 17,481; NOTES.md 8.19); SCAN's answers name no places, so no
   pair is read and nothing is reordered. A plan over places is a lived answer filled and keeps its order already; only
-  plans by parts are reordered (NOTES.md 8.18).
+  plans by parts are reordered (NOTES.md 8.18), and these at every step of a chain: the next step reads the answer
+  item by item against its example's, and an answer out of order puts the next change inside the wrong item
+  (NOTES.md 8.24).
 - **A second search, with words read by their kind.** Frames read every word that has a relation as one mark, so a
   phrase hung on a subject ("A donkey [in the room] sold Ella a donut") has the frame of a verb with its object ("A
   donkey [sold the cake] to Emma"), a frame whose parts are not wholes; and phrases were lived only on objects, so no
@@ -784,7 +786,23 @@ are mended by the same store of episodes.
   nothing of other surroundings (SCAN). Within the same surroundings a change is still put where its example put it:
   there it is where it goes, and a change inside an item ("sell . recipient ( x _ 3 , x _ 1 )" become "sell . theme
   ...") is put by its changed tokens alone where the item as a whole has no counterpart (the asked item names "Paula"
-  where the example's named a place).
+  where the example's named a place). Where the item a change is made inside has a counterpart, the change is made in
+  it: the example's item, put into the asked rest's answer, is found there once, and the change is made in it at the
+  same place. Read token by token, the two answers line up where their longest runs do, and a far item can win over
+  the one that holds the part (a far clause whose agent is a thing, as the example's is, over the clause of a name
+  that holds the part). An item said of a place is put as the item of the word at the place it is put to: a token
+  is told apart by its place, and the example's clause verb may also stand in the part, where its token would be put
+  as the part's own (NOTES.md 8.24).
+- **The roles an answer gives.** The rests of a chain are steps on the way, often utterances no one would say ("Aubrey
+  liked the ring to a cat ."), and their answers by the analogy are what makes a chain go: held to the roles their
+  tokens were lived with, 95 right clause recursions fell silent (NOTES.md 8.23). But the answer given is believed no
+  further than the roles it gives its tokens were lived: an item that gives a token a role it never took in a lived
+  answer ("like . recipient") is believed by the rule on the tokens that took every role it took, how many of them
+  took that one too, and the answer's belief is the least of its own and these. A token that took no role is not read
+  so: nothing lived says what roles it takes. A token that took few takes a new one as the tokens that took those
+  do, as the generalisation set asks (a verb met only without an object, asked with one, takes an agent as almost all
+  verbs that take a theme do). Where the first search's answer is held back so, the second search is made; the items
+  are the answer's "token . role ( ... )", read as the far places of 12.6 read them (NOTES.md 8.24).
 
 Nothing of COGS is named here: no word, mark or form of its answers. What the mechanism assumes is general: an answer
 may name the places of what was said by their numbers or by a word's own token, and the items of an answer keep the

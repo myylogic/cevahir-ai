@@ -1005,8 +1005,8 @@ Every command Cevahir missed Zihin answered right: where the two thoughts differ
 by the analogy's plans over places, and it lets a plan by parts lead too, so a fault of the hippocampus shows here as
 a command lost (8.15). With the final code Cevahir misses none of the 300, and is wrong or silent on none; so too
 with the code of 8.19 (fc73e36: 50 of 50 in each of the six splits, Zihin alone 300 too; rows of
-`results/m3_scan.jsonl` written by fc73e36) and with the hippocampus of 8.21 (the rows written by 96f0938: 300 of
-300 again).
+`results/m3_scan.jsonl` written by fc73e36), with the hippocampus of 8.21 (the rows written by 96f0938: 300 of
+300 again) and with that of 8.23 (the rows written by 31fc5b9: 300 of 300, Zihin alone 300 too).
 
 ### 8.14 Answering by parts, held to its own record
 
@@ -1614,3 +1614,73 @@ the tokens that took every role it took took that one too (the rule on how many 
 what "like" takes take a recipient). The three wrong answers were right; but every seventh generalisation sentence
 came to 2,884 / 113 / 3, 95 clause recursions silent (the clause verbs put for each other in their rests fail the same
 rule), and asking it took five times as long.
+
+### 8.24 A change put where it goes, and the roles an answer gives
+
+After 8.23 six of every seventh generalisation sentence were wrong and eleven silent, and two of the sample of 300
+were wrong. Followed step by step, each wrong answer of a chain went wrong in one of two ways: a change was put back
+in the wrong place of the rest's answer, or a rest no one would say was answered with a word in a role it never takes,
+and that role stayed in the answer given.
+
+- "The turtle gave the donut beside a bed beside a barrel in a glass in a hole on the chair beside a bench in a cup in
+  a room to the girl .": taking "donut beside a" out of "Skylar gave the donut beside a bench to the girl ." adds its
+  items after the recipient, the last of them, so the step put them last; the step above read that answer token by
+  token against its example's, whose items stand in the order of their places, and put its change, a phrase on
+  "bed", inside the wrong item ("bed ( x _ 7 ) 10 ) AND barrel ...", an answer no longer made of items).
+- "Ava wished that Olivia hoped that the horse tolerated that a politician liked that Lily liked that Levi respected
+  that the chicken liked that a box was liked by a sailor .": taking "liked that a box" out of "A boy tolerated that
+  the dog liked that a box was poked ." changes what the clause of "tolerated" holds. Read token by token, the
+  example's two items of "tolerated" line up over a longer run with the far clause of "the horse tolerated" (its
+  agent a thing, as the example's is) than with Levi's (a name), which holds the part, and the change went there.
+- "The girl hoped that Olivia liked that Noah liked that a president said that the boy liked that the bear liked that
+  a bat was liked .": the example's clause verb "liked" stands in its part too, so its token was put as the part's own
+  token, the example's item was found nowhere in the asked rest's answer (where the clause around the part is
+  "said"'s), and the change again went where the token alignment put it.
+- "Aubrey liked that Grayson gave Lina to a cat ." (and "... Paula to a cat .", "Emma said that Sofia sent Paula to
+  Liam ."): a part is exchanged ("that Grayson gave Lina" for "the ring"), the rest "Aubrey liked the ring to a cat ."
+  is answered by the analogy at 0.999 with "like . recipient", and the exchange's change leaves that item as it is.
+
+What was built (MODEL.md 12.6):
+
+- **An answer put together by parts is said in the order of its lists at every step** (62ed7db), not only once the
+  chain is done, so the step above reads a list whose items stand where their places put them.
+- **A change made inside one of the example's items is made inside the item it stands for** (0b5acfe): the example's
+  item, put into the asked rest's answer, is found there once, and the change is made in it at the same place; where
+  it is found nowhere, or more than once, the token alignment decides as before.
+- **The answer given is believed no further than the roles it gives were lived** (3b766fa): an item that gives a token
+  a role it never took in a lived answer is believed by the rule on the tokens that took every role it took, how many
+  of them took that one too, and the answer's belief is the least of its own and these; a token that took no role is
+  not read so. Only the answer given is read so: the rests are steps on the way, and the role belief inside the
+  analogy (8.23) silenced 95 right clause recursions. Where the first search's answer is held back, the second search
+  is made. "like" takes no recipient in any lived answer, and no token that takes all "like" takes does (the rule 0.50);
+  "say" takes none, nor do any of the 19 tokens that take all it takes (0.025). Of the 2,995 right answers in the end,
+  531 give a token a role it never took, as the generalisation set asks (a verb met only without an object, asked with
+  one, takes an agent as almost every token that takes a theme does), and all of them stay above the line.
+- **An item said of a place stands for the item of the word put at that place** (b003819): a token is told apart by
+  its place, so the example's "like . ccomp ( x _ 2 , ... )", said of the clause around "liked that the rose", is
+  "say . ccomp" where the clause around the asked part is "said"'s.
+
+The second mend alone changed two answers and left the count as it was: "Ava ..." became right, and an exchange it let
+through made "The baby liked that Benjamin forwarded Paula to the boy ." wrong through the rest "The baby liked a table
+to the boy ." ("like . recipient" again), which the role belief then held back; the second search answers all four
+such sentences right.
+
+The hippocampus alone (right / silent / wrong; `m3_analogy.py`, rows of `results/m3_analogy.jsonl` written by
+3b766fa and b003819; the two middle columns asked by the same procedure of the hippocampus kept from the same lives,
+without rows):
+
+| | 8.23 (e2d9562) | + order (62ed7db) | + item (0b5acfe) | + roles (3b766fa) | + place (b003819) |
+|---|---|---|---|---|---|
+| COGS in distribution, the sample of 300 | 299 / 1 / 0 | — | — | 299 / 1 / 0 | 299 / 1 / 0 |
+| COGS in distribution, the whole test file (3,000) | 2,999 / 1 / 0 | 2,999 / 1 / 0 | — | 2,999 / 1 / 0 | 2,999 / 1 / 0 |
+| COGS generalisation, the sample of 300 | 297 / 1 / 2 | 299 / 1 / 0 | — | 299 / 1 / 0 | **299 / 1 / 0** |
+| COGS generalisation, every seventh sentence (3,000) | 2,983 / 11 / 6 | 2,990 / 5 / 5 | 2,990 / 5 / 5 | 2,994 / 5 / 1 | **2,995 / 5 / 0** |
+| SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same | — | the same | the same |
+
+On every seventh generalisation sentence no answer is wrong. Clause recursion is answered in 131 of 134 sentences
+(128 before; three silent), recursion of phrases in 134 of 135 (131; one silent), names met only as subjects or alone
+and asked as objects in 287 of 288 (284; one silent), and all of the other eighteen kinds whole. The five silent
+sentences: three with eight, ten and ten clauses nested, one with nine phrases nested inside a clause, and "A king
+liked that a chicken gave Emma Lina .", for which no step is found even with the line lowered to 0.45. Asking every seventh generalisation sentence took 362 s and 417 s on two
+shards at once, the in-distribution file 241 s and 213 s (the machine shared with a run of the whole Cevahir and
+another battery; 435 s and 270 s in one process each for 8.23).
