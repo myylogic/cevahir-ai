@@ -1220,3 +1220,10 @@ to subject (common) 144 / 0 / 2 → 140 / 5 / 1, pp dative to do dative 135 / 0 
 - **Tried, not taken: the innermost part first.** Trying the rightmost parts before the most whole-like ones (the
   innermost clause of a right-branching sentence) answered 75 of the 134 cp recursions, but said 9 pp recursions
   wrong where the records' order says 3; the rule above answers them by mending what the search was spent on.
+- **The search's bound.** With the rule, 69 nested sentences were still silent, and the bound on parts tried was
+  what stopped them (with 4,000 instead of 400, 26 were answered, all right; 40 steps instead of 16 changed nothing).
+  The bound decides only where a search is spent: the order of the search is the same, so a plan found within 400
+  is the one found within 4,000, and only a silent utterance can change. It is now 4,000. On every seventh
+  generalisation sentence the hippocampus then answers 2,762, silent 221, wrong 17 (cp recursion 90 / 41 / 3, pp
+  recursion 131 / 2 / 2); the in-distribution file's three silent sentences stay silent, and SCAN is unchanged. The
+  69 searches took 48 s together with the larger bound (12 s with the smaller).

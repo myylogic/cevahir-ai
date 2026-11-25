@@ -85,7 +85,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 from living.evidence import SPEAKING_LINE
 
 TOKEN = re.compile(r"\w+|[^\w\s]", re.UNICODE)
-PARTS_BUDGET = 400                                             # parts tried, at most, for one utterance
+PARTS_BUDGET = 4000                                            # parts tried, at most, for one utterance
 PARTS_DEPTH = 16                                               # parts taken out, at most, one after another
 PARTS_AROUND = 3                                               # tokens on each side of a part an example must share
 PART = "\u27e8%d\u27e9"                                         # a place of a part put in for another, while it stands

@@ -30,8 +30,8 @@
 >   together facts read apart, it answers every question, and a Transformer trained on the very stream it lived answers
 >   none. At school it answers 342 of 405 examination questions, every one of the 63 deductions among them (a
 >   Transformer trained on the same lessons: 203, and none of the deductions). On COGS the hippocampus alone answers
->   2,993 of the 3,000 in-distribution test sentences (4 wrong) and 2,736 of every seventh sentence of the
->   generalisation set (3,000; 17 wrong): among them 130 of 135 with phrases nested deeper than any it lived, a kind on
+>   2,993 of the 3,000 in-distribution test sentences (4 wrong) and 2,762 of every seventh sentence of the
+>   generalisation set (3,000; 17 wrong): among them 131 of 135 with phrases nested deeper than any it lived, a kind on
 >   which published Transformers score 0 %, and 436 of the 437 whose verb decides the part its noun plays, read from
 >   what a word's token always had after it where the word was said. Answering by parts is held to records of its own,
 >   read by the one rule from what was lived, and alone on SCAN it says nothing wrong.

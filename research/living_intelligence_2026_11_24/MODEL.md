@@ -698,7 +698,8 @@ are mended by the same store of episodes.
   the same frames), so their errors go together rather than one by one: the chain is believed as far as its least
   believed step, and no further. (Multiplying the steps' beliefs, as if each could fail on its own, left most phrases
   nested deeper than four silent; NOTES.md 8.14.) The most whole-like parts are tried first, then the rightmost; a
-  search tries at most 400 parts and takes out at most 16 one after another.
+  search tries at most 4,000 parts and takes out at most 16 one after another (the bound decides only where a search
+  is spent: a plan found within a smaller bound is found the same within a larger one).
 - **Exchanging a part.** Some parts cannot be taken out: what remains would not be an utterance ("Emma offered Lina to
   a girl" without "Lina"). Such a part is exchanged for the part lived most often between the same neighbours ("the
   cake"); the rest ("Emma offered the cake to a girl") is answered, and what that exchange changes in lived answers is
