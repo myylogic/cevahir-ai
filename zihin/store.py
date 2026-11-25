@@ -537,6 +537,13 @@ class Substance:
             state.pop(name, None)
         return state
 
+    def drop_caches(self) -> None:
+        """Drop what reading keeps beside the substance (the tensors of out lists, views, parts, slot keys, tables):
+        it is made again from the substance when it is needed, as after a load. Nothing the mind knows changes."""
+        for name in self._CACHES:
+            self.__dict__.pop(name, None)
+        self._out_ids, self._npv, self._parts, self._abstract_in = {}, None, {}, None
+
     def __setstate__(self, state) -> None:
         t_w = state.pop("t_w", None)
         touched = state.pop("_touched", None)    # the moment's touched ties as kept before ``_touch`` (a set)

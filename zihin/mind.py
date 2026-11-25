@@ -1379,6 +1379,18 @@ class Mind:
             forget_moment(self, m)
         return report
 
+    def consolidate(self) -> None:
+        """The night's keeping that changes nothing the mind knows: the day's ties are sorted into the long-term store
+        of the tie index, and the caches and memos of reading are dropped (read again from the substance when they are
+        needed, as after the mind is saved and loaded). Beside its substance a long life then holds what one day
+        touched, not what every day ever touched."""
+        index = getattr(self.S, "tie_index", None)
+        if hasattr(index, "merge"):
+            index.merge()
+        for name in ("_situation_cache", "_between_memo", "_episode_memo") + READ_CACHES:
+            self.__dict__.pop(name, None)
+        self.S.drop_caches()
+
     def __getstate__(self):
         state = self.__dict__.copy()
         state.pop("_facet_cache", None)                   # caches, rebuilt on demand

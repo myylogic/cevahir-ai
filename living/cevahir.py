@@ -842,7 +842,8 @@ class Cevahir:
     def sleep(self, keep_min: int = 2, dream: bool = True, cycles: int = 3) -> Dict[str, object]:
         """The hippocampus's night (MODEL.md 8): the cortex of every channel forgets the contexts met fewer than
         ``keep_min`` times (what recurred stays exactly), and Zihin dreams and sorts its dreams against what is real
-        (``zihin.dusunce.sleep``, F20–F22) if ``dream``. Returns what was forgotten and dreamt."""
+        (``zihin.dusunce.sleep``, F20–F22) if ``dream``; either way Zihin keeps the day as its night does
+        (``Mind.consolidate``: its caches dropped, nothing it knows changed). Returns what was forgotten and dreamt."""
         self.flush()
         self.nights = getattr(self, "nights", 0) + 1
         out = {"forgotten": {self.channel: self.cortex.sleep(keep_min)}}
@@ -852,6 +853,8 @@ class Cevahir:
             from zihin.dusunce import sleep as night
             got = night(self.session, cycles)
             out["dreams"] = len(got.get("dreams", []))
+        else:
+            self.mind.consolidate()
         return out
 
     # ------------------------------------------------------------------------------------------------- keeping -----

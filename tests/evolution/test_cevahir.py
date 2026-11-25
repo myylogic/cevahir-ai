@@ -319,6 +319,22 @@ def test_cevahir_keeps_its_ledger_on_disk_and_a_loaded_one_forgets_exactly_from_
     said = d.answers(["şifre nedir ?"], way="every", workers=1)[0]
     assert all("kırmızı" not in said[w].lower() for w in said)
 
+
+def test_zihin_keeps_the_day_at_night_without_changing_what_it_knows(FastCortex):
+    from living.cevahir import Cevahir
+    life, _ = _world()
+    c, d = Cevahir(variant="speaking"), Cevahir(variant="speaking")
+    for i, (q, a) in enumerate(life[:30]):
+        for x in (c, d):
+            x.watch(q, a + " .")
+        if i == 14:
+            assert c.mind.S._out_ids and c.mind.S.tie_index.day
+            c.mind.consolidate()                        # the night: the caches dropped, the day's ties merged
+            assert not c.mind.S._out_ids and not c.mind.S.tie_index.day
+    assert c.mind.S.digest() == d.mind.S.digest() and c.cortex.digest() == d.cortex.digest()
+    asked = [q for q, _ in life[30:36]]
+    assert c.answers(asked, way="every", workers=1) == d.answers(asked, way="every", workers=1)
+
 def test_the_hippocampus_answers_an_utterance_that_differs_in_two_places_from_every_one_lived(FastCortex):
     from living.analogy import Episodes
     people = ["Ali", "Veli", "Ayşe", "Can", "Ece", "Zeynep"]
