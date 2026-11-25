@@ -683,6 +683,18 @@ At each moment, roughly each word, the mind lives these steps:
   4, but in a small world the ways it opens are claimed with while the mind listens, each a voice in the vote of
   every way, and where they fail every reading is believed less; the answer is not begun (notes of 2026-11-22,
   section 41).
+- **The Newest Holds (F76; off, not in the full configuration).** Every telling is otherwise evidence of the same
+  weight, whenever it came: the counts are right of a world that does not change, and where it does, three tellings
+  of an old place outweigh one of the new. A mind with the switch keeps each tie's last confirmed moment (the last
+  moment its positive evidence grew; given back exactly by undo and retraction, saved with the mind). What the
+  sequence going on now was followed by last (before the present run of items, not an echo of what the partner just
+  said) is a way of reading of its own, read after every other: where the other readings claim several lived
+  continuations on one channel, the one that came last claims to come next, by the rule on one confirmation since
+  ((1 + ½) / (1 + 1)), believed as far as the way's record allows (F49). It brings no word of its own. The record is
+  settled while the mind lives, where a context's counts and what followed it last foresaw different items and one
+  of them came. Measured: where people's places change, the place told last for 36 of 36 people asked (9 without
+  it, those told once); the worlds of deduction and chains are answered as without it. Off, because the record by
+  which Cevahir trusts Zihin alone does not yet follow it (research/living_intelligence_2026_11_24/NOTES.md, 8.30).
 - **The Ground (`Config.grounded`; off, not in the full configuration).** What is perceived and what is said meet in
   the one store (research/living_mind_2026_11_23/: MODEL.md, NOTES.md). Perception binds opaque features to
   tracked things, events and each participant's part (who starts it, who moves, who is turned to, who is touched);
@@ -998,6 +1010,7 @@ The models were small and the data scarce; with far more data the gap may close.
 | The Subject Carries | Konu Taşınır | F72, off by default (while listening: with silent claims) | the discourse topic held in working memory; zero anaphora (pro-drop); centering |
 | Recall or Reason | Hatırla ya da Düşün | F74, off by default (deep_only: what only a reasoned moment reads) | dual-process theories (fast retrieval, slow deliberation); the feeling of knowing as the signal to deliberate; metareasoning (computation spent where it can change the decision) |
 | The Reach of a Continuation | Devamın Erimi | F75, off by default, not in the full configuration (measured, not kept) | back-off between orders of context (n-gram back-off, prediction by partial matching) |
+| The Newest Holds | En Yeni Tutar | F76, off by default, not in the full configuration | recency against frequency; estimation in a world that changes (discounting, change detection); the last value as a forecast |
 | The Ground | Zemin | `Config.grounded`, off by default | cross-situational word learning with the referent first (Siskind 1996; Fazly et al. 2010); mutual exclusivity; joint attention; verb islands and constructions (Tomasello; construction grammar); thematic roles as profiles (Dowty 1991); time of speech and of event (Reichenbach) |
 | Voice Credibility | Ses Güvenilirliği | F24, off by default | |
 | Born Failures | Doğuş Başarısızlıkları | F25, studied, off by default | |

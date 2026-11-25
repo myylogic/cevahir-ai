@@ -511,7 +511,7 @@ This section is the design as built (`living/cevahir.py`, `living/_core.c`); NOT
 
 ### 12.1 Two bodies, one place
 
-- **Zihin** lives each word as a moment: its units and ties with per-origin evidence, and the mechanisms F1–F75
+- **Zihin** lives each word as a moment: its units and ties with per-origin evidence, and the mechanisms F1–F76
   (frames, families, relations, wholes, inheritance, conjectures, the ground). It is the part that generalises:
   it answers the six published SCAN test files, deduces, and says who does what in scenes never described.
 - **The cortex** lives each letter (sections 3–5). It is the part that predicts: below PPMd and a character
@@ -595,6 +595,11 @@ not know.
   built yet.
 - **Speed.** Zihin's moment is Python and costs milliseconds; the cortex's symbol costs microseconds. On text,
   Cevahir reads at Zihin's speed.
+- **Facts that change.** Zihin's counts weigh every telling alike, whenever it came: three tellings of an old place
+  outweigh one of a new. F76 (the newest holds, a switch of Zihin, off) reads what came last as a way of its own with
+  its own record, and Zihin then says the place told last; but the record by which Cevahir trusts Zihin alone (12.5)
+  is read from Zihin's voice while it lives, which reads the counts, and Cevahir stays silent there. A record that
+  follows how far a voice can be trusted now, not how far it could be at first, is not built (NOTES.md 8.30).
 
 ### 12.5 The hippocampus's analogy: several places at once (`living/analogy.py`)
 

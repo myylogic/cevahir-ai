@@ -1910,3 +1910,124 @@ the text: about 1.1 kilobytes a character walked and 2 to 3 resident, with about
 ledger on disk. A gigabyte of text would take Cevahir months on one core and a terabyte of memory or more; the cortex
 alone, minutes and tens of gigabytes at most (fewer after its nights, 8.8). What would change it is a cheaper moment
 (the silent claims, a compiled inner loop) and the long-term stores on disk (MODEL.md 3.4); neither is built.
+
+### 8.29 Tokens that take turns, and Zihin alone where the analogy foresees nothing
+
+**Tokens that take turns** (763b6df). The two broken answers left on the whole generalisation file (8.26) are lists
+whose items are not closed: "Paula sent a can on a table to Chloe ." came out as "send . agent ( x _ 1 , Paula ) AND
+1 , x _ 3 ) AND send . theme ( x _ send . recipient ( x _ 1 , Chloe ) ...", and a chain of clauses ending in "Oliver
+was given the cookie in a garden by Sophia ." as "... give . theme ( x _ 24 , give . agent ( x _ 24 , Sophia ) AND x
+_ 26 ) ...". Counting does not see it: "(" and ")" are as many as in a lived answer (6 and 6, 22 and 22). Their order
+does: an item is opened inside another, or closed when none is open.
+
+What was built (MODEL.md 12.6): two tokens that take turns in every lived answer that holds either (the first opens,
+the second closes, never two open, never a close with none open, none left open at the end) take turns in the answer
+given, or it is believed by the rule with nothing for it, over the times a lived answer could have broken them
+(every opening after an answer's first). Read from COGS's 24,155 lived answers, the pairs are "(" and ")" (77,448
+chances), "x" and "_" (122,254) and "*" and ";" (5,331). Tokens met at most once in every answer could break nothing
+and are no pair: two words said together in every answer that holds either ("the" and "ball") say nothing of an
+answer with one of them. No gold answer of the generalisation file or the test file breaks a pair; the two broken
+answers are held back, and the second search finds nothing for them. The hippocampus alone (rows of
+`results/m3_analogy.jsonl` written by 273836a): the whole generalisation file **20,914 / 84 / 2** (20,914 / 82 / 4
+at 8.27): the two broken answers are silent and nothing else changed; the test file 3,000 / 0 / 0, the samples of
+300: 300 / 0 / 0 and 299 / 1 / 0, SCAN 100 / 200 / 0 and 114 / 186 / 0, as before. The two wrong answers left are the
+two of 8.27, each a role: "notice . theme" for the agent of a verb said without its object, and a clause hung on the
+wrong verb. Each third of the file took 716 s to 748 s.
+
+**Zihin alone where the analogy foresees nothing** (273836a). On COGS's generalisation sample Zihin alone says 1
+answer of 300 right (194 silent, 105 wrong; rows of 8.7), and every wrong answer of the whole Cevahir there (6 at
+19e589d, 1 at 541a35f) is Zihin's plan, said where the analogy is silent (MODEL.md 12.5: where the analogy has no
+thought, Zihin's plan is the thought). Nothing held Zihin's plan to what it had shown where the analogy foresaw
+nothing.
+
+What was built (MODEL.md 12.5): while Cevahir lives a dialogue whose answer the analogy foresaw nothing of (no plan,
+or one under the speaking line; the analogy is asked before each answer already, 8.7), and Zihin would have said its
+first token (its guess at the speaking line), how far Zihin would have said the whole answer is kept: right when each
+token was its guess at the line, knowing the tokens said before it. Where the analogy foresees nothing when Cevahir
+is asked, Zihin's plan is the thought only as far as this record allows (the rule on it): under the speaking line it
+is held back and nothing is said, not even the harmony alone. With no record, the plan stands (nothing lived says how
+far Zihin goes alone). On the worlds of deduction and chains (m3_worlds) and in the school (m3_school), Cevahir still
+says every answer Zihin says, in each of three seeds (rows of 8dfba6e, whose Cevahir without F76 is this one, written
+without the Transformer: deduction 16 of 16, chains 13 of 13, the school as at 79a2e77). Cevahir on COGS with it:
+8.7.
+
+Tried and not taken: the record read from what Zihin would say, not from its voice (68480d1). The voice Cevahir
+hears while it lives is Zihin's cheap reading of the present context's own memory (predictions "own"); what Zihin
+says when asked is read with every way it has ("specific"). Read so, the record follows what Zihin says: in the world
+of 8.30 with the newest (F76) it rose to 30 to 32 of 33 or 34 and Cevahir said every place told last. But in the
+worlds of deduction and chains it held Cevahir silent on every question Zihin answers, in two seeds of three in
+deduction (16 questions each) and in all three in chains (13 each; rows of 68480d1 in `results/m3_worlds.jsonl`):
+early in its life, before the facts it deduces from were read, the reading Zihin speaks by fails, and the record
+keeps those failures. The record is read from the
+voice again (fba82e4). A record that follows how far Zihin can be trusted now, not how far it could be at first, is
+what 8.30 asks of facts too.
+
+### 8.30 Facts that change
+
+The question behind this: what does Cevahir say when what it was told stops being true? `m3_change.py`
+(`results/m3_change.jsonl`): twelve people are told where they are, asked and answered ("Veli nerede ?", "Veli evde
+."), three rounds, moving between them; twelve others are only told, interleaved with that life, in four kinds, three
+of each, and asked once the life is over. Right: the place told last. Three seeds; right / the old place / another
+answer / silent, of 9 each.
+
+| kind | Zihin (cd3a175) | Zihin with F76 (8dfba6e) | Cevahir (cd3a175) | Cevahir with F76 (8dfba6e) |
+|---|---|---|---|---|
+| told once, nothing more | 9 right | 9 right | 9 silent | 9 silent |
+| told once, then once elsewhere | 3 old, 6 no place | **9 right** | 9 silent | 9 silent |
+| told three times, then once elsewhere | 9 old | **9 right** | 9 silent | 9 silent |
+| told three times, then twice elsewhere | 3 old, 6 no place | **9 right** | 9 silent | 9 silent |
+
+**What it was.** Zihin recalls what it was told once, and goes by the counts of the rest: three tellings of the old
+place outweigh one of the new, and one against one, or three against two, mostly says nothing past the person's name
+(the name alone in every example kept). Every telling is evidence of the same weight, whenever it came: the one rule
+holds of a world that does not change. Cevahir says nothing at all, because of 8.29: in this life Zihin's voice where
+the analogy foresaw nothing was a stale place (2 to 4 right of 23 or 24), and the record holds back even the place
+told once.
+
+**What was built: F76, the newest holds** (`Config.newest`, off; 68480d1, fba82e4, 8dfba6e). Each tie keeps its last
+confirmed moment (`t_won`, the last moment its positive evidence grew, kept only by a mind that tracks it, given back
+exactly by undo and retraction, saved with the mind). What the sequence going on now was followed by last, before
+the present run of items and not an echo of what the partner just said, is a way of reading of its own ("yeni"),
+read last, over every other reading: of the continuations that the readings claim, where several are claimed, the
+one that came last claims to come next, with what one confirmation since gives by the rule ((1 + ½) / (1 + 1)), and
+is believed as far as the way's record allows (F49). The record is settled while the mind lives: where a context's
+counts and what followed it last foresaw different items and what came was one of them, the way held or failed.
+After the life of this world it had held 272 times and failed 229 (269 and 243, 307 and 261 in the other seeds):
+where the two disagree in this world, what came last is right only a little more often than the counts. Zihin then
+says the place told last for every person asked (36 of 36).
+
+Two forms were measured and not taken on the way. As first built, the newest claimed what followed a context last
+wherever it was read, and outspoke inheritance in the world of deduction ("kartal ne yapar ?" answered "kartal bir",
+from "kartal bir kuştur" read last: 0 of 15). Allowed only where several continuations were lived, it still outspoke
+an exception ("penguen yüzer" against "penguen bir kuştur": 1 of 3 seeds right). Reranking only what the readings
+claim, it brings no word of its own, and the worlds of deduction and chains are answered as without it: 16 of 16 and
+13 of 13, by Zihin and by Cevahir, in each of three seeds, with F76 and without it (`m3_worlds.py --minutes 0`, no
+Transformer; rows of 8dfba6e in `results/m3_worlds.jsonl`).
+
+**What is left.** Cevahir stays silent in this world with F76, because the record of Zihin alone (8.29) is read from
+Zihin's voice while it lives, and the voice reads the context's own memory, not the newest: it stays stale where
+Zihin, asked, is right. Read from what Zihin says instead, the record followed (Cevahir 36 of 36, 68480d1) and held
+Cevahir silent in the worlds of deduction and chains (8.29). F76 is off by default until a record of Zihin alone follows how far it can be trusted
+now; it has not been measured on COGS or SCAN.
+
+**Tried and not taken: a record of Zihin alone that follows it now.** Three more forms, measured on the worlds of
+change, deduction and chains with changes not committed (the rows were not kept):
+
+- read from what Zihin says (as 68480d1), from the newer half of its record only: deduction is answered, chains stay
+  silent in every seed. There Zihin as it speaks is confidently wrong while it learns (seed 0: "karga ne yapar ?",
+  foreseen "karga filizlenir", the property of another class, at 0.595), and right on 1 of the 11 answers it would
+  have said, the last;
+- the same, a claim beginning only past the words the question said (an echo of the question claims nothing):
+  chains silent in one seed of three (1 of its 3 claims right);
+- the newest in the voice Zihin gives while it listens: in the change world's life it claims at 11 of 288 tokens,
+  believed by its record at about 0.55, under what the counts give the old place there (0.667); the record stays 2
+  of 24 and Cevahir silent.
+
+What the four share: a record counts what Zihin came to while it was learning, and where it learns fast its past is
+not its present. A record read again from what Zihin would say now (the lived questions asked again at night, as the
+hippocampus replays the day) would follow it; but a question lived with its answer is recalled, not generalised from,
+and how to ask Zihin now without the answer it lived is open.
+
+In one run of one seed, made before the rows were written, one person
+of the three told three times then once elsewhere came out otherwise (the same code; how far a run depends on the
+order Python gives its sets was not separated).
