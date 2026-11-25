@@ -455,6 +455,38 @@ def test_a_word_keeps_what_its_token_always_had_after_it_between_the_same_neighb
     assert plan == ["I_WALK", "I_WALK", "I_LOOK"] and agree == filled == 2
 
 
+def test_only_a_word_never_met_stands_for_itself(FastCortex):
+    """A name's relation is the name itself, and a word never met before stands for itself where a name stood ("Zeki
+    saw Can"). A word lived again and again that never brought a token of its own ("the": the mark that comes with it
+    is in more than half of all answers, so it is no word's) is no name: "the saw Can" is not answered as if "the" saw
+    Can (in COGS such rests, "The liked that ...", were answered so and spent the search for parts)."""
+    from living.analogy import Episodes
+    names, things, verbs = ["Ali", "Can", "Ece", "Deniz", "Selin", "Mert"], ["cup", "box", "pen", "hat"], \
+        {"saw": "see", "took": "take"}
+    def two(v, a, b):
+        return [a, v, b, "."], [verbs[v], ".", "agent", "(", "x", "_", "1", ",", a, ")", "AND", verbs[v], ".", "theme",
+                                "(", "x", "_", "1", ",", b, ")"]
+    def the(v, a, t):
+        return [a, v, "the", t, "."], ["*", t, "(", "x", "_", "3", ")", ";", verbs[v], ".", "agent", "(", "x", "_",
+                                       "1", ",", a, ")", "AND", verbs[v], ".", "theme", "(", "x", "_", "1", ",", "x",
+                                       "_", "3", ")"]
+    ep = Episodes()
+    for n in names:
+        ep.live([n], [n])
+    for a in names:
+        for b in names[:3]:
+            if a != b:
+                ep.live(*two("saw", a, b))
+    for v in verbs:
+        for a in names:
+            for t in things:
+                ep.live(*the(v, a, t))
+    ep.ready()
+    assert ep.relation("the") is None and ep.with_w["the"] == 48
+    assert ep._plan(["the", "saw", "Can", "."])[0] is None
+    assert ep._plan(["Zeki", "saw", "Can", "."])[0] == two("saw", "Zeki", "Can")[1]
+
+
 def test_a_word_inside_and_outside_a_part_lends_no_change_where_the_answer_names_no_places(FastCortex):
     """Taking "opposite right and look" out of "look opposite right and look opposite right twice": its answer's
     I_LOOK may be either look's, so the example lends no change; where an answer names the places of what was said

@@ -898,7 +898,8 @@ studied in conversation, in four conditions; the other half (nine per seed) is a
   the rest's answer has one conjunct ("The baby screamed"), the new one must come first and its "AND" after it, and
   the frame of "in the room" after a subject is also that of "sold the cake" ("□ the □"), whose record is 0.02. The
   same placing, applied to every answer by parts, was not taken: on every seventh generalisation sentence it gave
-  2,700 / 276 / 24 against 2,706 / 275 / 19 (moved early in a chain, a run shifts the places later steps read). An
+  2,700 / 276 / 24 against 2,706 / 275 / 19, and 2,702 / 275 / 23 with a run begun only at a token that, wherever it
+  stands, is followed by a word's token (moved early in a chain, a run shifts the places later steps read). An
   answer's lists, what separates their runs and the order the runs keep, would have to be read from the answers
   lived as a whole, not mended where a run is put in.
   Answering by parts is held to records read from what was lived (8.14); a change that carries differently in
@@ -1187,3 +1188,35 @@ The other nine kinds are unchanged. All 437 sentences of the three verb-class ki
 - **What it does not do.** A word never said between neighbours of the shapes it is asked between is not held back,
   and a following token is read where the word's own relation stands in the answer; a word with no relation is not
   read at all.
+
+### 8.17 A word lived again and again is no name
+
+A name's relation is the name itself, and a word never met before stands for itself where a name stood: that is how
+Cevahir answers about someone it hears of for the first time (12.5). The analogy let any word with no relation stand
+so. "The", in COGS, has none: the mark that comes with it ("*") is in more than half of all answers, so it is no
+word's. Answering by parts then made rests such as "The liked that Emma said that ..." (a noun taken out) and
+answered them by putting "The" where a name stood ("like . agent ( x _ 1 , The )"); the round trip came back right in
+lived examples, so a noun after "The" had a record of 0.98 as a whole and was tried first, and in long sentences the
+search spent its bound on such rests. Of COGS's sentences with clauses nested deeper than any lived, 93 of 134 were
+silent; with a larger bound (4,000 parts and 40 steps instead of 400 and 16) one of four was answered.
+
+Now only a word never met stands for itself (MODEL.md 12.5); one that was lived and brought no token of its own does
+not. The hippocampus alone (right / silent / wrong; `m3_analogy.py`, the rule in force while living too):
+
+| | before (fd8f4c3) | only a word never met stands for itself |
+|---|---|---|
+| COGS in distribution, the sample of 300 | 297 / 0 / 3 | 298 / 0 / 2 |
+| COGS in distribution, the whole test file (3,000) | 2,990 / 2 / 8 | **2,993 / 3 / 4** |
+| COGS generalisation, the sample of 300 | 272 / 24 / 4 | 275 / 21 / 4 |
+| COGS generalisation, every seventh sentence (3,000) | 2,706 / 275 / 19 | **2,736 / 247 / 17** |
+| SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same |
+
+By kind (every seventh sentence): cp recursion 37 / 93 / 4 → 65 / 66 / 3, pp recursion 125 / 7 / 3 → 130 / 3 / 2,
+subject to object (proper) 135 / 18 / 0 → 137 / 15 / 1, prim to object (proper) 120 / 15 / 0 → 121 / 12 / 2, active
+to passive 164 / 0 / 1 → 165 / 0 / 0, subject to object (common) 146 / 0 / 2 → 147 / 0 / 1; and fewer right in prim
+to subject (common) 144 / 0 / 2 → 140 / 5 / 1, pp dative to do dative 135 / 0 / 1 → 133 / 2 / 1, object to subject
+(proper) 147 / 0 / 0 → 146 / 1 / 0, and one of the 437 verb-class sentences silent. The other kinds are unchanged.
+
+- **Tried, not taken: the innermost part first.** Trying the rightmost parts before the most whole-like ones (the
+  innermost clause of a right-branching sentence) answered 75 of the 134 cp recursions, but said 9 pp recursions
+  wrong where the records' order says 3; the rule above answers them by mending what the search was spent on.

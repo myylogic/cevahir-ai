@@ -601,7 +601,9 @@ as a frame, done on the episodes the hippocampus keeps.
   depend on anything but what was lived: chosen first by the order in which a set happened to hold the candidates,
   it differed from one process to another, and with it one sample of COGS (NOTES.md 8.15).
 - **The plan.** For a neighbour (U′, A′), each place where U and U′ differ (u in U′, v in U) is filled: every token of
-  A′ that is u's relation becomes v's relation, or v itself where u's relation is u itself and v has none yet. All
+  A′ that is u's relation becomes v's relation, or v itself where u's relation is u itself and v was never met (a
+  word lived again and again that never brought a token of its own, as "The" in COGS, is no name to stand for one:
+  NOTES.md 8.17). All
   places are filled at once, so two roles that swap places ("Veli'nin babası Ali" from "Ali'nin babası Veli") are
   read as a swap; one token that would have to become two gives nothing. Nor does a place whose word also stands,
   unchanged, elsewhere in the neighbour: its tokens cannot be told from the other occurrence's ("run left after run

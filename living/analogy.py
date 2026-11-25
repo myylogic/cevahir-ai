@@ -17,7 +17,8 @@ with several places at once, done on the episodes the hippocampus keeps.
   stem: Zihin's F34, the asked word itself, and F36, word forms), then the token whose own dialogues held the word
   most often (the rule on them: the token most the word's own), then the one first met with it.
 - **The plan.** For a neighbour (U', A'), each place where U and U' differ (u in U', v in U) is filled: every token of
-  A' that is u's relation becomes v's relation (v itself where u's relation is u itself and v has none yet). All
+  A' that is u's relation becomes v's relation (v itself where u's relation is u itself and v was never met: a word
+  lived again and again that never brought a token of its own, as "The" in COGS, is no name to stand for one). All
   places are filled at once, so two roles that swap places are read as a swap; one token that would have to become two
   gives nothing, and so does a place whose word also stands unchanged elsewhere in the neighbour (its tokens cannot be
   told from the other occurrence's: "run left after run left" says nothing of "run left after jump left"). A neighbour
@@ -786,7 +787,7 @@ class Episodes:
                 continue
             ry = self.relation(y)
             if ry is None:
-                if rx != x:
+                if rx != x or self.with_w.get(y, 0):
                     return None
                 ry = y
             elif not self.alike(rx, ry):
@@ -879,8 +880,8 @@ class Episodes:
                     break
                 rv = self.relation(v)
                 if rv is None:
-                    if ru == u:
-                        rv = v                                 # the word itself
+                    if ru == u and not self.with_w.get(v, 0):
+                        rv = v                                 # the word itself, never met before
                     else:
                         ok = False
                         break
