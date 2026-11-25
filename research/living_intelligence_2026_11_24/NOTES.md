@@ -818,6 +818,11 @@ ways (exact of 300):
   thought is Zihin's, and on COGS Zihin's plans are its own continuations of what it lived and wrong: Cevahir is
   silent 8 times and wrong 35, where the analogy alone is wrong 14. Holding Zihin's plan to a record of its own, as
   the analogy's is, is not done.
+- **With the hippocampus of 8.15 to 8.18** (code 25a9c44; life 5,682 s and answers 1,648 s with three workers, the
+  machine shared with other measurements): in distribution the analogy and Cevahir both answer 298; on the
+  generalisation set the analogy answers 275 (silent on 23, wrong on 2) and Cevahir **275**, the thought being the
+  analogy's in 559 of the 600 answers. Where the analogy is silent the thought is Zihin's, and Cevahir is silent 7
+  times and wrong 18 (35 before).
 
 ### 8.8 Sleep
 
@@ -889,23 +894,26 @@ studied in conversation, in four conditions; the other half (nine per seed) is a
   Transformer answers in hundredths of a second.
 - **Text.** On running text Zihin's voice takes 0.1–1.2 % of the harmony's bits (8.6): what Cevahir knows of a text,
   the harmony mostly knows already. Its gains are in answers that text does not hold.
-- **What the hippocampus cannot answer** (8.7, 8.14, 8.16): a phrase on a subject when phrases were lived only on
-  objects (silent, 138 of the 138 asked of every seventh sentence), a name after a noun phrase where only noun phrases
-  were lived, and parts longer than four tokens. For the first, taking the phrase out and putting back the change
-  read from phrases on objects gives the right tokens; what is missing is their order and a part to take out. Tried
-  on "A donkey in the room sold Ella a donut .", with a new run put among the runs that begin as it does by the place
-  it names first, 27 of the 36 changes read from phrases on objects gave the answer exactly (none before); but where
-  the rest's answer has one conjunct ("The baby screamed"), the new one must come first and its "AND" after it, and
-  the frame of "in the room" after a subject is also that of "sold the cake" ("□ the □"), whose record is 0.02. The
-  same placing, applied to every answer by parts, was not taken: on every seventh generalisation sentence it gave
-  2,700 / 276 / 24 against 2,706 / 275 / 19, and 2,702 / 275 / 23 with a run begun only at a token that, wherever it
-  stands, is followed by a word's token (moved early in a chain, a run shifts the places later steps read). An
-  answer's lists, what separates their runs and the order the runs keep, would have to be read from the answers
-  lived as a whole, not mended where a run is put in.
+- **What the hippocampus cannot answer** (8.7, 8.14, 8.16, 8.19): a name after a noun phrase where only noun phrases
+  were lived, and parts longer than four tokens. A phrase on a subject, where phrases were lived only on objects, it
+  could not answer (silent on the 138 asked of every seventh sentence); it answers all 138 since 8.19, by a second
+  search where the first is silent. In the deepest chains of phrases on an object that second search hangs a phrase
+  on the head noun rather than on the noun it follows: 2 of every seventh sentence are answered wrong so. Before
+  8.19 the attempts on the phrase on a subject ran thus: taking the phrase out and putting back the change read from
+  phrases on objects gave the right tokens, but not their order and not a part to take out. Tried on "A donkey in the
+  room sold Ella a donut .", with a new run put among the runs that begin as it does by the place it names first, 27
+  of the 36 changes read from phrases on objects gave the answer exactly (none before); but where the rest's answer
+  has one conjunct ("The baby screamed"), the new one must come first and its "AND" after it, and the frame of "in the
+  room" after a subject is also that of "sold the cake" ("□ the □"), whose record is 0.02. The same placing, applied to
+  every answer by parts, was not taken: on every seventh generalisation sentence it gave 2,700 / 276 / 24 against
+  2,706 / 275 / 19, and 2,702 / 275 / 23 with a run begun only at a token that, wherever it stands, is followed by a
+  word's token (moved early in a chain, a run shifts the places later steps read). An answer's lists, what separates
+  their runs and the order the runs keep, had to be read from the answers lived as a whole (8.18, 8.19), not mended
+  where a run is put in.
   Answering by parts is held to records read from what was lived (8.14); a change that carries differently in
   surroundings no lived example shares, and that the three tokens around a part do not show, can still be said. On
-  COGS 19 of 3,000 generalisation sentences and 8 of the 3,000 in-distribution ones are answered wrong; alone on
-  SCAN, none of 300.
+  COGS 15 of 3,000 generalisation sentences (every seventh) and 3 of the 3,000 in-distribution ones are answered
+  wrong; alone on SCAN, none of 300.
 - **The prefrontal decision.** The record that chooses between Zihin's plan and the analogy's was kept unfairly
   (8.7, mended in 8.15); and it is earned by the analogy's plans over places alone, because plans by parts are not
   foreseen while Cevahir lives (they would cost seconds a dialogue). A plan by parts therefore leads over Zihin's on
@@ -1280,3 +1288,98 @@ the three verb-class kinds 436 of 437 right, a primitive in a new role 138 of 13
 object (proper) 138 / 14 / 1, and a phrase on a subject 0 / 138 / 0 still. Of the 13 wrong answers left, 10 hold
 other tokens than the lived answer (a role on the wrong verb, a wrong place), and 3 the same tokens with places
 exchanged inside the items or a run put inside another, which no order of the items mends.
+
+### 8.19 A phrase on a subject
+
+COGS asks phrases on subjects ("A donkey in the room sold Ella a donut .") where phrases were lived only on objects;
+every seventh sentence of the generalisation file holds 138 of them, and the hippocampus was silent on all 138 (8.11).
+Traced, three things stood in the way.
+
+- **The frame.** With every word that has a relation read as one mark, "in the room" after a subject has the frame of
+  "sold the cake" after a subject ("A □ [□ the □] □"); the frame's record is 0.02 (taking "sold the cake" out leaves
+  no utterance), so no part there is taken out.
+- **No example.** Read finer, no lived phrase stood where a phrase on a subject stands: before a verb, or after the
+  agent of a passive ("by the boy beside a table": no training sentence has a phrase there). The change of a part is
+  read only from examples with the same surroundings.
+- **Where a change goes.** A change read from a phrase in other surroundings, put back where its example put it,
+  lands in the wrong place. Of 24 lived phrases of the shape "□( the □(" ("on the table", "to the girl"), each
+  foreseen with the change read from the nearest such phrase in other surroundings, 12 came out right: the new noun's
+  run went inside another item ("offer * table ( x _ 8 ) ; . agent ..."), its "AND" stood after it at the end, or the
+  "*" of a definite noun went to the wrong noun, wherever the example's nouns were definite and the asked ones not.
+
+What was built (MODEL.md 12.6):
+
+- **The order of an answer's lists, complete.** Items are said in the order of the places they name: their numbers,
+  and the own tokens of the words said once (a word whose token is the word itself, as a name), each read as the place
+  where it was said; the ended items first. All 24,012 lived answers whose items name places are given back exactly by
+  this rule from their items shuffled; by the first place alone 11,157 (ties were left as they came: "help . theme
+  ( x _ 3 , x _ 1 )" before "help . agent ( x _ 3 , x _ 6 )"), by all the numbers 17,481 (a name is a place too:
+  "forward . recipient ( x _ 3 , Levi )" before "forward . agent ( x _ 3 , Charlotte )"), and with the token of every
+  word that has a relation 22,223 ("to" brings "recipient", "that" brings "ccomp"), of every word whose token is
+  itself 23,933 (a word said twice names no one place). Alone it changes no answer of the hippocampus: every seventh
+  generalisation sentence 2,779 / 208 / 13 as before (four plans of silent or wrong sentences differ), the
+  in-distribution file 2,994 / 3 / 3.
+- **A second search, with words read by their kind.** Where the search for parts is silent, a second one is made, and
+  there a word with a relation is read by its kind: the mark and the token its relation has right after it in the
+  lived answers, where one token does by the rule. Read from COGS's training file, 408 relations are followed by "("
+  (nouns, prepositions, "to", "that"), 134 by "." (verbs), 102 by ")" (names) and one by the end of the answer. In
+  the second search a part that no lived part of its frame, so read, stood in the surroundings of (three tokens on
+  each side) is taken out first, from the right, by what parts of its shape do elsewhere, and believed by the shape's
+  record elsewhere (lived examples of it, foreseen with the change read from the nearest example with other
+  surroundings, counted as a frame's record is). What the first search answers is answered as before.
+- **A change read from other surroundings is put as items.** The items the example's answer gained and lost: the lost
+  ones must stand in the rest's answer and are taken away, the gained ones are put in, and the answer is said in the
+  order of its lists. Tokens are read by where they stand near the part, where the words standing at that place in the
+  example and in the asked utterance are of a kind; else through the alignment of the two rests' answers, and no place
+  or word's token is put for one whose word is of another kind. The record of "□( the □(" is then 0.94; that of
+  "□( a □(" 0.78, its failures phrases with "to" read from a passive for an active sentence, which now lend nothing
+  (with the pairing by place alone they lent "cake . recipient ( x _ 4 , x _ 7 )"). Where the answers keep no lists
+  nothing read from other surroundings is put: in a small world of SCAN's moves the second search, putting such a
+  change token by token, said a command of "around right" wrong at the speaking line.
+
+The hippocampus alone (right / silent / wrong; `m3_analogy.py`, rows of `results/m3_analogy.jsonl` written by
+fc73e36):
+
+| | before (25a9c44) | after 8.19 (fc73e36) |
+|---|---|---|
+| COGS in distribution, the sample of 300 | 298 / 0 / 2 | 298 / 0 / 2 |
+| COGS in distribution, the whole test file (3,000) | 2,994 / 3 / 3 | 2,994 / 3 / 3 |
+| COGS generalisation, the sample of 300 | 281 / 18 / 1 | **292 / 7 / 1** |
+| COGS generalisation, every seventh sentence (3,000) | 2,779 / 208 / 13 | **2,918 / 67 / 15** |
+| SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same |
+
+By kind on every seventh generalisation sentence: a phrase on a subject 138 of 138 (0 / 138 / 0 before), cp
+recursion 95 / 38 / 1 (one more right), pp recursion 133 / 0 / 2: the two it was silent on are now wrong, deep
+chains ("... beside the cup beside the gardner beside a bin on the rock .") where the second search hangs "beside the
+gardner" on the head noun ("hammer . nmod . beside ( x _ 7 , x _ 25 )"); every other kind as before. The second
+search is made only where the first is silent, so no answer the first gives changes; on the in-distribution file it
+answers none of the three silent sentences, and on the generalisation sample the 11 more answers are its 11 phrases
+on subjects.
+
+Tried and not taken (every seventh generalisation sentence; the in-distribution file):
+
+| | gen/7 right / silent / wrong | test file |
+|---|---|---|
+| before (25a9c44) | 2,779 / 208 / 13 | 2,994 / 3 / 3 |
+| words by kind in every frame, the never-lived parts at every step of the one search, by their record | 2,794 / 83 / 123 | 2,995 / 0 / 5 |
+| words by kind in every frame, a second search (parts by their record) | 2,872 / 85 / 43 | 2,995 / 0 / 5 |
+| items for every change (the first search too) | 2,685 / 304 / 11 | 2,996 / 3 / 1 |
+| items for every change, token by token where an item cannot be put whole | 2,802 / 184 / 14 | 2,995 / 0 / 5 |
+| words by kind only in the second search, a part never lived by its frame (not its surroundings) | 2,894 / 88 / 18 | 2,994 / 3 / 3 |
+| a word's own continuation (8.16) as the set of tokens lived after it | 2,751 / 244 / 5 | 2,993 / 7 / 0 |
+
+- **Words by kind in every frame** change what the first search does: proper names as objects, answered by
+  exchanges (8.14), lost 48 (41 now silent, 7 wrong), and clause recursion gained 22 wrong. The order was then by record rather than from the
+  right, and in the one search the never-lived parts at every step turned 69 pp recursion answers wrong (items put in
+  a chain, before the order was complete, left a noun's own item after its phrase).
+- **Items for every change**: a change inside an item (a role exchanged, "sell . recipient ( x _ 3 , x _ 1 )" become
+  "sell . theme ...") cannot be put whole where a token of it has no counterpart (the asked item names "Paula" where
+  the example's named a place); token by token, only the changed token is put.
+- **A part never lived by its frame**: a phrase on the agent of a passive ("by the boy beside a table") has the frame
+  of a phrase on an object at the end; only its surroundings were never lived, so "by the boy", the part before it,
+  was taken out first, and "beside a table" was left hung on the theme: 5 wrong answers, all of this kind.
+- **Never-lived parts by their record rather than from the right**: of the 5 subject sentences with two phrases, 2
+  right; the second phrase was hung on the subject ("governor . nmod . beside" for "surface . nmod . beside").
+- **A word's own continuation as a set** (every token lived after it there, not the one always lived): 8 wrong
+  answers fewer and 28 right ones fewer on every seventh sentence; on the in-distribution file 3 wrong fewer and 1
+  right fewer.

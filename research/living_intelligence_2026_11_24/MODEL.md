@@ -727,18 +727,55 @@ are mended by the same store of episodes.
   theme. Where the lived answers keep lists, an answer put together by parts is said in their order. What the lists
   are is read from the lived answers: a token that ends items and one that stands between them, every item naming a
   place, taken as the pair that leaves the most lived answers as they were when each answer's items are put in the
-  order of the first place each names, the ended items first (ties keep their order). The pair is believed by the rule
-  on all lived answers that hold it and used at the speaking line; it is read again as life doubles. In COGS it is ";"
-  (ending each definite noun's run) and "AND" (between conjuncts), and all 23,222 lived answers that name places keep
-  that order; SCAN's answers name no places, so no pair is read and nothing is reordered. A plan over places is a
-  lived answer filled and keeps its order already; only plans by parts are reordered (NOTES.md 8.18).
+  order of the places each names, the ended items first. The places an item names are its numbers and its names (the
+  own token of a word said once, a word whose token is the word itself), each read as the place where it was said:
+  "see . agent ( x _ 1 , Ali )" comes before "see . theme ( x _ 1 , Can )" because Ali was said before Can. The pair
+  is believed by the rule on all lived answers that hold it and used at the speaking line; it is read again as life
+  doubles. In COGS it is ";" (ending each definite noun's run) and "AND" (between conjuncts), and every lived answer
+  that names places is given back by it from its items in any order (by the first place alone, with ties left as
+  they came, 11,157 of the 24,012; by the numbers alone 17,481; NOTES.md 8.19); SCAN's answers name no places, so no
+  pair is read and nothing is reordered. A plan over places is a lived answer filled and keeps its order already; only
+  plans by parts are reordered (NOTES.md 8.18).
+- **A second search, with words read by their kind.** Frames read every word that has a relation as one mark, so a
+  phrase hung on a subject ("A donkey [in the room] sold Ella a donut") has the frame of a verb with its object ("A
+  donkey [sold the cake] to Emma"), a frame whose parts are not wholes; and phrases were lived only on objects, so no
+  lived phrase stands in the surroundings of one on a subject. Where the search above is silent, a second one is made.
+  In it a word with a relation is read by its kind: the mark and the token its relation has right after it in the
+  lived answers, where one token does by the rule (read from COGS's training file, 408 relations are followed by "(":
+  nouns, prepositions, "to" and "that"; 134 by ".": verbs; 102 by ")": names). A part that no lived part of its frame,
+  so read, stood in the surroundings of (the three tokens on each side, read so: where the changes of the first search
+  are read from) is taken out first, by what parts of its shape do elsewhere: the change is read from lived parts of
+  that shape, nearest first. Such parts have no record of their own there, so they are taken out from the right: a
+  phrase hangs on what stands before it, and taking out the left one of two first leaves the right one hung on the
+  subject ("A governor on the surface beside a log": "beside a log" first). A step is believed by the shape's record
+  elsewhere, read as a frame's is: up to 24 lived examples of the shape, each foreseen as if not lived with the change
+  read from the nearest example with other surroundings (one whose rest has no answer, or that nothing can be put
+  into, counts as not right), times the share of the examples that agree. The rest is answered by the second search
+  again, so a subject with two phrases takes two such steps. What the first search answers is answered as before:
+  words read by their kind in every frame, the search's and the exchanges', change what it does (NOTES.md 8.19).
+- **A change read from other surroundings.** Where its example put a run says nothing of where it goes in other
+  surroundings: put back token by token where its example put it, the change of a phrase in other surroundings went
+  inside another item, left its "AND" at the end, or gave a definite noun's "*" to the wrong noun (the record of
+  phrases like "on the table" was 0.50). So a change read from other surroundings is put as the items the example's
+  answer gained and lost: the lost ones must stand in the rest's answer and are taken away, the gained ones are put
+  in, and the answer is said in the order of its lists (that record is then 0.94). A token is read by where it stands
+  near the part (before it, in it, after it), where the words standing at that place in the example and in the asked
+  utterance are of a kind; else through the alignment of the two rests' answers, and no place or word's token is put
+  for one whose word is of another kind (in "A donut was given to a teacher" the word before the phrase is a verb, in
+  "The penguin lended a cake to a teacher" a noun: that example lends nothing). Where the lived answers keep no lists,
+  a change read from other surroundings is not put at all: where its example put a run is all there is, and it says
+  nothing of other surroundings (SCAN). Within the same surroundings a change is still put where its example put it:
+  there it is where it goes, and a change inside an item ("sell . recipient ( x _ 3 , x _ 1 )" become "sell . theme
+  ...") is put by its changed tokens alone where the item as a whole has no counterpart (the asked item names "Paula"
+  where the example's named a place).
 
 Nothing of COGS is named here: no word, mark or form of its answers. What the mechanism assumes is general: an answer
-may name the places of what was said by their numbers, and runs of the same shape in an answer keep the order in which
-what they name was said. Where an answer does neither, the change of a part cannot be put (the example gives nothing)
+may name the places of what was said by their numbers or by a word's own token, and the items of an answer keep the
+order of what they name. Where an answer does neither, the change of a part cannot be put (the example gives nothing)
 or the examples disagree (the plan stays under the line). The analogy's own record (12.5) is kept by its plain form:
 while Cevahir lives a dialogue it foresees the answer by the analogy over places, without parts. Answering by parts
-is done when Cevahir is asked, and its records, the frames' and the exchanges', are read then from what was lived
+is done when Cevahir is asked, and its records, the frames', the exchanges' and the shapes' elsewhere, are read then
+from what was lived
 (again each time life has doubled, and before answering after anything new was lived).
 
 ## References
