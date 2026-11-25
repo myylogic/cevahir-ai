@@ -687,9 +687,15 @@ are mended by the same store of episodes.
   example with "twice" after the part says nothing of "thrice". That change is put into the answer of the asked rest.
   The part's own words map by their place in the part (each word to its relation, as in 12.5, alike by kind); the
   rest of the example maps through the alignment of the two rests' answers, read by what they say about the places
-  near the part (the numbers that name them, and the relations of the words that stand there). A token of an answer
-  that is a whole number smaller than the utterance's length is read as a place of it, and moves on with the places
-  when a part is put in. One change can be written in several ways where the tokens repeat; it is put in as far on
+  near the part (the numbers that name them, and the relations of the words that stand there). Beyond the three
+  tokens on each side every place reads alike, so a place far from the part, and the token of its word, is read by
+  what links it to the place right beside the part: the items of the answer followed link by link ("table" is
+  governed through "nmod . on" by "brush", and "brush" through "theme" by "lend"), and the example's far place is put
+  for the asked answer's place that governs the place beside the asked part through the same role. Taking "to a
+  hero" out of "Caleb lended a brush on the table to a hero" puts the recipient back on the verb that governs the
+  thing given ("teleport" in "Emma imagined that a boy teleported the notebook to a hero"), not on the first verb,
+  which alone stands as far from the part (NOTES.md 8.22). A token of an answer that is a whole number smaller than
+  the utterance's length is read as a place of it, and moves on with the places when a part is put in. One change can be written in several ways where the tokens repeat; it is put in as far on
   as the tokens allow. Where an answer names no places of what was said, an example whose part holds a word with a
   relation that also stands outside the part lends nothing: which occurrence its tokens belong to cannot be told (an
   answer that names places tells them apart by their places). What the example put at the very beginning of its

@@ -1001,7 +1001,8 @@ Every command Cevahir missed Zihin answered right: where the two thoughts differ
 by the analogy's plans over places, and it lets a plan by parts lead too, so a fault of the hippocampus shows here as
 a command lost (8.15). With the final code Cevahir misses none of the 300, and is wrong or silent on none; so too
 with the code of 8.19 (fc73e36: 50 of 50 in each of the six splits, Zihin alone 300 too; rows of
-`results/m3_scan.jsonl` written by fc73e36).
+`results/m3_scan.jsonl` written by fc73e36) and with the hippocampus of 8.21 (the rows written by 96f0938: 300 of
+300 again).
 
 ### 8.14 Answering by parts, held to its own record
 
@@ -1523,3 +1524,39 @@ analogy answers the rest, "Aubrey liked the ring to a cat .", at 0.999.
 Reading all six tokens around a part by kind (8.20) answers 43 generalisation sentences fewer; reading only the two
 right beside it keeps every clause recursion and all names asked as objects but the one above: further out, the
 marks keep together what an example needs to lend its change.
+
+### 8.22 A far place, read by what links it to the place beside the part
+
+Of the ten wrong answers left (8.21), six put back a recipient phrase, "to a hero", on the wrong verb. Traced:
+"Emma imagined that a boy teleported the notebook to a hero ." has "to a hero" taken out, and the change is read from
+"Caleb lended a brush on the table to a hero .": "lend . recipient ( x _ 1 , x _ 9 )" put in. Its verb stands five
+tokens before the part, and a change is read by where its tokens stand near the part (the three tokens on each side
+apart, every place beyond them one class, "L"); in the asked rest "teleport" stands three tokens before the part
+("L3") and "imagine" six ("L"), so the far verb of the example was put for "imagine": "imagine . recipient".
+
+What was built (MODEL.md 12.6):
+
+- **A far place read by what links it to the place beside the part.** The answer's items link places ("brush . nmod
+  . on ( x _ 3 , x _ 6 )": "table" hangs on "brush"; "lend . theme ( x _ 1 , x _ 3 )": "brush" on "lend"). A place of
+  the example far from its part, and the token of its word, is put for the place of the asked answer that governs
+  the place right beside the asked part through the same role: "lend" governs "table" through "theme" (after "nmod .
+  on"), and in the asked rest the place that governs "notebook" through "theme" is "teleport". A name is followed by
+  its own token, as the answer names it. Places near the part are read by their place as before.
+
+The hippocampus alone (right / silent / wrong; `m3_analogy.py`, rows of `results/m3_analogy.jsonl` written by
+6de2c55):
+
+| | before (04b1b45) | after 8.22 (6de2c55) |
+|---|---|---|
+| COGS in distribution, the sample of 300 | 299 / 1 / 0 | 299 / 1 / 0 |
+| COGS in distribution, the whole test file (3,000) | 2,998 / 2 / 0 | 2,998 / 2 / 0 |
+| COGS generalisation, the sample of 300 | 298 / 1 / 1 | 298 / 1 / 1 |
+| COGS generalisation, every seventh sentence (3,000) | 2,942 / 48 / 10 | **2,946 / 48 / 6** |
+| SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same |
+
+Four wrong answers are right ("Emma imagined that a boy teleported the donut on the notebook to a hero .", "The baby
+liked that Benjamin forwarded Paula to the boy ."), and no other answer of either file changes. What is left wrong on
+every seventh generalisation sentence: "Aubrey liked that Grayson gave Lina (and Paula) to a cat ." and "Emma said
+that Sofia sent Paula to Liam .", answered by exchanging a part that is no clause of its own ("that Grayson gave
+Lina") for "the ring" (8.21); "The cockroach sold a cake in a house on the stool to a champion .", whose recipient
+and phrases take the places of an example with one phrase fewer; and two chains of phrases deeper than ten.
