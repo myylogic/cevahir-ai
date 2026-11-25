@@ -217,10 +217,13 @@ forgetting exact:
 
 - *Zihin's night.* The cortex's night forgets the contexts met once and keeps what recurred (NOTES.md 8.8: the store
   2–3.8 times smaller for 0.4–1.1 % more bits); Zihin's sleep dreams but forgets no tie, though 73 % of its ties are
-  written once and never used again. A night that forgets the ties never used, without losing what one reading taught
-  (recall by a question), is the first.
+  written once. Among them is what one reading taught (recall by a question), so a night that forgets them forgets
+  facts read once. What is built (NOTES.md 8.28) forgets nothing: the night drops the caches of reading and merges the
+  day's ties into the long-term index, so that a long life holds what one day touched beside its substance.
 - *A store on disk.* Each moment touches a small part of the store, and most of it is touched once: the contexts in
-  use can be held in memory and the rest on disk, so that a life is bounded by the disk and not by memory.
+  use can be held in memory and the rest on disk, so that a life is bounded by the disk and not by memory. The first
+  part is built (NOTES.md 8.28): Zihin's ledger, five kilobytes a character of running text and most of what Cevahir
+  held, is kept on disk, compressed; the long-term stores of the substance are not yet.
 - *What was lived kept in the cortex's own code.* A text, or a dialogue the hippocampus keeps, can be kept coded under
   the cortex's predictions, about 1.5–2 bits a character instead of 8, and given back byte for byte (the code is
   lossless; a vector space alone would not be).
@@ -650,7 +653,12 @@ as a frame, done on the episodes the hippocampus keeps.
   before it: from its first slip on it says nothing of the rest (counting every later token against it made the
   record favour Zihin wherever answers are long; on COGS's generalisation set Cevahir then answered 13 fewer than the
   analogy alone, NOTES.md 8.7). The analogy leads if the rule on that record is at least one half. The thought is
-  then said token by token as in 12.3. Measured alone, the analogy answers 0 to 27 of 200 test commands of each
+  then said token by token as in 12.3. Where the analogy foresees nothing, Zihin's plan is the thought only as far as
+  Zihin's record alone allows: of the answers lived that the analogy foresaw nothing of (no plan, or one under the
+  line) and whose first token Zihin would have said (its guess at the line), how many it would have said whole, each
+  token its guess at the line, knowing those said before it. Under the line the plan is held back and nothing is said
+  (not the harmony alone either: the thought was there, and was not trusted); with no record it stands (NOTES.md
+  8.29). Measured alone, the analogy answers 0 to 27 of 200 test commands of each
   published SCAN split (a word there changes how often an action is repeated, which one substitution cannot carry),
   where Zihin answers 199 or 200; on COGS it is the other way round. Each mechanism covers structure the other does
   not, and the record says which to follow.
@@ -819,6 +827,12 @@ are mended by the same store of episodes.
   said of one place: two roles the answer gives one place that no lived answer gave one place together (two phrases
   on one noun, a clause and a thing of one verb) are believed by the rule with nothing for them, over the lived places
   that took the rarer of the two (NOTES.md 8.26).
+- **Tokens that take turns.** Two tokens that take turns in every lived answer that holds either (the first opens,
+  the second closes, never two open, never a close with none open, none left open at the end: "(" and ")", "x" and
+  "_" on COGS) take turns in the answer given, or it is believed by the rule with nothing for it, over the times a
+  lived answer could have broken them (every opening after an answer's first). An item put back across the end of
+  another opens one inside the other: counting the tokens does not see it, their turns do. Tokens met at most once in
+  every answer could break nothing and are no pair (NOTES.md 8.29).
 
 Nothing of COGS is named here: no word, mark or form of its answers. What the mechanism assumes is general: an answer
 may name the places of what was said by their numbers or by a word's own token, and the items of an answer keep the
