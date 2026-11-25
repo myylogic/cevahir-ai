@@ -57,11 +57,15 @@ with several places at once, done on the episodes the hippocampus keeps.
   the answer's items followed link by link: the verb "to a hero" hangs on governs "table" through "nmod . on" and
   "theme", and is put for the token that governs the place beside the asked part through "theme", not for the first
   verb); a token of an answer that is a whole number smaller than the utterance's length is read as a place of it,
-  and moves with the places. What the example put at the very beginning goes at the beginning; where an answer
-  lists runs of the same shape, a new run goes by its place among its neighbours (a list keeps the order of what was
-  said). The examples vote; a step's belief is the frame's record times the share of the examples that agree, and a
-  plan's belief is that of its weakest step (the rest's own included): the steps of a chain read the same kind of
-  change again and again, so their errors go together. A change no lived example carries stays below the line: SCAN's
+  and moves with the places. A change made inside one of the example's items (where the answers keep lists) is made
+  inside the item it stands for: the example's item, put into the asked rest's answer, is found there once, and the
+  change is made in it at the same place (read token by token, the example's clause of "tolerated", whose agent is a
+  thing, lines up with a far clause whose agent is a thing too, while the clause that holds the asked part is
+  "Levi respected"'s). What the example put at the very beginning goes at the beginning; where an answer lists runs
+  of the same shape, a new run goes by its place among its neighbours (a list keeps the order of what was said).
+  The examples vote; a step's belief is the frame's record times the share of the examples that agree, and a plan's
+  belief is that of its weakest step (the rest's own included): the steps of a chain read the same kind of change
+  again and again, so their errors go together. A change no lived example carries stays below the line: SCAN's
   "around" turns four times for each turn "twice" or "thrice" asks, and an example with "twice" after the part, whose
   surroundings differ, says nothing of "thrice". The most whole-like parts are tried first, then the rightmost; the
   search is bounded.
@@ -1122,12 +1126,14 @@ class Episodes:
         answer, put into the answer of the asked utterance's rest (u, its part at p, likewise taken out or
         exchanged); with ``items`` (a change read from other surroundings), as the items it adds and takes away
         (``_by_items``), which needs answers that keep lists: where they keep none, where an example put a run says
-        nothing of other surroundings, and nothing is put. The answer is said in the order the lived answers keep
-        their lists (``_in_order``), so that the next step of a chain reads it item by item. None where the change cannot be put, or where it leaves anything of ``instead`` in the answer, or
-        where the example's answer names no places of what was said and a word with a relation stands both in the
-        example's part and outside it: which of the two its tokens belong to cannot then be told ("look opposite right
-        and look opposite right twice" says nothing of taking "opposite right and look" out of a command whose first
-        action is not "look"), while in an answer that names places a token is told apart by its place."""
+        nothing of other surroundings, and nothing is put. A change made inside one of the example's items is made
+        inside the item that one stands for: the example's item, put into the asked rest's answer, found there once.
+        The answer is said in the order the lived answers keep their lists (``_in_order``), so that the next step of a
+        chain reads it item by item. None where the change cannot be put, or where it leaves anything of ``instead`` in
+        the answer, or where the example's answer names no places of what was said and a word with a relation stands
+        both in the example's part and outside it: which of the two its tokens belong to cannot then be told ("look
+        opposite right and look opposite right twice" says nothing of taking "opposite right and look" out of a command
+        whose first action is not "look"), while in an answer that names places a token is told apart by its place."""
         if not any(t.isdigit() and int(t) < len(o) for t in a2):
             inside = set(o[p2:p2 + m])
             if any(w in inside and self.relation(w) is not None for w in o[:p2] + o[p2 + m:]):
@@ -1236,6 +1242,25 @@ class Episodes:
                     return int(t)
             return -1
         codes = [c for c in difflib.SequenceMatcher(None, a2s, a2, autojunk=False).get_opcodes() if c[0] != "equal"]
+        order = self._list_order()
+        def spans(seq: Sequence[str]) -> List[Tuple[int, int]]:
+            out, s0 = [], 0
+            for k, t in enumerate(seq):
+                if t in order:
+                    out.append((s0, k))
+                    s0 = k + 1
+            out.append((s0, len(seq)))
+            return out
+        sp2, sp = (spans(a2s), spans(a_s)) if order is not None else ([], [])
+        def anchored(tag: str, i1: int, i2: int) -> Optional[int]:
+            for s0, e0 in sp2:                                 # the item the change is made inside
+                if (s0 < i1 < e0) if tag == "insert" else (s0 <= i1 < i2 <= e0):
+                    item = [put(t) for t in a2s[s0:e0]]
+                    if None in item:
+                        return None
+                    hits = [s1 for s1, e1 in sp if a_s[s1:e1] == item]
+                    return hits[0] + (i1 - s0) if len(hits) == 1 else None
+            return None
         edits = []
         for n_op, (tag, i1, i2, j1, j2) in enumerate(codes):
             seg = list(a2[j1:j2])
@@ -1245,12 +1270,13 @@ class Episodes:
                     seg = seg[1:] + [a2s[i1]]
                     i1 += 1
                 i2 = i1
-            where = at(i1)
+            here_item = anchored(tag, i1, i2)                  # made inside an item: in the item it stands for
+            where = at(i1) if here_item is None else here_item
             old = [put(t) for t in a2s[i1:i2]]
             new = [put(t) for t in seg]
             if None in old or None in new or a_s[where:where + len(old)] != old:
                 return None
-            if tag == "insert":                                # a list keeps the order of what was said
+            if tag == "insert" and here_item is None:          # a list keeps the order of what was said
                 size, here, first = len(new), shape(new), first_place(new)
                 if first >= 0:
                     while (where + size <= len(a_s) and shape(a_s[where:where + size]) == here

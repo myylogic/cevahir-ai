@@ -730,6 +730,76 @@ def test_a_change_put_in_is_said_in_the_order_the_lived_answers_keep(FastCortex)
     assert ep._transplant(o, 4, 3, its_rest, lived, u, 4, rest) == want
 
 
+def _clauses(rng, depth):
+    """Clauses inside clauses: "the cat hoped that Ali liked that the box was taken ." and its answer, which names the
+    places of what was said and keeps its items in the order of the places they name (a form like COGS's, its words
+    and marks made up here)."""
+    nouns = rng.sample(["cat", "dog", "box", "cup", "hat", "pen", "jar", "map", "toy", "horse", "chicken", "boy"],
+                       depth + 2)
+    verbs = [("liked", "like"), ("hoped", "hope"), ("said", "say"), ("tolerated", "tolerate"),
+             ("respected", "respect")]
+    said, ended, joined, last, last_lemma = [], [], [], None, None
+    for _ in range(depth + 1):
+        if rng.random() < 0.5:
+            said.append(rng.choice(["Ali", "Can", "Ece", "Lily", "Levi", "Mia"]))
+            key, arg = len(said) - 1, [said[-1]]
+        else:
+            said.extend(["the", nouns.pop()])
+            key, arg = len(said) - 1, ["x", "_", str(len(said) - 1)]
+            ended.append((key, ["*", said[-1], "(", "x", "_", str(key), ")"]))
+        verb, lemma = rng.choice(verbs)
+        said.append(verb)
+        v = len(said) - 1
+        if last is not None:
+            joined.append(((last, v), [last_lemma, ".", "ccomp", "(", "x", "_", str(last), ",", "x", "_", str(v), ")"]))
+        joined.append(((v, key), [lemma, ".", "agent", "(", "x", "_", str(v), ","] + arg + [")"]))
+        said.append("that")
+        last, last_lemma = v, lemma
+    said.extend(["the", nouns.pop()])
+    n = len(said) - 1
+    ended.append((n, ["*", said[n], "(", "x", "_", str(n), ")"]))
+    verb, lemma = rng.choice([("taken", "take"), ("liked", "like"), ("poked", "poke")])
+    said.extend(["was", verb])
+    v = len(said) - 1
+    joined.append(((last, v), [last_lemma, ".", "ccomp", "(", "x", "_", str(last), ",", "x", "_", str(v), ")"]))
+    joined.append(((v, n), [lemma, ".", "theme", "(", "x", "_", str(v), ",", "x", "_", str(n), ")"]))
+    answer = [t for _, it in sorted(ended) for t in it + [";"]]
+    for k, (_, it) in enumerate(sorted(joined)):
+        answer += (["AND"] if k else []) + it
+    return said + ["."], answer
+
+
+def test_a_change_made_inside_an_item_is_made_in_the_item_it_stands_for(FastCortex):
+    """Taking "liked that the cup" out of the example changes what the clause around it holds: its verb's item,
+    "tolerate . ccomp ( x _ 2 , ... )", now holds the new clause. Asked, the clause around the part is Levi's;
+    read token by token, the example's item lines up with the far "tolerated" (its agent is a thing, as the example's
+    is, and Levi is a name), but put into the asked rest's answer it is respect's item, and the change is made
+    there."""
+    from living.analogy import Episodes
+    rng = random.Random(3)
+    ep = Episodes()
+    for _ in range(400):
+        ep.live(*_clauses(rng, rng.choice([0, 1, 1, 2])))
+    ep.ready()
+    assert ep._list_order() == (";", "AND")
+    o = tuple("the boy tolerated that the dog liked that the cup was taken .".split())
+    lived = ("* boy ( x _ 1 ) ; * dog ( x _ 5 ) ; * cup ( x _ 9 ) ; tolerate . agent ( x _ 2 , x _ 1 ) AND tolerate . "
+             "ccomp ( x _ 2 , x _ 6 ) AND like . agent ( x _ 6 , x _ 5 ) AND like . ccomp ( x _ 6 , x _ 11 ) AND take "
+             ". theme ( x _ 11 , x _ 9 )").split()
+    its_rest = ("* boy ( x _ 1 ) ; * dog ( x _ 5 ) ; tolerate . agent ( x _ 2 , x _ 1 ) AND tolerate . ccomp ( x _ 2 , "
+                "x _ 7 ) AND take . theme ( x _ 7 , x _ 5 )").split()
+    u = tuple("the horse tolerated that Lily liked that Levi respected that the chicken liked that the box was liked ."
+              .split())
+    rest = ("* horse ( x _ 1 ) ; * chicken ( x _ 11 ) ; tolerate . agent ( x _ 2 , x _ 1 ) AND tolerate . ccomp ( x _ 2 "
+            ", x _ 5 ) AND like . agent ( x _ 5 , Lily ) AND like . ccomp ( x _ 5 , x _ 8 ) AND respect . agent ( x _ 8 "
+            ", Levi ) AND respect . ccomp ( x _ 8 , x _ 13 ) AND like . theme ( x _ 13 , x _ 11 )").split()
+    want = ("* horse ( x _ 1 ) ; * chicken ( x _ 11 ) ; * box ( x _ 15 ) ; tolerate . agent ( x _ 2 , x _ 1 ) AND "
+            "tolerate . ccomp ( x _ 2 , x _ 5 ) AND like . agent ( x _ 5 , Lily ) AND like . ccomp ( x _ 5 , x _ 8 ) "
+            "AND respect . agent ( x _ 8 , Levi ) AND respect . ccomp ( x _ 8 , x _ 12 ) AND like . agent ( x _ 12 , "
+            "x _ 11 ) AND like . ccomp ( x _ 12 , x _ 17 ) AND like . theme ( x _ 17 , x _ 15 )").split()
+    assert ep._transplant(o, 6, 4, its_rest, lived, u, 12, rest) == want
+
+
 def _moves():
     """Commands of a small grammar of moves, built as SCAN builds them: an action, a way (around: four turns and acts;
     opposite: two turns and an act) and a side, said once, twice or thrice, and two of them joined by "and"."""
