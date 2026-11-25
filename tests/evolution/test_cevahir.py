@@ -397,6 +397,17 @@ def test_a_part_that_cannot_be_taken_out_is_exchanged_for_one_lived_in_its_place
     ep.ready()
     shape = ("\u25a1",)
     assert ep.exchange_record(1, shape, 2, ("the", "\u25a1"), ("the", "cup"), elsewhere=True) >= SPEAKING_LINE
+    # An exchange's rest is read as its record reads the rests of its examples (the one lived, or the analogy's own at
+    # the speaking line), never by parts in turn: a rest answered by parts would be believed beyond that record.
+    depths = []
+    inner = ep._by_parts
+    def counted(*args, **kw):
+        depths.append(args[3])
+        return inner(*args, **kw)
+    ep._by_parts = counted
+    said, answer = gave(rng, True)
+    got = ep._by_exchange(tuple(said), {}, [100], 0)
+    assert depths == [] and (got[0] is None or got[1] < SPEAKING_LINE or got[0] == answer)
 
 
 def test_a_word_that_stands_twice_is_not_filled_where_only_one_of_it_changes(FastCortex):
