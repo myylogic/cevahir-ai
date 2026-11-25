@@ -949,9 +949,21 @@ code that is checked out (`results/m3_analogy.jsonl`).
 
 A Transformer trained from scratch on exactly the dialogues Cevahir lived for each SCAN split
 (`m3_scan_transformer.py`, 1.8 million parameters, 15 minutes of three cores per split, its answers written character
-by character; `results/m3_scan.jsonl`, rows "who": "transformer"). On add jump it answered none of the 200 commands:
-in its 15 minutes it took 235 steps of training (loss 0.57 at the end) while the Cevahir run on COGS (8.7) shared the
-machine. The other five splits run with the machine to themselves; their rows follow.
+by character; `results/m3_scan.jsonl`, rows "who": "transformer"), asked the same 200 test commands of each split:
+
+| split | steps in its 15 minutes | loss at the end | right of 200 |
+|---|---|---|---|
+| add jump (the machine shared with the Cevahir run on COGS) | 235 | 0.57 | 0 |
+| around right | 1,124 | 0.125 | 0 |
+| length | 1,015 | 0.132 | 1 |
+| jump around right | 1,006 | 0.120 | 0 |
+| opposite right | 997 | 0.105 | 0 |
+| right | 957 | 0.117 | 0 |
+
+With the machine to itself it took about a thousand steps on each split and fit what it lived (a loss near 0.12
+nats a character), and answered 1 of the 1,000 test commands; on 50 commands of each of the same five splits
+Cevahir answers 250 of 250 (e6d0cc8, below), and so does Zihin. A first run of these five splits, started while other
+measurements shared the machine, was stopped before any row was written.
 
 The six splits again, 50 commands each, with the code as 8.15 mended it (`m3_scan.py --test 50`): after the first
 three faults (ad6dea0) and after the first six (e6d0cc8). Zihin answers every command right in both runs.
@@ -1250,9 +1262,14 @@ the whole in-distribution file 1 of 4. The hippocampus alone, with what 8.16 to 
 
 | | before 8.16 (297471c) | after 8.18 |
 |---|---|---|
+| COGS in distribution, the sample of 300 | 298 / 0 / 2 | 298 / 0 / 2 |
 | COGS in distribution, the whole test file (3,000) | 2,969 / 5 / 26 | **2,994 / 3 / 3** |
+| COGS generalisation, the sample of 300 | 264 / 23 / 13 | **281 / 18 / 1** |
 | COGS generalisation, every seventh sentence (3,000) | 2,600 / 285 / 115 | **2,779 / 208 / 13** |
 | SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same |
+
+Two processes with different hash seeds give the same 600 answers of the samples and the same beliefs, bit for bit
+(the digest of all of them is the same, as in 8.15).
 
 By kind on every seventh generalisation sentence, after 8.18: cp recursion 94 / 39 / 1, pp recursion 133 / 2 / 0,
 the three verb-class kinds 436 of 437 right, a primitive in a new role 138 of 138 (an infinitive's argument), 128 of
