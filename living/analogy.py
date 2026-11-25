@@ -112,6 +112,15 @@ with several places at once, done on the episodes the hippocampus keeps.
   in the asked utterance are of a kind; else through the alignment of the two rests' answers, and no place or word's
   token is put for one whose word is of another kind (a verb's place before "to the girl" in a passive is not the
   noun's place before it in an active sentence).
+- **The roles an answer gives.** The answer given (not the answers of rests, which are steps on the way and are
+  often utterances no one would say) is believed no further than the roles it gives its tokens were lived: an item
+  that gives a token a role it never took in a lived answer is believed by the rule on the tokens that took every role
+  it took, how many of them took that one too. "like" takes no recipient in any lived answer, and of the tokens that
+  take all it takes none does: "Aubrey liked that Grayson gave Lina to a cat .", answered through the rest "Aubrey
+  liked the ring to a cat .", gives "like" a recipient and is held back; where the first search's answer is held back
+  so, the second search is made. A token that took no role is not read so (nothing lived says what roles it takes),
+  and a token that took few takes a new one as the tokens that took those do (a verb met only with a theme is asked
+  with an agent as most such verbs take one).
 
 Nothing here names a language, a word or a format: tokens are what was said, split as Zihin splits (words and marks).
 """
@@ -183,6 +192,8 @@ class Episodes:
         self._mshapes: Dict[tuple, list] = {}
         self._elsewhere: Dict[tuple, float] = {}               # the record of a shape's parts, read elsewhere
         self._here: Dict[tuple, bool] = {}                     # whether a part of a frame stood in such surroundings
+        self._roles: Dict[str, set] = {}                       # the roles each token took (read as life doubles)
+        self._role_beliefs: Dict[tuple, float] = {}
         self._forgotten = 0
 
     def __len__(self) -> int:
@@ -306,22 +317,67 @@ class Episodes:
         belief is the rule on the analogy's own record for that many places (how often an answer foreseen so was
         right), times the share of the neighbours that agree. Where that does not reach the speaking line and
         ``parts`` is on, the utterance is answered by parts (see the module's text); then the count is the examples
-        that agreed."""
+        that agreed. The answer given is believed no further than the roles it gives its tokens were lived
+        (``_roles_believed``); where the first search's answer is held back so, the second search is made."""
         key = (tuple(said), parts, len(self.said), self._forgotten)
         if key in self._asked:                                 # asked again before anything new was lived
             plan, e, n = self._asked[key]
             return (list(plan) if plan is not None else None), e, n
         got = self._plain(said)
+        if got[0] is not None and got[1] >= SPEAKING_LINE:
+            got = (got[0], min(got[1], self._roles_believed(got[0])), got[2])
         if parts and self.said and not (got[0] is not None and got[1] >= SPEAKING_LINE):
             plan, e, n = self._by_parts(tuple(said), {}, [PARTS_BUDGET], 0)
-            if plan is None:                                   # nothing lived between the same neighbours answers
-                plan, e, n = self._by_parts(tuple(said), {}, [PARTS_BUDGET], 0, True)
+            if plan is not None:
+                e = min(e, self._roles_believed(plan))
+            if plan is None or e < SPEAKING_LINE:              # nothing lived between the same neighbours answers,
+                second = self._by_parts(tuple(said), {}, [PARTS_BUDGET], 0, True)   # or not with roles lived
+                if second[0] is not None:
+                    second = (second[0], min(second[1], self._roles_believed(second[0])), second[2])
+                    if plan is None or second[1] > e:
+                        plan, e, n = second
             if plan is not None:
                 got = (self._in_order(plan, said), e, n)
         if len(self._asked) > 4096:
             self._asked.clear()
         self._asked[key] = got
         return (list(got[0]) if got[0] is not None else None), got[1], got[2]
+
+    def _heads(self, a: Sequence[str]) -> List[Tuple[str, tuple]]:
+        """The tokens an answer's items give roles to, with the roles: an item "token . role ( ... )" of an answer that
+        keeps lists (``_list_order``); nothing where the answers keep none."""
+        order = self._list_order()
+        if order is None:
+            return []
+        out, item = [], []
+        for t in list(a) + [order[1]]:
+            if t not in order:
+                item.append(t)
+                continue
+            if "(" in item:
+                j = item.index("(")
+                if j >= 2 and item[1] == ".":
+                    out.append((item[0], tuple(item[1:j])))
+            item = []
+        return out
+
+    def _roles_believed(self, plan: Sequence[str]) -> float:
+        """How far the roles an answer gives its tokens were lived: a role a token took in a lived answer is believed;
+        one it never took, by the rule on the tokens that took every role it took (how many of them took that one too:
+        "like" never takes a recipient, and few of the tokens that take what it takes do). A token that took no role
+        is not read so: nothing lived says what roles it takes."""
+        self._make()
+        least = 1.0
+        for tok, role in self._heads(plan):
+            mine = self._roles.get(tok)
+            if not mine or role in mine:
+                continue
+            key = (tok, role)
+            if key not in self._role_beliefs:
+                others = [r for t, r in self._roles.items() if t != tok and mine <= r]
+                self._role_beliefs[key] = (sum(role in r for r in others) + 0.5) / (len(others) + 1.0)
+            least = min(least, self._role_beliefs[key])
+        return least
 
     def _named(self, said: Sequence[str]):
         """The places an item of an answer to ``said`` names, in its order: its numbers, and the own tokens of the
@@ -491,6 +547,13 @@ class Episodes:
                 if len(at[key]) < 64:
                     at[key].append(i)
         self._at = dict(at)
+        roles: Dict[str, set] = defaultdict(set)              # the roles each token took in the lived answers
+        for a in self.answers:
+            if a is not None:
+                for tok, role in self._heads(a):
+                    roles[tok].add(role)
+        self._roles = dict(roles)
+        self._role_beliefs = {}
         self._owns = {}
         self._elsewhere = {}
         self._here = {}

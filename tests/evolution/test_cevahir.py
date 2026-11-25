@@ -790,14 +790,40 @@ def test_a_change_made_inside_an_item_is_made_in_the_item_it_stands_for(FastCort
                 "x _ 7 ) AND take . theme ( x _ 7 , x _ 5 )").split()
     u = tuple("the horse tolerated that Lily liked that Levi respected that the chicken liked that the box was liked ."
               .split())
-    rest = ("* horse ( x _ 1 ) ; * chicken ( x _ 11 ) ; tolerate . agent ( x _ 2 , x _ 1 ) AND tolerate . ccomp ( x _ 2 "
-            ", x _ 5 ) AND like . agent ( x _ 5 , Lily ) AND like . ccomp ( x _ 5 , x _ 8 ) AND respect . agent ( x _ 8 "
-            ", Levi ) AND respect . ccomp ( x _ 8 , x _ 13 ) AND like . theme ( x _ 13 , x _ 11 )").split()
+    rest = ("* horse ( x _ 1 ) ; * chicken ( x _ 11 ) ; tolerate . agent ( x _ 2 , x _ 1 ) AND tolerate . ccomp "
+            "( x _ 2 , x _ 5 ) AND like . agent ( x _ 5 , Lily ) AND like . ccomp ( x _ 5 , x _ 8 ) AND respect . "
+            "agent ( x _ 8 , Levi ) AND respect . ccomp ( x _ 8 , x _ 13 ) AND like . theme ( x _ 13 , x _ 11 )"
+            ).split()
     want = ("* horse ( x _ 1 ) ; * chicken ( x _ 11 ) ; * box ( x _ 15 ) ; tolerate . agent ( x _ 2 , x _ 1 ) AND "
             "tolerate . ccomp ( x _ 2 , x _ 5 ) AND like . agent ( x _ 5 , Lily ) AND like . ccomp ( x _ 5 , x _ 8 ) "
             "AND respect . agent ( x _ 8 , Levi ) AND respect . ccomp ( x _ 8 , x _ 12 ) AND like . agent ( x _ 12 , "
             "x _ 11 ) AND like . ccomp ( x _ 12 , x _ 17 ) AND like . theme ( x _ 17 , x _ 15 )").split()
     assert ep._transplant(o, 6, 4, its_rest, lived, u, 12, rest) == want
+
+
+def test_an_answer_is_believed_no_further_than_the_roles_it_gives_were_lived(FastCortex):
+    """A verb of clauses takes no recipient in any lived answer, and none of the tokens that take all it takes does:
+    an answer that gives it one is held back. A verb met only with a theme (a passive) takes an agent as the tokens
+    that take a theme mostly do; a token that took no role says nothing either way; lived answers are believed."""
+    from living.analogy import Episodes
+    from living.evidence import SPEAKING_LINE
+    rng = random.Random(5)
+    lived = [_clauses(rng, rng.choice([0, 1, 2])) for _ in range(200)] + \
+        [_phrased(rng, 0, rng.choice([0, 1])) for _ in range(200)]
+    ep = Episodes()
+    for said, answer in lived:
+        ep.live(said, answer)
+    ep.ready()
+    assert min(ep._roles_believed(answer) for _, answer in lived) == 1.0
+    def roles(text):
+        return ep._roles_believed(text.split())
+    for verb in ("hope", "like"):
+        assert roles("* cat ( x _ 4 ) ; %s . agent ( x _ 1 , Ali ) AND %s . recipient ( x _ 1 , x _ 4 )"
+                     % (verb, verb)) < SPEAKING_LINE
+    assert ep._roles["poke"] == {(".", "theme")}
+    assert roles("* cat ( x _ 1 ) ; * dog ( x _ 4 ) ; poke . agent ( x _ 2 , x _ 1 ) AND poke . theme ( x _ 2 , x _ 4 )"
+                 ) >= SPEAKING_LINE
+    assert roles("* cat ( x _ 1 ) ; zap . agent ( x _ 2 , x _ 1 ) AND zap . recipient ( x _ 2 , x _ 4 )") == 1.0
 
 
 def _moves():
