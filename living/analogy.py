@@ -14,12 +14,15 @@ with several places at once, done on the episodes the hippocampus keeps.
   dialogues w was said in, e(t | w) = (W⁺ + ½) / (W + 1) with W⁺ the answers holding t; tokens held by half of all
   answers or more are the answers' own structure, not any word's. A relation is believed when e reaches the speaking
   line e*. On equal evidence the word itself is preferred, then the token sharing the longest beginning with it (its
-  stem: Zihin's F34, the asked word itself, and F36, word forms).
+  stem: Zihin's F34, the asked word itself, and F36, word forms), then the token whose own dialogues held the word
+  most often (the rule on them: the token most the word's own), then the one first met with it.
 - **The plan.** For a neighbour (U', A'), each place where U and U' differ (u in U', v in U) is filled: every token of
   A' that is u's relation becomes v's relation (v itself where u's relation is u itself and v has none yet). All
   places are filled at once, so two roles that swap places are read as a swap; one token that would have to become two
-  gives nothing. A neighbour with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest
-  places first, at most ``k``), and the plan is the answer most of them give.
+  gives nothing, and so does a place whose word also stands unchanged elsewhere in the neighbour (its tokens cannot be
+  told from the other occurrence's: "run left after run left" says nothing of "run left after jump left"). A neighbour
+  with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first, at most
+  ``k``), and the plan is the answer most of them give.
 - **Its belief.** Every dialogue lived is first foreseen by the analogy from the episodes already kept; the record of
   how often an answer foreseen over d places was right is the analogy's own (the evidence core's trust in a way of
   reading, learned from what its claims came to). A plan is believed by the rule on the record for its places, times
@@ -138,10 +141,10 @@ class Episodes:
         self.where[said] = i
         for j, w in enumerate(said):
             self.index[(len(said), j, w)].append(i)
-        held = set(answer)
+        held = list(dict.fromkeys(answer))                    # in the order first met: the same in every process
         for t in held:
             self.t_count[t] += 1
-        for w in set(said):
+        for w in dict.fromkeys(said):
             self.with_w[w] += 1
             row = self.with_wt[w]
             for t in held:
@@ -209,7 +212,9 @@ class Episodes:
                 e = (c + 0.5) / (n + 1.0)
                 if e < SPEAKING_LINE:
                     continue
-                kk = (e, t == w, shared_beginning(t, w))
+                # on equal evidence: the word itself, then its stem, then the token that comes with this word more
+                # than with any other (the rule on how many of the token's dialogues held the word)
+                kk = (e, t == w, shared_beginning(t, w), (c + 0.5) / (self.t_count[t] + 1.0))
                 if key is None or kk > key:
                     best, key = t, kk
         self._rel[w] = best
@@ -780,8 +785,12 @@ class Episodes:
             other = self.said[i]
             mapping: Dict[str, str] = {}                       # every place filled at once (two roles may swap)
             ok = True
+            kept = {other[k] for k in range(len(other)) if k not in places}
             for j in places:
                 u, v = other[j], said[j]
+                if u in kept:                                  # u also stands unchanged elsewhere: its token cannot
+                    ok = False                                 # be told from the other's
+                    break
                 ru = self.relation(u)
                 if ru is None:
                     ok = False

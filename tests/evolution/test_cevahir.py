@@ -386,6 +386,20 @@ def test_a_part_that_cannot_be_taken_out_is_exchanged_for_one_lived_in_its_place
     assert ep.exchange_record(1, shape, 2, ("the", "\u25a1"), ("the", "cup"), elsewhere=True) >= SPEAKING_LINE
 
 
+def test_a_word_that_stands_twice_is_not_filled_where_only_one_of_it_changes(FastCortex):
+    """"run and run" says nothing of "run and jump": which of its two I_RUN is the one that changes cannot be told, so
+    that neighbour does not vote (it would say I_JUMP I_JUMP); the neighbours whose replaced words stand once do."""
+    from living.analogy import Episodes
+    ep = Episodes()
+    for word, act in (("walk", "I_WALK"), ("look", "I_LOOK"), ("run", "I_RUN"), ("jump", "I_JUMP")):
+        ep.live([word], [act])
+    ep.live(["walk", "and", "look"], ["I_WALK", "I_LOOK"])
+    ep.live(["look", "and", "walk"], ["I_LOOK", "I_WALK"])
+    ep.live(["run", "and", "run"], ["I_RUN", "I_RUN"])
+    plan, agree, filled, d = ep._plan(["run", "and", "jump"])
+    assert plan == ["I_RUN", "I_JUMP"] and agree == filled == 2
+
+
 def _moves():
     """Commands of a small grammar of moves, built as SCAN builds them: an action, a way (around: four turns and acts;
     opposite: two turns and an act) and a side, said once, twice or thrice, and two of them joined by "and"."""
