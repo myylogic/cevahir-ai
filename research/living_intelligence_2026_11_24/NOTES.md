@@ -832,6 +832,10 @@ ways (exact of 300):
   accumulated over moments; the bit "every token of the answer foreseen" was true in none of 1,000 SCAN dialogues and
   none of 6,000 COGS ones, though Zihin answers SCAN's test commands right. Such a record has to be read from
   Zihin's own answers.)
+- **With the hippocampus of 8.21** (the rows written by 96f0938, the code of 04b1b45; life 5,704 s and answers 2,031 s
+  with two workers): in distribution both answer 299, Cevahir wrong on one (the analogy silent on it); on the
+  generalisation set the analogy answers 287 (silent on 10, wrong on 3) and Cevahir **287**, silent 5 times and wrong
+  8: the analogy's three, and five where the analogy is silent and Zihin's plan is said.
 
 ### 8.8 Sleep
 
