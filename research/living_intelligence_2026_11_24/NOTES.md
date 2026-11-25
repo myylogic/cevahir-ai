@@ -1785,3 +1785,7 @@ Tried and not taken:
   answers the list order reads with "theme" between items, it holds back every name exchanged for a thing (a name was
   never a theme there, and the shape of the "item" after "theme" says so), the generalisation the exchange of 8.20 is
   for.
+- Each part tried for the asked utterance first on its own share of the bound (an eighth of it), then on what is left,
+  and a search cut short by the bound not counted as failed (so a part tried again later may finish it). On the whole
+  file eight silent clause chains become right and four right ones silent (20,894 / 104 / 2), the shares spent before
+  the parts whose chains were right are reached; asking takes a third longer.
