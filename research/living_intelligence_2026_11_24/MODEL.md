@@ -672,9 +672,12 @@ are mended by the same store of episodes.
   near the part (the numbers that name them, and the relations of the words that stand there). A token of an answer
   that is a whole number smaller than the utterance's length is read as a place of it, and moves on with the places
   when a part is put in. One change can be written in several ways where the tokens repeat; it is put in as far on
-  as the tokens allow. What the example put at the very beginning of its answer goes at the beginning, and where the
-  answer lists runs of the same shape, a new run goes by its place among its neighbours (a list keeps the order of
-  what was said). The examples nearest the asked part vote (at most eight). A step's belief is the frame's record
+  as the tokens allow. Where an answer names no places of what was said, an example whose part holds a word with a
+  relation that also stands outside the part lends nothing: which occurrence its tokens belong to cannot be told (an
+  answer that names places tells them apart by their places). What the example put at the very beginning of its
+  answer goes at the beginning, and where the answer lists runs of the same shape, a new run goes by its place among
+  its neighbours (a list keeps the order of what was said). The examples nearest the asked part vote (at most
+  eight). A step's belief is the frame's record
   times the share of the examples that agree; a plan's belief is that of its weakest step, the rest's own included.
   The steps of a chain read the same kind of change again and again (the phrases of a nested phrase are taken out by
   the same frames), so their errors go together rather than one by one: the chain is believed as far as its least
@@ -690,18 +693,19 @@ are mended by the same store of episodes.
   while it stands, and a change that leaves any of them named is not put. Only parts whose words have relations are
   exchanged: what such a word brings to an answer is its own token wherever it stands, while what a word without one
   brings depends on where it stands (SCAN's "right" turns once, or four times after "around"). And a part is
-  exchanged only for one that holds a word with a relation and none of the asked part's words: an exchange puts one
-  part's meaning where another's was, and a part with no relation has none of its own to give way (SCAN's "turn",
-  whose turns belong to the side named after it, gives way to "walk" four times in "around" and twelve times in
-  "around ... thrice"), while a part that holds the asked one ("jump opposite" for "jump") only adds a word that
-  brings no token of its own. The change is read
-  first from lived parts of the asked part's own frame with the same surroundings; where there are none, from the
-  places where both kinds of part were lived. Each case has its own record, read as a frame's is: lived examples of
-  the asked part's shape exchanged for the same part, foreseen as if not lived, with the change read from an example
-  with the same surroundings or, for the second case, from one with other surroundings (does a change read in one
-  place carry to another?). An exchange's belief is that record times the share of the examples that agree. Taking a
-  part out is an exchange for nothing; exchanges are tried for the asked utterance's own parts only, after the parts
-  that can be taken out, on a quarter of the search's bound.
+  exchanged only for one that holds a word with a relation and shares no word with it: an exchange puts one part's
+  meaning where another's was, and a part with no relation has none of its own to give way (SCAN's "turn", whose
+  turns belong to the side named after it, gives way to "walk" four times in "around" and twelve times in "around ...
+  thrice"), while a part that holds the asked one ("jump opposite" for "jump") only adds a word that brings no token
+  of its own. The change is read first from lived parts of the asked part's own frame with the same surroundings;
+  where there are none, from the places where both kinds of part were lived; and only from examples whose part, too,
+  shares no word with the part put in: exchanging "look" for "look opposite" in "look left after run" keeps "look"'s
+  token, and says nothing of what becomes of it where "run" gives way. Each case has its own record, read as a
+  frame's is: lived examples of the asked part's shape exchanged for the same part, foreseen as if not lived, with
+  the change read from an example with the same surroundings or, for the second case, from one with other
+  surroundings (does a change read in one place carry to another?). An exchange's belief is that record times the
+  share of the examples that agree. Taking a part out is an exchange for nothing; exchanges are tried for the asked
+  utterance's own parts only, after the parts that can be taken out, on a quarter of the search's bound.
 
 Nothing of COGS is named here: no word, mark or form of its answers. What the mechanism assumes is general: an answer
 may name the places of what was said by their numbers, and runs of the same shape in an answer keep the order in which

@@ -929,20 +929,22 @@ by character; `results/m3_scan.jsonl`, rows "who": "transformer"). On add jump i
 in its 15 minutes it took 235 steps of training (loss 0.57 at the end) while the Cevahir run on COGS (8.7) shared the
 machine. The other five splits run with the machine to themselves; their rows follow.
 
-The six splits again, 50 commands each, with the code after 8.15 (`m3_scan.py --test 50`, ad6dea0):
+The six splits again, 50 commands each, with the code as 8.15 mended it (`m3_scan.py --test 50`): after the first
+three faults (ad6dea0) and after the first six (e6d0cc8). Zihin answers every command right in both runs.
 
-| split | Zihin | Cevahir | Cevahir wrong where Zihin was right |
+| split | Zihin | Cevahir (ad6dea0) | Cevahir (e6d0cc8) |
 |---|---|---|---|
-| add jump | 50 | 49 | 1 |
-| around right | 50 | 50 | 0 |
-| length | 50 | 50 | 0 |
-| jump around right | 50 | 50 | 0 |
-| opposite right | 50 | 50 | 0 |
-| right | 50 | 49 | 1 |
-| **all six** | **300** | **298** | **2** |
+| add jump | 50 | 49 | 49 |
+| around right | 50 | 50 | 50 |
+| length | 50 | 50 | 50 |
+| jump around right | 50 | 50 | 50 |
+| opposite right | 50 | 50 | 50 |
+| right | 50 | 49 | 50 |
+| **all six** | **300** | **298** | **299** |
 
-With the hippocampus in the layer, Cevahir answers two commands fewer than Zihin alone (8.15): where the two thoughts
-differ, the record that decides was earned by the analogy's plans over places, and it lets a plan by parts lead too.
+Every command Cevahir misses Zihin answered right: where the two thoughts differ, the record that decides was earned
+by the analogy's plans over places, and it lets a plan by parts lead too, so a fault of the hippocampus shows here as
+a command lost (8.15).
 
 ### 8.14 Answering by parts, held to its own record
 
@@ -1034,9 +1036,9 @@ records, none wrong and the same 4 right. The world of nested phrases answers 15
   differently in surroundings no lived example shares is silenced by the surroundings rule only when those
   surroundings differ within three tokens of the part; and a record is read from 24 examples of a frame, not all.
 
-### 8.15 Four faults found by measuring again
+### 8.15 Seven faults found by measuring again
 
-Running the measurements again with the code of 8.14, through the scripts that write the result rows, turned up four
+Running the measurements again with the code of 8.14, through the scripts that write the result rows, turned up seven
 faults. Each is mended, has a test, and every row after it was written by the mended code.
 
 - **The hippocampus was not the same in every process.** A word's relation was chosen, on equal evidence, by the
@@ -1058,6 +1060,22 @@ faults. Each is mended, has a test, and every row after it was written by the me
   24); its token had no written form, and the speaking stopped there. In the life of 4,000 lines, Cevahir lost two
   of the analogy's right answers this way (pp recursion, the plan right and chosen, the answer cut after "x _"), and
   no other. A token of the plan never written is now written as it is held.
+- **A part exchanged for one that holds it.** One of the two answers Cevahir still missed on SCAN after the first
+  three (below) was an exchange of "jump" for "jump opposite": not one meaning put for another but a word added,
+  "opposite", that brings no token of its own.
+  A part is now exchanged only for one that holds none of its words.
+- **A word inside and outside a part.** The other: taking "opposite right and look" out of "look opposite right and
+  look opposite right twice" to answer "jump opposite right and look opposite right twice"; the example's I_LOOK may
+  be either look's, and the change put back made both actions look. Where an answer names no places of what was said,
+  such an example now lends no change (where answers name places, as COGS's do, a token is told apart by its place).
+  Neither of the last two changes a single answer of the hippocampus alone on COGS (the digest of the 600 answers is
+  the same) or on SCAN.
+- **An example whose part shares a word with the part put in.** With the sixth mended (e6d0cc8), Cevahir's SCAN life
+  on add jump gave one wrong answer it had not given before: "run left after jump left", I_TURN_LEFT I_JUMP
+  I_TURN_LEFT I_LOOK. The hippocampus exchanged "run" for "look opposite" and read the change from "look left after
+  run", exchanged the same way: a turn fewer, and its I_LOOK kept, since its "look" stays. Put into the asked rest,
+  that left "look"'s token where "run"'s belongs. The two parts of an exchange now share no word, in what is asked and
+  in the examples that lend the change; the hippocampus is silent on that command, and Cevahir says Zihin's answer.
 
 With the first three mended (ad6dea0), the hippocampus alone (`m3_analogy.py`): SCAN by parts 114 / 186 / 0 (add jump
 by places 50 / 0 / 0); COGS 298 / 0 / 2 in distribution and 264 / 23 / 13 on the generalisation sample, as in 8.14;
@@ -1068,4 +1086,5 @@ Cevahir on SCAN with the first three mended (`m3_scan.py --test 50`, ad6dea0): Z
 298. The two it misses Zihin answered right, and both times the analogy's plan was the thought. The one traced (add
 jump) was a plan by parts believed at 0.60: the analogy's own records rate such a plan as right three times in five,
 and the record that let it lead over Zihin was earned by its plans over places, not by plans by parts. Before the
-fixes (68ab34e) Cevahir missed 6; before the hippocampus existed it answered as Zihin (8.4).
+fixes (68ab34e) Cevahir missed 6; before the hippocampus existed it answered as Zihin (8.4). With the first six mended
+(e6d0cc8) Cevahir answers 299 of 300: the two traced are answered, and the one it misses is the seventh fault.

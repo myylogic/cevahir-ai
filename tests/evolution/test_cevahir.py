@@ -432,6 +432,26 @@ def test_a_word_inside_and_outside_a_part_lends_no_change_where_the_answer_names
     assert ep._transplant(o, 1, 4, ["look", "0"] + a2_rest, named, u, 1, ["jump", "0"] + rest) is not None
 
 
+def test_an_example_whose_part_shares_a_word_with_the_part_put_in_lends_no_change(FastCortex):
+    """Exchanging "run" for "look opposite" to answer "run left after jump left": the example "look left after run",
+    exchanged the same way, shows a turn fewer and its I_LOOK kept, since its "look" stays; put into the asked rest,
+    that leaves "look"'s token where "run"'s belongs. An example whose part shares no word with the part put in shows
+    both changes (SCAN's add jump: Cevahir said I_TURN_LEFT I_JUMP I_TURN_LEFT I_LOOK)."""
+    from living.analogy import Episodes
+    ep = Episodes()
+    for word, act in (("walk", "I_WALK"), ("look", "I_LOOK"), ("run", "I_RUN"), ("jump", "I_JUMP")):
+        ep.live([word], [act])
+    u, y = ("run", "left", "after", "jump", "left"), ("look", "opposite")
+    rest = ["I_TURN_LEFT", "I_JUMP", "I_TURN_LEFT", "I_TURN_LEFT", "I_LOOK"]     # look opposite left after jump left
+    a2_rest = ["I_RUN", "I_TURN_LEFT", "I_TURN_LEFT", "I_LOOK"]                  # look opposite left after run
+    shared, apart = ("look", "left", "after", "run"), ("walk", "left", "after", "run")
+    lent = ep._transplant(shared, 0, 1, a2_rest, ["I_RUN", "I_TURN_LEFT", "I_LOOK"], u, 0, rest, instead=y)
+    assert lent == ["I_TURN_LEFT", "I_JUMP", "I_TURN_LEFT", "I_LOOK"] and not ep._apart(shared[:1], y)
+    lent = ep._transplant(apart, 0, 1, a2_rest, ["I_RUN", "I_TURN_LEFT", "I_WALK"], u, 0, rest, instead=y)
+    assert lent == ["I_TURN_LEFT", "I_JUMP", "I_TURN_LEFT", "I_RUN"] and ep._apart(apart[:1], y)
+    assert not ep._apart(("jump",), ("jump", "opposite"))               # asked: a part holding the asked one
+
+
 def _moves():
     """Commands of a small grammar of moves, built as SCAN builds them: an action, a way (around: four turns and acts;
     opposite: two turns and an act) and a side, said once, twice or thrice, and two of them joined by "and"."""

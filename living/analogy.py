@@ -62,7 +62,9 @@ with several places at once, done on the episodes the hippocampus keeps.
   stands (SCAN's "right" turns once, or four times after "around"), and only for a part that holds a word with a
   relation and none of the asked part's words (an exchange puts one part's meaning where another's was; "jump" for
   "jump opposite" would add "opposite", a word that brings no token of its own). The change is read from the asked
-  part's own frame with the same surroundings or, where there is none, wherever both kinds of part were lived; each
+  part's own frame with the same surroundings or, where there is none, wherever both kinds of part were lived, and
+  only from examples whose part, too, shares no word with the one put in ("look left after run", exchanging "look"
+  for "look opposite", keeps "look"'s token, and says nothing of what becomes of it when "run" is exchanged); each
   case is believed by its own record (lived examples exchanged as if not lived, the change read from an example with
   the same, or with other, surroundings). Taking a part out is the exchange for nothing.
 
@@ -523,8 +525,8 @@ class Episodes:
                     return None, 0.0, 0
                 i0, q0 = divmod(code, 1024)
                 y = self.said[i0][q0:q0 + m2] if self.said[i0] is not None else None
-                if not y or set(y) & set(u[p:p + m]):
-                    continue                                   # a part holding the asked one is not another part
+                if not y or not self._apart(u[p:p + m], y):
+                    continue
                 rest_plan, rest_e, _ = self._by_parts(u[:p] + y + u[p + m:], memo, budget, depth + 1)
                 if rest_plan is None:
                     continue
@@ -539,7 +541,7 @@ class Episodes:
                     for c in sorted(codes, key=near)[:4 * self.k]:
                         i, p2 = divmod(c, 1024)
                         o = self.said[i]
-                        if o is None:
+                        if o is None or not self._apart(o[p2:p2 + m], y):
                             continue
                         a2_rest = self._rest(o[:p2] + y + o[p2 + m:])
                         if a2_rest is None:
@@ -611,8 +613,8 @@ class Episodes:
         for code in pool[::step][:sample]:
             i, p2 = divmod(code, 1024)
             u = self.said[i]
-            if u is None:
-                continue
+            if u is None or not self._apart(u[p2:p2 + m], y):
+                continue                                       # foreseen as an exchange is asked
             rest = self._rest(u[:p2] + tuple(y) + u[p2 + m:])
             if rest is None:
                 continue
@@ -621,7 +623,8 @@ class Episodes:
             for c2 in pool:
                 j, q2 = divmod(c2, 1024)
                 o = self.said[j]
-                if o is not None and o != u and (self._window(o, q2, m) != around) == elsewhere:
+                if (o is not None and o != u and (self._window(o, q2, m) != around) == elsewhere
+                        and self._apart(o[q2:q2 + m], y)):
                     others.append((-self._near(u, p2, o, q2, m), j, q2, o))
             others.sort(key=lambda x: x[0])
             for _, j, q2, o in others[:3]:
@@ -635,6 +638,14 @@ class Episodes:
                     break
         self._exchanges[key] = (right + 0.5) / (n + 1.0)
         return self._exchanges[key]
+
+    @staticmethod
+    def _apart(part: Sequence[str], y: Sequence[str]) -> bool:
+        """Whether a part and the part exchanged for it share no word, as an exchange asks: it puts one part's
+        meaning where another's was, and where the two share a word, what becomes of that word's tokens cannot be
+        seen. Asked, "jump" for "jump opposite" adds a word that brings no token of its own; in an example, "look"
+        for "look opposite" keeps "look"'s token where the asked part ("run") would change it."""
+        return not set(part) & set(y)
 
     @staticmethod
     def _agreement(agree: int, filled: int) -> float:
