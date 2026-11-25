@@ -346,16 +346,16 @@ def test_a_part_that_cannot_be_taken_out_is_exchanged_for_one_lived_in_its_place
     from living.analogy import Episodes
     from living.evidence import SPEAKING_LINE
     names, things = ["Ali", "Can", "Ece", "Deniz", "Selin", "Mert"], ["cup", "box", "pen", "hat", "jar", "map"]
-    def saw(rng):                                                        # "Ali saw Can ." or "Ali saw the cup ."
-        a = rng.choice(names)
+    def saw(rng):                                    # "Ali saw Can ." or "Ali saw the cup ." (or took ... home)
+        a, (verb, lemma, end) = rng.choice(names), rng.choice([("saw", "see", []), ("took", "take", ["home"])])
         if rng.random() < 0.5:
             n = rng.choice(names)
-            return [a, "saw", n, "."], ["see", ".", "agent", "(", "x", "_", "1", ",", a, ")", "AND", "see", ".",
-                                          "theme", "(", "x", "_", "1", ",", n, ")"]
+            return [a, verb, n] + end + ["."], [lemma, ".", "agent", "(", "x", "_", "1", ",", a, ")", "AND", lemma,
+                                                 ".", "theme", "(", "x", "_", "1", ",", n, ")"]
         t = rng.choice(things)
-        return [a, "saw", "the", t, "."], ["*", t, "(", "x", "_", "3", ")", ";", "see", ".", "agent", "(", "x",
-                                              "_", "1", ",", a, ")", "AND", "see", ".", "theme", "(", "x", "_",
-                                              "1", ",", "x", "_", "3", ")"]
+        return [a, verb, "the", t] + end + ["."], ["*", t, "(", "x", "_", "3", ")", ";", lemma, ".", "agent", "(",
+                                                    "x", "_", "1", ",", a, ")", "AND", lemma, ".", "theme", "(",
+                                                    "x", "_", "1", ",", "x", "_", "3", ")"]
     def gave(rng, name):                                                 # a name is never given in what is lived
         a, r = rng.choice(names), rng.choice(names)
         head = ["give", ".", "agent", "(", "x", "_", "1", ",", a, ")", "AND", "give", ".", "theme", "(", "x", "_",
@@ -379,6 +379,48 @@ def test_a_part_that_cannot_be_taken_out_is_exchanged_for_one_lived_in_its_place
         assert plan is None or e < SPEAKING_LINE or plan == answer          # silent, never wrong
         right += plan == answer and e >= SPEAKING_LINE
     assert right >= 8                                                    # "the cup" for the name, and back
+    # A change read in one place is carried to another because such changes carried between the places lived (a
+    # name for "the cup" after "saw" and after "took"): the record of exchanges read elsewhere.
+    ep.ready()
+    shape = ("\u25a1",)
+    assert ep.exchange_record(1, shape, 2, ("the", "\u25a1"), ("the", "cup"), elsewhere=True) >= SPEAKING_LINE
+
+
+def _moves():
+    """Commands of a small grammar of moves, built as SCAN builds them: an action, a way (around: four turns and acts;
+    opposite: two turns and an act) and a side, said once, twice or thrice, and two of them joined by "and"."""
+    acts = {"walk": "I_WALK", "run": "I_RUN", "jump": "I_JUMP", "look": "I_LOOK"}
+    turns = {"left": "I_TURN_LEFT", "right": "I_TURN_RIGHT"}
+    units = []
+    for a, act in acts.items():
+        units.append(([a], [act]))
+        for side, turn in turns.items():
+            units += [([a, side], [turn, act]), ([a, "opposite", side], [turn, turn, act]),
+                      ([a, "around", side], [turn, act] * 4)]
+    said = [(u + ([w] if w else []), ans * k) for u, ans in units for w, k in (("", 1), ("twice", 2), ("thrice", 3))]
+    pairs = [(a[0] + ["and"] + b[0], a[1] + b[1]) for a in said for b in said]
+    random.Random(0).shuffle(pairs)
+    return said, pairs
+
+
+def test_parts_stay_silent_where_a_change_depends_on_what_stands_around_it(FastCortex):
+    """What "around" changes depends on what stands around it ("around right thrice" turns twelve times), and a part
+    whose words have no relation of their own ("right") brings a change that depends on its place: answering by
+    parts is silent there, never wrong (SCAN's around-right and length splits, in a small world)."""
+    from living.analogy import Episodes
+    from living.evidence import SPEAKING_LINE
+    said, pairs = _moves()
+    held = lambda s: any(s[i:i + 2] == ["around", "right"] for i in range(len(s) - 1))
+    splits = [([d for d in said + pairs if not held(d[0])][:3000], [d for d in pairs if held(d[0])][:30]),
+              ([d for d in said + pairs if len(d[1]) <= 22][:4000], [d for d in said + pairs if len(d[1]) >= 24][:30])]
+    for lived, asked in splits:
+        ep = Episodes()
+        for s, a in lived:
+            ep.live(s, a)
+        ep.ready()
+        for s, a in asked:
+            plan, e, _ = ep.plan(s)
+            assert plan is None or e < SPEAKING_LINE or plan == a                # silent, never wrong
 
 
 def test_where_one_place_frames_cannot_answer_the_record_lets_the_analogy_lead(FastCortex):

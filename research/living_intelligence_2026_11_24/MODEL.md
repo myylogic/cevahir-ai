@@ -637,16 +637,27 @@ are mended by the same store of episodes.
   followed only a verb's name and "on" only "nmod", so the two never stand for each other, while "on" and "in", two
   verbs or two nouns do. (Asking for half of the places shared was tried first: it kept apart what COGS asks to put
   together, a noun met only as a subject and the nouns met as objects; NOTES.md 8.7.)
-- **Wholes.** A part of an utterance is read with its frame: its own tokens, the two before it and the one after it,
-  every word that has a relation read as one mark. A part of that frame is a whole of its own when taking a part of
-  the same frame out of lived utterances leaves utterances that are lived or that the analogy answers at the speaking
-  line: the rule on twelve such examples. This is Zihin's working memory (F43, wholes) read from the other side: there
-  the parts of a long command are answered and put together; here a part is known to be one because what remains
-  without it is still like what was lived.
+- **Wholes, and the record of a frame.** A part of an utterance is read with its frame: its own tokens, the two before
+  it and the one after it, every word that has a relation read as one mark. How far a part of a frame is a whole of
+  its own is the frame's own record, kept by the one rule as the analogy's is (12.5), but read from what was lived
+  rather than while living: up to 24 lived examples of the frame are each foreseen as if they had not been lived (the
+  part taken out, the rest's answer read, lived or the analogy's at the speaking line, and the change that the nearest
+  other example with the same surroundings shows put back, as below), and the rule on how often that gave the answer
+  that was lived is the record. An example whose rest has no answer, or that no other example can be put into, counts
+  as not right: a part is a whole as far as taking it out leaves what can be answered and putting it back gives what
+  was lived. (Counting only the examples that could be foreseen, as the analogy's own record counts only what it
+  foresaw, raised the records of parts that are not wholes, which were then tried first and spent the search: COGS's
+  pp recursion fell from 15 of 18 to 1; NOTES.md 8.14.) A frame is a whole when its record reaches the speaking line. This is Zihin's working
+  memory (F43, wholes) read from the other side: there the parts of a long command are answered and put together;
+  here a part is known to be one because putting it back as other examples do gives what was lived.
 - **Answering by parts.** An utterance that no plan answers at the speaking line is answered by taking out a whole,
   answering the rest (by the analogy, or again by parts), and putting the whole's effect back. Its effect is read from
   the lived utterances that hold a part of the same frame: what taking their part out changes in their answers (the
-  change between the answer of the rest and the answer lived). That change is put into the answer of the asked rest.
+  change between the answer of the rest and the answer lived), among those whose part has the same surroundings as
+  the asked part: the three tokens on each side, read by shape (a word with a relation as one mark, every other word
+  as itself). What a part changes can depend on what stands near it, and the change carries only what the examples
+  show: SCAN's "around" turns four times for each turn that "twice" or "thrice" asks, so an example with "twice" after
+  the part says nothing of "thrice". That change is put into the answer of the asked rest.
   The part's own words map by their place in the part (each word to its relation, as in 12.5, alike by kind); the
   rest of the example maps through the alignment of the two rests' answers, read by what they say about the places
   near the part (the numbers that name them, and the relations of the words that stand there). A token of an answer
@@ -654,25 +665,40 @@ are mended by the same store of episodes.
   when a part is put in. One change can be written in several ways where the tokens repeat; it is put in as far on
   as the tokens allow. What the example put at the very beginning of its answer goes at the beginning, and where the
   answer lists runs of the same shape, a new run goes by its place among its neighbours (a list keeps the order of
-  what was said). The examples nearest the asked part vote (at most eight); the plan's belief is the rest's belief
-  times the share of the examples that agree. The most whole-like parts are tried first, then the rightmost; a search
-  tries at most 400 parts and takes out at most 16 one after another.
+  what was said). The examples nearest the asked part vote (at most eight). A step's belief is the frame's record
+  times the share of the examples that agree; a plan's belief is that of its weakest step, the rest's own included.
+  The steps of a chain read the same kind of change again and again (the phrases of a nested phrase are taken out by
+  the same frames), so their errors go together rather than one by one: the chain is believed as far as its least
+  believed step, and no further. (Multiplying the steps' beliefs, as if each could fail on its own, left most phrases
+  nested deeper than four silent; NOTES.md 8.14.) The most whole-like parts are tried first, then the rightmost; a
+  search tries at most 400 parts and takes out at most 16 one after another.
 - **Exchanging a part.** Some parts cannot be taken out: what remains would not be an utterance ("Emma offered Lina to
   a girl" without "Lina"). Such a part is exchanged for the part lived most often between the same neighbours ("the
   cake"); the rest ("Emma offered the cake to a girl") is answered, and what that exchange changes in lived answers is
   put back. The change is read wherever a part of the asked part's shape was lived where a part of the other's shape
   was lived too ("Emma saw Liam" and "Emma saw the cake"), the like places first: there the answer loses the run of
   the noun phrase and names the name where it named the phrase's place. The places of the part put in are marked
-  while it stands, and a change that leaves any of them named is not put. Taking a part out is an exchange for
-  nothing; exchanges are tried for the asked utterance's own parts only, after the parts that can be taken out, on a
-  quarter of the search's bound.
+  while it stands, and a change that leaves any of them named is not put. Only parts whose words have relations are
+  exchanged: what such a word brings to an answer is its own token wherever it stands, while what a word without one
+  brings depends on where it stands (SCAN's "right" turns once, or four times after "around"). And a part is
+  exchanged only for one that holds a word with a relation: an exchange puts one part's meaning where another's was,
+  and a part with no relation has none of its own to give way (SCAN's "turn", whose turns belong to the side named
+  after it, gives way to "walk" four times in "around" and twelve times in "around ... thrice"). The change is read
+  first from lived parts of the asked part's own frame with the same surroundings; where there are none, from the
+  places where both kinds of part were lived. Each case has its own record, read as a frame's is: lived examples of
+  the asked part's shape exchanged for the same part, foreseen as if not lived, with the change read from an example
+  with the same surroundings or, for the second case, from one with other surroundings (does a change read in one
+  place carry to another?). An exchange's belief is that record times the share of the examples that agree. Taking a
+  part out is an exchange for nothing; exchanges are tried for the asked utterance's own parts only, after the parts
+  that can be taken out, on a quarter of the search's bound.
 
 Nothing of COGS is named here: no word, mark or form of its answers. What the mechanism assumes is general: an answer
 may name the places of what was said by their numbers, and runs of the same shape in an answer keep the order in which
 what they name was said. Where an answer does neither, the change of a part cannot be put (the example gives nothing)
 or the examples disagree (the plan stays under the line). The analogy's own record (12.5) is kept by its plain form:
-while Cevahir lives a dialogue it foresees the answer by the analogy over places, without parts; answering by parts is
-done when Cevahir is asked.
+while Cevahir lives a dialogue it foresees the answer by the analogy over places, without parts. Answering by parts
+is done when Cevahir is asked, and its records, the frames' and the exchanges', are read then from what was lived
+(again each time life has doubled, and before answering after anything new was lived).
 
 ## References
 

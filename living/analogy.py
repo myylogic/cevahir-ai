@@ -12,19 +12,19 @@ with several places at once, done on the episodes the hippocampus keeps.
   places (5), found through an index of (length, place, token).
 - **The relation of a word to the answer.** For a word w, the answer token t that came with it: the one rule on the
   dialogues w was said in, e(t | w) = (W⁺ + ½) / (W + 1) with W⁺ the answers holding t; tokens held by half of all
-  answers or more are the answers' own structure, not any word's. A relation is believed when e reaches the
-  speaking line e*. On equal evidence the word itself is preferred, then the token sharing the longest beginning
-  with it (its stem: Zihin's F34, the asked word itself, and F36, word forms).
+  answers or more are the answers' own structure, not any word's. A relation is believed when e reaches the speaking
+  line e*. On equal evidence the word itself is preferred, then the token sharing the longest beginning with it (its
+  stem: Zihin's F34, the asked word itself, and F36, word forms).
 - **The plan.** For a neighbour (U', A'), each place where U and U' differ (u in U', v in U) is filled: every token of
   A' that is u's relation becomes v's relation (v itself where u's relation is u itself and v has none yet). All
-  places are filled at once, so two roles that swap places are read as a swap; one token that would have to become
-  two gives nothing. A neighbour with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first,
-  at most ``k``), and the plan is the answer most of them give.
-- **Its belief.** Every dialogue lived is first foreseen by the analogy from the episodes already kept; the record
-  of how often an answer foreseen over d places was right is the analogy's own (the evidence core's trust in a way of
+  places are filled at once, so two roles that swap places are read as a swap; one token that would have to become two
+  gives nothing. A neighbour with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest
+  places first, at most ``k``), and the plan is the answer most of them give.
+- **Its belief.** Every dialogue lived is first foreseen by the analogy from the episodes already kept; the record of
+  how often an answer foreseen over d places was right is the analogy's own (the evidence core's trust in a way of
   reading, learned from what its claims came to). A plan is believed by the rule on the record for its places, times
-  the share of the neighbours that agree. An analogy over many places that was seldom right stays below the
-  speaking line.
+  the share of the neighbours that agree. An analogy over many places that was seldom right stays below the speaking
+  line.
 
 - **Words of a kind.** Two words stand for each other only if their relations have played a like part in the answers
   lived: the places a relation has held (the two tokens before it and the one after it, with the relations of words
@@ -32,24 +32,35 @@ with several places at once, done on the episodes the hippocampus keeps.
   one same place (a relation not yet met in an answer of more than one token is not held back). "to" (its relation
   "recipient", after a verb) and "on" (after "nmod") are not alike, though both are words with relations.
 - **Wholes.** A part of an utterance (one to four tokens at a place, read with its frame: the two tokens before it,
-  the one after it, a word with a relation read as one mark) is a whole of its own when taking a part of that frame
-  out of the lived utterances leaves utterances that can still be answered: the rule on those examples, at the
+  the one after it, a word with a relation read as one mark) is a whole of its own as far as answering by such a part
+  foresees what was lived: lived examples of the frame are each answered as if they had not been lived (the part taken
+  out, the rest's answer read, the change the nearest other example with the same surroundings shows put back, as
+  below), and the rule on how often that gave the lived answer is the frame's record. A frame is a whole at the
   speaking line.
 - **Answering by parts.** An utterance no lived one is near (no plan reaches the line) is answered by taking a whole
-  out, answering the rest (by the analogy, or again by parts), and putting the whole's effect back. The effect is
-  read from lived utterances holding a part of the same frame: what taking their part out changes in their answers.
-  The change is put into the rest's answer: the part's own words and places by their place in the part, everything
-  else through the alignment of the two rests' answers (read by what they say about the places near the part: the
-  numbers that name them and the relations of the words there); a token of an answer that is a whole number
-  smaller than the utterance's length is read as a place of it, and moves with the places. What the example put at
-  the very beginning goes at the beginning; where an answer lists runs of the same shape, a new run goes by its
-  place among its neighbours (a list keeps the order of what was said). The examples vote; the plan's belief is the
-  rest's belief times the share of the examples that agree. The most whole-like parts are tried first, then the
-  rightmost; the search is bounded.
+  out, answering the rest (by the analogy, or again by parts), and putting the whole's effect back. The effect is read
+  from lived utterances holding a part of the same frame with the same surroundings (the PARTS_AROUND tokens on each
+  side, read by shape): what taking their part out changes in their answers. The change is put into the rest's answer:
+  the part's own words and places by their place in the part, everything else through the alignment of the two rests'
+  answers (read by what they say about the places near the part: the numbers that name them and the relations of the
+  words there); a token of an answer that is a whole number smaller than the utterance's length is read as a place of
+  it, and moves with the places. What the example put at the very beginning goes at the beginning; where an answer
+  lists runs of the same shape, a new run goes by its place among its neighbours (a list keeps the order of what was
+  said). The examples vote; a step's belief is the frame's record times the share of the examples that agree, and a
+  plan's belief is that of its weakest step (the rest's own included): the steps of a chain read the same kind of
+  change again and again, so their errors go together. A change no lived example carries stays below the line: SCAN's
+  "around" turns four times for each turn "twice" or "thrice" asks, and an example with "twice" after the part, whose
+  surroundings differ, says nothing of "thrice". The most whole-like parts are tried first, then the rightmost; the
+  search is bounded.
 - **Exchanging a part.** A part that cannot be taken out (what remains would not be an utterance) is exchanged for the
-  part lived most often between the same neighbours; the rest is answered, and what such an exchange changes in
-  lived answers (wherever a part of the asked part's shape was lived where a part of the other's shape was too) is
-  put back the same way. Taking a part out is the exchange for nothing.
+  part lived most often between the same neighbours; the rest is answered, and what such an exchange changes in lived
+  answers is put back the same way. Only parts made of words with relations are exchanged: what such a word brings to
+  an answer is its own token wherever it stands, while what a word without a relation brings depends on where it
+  stands (SCAN's "right" turns once, or four times after "around"), and only for a part that holds a word with a
+  relation (an exchange puts one part's meaning where another's was). The change is read from the asked part's own
+  frame with the same surroundings or, where there is none, wherever both kinds of part were lived; each case is
+  believed by its own record (lived examples exchanged as if not lived, the change read from an example with the same,
+  or with other, surroundings). Taking a part out is the exchange for nothing.
 
 Nothing here names a language, a word or a format: tokens are what was said, split as Zihin splits (words and marks).
 """
@@ -65,6 +76,7 @@ from living.evidence import SPEAKING_LINE
 TOKEN = re.compile(r"\w+|[^\w\s]", re.UNICODE)
 PARTS_BUDGET = 400                                             # parts tried, at most, for one utterance
 PARTS_DEPTH = 16                                               # parts taken out, at most, one after another
+PARTS_AROUND = 3                                               # tokens on each side of a part an example must share
 PART = "\u27e8%d\u27e9"                                         # a place of a part put in for another, while it stands
 
 
@@ -100,6 +112,9 @@ class Episodes:
         self._slots: Dict[tuple, list] = {}
         self._shapes: Dict[tuple, list] = {}
         self._units: Dict[tuple, float] = {}
+        self._rests: Dict[tuple, Optional[List[str]]] = {}     # the answers of rests, as the parts read them
+        self._windows: Dict[tuple, Dict[tuple, List[int]]] = {}  # each frame's examples, by what stands around them
+        self._exchanges: Dict[tuple, float] = {}               # the record of each kind of exchange
         self._asked: Dict[tuple, tuple] = {}
         self._alike: Dict[Tuple[str, str], bool] = {}
         self._forgotten = 0
@@ -132,6 +147,8 @@ class Episodes:
             for t in held:
                 row[t] += 1
         self._rel.clear()                                      # relations follow the evidence
+        if self._rests:
+            self._rests.clear()
 
     def forget(self, i: int) -> None:
         """Take a dialogue back exactly: its place in the index and its counts."""
@@ -155,6 +172,7 @@ class Episodes:
                     break
         self.said[i] = self.answers[i] = None
         self._rel.clear()
+        self._rests.clear()
         self._made_at = -1                                     # the kinds and frames are read again
         self._forgotten += 1
 
@@ -289,6 +307,9 @@ class Episodes:
         self._slots = dict(slots)
         self._shapes = dict(shapes)
         self._units = {}
+        self._rests = {}
+        self._windows = {}
+        self._exchanges = {}
         self._alike = {}
 
     def ready(self) -> None:
@@ -320,27 +341,80 @@ class Episodes:
         right = tuple(self._shape(w) for w in u[p + m:p + m + 1]) or ("$",)
         return (m, left, tuple(self._shape(w) for w in u[p:p + m]), right)
 
-    def unit(self, fr: tuple, sample: int = 12) -> float:
-        """How far a part of this frame is a whole of its own: the rule on lived examples, each counted when taking
-        its part out leaves an utterance that is lived or that the analogy answers at the speaking line."""
+    def _rest(self, r: Tuple[str, ...]) -> Optional[List[str]]:
+        """The answer of an utterance as the parts read it: the one lived, or the analogy's own at the speaking line."""
+        if r in self.where:
+            return list(self.answers[self.where[r]])
+        if r not in self._rests:
+            plan, e, _ = self._plain(r)
+            self._rests[r] = plan if plan is not None and e >= SPEAKING_LINE else None
+        got = self._rests[r]
+        return list(got) if got is not None else None
+
+    @staticmethod
+    def _near(u: Sequence[str], p: int, o: Sequence[str], p2: int, m: int) -> int:
+        """How near an example (o, its part at p2) stands to an utterance (u, its part at p): the tokens that are the
+        same around the two parts, three on each side."""
+        return sum(1 for r in range(-3, m + 3)
+                   if 0 <= p + r < len(u) and 0 <= p2 + r < len(o) and u[p + r] == o[p2 + r])
+
+    def _window(self, u: Sequence[str], p: int, m: int) -> tuple:
+        """What stands around a part (u, at p, m tokens): the shapes of the PARTS_AROUND tokens on each side of it."""
+        w = PARTS_AROUND
+        return tuple("^" if k < 0 else ("$" if k >= len(u) else self._shape(u[k]))
+                     for k in list(range(p - w, p)) + list(range(p + m, p + m + w)))
+
+    def _windows_of(self, fr: tuple) -> Dict[tuple, List[int]]:
+        """The lived examples of a frame, by what stands around their part."""
+        got = self._windows.get(fr)
+        if got is None:
+            groups: Dict[tuple, List[int]] = defaultdict(list)
+            for code in self._frames.get(fr, ()):
+                i, p2 = divmod(code, 1024)
+                if self.said[i] is not None:
+                    groups[self._window(self.said[i], p2, fr[0])].append(code)
+            got = self._windows[fr] = dict(groups)
+        return got
+
+    def unit(self, fr: tuple, sample: int = 24) -> float:
+        """How far a part of this frame is a whole of its own: the rule on lived examples of the frame, each
+        foreseen as if it had not been lived: its part taken out, the rest's answer read (lived, or the analogy's at
+        the speaking line), and the change the nearest other example with the same surroundings shows put back. An
+        example counts as right when that gives the answer that was lived; one whose rest has no answer, or that no
+        other example can be put into, counts as not right: a part is a whole as far as taking it out leaves what can
+        be answered and putting it back gives what was lived."""
         if fr in self._units:
             return self._units[fr]
+        m = fr[0]
         ex = self._frames.get(fr, [])
+        groups = self._windows_of(fr)
         step = max(1, len(ex) // sample)
-        ok = n = 0
+        right = n = 0
         for code in ex[::step][:sample]:
             i, p2 = divmod(code, 1024)
             u = self.said[i]
             if u is None:
                 continue
-            rest = u[:p2] + u[p2 + fr[0]:]
             n += 1
-            if rest in self.where:
-                ok += 1
-            else:
-                plan, e, _ = self._plain(rest)
-                ok += plan is not None and e >= SPEAKING_LINE
-        self._units[fr] = (ok + 0.5) / (n + 1.0)
+            rest = self._rest(u[:p2] + u[p2 + m:])
+            if rest is None:
+                continue
+            others = []
+            for c2 in groups.get(self._window(u, p2, m), ())[:64]:
+                j, q2 = divmod(c2, 1024)
+                o = self.said[j]
+                if o is not None and o != u:
+                    others.append((-self._near(u, p2, o, q2, m), j, q2, o))
+            others.sort(key=lambda x: x[0])
+            for _, j, q2, o in others[:3]:
+                o_rest = self._rest(o[:q2] + o[q2 + m:])
+                if o_rest is None:
+                    continue
+                got = self._transplant(o, q2, m, o_rest, list(self.answers[j]), u, p2, rest)
+                if got is not None:
+                    right += got == list(self.answers[i])
+                    break
+        self._units[fr] = (right + 0.5) / (n + 1.0)
         return self._units[fr]
 
     # ----- answering by parts -----
@@ -372,7 +446,7 @@ class Episodes:
                     if r >= SPEAKING_LINE:
                         tries.append((-r, -(p + m), p, m, fr))
         tries.sort()                                           # the most whole-like parts first, then the rightmost
-        for _, _, p, m, fr in tries:
+        for minus_r, _, p, m, fr in tries:
             budget[0] -= 1
             if budget[0] < 0:
                 break
@@ -384,22 +458,16 @@ class Episodes:
             def near(code: int) -> int:
                 i, p2 = divmod(code, 1024)
                 o = self.said[i]
-                if o is None:
-                    return 0
-                return -sum(1 for r in range(-3, m + 3)
-                            if 0 <= p + r < n and 0 <= p2 + r < len(o) and u[p + r] == o[p2 + r])
-            for code in sorted(self._frames[fr], key=near)[:4 * self.k]:
+                return 0 if o is None else -self._near(u, p, o, p2, m)
+            pool = self._windows_of(fr).get(self._window(u, p, m), ())
+            for code in sorted(pool, key=near)[:4 * self.k]:
                 i, p2 = divmod(code, 1024)
                 o = self.said[i]
                 if o is None:
                     continue
-                rest2 = o[:p2] + o[p2 + m:]
-                if rest2 in self.where:
-                    a2_rest = list(self.answers[self.where[rest2]])
-                else:
-                    a2_rest, e2, _ = self._plain(rest2)
-                    if a2_rest is None or e2 < SPEAKING_LINE:
-                        continue
+                a2_rest = self._rest(o[:p2] + o[p2 + m:])
+                if a2_rest is None:
+                    continue
                 got = self._transplant(o, p2, m, a2_rest, list(self.answers[i]), u, p, rest_plan)
                 if got is None:
                     continue
@@ -409,7 +477,7 @@ class Episodes:
                     break
             if votes:
                 best, agree = votes.most_common(1)[0]
-                e = rest_e * self._agreement(agree, filled)
+                e = min(rest_e, -minus_r * self._agreement(agree, filled))   # a chain is its weakest step
                 if e >= SPEAKING_LINE:
                     memo[u] = (list(best), e, agree)
                     return memo[u]
@@ -422,18 +490,24 @@ class Episodes:
     def _by_exchange(self, u: Tuple[str, ...], memo: dict, budget: list, depth: int
                      ) -> Tuple[Optional[List[str]], float, int]:
         """A part that cannot be taken out (what remains would not be an utterance) is exchanged for the part lived
-        most often between the same neighbours; the rest is answered, and what such an exchange changes in lived
-        answers, wherever a part of the asked part's shape was lived where a part of the other's shape was lived
-        too, is put back, as for a part taken out."""
+        most often between the same neighbours; the rest is answered, and what that exchange changes in lived answers
+        is put back, as for a part taken out: read from lived parts of the asked part's frame with the same
+        surroundings, or, where there are none, wherever a part of its shape was lived where a part of the other's
+        was too. Its belief is the exchange's own record for that case (``exchange_record``) times the share of the
+        examples that agree."""
         slots = getattr(self, "_slots", None) or {}
         shapes = getattr(self, "_shapes", None) or {}
         n = len(u)
+        held = "\u25a1"
         tries = []
         for m in range(1, 5):
             for p in range(0, n - m):
                 fr = self._frame(u, p, m)
-                alts = [a for a in slots.get((fr[1], fr[3]), ()) if (a[1], a[2]) != (m, fr[2])][:2]
-                if alts and (m, fr[2]) in shapes:
+                if any(x != held for x in fr[2]) or (m, fr[2]) not in shapes:
+                    continue                                   # only words with relations carry their change ...
+                alts = [a for a in slots.get((fr[1], fr[3]), ())  # ... for a part that stands for something too
+                        if (a[1], a[2]) != (m, fr[2]) and held in a[2]][:2]
+                if alts:
                     tries.append((-alts[0][0], -(p + m), p, m, fr, alts))
         tries.sort(key=lambda x: x[:4])
         for _, _, p, m, fr, alts in tries:
@@ -448,55 +522,119 @@ class Episodes:
                 rest_plan, rest_e, _ = self._by_parts(u[:p] + y + u[p + m:], memo, budget, depth + 1)
                 if rest_plan is None:
                     continue
-                places = []                                    # where both kinds of part were lived; like ones first
-                for fr2 in shapes[(m, fr[2])]:
-                    if any((a[1], a[2]) == (m2, shape2) for a in slots.get((fr2[1], fr2[3]), ())):
-                        places.append(((fr2[1] != fr[1]) + (fr2[3] != fr[3]), -len(self._frames[fr2]), fr2))
-                places.sort(key=lambda x: x[:2])
-                codes: List[int] = []
-                for _, _, fr2 in places:
-                    codes.extend(self._frames[fr2][:4 * self.k])
-                    if len(codes) >= 16 * self.k:
-                        break
+                around = self._window(u, p, m)
                 def near(c: int) -> int:
                     i, p2 = divmod(c, 1024)
                     o = self.said[i]
-                    if o is None:
-                        return 0
-                    return -sum(1 for r in range(-3, m + 3)
-                                if 0 <= p + r < n and 0 <= p2 + r < len(o) and u[p + r] == o[p2 + r])
-                votes: Counter = Counter()
-                filled = 0
-                for c in sorted(codes, key=near)[:4 * self.k]:
-                    i, p2 = divmod(c, 1024)
-                    o = self.said[i]
-                    if o is None:
-                        continue
-                    rest2 = o[:p2] + y + o[p2 + m:]
-                    if rest2 in self.where:
-                        a2_rest = list(self.answers[self.where[rest2]])
-                    else:
-                        a2_rest, e2, _ = self._plain(rest2)
-                        if a2_rest is None or e2 < SPEAKING_LINE:
+                    return 0 if o is None else -self._near(u, p, o, p2, m)
+                def vote(codes) -> Tuple[Counter, int]:
+                    votes: Counter = Counter()
+                    filled = 0
+                    for c in sorted(codes, key=near)[:4 * self.k]:
+                        i, p2 = divmod(c, 1024)
+                        o = self.said[i]
+                        if o is None:
                             continue
-                    got = self._transplant(o, p2, m, a2_rest, list(self.answers[i]), u, p, rest_plan, instead=y)
-                    if got is None:
-                        continue
-                    votes[tuple(got)] += 1
-                    filled += 1
-                    if filled >= self.k:
-                        break
-                if votes:
-                    best, agree = votes.most_common(1)[0]
-                    e = rest_e * self._agreement(agree, filled)
-                    if e >= SPEAKING_LINE:
-                        return list(best), e, agree
+                        a2_rest = self._rest(o[:p2] + y + o[p2 + m:])
+                        if a2_rest is None:
+                            continue
+                        got = self._transplant(o, p2, m, a2_rest, list(self.answers[i]), u, p, rest_plan, instead=y)
+                        if got is None:
+                            continue
+                        votes[tuple(got)] += 1
+                        filled += 1
+                        if filled >= self.k:
+                            break
+                    return votes, filled
+                same = self._windows_of(fr).get(around, ()) if fr in self._frames else ()
+                votes, filled = vote(same)                     # the same surroundings first ...
+                elsewhere = not votes
+                if elsewhere:                                  # ... else where both kinds of part were lived
+                    places = []
+                    for fr2 in shapes.get((m, fr[2]), ()):
+                        if any((a[1], a[2]) == (m2, shape2) for a in slots.get((fr2[1], fr2[3]), ())):
+                            places.append(((fr2[1] != fr[1]) + (fr2[3] != fr[3]), -len(self._frames[fr2]), fr2))
+                    places.sort(key=lambda x: x[:2])
+                    codes: List[int] = []
+                    for _, _, fr2 in places:
+                        codes.extend(c for c in self._frames[fr2][:4 * self.k]
+                                     if self.said[c // 1024] is not None
+                                     and self._window(self.said[c // 1024], c % 1024, m) != around)
+                        if len(codes) >= 16 * self.k:
+                            break
+                    votes, filled = vote(codes)
+                if not votes:
+                    continue
+                record = self.exchange_record(m, fr[2], m2, shape2, y, elsewhere)
+                best, agree = votes.most_common(1)[0]
+                e = min(rest_e, record * self._agreement(agree, filled))
+                if e >= SPEAKING_LINE:
+                    return list(best), e, agree
         return None, 0.0, 0
+
+    def _exchange_pool(self, m: int, shape: tuple, m2: int, shape2: tuple) -> List[int]:
+        """The lived parts of one shape standing where a part of another shape was lived too (between the same
+        neighbours), from the frames lived most often."""
+        slots = getattr(self, "_slots", None) or {}
+        frames = [fr2 for fr2 in (getattr(self, "_shapes", None) or {}).get((m, shape), ())
+                  if any((a[1], a[2]) == (m2, shape2) for a in slots.get((fr2[1], fr2[3]), ()))]
+        frames.sort(key=lambda fr2: -len(self._frames[fr2]))
+        codes: List[int] = []
+        for fr2 in frames:
+            codes.extend(self._frames[fr2][:4 * self.k])
+            if len(codes) >= 16 * self.k:
+                break
+        return codes
+
+    def exchange_record(self, m: int, shape: tuple, m2: int, shape2: tuple, y: Tuple[str, ...],
+                        elsewhere: bool = False, sample: int = 24) -> float:
+        """How far exchanging a part of this shape for ``y`` is believed: the rule on lived examples of such parts,
+        each foreseen as if it had not been lived: its part exchanged for ``y``, that rest's answer read, and what the
+        nearest other example shows the exchange changes put back: an example with the same surroundings, or, with
+        ``elsewhere``, one with other surroundings (does a change read in one place carry to another?). An exchange
+        is only made where the asked rest has an answer and examples can be put into it, so what counts is the
+        answers so foreseen and how many were the answer lived (as for the analogy's own record); an example that
+        cannot be foreseen is not counted. (A frame's record counts it as not right: there the record also says how
+        far a part is a whole, and orders the search.)"""
+        key = (m, shape, tuple(y), elsewhere)
+        if key in self._exchanges:
+            return self._exchanges[key]
+        pool = self._exchange_pool(m, shape, m2, shape2)
+        step = max(1, len(pool) // sample)
+        right = n = 0
+        for code in pool[::step][:sample]:
+            i, p2 = divmod(code, 1024)
+            u = self.said[i]
+            if u is None:
+                continue
+            rest = self._rest(u[:p2] + tuple(y) + u[p2 + m:])
+            if rest is None:
+                continue
+            around = self._window(u, p2, m)
+            others = []
+            for c2 in pool:
+                j, q2 = divmod(c2, 1024)
+                o = self.said[j]
+                if o is not None and o != u and (self._window(o, q2, m) != around) == elsewhere:
+                    others.append((-self._near(u, p2, o, q2, m), j, q2, o))
+            others.sort(key=lambda x: x[0])
+            for _, j, q2, o in others[:3]:
+                o_rest = self._rest(o[:q2] + tuple(y) + o[q2 + m:])
+                if o_rest is None:
+                    continue
+                got = self._transplant(o, q2, m, o_rest, list(self.answers[j]), u, p2, rest, instead=y)
+                if got is not None:
+                    n += 1
+                    right += got == list(self.answers[i])
+                    break
+        self._exchanges[key] = (right + 0.5) / (n + 1.0)
+        return self._exchanges[key]
 
     @staticmethod
     def _agreement(agree: int, filled: int) -> float:
-        """How far the examples' votes carry a plan by parts: the share of them that agree."""
-        return agree / filled
+        """How far the examples' votes carry a plan by parts: the one rule on them, (agree + ½) / (filled + 1), so
+        that one example alone carries a plan no further than three quarters."""
+        return (agree + 0.5) / (filled + 1.0)
 
     @staticmethod
     def _shift(a: Sequence[str], p: int, m: int, n: int, y: int = 0) -> List[str]:

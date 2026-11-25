@@ -729,7 +729,8 @@ if its belief reaches the speaking line.
 | words of a kind, by one answer context shared | 285 / 13 / 2 | 209 / 82 / 9 |
 | and answering by parts | 294 / 0 / 6 | 246 / 35 / 19 |
 | and what an example put first goes first; words near the part aligned by their place | 296 / 0 / 4 | 252 / 32 / 16 |
-| **and a part that cannot be taken out exchanged for one lived in its place** | **296 / 0 / 4** | **264 / 14 / 22** |
+| and a part that cannot be taken out exchanged for one lived in its place | 296 / 0 / 4 | 264 / 14 / 22 |
+| **and answering by parts held to its own records (8.14)** | **298 / 0 / 2** | **264 / 23 / 13** |
 
 (The third row was first written as 279 / 19 / 2 from an intermediate version; measured again with the code that
 followed it, 280 / 19 / 1. A further change, putting a new run among all the runs of its kind by its place, gave
@@ -742,55 +743,74 @@ followed it, 280 / 19 / 1. A further change, putting a new run among all the run
 
 By kind, on the generalisation sample (the same 300; right of those asked):
 
-| kind (asked) | analogy over places (all at once) | with words of a kind | and by parts | and exchanges |
-|---|---|---|---|---|
-| active to passive (27) | 27 | 27 | 27 | 27 |
-| cp recursion (9) | 0 | 0 | 4 | 4 |
-| do dative to pp dative (8) | 7 | 7 | 7 | 7 |
-| obj omitted transitive to transitive (10) | 9 | 9 | 10 | 10 |
-| obj pp to subj pp (11) | 0 | 0 | 0 | 0 |
-| obj to subj common (11) | 9 | 9 | 10 | 10 |
-| obj to subj proper (9) | 9 | 9 | 9 | 9 |
-| only seen as transitive subj as unacc subj (18) | 8 | 8 | 11 | 11 |
-| only seen as unacc subj as obj omitted transitive subj (20) | 7 | 8 | 18 | 19 |
-| only seen as unacc subj as unerg subj (8) | 5 | 6 | 7 | 7 |
-| passive to active (15) | 15 | 15 | 15 | 15 |
-| pp dative to do dative (11) | 10 | 10 | 11 | 11 |
-| pp recursion (18) | 0 | 0 | 16 | 16 |
-| prim to inf arg (13) | 13 | 13 | 13 | 13 |
-| prim to obj common (11) | 10 | 9 | 11 | 11 |
-| prim to obj proper (20) | 10 | 11 | 11 | 16 |
-| prim to subj common (13) | 11 | 12 | 13 | 13 |
-| prim to subj proper (19) | 17 | 17 | 19 | 19 |
-| subj to obj common (13) | 12 | 12 | 13 | 13 |
-| subj to obj proper (16) | 7 | 7 | 7 | 13 |
-| unacc to transitive (20) | 19 | 20 | 20 | 20 |
+| kind (asked) | analogy over places (all at once) | with words of a kind | and by parts | and exchanges | with its records |
+|---|---|---|---|---|---|
+| active to passive (27) | 27 | 27 | 27 | 27 | 27 |
+| cp recursion (9) | 0 | 0 | 4 | 4 | 4 |
+| do dative to pp dative (8) | 7 | 7 | 7 | 7 | 8 |
+| obj omitted transitive to transitive (10) | 9 | 9 | 10 | 10 | 10 |
+| obj pp to subj pp (11) | 0 | 0 | 0 | 0 | 0 |
+| obj to subj common (11) | 9 | 9 | 10 | 10 | 10 |
+| obj to subj proper (9) | 9 | 9 | 9 | 9 | 9 |
+| only seen as transitive subj as unacc subj (18) | 8 | 8 | 11 | 11 | 11 |
+| only seen as unacc subj as obj omitted transitive subj (20) | 7 | 8 | 18 | 19 | 18 |
+| only seen as unacc subj as unerg subj (8) | 5 | 6 | 7 | 7 | 7 |
+| passive to active (15) | 15 | 15 | 15 | 15 | 15 |
+| pp dative to do dative (11) | 10 | 10 | 11 | 11 | 11 |
+| pp recursion (18) | 0 | 0 | 16 | 16 | 15 |
+| prim to inf arg (13) | 13 | 13 | 13 | 13 | 13 |
+| prim to obj common (11) | 10 | 9 | 11 | 11 | 11 |
+| prim to obj proper (20) | 10 | 11 | 11 | 16 | 17 |
+| prim to subj common (13) | 11 | 12 | 13 | 13 | 13 |
+| prim to subj proper (19) | 17 | 17 | 19 | 19 | 19 |
+| subj to obj common (13) | 12 | 12 | 13 | 13 | 13 |
+| subj to obj proper (16) | 7 | 7 | 7 | 13 | 13 |
+| unacc to transitive (20) | 19 | 20 | 20 | 20 | 20 |
 
-- **Where it stands.** On these samples the hippocampus alone answers 296 of 300 in distribution (98.7 %) and 264 of
-  300 of the generalisation set (88 %), silent on 14 and wrong on 22. Kim and Linzen (2020) report 96–99 % in
+- **Where it stands.** On these samples the hippocampus alone answers 298 of 300 in distribution (99.3 %) and 264 of
+  300 of the generalisation set (88 %), silent on 23 and wrong on 13, with answering by parts held to its own
+  records (8.14; as first built, 296 and 264, wrong on 4 and 22). Kim and Linzen (2020) report 96–99 % in
   distribution and at most 35 % on the generalisation set for the Transformers and LSTMs they trained on the same
   file ([arXiv:2010.05465](https://arxiv.org/abs/2010.05465)); with careful choices of embedding scale, early stopping
   and positional encoding, Transformers reach about 81 % (Csordás, Irie and Schmidhuber 2021,
   [arXiv:2108.12284](https://arxiv.org/abs/2108.12284)). These are samples of 300 of the 3,000 test and 21,000
   generalisation sentences, not the whole files: a sample of 300 leaves two or three points of chance either way.
 - **Recursion deeper than lived.** PP and CP recursion ask for depths 3 to 12 where training reaches 2. Answered by
-  parts, a phrase taken out at a time and its effect put back, the hippocampus answers 16 of 18 and 4 of 9. The
+  parts, a phrase taken out at a time and its effect put back, the hippocampus answers 15 of 18 and 4 of 9 (16 and 4
+  as first built). The
   Transformer of Kim and Linzen answers 0 % of both (as tabulated by Wu et al. 2023,
   [arXiv:2303.13716](https://arxiv.org/abs/2303.13716)).
 - **What it does not do.** A phrase on a subject, when phrases were lived only on objects: 0 of 11, silent (no lived
   frame holds a phrase right after a sentence's first noun). A name where the lived utterances had a noun phrase
-  (subj to obj proper, prim to obj proper): 13 of 16 and 16 of 20 by exchange, against 7 and 11 before it; the ones
+  (subj to obj proper, prim to obj proper): 13 of 16 and 17 of 20 by exchange, against 7 and 11 before it; the ones
   missed are mostly a name after a noun phrase ("gave the crocodile Paula"), where the examples' change is put into
-  the wrong run. And it is not silent everywhere it should be: 4 answers in distribution and 22 on the generalisation
-  set are wrong; the exchanges brought 12 right answers and 6 wrong ones.
+  the wrong run. And it is not silent everywhere it should be: 2 answers in distribution and 13 on the generalisation
+  set are wrong (4 and 22 before the records of 8.14).
 - **Alone on SCAN** the analogy (before words of a kind and parts) answered 27, 0, 0, 24, 0 and 0 of the 200 test
   commands of the six splits (a word there changes how often an action is repeated, which one substitution cannot
   carry), where Zihin answers 199–200. This is why Cevahir chooses between the two thoughts by the record of their
-  disagreements (MODEL.md 12.5).
+  disagreements (MODEL.md 12.5). With words of a kind and parts, and held to its own records, it answers 114 of the
+  300 commands of 8.14 and says nothing wrong.
 
-**Cevahir on COGS** (`m3_cogs.py`, `results/m3_cogs.jsonl`): the whole mind lives the training file (Zihin each
-word, the harmony each character, the hippocampus each dialogue) and answers the same samples in four ways (Zihin,
-the harmony alone, the analogy alone, Cevahir). The run is in progress; its row follows.
+**Cevahir on COGS** (`m3_cogs.py`, `results/m3_cogs.jsonl`, code bf0d7e8: answering by parts before exchanges and
+before its records): the whole mind lives the training file (Zihin each word, the harmony each character, the
+hippocampus each dialogue; 24,155 dialogues, 1,405,361 moments of Zihin, 5,017 s) and answers the same samples in four
+ways (exact of 300):
+
+| | Zihin | the harmony alone | the analogy alone | Cevahir |
+|---|---|---|---|---|
+| in distribution | 2 (17 ignoring case) | 0 | 297 | 297 |
+| generalisation | 0 (1 ignoring case) | 0 | 238 | 225 |
+
+- **One layer, and where it falls short.** The thought was the analogy's in 552 of the 600 answers and Zihin's in
+  48. Zihin alone answers almost nothing of COGS: its answers are its own continuations of what it lived, and a
+  logical form of thirty tokens is never continued whole. In distribution Cevahir answers what the analogy answers.
+  On the generalisation set it answers 13 fewer than the analogy alone: where Zihin had a plan and the analogy
+  differed, the prefrontal decision took Zihin's, and Zihin's plan was wrong (pp recursion: the analogy 10 of 18,
+  Cevahir 0). The decision is made by the record of the two thoughts' disagreements while living, kept token by
+  token; there Zihin's guess of each token is made knowing the tokens said before it, while the analogy's plan is
+  made once, whole, and every token after its first slip counts against it. The record so favours Zihin; reading the
+  analogy's plan as a guess only while it agrees with what was said is the next step (8.11).
 
 ### 8.8 Sleep
 
@@ -862,10 +882,14 @@ studied in conversation, in four conditions; the other half (nine per seed) is a
   Transformer answers in hundredths of a second.
 - **Text.** On running text Zihin's voice takes 0.1–1.2 % of the harmony's bits (8.6): what Cevahir knows of a text,
   the harmony mostly knows already. Its gains are in answers that text does not hold.
-- **What the hippocampus cannot answer** (8.7): a phrase on a subject when phrases were lived only on objects (silent),
-  a name after a noun phrase where only noun phrases were lived, and parts longer than four tokens. Answering by parts has no record of its
-  own: while Cevahir lives, the analogy foresees by places only, and a plan by parts is believed by its examples'
-  agreement and the rest's belief. On COGS that leaves 22 wrong answers in 300 on the generalisation set.
+- **What the hippocampus cannot answer** (8.7, 8.14): a phrase on a subject when phrases were lived only on objects
+  (silent), a name after a noun phrase where only noun phrases were lived, and parts longer than four tokens.
+  Answering by parts is held to records read from what was lived (8.14); a change that carries differently in
+  surroundings no lived example shares, and that the three tokens around a part do not show, can still be said. On
+  COGS 13 answers in 300 on the generalisation set are wrong; alone on SCAN, none of 300.
+- **The prefrontal decision on COGS** (8.7): the record that chooses between Zihin's plan and the analogy's is kept
+  token by token, Zihin guessing each token knowing those before it and the analogy's plan made once; it favours
+  Zihin, and on COGS's generalisation set Cevahir answers 13 fewer than the analogy alone.
 - **Scale.** Every measurement here is at most ten million characters on one machine with four cores; no standard
   large benchmark was run (enwik8 could not be downloaded, section 6.6).
 - **Samples.** COGS was measured on samples of 300 of each file, and SCAN on 200 commands of each split, not on the
@@ -886,16 +910,111 @@ python m3_cogs.py --cogs COGS_FOLDER/data --test 300 --gen 300  # 8.7, Cevahir
 python m3_sleep.py                                              # 8.8
 python m3_amygdala.py                                           # 8.10
 python m3_scan_transformer.py --scan SCAN_FOLDER --minutes 15   # 8.13
+python m3_analogy.py --scan SCAN_FOLDER --cogs COGS_FOLDER/data   # 8.7 and 8.14, the hippocampus alone
 python ../../minds/raise_cevahir.py OUT_FOLDER                  # the open Cevahir (m3_etut.py)
 python -m pytest ../../tests/evolution/test_cevahir.py ../../tests/evolution/test_living_fast.py
 ```
 
 The hippocampus alone on COGS (the rows of the table in 8.7) is the module itself: live every line of train.tsv with
 `living.analogy.Episodes.live`, call `ready()`, and ask `plan(tokens(sentence))` of the same samples; a plan is said
-when its belief reaches the speaking line.
+when its belief reaches the speaking line. `m3_analogy.py` does this for COGS and for the six SCAN splits, with the
+code that is checked out (`results/m3_analogy.jsonl`).
 
 ### 8.13 SCAN: a Transformer trained on the same lives, and the final code
 
-A Transformer trained from scratch on exactly the dialogues Cevahir lived for each SCAN split (`m3_scan_transformer.py`,
-15 minutes of three cores per split) and the six splits again with the final code (`m3_scan.py --test 50`) are
-running; their rows follow.
+A Transformer trained from scratch on exactly the dialogues Cevahir lived for each SCAN split
+(`m3_scan_transformer.py`, 1.8 million parameters, 15 minutes of three cores per split, its answers written character
+by character; `results/m3_scan.jsonl`, rows "who": "transformer"). On add jump it answered none of the 200 commands:
+in its 15 minutes it took 235 steps of training (loss 0.57 at the end) while the Cevahir run on COGS (8.7) shared the
+machine. The other five splits, and the six splits again with the final code (`m3_scan.py --test 50`), are running;
+their rows follow.
+
+### 8.14 Answering by parts, held to its own record
+
+Alone on SCAN (every published training pair of a split lived, then the same seeded 50 test commands as
+`m3_scan.py --test 50`), answering by parts as first built (8.7) answered 112 commands right and 119 wrong of 300,
+where the analogy over places answered 95 right and none wrong. The wrong answers had one cause: a change put back
+where no lived example showed that it carries. Taking "around" out of "look and walk around right thrice", the
+examples nearest it ("look and walk around right", "... around right twice") showed "around" adding three or six
+turns and steps; there it adds nine. Exchanging "right" for "left" inside "around", the examples ("walk right" and
+"walk left") showed one turn changing; there four do. Nothing measured how far such a change carries: a plan by parts
+was believed by its rest's belief and its examples' agreement, and the examples agreed.
+
+Answering by parts now has records of its own, read by the one rule as the analogy's is (MODEL.md 12.6):
+
+- **A frame's record.** Up to 24 lived examples of each frame are foreseen as if they had not been lived: the part
+  taken out, the rest's answer read, and the change that the nearest other example shows put back. The rule on how
+  often that gave the lived answer is the frame's record, an example that cannot be foreseen counted as not right (a
+  part is a whole as far as taking it out leaves what can be answered and putting it back gives what was lived).
+- **The same surroundings.** An example lends its change only where the three tokens on each side of its part, read
+  by shape (a word with a relation as one mark), are those around the asked part: "twice" after the part is not
+  "thrice".
+- **The weakest step.** A step's belief is its frame's record times the rule on its examples' agreement, (agree + ½)
+  / (filled + 1); a plan is believed as far as its weakest step.
+- **Exchanges.** Only a part whose words have relations is exchanged, and only for a part that holds a word with a
+  relation (an exchange puts one part's meaning where another's was; SCAN's "turn", whose turns belong to the side
+  named after it, has none). The change is read from the asked part's own frame with the same surroundings, else from
+  wherever both kinds of part were lived, and each case has its own record: lived exchanges foreseen with the change
+  read from the same surroundings, or from other ones, counting the answers foreseen.
+
+SCAN, the hippocampus alone (right / silent / wrong of 50; `m3_analogy.py`):
+
+| split | the analogy over places | by parts, as first built | by parts, with its records |
+|---|---|---|---|
+| add jump | 45 / 5 / 0 | 50 / 0 / 0 | 50 / 0 / 0 |
+| around right | 0 / 50 / 0 | 0 / 13 / 37 | 0 / 50 / 0 |
+| length | 0 / 50 / 0 | 12 / 0 / 38 | 14 / 36 / 0 |
+| jump around right | 50 / 0 / 0 | 50 / 0 / 0 | 50 / 0 / 0 |
+| opposite right | 0 / 50 / 0 | 0 / 21 / 29 | 0 / 50 / 0 |
+| right | 0 / 50 / 0 | 0 / 35 / 15 | 0 / 50 / 0 |
+| **all six (300)** | **95 / 205 / 0** | **112 / 69 / 119** | **114 / 186 / 0** |
+
+COGS, the hippocampus alone (the samples of 8.7): in distribution 296 / 0 / 4 → **298 / 0 / 2**; generalisation
+264 / 14 / 22 → **264 / 23 / 13**. By kind, the generalisation counts are those of the last column of 8.7's table
+except do dative to pp dative (7 → 8 of 8), pp recursion (16 → 15 of 18), prim to obj proper (16 → 17 of 20) and
+only seen as unacc subj as obj omitted transitive subj (19 → 18 of 20). Nine wrong answers fewer, and as many right.
+
+What each rule does, each measured by leaving it out or changing it (the same samples):
+
+| change | COGS in distribution | COGS generalisation | SCAN alone (300) |
+|---|---|---|---|
+| as first built (8.7) | 296 / 0 / 4 | 264 / 14 / 22 | 112 / 69 / 119 |
+| a frame's record, the steps' beliefs multiplied, no surroundings | 298 / 0 / 2 | 232 / 56 / 12 | |
+| the weakest step instead | 297 / 0 / 3 | 247 / 36 / 17 | |
+| and the same surroundings | 298 / 0 / 2 | 263 / 24 / 13 | (length split: 14 / 15 / 21) |
+| and the exchanges' records, every example counted | 298 / 0 / 2 | 253 / 34 / 13 | 114 / 170 / 16 |
+| and no exchange for a part without a relation ("turn") | 298 / 0 / 2 | 252 / 35 / 13 | 114 / 186 / 0 |
+| frames' records counting only the examples foreseen | 292 / 5 / 3 | 234 / 56 / 10 | 114 / 185 / 1 |
+| exchanges' records counting only the examples foreseen | 298 / 0 / 2 | 264 / 23 / 13 | 114 / 185 / 1 |
+| **and the examples' agreement by the rule** | **298 / 0 / 2** | **264 / 23 / 13** | **114 / 186 / 0** |
+
+(In the second and third rows exchanges were also limited to parts whose words all have relations on both sides,
+which kept names from being exchanged for noun phrases: prim to obj proper 11 and subj to obj proper 7. Empty cells
+were not measured.)
+
+- **Multiplying the steps' beliefs** as if each could fail on its own left most deep chains silent: COGS's pp
+  recursion fell to 1 of 18, and the world of nested phrases of the tests to 8 of 15 (15 with the weakest step). The
+  steps of a nested phrase take out the same kind of part again and again; their errors go together.
+- **The same surroundings** is what silences the length split: with the frames' records alone, 33 of its 50 were
+  still wrong; with it, the wrong ones that were left (21) all came from exchanges.
+- **Exchanges read elsewhere.** On COGS, a change read in other surroundings carried in all 9 of the lived exchanges
+  that could be foreseen (a name for "the girl"); on SCAN, in 18 of 24 for "turn", and 16 of the 50 longest commands
+  were then wrong. The rule on "turn" is what separates the two.
+- **Counting only the examples foreseen** is right for an exchange, which is made only where the asked rest has an
+  answer, and wrong for a frame, whose record also orders the search: parts that are not wholes then rose to the top,
+  were tried first and spent the search (pp recursion 15 → 1 of 18).
+- **One example alone** carried the last wrong answer on SCAN (a share of 1 of 1); by the rule it carries three
+  quarters at most.
+
+The small worlds of the tests (`tests/evolution/test_cevahir.py`): a grammar of moves built as SCAN builds them, with
+"around right" never lived (30 asked) and with answers of at most 22 moves lived (30 longer ones asked). As first
+built, answering by parts said 21 wrong answers in the first and 26 wrong and 4 right in the second; with its
+records, none wrong and the same 4 right. The world of nested phrases answers 15 of 15, the world of exchanged names
+10 of 10.
+
+- **Cost.** The records are read when the hippocampus is asked (again each time life has doubled). A SCAN split
+  (its life, and 50 commands asked both ways) took 34–73 s, against 39–94 s as first built; the machine was shared
+  in both runs, so these say only that the records did not make it slower.
+- **What it does not do.** A record measures how changes carried among the examples lived. A change that carries
+  differently in surroundings no lived example shares is silenced by the surroundings rule only when those
+  surroundings differ within three tokens of the part; and a record is read from 24 examples of a frame, not all.

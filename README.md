@@ -29,9 +29,10 @@
 >   Measured: on the six published SCAN splits it answers 1,199 of 1,200 test commands. Where an answer has to put
 >   together facts read apart, it answers every question, and a Transformer trained on the very stream it lived answers
 >   none. At school it answers 342 of 405 examination questions, every one of the 63 deductions among them (a
->   Transformer trained on the same lessons: 203, and none of the deductions). On samples of COGS the hippocampus alone answers 296 of 300 in-distribution sentences and
->   264 of 300 of the generalisation set, among them 16 of 18 with phrases nested deeper than any it lived, a kind
->   on which published Transformers score 0 %.
+>   Transformer trained on the same lessons: 203, and none of the deductions). On samples of COGS the hippocampus alone
+>   answers 298 of 300 in-distribution sentences and 264 of 300 of the generalisation set, among them 15 of 18 with
+>   phrases nested deeper than any it lived, a kind on which published Transformers score 0 %; answering by parts is
+>   held to records of its own, read by the one rule from what was lived, and alone on SCAN it says nothing wrong.
 >   [The model, section 12](research/living_intelligence_2026_11_24/MODEL.md) · [the measurements, section 8](research/living_intelligence_2026_11_24/NOTES.md)
 > - **Living Intelligence, a new study (24 November 2026):** a new body for the mind, on the same rule. It keeps no list
 >   of words and no vector per word. It keeps a cortex of letter contexts that grows with what it lives, sublinearly.
