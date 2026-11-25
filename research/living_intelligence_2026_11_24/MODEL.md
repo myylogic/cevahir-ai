@@ -701,9 +701,11 @@ are mended by the same store of episodes.
   search tries at most 4,000 parts and takes out at most 16 one after another (the bound decides only where a search
   is spent: a plan found within a smaller bound is found the same within a larger one).
 - **Exchanging a part.** Some parts cannot be taken out: what remains would not be an utterance ("Emma offered Lina to
-  a girl" without "Lina"). Such a part is exchanged for the part lived most often between the same neighbours ("the
-  cake"); the rest ("Emma offered the cake to a girl") is answered, and what that exchange changes in lived answers is
-  put back. The change is read wherever a part of the asked part's shape was lived where a part of the other's shape
+  a girl" without "Lina"). Such a part is exchanged for a part lived between the same neighbours ("the cake"); the
+  rest ("Emma offered the cake to a girl") is answered as the exchange's record answers the rests of its examples
+  (the one lived, or the analogy's own at the speaking line, never by parts in turn: a rest put together by parts
+  would be believed beyond anything the record measured; NOTES.md 8.20), and what that exchange changes in lived
+  answers is put back. The change is read wherever a part of the asked part's shape was lived where a part of the other's shape
   was lived too ("Emma saw Liam" and "Emma saw the cake"), the like places first: there the answer loses the run of
   the noun phrase and names the name where it named the phrase's place. The places of the part put in are marked
   while it stands, and a change that leaves any of them named is not put. Only parts whose words have relations are
@@ -721,7 +723,10 @@ are mended by the same store of episodes.
   the change read from an example with the same surroundings or, for the second case, from one with other
   surroundings (does a change read in one place carry to another?). An exchange's belief is that record times the
   share of the examples that agree. Taking a part out is an exchange for nothing; exchanges are tried for the asked
-  utterance's own parts only, after the parts that can be taken out, on a quarter of the search's bound.
+  utterance's own parts only, after the parts that can be taken out, on a quarter of the search's bound: for every
+  part the two parts lived most often in its place first, then the next eight, on a bound of their own (before the
+  full stop after "the boy" the parts lived most often are phrases, "on the table", and a noun phrase for the name in
+  "Emma gave the boy Paula" comes ninth).
 - **The order of an answer's lists.** A change is put back where its example put it, and a run so put can stand out
   of the order the answer's lists keep: a definite noun's run after a conjunct, a recipient after a modifier of the
   theme. Where the lived answers keep lists, an answer put together by parts is said in their order. What the lists

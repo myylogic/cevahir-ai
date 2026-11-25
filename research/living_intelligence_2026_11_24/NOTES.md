@@ -990,7 +990,9 @@ code, 25a9c44). Zihin answers every command right in all three runs.
 
 Every command Cevahir missed Zihin answered right: where the two thoughts differ, the record that decides was earned
 by the analogy's plans over places, and it lets a plan by parts lead too, so a fault of the hippocampus shows here as
-a command lost (8.15). With the final code Cevahir misses none of the 300, and is wrong or silent on none.
+a command lost (8.15). With the final code Cevahir misses none of the 300, and is wrong or silent on none; so too
+with the code of 8.19 (fc73e36: 50 of 50 in each of the six splits, Zihin alone 300 too; rows of
+`results/m3_scan.jsonl` written by fc73e36).
 
 ### 8.14 Answering by parts, held to its own record
 
@@ -1384,3 +1386,88 @@ Tried and not taken (every seventh generalisation sentence; the in-distribution 
 - **A word's own continuation as a set** (every token lived after it there, not the one always lived): 8 wrong
   answers fewer and 28 right ones fewer on every seventh sentence; on the in-distribution file 3 wrong fewer and 1
   right fewer.
+
+### 8.20 More parts to exchange, each read as its record reads
+
+A name met only as a subject, asked as the second object of a verb ("Emma gave the boy Paula ."), cannot be taken out
+(what remains is no utterance) and is answered by an exchange (8.14): the part is exchanged for a part lived between
+the same neighbours, the rest is answered, and what the exchange changes is put back. For each part the exchange
+tried the two parts lived most often there; before the full stop after "the boy" these were phrases ("on the table",
+"to a girl"), and the noun phrases ("the cake") came ninth or tenth. On every seventh generalisation sentence the
+hippocampus was silent on 22 such sentences (13 of subj_to_obj_proper, 9 of prim_to_obj_proper).
+
+Trying the next parts too answered them, and gave two answers no lived utterance supports, both of one kind. "Liam
+confessed" (and, in the in-distribution file, "Evelyn hoped") was exchanged for "The girl needed", lived between the
+same marks: before "to", which, like "that", is a word with a relation. The rest, "The girl needed that a donkey
+shipped Nathan the cake .", was answered by parts in turn at 0.594 and came out garbled ("confess . recipient ( x _ 1
+, Nathan )", "ship . ccomp ( x _ 5 , x _ 8 )"). The exchange was believed by its record (0.944), and that record
+reads the rests of its examples as a frame's does, lived or by the analogy at the speaking line, never by parts: a
+rest put together by parts was believed beyond anything the record had measured.
+
+What was built (MODEL.md 12.6):
+
+- **The exchange in two rounds.** For every part the two parts lived most often in its place are tried first; then
+  the next eight, on a bound of their own (a quarter of the search's, as the first round's): a part lived less often
+  in a place is tried only where those lived most often, for every part, answer nothing.
+- **A rest read as its record reads.** An exchange's rest is answered as the exchange's record answers the rests of
+  its examples: the one lived, or the analogy's own at the speaking line. Its belief is then what the record and the
+  examples' agreement say.
+
+The hippocampus alone (right / silent / wrong; `m3_analogy.py`, rows of `results/m3_analogy.jsonl` written by
+42bfe65):
+
+| | before (fc73e36) | after 8.20 (42bfe65) |
+|---|---|---|
+| COGS in distribution, the sample of 300 | 298 / 0 / 2 | 298 / 0 / 2 |
+| COGS in distribution, the whole test file (3,000) | 2,994 / 3 / 3 | **2,995 / 2 / 3** |
+| COGS generalisation, the sample of 300 | 292 / 7 / 1 | **298 / 1 / 1** |
+| COGS generalisation, every seventh sentence (3,000) | 2,918 / 67 / 15 | **2,939 / 48 / 13** |
+| SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same |
+
+On every seventh generalisation sentence 24 silent sentences are now right: 13 of subj_to_obj_proper and 9 of
+prim_to_obj_proper ("Emma gave the boy Paula .", "Emma thought that William loaned the girl Paula ."), one of
+pp_dative_to_do_dative and one of only_seen_as_unacc_subj_as_unerg_subj. Two wrong answers are now silent ("Ava
+wished that Olivia hoped that ... a box was liked by a sailor .", "Penelope hoped that the patient teleported a
+strawberry in the room to Skylar ."), and five right ones too, each an exchange whose rest was answered by parts in a
+sentence with clauses ("A cat liked that a lion liked that the shoe was blessed ."): the record says nothing of such a
+rest. What is left: 40 of the 48 silent sentences are clause recursion; the 13 wrong ones are 3 of
+do_dative_to_pp_dative, 3 of prim_to_obj_proper, 2 of obj_to_subj_common, 2 of pp recursion, and one each of
+pp_dative_to_do_dative, prim_to_subj_common and subj_to_obj_proper.
+
+Tried and not taken (every seventh generalisation sentence; the in-distribution file):
+
+| | gen/7 right / silent / wrong | test file |
+|---|---|---|
+| before (fc73e36) | 2,918 / 67 / 15 | 2,994 / 3 / 3 |
+| ten parts in one round, on the one bound, rests answered by parts | 2,939 / 47 / 14 | 2,995 / 1 / 4 |
+| two rounds, rests answered by parts | 2,942 / 42 / 16 | 2,995 / 1 / 4 |
+| the same, a part put in only where both its ends were lived beside the words they come to stand beside | 2,941 / 43 / 16 | 2,994 / 1 / 5 |
+| the same for the second round's parts only | 2,942 / 42 / 16 | 2,995 / 0 / 5 |
+| two rounds, the rest read as the record reads in the second round only | 2,942 / 43 / 15 | 2,995 / 2 / 3 |
+| a step's belief by its frame's record counting only the examples that could be foreseen | 2,936 / 42 / 22 | 2,994 / 0 / 6 |
+| what stands around a part read by kind where examples are chosen (8.19), the frames by mark as before | 2,896 / 93 / 11 | 2,997 / 2 / 1 |
+
+- **Ten parts in one round** spent the bound before the parts that had answered: three sentences answered before
+  were silent ("Isabella liked that the boy offered Paula to James ."); a bound twice as large answered them again.
+- **Both ends lived beside their new neighbours** ("needed" never stood before "that") refused the exchange of the
+  two wrong answers, but the search then went on to others: "Evelyn hoped that a child lended Olivia the bag ." came
+  out wrong from another exchange, and two sentences answered before were silent or wrong.
+- **The rest read as the record reads in the second round only** keeps every answer of the first round (24 more right,
+  none more wrong), but holds the two rounds to two rules; with one rule for both, two wrong answers are silent and
+  three right ones fewer.
+- **A step's belief by the examples that could be foreseen** (the clause recursion of COGS). The frame of a clause
+  ("that a dog liked" after "supported") has the record 0.66: of 24 lived examples 16 came out right and none wrong;
+  seven could not be foreseen because what remains of them has no answer of the analogy ("A girl admired that a
+  donut was lended to the frog by Ryan ."), and two because no other example stood in the same surroundings. With
+  the record of the foreseen examples (0.97) for a step's belief, the order of the search kept as before, 18 clause
+  sentences silent before were right; but five right answers became wrong, all with a recipient, four of them inside
+  a clause ("Liam declared that the boy fed Paula to Emma ."), and the wrong ones rose from 15 to 22. Counting the
+  examples that could not be foreseen as not right stays: it is what keeps those steps below the line.
+- **What stands around a part read by kind** where the examples that lend a change are chosen. Eight of the 13
+  wrong answers left hang a recipient inside a clause on the verb outside it, and in two traced the change came from
+  an example that only looked alike: "The girl liked that a cockroach gave Oliver the cake ." with "that a cockroach
+  gave" taken out read its change from "The boy liked that a prisoner liked that the sandwich was slid .", where
+  "that" stands where "Oliver" stands, both words with a relation, one mark. Read by kind ("that" is followed by "(",
+  a name by ")"), the in-distribution file has one wrong answer where it had three, and every seventh generalisation
+  sentence 11 where it had 13; but there it answers 43 sentences fewer: it loses all 22 names as second objects
+  (their exchanges read the change from the same surroundings, by mark) and 27 clause recursions.
