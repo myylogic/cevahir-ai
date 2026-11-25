@@ -182,7 +182,7 @@ class Episodes:
         self._units_plain: Dict[tuple, float] = {}             # ... read inside a record's own step (below)
         self._steps: Dict[tuple, Optional[List[str]]] = {}     # the rests a record read one step on
         self._in_step = False
-        self._rests: Dict[tuple, Optional[List[str]]] = {}     # the answers of rests, as the parts read them
+        self._rests: Dict[tuple, Optional[tuple]] = {}         # the answers of rests, as the parts read them
         self._windows: Dict[tuple, Dict[tuple, List[int]]] = {}  # each frame's examples, by what stands around them
         self._exchanges: Dict[tuple, float] = {}               # the record of each kind of exchange
         self._asked: Dict[tuple, tuple] = {}
@@ -728,9 +728,9 @@ class Episodes:
             return list(self.answers[self.where[r]])
         if r not in self._rests:
             plan, e, _ = self._plain(r)
-            self._rests[r] = plan if plan is not None and e >= SPEAKING_LINE else None
+            self._rests[r] = (list(plan), e) if plan is not None and e >= SPEAKING_LINE else None
         got = self._rests[r]
-        return list(got) if got is not None else None
+        return list(got[0]) if got is not None else None
 
     @staticmethod
     def _near(u: Sequence[str], p: int, o: Sequence[str], p2: int, m: int) -> int:
@@ -1119,9 +1119,18 @@ class Episodes:
         RECORD_STEP tried); within that step records read their examples' rests by the analogy alone, so that no
         record waits on another being read. Only an example whose rest none of these answers counts against its
         frame for want of an answer."""
-        got = self._rest(r)
-        if got is not None or getattr(self, "_in_step", False):
-            return got
+        return self._rest_believed(r)[0]
+
+    def _rest_believed(self, r: Tuple[str, ...]) -> Tuple[Optional[List[str]], float]:
+        """The answer of a rest as a record reads its examples' rests (``_rest_read``: the one lived, or the analogy's
+        own at the speaking line, or by parts one step on), with its belief."""
+        if r in self.where:
+            return list(self.answers[self.where[r]]), 1.0
+        if self._rest(r) is not None:
+            plan, e = self._rests[r]
+            return list(plan), e
+        if getattr(self, "_in_step", False):
+            return None, 0.0
         if r not in self._steps:
             self._steps[r] = None
             self._in_step = True
@@ -1129,19 +1138,9 @@ class Episodes:
                 plan, e, _ = self._by_parts(tuple(r), {}, [RECORD_STEP], PARTS_DEPTH)
             finally:
                 self._in_step = False
-            self._steps[r] = list(plan) if plan is not None and e >= SPEAKING_LINE else None
+            self._steps[r] = (list(plan), e) if plan is not None and e >= SPEAKING_LINE else None
         got = self._steps[r]
-        return list(got) if got is not None else None
-
-    def _rest_believed(self, r: Tuple[str, ...]) -> Tuple[Optional[List[str]], float]:
-        """The answer of a rest as a record reads its examples' rests (``_rest``: the one lived, or the analogy's own
-        at the speaking line), with its belief."""
-        if r in self.where:
-            return list(self.answers[self.where[r]]), 1.0
-        plan, e, _ = self._plain(r)
-        if plan is None or e < SPEAKING_LINE:
-            return None, 0.0
-        return plan, e
+        return (list(got[0]), got[1]) if got is not None else (None, 0.0)
 
     def _exchange_pool(self, m: int, shape: tuple, m2: int, shape2: tuple) -> List[int]:
         """The lived parts of one shape standing where a part of another shape was lived too (between the same
@@ -1178,7 +1177,7 @@ class Episodes:
             u = self.said[i]
             if u is None or not self._apart(u[p2:p2 + m], y):
                 continue                                       # foreseen as an exchange is asked
-            rest = self._rest(u[:p2] + tuple(y) + u[p2 + m:])
+            rest = self._rest_read(u[:p2] + tuple(y) + u[p2 + m:])
             if rest is None:
                 continue
             around = self._window(u, p2, m)
@@ -1191,7 +1190,7 @@ class Episodes:
                     others.append((-self._near(u, p2, o, q2, m), j, q2, o))
             others.sort(key=lambda x: x[0])
             for _, j, q2, o in others[:3]:
-                o_rest = self._rest(o[:q2] + tuple(y) + o[q2 + m:])
+                o_rest = self._rest_read(o[:q2] + tuple(y) + o[q2 + m:])
                 if o_rest is None:
                     continue
                 got = self._transplant(o, q2, m, o_rest, list(self.answers[j]), u, p2, rest, instead=y)
