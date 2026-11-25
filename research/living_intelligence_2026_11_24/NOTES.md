@@ -811,6 +811,13 @@ ways (exact of 300):
   token; there Zihin's guess of each token is made knowing the tokens said before it, while the analogy's plan is
   made once, whole, and every token after its first slip counts against it. The record so favours Zihin; reading the
   analogy's plan as a guess only while it agrees with what was said is the next step (8.11).
+- **Mended** (8.15: the prefrontal record and a plan said to its end; code ac5891a, life 4,935 s, the hippocampus
+  before e6d0cc8): in distribution the analogy alone and Cevahir both answer 297; on the generalisation set the
+  analogy alone answers 257 and Cevahir **257**, the thought being the analogy's in 552 of the 600 answers again.
+  Cevahir now says every answer the analogy alone says right. Where the analogy is silent (29 of the 300) the
+  thought is Zihin's, and on COGS Zihin's plans are its own continuations of what it lived and wrong: Cevahir is
+  silent 8 times and wrong 35, where the analogy alone is wrong 14. Holding Zihin's plan to a record of its own, as
+  the analogy's is, is not done.
 
 ### 8.8 Sleep
 
@@ -912,6 +919,8 @@ python m3_sleep.py                                              # 8.8
 python m3_amygdala.py                                           # 8.10
 python m3_scan_transformer.py --scan SCAN_FOLDER --minutes 15   # 8.13
 python m3_analogy.py --scan SCAN_FOLDER --cogs COGS_FOLDER/data   # 8.7 and 8.14, the hippocampus alone
+python m3_analogy.py --cogs COGS_FOLDER/data --every 7 --shard 0 --shards 2   # 8.15, 8.16 (and --shard 1)
+python m3_analogy.py --cogs COGS_FOLDER/data --every 1 --part test --shard 0 --shards 2   # 8.16 (and --shard 1)
 python ../../minds/raise_cevahir.py OUT_FOLDER                  # the open Cevahir (m3_etut.py)
 python -m pytest ../../tests/evolution/test_cevahir.py ../../tests/evolution/test_living_fast.py
 ```
@@ -1088,3 +1097,78 @@ jump) was a plan by parts believed at 0.60: the analogy's own records rate such 
 and the record that let it lead over Zihin was earned by its plans over places, not by plans by parts. Before the
 fixes (68ab34e) Cevahir missed 6; before the hippocampus existed it answered as Zihin (8.4). With the first six mended
 (e6d0cc8) Cevahir answers 299 of 300: the two traced are answered, and the one it misses is the seventh fault.
+
+### 8.16 What a word's token always had after it
+
+Of the 115 wrong answers the hippocampus alone gave on every seventh sentence of COGS's generalisation file (8.15), 89
+came from its three verb-class kinds. There a noun met with verbs of one class only is said with a verb of the other:
+"hippo" only as the one something happens to ("the hippo rolled": roll . theme), now with "smirked", whose subject is
+the one who does it (smirk . agent). No lived sentence is one place away; the nearest differ in the noun, the verb and
+more, and the neighbours vote. For "The girl noticed that a hippo smirked ." the eight nearest that could be filled
+had for verbs "ate", "rolled", "froze", "broke", "drew", "burned", "snoozed" and "reddened"; each put "smirk" where its
+own verb's token stood and kept what came after it, so five said "smirk . theme" and three "smirk . agent", and the
+plan said "theme" at a belief of 0.61. Words of a kind (12.6) cannot tell the verbs apart: every verb has followed a
+conjunct and come before "."; adding the second token after a relation to its profile changed nothing (sample:
+264 / 24 / 12 against 264 / 23 / 13), because a verb said both with an object and without one has had "agent" and
+"theme" both after it, and one same place makes two relations alike.
+
+What tells them apart is where the word was said. "smirked", said after a noun at the end of a sentence, was always
+answered "smirk . agent"; "rolled", said there, always "roll . theme" (with an object after it, "roll . agent" and
+"roll . theme" both). So (MODEL.md 12.5): where a word was said between neighbours of the same shapes, the one or two
+tokens its relation always had right after it are its own there, the end of an answer counted as what comes after; a
+neighbour whose filled answer gives it other tokens there, or ends after it, gives nothing. Where the word was never
+said between such neighbours nothing holds the answer back, so a verb met only in active sentences still stands in a
+passive one and a name met only as a subject as an object.
+
+The hippocampus alone (right / silent / wrong; `m3_analogy.py` and the whole in-distribution file asked the same way):
+
+| | before (297471c) | what a word's token always had after it |
+|---|---|---|
+| COGS in distribution, the sample of 300 | 298 / 0 / 2 | 297 / 0 / 3 |
+| COGS in distribution, the whole test file (3,000) | 2,969 / 5 / 26 | **2,990 / 2 / 8** |
+| COGS generalisation, the sample of 300 | 264 / 23 / 13 | 272 / 24 / 4 |
+| COGS generalisation, every seventh sentence (3,000) | 2,600 / 285 / 115 | **2,706 / 275 / 19** |
+| SCAN, by places (300) | 100 / 200 / 0 | 100 / 200 / 0 |
+| SCAN, by parts (300) | 114 / 186 / 0 | 114 / 186 / 0 |
+
+By kind, on every seventh sentence of the generalisation file (before → after):
+
+| kind | before | after |
+|---|---|---|
+| only seen as transitive subject, as unaccusative subject | 104 / 1 / 41 | 146 / 0 / 0 |
+| only seen as unaccusative subject, as unergative subject | 135 / 2 / 28 | 165 / 0 / 0 |
+| only seen as unaccusative subject, as subject of a transitive verb without its object | 106 / 0 / 20 | 126 / 0 / 0 |
+| cp recursion | 31 / 96 / 7 | 37 / 93 / 4 |
+| subject to object (proper) | 129 / 24 / 0 | 135 / 18 / 0 |
+| do dative to pp dative | 144 / 1 / 6 | 146 / 1 / 4 |
+| prim to subject (common) | 143 / 0 / 3 | 144 / 0 / 2 |
+| object to subject (common) | 139 / 0 / 3 | 140 / 0 / 2 |
+| pp recursion | 125 / 6 / 4 | 125 / 7 / 3 |
+| prim to object (proper) | 120 / 14 / 1 | 120 / 15 / 0 |
+| active to passive | 165 / 0 / 0 | 164 / 0 / 1 |
+| subject to object (common) | 147 / 0 / 1 | 146 / 0 / 2 |
+
+The other nine kinds are unchanged. All 437 sentences of the three verb-class kinds are answered right.
+
+- **The end of an answer counts.** Read first without it (where the token stood last, nothing was counted), the rule
+  gave the same on COGS (2,705 / 276 / 19) but lost SCAN answers: alone on add jump, 5 of 50 commands fell silent by
+  places (answering by parts still answered them). In the commands lived in order, "walk", said after "after" and
+  before "around", had always had I_WALK two tokens on, but for its last turn, which stood at the end of the answer
+  ("jump after walk around left": its last I_WALK comes before I_JUMP and the end); so "look around left after walk
+  around left twice", whose last I_WALK comes before I_TURN_LEFT I_LOOK, was not foreseen, and none of the seven
+  commands foreseen over two places while living was left in the analogy's record, which then believed an analogy
+  over two places at one half. Counting the end, nothing always came after I_WALK there.
+- **Tried, not taken: two different utterances.** Asking a token's following tokens to have stayed the same in at least
+  two different utterances (that it stay while what was said around it changed) gave 2,705 / 275 / 20 and left SCAN's
+  five commands silent: the end was the cause.
+- **The sample's one loss.** "Emma declared that the boy passed Harper a donut in the garden ." was answered right
+  before and is wrong now, by parts, through rests no lived sentence is like. Before, "Emma declared that the garden ."
+  was answered "... garden . agent ( x _ 4 , the )" by the analogy at 0.86 (a noun put for a verb), and the change put
+  back made it right; the rule silences that rest (after "the" and before the end, "garden" was always followed by
+  "( x"), and the search goes on to "Emma declared Harper the garden .", answered as if "declared" took two objects.
+  Nothing lived holds that back: between words of those shapes ("Emma declared that ...", "that" having a relation
+  too) the token of "declared" was always followed by ".", but then by "agent" or "ccomp", so no second token was its
+  own. The change put back is wrong. On the whole test file the rule gives 21 right answers more and 18 wrong fewer.
+- **What it does not do.** A word never said between neighbours of the shapes it is asked between is not held back,
+  and a following token is read where the word's own relation stands in the answer; a word with no relation is not
+  read at all.

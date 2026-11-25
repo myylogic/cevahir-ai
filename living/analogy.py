@@ -21,8 +21,12 @@ with several places at once, done on the episodes the hippocampus keeps.
   places are filled at once, so two roles that swap places are read as a swap; one token that would have to become two
   gives nothing, and so does a place whose word also stands unchanged elsewhere in the neighbour (its tokens cannot be
   told from the other occurrence's: "run left after run left" says nothing of "run left after jump left"). A neighbour
-  with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first, at most
-  ``k``), and the plan is the answer most of them give.
+  with a place that cannot be filled gives nothing, and so does one whose answer, filled, gives the token of a word
+  put in other tokens after it than it has always had where the word was said between neighbours of the same shapes
+  (one and two tokens on, the end of an answer counted as what comes after: "smiled", said after a noun at the end,
+  was always answered "smile . agent", so "a hippo smiled" is not answered from "a hippo rolled" as "smile .
+  theme"); where the word was never said so, nothing holds the answer back. The nearest neighbours vote (the fewest
+  places first, at most ``k``), and the plan is the answer most of them give.
 - **Its belief.** Every dialogue lived is first foreseen by the analogy from the episodes already kept; the record of
   how often an answer foreseen over d places was right is the analogy's own (the evidence core's trust in a way of
   reading, learned from what its claims came to). A plan is believed by the rule on the record for its places, times
@@ -123,6 +127,8 @@ class Episodes:
         self._exchanges: Dict[tuple, float] = {}               # the record of each kind of exchange
         self._asked: Dict[tuple, tuple] = {}
         self._alike: Dict[Tuple[str, str], bool] = {}
+        self._at: Dict[tuple, List[int]] = {}                  # the dialogues of each word, by its neighbours' shapes
+        self._owns: Dict[tuple, Dict[int, str]] = {}           # what its token always had after it there
         self._forgotten = 0
 
     def __len__(self) -> int:
@@ -314,6 +320,16 @@ class Episodes:
             v.sort(key=lambda x: (-x[0], x[1], x[2]))
         self._slots = dict(slots)
         self._shapes = dict(shapes)
+        at: Dict[tuple, List[int]] = defaultdict(list)          # each word's dialogues, by the shapes of its neighbours
+        for i, u in enumerate(self.said):
+            if u is None:
+                continue
+            for j, w in enumerate(u):
+                key = (w, self._shape(u[j - 1]) if j else "^", self._shape(u[j + 1]) if j + 1 < len(u) else "$")
+                if len(at[key]) < 64:
+                    at[key].append(i)
+        self._at = dict(at)
+        self._owns = {}
         self._units = {}
         self._rests = {}
         self._windows = {}
@@ -339,6 +355,52 @@ class Episodes:
             else:
                 self._alike[key] = any(f in pb for f in pa)          # seen at least once in the same place
         return self._alike[key]
+
+    def _own(self, w: str, left: str, right: str) -> Dict[int, str]:
+        """What the token of ``w`` has always had right after it, one and two tokens on, in the lived answers where w
+        was said between neighbours of these shapes: {how far on: token}, a number read as one mark. The end of an
+        answer counts as what comes after: where the token stood last, nothing came after it."""
+        key = (w, left, right)
+        got = self._owns.get(key)
+        if got is None:
+            r = self.relation(w)
+            seen: Dict[int, set] = {1: set(), 2: set()}
+            if r is not None:
+                for i in self._at.get(key, ()):
+                    a = self.answers[i]
+                    if a is None:
+                        continue
+                    for q, t in enumerate(a):
+                        if t == r:
+                            for k in (1, 2):
+                                seen[k].add(self._after(a, q + k))
+            got = self._owns[key] = {k: next(iter(v)) for k, v in seen.items() if len(v) == 1}
+        return got
+
+    def _as_lived(self, said: Sequence[str], places: Sequence[int], answer: Sequence[str]) -> bool:
+        """Whether a filled answer leaves the token of each word put in among what it has always had after it where
+        the word was said between neighbours of the same shapes (``_own``): an answer that puts other tokens there, or
+        ends there, says of that word what was never lived. Where the word was never said so, nothing holds the answer
+        back."""
+        self._make()
+        n = len(said)
+        for j in places:
+            v = said[j]
+            rv = self.relation(v)
+            if rv is None:
+                continue
+            own = self._own(v, self._shape(said[j - 1]) if j else "^", self._shape(said[j + 1]) if j + 1 < n else "$")
+            if not own:
+                continue
+            for q, t in enumerate(answer):
+                if t == rv:
+                    if any(self._after(answer, q + k) != x for k, x in own.items()):
+                        return False
+        return True
+
+    @staticmethod
+    def _after(a: Sequence[str], k: int) -> str:
+        return "$" if k >= len(a) else ("#" if a[k].isdigit() else a[k])
 
     def _shape(self, w: str) -> str:
         return "\u25a1" if self.relation(w) is not None else w
@@ -832,6 +894,8 @@ class Episodes:
             if not ok:
                 continue
             answer = [mapping.get(t, t) for t in self.answers[i]]
+            if not self._as_lived(said, places, answer):
+                continue
             votes[tuple(answer)] += 1
             first.setdefault(tuple(answer), len(places))
             filled += 1

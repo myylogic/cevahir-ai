@@ -413,6 +413,48 @@ def test_a_word_that_stands_twice_is_not_filled_where_only_one_of_it_changes(Fas
     assert plan == ["I_RUN", "I_JUMP"] and agree == filled == 2
 
 
+def test_a_word_keeps_what_its_token_always_had_after_it_between_the_same_neighbours(FastCortex):
+    """COGS's verb classes in a small world: of some verbs the one named is the one it happens to ("theme"), of others
+    the one who does it ("agent"), and "hippo" is met only with the first kind. "a hippo smiled" filled from "a hippo
+    rolled" would make the hippo a theme; but "smiled", said after a noun at the end, was always answered "smile .
+    agent", so that neighbour gives nothing and those that keep "smiled" answer. Where a word was never said between
+    such neighbours, nothing holds a plan back."""
+    from living.analogy import Episodes
+    from living.evidence import SPEAKING_LINE
+    happens = {"rolled": "roll", "froze": "freeze", "broke": "break"}
+    does = {"smiled": "smile", "slept": "sleep", "laughed": "laugh"}
+    def say(n, v):
+        lemma, role = (happens[v], "theme") if v in happens else (does[v], "agent")
+        return ["a", n, v, "."], [n, "(", "x", "_", "1", ")", "AND", lemma, ".", role, "(", "x", "_", "2", ",", "x",
+                                  "_", "1", ")"]
+    ep = Episodes()
+    for n in ["dog", "cat", "girl", "boy", "lion"]:
+        for v in list(happens) + list(does):
+            ep.live(*say(n, v))
+    for _ in range(2):
+        for v in happens:
+            ep.live(*say("hippo", v))
+    ep.ready()
+    for v in does:
+        said, answer = say("hippo", v)
+        plan, e, _ = ep.plan(said)
+        assert plan == answer and e >= SPEAKING_LINE
+    assert ep._own("smiled", "□", ".") == {1: ".", 2: "agent"}
+    assert ep._own("smiled", "was", ".") == {}
+    # The end of an answer counts: in "run after walk twice" the second I_WALK stood before I_RUN, the first before
+    # I_WALK, and nothing came after I_RUN; nothing always came after I_WALK there, so "look after walk twice" is filled
+    # from "look after run twice" (counting only what came before the end, I_RUN would have been I_WALK's own).
+    ep = Episodes()
+    for w in ("walk", "run", "look", "jump", "sit", "swim", "sing", "stand"):
+        ep.live([w], ["I_" + w.upper()])
+    ep.live(["run", "after", "walk", "twice"], ["I_WALK", "I_WALK", "I_RUN"])
+    ep.live(["look", "after", "run", "twice"], ["I_RUN", "I_RUN", "I_LOOK"])
+    ep.ready()
+    assert ep._own("walk", ep._shape("after"), ep._shape("twice")) == {}
+    plan, agree, filled, d = ep._plan(["look", "after", "walk", "twice"])
+    assert plan == ["I_WALK", "I_WALK", "I_LOOK"] and agree == filled == 2
+
+
 def test_a_word_inside_and_outside_a_part_lends_no_change_where_the_answer_names_no_places(FastCortex):
     """Taking "opposite right and look" out of "look opposite right and look opposite right twice": its answer's
     I_LOOK may be either look's, so the example lends no change; where an answer names the places of what was said

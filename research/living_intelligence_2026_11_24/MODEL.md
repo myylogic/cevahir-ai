@@ -608,6 +608,19 @@ as a frame, done on the episodes the hippocampus keeps.
   left" says nothing of "run left after jump left"; replacing every I_RUN would make both actions jumps). A neighbour
   with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first, at most
   eight), and the plan is the answer most of them give.
+- **What a word's token always had after it.** A word is said between neighbours, and where it was said between
+  neighbours of the same shapes (a word with a relation as one mark), the one or two tokens that its relation always
+  had right after it in the answers are its own there (the end of an answer counted as what comes after: where the
+  token stood last, nothing came after it). A neighbour whose answer, filled, gives the token of a word put in other
+  tokens after it than those, or ends after it, says of that word what was never lived, and gives nothing. "smiled",
+  said after a noun at the end of a sentence, was always answered "smile . agent", and "rolled", said there, always
+  "roll . theme": "a hippo smiled" is not answered from "a hippo rolled" as "smile . theme", whatever the vote.
+  Where a word was never said between such neighbours, nothing holds the answer back: a verb met only in active
+  sentences stands in a passive one, a name met only as a subject stands as an object, and a verb met only without
+  an object takes one. Which tokens follow a token is not named anywhere; it is read from the answers lived, where
+  the word was said as it is said now. (Words of a kind, 12.6, ask only that two relations have held one same place,
+  and every verb has followed a name's conjunct and come before "."; a verb that takes both an object and none has
+  had "agent" and "theme" both after it, so a kind cannot tell the verbs apart where it matters: NOTES.md 8.16.)
 - **Its belief: its own record.** Every dialogue lived is first foreseen by the analogy from the episodes already
   kept, and the record of how often an answer foreseen over d places was right is the analogy's own: the evidence
   core's trust in a way of reading, learned from what its claims came to (F49). A plan is believed by the rule on the
