@@ -106,6 +106,7 @@ class Cevahir:
         self.alphabets: Dict[str, set] = {self.channel: set()}   # every channel's own alphabet (MODEL.md 4)
         self.entries: Optional[List[dict]] = [] if ledger else None  # what was lived, entry by entry (to forget)
         self.episodes = Episodes()                                   # the hippocampus: dialogues as lived
+        self.marks_kept = True                                   # ... what was said heard with its closing marks
         self._open: Optional[dict] = None
         self.others: Dict[str, dict] = {}                        # channels born by the rule: a harmony each
 
@@ -338,7 +339,7 @@ class Cevahir:
         if z is not None:
             z.heard(s.body(first), "soran")
             z.see(scene_answer or scene)
-        a_plan, _, _ = self.episodes.plan(self._said(first), parts=False)   # the hippocampus foresees the answer
+        a_plan, _, _ = self.episodes.plan(self._heard(first), parts=False)   # the hippocampus foresees the answer
         foreseen = [self.session.lower(t) for t in a_plan] if a_plan else None
         bits += self.hear(answer, prov, lead="\t", answer=True, foreseen=foreseen)
         s.end_of_turn(prov, tone=s.tone(answer))
@@ -348,10 +349,17 @@ class Cevahir:
         if getattr(self.mind.cfg, "wholes", False):          # F43: the dialogue lived once more as wholes
             from zihin.butun import consolidate
             consolidate(s, first, answer, prov, asker)
-        self.episodes.live(self._said(first), self._said(answer))   # the hippocampus keeps it as it was said
+        self.episodes.live(self._heard(first), self._said(answer))   # the hippocampus keeps it as it was said
         if self._open is not None:
             self._open["episode"] = len(self.episodes) - 1
         return bits
+
+    def _heard(self, text: str) -> List[str]:
+        """What was said to Cevahir, as the hippocampus keeps it: its tokens as said (case kept) with its closing marks,
+        which end the utterance and stand after its last word, so that a part ending at that word can be read with what
+        stands after it, as every other part is (a mind saved before marks were kept hears without them)."""
+        from living.analogy import tokens
+        return tokens(text) if self.marks_kept else self._said(text)
 
     @staticmethod
     def _said(text: str) -> List[str]:
@@ -534,7 +542,7 @@ class Cevahir:
         thought; where the two plans differ, the record of their disagreements decides (``trust_analogy``).
         Returns (plan, beliefs, whose)."""
         from living.evidence import SPEAKING_LINE
-        a_plan, a_e, _ = self.episodes.plan(self._said(question))
+        a_plan, a_e, _ = self.episodes.plan(self._heard(question))
         self.last_choice = None
         if a_plan and a_e >= SPEAKING_LINE:
             low = [self.session.lower(t) for t in a_plan]
@@ -611,7 +619,7 @@ class Cevahir:
         es = [e for w, e in decided]
         plan_e = es if [w for w, _ in decided] == plan else []
         from living.evidence import SPEAKING_LINE
-        a_plan, a_e, _ = self.episodes.plan(self._said(question))
+        a_plan, a_e, _ = self.episodes.plan(self._heard(question))
         out["analogy"] = " ".join(a_plan) if a_plan and a_e >= SPEAKING_LINE else "(sessiz)"
         plan, plan_e, out["thought"] = self.choose_plan(question, plan, plan_e)
         out["cevahir"] = self.speak(history, plan, plan_e, "\t", most=16 * limit).strip()
@@ -848,7 +856,7 @@ class Cevahir:
             "outcome_good": [[w, c, n] for (w, c), n in self.outcome_good.items()],
             "outcome_all": [[w, c, n] for (w, c), n in self.outcome_all.items()],
             "alphabets": {k: "".join(sorted(v)) for k, v in self.alphabets.items()},
-            "episodes": self.episodes.state(), "az": [self.az_won, self.az_all],
+            "episodes": self.episodes.state(), "marks": self.marks_kept, "az": [self.az_won, self.az_all],
             "others": [[name, ch["won"], ch["seen"]] for name, ch in sorted(self.others.items())]}
         with open(os.path.join(folder, "cevahir.json"), "w", encoding="utf-8") as f:
             json.dump(state, f, ensure_ascii=False)
@@ -929,6 +937,7 @@ class Cevahir:
         self.last_leads, self.pending = [], None
         self.entries, self._open, self._pending_entry = None, None, None
         self.episodes = Episodes.from_state(state.get("episodes", {}))
+        self.marks_kept = state.get("marks", False)
         self.az_won, self.az_all = state.get("az", [0, 0])
         self.alphabets = {k: set(v) for k, v in state.get("alphabets", {self.channel: ""}).items()}
         self.others = {}

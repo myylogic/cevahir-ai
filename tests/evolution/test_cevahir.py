@@ -139,6 +139,35 @@ def test_a_kept_cevahir_answers_and_lives_as_the_one_kept(FastCortex, tmp_path):
         Cevahir.load(folder)
 
 
+def test_the_hippocampus_keeps_what_was_said_with_its_closing_mark(FastCortex, tmp_path):
+    """What was said ends with its mark, and the hippocampus keeps it so: a part ending at the last word is read with
+    what stands after it, as every other part is. A mind kept before marks were kept goes on hearing without them."""
+    import json
+    import os
+    from living.cevahir import Cevahir
+    c = Cevahir(variant="speaking", window=13)
+    c.watch("Ali saw the cup .", "see . agent ( x _ 1 , Ali ) .")
+    assert c.episodes.said[-1][-1] == "." and c.episodes.answers[-1][-1] != "."
+    folder = str(tmp_path / "kept")
+    c.save(folder)
+    assert Cevahir.load(folder).marks_kept
+    path = os.path.join(folder, "cevahir.json")
+    with open(path, encoding="utf-8") as f:
+        state = json.load(f)
+    del state["marks"]                                                   # a mind kept before marks were kept
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False)
+    with open(os.path.join(folder, "manifest.json"), encoding="utf-8") as f:
+        manifest = json.load(f)
+    import hashlib
+    with open(path, "rb") as f:
+        manifest["files"]["cevahir.json"] = hashlib.sha256(f.read()).hexdigest()
+    with open(os.path.join(folder, "manifest.json"), "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=1)
+    old = Cevahir.load(folder)
+    assert not old.marks_kept and old._heard("Ali saw Can .")[-1] == "Can"
+
+
 def test_feedback_is_kept_by_the_amygdala_and_a_wrong_answer_is_not_lived_as_right(FastCortex):
     from living.cevahir import Cevahir
     life, tests = _world()
