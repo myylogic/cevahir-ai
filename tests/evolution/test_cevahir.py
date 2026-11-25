@@ -251,6 +251,8 @@ def test_a_word_first_met_in_the_question_is_said_back_as_it_was_written(FastCor
     for q, a in life:
         c.watch(q, a)
     c.session.close_turn()
+    c.za_won = c.za_all = 0          # Zihin alone guessed few places right, and its plan would be held back (no
+    #                                  place is known of a name never met): what is asked here is how a plan is said
     said = c.answers(["Zorbek nerede ?", "Yıldız nerede ?"], way="every", workers=2)
     for s, name in zip(said, ["Zorbek", "Yıldız"]):
         if s["zihin"] != "(sessiz)":
@@ -334,6 +336,28 @@ def test_zihin_keeps_the_day_at_night_without_changing_what_it_knows(FastCortex)
     assert c.mind.S.digest() == d.mind.S.digest() and c.cortex.digest() == d.cortex.digest()
     asked = [q for q, _ in life[30:36]]
     assert c.answers(asked, way="every", workers=1) == d.answers(asked, way="every", workers=1)
+
+
+def test_zihin_alone_is_believed_as_far_as_its_record_where_the_analogy_foresees_nothing(FastCortex):
+    """While Cevahir lives, the answers the analogy foresaw nothing of are where Zihin's guesses are kept as its record
+    alone. Where the analogy foresees nothing when it is asked, Zihin's plan is the thought only as far as that
+    record allows: under the speaking line it is held back and nothing is said; with no record it stands."""
+    from living.cevahir import Cevahir
+    life, _ = _world()
+    c = Cevahir(variant="speaking")
+    for q, a in life[:40]:
+        c.watch(q, a + " .")
+    assert c.za_all > 0 and 0 <= c.za_won <= c.za_all          # the first answers: nothing foreseen them yet
+    c.episodes.plan = lambda said, parts=True: (None, 0.0, 0)  # the analogy foresees nothing
+    plan, es = ["walk", "walk"], [0.9, 0.9]
+    c.za_won, c.za_all = 0, 6
+    assert c.choose_plan("walk twice", plan, es) == ([], [], "held")
+    got = c.every_way("walk twice")
+    assert got["thought"] == "held" and got["cevahir"] == ""
+    c.za_won, c.za_all = 6, 6
+    assert c.choose_plan("walk twice", plan, es)[2] == "zihin"
+    c.za_won, c.za_all = 0, 0
+    assert c.choose_plan("walk twice", plan, es)[2] == "zihin"
 
 def test_the_hippocampus_answers_an_utterance_that_differs_in_two_places_from_every_one_lived(FastCortex):
     from living.analogy import Episodes
