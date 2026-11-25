@@ -85,8 +85,12 @@ with several places at once, done on the episodes the hippocampus keeps.
   the places each names (its numbers, and the own tokens of the words said once, a name, each read as the place it
   was said), the ended items first; it is believed by the rule on all of them, and used at the speaking line. A
   change put back where the example put it may leave a run out of that order; the answer is said in the order all
-  lived answers keep. In COGS the pair is ";" and "AND", and every one of the lived answers that name places is given
-  back by it from its items in any order; SCAN's answers name no places and have none.
+  lived answers keep, at every step of a chain, so that the next step reads a list whose items stand where their
+  places put them (taking "donut beside a" out of "Skylar gave the donut beside a bench to the girl ." adds its items
+  after the recipient, the last of them; put into an answer that goes on past them, they would stand last, and the
+  step after would read the answer's items out of line). In COGS the pair is ";" and "AND", and every one of the lived
+  answers that name places is given back by it from its items in any order; SCAN's answers name no places and have
+  none.
 - **A second search, with words read by their kind.** Where the search for parts is silent, a second one is made. In
   it a word with a relation is read by its kind: the mark and the token its relation has right after it in the lived
   answers, where one token does by the rule (a noun's and a preposition's "(", a verb's "."), so a phrase hung on a
@@ -1118,7 +1122,8 @@ class Episodes:
         answer, put into the answer of the asked utterance's rest (u, its part at p, likewise taken out or
         exchanged); with ``items`` (a change read from other surroundings), as the items it adds and takes away
         (``_by_items``), which needs answers that keep lists: where they keep none, where an example put a run says
-        nothing of other surroundings, and nothing is put. None where the change cannot be put, or where it leaves anything of ``instead`` in the answer, or
+        nothing of other surroundings, and nothing is put. The answer is said in the order the lived answers keep
+        their lists (``_in_order``), so that the next step of a chain reads it item by item. None where the change cannot be put, or where it leaves anything of ``instead`` in the answer, or
         where the example's answer names no places of what was said and a word with a relation stands both in the
         example's part and outside it: which of the two its tokens belong to cannot then be told ("look opposite right
         and look opposite right twice" says nothing of taking "opposite right and look" out of a command whose first
@@ -1260,7 +1265,7 @@ class Episodes:
             out[where:where + k] = new                         # from the end, so that each place still holds
         if instead and any(t.startswith("\u27e8") for t in out):
             return None                                        # the part put in for the asked one is still named
-        return out
+        return self._in_order(out, u)                          # said in the order the lived answers keep their lists
 
     @staticmethod
     def _items(a: Sequence[str], end: str, between: str) -> Optional[List[Tuple[Tuple[str, ...], bool]]]:

@@ -704,6 +704,32 @@ def test_an_answer_is_said_in_the_order_of_the_places_its_items_name(FastCortex)
         assert ep._in_order(shuffled, said) == answer
 
 
+def test_a_change_put_in_is_said_in_the_order_the_lived_answers_keep(FastCortex):
+    """Taking "box in a" out of the example adds its items after the recipient, the last of its items; put into an
+    answer that goes on past them (a phrase on the thing seen), the change is said where its places put it, so that
+    the answer a step of a chain hands on is a list the next step can read item by item."""
+    from living.analogy import Episodes
+    rng = random.Random(1)
+    ep = Episodes()
+    for _ in range(300):
+        ep.live(*_phrased(rng, rng.choice([0, 1]), rng.choice([0, 1, 2])))
+    ep.ready()
+    assert ep._list_order() == (";", "AND")
+    o = tuple("the cup gave the box in a jar to the cat .".split())
+    lived = ("* cup ( x _ 1 ) ; * box ( x _ 4 ) ; * cat ( x _ 10 ) ; give . agent ( x _ 2 , x _ 1 ) AND give . theme "
+             "( x _ 2 , x _ 4 ) AND give . recipient ( x _ 2 , x _ 10 ) AND box . nmod . in ( x _ 4 , x _ 7 ) AND jar "
+             "( x _ 7 )").split()
+    its_rest = ("* cup ( x _ 1 ) ; * jar ( x _ 4 ) ; * cat ( x _ 7 ) ; give . agent ( x _ 2 , x _ 1 ) AND give . "
+                "theme ( x _ 2 , x _ 4 ) AND give . recipient ( x _ 2 , x _ 7 )").split()
+    u = tuple("the dog saw the hat in a pen on the map .".split())
+    rest = ("* dog ( x _ 1 ) ; * pen ( x _ 4 ) ; * map ( x _ 7 ) ; see . agent ( x _ 2 , x _ 1 ) AND see . theme "
+            "( x _ 2 , x _ 4 ) AND pen . nmod . on ( x _ 4 , x _ 7 )").split()
+    want = ("* dog ( x _ 1 ) ; * hat ( x _ 4 ) ; * map ( x _ 10 ) ; see . agent ( x _ 2 , x _ 1 ) AND see . theme "
+            "( x _ 2 , x _ 4 ) AND hat . nmod . in ( x _ 4 , x _ 7 ) AND pen ( x _ 7 ) AND pen . nmod . on "
+            "( x _ 7 , x _ 10 )").split()
+    assert ep._transplant(o, 4, 3, its_rest, lived, u, 4, rest) == want
+
+
 def _moves():
     """Commands of a small grammar of moves, built as SCAN builds them: an action, a way (around: four turns and acts;
     opposite: two turns and an act) and a side, said once, twice or thrice, and two of them joined by "and"."""
