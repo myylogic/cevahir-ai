@@ -1120,7 +1120,8 @@ neighbour whose filled answer gives it other tokens there, or ends after it, giv
 said between such neighbours nothing holds the answer back, so a verb met only in active sentences still stands in a
 passive one and a name met only as a subject as an object.
 
-The hippocampus alone (right / silent / wrong; `m3_analogy.py` and the whole in-distribution file asked the same way):
+The hippocampus alone (right / silent / wrong; `m3_analogy.py`, rows of `results/m3_analogy.jsonl` written by
+fd8f4c3, and before it the same samples and files asked with the code before the rule):
 
 | | before (297471c) | what a word's token always had after it |
 |---|---|---|
