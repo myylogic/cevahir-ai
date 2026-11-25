@@ -596,13 +596,18 @@ as a frame, done on the episodes the hippocampus keeps.
   rule on the dialogues w was said in: e(t | w) = (W⁺ + ½) / (W + 1), with W⁺ the answers that held t. Tokens held
   by half of all answers or more are the answers' own structure, not any word's. A relation is believed when e
   reaches the speaking line. On equal evidence the word itself is preferred (Zihin's F34, the asked word itself),
-  then the token that shares the longest beginning with it (F36, word forms).
+  then the token that shares the longest beginning with it (F36, word forms), then the token most the word's own (the
+  rule on how many of the token's own dialogues held the word), then the one first met with it. The choice must not
+  depend on anything but what was lived: chosen first by the order in which a set happened to hold the candidates,
+  it differed from one process to another, and with it one sample of COGS (NOTES.md 8.15).
 - **The plan.** For a neighbour (U′, A′), each place where U and U′ differ (u in U′, v in U) is filled: every token of
   A′ that is u's relation becomes v's relation, or v itself where u's relation is u itself and v has none yet. All
   places are filled at once, so two roles that swap places ("Veli'nin babası Ali" from "Ali'nin babası Veli") are
-  read as a swap; one token that would have to become two gives nothing. A neighbour with a place that cannot be
-  filled gives nothing. The nearest neighbours vote (the fewest places first,
-  at most eight), and the plan is the answer most of them give.
+  read as a swap; one token that would have to become two gives nothing. Nor does a place whose word also stands,
+  unchanged, elsewhere in the neighbour: its tokens cannot be told from the other occurrence's ("run left after run
+  left" says nothing of "run left after jump left"; replacing every I_RUN would make both actions jumps). A neighbour
+  with a place that cannot be filled gives nothing. The nearest neighbours vote (the fewest places first, at most
+  eight), and the plan is the answer most of them give.
 - **Its belief: its own record.** Every dialogue lived is first foreseen by the analogy from the episodes already
   kept, and the record of how often an answer foreseen over d places was right is the analogy's own: the evidence
   core's trust in a way of reading, learned from what its claims came to (F49). A plan is believed by the rule on the

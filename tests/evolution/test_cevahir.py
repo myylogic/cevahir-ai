@@ -229,6 +229,19 @@ def test_a_word_first_met_in_the_question_is_said_back_as_it_was_written(FastCor
             assert s["cevahir"].startswith(name)                        # the case as it was heard
 
 
+def test_a_plan_is_said_to_its_end_though_a_token_of_it_was_never_written(FastCortex):
+    """A plan by parts may count a place beyond any lived ("x _ 24" where answers went to 9): its token has no
+    written form, and the plan is still said to its end, the token as it is held."""
+    from living.cevahir import Cevahir
+    c = Cevahir(variant="full")
+    for n in range(1, 10):
+        c.watch("kaç %d ?" % n, "x _ %d ." % n)
+    c.session.close_turn()
+    plan = ["x", "_", "24", "ve", "x", "_", "3"]
+    said = c.speak("kaç 24 ?\t", plan, [1.0] * len(plan), "\t", most=400)
+    assert c.session.words(said)[:len(plan)] == plan
+
+
 def test_cevahir_forgets_an_entry_exactly_and_can_no_longer_say_it(FastCortex):
     from living.cevahir import Cevahir
     life, _ = _world()

@@ -469,7 +469,9 @@ class Cevahir:
         - otherwise nothing more is said.
 
         How Zihin's token is written (its gap, its case) is the harmony's choice among the gaps and the ways it was
-        written that it has lived, never a line end: the answer is one line. ``start``: the gap already lived after
+        written that it has lived, never a line end: the answer is one line. A token of the plan never written is
+        written as it is held, after a gap lived in the situation (without it, a plan by parts that counts a place
+        beyond any lived, "x _ 24", was cut there). ``start``: the gap already lived after
         ``history``. Nothing is learned. Returns what was said, without ``start``."""
         from living.evidence import SPEAKING_LINE
         line = SPEAKING_LINE if line is None else line
@@ -492,6 +494,12 @@ class Cevahir:
                 if z_tok is not None:
                     forms, _ = self.candidates(z_tok, partial, gaps=6, where=(True, k == 0))
                     forms = [f for f in forms if "\n" not in f]
+                    if not forms:                            # a token of the plan never written (a number the
+                        #                                      analogy counted, say): written as it is held, after
+                        #                                      a gap lived in this situation
+                        lived = (self.gaps.get((True, k == 0)) or Counter({" ": 1})).most_common(6)
+                        forms = [z_tok] if partial is not None else \
+                            [g + z_tok for g, _ in lived if "\n" not in g] or [" " + z_tok]
                     if forms:
                         beliefs = [self.belief(here, f) for f in forms]
                         z_form = forms[max(range(len(forms)), key=lambda i: beliefs[i])]
