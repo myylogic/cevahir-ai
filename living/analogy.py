@@ -123,7 +123,8 @@ with several places at once, done on the episodes the hippocampus keeps.
   liked the ring to a cat .", gives "like" a recipient and is held back; where the first search's answer is held back
   so, the second search is made. A token that took no role is not read so (nothing lived says what roles it takes),
   and a token that took few takes a new one as the tokens that took those do (a verb met only with a theme is asked
-  with an agent as most such verbs take one).
+  with an agent as most such verbs take one). So too two roles said of one place that no lived answer said of one
+  place (two phrases on one noun, a clause and a thing of one verb) are believed by the rule with nothing for them.
 
 Nothing here names a language, a word or a format: tokens are what was said, split as Zihin splits (words and marks).
 """
@@ -197,6 +198,8 @@ class Episodes:
         self._here: Dict[tuple, bool] = {}                     # whether a part of a frame stood in such surroundings
         self._roles: Dict[str, set] = {}                       # the roles each token took (read as life doubles)
         self._role_beliefs: Dict[tuple, float] = {}
+        self._together: set = set()                            # pairs of roles lived said of one place
+        self._role_places: Counter = Counter()                 # how many lived places took each role
         self._forgotten = 0
 
     def __len__(self) -> int:
@@ -320,7 +323,7 @@ class Episodes:
         belief is the rule on the analogy's own record for that many places (how often an answer foreseen so was
         right), times the share of the neighbours that agree. Where that does not reach the speaking line and
         ``parts`` is on, the utterance is answered by parts (see the module's text); then the count is the examples
-        that agreed. The answer given is believed no further than the roles it gives its tokens were lived
+        that agreed. The answer given is believed no further than the roles it gives were lived
         (``_roles_believed``); where the first search's answer is held back so, the second search is made."""
         key = (tuple(said), parts, len(self.said), self._forgotten)
         if key in self._asked:                                 # asked again before anything new was lived
@@ -364,11 +367,31 @@ class Episodes:
             item = []
         return out
 
+    def _said_of(self, a: Sequence[str]) -> List[Tuple[str, tuple]]:
+        """The places an answer's items give roles to, with the roles: the first place an item "token . role ( x _ k ,
+        ... )" names."""
+        order = self._list_order()
+        if order is None:
+            return []
+        out, item = [], []
+        for t in list(a) + [order[1]]:
+            if t not in order:
+                item.append(t)
+                continue
+            if "(" in item:
+                j = item.index("(")
+                if j >= 2 and item[1] == "." and item[j + 1:j + 3] == ["x", "_"] and j + 3 < len(item):
+                    out.append((item[j + 3], tuple(item[1:j])))
+            item = []
+        return out
+
     def _roles_believed(self, plan: Sequence[str]) -> float:
-        """How far the roles an answer gives its tokens were lived: a role a token took in a lived answer is believed;
-        one it never took, by the rule on the tokens that took every role it took (how many of them took that one too:
-        "like" never takes a recipient, and few of the tokens that take what it takes do). A token that took no role
-        is not read so: nothing lived says what roles it takes."""
+        """How far the roles an answer gives were lived. A role a token took in a lived answer is believed, one it never
+        took by the rule on the tokens that took every role it took (how many of them took that one too: "like" never
+        takes a recipient, and few of the tokens that take what it takes do; a token that took no role is not read so,
+        nothing lived says what roles it takes). Two roles said of one place were said of one place in a lived answer,
+        or are believed by the rule with nothing for them: none of the lived places that took the rarer of the two
+        (two phrases on one noun, a clause and a thing of one verb)."""
         self._make()
         least = 1.0
         for tok, role in self._heads(plan):
@@ -380,6 +403,15 @@ class Episodes:
                 others = [r for t, r in self._roles.items() if t != tok and mine <= r]
                 self._role_beliefs[key] = (sum(role in r for r in others) + 0.5) / (len(others) + 1.0)
             least = min(least, self._role_beliefs[key])
+        at: Dict[str, List[tuple]] = defaultdict(list)         # roles said of one place: as lived together
+        for place, role in self._said_of(plan):
+            at[place].append(role)
+        for roles in at.values():
+            for x in range(len(roles)):
+                for y in range(x + 1, len(roles)):
+                    if tuple(sorted((roles[x], roles[y]))) not in self._together:
+                        w = min(self._role_places.get(roles[x], 0), self._role_places.get(roles[y], 0))
+                        least = min(least, 0.5 / (w + 1.0))
         return least
 
     def _named(self, said: Sequence[str]):
@@ -557,6 +589,19 @@ class Episodes:
                     roles[tok].add(role)
         self._roles = dict(roles)
         self._role_beliefs = {}
+        together, role_places = set(), Counter()               # the roles said of one place in a lived answer
+        for a in self.answers:
+            if a is None:
+                continue
+            at: Dict[str, List[tuple]] = defaultdict(list)
+            for place, role in self._said_of(a):
+                at[place].append(role)
+            for rs in at.values():
+                role_places.update(set(rs))
+                for x in range(len(rs)):
+                    for y in range(x + 1, len(rs)):
+                        together.add(tuple(sorted((rs[x], rs[y]))))
+        self._together, self._role_places = together, role_places
         self._owns = {}
         self._elsewhere = {}
         self._here = {}

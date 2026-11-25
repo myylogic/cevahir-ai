@@ -855,6 +855,31 @@ def test_an_answer_is_believed_no_further_than_the_roles_it_gives_were_lived(Fas
     assert roles("* cat ( x _ 1 ) ; zap . agent ( x _ 2 , x _ 1 ) AND zap . recipient ( x _ 2 , x _ 4 )") == 1.0
 
 
+def test_an_answer_whose_roles_of_one_place_were_never_lived_together_is_held_back(FastCortex):
+    """No lived answer says two phrases of one noun, or a clause and a thing of one verb: an answer that does is held
+    back. A verb's agent and theme said of it together were lived, and a word never met says nothing either way."""
+    from living.analogy import Episodes
+    from living.evidence import SPEAKING_LINE
+    rng = random.Random(5)
+    lived = [_clauses(rng, rng.choice([0, 1, 2])) for _ in range(200)] + \
+        [_phrased(rng, rng.choice([0, 1]), rng.choice([0, 1, 2])) for _ in range(200)]
+    ep = Episodes()
+    for said, answer in lived:
+        ep.live(said, answer)
+    ep.ready()
+    assert min(ep._roles_believed(answer) for _, answer in lived) == 1.0
+    def held(text):
+        return ep._roles_believed(text.split()) < SPEAKING_LINE
+    assert held("* cup ( x _ 1 ) ; * box ( x _ 4 ) ; * mat ( x _ 7 ) ; see . agent ( x _ 2 , x _ 1 ) AND see . theme "
+                "( x _ 2 , x _ 4 ) AND box . nmod . on ( x _ 4 , x _ 7 ) AND box . nmod . in ( x _ 4 , x _ 10 )")
+    assert held("* cat ( x _ 3 ) ; like . agent ( x _ 1 , Ali ) AND like . ccomp ( x _ 1 , x _ 5 ) AND like . theme "
+                "( x _ 1 , x _ 3 )")
+    assert not held("* cup ( x _ 1 ) ; * box ( x _ 4 ) ; see . agent ( x _ 2 , x _ 1 ) AND see . theme ( x _ 2 , "
+                    "x _ 4 )")
+    assert not held("* zork ( x _ 1 ) ; * box ( x _ 4 ) ; see . agent ( x _ 2 , x _ 1 ) AND see . theme ( x _ 2 , "
+                    "x _ 4 )")
+
+
 def _moves():
     """Commands of a small grammar of moves, built as SCAN builds them: an action, a way (around: four turns and acts;
     opposite: two turns and an act) and a side, said once, twice or thrice, and two of them joined by "and"."""
