@@ -909,7 +909,8 @@ studied in conversation, in four conditions; the other half (nine per seed) is a
 - **The prefrontal decision.** The record that chooses between Zihin's plan and the analogy's was kept unfairly
   (8.7, mended in 8.15); and it is earned by the analogy's plans over places alone, because plans by parts are not
   foreseen while Cevahir lives (they would cost seconds a dialogue). A plan by parts therefore leads over Zihin's on
-  the strength of a record that is not its own: on SCAN, twice in 300, where Zihin was right (8.13). And where the
+  the strength of a record that is not its own: on SCAN, twice in 300, where Zihin was right (8.13; with the
+  hippocampus's faults mended, 8.15, no longer). And where the
   analogy is silent the thought is Zihin's, with no record of its own whole answers: on COGS's generalisation sample
   Cevahir is wrong 35 times where the analogy alone is wrong 14 (8.7).
 - **Scale.** Every measurement here is at most ten million characters on one machine with four cores; no standard
@@ -966,21 +967,22 @@ Cevahir answers 250 of 250 (e6d0cc8, below), and so does Zihin. A first run of t
 measurements shared the machine, was stopped before any row was written.
 
 The six splits again, 50 commands each, with the code as 8.15 mended it (`m3_scan.py --test 50`): after the first
-three faults (ad6dea0) and after the first six (e6d0cc8). Zihin answers every command right in both runs.
+three faults (ad6dea0), after the first six (e6d0cc8), and with all seven mended and what 8.16 to 8.18 add (the final
+code, 25a9c44). Zihin answers every command right in all three runs.
 
-| split | Zihin | Cevahir (ad6dea0) | Cevahir (e6d0cc8) |
-|---|---|---|---|
-| add jump | 50 | 49 | 49 |
-| around right | 50 | 50 | 50 |
-| length | 50 | 50 | 50 |
-| jump around right | 50 | 50 | 50 |
-| opposite right | 50 | 50 | 50 |
-| right | 50 | 49 | 50 |
-| **all six** | **300** | **298** | **299** |
+| split | Zihin | Cevahir (ad6dea0) | Cevahir (e6d0cc8) | Cevahir (25a9c44) |
+|---|---|---|---|---|
+| add jump | 50 | 49 | 49 | 50 |
+| around right | 50 | 50 | 50 | 50 |
+| length | 50 | 50 | 50 | 50 |
+| jump around right | 50 | 50 | 50 | 50 |
+| opposite right | 50 | 50 | 50 | 50 |
+| right | 50 | 49 | 50 | 50 |
+| **all six** | **300** | **298** | **299** | **300** |
 
-Every command Cevahir misses Zihin answered right: where the two thoughts differ, the record that decides was earned
+Every command Cevahir missed Zihin answered right: where the two thoughts differ, the record that decides was earned
 by the analogy's plans over places, and it lets a plan by parts lead too, so a fault of the hippocampus shows here as
-a command lost (8.15).
+a command lost (8.15). With the final code Cevahir misses none of the 300, and is wrong or silent on none.
 
 ### 8.14 Answering by parts, held to its own record
 
@@ -1123,7 +1125,8 @@ Cevahir on SCAN with the first three mended (`m3_scan.py --test 50`, ad6dea0): Z
 jump) was a plan by parts believed at 0.60: the analogy's own records rate such a plan as right three times in five,
 and the record that let it lead over Zihin was earned by its plans over places, not by plans by parts. Before the
 fixes (68ab34e) Cevahir missed 6; before the hippocampus existed it answered as Zihin (8.4). With the first six mended
-(e6d0cc8) Cevahir answers 299 of 300: the two traced are answered, and the one it misses is the seventh fault.
+(e6d0cc8) Cevahir answers 299 of 300: the two traced are answered, and the one it misses is the seventh fault. With
+all seven mended (and 8.16 to 8.18, 25a9c44) it answers 300 of 300 (8.13).
 
 ### 8.16 What a word's token always had after it
 

@@ -26,7 +26,8 @@
 >   0.4–1.1 % more bits); a script never met opens a channel that is watched until it shows structure; any entry can be
 >   forgotten exactly; the whole mind is kept and loaded bit for bit.
 >
->   Measured: on the six published SCAN splits it answers 1,199 of 1,200 test commands. Where an answer has to put
+>   Measured: on the six published SCAN splits it answers 1,199 of 1,200 test commands (200 of each), and with the
+>   final code 300 of 300 (50 of each), wrong and silent on none. Where an answer has to put
 >   together facts read apart, it answers every question, and a Transformer trained on the very stream it lived answers
 >   none. At school it answers 342 of 405 examination questions, every one of the 63 deductions among them (a
 >   Transformer trained on the same lessons: 203, and none of the deductions). On COGS the hippocampus alone answers
