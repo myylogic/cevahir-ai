@@ -3156,9 +3156,10 @@ def witnessed(mind, unit: int, trust, counted, focus) -> Dict[int, List[Tuple[fl
 def newest_reading(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
     """F76 (The Newest Holds, ``Config.newest``): what the sequence going on now was followed by last, before the
     present run of items. As ``continuation_backoff`` reads it, the end of the sequence after the last perceived
-    event, its longest suffix that has lived continuations: of these, on a world channel and not a word the partner
-    just said (an echo), the one confirmed last before the present run claims to come next, with what one
-    confirmation since gives by the rule (``learn.NEWEST_CLAIM``). How far it is believed is the way's record
+    event, its longest suffix that has lived continuations: where these were several on one channel (a world
+    channel, not a word the partner just said: an echo), the one confirmed last before the present run claims to
+    come next, with what one confirmation since gives by the rule (``learn.NEWEST_CLAIM``); one continuation lived
+    is nothing that changed, and the newest says nothing there. How far it is believed is the way's record
     (``hata.believed`` through ``_take``): where the counts and what came last foresaw apart while the mind lived,
     which came."""
     from .learn import NEWEST_CLAIM
@@ -3182,15 +3183,20 @@ def newest_reading(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dic
         x = suffix[0] if len(suffix) == 1 else S.tuple_index.get(tuple(suffix))
         if x is None:
             continue
-        best_t, best = -1, None
+        best_t, best, lived = -1, None, []
         for target, (w_pos, _) in own_mass(mind, x, 1, trust).items():
             if w_pos <= 0.0 or target in heard or not _world(mind, target):
                 continue
+            lived.append(target)
             t = int(won[S.find_tie(x, target, EXPECT, 1)])
             if best_t < t < now:
                 best_t, best = t, target
-        if best is not None:
-            return {best: NEWEST_CLAIM}
+        if not lived:
+            continue
+        channels = mv_view(mind, "u_channel")         # the longest suffix with lived continuations speaks, and only
+        if best is not None and sum(channels[v] == channels[best] for v in lived) > 1:   # where they were several:
+            return {best: NEWEST_CLAIM}               # one continuation lived is nothing that changed
+        return {}
     return {}
 
 

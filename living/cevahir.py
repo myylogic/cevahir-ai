@@ -152,14 +152,6 @@ class Cevahir:
         self.cortex.set_voice(forms, weights, know)
         return believed[0][1], believed[0][0]
 
-    def _zihin_would(self, where: Tuple[bool, bool]) -> Tuple[Optional[str], float]:
-        """Zihin's next token as it would say it (its reading of the present context as when it speaks, every way of
-        reading in it: ``predictions`` "specific"), and its e; the voice of the harmony is the cheaper reading made
-        while it listens."""
-        expected = self.mind.expected(self.channel, "specific")
-        believed = max(((e, s) for s, e in expected.items() if isinstance(s, str)), default=(0.0, None))
-        return believed[1], believed[0]
-
     @staticmethod
     def situation(answer: bool, first: bool, e: float) -> int:
         """The class of a disagreement: in an answer or not, x the first token of the utterance or a later one,
@@ -298,13 +290,12 @@ class Cevahir:
                         self.az_all += 1
                         self.az_won += 1 if a_tok == body[i] else 0
                     on_track = on_track and a_tok == body[i]
-                    if answer and unforeseen and (i == 0 or own is not None):   # a claim begins where Zihin
-                        f_tok, f_e = self._zihin_would(where)   # would say the first token (its reading as it
-                        said_it = f_tok is not None and f_e >= SPEAKING_LINE   # speaks), and holds while it would
+                    if answer and unforeseen:                # a claim begins where Zihin would say the first
+                        said_it = z_tok is not None and z_e >= SPEAKING_LINE   # token, and holds while it would
                         if i == 0:                           # say each token and each is the one said
-                            own = (f_tok == body[0]) if said_it else None
+                            own = (z_tok == body[0]) if said_it else None
                         elif own is not None:
-                            own = own and said_it and f_tok == body[i]
+                            own = own and said_it and z_tok == body[i]
                     if self.record and z_tok is None and h_tok is not None:
                         cell = self.situation(answer, i == 0, 0.0)
                         self.alone_all[cell] += 1
@@ -567,9 +558,9 @@ class Cevahir:
     def trust_unforeseen(self) -> Optional[float]:
         """The belief, by the one rule, that Zihin's answer is right where the analogy foresees nothing: of the
         answers Cevahir lived that the analogy foresaw nothing of (no plan, or one under the speaking line) and
-        whose first token Zihin would have said (its reading as it speaks, at the speaking line), how many it would
-        have said whole, each token its guess at the line, knowing the tokens said before it, and the one said.
-        None while there are none: nothing lived says how far Zihin goes alone."""
+        whose first token Zihin would have said (its guess at the speaking line), how many it would have said
+        whole, each token its guess at the line, knowing the tokens said before it, and the one said. None while
+        there are none: nothing lived says how far Zihin goes alone."""
         if not self.za_all:
             return None
         return (self.za_won + 0.5) / (self.za_all + 1.0)
