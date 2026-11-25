@@ -485,6 +485,17 @@ def test_only_a_word_never_met_stands_for_itself(FastCortex):
     assert ep.relation("the") is None and ep.with_w["the"] == 48
     assert ep._plan(["the", "saw", "Can", "."])[0] is None
     assert ep._plan(["Zeki", "saw", "Can", "."])[0] == two("saw", "Zeki", "Can")[1]
+    # The order lived answers keep their lists in (MODEL.md 12.6): the items ";" ends first, then the items "AND"
+    # joins, each by the first place it names. A plan put together by parts is said in that order.
+    assert ep._list_order() == (";", "AND")
+    lived = the("took", "Ece", "pen")[1]
+    misplaced = lived[8:18] + ["AND"] + lived[:7] + [";"] + lived[19:]   # "take . agent ... AND * pen ... ; ..."
+    assert misplaced != lived and ep._in_order(misplaced) == lived
+    moves = Episodes()                                                   # answers that name no places: no lists
+    for w in ("walk", "run", "look", "jump"):
+        moves.live([w], ["I_" + w.upper()])
+        moves.live([w, "twice"], ["I_" + w.upper()] * 2)
+    assert moves._list_order() is None and moves._in_order(["I_RUN", "I_WALK"]) == ["I_RUN", "I_WALK"]
 
 
 def test_a_word_inside_and_outside_a_part_lends_no_change_where_the_answer_names_no_places(FastCortex):

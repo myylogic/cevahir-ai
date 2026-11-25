@@ -722,6 +722,16 @@ are mended by the same store of episodes.
   surroundings (does a change read in one place carry to another?). An exchange's belief is that record times the
   share of the examples that agree. Taking a part out is an exchange for nothing; exchanges are tried for the asked
   utterance's own parts only, after the parts that can be taken out, on a quarter of the search's bound.
+- **The order of an answer's lists.** A change is put back where its example put it, and a run so put can stand out
+  of the order the answer's lists keep: a definite noun's run after a conjunct, a recipient after a modifier of the
+  theme. Where the lived answers keep lists, an answer put together by parts is said in their order. What the lists
+  are is read from the lived answers: a token that ends items and one that stands between them, every item naming a
+  place, taken as the pair that leaves the most lived answers as they were when each answer's items are put in the
+  order of the first place each names, the ended items first (ties keep their order). The pair is believed by the rule
+  on all lived answers that hold it and used at the speaking line; it is read again as life doubles. In COGS it is ";"
+  (ending each definite noun's run) and "AND" (between conjuncts), and all 23,222 lived answers that name places keep
+  that order; SCAN's answers name no places, so no pair is read and nothing is reordered. A plan over places is a
+  lived answer filled and keeps its order already; only plans by parts are reordered (NOTES.md 8.18).
 
 Nothing of COGS is named here: no word, mark or form of its answers. What the mechanism assumes is general: an answer
 may name the places of what was said by their numbers, and runs of the same shape in an answer keep the order in which

@@ -1221,9 +1221,42 @@ to subject (common) 144 / 0 / 2 → 140 / 5 / 1, pp dative to do dative 135 / 0 
   innermost clause of a right-branching sentence) answered 75 of the 134 cp recursions, but said 9 pp recursions
   wrong where the records' order says 3; the rule above answers them by mending what the search was spent on.
 - **The search's bound.** With the rule, 69 nested sentences were still silent, and the bound on parts tried was
-  what stopped them (with 4,000 instead of 400, 26 were answered, all right; 40 steps instead of 16 changed nothing).
-  The bound decides only where a search is spent: the order of the search is the same, so a plan found within 400
-  is the one found within 4,000, and only a silent utterance can change. It is now 4,000. On every seventh
-  generalisation sentence the hippocampus then answers 2,762, silent 221, wrong 17 (cp recursion 90 / 41 / 3, pp
-  recursion 131 / 2 / 2); the in-distribution file's three silent sentences stay silent, and SCAN is unchanged. The
-  69 searches took 48 s together with the larger bound (12 s with the smaller).
+  what stopped them (with 4,000 parts instead of 400, 26 of them were answered, all right; 40 steps instead of 16
+  changed nothing; the 69 searches took 48 s together, 12 s with the smaller bound). The bound decides only where a
+  search is spent: the order of the search is the same, so a plan found within 400 is the one found within 4,000,
+  and only a silent utterance can change. It is now 4,000, and exchanges, tried on a quarter of it, get 1,000 instead
+  of 100. On every seventh generalisation sentence 39 silent sentences were then answered, 36 right and 3 wrong
+  (2,772 / 208 / 20; two put a recipient on the wrong verb and one links nested clauses to the wrong places, at
+  beliefs of 0.62 to 0.70); the in-distribution
+  file's three silent sentences stay silent, and SCAN is unchanged.
+
+### 8.18 The order of an answer's lists
+
+Of the wrong answers left (8.17), most hold the right runs in a wrong order: "cat ( x _ 1 ) AND * shoe ( x _ 9 ) ;
+like ..." (a definite noun's run after a conjunct), "... AND hedgehog . nmod . beside ( x _ 3 , x _ 6 ) AND sell .
+recipient ( x _ 1 , x _ 12 ) ..." (a recipient after a modifier of the theme). A change is put back where its example
+put it, and a run so put can stand out of the order the answer's lists keep. Mending where a run is put in cost more
+than it gave (8.11). The order is now read from the lived answers as a whole, and an answer put together by parts is
+said in it (MODEL.md 12.6): the token that ends items and the one that stands between them are the pair that leaves
+the most lived answers as they were when their items are put in the order of the first place each names, the ended
+items first. Read from COGS's training file, the pair is ";" and "AND", and all 23,222 lived answers that name places
+keep that order (the 40 that name none, a verb's lambda form, are no lists of this kind). SCAN's answers name no
+places: no pair is read, and nothing is reordered.
+
+Applied to the answers of 8.17 (with the bound of 4,000), every right answer stays as it was, since a right answer
+keeps the lived order already, and 7 of the 20 wrong ones on every seventh generalisation sentence come out right; on
+the whole in-distribution file 1 of 4. The hippocampus alone, with what 8.16 to 8.18 add (rows to follow from
+`m3_analogy.py` with the committed code):
+
+| | before 8.16 (297471c) | after 8.18 |
+|---|---|---|
+| COGS in distribution, the whole test file (3,000) | 2,969 / 5 / 26 | **2,994 / 3 / 3** |
+| COGS generalisation, every seventh sentence (3,000) | 2,600 / 285 / 115 | **2,779 / 208 / 13** |
+| SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same |
+
+By kind on every seventh generalisation sentence, after 8.18: cp recursion 94 / 39 / 1, pp recursion 133 / 2 / 0,
+the three verb-class kinds 436 of 437 right, a primitive in a new role 138 of 138 (an infinitive's argument), 128 of
+128 and 123 of 135 (object, common and proper), 143 of 146 and 145 of 146 (subject, common and proper), subject to
+object (proper) 138 / 14 / 1, and a phrase on a subject 0 / 138 / 0 still. Of the 13 wrong answers left, 10 hold
+other tokens than the lived answer (a role on the wrong verb, a wrong place), and 3 the same tokens with places
+exchanged inside the items or a run put inside another, which no order of the items mends.

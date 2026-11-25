@@ -72,6 +72,13 @@ with several places at once, done on the episodes the hippocampus keeps.
   for "look opposite", keeps "look"'s token, and says nothing of what becomes of it when "run" is exchanged); each
   case is believed by its own record (lived examples exchanged as if not lived, the change read from an example with
   the same, or with other, surroundings). Taking a part out is the exchange for nothing.
+- **The order of an answer's lists.** Where the lived answers keep lists, an answer put together by parts is said in
+  their order: a token that ends items and one that stands between them (every item naming a place) are read from the
+  lived answers, as the pair that leaves the most of them as they were lived when their items are put in the order of
+  the first place each names, the ended items first; it is believed by the rule on all of them, and used at the
+  speaking line. A change put back where the example put it may leave a run out of that order; the answer is said in
+  the order all lived answers keep. In COGS the pair is ";" and "AND", and every one of the lived answers that name
+  places keeps it; SCAN's answers name no places and have none.
 
 Nothing here names a language, a word or a format: tokens are what was said, split as Zihin splits (words and marks).
 """
@@ -128,6 +135,8 @@ class Episodes:
         self._exchanges: Dict[tuple, float] = {}               # the record of each kind of exchange
         self._asked: Dict[tuple, tuple] = {}
         self._alike: Dict[Tuple[str, str], bool] = {}
+        self._order: Optional[Tuple[str, str]] = None          # how lived answers keep their lists (read as life doubles)
+        self._order_at = -1
         self._at: Dict[tuple, List[int]] = {}                  # the dialogues of each word, by its neighbours' shapes
         self._owns: Dict[tuple, Dict[int, str]] = {}           # what its token always had after it there
         self._forgotten = 0
@@ -187,6 +196,7 @@ class Episodes:
         self._rel.clear()
         self._rests.clear()
         self._made_at = -1                                     # the kinds and frames are read again
+        self._order_at = -1
         self._forgotten += 1
 
     def state(self) -> dict:
@@ -261,11 +271,82 @@ class Episodes:
         if parts and self.said and not (got[0] is not None and got[1] >= SPEAKING_LINE):
             plan, e, n = self._by_parts(tuple(said), {}, [PARTS_BUDGET], 0)
             if plan is not None:
-                got = (plan, e, n)
+                got = (self._in_order(plan), e, n)
         if len(self._asked) > 4096:
             self._asked.clear()
         self._asked[key] = got
         return (list(got[0]) if got[0] is not None else None), got[1], got[2]
+
+    @staticmethod
+    def _ordered(a: Sequence[str], end: str, between: str) -> Optional[List[str]]:
+        """An answer's items in the order of the first place each names: the items ``end`` ends first, then the items
+        ``between`` joins, each kept as its own list; None where an item names no place (not a list of this kind)."""
+        items, cur = [], []
+        for t in a:
+            if t == end or t == between:
+                items.append((cur, t))
+                cur = []
+            else:
+                cur.append(t)
+        items.append((cur, None))
+        def first(item: List[str]) -> int:
+            for t in item:
+                if t.isdigit():
+                    return int(t)
+            return -1
+        if any(first(it) < 0 for it, _ in items):
+            return None
+        ended = sorted((it for it, sep in items if sep == end), key=first)   # stable: a tie keeps its order
+        joined = sorted((it for it, sep in items if sep != end), key=first)
+        out: List[str] = []
+        for it in ended:
+            out += it + [end]
+        for k, it in enumerate(joined):
+            out += ([between] if k else []) + it
+        return out
+
+    def _list_order(self) -> Optional[Tuple[str, str]]:
+        """How the lived answers keep their lists, if they keep them so (MODEL.md 12.6): a token that ends items and one
+        that stands between them, every item naming a place, such that the lived answers holding them are said with
+        their items in the order of the first place each names, the ended items first (``_ordered``). The pair is the
+        one whose rule on the answers it leaves as they were lived is highest, read from a sample of them and believed
+        by the rule on all; None where it does not reach the speaking line. Read again as life doubles."""
+        if self._order_at >= 0 and len(self.said) < 2 * max(1, self._order_at):
+            return self._order
+        self._order_at = len(self.said)
+        related = {r for r in (self.relation(w) for w in self.with_w if self.with_w[w] > 0) if r is not None}
+        answers = [a for a in self.answers if a is not None]
+        seen = Counter(t for a in answers for t in set(a))
+        marks = sorted(t for t, c in seen.items() if c >= 2 and not t.isdigit() and t not in related)
+        sample = [(a, set(a)) for a in answers[::max(1, len(answers) // 512)][:512]]
+        def rule(pairs, end: str, between: str) -> Tuple[float, int]:
+            n = same = 0
+            for a, held in pairs:
+                if end in held or between in held:
+                    got = self._ordered(a, end, between)
+                    if got is not None:
+                        n += 1
+                        same += got == list(a)
+            return (same + 0.5) / (n + 1.0), n
+        best = None
+        for end in marks:
+            for between in marks:
+                if end != between:
+                    r = rule(sample, end, between)
+                    if r[1] and (best is None or r > best[0]):
+                        best = (r, end, between)
+        self._order = None
+        if best is not None and rule([(a, set(a)) for a in answers], best[1], best[2])[0] >= SPEAKING_LINE:
+            self._order = (best[1], best[2])
+        return self._order
+
+    def _in_order(self, plan: List[str]) -> List[str]:
+        """A plan put together by parts, said in the order the lived answers keep their lists (``_list_order``)."""
+        order = self._list_order()
+        if order is None:
+            return plan
+        got = self._ordered(plan, *order)
+        return plan if got is None else got
 
     def _plain(self, said: Sequence[str]) -> Tuple[Optional[List[str]], float, int]:
         plan, agree, filled, d = self._plan(said)
