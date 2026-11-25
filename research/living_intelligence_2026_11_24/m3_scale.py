@@ -2,7 +2,7 @@
 """M3: where Cevahir's memory and time go as it reads, and how much of a text the harmony already knows
 (NOTES.md, 8.28).
 
-    python m3_scale.py memory CORPUS --chars N [--variant full] [--ledger disk|memory|none] [--out ...]
+    python m3_scale.py memory CORPUS --chars N [--variant full] [--ledger disk|memory|none] [--night] [--out ...]
     python m3_scale.py known CORPUS [--chars N] [--out ...]
 
 ``memory``: a new Cevahir reads the first N characters of the corpus stream (``Cevahir.read``, in ten pieces), with
@@ -10,8 +10,9 @@ Zihin's ledger on disk (``Cevahir(ledger=True)``: the file in a temporary folder
 memory (the ledger as a dict, as Cevahir kept it before 8.28), or none. Reported: the seconds, the resident memory
 the process gained (before and after ``malloc_trim``), Zihin's units, ties and moments, the cortex's size, and the
 bytes of every part of Cevahir reached by a walk of its objects (each object counted once; a tensor or an array by
-the bytes it holds, capacity included), largest first, with the bytes per character. The cortex's store is held by
-the compiled core and is not walked (its sizes are given).
+the bytes it holds, capacity included), largest first, with the bytes per character; with ``--night``, the bytes
+walked again after Zihin's night (``Mind.consolidate``). The cortex's store is held by the compiled core and is not
+walked (its sizes are given).
 
 ``known``: the harmony alone reads the stream as Cevahir's harmony does, sentence by sentence (Zihin's sentence
 split). Before it lives a sentence, a character is foreseen when the harmony believed it at the speaking line or
@@ -92,6 +93,20 @@ def deep_bytes(o, seen: set) -> int:
     return n
 
 
+def walk(c) -> dict:
+    """The bytes of every part of Cevahir and of Zihin (its substance, mind and session), the cortex's store apart."""
+    parts, seen = {}, set()
+    for owner, prefix in ((c.mind.S, "zihin.S."), (c.mind, "zihin.mind."), (c.session, "zihin.session."),
+                          (c, "cevahir.")):
+        names = sorted(set(getattr(type(owner), "__slots__", ())) | set(getattr(owner, "__dict__", {})))
+        for k in names:
+            if k == "cortex" or not hasattr(owner, k):
+                continue
+            parts[prefix + k] = deep_bytes(getattr(owner, k), seen)
+        seen.add(id(owner))
+    return parts
+
+
 def memory(a) -> dict:
     import torch
     torch.set_num_threads(1)
@@ -112,20 +127,18 @@ def memory(a) -> dict:
     ctypes.CDLL("libc.so.6").malloc_trim(0)
     rss_trimmed = resident_mb() - base
     S = c.mind.S
-    parts, seen = {}, set()
-    for owner, prefix in ((S, "zihin.S."), (c.mind, "zihin.mind."), (c.session, "zihin.session."), (c, "cevahir.")):
-        names = sorted(set(getattr(type(owner), "__slots__", ())) | set(getattr(owner, "__dict__", {})))
-        for k in names:
-            if k == "cortex" or not hasattr(owner, k):
-                continue
-            parts[prefix + k] = deep_bytes(getattr(owner, k), seen)
-        seen.add(id(owner))
+    parts = walk(c)
+    night = None
+    if a.night:                                          # Zihin's night (Mind.consolidate), then walked again
+        c.mind.consolidate()
+        gc.collect()
+        night = round(sum(walk(c).values()) / 1e6, 1)
     n = len(text)
     log = S.log
     row = {"what": "memory", "corpus": a.corpus, "code": CODE, "chars": n, "variant": a.variant, "ledger": a.ledger,
            "seconds": round(seconds, 1), "chars_per_second": round(n / seconds, 1),
            "resident_mb": round(rss, 1), "resident_trimmed_mb": round(rss_trimmed, 1),
-           "walked_mb": round(sum(parts.values()) / 1e6, 1),
+           "walked_mb": round(sum(parts.values()) / 1e6, 1), "walked_after_night_mb": night,
            "zihin": {"moments": c.mind.t, "units": int(S.n_units), "ties": int(S.n_ties)},
            "ledger_disk_mb": round(log.disk_bytes() / 1e6, 1) if hasattr(log, "disk_bytes") else 0.0,
            "cortex": c.cortex.size(),
@@ -176,6 +189,7 @@ def main() -> None:
     ap.add_argument("--chars", type=int, default=0)
     ap.add_argument("--variant", default="full")
     ap.add_argument("--ledger", default="disk", choices=["disk", "memory", "none"])
+    ap.add_argument("--night", action="store_true", help="memory: walk again after Zihin's night")
     ap.add_argument("--out", default=os.path.join(HERE, "results", "m3_scale.jsonl"))
     a = ap.parse_args()
     if a.what == "memory" and not a.chars:
