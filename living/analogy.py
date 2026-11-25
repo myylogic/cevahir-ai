@@ -60,10 +60,11 @@ with several places at once, done on the episodes the hippocampus keeps.
   answers is put back the same way. Only parts made of words with relations are exchanged: what such a word brings to
   an answer is its own token wherever it stands, while what a word without a relation brings depends on where it
   stands (SCAN's "right" turns once, or four times after "around"), and only for a part that holds a word with a
-  relation (an exchange puts one part's meaning where another's was). The change is read from the asked part's own
-  frame with the same surroundings or, where there is none, wherever both kinds of part were lived; each case is
-  believed by its own record (lived examples exchanged as if not lived, the change read from an example with the same,
-  or with other, surroundings). Taking a part out is the exchange for nothing.
+  relation and none of the asked part's words (an exchange puts one part's meaning where another's was; "jump" for
+  "jump opposite" would add "opposite", a word that brings no token of its own). The change is read from the asked
+  part's own frame with the same surroundings or, where there is none, wherever both kinds of part were lived; each
+  case is believed by its own record (lived examples exchanged as if not lived, the change read from an example with
+  the same, or with other, surroundings). Taking a part out is the exchange for nothing.
 
 Nothing here names a language, a word or a format: tokens are what was said, split as Zihin splits (words and marks).
 """
@@ -522,8 +523,8 @@ class Episodes:
                     return None, 0.0, 0
                 i0, q0 = divmod(code, 1024)
                 y = self.said[i0][q0:q0 + m2] if self.said[i0] is not None else None
-                if not y:
-                    continue
+                if not y or set(y) & set(u[p:p + m]):
+                    continue                                   # a part holding the asked one is not another part
                 rest_plan, rest_e, _ = self._by_parts(u[:p] + y + u[p + m:], memo, budget, depth + 1)
                 if rest_plan is None:
                     continue
@@ -659,7 +660,15 @@ class Episodes:
                     u: Tuple[str, ...], p: int, rest_plan: List[str], instead: Sequence[str] = ()) -> Optional[List[str]]:
         """What taking the part out of the example (o, its part at p2), or exchanging it for ``instead``, changed in its
         answer, put into the answer of the asked utterance's rest (u, its part at p, likewise taken out or
-        exchanged). None where the change cannot be put, or where it leaves anything of ``instead`` in the answer."""
+        exchanged). None where the change cannot be put, or where it leaves anything of ``instead`` in the answer, or
+        where the example's answer names no places of what was said and a word with a relation stands both in the
+        example's part and outside it: which of the two its tokens belong to cannot then be told ("look opposite right
+        and look opposite right twice" says nothing of taking "opposite right and look" out of a command whose first
+        action is not "look"), while in an answer that names places a token is told apart by its place."""
+        if not any(t.isdigit() and int(t) < len(o) for t in a2):
+            inside = set(o[p2:p2 + m])
+            if any(w in inside and self.relation(w) is not None for w in o[:p2] + o[p2 + m:]):
+                return None
         a2s = self._shift(a2_rest, p2, m, len(o) - m + len(instead), len(instead))
         a_s = self._shift(rest_plan, p, m, len(u) - m + len(instead), len(instead))
         def cls(k: int, pp: int) -> str:

@@ -413,6 +413,25 @@ def test_a_word_that_stands_twice_is_not_filled_where_only_one_of_it_changes(Fas
     assert plan == ["I_RUN", "I_JUMP"] and agree == filled == 2
 
 
+def test_a_word_inside_and_outside_a_part_lends_no_change_where_the_answer_names_no_places(FastCortex):
+    """Taking "opposite right and look" out of "look opposite right and look opposite right twice": its answer's
+    I_LOOK may be either look's, so the example lends no change; where an answer names the places of what was said
+    (as COGS's do), a token is told apart by its place and the example still lends one."""
+    from living.analogy import Episodes
+    ep = Episodes()
+    for word, act in (("look", "I_LOOK"), ("jump", "I_JUMP"), ("walk", "I_WALK"), ("run", "I_RUN")):
+        ep.live([word], [act])
+    assert ep.relation("look") == "I_LOOK"
+    o = ("look", "opposite", "right", "and", "look", "opposite", "right", "twice")
+    a2 = ["I_TURN_RIGHT", "I_TURN_RIGHT", "I_LOOK"] * 3
+    a2_rest = ["I_TURN_RIGHT", "I_TURN_RIGHT", "I_LOOK"] * 2
+    u = ("jump", "opposite", "right", "and", "look", "opposite", "right", "twice")
+    rest = ["I_TURN_RIGHT", "I_TURN_RIGHT", "I_JUMP"] * 2
+    assert ep._transplant(o, 1, 4, a2_rest, a2, u, 1, rest) is None
+    named = ["look", "0"] + a2                                           # the same answer naming a place
+    assert ep._transplant(o, 1, 4, ["look", "0"] + a2_rest, named, u, 1, ["jump", "0"] + rest) is not None
+
+
 def _moves():
     """Commands of a small grammar of moves, built as SCAN builds them: an action, a way (around: four turns and acts;
     opposite: two turns and an act) and a side, said once, twice or thrice, and two of them joined by "and"."""

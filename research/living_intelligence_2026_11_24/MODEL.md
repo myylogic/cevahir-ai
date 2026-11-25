@@ -690,9 +690,11 @@ are mended by the same store of episodes.
   while it stands, and a change that leaves any of them named is not put. Only parts whose words have relations are
   exchanged: what such a word brings to an answer is its own token wherever it stands, while what a word without one
   brings depends on where it stands (SCAN's "right" turns once, or four times after "around"). And a part is
-  exchanged only for one that holds a word with a relation: an exchange puts one part's meaning where another's was,
-  and a part with no relation has none of its own to give way (SCAN's "turn", whose turns belong to the side named
-  after it, gives way to "walk" four times in "around" and twelve times in "around ... thrice"). The change is read
+  exchanged only for one that holds a word with a relation and none of the asked part's words: an exchange puts one
+  part's meaning where another's was, and a part with no relation has none of its own to give way (SCAN's "turn",
+  whose turns belong to the side named after it, gives way to "walk" four times in "around" and twelve times in
+  "around ... thrice"), while a part that holds the asked one ("jump opposite" for "jump") only adds a word that
+  brings no token of its own. The change is read
   first from lived parts of the asked part's own frame with the same surroundings; where there are none, from the
   places where both kinds of part were lived. Each case has its own record, read as a frame's is: lived examples of
   the asked part's shape exchanged for the same part, foreseen as if not lived, with the change read from an example
