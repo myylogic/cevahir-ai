@@ -53,8 +53,11 @@ with several places at once, done on the episodes the hippocampus keeps.
   their answers. The change is put into the rest's answer:
   the part's own words and places by their place in the part, everything else through the alignment of the two rests'
   answers (read by what they say about the places near the part: the numbers that name them and the relations of the
-  words there); a token of an answer that is a whole number smaller than the utterance's length is read as a place of
-  it, and moves with the places. What the example put at the very beginning goes at the beginning; where an answer
+  words there; a place far from the part, and its word's token, by what links it to the place right beside the part,
+  the answer's items followed link by link: the verb "to a hero" hangs on governs "table" through "nmod . on" and
+  "theme", and is put for the token that governs the place beside the asked part through "theme", not for the first
+  verb); a token of an answer that is a whole number smaller than the utterance's length is read as a place of it,
+  and moves with the places. What the example put at the very beginning goes at the beginning; where an answer
   lists runs of the same shape, a new run goes by its place among its neighbours (a list keeps the order of what was
   said). The examples vote; a step's belief is the frame's record times the share of the examples that agree, and a
   plan's belief is that of its weakest step (the rest's own included): the steps of a chain read the same kind of
@@ -950,6 +953,39 @@ class Episodes:
                     break
         return None, 0.0, 0
 
+    def _governors(self, ans: Sequence[str], w: Sequence[str], k: int) -> List[Tuple[str, tuple, str]]:
+        """What governs the place k of the utterance w in its answer ans, link by link: the items "token . role
+        ( x _ i , arg )" whose second argument names the place (its number, or, where the answer names a word by
+        its own token, that token), then the place i in turn; each link as (i, role, token)."""
+        links = []
+        item: List[str] = []
+        for t in list(ans) + ["AND"]:
+            if t not in ("AND", ";"):
+                item.append(t)
+                continue
+            if "(" in item and item[-1] == ")":
+                j = item.index("(")
+                inner = item[j + 1:-1]
+                if len(inner) >= 5 and inner[:2] == ["x", "_"] and inner[3] == ",":
+                    arg = inner[4:]
+                    named = arg[2] if len(arg) == 3 and arg[:2] == ["x", "_"] else (arg[0] if len(arg) == 1 else None)
+                    if named is not None and j > 0:
+                        links.append((named, inner[2], tuple(item[1:j]), item[0]))
+            item = []
+        def chain(start: str) -> List[Tuple[str, tuple, str]]:
+            out, seen, cur = [], {start}, start
+            while True:
+                got = next(((g, role, tok) for arg, g, role, tok in links if arg == cur), None)
+                if got is None or got[0] in seen:
+                    return out
+                out.append(got)
+                seen.add(got[0])
+                cur = got[0]
+        found = chain(str(k))
+        if not found and self.relation(w[k]) == w[k]:
+            found = chain(w[k])
+        return found
+
     def _rest_believed(self, r: Tuple[str, ...]) -> Tuple[Optional[List[str]], float]:
         """The answer of a rest as a record reads its examples' rests (``_rest``: the one lived, or the analogy's own
         at the speaking line), with its belief."""
@@ -1097,6 +1133,19 @@ class Episodes:
                     places[t2][t] += 1
                 elif r2[bi + d].startswith("\u25a1"):
                     words[t2][t] += 1
+        for side2, side in ((p2 - 1, p - 1), (p2 + m, p + m)):   # far tokens: by what links them to the place
+            if not (0 <= side2 < len(o) and 0 <= side < len(u)):   # right beside the part
+                continue
+            mine_g = self._governors(a_s, u, side)
+            for g2, role, pred2 in self._governors(a2s, o, side2):
+                if not g2.isdigit() or int(g2) >= len(o) or cls(int(g2), p2) not in ("L", "R"):
+                    continue                                   # near places are read by their place
+                g, pred = next(((g, pred) for g, role_, pred in mine_g if role_ == role), (None, None))
+                if g is None or not g.isdigit() or int(g) >= len(u):
+                    continue
+                places[g2] = Counter({g: len(a2s) + 1})
+                if self.relation(o[int(g2)]) == pred2 and self.relation(u[int(g)]) == pred:
+                    words[pred2] = Counter({pred: len(a2s) + 1})
         own: Dict[str, str] = {}
         for k in range(m):
             x, y = o[p2 + k], u[p + k]

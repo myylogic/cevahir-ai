@@ -352,6 +352,33 @@ def test_what_stands_right_beside_a_part_is_read_by_its_kind(FastCortex):
     assert a[3] != b[3] and a[4] == b[4]          # right beside the part read by kind, one further on by shape
 
 
+def test_what_governs_the_place_beside_a_part_is_read_link_by_link(FastCortex):
+    from living.analogy import Episodes
+    ep = Episodes()
+    said = "Caleb lended a brush on the table to a hero .".split()
+    answer = ("* table ( x _ 6 ) ; brush ( x _ 3 ) ; hero ( x _ 9 ) ; lend . agent ( x _ 1 , Caleb ) AND lend . theme "
+              "( x _ 1 , x _ 3 ) AND lend . recipient ( x _ 1 , x _ 9 ) AND brush . nmod . on ( x _ 3 , x _ 6 )").split()
+    ep.live(said, answer)
+    got = ep._governors(answer, said, 6)                  # "table", right before "to a hero"
+    assert [(g, role[-1], tok) for g, role, tok in got] == [("3", "on", "brush"), ("1", "theme", "lend")]
+    asked = "Emma imagined that a boy teleported the notebook to a hero .".split()
+    rest = ("* notebook ( x _ 7 ) ; boy ( x _ 4 ) ; imagine . agent ( x _ 1 , Emma ) AND imagine . ccomp ( x _ 1 , x _ 5 )"
+            " AND teleport . agent ( x _ 5 , x _ 4 ) AND teleport . theme ( x _ 5 , x _ 7 )").split()
+    mine = ep._governors(rest, asked, 7)                  # through "theme" the verb that governs "notebook" is
+    assert next(g for g, role, tok in mine if role[-1] == "theme") == "5"      # "teleport", not the first verb
+    names = ["Liam", "Paula", "Emma", "Noah", "Ava", "Mia", "Leo", "Zoe"]
+    for a in names:                                       # names said in a few dialogues each: each its own token
+        for b in names:
+            if a != b:
+                for verb, lemma in (("sent", "send"), ("saw", "see")):
+                    ep.live([a, verb, b, "."], [lemma, ".", "agent", "(", "x", "_", "1", ",", a, ")", "AND",
+                                                lemma, ".", "theme", "(", "x", "_", "1", ",", b, ")"])
+    assert ep.relation("Paula") == "Paula"
+    named = ep._governors("send . agent ( x _ 1 , Liam ) AND send . theme ( x _ 1 , Paula )".split(),
+                          "Liam sent Paula to a dog .".split(), 2)            # a name is named by its own token
+    assert [(g, role[-1], tok) for g, role, tok in named] == [("1", "theme", "send")]
+
+
 def test_parts_answer_nesting_deeper_than_any_lived(FastCortex):
     from living.analogy import Episodes
     from living.evidence import SPEAKING_LINE
