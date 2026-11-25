@@ -1690,3 +1690,52 @@ sentences: three with eight, ten and ten clauses nested, one with nine phrases n
 liked that a chicken gave Emma Lina .", for which no step is found even with the line lowered to 0.45. Asking every seventh generalisation sentence took 362 s and 417 s on two
 shards at once, the in-distribution file 241 s and 213 s (the machine shared with a run of the whole Cevahir and
 another battery; 435 s and 270 s in one process each for 8.23).
+
+### 8.25 The whole generalisation file
+
+Sections 8.14 to 8.24 measured every seventh generalisation sentence. The whole file is 21,000 sentences, a thousand
+of each of its 21 kinds. Asked of the hippocampus alone with the code of 8.24, every line of the training file lived
+once (`m3_analogy.py --every 1 --shards 4`, the four shards at once, 866 s to 922 s each; rows of
+`results/m3_analogy.jsonl` written by b003819):
+
+| kind | right / silent / wrong |
+|---|---|
+| active to passive | 1,000 / 0 / 0 |
+| object omitted transitive to transitive | 1,000 / 0 / 0 |
+| object to subject (common) | 1,000 / 0 / 0 |
+| object to subject (proper) | 1,000 / 0 / 0 |
+| only seen as transitive subject, as unaccusative subject | 1,000 / 0 / 0 |
+| only seen as unaccusative subject, as unergative subject | 1,000 / 0 / 0 |
+| passive to active | 1,000 / 0 / 0 |
+| primitive to infinitival argument | 1,000 / 0 / 0 |
+| unaccusative to transitive | 1,000 / 0 / 0 |
+| do dative to pp dative | 999 / 1 / 0 |
+| a phrase on the object to a phrase on the subject | 999 / 1 / 0 |
+| only seen as unaccusative subject, as subject of a transitive verb without its object | 999 / 1 / 0 |
+| pp dative to do dative | 999 / 1 / 0 |
+| primitive to object (common) | 999 / 1 / 0 |
+| primitive to subject (proper) | 999 / 0 / 1 |
+| subject to object (common) | 999 / 1 / 0 |
+| primitive to subject (common) | 998 / 2 / 0 |
+| pp recursion | 994 / 4 / 2 |
+| primitive to object (proper) | 985 / 14 / 1 |
+| subject to object (proper) | 985 / 14 / 1 |
+| cp recursion | 935 / 63 / 2 |
+| **all 21 kinds** | **20,890 / 103 / 7** |
+
+99.48 % of the sentences are answered right, 0.03 % wrong, and nine kinds whole. Clauses nested deeper than any
+lived are answered less the deeper they go: 99 of the 100 sentences with three "that" clauses, 98 of 100 with four,
+93 of 100 with seven, 91 of 100 with ten and 83 of 100 with twelve; 58 of the 63 silent ones nest seven clauses or
+more. Of the 28 names asked as objects that are silent, 24 stand inside one clause ("A king liked that a chicken gave
+Emma Lina ." is among them).
+
+The seven wrong are each believed at 0.61 to 0.63, just over the line: "The mouse liked that a boy appreciated that
+Emma handed Jackson Lina ." and the same sentence with "Paula" (a name met only as a subject, or only alone, asked
+as the second object of a verb inside two clauses); two chains of clauses, "A baby liked that the girl liked that the
+cat liked that Emma hoped that the horse liked that Chloe hoped that Oliver was given the cookie in a garden by
+Sophia ." and "Noah valued that the child liked that William hoped that Leah expected that Ava respected that the
+girl valued that Olivia examined Emma ."; two chains of phrases, "The giraffe packed a bat beside a table beside the
+stage beside a gardner in the car in a pit on a tree in the house ." and "The cat liked the girl on a blanket in the
+car in the backyard beside the table in the house on a stage beside a cassette beside the gardner on a bag ."; and
+"Paula sent a can on a table to Chloe ." (a name met only alone, asked as a subject). Every seventh sentence holds
+none of them.

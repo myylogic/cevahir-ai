@@ -31,12 +31,12 @@
 >   together facts read apart, it answers every question, and a Transformer trained on the very stream it lived answers
 >   none. At school it answers 342 of 405 examination questions, every one of the 63 deductions among them (a
 >   Transformer trained on the same lessons: 203, and none of the deductions). On COGS the hippocampus alone answers
->   2,999 of the 3,000 in-distribution test sentences (wrong on none) and 2,995 of every seventh sentence of the
->   generalisation set (3,000; wrong on none, silent on 5): among them all 138 with a phrase on the subject where
->   phrases were lived only on objects, 134 of 135 with phrases nested deeper than any it lived, a kind on which
->   published Transformers score 0 %, 131 of 134 with clauses nested so, 287 of the 288 names met only as subjects or
->   alone and asked as objects, and all 437 whose verb decides the part its noun plays, read from what a word's token
->   always had after it where the word was said. Answering by parts is held to records of its own, read by the one
+>   2,999 of the 3,000 in-distribution test sentences (wrong on none) and 20,890 of the 21,000 sentences of the
+>   generalisation set (99.5 %; 7 wrong, 103 silent), every sentence of nine of its 21 kinds: among them 999 of the
+>   1,000 with a phrase on the subject where phrases were lived only on objects, 994 of 1,000 with phrases nested
+>   deeper than any it lived, a kind on which published Transformers score 0 %, 935 of 1,000 with clauses nested so,
+>   1,970 of the 2,000 names met only as subjects or alone and asked as objects, and 2,999 of the 3,000 whose verb
+>   decides the part its noun plays, read from what a word's token always had after it where the word was said. Answering by parts is held to records of its own, read by the one
 >   rule from what was lived, says its answers in the order of the places their items name at every step, makes a
 >   change in the item it stands for, believes an answer no further than the roles it gives its words were lived, and
 >   where nothing lived around a part answers, reads every word by its kind, takes that part out first and puts back
