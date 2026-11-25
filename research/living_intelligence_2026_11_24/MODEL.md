@@ -802,7 +802,10 @@ are mended by the same store of episodes.
   so: nothing lived says what roles it takes. A token that took few takes a new one as the tokens that took those
   do, as the generalisation set asks (a verb met only without an object, asked with one, takes an agent as almost all
   verbs that take a theme do). Where the first search's answer is held back so, the second search is made; the items
-  are the answer's "token . role ( ... )", read as the far places of 12.6 read them (NOTES.md 8.24).
+  are the answer's "token . role ( ... )", read as the far places of 12.6 read them (NOTES.md 8.24). So too the roles
+  said of one place: two roles the answer gives one place that no lived answer gave one place together (two phrases
+  on one noun, a clause and a thing of one verb) are believed by the rule with nothing for them, over the lived places
+  that took the rarer of the two (NOTES.md 8.26).
 
 Nothing of COGS is named here: no word, mark or form of its answers. What the mechanism assumes is general: an answer
 may name the places of what was said by their numbers or by a word's own token, and the items of an answer keep the

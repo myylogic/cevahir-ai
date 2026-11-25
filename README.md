@@ -26,21 +26,21 @@
 >   0.4–1.1 % more bits); a script never met opens a channel that is watched until it shows structure; any entry can be
 >   forgotten exactly; the whole mind is kept and loaded bit for bit.
 >
->   Measured: on the six published SCAN splits it answers 1,199 of 1,200 test commands (200 of each), and with the
->   final code 300 of 300 (50 of each), wrong and silent on none. Where an answer has to put
->   together facts read apart, it answers every question, and a Transformer trained on the very stream it lived answers
->   none. At school it answers 342 of 405 examination questions, every one of the 63 deductions among them (a
->   Transformer trained on the same lessons: 203, and none of the deductions). On COGS the hippocampus alone answers
->   2,999 of the 3,000 in-distribution test sentences (wrong on none) and 20,890 of the 21,000 sentences of the
->   generalisation set (99.5 %; 7 wrong, 103 silent), every sentence of nine of its 21 kinds: among them 999 of the
->   1,000 with a phrase on the subject where phrases were lived only on objects, 994 of 1,000 with phrases nested
->   deeper than any it lived, a kind on which published Transformers score 0 %, 935 of 1,000 with clauses nested so,
->   1,970 of the 2,000 names met only as subjects or alone and asked as objects, and 2,999 of the 3,000 whose verb
->   decides the part its noun plays, read from what a word's token always had after it where the word was said. Answering by parts is held to records of its own, read by the one
->   rule from what was lived, says its answers in the order of the places their items name at every step, makes a
->   change in the item it stands for, believes an answer no further than the roles it gives its words were lived, and
->   where nothing lived around a part answers, reads every word by its kind, takes that part out first and puts back
->   as items what parts of its shape add elsewhere. Alone on SCAN it says nothing wrong.
+>   Measured: on the six published SCAN splits it answers 1,199 of 1,200 test commands (200 of each), and with the final
+>   code 300 of 300 (50 of each), wrong and silent on none. Where an answer has to put together facts read apart, it
+>   answers every question, and a Transformer trained on the very stream it lived answers none. At school it answers 342
+>   of 405 examination questions, every one of the 63 deductions among them (a Transformer trained on the same lessons:
+>   203, and none of the deductions). On COGS the hippocampus alone answers 2,999 of the 3,000 in-distribution test
+>   sentences (wrong on none) and 20,890 of the 21,000 sentences of the generalisation set (99.5 %; 2 wrong, 108
+>   silent), every sentence of nine of its 21 kinds: among them 999 of the 1,000 with a phrase on the subject where
+>   phrases were lived only on objects, 994 of 1,000 with phrases nested deeper than any it lived, a kind on which
+>   published Transformers score 0 %, 935 of 1,000 with clauses nested so, 1,970 of the 2,000 names met only as subjects
+>   or alone and asked as objects, and 2,999 of the 3,000 whose verb decides the part its noun plays, read from what a
+>   word's token always had after it where the word was said. Answering by parts is held to records of its own, read by
+>   the one rule from what was lived, says its answers in the order of the places their items name at every step, makes
+>   a change in the item it stands for, believes an answer no further than the roles it gives its words, alone and
+>   together, were lived, and where nothing lived around a part answers, reads every word by its kind, takes that part
+>   out first and puts back as items what parts of its shape add elsewhere. Alone on SCAN it says nothing wrong.
 >   [The model, section 12](research/living_intelligence_2026_11_24/MODEL.md) · [the measurements, section 8](research/living_intelligence_2026_11_24/NOTES.md)
 > - **Living Intelligence, a new study (24 November 2026):** a new body for the mind, on the same rule. It keeps no list
 >   of words and no vector per word. It keeps a cortex of letter contexts that grows with what it lives, sublinearly.

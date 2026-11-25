@@ -1739,3 +1739,49 @@ stage beside a gardner in the car in a pit on a tree in the house ." and "The ca
 car in the backyard beside the table in the house on a stage beside a cassette beside the gardner on a bag ."; and
 "Paula sent a can on a table to Chloe ." (a name met only alone, asked as a subject). Every seventh sentence holds
 none of them.
+
+### 8.26 Two roles of one place, as lived together
+
+Of the seven wrong answers on the whole generalisation file (8.25), five give one place two roles that no lived answer
+gives one place: a noun two phrases ("table . nmod . beside" twice in "The giraffe packed a bat beside a table beside
+the stage beside a gardner ..."; "blanket . nmod . in" and "blanket . nmod . beside" in "The cat liked the girl on a
+blanket in the car ..."), and a verb a clause and a thing ("value . ccomp" with "value . theme" in "... the girl valued
+that Olivia examined Emma ."; "appreciate . ccomp" with "appreciate . theme" in "The mouse liked that a boy appreciated
+that Emma handed Jackson Lina ." and the same with "Paula"). In each a step put a phrase, or a thing, back on the wrong
+word, and nothing held the answer back: the roles each token takes were lived (8.24), only not together.
+
+What was built (MODEL.md 12.6): **two roles said of one place in the answer given were said of one place in a lived
+answer** (bd2255e). The roles said of each place are read from the items as the far places are ("token . role ( x _ k
+, ... )" said of place k); a pair never lived together is believed by the rule with nothing for it, over the lived
+places that took the rarer of the two roles, and the answer's belief is the least of its own and these. As with the
+roles of 8.24, only the answer given is read so. Of the 20,890 right answers on the whole file none gives one place a
+pair of roles never lived together; the five wrong answers are held back (the second search finds nothing for them),
+and nothing else changes.
+
+The hippocampus alone (right / silent / wrong; rows of `results/m3_analogy.jsonl` written by bd2255e):
+
+| | 8.25 (b003819) | 8.26 (bd2255e) |
+|---|---|---|
+| COGS generalisation, the whole file (21,000) | 20,890 / 103 / 7 | **20,890 / 108 / 2** |
+| COGS in distribution, the whole test file (3,000) | 2,999 / 1 / 0 | 2,999 / 1 / 0 |
+| COGS in distribution and generalisation, the samples of 300 | 299 / 1 / 0 and 299 / 1 / 0 | the same |
+| SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same |
+
+The two wrong answers left are no list of items at all: "Paula sent a can on a table to Chloe ." comes out as "send .
+agent ( x _ 1 , Paula ) AND 1 , x _ 3 ) AND send . theme ( x _ send . recipient ( x _ 1 , Chloe ) ...". A step put
+back a recipient whose items its example added whole, between two items ("sell . recipient ( x _ 1 , Olivia ) AND"),
+where the alignment of the two rests' answers ended inside an item, and the item opened there was never closed.
+
+Tried and not taken:
+
+- Putting whole items only between items (an insertion its example made between two items goes to the start of the
+  item the alignment put it in, or after the item's end). Both broken answers are then right; but the records of some
+  frames rise (examples that came out broken come out right), the search for parts tries such parts in another order,
+  and four chains of nine to twelve clauses that were right fall silent: the first part tried at the top ("on the
+  table" in "... Oliver found a mouse on the table .") leads to a rest no chain answers, and searching it spends the
+  whole bound, so that the part after it ("a mouse on", whose chain is right) is never tried.
+- Holding back an answer with an item of a shape no lived item has (the answers' own marks kept, every other token one
+  mark): it holds back the two broken answers and no right answer on the whole file; but in a small world whose
+  answers the list order reads with "theme" between items, it holds back every name exchanged for a thing (a name was
+  never a theme there, and the shape of the "item" after "theme" says so), the generalisation the exchange of 8.20 is
+  for.
