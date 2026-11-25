@@ -889,19 +889,33 @@ studied in conversation, in four conditions; the other half (nine per seed) is a
   Transformer answers in hundredths of a second.
 - **Text.** On running text Zihin's voice takes 0.1–1.2 % of the harmony's bits (8.6): what Cevahir knows of a text,
   the harmony mostly knows already. Its gains are in answers that text does not hold.
-- **What the hippocampus cannot answer** (8.7, 8.14): a phrase on a subject when phrases were lived only on objects
-  (silent), a name after a noun phrase where only noun phrases were lived, and parts longer than four tokens.
+- **What the hippocampus cannot answer** (8.7, 8.14, 8.16): a phrase on a subject when phrases were lived only on
+  objects (silent, 138 of the 138 asked of every seventh sentence), a name after a noun phrase where only noun phrases
+  were lived, and parts longer than four tokens. For the first, taking the phrase out and putting back the change
+  read from phrases on objects gives the right tokens; what is missing is their order and a part to take out. Tried
+  on "A donkey in the room sold Ella a donut .", with a new run put among the runs that begin as it does by the place
+  it names first, 27 of the 36 changes read from phrases on objects gave the answer exactly (none before); but where
+  the rest's answer has one conjunct ("The baby screamed"), the new one must come first and its "AND" after it, and
+  the frame of "in the room" after a subject is also that of "sold the cake" ("□ the □"), whose record is 0.02. The
+  same placing, applied to every answer by parts, was not taken: on every seventh generalisation sentence it gave
+  2,700 / 276 / 24 against 2,706 / 275 / 19 (moved early in a chain, a run shifts the places later steps read). An
+  answer's lists, what separates their runs and the order the runs keep, would have to be read from the answers
+  lived as a whole, not mended where a run is put in.
   Answering by parts is held to records read from what was lived (8.14); a change that carries differently in
   surroundings no lived example shares, and that the three tokens around a part do not show, can still be said. On
-  COGS 13 answers in 300 on the generalisation set are wrong; alone on SCAN, none of 300.
+  COGS 19 of 3,000 generalisation sentences and 8 of the 3,000 in-distribution ones are answered wrong; alone on
+  SCAN, none of 300.
 - **The prefrontal decision.** The record that chooses between Zihin's plan and the analogy's was kept unfairly
   (8.7, mended in 8.15); and it is earned by the analogy's plans over places alone, because plans by parts are not
   foreseen while Cevahir lives (they would cost seconds a dialogue). A plan by parts therefore leads over Zihin's on
-  the strength of a record that is not its own: on SCAN, twice in 300, where Zihin was right (8.13).
+  the strength of a record that is not its own: on SCAN, twice in 300, where Zihin was right (8.13). And where the
+  analogy is silent the thought is Zihin's, with no record of its own whole answers: on COGS's generalisation sample
+  Cevahir is wrong 35 times where the analogy alone is wrong 14 (8.7).
 - **Scale.** Every measurement here is at most ten million characters on one machine with four cores; no standard
   large benchmark was run (enwik8 could not be downloaded, section 6.6).
-- **Samples.** COGS was measured on samples of 300 of each file, and SCAN on 200 commands of each split, not on the
-  whole files.
+- **Samples.** Cevahir was measured on samples of COGS (300 of each file) and of SCAN (200, then 50 commands of each
+  split); the hippocampus alone also on the whole in-distribution file of COGS and every seventh sentence of the
+  generalisation file (8.16).
 
 ### 8.12 Reproduce
 
