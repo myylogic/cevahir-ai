@@ -67,14 +67,15 @@ class Cevahir:
 
     def __init__(self, variant: str = "full", switches: Optional[Dict[str, bool]] = None, window: int = 0,
                  cortex: Optional[dict] = None, dil: str = "tr", seed: int = 0, top: int = 12, forms_per: int = 2,
-                 record: bool = True, keep_stream: bool = False, ledger: bool = False):
+                 record: bool = True, keep_stream: bool = False, ledger=False):
         import torch
         from zihin import Mind
-        from zihin.__main__ import CHANNEL, Session
+        from zihin.__main__ import CHANNEL, Session, _log_path
         torch.manual_seed(seed)
         cfg_z = zihin_config(variant, switches)
-        if ledger:                                       # Zihin keeps its ledger (in memory): it can forget exactly
-            cfg_z.keep_log = True
+        if ledger:                                       # Zihin keeps its ledger: it can forget exactly. On disk (a
+            cfg_z.keep_log = True                        # folder given, or a temporary one), see ``keep_ledger``
+            cfg_z.log_path = _log_path(ledger if isinstance(ledger, str) else None)
         self.mind = Mind(cfg_z)
         self.mind.add_channel(CHANNEL, "act")
         if window:
@@ -759,6 +760,29 @@ class Cevahir:
                 del self.written[answer][token][raw]
         e["forgotten"] = True
         return {"forgotten": True, "moments": len(moments), "characters": len(e["text"]), "core_exact": exact}
+
+    def keep_ledger(self, folder: Optional[str] = None) -> str:
+        """Keep Zihin's ledger, the experience log that makes forgetting exact, on disk from now on: one file in
+        ``folder`` (by default a temporary folder, removed when the process exits), the latest moments in memory
+        (``zihin.store.DiskLog``). The ledger is read only to forget, so it need not be in working memory; kept in
+        memory it held about five kilobytes a character of natural text, most of what Cevahir held (NOTES.md 8.28).
+        What the ledger already holds is moved there, and the history of entries begins if it had not. Returns the
+        file's path."""
+        from zihin.__main__ import _log_path
+        from zihin.store import DiskLog
+        S, cfg = self.mind.S, self.mind.cfg
+        path = _log_path(folder)
+        log = DiskLog(path, keep=max(4, cfg.undo_depth + 2))
+        for m in sorted(S.log):
+            e = S.log[m]
+            log[m] = e
+            if getattr(e, "retracted", False):
+                log.mark_retracted(m)
+        S.log, S.keep_log = log, True
+        cfg.keep_log, cfg.log_path = True, path
+        if self.entries is None:
+            self.entries = []
+        return path
 
     # ------------------------------------------------------------------------------------------------- channels ---
     def newness(self, segment: str) -> Dict[str, float]:

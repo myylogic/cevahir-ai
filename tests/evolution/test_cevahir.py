@@ -290,6 +290,35 @@ def test_cevahir_forgets_an_entry_exactly_and_can_no_longer_say_it(FastCortex):
     assert all("kırmızı" not in said[w].lower() for w in said)
 
 
+
+def test_cevahir_keeps_its_ledger_on_disk_and_a_loaded_one_forgets_exactly_from_then_on(FastCortex, tmp_path):
+    from living.cevahir import Cevahir
+    from zihin.store import DiskLog
+    life, _ = _world()
+    c = Cevahir(variant="speaking", ledger=True)
+    for q, a in life[:20]:
+        c.watch(q, a + " .")
+    log = c.mind.S.log
+    assert isinstance(log, DiskLog) and len(log.ram) <= log.keep and log.disk_bytes() > 0   # on disk, not in memory
+    folder = str(tmp_path / "c")
+    c.save(folder)
+    d, m = Cevahir.load(folder), Cevahir.load(folder)
+    assert d.entries is None
+    d.keep_ledger(str(tmp_path / "ledger"))
+    m.entries, m.mind.S.log, m.mind.S.keep_log, m.mind.cfg.keep_log = [], {}, True, True   # the ledger in memory
+    S = d.mind.S
+    before = (int(S.t_alive[:S.n_ties].sum()), d.cortex.digest())
+    for x in (d, m):
+        x.watch("şifre nedir ?", "şifre kırmızı elma .")
+        x.watch("şifre nedir ?", "şifre kırmızı elma .")
+    assert len(S.log.ram) <= S.log.keep and int(S.t_alive[:S.n_ties].sum()) > before[0]
+    for x in (d, m):
+        assert x.forget(1)["forgotten"] and x.forget(0)["forgotten"]
+    assert (int(S.t_alive[:S.n_ties].sum()), d.cortex.digest()) == before       # as if it had never heard them
+    assert S.digest() == m.mind.S.digest()                                         # as the ledger in memory forgets
+    said = d.answers(["şifre nedir ?"], way="every", workers=1)[0]
+    assert all("kırmızı" not in said[w].lower() for w in said)
+
 def test_the_hippocampus_answers_an_utterance_that_differs_in_two_places_from_every_one_lived(FastCortex):
     from living.analogy import Episodes
     people = ["Ali", "Veli", "Ayşe", "Can", "Ece", "Zeynep"]
