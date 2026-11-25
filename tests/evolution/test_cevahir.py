@@ -537,6 +537,107 @@ def test_an_example_whose_part_shares_a_word_with_the_part_put_in_lends_no_chang
     assert not ep._apart(("jump",), ("jump", "opposite"))               # asked: a part holding the asked one
 
 
+def _phrased(rng, on_subject=0, on_object=0):
+    """A small world of phrases: "the cup on the mat gave the box in the jar to the cat ." and its answer, which names
+    the places of what was said and keeps its items in the order of the places they name (a form like COGS's, its
+    words and marks made up here); no noun is said twice in a sentence."""
+    nouns = rng.sample(["cat", "dog", "box", "cup", "mat", "bed", "car", "hat", "pen", "jar", "map", "toy"], 8)
+    verb, lemma, gives = rng.choice([("saw", "see", False), ("took", "take", False), ("gave", "give", True),
+                                     ("sent", "send", True)])
+    said, ended, joined = [], [], []
+    def noun_phrase(k):
+        said.extend(["the", nouns.pop()])
+        head = last = len(said) - 1
+        ended.append((head, ["*", said[head], "(", "x", "_", str(head), ")"]))
+        for _ in range(k):
+            p = rng.choice(["on", "in", "beside"])
+            said.extend([p, "the", nouns.pop()])
+            n = len(said) - 1
+            ended.append((n, ["*", said[n], "(", "x", "_", str(n), ")"]))
+            joined.append(((last, n), [said[last], ".", "nmod", ".", p, "(", "x", "_", str(last), ",", "x", "_",
+                                       str(n), ")"]))
+            last = n
+        return head
+    subj = noun_phrase(on_subject)
+    said.append(verb)
+    v = len(said) - 1
+    obj = noun_phrase(on_object)
+    joined.append(((v, subj), [lemma, ".", "agent", "(", "x", "_", str(v), ",", "x", "_", str(subj), ")"]))
+    joined.append(((v, obj), [lemma, ".", "theme", "(", "x", "_", str(v), ",", "x", "_", str(obj), ")"]))
+    if gives:
+        said.extend(["to", "the", nouns.pop()])
+        r = len(said) - 1
+        ended.append((r, ["*", said[r], "(", "x", "_", str(r), ")"]))
+        joined.append(((v, r), [lemma, ".", "recipient", "(", "x", "_", str(v), ",", "x", "_", str(r), ")"]))
+    said.append(".")
+    answer = []
+    for _, it in sorted(ended, key=lambda x: x[0]):
+        answer += it + [";"]
+    for k, (_, it) in enumerate(sorted(joined, key=lambda x: x[0])):
+        answer += (["AND"] if k else []) + it
+    return said, answer
+
+
+def test_a_phrase_on_a_subject_is_answered_from_phrases_lived_on_objects(FastCortex):
+    """Phrases lived only on objects; asked on a subject ("the cup on the mat saw the box ."), the first search is
+    silent: the phrase's frame is one no lived part was a whole in, and no lived phrase stood in its surroundings. The
+    second reads every word by its kind ("on" and "mat" by the "(" their tokens have after them, "saw" by its "."),
+    takes the phrase out as one never lived there, answers the rest, and puts the phrase's change back as the items a
+    phrase on an object adds, read from phrases in other surroundings, the answer said in the order of its lists."""
+    from living.analogy import Episodes
+    from living.evidence import SPEAKING_LINE
+    rng = random.Random(0)
+    ep = Episodes()
+    for _ in range(600):
+        ep.live(*_phrased(rng, 0, rng.choice([0, 1])))                     # phrases only on objects
+    ep.ready()
+    assert ep._kind("on") == ep._kind("mat") == "□(" and ep._kind("saw") == "□."
+    asked = [_phrased(rng, 1, rng.choice([0, 1])) for _ in range(12)]
+    right = 0
+    for said, answer in asked:
+        plan, e, n = ep.plan(said)
+        right += plan == answer and e >= SPEAKING_LINE
+        assert plan is None or e < SPEAKING_LINE or plan == answer          # silent, never wrong
+        assert ep._by_parts(tuple(said), {}, [4000], 0)[0] is None          # the first search alone is silent
+    assert right >= 10
+
+
+def test_an_answer_is_said_in_the_order_of_the_places_its_items_name(FastCortex):
+    """Every lived answer is given back from its items in any order: the ended items first, each item by the places it
+    names, its numbers and the names in it (a word whose token is the word itself, said once), a name read as the
+    place where it was said ("see . agent ( x _ 1 , Ali )" before "see . theme ( x _ 1 , Can )")."""
+    from living.analogy import Episodes
+    rng = random.Random(1)
+    lived = [_phrased(rng, 0, rng.choice([0, 1])) for _ in range(200)]
+    names = ["Ali", "Can", "Ece", "Deniz"]
+    for a in names:
+        for b in names:
+            if a != b:
+                lived.append(([a, "saw", b, "."], ["see", ".", "agent", "(", "x", "_", "1", ",", a, ")", "AND", "see",
+                                                   ".", "theme", "(", "x", "_", "1", ",", b, ")"]))
+    ep = Episodes()
+    for n in names:
+        ep.live([n], [n])
+    for said, answer in lived:
+        ep.live(said, answer)
+    assert ep._list_order() == (";", "AND")
+    for said, answer in lived:
+        items, cur = [], []
+        for t in answer:
+            if t in (";", "AND"):
+                items.append((cur, t))
+                cur = []
+            else:
+                cur.append(t)
+        items.append((cur, None))
+        rng.shuffle(items)
+        ended = [it for it, sep in items if sep == ";"]
+        joined = [it for it, sep in items if sep != ";"]
+        shuffled = [t for it in ended for t in it + [";"]] + \
+            [t for k, it in enumerate(joined) for t in (["AND"] if k else []) + it]
+        assert ep._in_order(shuffled, said) == answer
+
+
 def _moves():
     """Commands of a small grammar of moves, built as SCAN builds them: an action, a way (around: four turns and acts;
     opposite: two turns and an act) and a side, said once, twice or thrice, and two of them joined by "and"."""

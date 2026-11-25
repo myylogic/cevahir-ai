@@ -75,10 +75,28 @@ with several places at once, done on the episodes the hippocampus keeps.
 - **The order of an answer's lists.** Where the lived answers keep lists, an answer put together by parts is said in
   their order: a token that ends items and one that stands between them (every item naming a place) are read from the
   lived answers, as the pair that leaves the most of them as they were lived when their items are put in the order of
-  the first place each names, the ended items first; it is believed by the rule on all of them, and used at the
-  speaking line. A change put back where the example put it may leave a run out of that order; the answer is said in
-  the order all lived answers keep. In COGS the pair is ";" and "AND", and every one of the lived answers that name
-  places keeps it; SCAN's answers name no places and have none.
+  the places each names (its numbers, and the own tokens of the words said once, a name, each read as the place it
+  was said), the ended items first; it is believed by the rule on all of them, and used at the speaking line. A
+  change put back where the example put it may leave a run out of that order; the answer is said in the order all
+  lived answers keep. In COGS the pair is ";" and "AND", and every one of the lived answers that name places is given
+  back by it from its items in any order; SCAN's answers name no places and have none.
+- **A second search, with words read by their kind.** Where the search for parts is silent, a second one is made. In
+  it a word with a relation is read by its kind: the mark and the token its relation has right after it in the lived
+  answers, where one token does by the rule (a noun's and a preposition's "(", a verb's "."), so a phrase hung on a
+  subject ("A donkey [in the room] sold ...") is no longer read as a verb with its object ("A donkey [sold the cake]
+  to ..."). A part that no lived part of its frame, so read, stood in the surroundings of (the PARTS_AROUND tokens on
+  each side, read so) is taken out first, from the right (it has no record of its own there), by what parts of its
+  shape do elsewhere: the change is read from lived parts of that shape, nearest first, and believed by the shape's
+  record elsewhere (lived examples of it, each foreseen with the change read from the nearest example with other
+  surroundings, counted as a frame's record is) times the share of the examples that agree. What the first search
+  answers is answered as before.
+- **A change read from other surroundings.** Where its example put a run says nothing of where it goes in other
+  surroundings, so such a change is put as the items the example's answer gained and lost: the lost ones must stand
+  in the rest's answer and are taken away, the gained ones are put in, and the answer is said in the order of its
+  lists. A token is read by where it stands near the part, where the words standing at that place in the example and
+  in the asked utterance are of a kind; else through the alignment of the two rests' answers, and no place or word's
+  token is put for one whose word is of another kind (a verb's place before "to the girl" in a passive is not the
+  noun's place before it in an active sentence).
 
 Nothing here names a language, a word or a format: tokens are what was said, split as Zihin splits (words and marks).
 """
@@ -139,6 +157,11 @@ class Episodes:
         self._order_at = -1
         self._at: Dict[tuple, List[int]] = {}                  # the dialogues of each word, by its neighbours' shapes
         self._owns: Dict[tuple, Dict[int, str]] = {}           # what its token always had after it there
+        self._next: Dict[str, str] = {}                        # what each relation's token has right after it
+        self._mframes: Dict[tuple, List[int]] = {}             # the frames read by kind (the second search)
+        self._mshapes: Dict[tuple, list] = {}
+        self._elsewhere: Dict[tuple, float] = {}               # the record of a shape's parts, read elsewhere
+        self._here: Dict[tuple, bool] = {}                     # whether a part of a frame stood in such surroundings
         self._forgotten = 0
 
     def __len__(self) -> int:
@@ -270,17 +293,28 @@ class Episodes:
         got = self._plain(said)
         if parts and self.said and not (got[0] is not None and got[1] >= SPEAKING_LINE):
             plan, e, n = self._by_parts(tuple(said), {}, [PARTS_BUDGET], 0)
+            if plan is None:                                   # nothing lived between the same neighbours answers
+                plan, e, n = self._by_parts(tuple(said), {}, [PARTS_BUDGET], 0, True)
             if plan is not None:
-                got = (self._in_order(plan), e, n)
+                got = (self._in_order(plan, said), e, n)
         if len(self._asked) > 4096:
             self._asked.clear()
         self._asked[key] = got
         return (list(got[0]) if got[0] is not None else None), got[1], got[2]
 
-    @staticmethod
-    def _ordered(a: Sequence[str], end: str, between: str) -> Optional[List[str]]:
-        """An answer's items in the order of the first place each names: the items ``end`` ends first, then the items
-        ``between`` joins, each kept as its own list; None where an item names no place (not a list of this kind)."""
+    def _named(self, said: Sequence[str]):
+        """The places an item of an answer to ``said`` names, in its order: its numbers, and the own tokens of the
+        words said once (a word whose token is the word itself, a name), each read as the place it was said."""
+        once = Counter(said)
+        where = {w: j for j, w in enumerate(said) if once[w] == 1 and self.relation(w) == w}
+        def key(item) -> tuple:
+            return tuple(int(t) if t.isdigit() else where[t] for t in item if t.isdigit() or t in where)
+        return key
+
+    def _ordered(self, a: Sequence[str], end: str, between: str, said: Sequence[str] = ()) -> Optional[List[str]]:
+        """An answer's items in the order of the places each names (``_named``): the items ``end`` ends first, then
+        the items ``between`` joins, each kept as its own list; None where an item names no place (not a list of
+        this kind)."""
         items, cur = [], []
         for t in a:
             if t == end or t == between:
@@ -296,8 +330,9 @@ class Episodes:
             return -1
         if any(first(it) < 0 for it, _ in items):
             return None
-        ended = sorted((it for it, sep in items if sep == end), key=first)   # stable: a tie keeps its order
-        joined = sorted((it for it, sep in items if sep != end), key=first)
+        key = self._named(said)
+        ended = sorted((it for it, sep in items if sep == end), key=key)    # stable: a tie keeps its order
+        joined = sorted((it for it, sep in items if sep != end), key=key)
         out: List[str] = []
         for it in ended:
             out += it + [end]
@@ -308,22 +343,22 @@ class Episodes:
     def _list_order(self) -> Optional[Tuple[str, str]]:
         """How the lived answers keep their lists, if they keep them so (MODEL.md 12.6): a token that ends items and one
         that stands between them, every item naming a place, such that the lived answers holding them are said with
-        their items in the order of the first place each names, the ended items first (``_ordered``). The pair is the
+        their items in the order of the places each names, the ended items first (``_ordered``). The pair is the
         one whose rule on the answers it leaves as they were lived is highest, read from a sample of them and believed
         by the rule on all; None where it does not reach the speaking line. Read again as life doubles."""
         if self._order_at >= 0 and len(self.said) < 2 * max(1, self._order_at):
             return self._order
         self._order_at = len(self.said)
         related = {r for r in (self.relation(w) for w in self.with_w if self.with_w[w] > 0) if r is not None}
-        answers = [a for a in self.answers if a is not None]
-        seen = Counter(t for a in answers for t in set(a))
+        lived = [(a, s) for a, s in zip(self.answers, self.said) if a is not None]
+        seen = Counter(t for a, _ in lived for t in set(a))
         marks = sorted(t for t, c in seen.items() if c >= 2 and not t.isdigit() and t not in related)
-        sample = [(a, set(a)) for a in answers[::max(1, len(answers) // 512)][:512]]
+        sample = [(a, set(a), s) for a, s in lived[::max(1, len(lived) // 512)][:512]]
         def rule(pairs, end: str, between: str) -> Tuple[float, int]:
             n = same = 0
-            for a, held in pairs:
+            for a, held, said in pairs:
                 if end in held or between in held:
-                    got = self._ordered(a, end, between)
+                    got = self._ordered(a, end, between, said)
                     if got is not None:
                         n += 1
                         same += got == list(a)
@@ -336,16 +371,16 @@ class Episodes:
                     if r[1] and (best is None or r > best[0]):
                         best = (r, end, between)
         self._order = None
-        if best is not None and rule([(a, set(a)) for a in answers], best[1], best[2])[0] >= SPEAKING_LINE:
+        if best is not None and rule([(a, set(a), s) for a, s in lived], best[1], best[2])[0] >= SPEAKING_LINE:
             self._order = (best[1], best[2])
         return self._order
 
-    def _in_order(self, plan: List[str]) -> List[str]:
+    def _in_order(self, plan: List[str], said: Sequence[str] = ()) -> List[str]:
         """A plan put together by parts, said in the order the lived answers keep their lists (``_list_order``)."""
         order = self._list_order()
         if order is None:
             return plan
-        got = self._ordered(plan, *order)
+        got = self._ordered(plan, order[0], order[1], said)
         return plan if got is None else got
 
     def _plain(self, said: Sequence[str]) -> Tuple[Optional[List[str]], float, int]:
@@ -367,6 +402,18 @@ class Episodes:
                 r = self.relation(w)
                 if r is not None:
                     related.add(r)
+        after: Dict[str, Counter] = defaultdict(Counter)        # what each relation's token has right after it
+        for a in self.answers:
+            if a is None:
+                continue
+            for q, t in enumerate(a):
+                if t in related:
+                    after[t][self._after(a, q + 1)] += 1
+        self._next = {}
+        for t, c in after.items():
+            x, k = max(c.items(), key=lambda kv: (kv[1], kv[0]))
+            if (k + 0.5) / (sum(c.values()) + 1.0) >= SPEAKING_LINE:
+                self._next[t] = x
         kinds: Dict[str, Counter] = defaultdict(Counter)
         for a in self.answers:
             if a is None or len(a) < 2:                         # an answer of one token says nothing of a part
@@ -402,6 +449,18 @@ class Episodes:
             v.sort(key=lambda x: (-x[0], x[1], x[2]))
         self._slots = dict(slots)
         self._shapes = dict(shapes)
+        mframes: Dict[tuple, List[int]] = defaultdict(list)     # the frames again, every word read by its kind
+        for i, u in enumerate(self.said):
+            if u is None:
+                continue
+            for m in range(1, 5):
+                for p in range(0, min(len(u) - m, 1024)):
+                    mframes[self._mframe(u, p, m)].append(i * 1024 + p)
+        mshapes: Dict[tuple, list] = defaultdict(list)
+        for fr in mframes:
+            mshapes[(fr[0], fr[2])].append(fr)
+        self._mframes = dict(mframes)
+        self._mshapes = dict(mshapes)
         at: Dict[tuple, List[int]] = defaultdict(list)          # each word's dialogues, by the shapes of its neighbours
         for i, u in enumerate(self.said):
             if u is None:
@@ -412,6 +471,8 @@ class Episodes:
                     at[key].append(i)
         self._at = dict(at)
         self._owns = {}
+        self._elsewhere = {}
+        self._here = {}
         self._units = {}
         self._rests = {}
         self._windows = {}
@@ -486,6 +547,40 @@ class Episodes:
 
     def _shape(self, w: str) -> str:
         return "\u25a1" if self.relation(w) is not None else w
+
+    def _kind(self, w: str) -> str:
+        """A word read by its kind: one with a relation as the mark and the token its relation has right after it in
+        the lived answers, where one token does by the rule (a noun's and a preposition's "(", a verb's ".")."""
+        r = self.relation(w)
+        return w if r is None else "\u25a1" + self._next.get(r, "")
+
+    def _mframe(self, u: Sequence[str], p: int, m: int) -> tuple:
+        """A part's frame with every word read by its kind (``_kind``)."""
+        left = tuple(self._kind(w) for w in u[max(0, p - 2):p])
+        left = ("^",) * (2 - len(left)) + left
+        right = tuple(self._kind(w) for w in u[p + m:p + m + 1]) or ("$",)
+        return (m, left, tuple(self._kind(w) for w in u[p:p + m]), right)
+
+    def _mwindow(self, u: Sequence[str], p: int, m: int) -> tuple:
+        """What stands around a part, every word read by its kind."""
+        w = PARTS_AROUND
+        return tuple("^" if k < 0 else ("$" if k >= len(u) else self._kind(u[k]))
+                     for k in list(range(p - w, p)) + list(range(p + m, p + m + w)))
+
+    def _lived_here(self, fr: tuple, around: tuple) -> bool:
+        """Whether a lived part of this frame (words read by kind) stood in these surroundings."""
+        key = (fr, around)
+        got = self._here.get(key)
+        if got is None:
+            got = False
+            for code in self._mframes.get(fr, ()):
+                i, p2 = divmod(code, 1024)
+                o = self.said[i]
+                if o is not None and self._mwindow(o, p2, fr[0]) == around:
+                    got = True
+                    break
+            self._here[key] = got
+        return got
 
     def _frame(self, u: Sequence[str], p: int, m: int) -> tuple:
         left = tuple(self._shape(w) for w in u[max(0, p - 2):p])
@@ -571,7 +666,7 @@ class Episodes:
 
     # ----- answering by parts -----
 
-    def _by_parts(self, u: Tuple[str, ...], memo: dict, budget: list, depth: int
+    def _by_parts(self, u: Tuple[str, ...], memo: dict, budget: list, depth: int, elsewhere: bool = False
                   ) -> Tuple[Optional[List[str]], float, int]:
         if u in memo:
             return memo[u]
@@ -588,6 +683,11 @@ class Episodes:
         if depth > PARTS_DEPTH or budget[0] <= 0:
             return memo[u]
         self._make()
+        if elsewhere:                                          # the second search: the parts never lived here first
+            got = self._by_elsewhere(u, memo, budget, depth)
+            if got[0] is not None:
+                memo[u] = got
+                return memo[u]
         n = len(u)
         tries = []
         for m in range(1, 5):
@@ -602,7 +702,7 @@ class Episodes:
             budget[0] -= 1
             if budget[0] < 0:
                 break
-            rest_plan, rest_e, _ = self._by_parts(u[:p] + u[p + m:], memo, budget, depth + 1)
+            rest_plan, rest_e, _ = self._by_parts(u[:p] + u[p + m:], memo, budget, depth + 1, elsewhere)
             if rest_plan is None:
                 continue
             votes: Counter = Counter()
@@ -633,11 +733,114 @@ class Episodes:
                 if e >= SPEAKING_LINE:
                     memo[u] = (list(best), e, agree)
                     return memo[u]
-        if depth == 0:                                         # the asked utterance's own parts, on their own budget
+        if depth == 0 and not elsewhere:                       # the asked utterance's own parts, on their own budget
             got = self._by_exchange(u, memo, [PARTS_BUDGET // 4], depth)
             if got[0] is not None:
                 memo[u] = got
         return memo[u]
+
+    def _by_elsewhere(self, u: Tuple[str, ...], memo: dict, budget: list, depth: int
+                      ) -> Tuple[Optional[List[str]], float, int]:
+        """The second search's own step: a part that no lived part of its frame stood in the surroundings of (every
+        word read by its kind, the PARTS_AROUND tokens on each side: where the changes of the first search are read
+        from) is taken out by what parts of its shape do elsewhere: the change is read from lived parts of the shape,
+        nearest first, and put in as the items it adds and takes away (``_by_items``); a step is believed by the
+        shape's record elsewhere (``unit_elsewhere``) times the share of the examples that agree. With no record of
+        their own here, such parts are taken out from the right."""
+        n = len(u)
+        tries = []
+        for m in range(1, 5):
+            for p in range(0, n - m):
+                fr = self._mframe(u, p, m)
+                if (m, fr[2]) not in self._mshapes or self._lived_here(fr, self._mwindow(u, p, m)):
+                    continue
+                r = self.unit_elsewhere(m, fr[2])
+                if r >= SPEAKING_LINE:
+                    tries.append((-(p + m), p, m, r, fr))
+        tries.sort(key=lambda x: x[:3])
+        for _, p, m, r, fr in tries:
+            budget[0] -= 1
+            if budget[0] < 0:
+                break
+            rest_plan, rest_e, _ = self._by_parts(u[:p] + u[p + m:], memo, budget, depth + 1, True)
+            if rest_plan is None:
+                continue
+            votes: Counter = Counter()
+            filled = 0
+            def near(code: int) -> int:
+                i, p2 = divmod(code, 1024)
+                o = self.said[i]
+                return 0 if o is None else -self._near(u, p, o, p2, m)
+            for code in sorted(self._shape_pool(m, fr[2]), key=near)[:4 * self.k]:
+                i, p2 = divmod(code, 1024)
+                o = self.said[i]
+                if o is None:
+                    continue
+                a2_rest = self._rest(o[:p2] + o[p2 + m:])
+                if a2_rest is None:
+                    continue
+                got = self._transplant(o, p2, m, a2_rest, list(self.answers[i]), u, p, rest_plan, items=True)
+                if got is None:
+                    continue
+                votes[tuple(got)] += 1
+                filled += 1
+                if filled >= self.k:
+                    break
+            if votes:
+                best, agree = votes.most_common(1)[0]
+                e = min(rest_e, r * self._agreement(agree, filled))
+                if e >= SPEAKING_LINE:
+                    return list(best), e, agree
+        return None, 0.0, 0
+
+    def _shape_pool(self, m: int, shape: tuple) -> List[int]:
+        """The lived parts of a shape (words read by kind), from the frames it was lived in most often."""
+        frames = sorted(self._mshapes.get((m, shape), ()), key=lambda fr2: (-len(self._mframes[fr2]), fr2))
+        codes: List[int] = []
+        for fr2 in frames:
+            codes.extend(self._mframes[fr2][:4 * self.k])
+            if len(codes) >= 16 * self.k:
+                break
+        return codes
+
+    def unit_elsewhere(self, m: int, shape: tuple, sample: int = 24) -> float:
+        """How far a part of this shape is a whole wherever it stands: up to 24 lived examples of it, each foreseen as
+        if it had not been lived, with the change read from the nearest example with other surroundings put in as
+        items, said in the order of the answer's lists; as for a frame (``unit``), an example whose rest has no answer
+        or that nothing can be put into counts as not right."""
+        key = (m, shape)
+        if key in self._elsewhere:
+            return self._elsewhere[key]
+        pool = self._shape_pool(m, shape)
+        step = max(1, len(pool) // sample)
+        right = n = 0
+        for code in pool[::step][:sample]:
+            i, p2 = divmod(code, 1024)
+            u = self.said[i]
+            if u is None:
+                continue
+            n += 1
+            rest = self._rest(u[:p2] + u[p2 + m:])
+            if rest is None:
+                continue
+            around = self._window(u, p2, m)
+            others = []
+            for c2 in pool:
+                j, q2 = divmod(c2, 1024)
+                o = self.said[j]
+                if o is not None and o != u and self._window(o, q2, m) != around:
+                    others.append((-self._near(u, p2, o, q2, m), j, q2, o))
+            others.sort(key=lambda x: x[:3])
+            for _, j, q2, o in others[:3]:
+                o_rest = self._rest(o[:q2] + o[q2 + m:])
+                if o_rest is None:
+                    continue
+                got = self._transplant(o, q2, m, o_rest, list(self.answers[j]), u, p2, rest, items=True)
+                if got is not None:
+                    right += self._in_order(got, u) == list(self.answers[i])
+                    break
+        self._elsewhere[key] = (right + 0.5) / (n + 1.0)
+        return self._elsewhere[key]
 
     def _by_exchange(self, u: Tuple[str, ...], memo: dict, budget: list, depth: int
                      ) -> Tuple[Optional[List[str]], float, int]:
@@ -812,10 +1015,13 @@ class Episodes:
         return out
 
     def _transplant(self, o: Tuple[str, ...], p2: int, m: int, a2_rest: List[str], a2: List[str],
-                    u: Tuple[str, ...], p: int, rest_plan: List[str], instead: Sequence[str] = ()) -> Optional[List[str]]:
+                    u: Tuple[str, ...], p: int, rest_plan: List[str], instead: Sequence[str] = (),
+                    items: bool = False) -> Optional[List[str]]:
         """What taking the part out of the example (o, its part at p2), or exchanging it for ``instead``, changed in its
         answer, put into the answer of the asked utterance's rest (u, its part at p, likewise taken out or
-        exchanged). None where the change cannot be put, or where it leaves anything of ``instead`` in the answer, or
+        exchanged); with ``items`` (a change read from other surroundings), as the items it adds and takes away
+        (``_by_items``), which needs answers that keep lists: where they keep none, where an example put a run says
+        nothing of other surroundings, and nothing is put. None where the change cannot be put, or where it leaves anything of ``instead`` in the answer, or
         where the example's answer names no places of what was said and a word with a relation stands both in the
         example's part and outside it: which of the two its tokens belong to cannot then be told ("look opposite right
         and look opposite right twice" says nothing of taking "opposite right and look" out of a command whose first
@@ -888,6 +1094,11 @@ class Episodes:
             if t in words:
                 return words[t].most_common(1)[0][0]
             return None if t in theirs else t
+        if items:                                              # read from other surroundings: as items, where
+            order = self._list_order()                         # the answers keep lists; else nothing can be put
+            if order is None:
+                return None
+            return self._by_items(o, p2, u, p, m, a2s, a2, a_s, r2, r, put, theirs, order)
         def at(i: int) -> int:
             if i == 0:                                         # put first where the example put it first
                 return 0
@@ -940,6 +1151,105 @@ class Episodes:
         if instead and any(t.startswith("\u27e8") for t in out):
             return None                                        # the part put in for the asked one is still named
         return out
+
+    @staticmethod
+    def _items(a: Sequence[str], end: str, between: str) -> Optional[List[Tuple[Tuple[str, ...], bool]]]:
+        """An answer's items, each with whether ``end`` ends it; None where an item names no place."""
+        items, cur = [], []
+        for t in a:
+            if t == end or t == between:
+                items.append((tuple(cur), t == end))
+                cur = []
+            else:
+                cur.append(t)
+        items.append((tuple(cur), False))
+        if any(not any(x.isdigit() for x in it) for it, _ in items):
+            return None
+        return items
+
+    def _by_items(self, o, p2, u, p, m, a2s, a2, a_s, r2, r, put, theirs, order) -> Optional[List[str]]:
+        """A change read from other surroundings, put as the items the example's answer gained and lost: where the
+        example put a run says nothing of where it goes here, so the items lost must stand in the rest's answer and
+        are taken away, the items gained are put in, and the answer is said in the order of its lists. A token is
+        read by where it stands near the part (the two answers read as ``_transplant`` reads them: a place before,
+        inside or after the part, a word's token by the place of its word), where the words standing at that place
+        in the example and here are of a kind (``_kind``); otherwise through the alignment of the two rests' answers,
+        and a place or a word's token is not put for one whose word is of another kind. None where the answers are
+        not lists of this kind or the change cannot be put."""
+        end, between = order
+        e2s, e2, es = self._items(a2s, end, between), self._items(a2, end, between), self._items(a_s, end, between)
+        if e2s is None or e2 is None or es is None:
+            return None
+        def stands(seq: Sequence[str], pp: int, c: str) -> Optional[str]:
+            k = pp + int(c[1:]) if c[0] == "S" else (pp - int(c[1:]) if c[0] == "L" else pp + m + int(c[1:]))
+            return seq[k] if 0 <= k < len(seq) else None
+        fine = set()                                           # the places near the part whose words are of a kind
+        for c in ["S%d" % k for k in range(m)] + ["L1", "L2", "L3", "R0", "R1", "R2", "R3"]:
+            x, y = stands(o, p2, c), stands(u, p, c)
+            if x is not None and y is not None and self._kind(x) == self._kind(y):
+                fine.add(c)
+        mine: Dict[str, set] = defaultdict(set)                # each such place, the tokens read so here
+        for t, c in zip(a_s, r):
+            if (c[1:] if c.startswith("\u25a1") else c) in fine:
+                mine[c].add(t)
+        where: Dict[str, set] = defaultdict(set)               # each token of the example, the places it is read as
+        for t, c in zip(a2s, r2):
+            if (c[1:] if c.startswith("\u25a1") else c) in fine:
+                where[t].add(c)
+        rel_u = {self.relation(x) for x in u} - {None}
+        def put_item_token(t: str) -> Optional[str]:
+            cs = where.get(t)
+            if cs and len(cs) == 1:
+                c = next(iter(cs))
+                if len(mine.get(c, ())) == 1:
+                    return next(iter(mine[c]))
+            got = put(t)
+            if got is None or got == t:
+                return got
+            if t.isdigit() and got.isdigit() and int(t) < len(o) and int(got) < len(u):
+                if self._kind(o[int(t)]) != self._kind(u[int(got)]):
+                    return None                                # a place for one whose word is of another kind
+            elif t in theirs and got in rel_u:
+                x = next((w for w in o if self.relation(w) == t), None)
+                y = next((w for w in u if self.relation(w) == got), None)
+                if x is not None and y is not None and self._kind(x) != self._kind(y):
+                    return None
+            return got
+        def put_item(it):
+            toks = [put_item_token(t) for t in it[0]]
+            return None if None in toks else (tuple(toks), it[1])
+        left = Counter(e2s)
+        gained = []
+        for it in e2:
+            if left[it] > 0:
+                left[it] -= 1
+            else:
+                gained.append(it)
+        kept = Counter(e2)
+        lost = []
+        for it in e2s:
+            if kept[it] > 0:
+                kept[it] -= 1
+            else:
+                lost.append(it)
+        out = list(es)
+        for it in lost:
+            got = put_item(it)
+            if got is None or got not in out:
+                return None
+            out.remove(got)
+        for it in gained:
+            got = put_item(it)
+            if got is None:
+                return None
+            out.append(got)
+        key = self._named(u)
+        toks: List[str] = []
+        for it in sorted((it for it, k in out if k), key=key):
+            toks += list(it) + [end]
+        for k, it in enumerate(sorted((it for it, k in out if not k), key=key)):
+            toks += ([between] if k else []) + list(it)
+        return toks
 
     def _plan(self, said: Sequence[str]) -> Tuple[Optional[List[str]], int, int, int]:
         votes: Counter = Counter()
