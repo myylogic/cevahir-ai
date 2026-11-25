@@ -1354,7 +1354,8 @@ chains ("... beside the cup beside the gardner beside a bin on the rock .") wher
 gardner" on the head noun ("hammer . nmod . beside ( x _ 7 , x _ 25 )"); every other kind as before. The second
 search is made only where the first is silent, so no answer the first gives changes; on the in-distribution file it
 answers none of the three silent sentences, and on the generalisation sample the 11 more answers are its 11 phrases
-on subjects.
+on subjects. Two processes with different hash seeds give the same 600 answers of the samples and the same beliefs,
+bit for bit (the digest of all of them is the same, 3d755da81d31d5f9).
 
 Tried and not taken (every seventh generalisation sentence; the in-distribution file):
 
