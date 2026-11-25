@@ -61,8 +61,11 @@ with several places at once, done on the episodes the hippocampus keeps.
   inside the item it stands for: the example's item, put into the asked rest's answer, is found there once, and the
   change is made in it at the same place (read token by token, the example's clause of "tolerated", whose agent is a
   thing, lines up with a far clause whose agent is a thing too, while the clause that holds the asked part is
-  "Levi respected"'s). What the example put at the very beginning goes at the beginning; where an answer lists runs
-  of the same shape, a new run goes by its place among its neighbours (a list keeps the order of what was said).
+  "Levi respected"'s). An item said of a place is put as the item of the word at the place it is put to: a token is
+  told apart by its place, so the example's "like . ccomp ( x _ 2 , ... )", said of the clause around "liked that the
+  rose", is "say . ccomp" where the clause around the asked part is "said"'s, though "liked" also stands in the part.
+  What the example put at the very beginning goes at the beginning; where an answer lists runs of the same shape, a
+  new run goes by its place among its neighbours (a list keeps the order of what was said).
   The examples vote; a step's belief is the frame's record times the share of the examples that agree, and a plan's
   belief is that of its weakest step (the rest's own included): the steps of a chain read the same kind of change
   again and again, so their errors go together. A change no lived example carries stays below the line: SCAN's
@@ -1190,7 +1193,8 @@ class Episodes:
         exchanged); with ``items`` (a change read from other surroundings), as the items it adds and takes away
         (``_by_items``), which needs answers that keep lists: where they keep none, where an example put a run says
         nothing of other surroundings, and nothing is put. A change made inside one of the example's items is made
-        inside the item that one stands for: the example's item, put into the asked rest's answer, found there once.
+        inside the item that one stands for: the example's item, put into the asked rest's answer, found there once
+        (an item said of a place puts its token as that of the word at the place it is put to).
         The answer is said in the order the lived answers keep their lists (``_in_order``), so that the next step of a
         chain reads it item by item. None where the change cannot be put, or where it leaves anything of ``instead`` in
         the answer, or where the example's answer names no places of what was said and a word with a relation stands
@@ -1318,7 +1322,15 @@ class Episodes:
         def anchored(tag: str, i1: int, i2: int) -> Optional[int]:
             for s0, e0 in sp2:                                 # the item the change is made inside
                 if (s0 < i1 < e0) if tag == "insert" else (s0 <= i1 < i2 <= e0):
-                    item = [put(t) for t in a2s[s0:e0]]
+                    seq = a2s[s0:e0]
+                    item = [put(t) for t in seq]
+                    j = seq.index("(") if "(" in seq else -1    # an item said of a place: its token is that of the
+                    if (j >= 2 and seq[1] == "." and seq[j + 1:j + 3] == ["x", "_"] and j + 3 < len(seq)   # word there
+                            and seq[j + 3].isdigit() and int(seq[j + 3]) < len(o)
+                            and self.relation(o[int(seq[j + 3])]) == seq[0]):
+                        k = item[j + 3]
+                        if k is not None and k.isdigit() and int(k) < len(u) and self.relation(u[int(k)]) is not None:
+                            item[0] = self.relation(u[int(k)])
                     if None in item:
                         return None
                     hits = [s1 for s1, e1 in sp if a_s[s1:e1] == item]

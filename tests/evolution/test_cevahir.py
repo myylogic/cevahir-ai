@@ -801,6 +801,35 @@ def test_a_change_made_inside_an_item_is_made_in_the_item_it_stands_for(FastCort
     assert ep._transplant(o, 6, 4, its_rest, lived, u, 12, rest) == want
 
 
+def test_an_item_said_of_a_place_stands_for_the_item_of_the_word_put_there(FastCortex):
+    """The clause around "respected that the cup" is "the dog respected"'s; "respected" stands in the part too, so its
+    token "respect" is the part's own token. Told apart by its place, the example's item of the clause around the part
+    stands for the item of the word at the place put for it: "said", whose item the change goes into, not the far
+    clause of "the girl respected"."""
+    from living.analogy import Episodes
+    rng = random.Random(3)
+    ep = Episodes()
+    for _ in range(400):
+        ep.live(*_clauses(rng, rng.choice([0, 1, 1, 2])))
+    ep.ready()
+    assert ep.relation("respected") == "respect" and ep.relation("said") == "say"
+    o = tuple("the dog respected that the boy respected that the cup was taken .".split())
+    lived = ("* dog ( x _ 1 ) ; * boy ( x _ 5 ) ; * cup ( x _ 9 ) ; respect . agent ( x _ 2 , x _ 1 ) AND respect . "
+             "ccomp ( x _ 2 , x _ 6 ) AND respect . agent ( x _ 6 , x _ 5 ) AND respect . ccomp ( x _ 6 , x _ 11 ) AND "
+             "take . theme ( x _ 11 , x _ 9 )").split()
+    its_rest = ("* dog ( x _ 1 ) ; * boy ( x _ 5 ) ; respect . agent ( x _ 2 , x _ 1 ) AND respect . ccomp ( x _ 2 , "
+                "x _ 7 ) AND take . theme ( x _ 7 , x _ 5 )").split()
+    u = tuple("the girl respected that Ali said that the boy respected that the box was liked .".split())
+    rest = ("* girl ( x _ 1 ) ; * boy ( x _ 8 ) ; respect . agent ( x _ 2 , x _ 1 ) AND respect . ccomp ( x _ 2 , "
+            "x _ 5 ) AND say . agent ( x _ 5 , Ali ) AND say . ccomp ( x _ 5 , x _ 10 ) AND like . theme ( x _ 10 , "
+            "x _ 8 )").split()
+    want = ("* girl ( x _ 1 ) ; * boy ( x _ 8 ) ; * box ( x _ 12 ) ; respect . agent ( x _ 2 , x _ 1 ) AND respect . "
+            "ccomp ( x _ 2 , x _ 5 ) AND say . agent ( x _ 5 , Ali ) AND say . ccomp ( x _ 5 , x _ 9 ) AND respect . "
+            "agent ( x _ 9 , x _ 8 ) AND respect . ccomp ( x _ 9 , x _ 14 ) AND like . theme ( x _ 14 , x _ 12 )"
+            ).split()
+    assert ep._transplant(o, 6, 4, its_rest, lived, u, 9, rest) == want
+
+
 def test_an_answer_is_believed_no_further_than_the_roles_it_gives_were_lived(FastCortex):
     """A verb of clauses takes no recipient in any lived answer, and none of the tokens that take all it takes does:
     an answer that gives it one is held back. A verb met only with a theme (a passive) takes an agent as the tokens
