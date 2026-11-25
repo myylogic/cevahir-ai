@@ -1560,3 +1560,53 @@ every seventh generalisation sentence: "Aubrey liked that Grayson gave Lina (and
 that Sofia sent Paula to Liam .", answered by exchanging a part that is no clause of its own ("that Grayson gave
 Lina") for "the ring" (8.21); "The cockroach sold a cake in a house on the stool to a champion .", whose recipient
 and phrases take the places of an example with one phrase fewer; and two chains of phrases deeper than ten.
+
+### 8.23 A record reads its examples one step on
+
+Of the 48 sentences left silent on every seventh generalisation sentence (8.22), 40 nest clauses deeper than any
+lived. They are silent because a clause's frame is believed too little: "that a dog liked" after "supported" has the
+record 0.66, and a step's belief is the frame's record times the share of agreeing examples, below the line as soon as
+one of four examples fails to agree (8.20). Of the 24 lived examples that record foresees, 16 come out right and none
+wrong; seven count as not right only because what remains of them once the clause is out has no answer of the
+analogy ("A girl admired that a donut was lended to the frog by Ryan ."), and two because no other example stood in
+their surroundings. An asked rest is answered by parts as well as by the analogy; the record read its examples' rests
+by the analogy alone, and so measured less than what it is used for.
+
+What was built (MODEL.md 12.6):
+
+- **A record reads the rest of its example one step on.** Where the analogy does not answer an example's rest, the
+  rest is answered as an asked rest is, by parts, one part taken out (at most 50 tried). Within that step records read
+  their examples' rests by the analogy alone and are kept apart from the others, so that no record waits on another
+  being read. Only an example whose rest none of these answers counts against its frame for want of an answer.
+  Counting such examples not at all was tried first (8.20: five right answers became wrong); here each is foreseen,
+  and counts as right or as not right as its foresight comes out.
+
+The hippocampus alone (right / silent / wrong; `m3_analogy.py`, rows of `results/m3_analogy.jsonl` written by
+e2d9562):
+
+| | before (6de2c55) | after 8.23 (e2d9562) |
+|---|---|---|
+| COGS in distribution, the sample of 300 | 299 / 1 / 0 | 299 / 1 / 0 |
+| COGS in distribution, the whole test file (3,000) | 2,998 / 2 / 0 | **2,999 / 1 / 0** |
+| COGS generalisation, the sample of 300 | 298 / 1 / 1 | 297 / 1 / 2 |
+| COGS generalisation, every seventh sentence (3,000) | 2,946 / 48 / 6 | **2,983 / 11 / 6** |
+| SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same |
+
+On every seventh generalisation sentence clause recursion is answered in 128 of 134 sentences (94 before; silent on 5,
+wrong on 1), and 40 silent sentences in all are right. The two chains of phrases deeper than ten that were wrong
+(8.21) are silent; one such chain that was right is silent, and two sentences that were right are wrong: "James handed
+a scarf beside the truck in a room in the parcel on the table beside the book on a bed beside the stage in the house
+on a road to a boy ." and "The girl hoped that Olivia liked that Noah liked that a president said that the boy liked
+that the bear liked that a bat was liked ."; in the sample of 300 one more of the first kind, a chain of phrases
+ended by a recipient, is wrong ("The turtle gave the donut beside a bed beside a barrel in a glass in a hole on the
+chair beside a bench in a cup in a room to the girl ."). On the in-distribution file one silent sentence is right. Asking every
+seventh generalisation sentence took 435 s on the shared machine (about 300 s before), the in-distribution file
+270 s (about 90 s): the records read once are kept, and the first ones read cost the most.
+
+Tried and not taken: three of the six wrong answers left are answered through a rest no utterance resembles, "Aubrey
+liked the ring to a cat .", which the analogy answers at 0.999 by putting "liked" for "gave" ("like . recipient": no
+lived answer has "like" take a recipient). A token put for another was let take a role it never took only as far as
+the tokens that took every role it took took that one too (the rule on how many of them did: few tokens that take
+what "like" takes take a recipient). The three wrong answers were right; but every seventh generalisation sentence
+came to 2,884 / 113 / 3, 95 clause recursions silent (the clause verbs put for each other in their rests fail the same
+rule), and asking it took five times as long.

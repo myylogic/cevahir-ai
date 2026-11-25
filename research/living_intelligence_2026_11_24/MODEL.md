@@ -667,9 +667,12 @@ are mended by the same store of episodes.
   rather than while living: up to 24 lived examples of the frame are each foreseen as if they had not been lived (the
   part taken out, the rest's answer read, lived or the analogy's at the speaking line, and the change that the nearest
   other example with the same surroundings shows put back, as below), and the rule on how often that gave the answer
-  that was lived is the record. An example whose rest has no answer, or that no other example can be put into, counts
-  as not right: a part is a whole as far as taking it out leaves what can be answered and putting it back gives what
-  was lived. (Counting only the examples that could be foreseen, as the analogy's own record counts only what it
+  that was lived is the record. An asked rest is answered by parts too, so a rest the analogy does not answer is read
+  one step on, by taking one part out of it (within that step records read their examples' rests by the analogy
+  alone, so that none waits on another being read): a clause in a long utterance ("A girl admired that a donut was
+  lended to the frog by Ryan ." once "that a baby wished" is out) is foreseen as it would be asked (NOTES.md 8.23).
+  An example whose rest has no answer even so, or that no other example can be put into, counts as not right: a part
+  is a whole as far as taking it out leaves what can be answered and putting it back gives what was lived. (Counting only the examples that could be foreseen, as the analogy's own record counts only what it
   foresaw, raised the records of parts that are not wholes, which were then tried first and spent the search: COGS's
   pp recursion fell from 15 of 18 to 1; NOTES.md 8.14.) A frame is a whole when its record reaches the speaking line. This is Zihin's working
   memory (F43, wholes) read from the other side: there the parts of a long command are answered and put together;
