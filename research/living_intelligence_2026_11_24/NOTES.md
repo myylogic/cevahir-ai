@@ -1835,3 +1835,78 @@ leaf by Olivia ." (0.623: the clause of "hoped" hung on "was promised", past "re
 exchanges by parts costs time: every shard of the whole file took 942 s to 967 s (560 s for 8.26), the in-distribution
 file the same as before.
 
+
+### 8.28 Where Cevahir's memory and time go, and its ledger on disk
+
+The question behind this: what would a life on gigabytes of text cost Cevahir? `m3_scale.py memory`
+(`results/m3_scale.jsonl`) lets a new Cevahir (the full variant, as the chat program raises it) read the first
+characters of en-repo and walks every object it holds, each counted once, a tensor or an array by the bytes it holds
+(capacity included). The cortex's store, held by the compiled core, is given by its sizes. Times were measured beside
+other processes (two to three of the four cores busy) and are rough.
+
+**The ledger was most of it.** With a ledger (the chat program keeps one, so that `!unut` forgets exactly), Zihin kept
+its experience log in memory: every increment of every moment, 18.6 kilobytes a moment, 5.1 kilobytes a character of
+running text, 83 % of what was walked. Zihin has kept its own ledger on disk since 14 November (66ad0b0,
+`zihin.store.DiskLog`: the latest moments in memory, the rest in one file found by offset); Cevahir did not use it. It
+does now (6cc90d9): `Cevahir(ledger=True)` keeps the file in a temporary folder (or a folder given), `keep_ledger()`
+starts or moves it, and the chat program keeps a loaded mind's ledger so. Forgetting is the same as with the ledger in
+memory (a test compares the substances bit for bit). Writing an entry costs about 0.04 ms. On disk the ledger was as
+large as in memory; each entry is now compressed (603ea2e: zlib at its fastest level, 4.7 times fewer bytes, about
+0.08 ms an entry; entries written before are read as they were).
+
+100,000 characters of en-repo (27,667 moments of Zihin, 34,137 units, 364,723 ties; the cortex 396,860 nodes):
+
+| ledger | walked | resident (after malloc_trim) | ledger file | seconds |
+|---|---|---|---|---|
+| in memory (as before) | 616.5 MB | 985 MB (985) | – | 327 |
+| on disk (6cc90d9) | 107.3 MB | 347 MB (299) | 495.6 MB | 340 |
+| on disk, compressed (603ea2e) | 107.3 MB | 340 MB (292) | 105.7 MB | 320 |
+| none | 96.9 MB | 334 MB (283) | – | 296 |
+
+What is left, by the bytes a character: the adjacency lists of the ties (`out`, 137) and the cached tensors made of
+them (`_out_ids`, 116), the first instance of every shape with one place left out (`frame_first`, 133: 127,672 shapes,
+of which 1,594 became frames), the parts cache (84), the tie index (75), the ties' own tables (`t_ev` 64 and five
+arrays of 32), the history of entries kept to forget (52) and the sentences' index (`tuple_index`, 39).
+
+**What is left grows with the text.** At 300,000 characters (ledger on disk, 6cc90d9): 85,071 moments, 99,705 units,
+1,043,967 ties, the cortex 953,106 nodes; 342.7 MB walked (1.14 kilobytes a character, 1.07 at 100,000), 699 MB
+resident after malloc_trim, 1,918 MB of ledger uncompressed. The time grew more than the text: 3,220 s, 93 characters
+a second (294 at 100,000), on a machine with every core busy; how much of it the larger mind costs and how much the
+machine was not separated.
+
+**Zihin's night** (40313b1). `Mind.consolidate()` sorts the day's ties into the tie index's long-term store and drops
+the caches and memos of reading, as saving and loading do; Zihin's sleep and Cevahir's night call it. A mind that
+consolidates halfway has the same substance and gives the same answers as one that never does (test). After the
+100,000 characters, the walked memory falls from 107.3 to 81.3 MB: a long life holds beside its substance what one
+day touched. No tie is pruned: of the 197,567 expectation ties, 116,777 were written only when born, and among them
+is what one reading taught; a night that forgot them would forget the facts read once.
+
+**Where the time goes.** Profiled over 20,000 characters (cProfile, the full variant): 406 characters a second, and
+64 % of the time in the silent claims Zihin makes while it listens (`hata.watch`, F49: at a context it has no record
+of, what each way of reading would claim, kept to be settled by what it hears next), most of it in the votes of the
+families (`aile.votes`, `read.member_votes`). The cortex's own share is a few percent. The claims are how Zihin learns
+which of its ways to trust; they are not taken out. Making them cheaper with the same answers is the next speed step.
+
+**Tried and not taken: Zihin living only what the harmony does not know.** If the harmony already knew most sentences
+of a text, Zihin could leave those to it and live the rest. `m3_scale.py known` reads each corpus with the harmony
+alone and asks, before each sentence, whether the harmony believed each of its characters at the speaking line (a
+word is foreseen when all its characters were, the sentence known when the rule over its words reaches the line):
+
+| corpus | sentences | known | share | words in known sentences |
+|---|---|---|---|---|
+| tr-lessons | 1,253 | 175 | 14.0 % | 15.3 % |
+| en-repo | 12,357 | 579 | 4.7 % | 5.8 % |
+| en-pydoc | 12,170 | 3,528 | 29.0 % | 37.4 % |
+| code-pystdlib | 240,041 | 64,348 | 26.8 % | 29.1 % |
+
+Running text is new to the harmony at the start of nearly every word: 5 to 29 % of sentences are known, more where a
+text repeats itself (on the standard library's code 92 % in one tenth, 14 to 28 % in the others). A gate on what the
+harmony knows would leave Zihin most of its life, and the sentences it would leave out are the repeated ones, whose
+counts Zihin's beliefs are made of. Not built.
+
+What this says of a life on gigabytes. The cortex reads 1.5 million characters a second alone and grows sublinearly
+(6.3); Cevahir reads at Zihin's pace, a hundred to a few hundred characters a second, and Zihin's substance grows with
+the text: about 1.1 kilobytes a character walked and 2 to 3 resident, with about 1 kilobyte a character of compressed
+ledger on disk. A gigabyte of text would take Cevahir months on one core and a terabyte of memory or more; the cortex
+alone, minutes and tens of gigabytes at most (fewer after its nights, 8.8). What would change it is a cheaper moment
+(the silent claims, a compiled inner loop) and the long-term stores on disk (MODEL.md 3.4); neither is built.
