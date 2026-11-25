@@ -846,6 +846,14 @@ ways (exact of 300):
   with two workers, the machine shared): in distribution both answer 299, Cevahir wrong on one (the analogy silent on
   it); on the generalisation set the analogy answers 289 and is wrong on none (silent on 11), and Cevahir **289**,
   silent 5 times and wrong 6, every one of them Zihin's plan where the analogy is silent.
+- **With what was said kept with its closing mark** (the row written by 541a35f, the hippocampus of 8.26; life 5,538
+  s and answers 6,422 s with two workers, the machine shared). Inside Cevahir the hippocampus heard every utterance
+  without its closing mark, and a part is never an utterance's last token, so a part ending at the last word ("to the
+  girl" at the end of a sentence) could not be taken out: inside Cevahir it answered 289 of the generalisation sample
+  where alone it answers 299. Kept with its mark (541a35f), it answers 299 inside Cevahir too (silent on 1), and so
+  does Cevahir: **299 of 300 in distribution and 299 of 300 on the generalisation set**, each wrong on one, Zihin's
+  plan where the analogy is silent (a chain of clauses on the generalisation set). Zihin's plan was the thought 20
+  times of the 600.
 
 ### 8.8 Sleep
 
