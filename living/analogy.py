@@ -124,7 +124,9 @@ with several places at once, done on the episodes the hippocampus keeps.
   so, the second search is made. A token that took no role is not read so (nothing lived says what roles it takes),
   and a token that took few takes a new one as the tokens that took those do (a verb met only with a theme is asked
   with an agent as most such verbs take one). So too two roles said of one place that no lived answer said of one
-  place (two phrases on one noun, a clause and a thing of one verb) are believed by the rule with nothing for them.
+  place (two phrases on one noun, a clause and a thing of one verb) are believed by the rule with nothing for them,
+  and so is an answer in which two tokens that take turns in every lived answer do not ("(" and ")": an item opened
+  inside another, or closed with none open, where a step put an item back across the end of one).
 
 Nothing here names a language, a word or a format: tokens are what was said, split as Zihin splits (words and marks).
 """
@@ -200,6 +202,7 @@ class Episodes:
         self._role_beliefs: Dict[tuple, float] = {}
         self._together: set = set()                            # pairs of roles lived said of one place
         self._role_places: Counter = Counter()                 # how many lived places took each role
+        self._turns: Dict[Tuple[str, str], int] = {}           # tokens that take turns in every lived answer
         self._forgotten = 0
 
     def __len__(self) -> int:
@@ -323,8 +326,8 @@ class Episodes:
         belief is the rule on the analogy's own record for that many places (how often an answer foreseen so was
         right), times the share of the neighbours that agree. Where that does not reach the speaking line and
         ``parts`` is on, the utterance is answered by parts (see the module's text); then the count is the examples
-        that agreed. The answer given is believed no further than the roles it gives were lived
-        (``_roles_believed``); where the first search's answer is held back so, the second search is made."""
+        that agreed. The answer given is believed no further than the roles it gives, and the turns its tokens take,
+        were lived (``_roles_believed``); where the first search's answer is held back so, the second search is made."""
         key = (tuple(said), parts, len(self.said), self._forgotten)
         if key in self._asked:                                 # asked again before anything new was lived
             plan, e, n = self._asked[key]
@@ -386,12 +389,15 @@ class Episodes:
         return out
 
     def _roles_believed(self, plan: Sequence[str]) -> float:
-        """How far the roles an answer gives were lived. A role a token took in a lived answer is believed, one it never
-        took by the rule on the tokens that took every role it took (how many of them took that one too: "like" never
-        takes a recipient, and few of the tokens that take what it takes do; a token that took no role is not read so,
-        nothing lived says what roles it takes). Two roles said of one place were said of one place in a lived answer,
-        or are believed by the rule with nothing for them: none of the lived places that took the rarer of the two
-        (two phrases on one noun, a clause and a thing of one verb)."""
+        """How far the roles an answer gives, and the turns its tokens take, were lived. A role a token took in a lived
+        answer is believed, one it never took by the rule on the tokens that took every role it took (how many of them
+        took that one too: "like" never takes a recipient, and few of the tokens that take what it takes do; a token
+        that took no role is not read so, nothing lived says what roles it takes). Two roles said of one place were
+        said of one place in a lived answer, or are believed by the rule with nothing for them: none of the lived
+        places that took the rarer of the two (two phrases on one noun, a clause and a thing of one verb). Two tokens
+        that take turns in every lived answer (``_alternations``) take turns in the answer, or it is believed by the
+        rule with nothing for it: none of the times a lived answer could have broken them (an item opened inside
+        another, closed with none open)."""
         self._make()
         least = 1.0
         for tok, role in self._heads(plan):
@@ -412,7 +418,52 @@ class Episodes:
                     if tuple(sorted((roles[x], roles[y]))) not in self._together:
                         w = min(self._role_places.get(roles[x], 0), self._role_places.get(roles[y], 0))
                         least = min(least, 0.5 / (w + 1.0))
+        if self._turns:
+            have = set(plan)
+            for (x, y), w in self._turns.items():
+                if (x in have or y in have) and not self._take_turns(plan, x, y):
+                    least = min(least, 0.5 / (w + 1.0))
         return least
+
+    def _alternations(self) -> Dict[Tuple[str, str], int]:
+        """The pairs of tokens that take turns in every lived answer that holds either: the first opens and the second
+        closes, never one opened while another is open, never a close with none open, none left open at the end ("("
+        and ")", "x" and "_" on COGS). Each with how many times a lived answer could have broken it: every opening
+        after the first of an answer. Tokens met at most once in every answer could break nothing, and are no pair:
+        "the" and "ball" said together in every answer that holds either say nothing of "the book"."""
+        seen: Dict[str, list] = defaultdict(list)              # each token's lived answers, with its count in each
+        for i, a in enumerate(self.answers):
+            if a is not None:
+                for t, n in Counter(a).items():
+                    seen[t].append((i, n))
+        alike: Dict[tuple, list] = defaultdict(list)           # tokens met in the same answers, as often in each
+        for t, where in seen.items():
+            if any(n > 1 for _, n in where):
+                alike[tuple(where)].append(t)
+        turns = {}
+        for where, toks in alike.items():
+            chances = sum(n - 1 for _, n in where)
+            for x in toks:
+                for y in toks:
+                    if x != y and all(self._take_turns(self.answers[i], x, y) for i, _ in where):
+                        turns[(x, y)] = chances
+        return turns
+
+    @staticmethod
+    def _take_turns(a: Sequence[str], x: str, y: str) -> bool:
+        """Whether ``x`` and ``y`` take turns in ``a``: ``x`` first, never twice without ``y`` between, ``y`` never
+        without an ``x`` before it, and the last ``x`` closed."""
+        open_ = False
+        for t in a:
+            if t == x:
+                if open_:
+                    return False
+                open_ = True
+            elif t == y:
+                if not open_:
+                    return False
+                open_ = False
+        return not open_
 
     def _named(self, said: Sequence[str]):
         """The places an item of an answer to ``said`` names, in its order: its numbers, and the own tokens of the
@@ -602,6 +653,7 @@ class Episodes:
                     for y in range(x + 1, len(rs)):
                         together.add(tuple(sorted((rs[x], rs[y]))))
         self._together, self._role_places = together, role_places
+        self._turns = self._alternations()
         self._owns = {}
         self._elsewhere = {}
         self._here = {}

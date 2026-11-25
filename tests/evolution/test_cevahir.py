@@ -955,6 +955,30 @@ def test_an_answer_whose_roles_of_one_place_were_never_lived_together_is_held_ba
                     "x _ 4 )")
 
 
+
+def test_an_answer_whose_marks_do_not_take_turns_as_in_every_lived_answer_is_held_back(FastCortex):
+    """In every lived answer "(" and ")" take turns, and so do "x" and "_": an answer that opens an item inside another,
+    or closes one never opened, is held back. Tokens met at most once in every answer that holds them are no pair:
+    "the" and "ball", lived only together, do not hold back "the book"."""
+    from living.analogy import Episodes
+    from living.evidence import SPEAKING_LINE
+    rng = random.Random(5)
+    lived = [_clauses(rng, rng.choice([0, 1, 2])) for _ in range(200)]
+    ep = Episodes()
+    for said, answer in lived:
+        ep.live(said, answer)
+    for who in ("Ali", "Veli", "Can"):
+        ep.live([who, "gave", "the", "ball", "."], ["give", who, "the", "ball"])
+    ep.ready()
+    assert ("(", ")") in ep._turns and ("x", "_") in ep._turns and ("the", "ball") not in ep._turns
+    assert min(ep._roles_believed(answer) for _, answer in lived) == 1.0
+    def held(text):
+        return ep._roles_believed(text.split()) < SPEAKING_LINE
+    assert held("like . agent ( x _ 1 , Ali ) AND 1 , x _ 3 ) AND like . ccomp ( x _ 1 , x _ 3 )")
+    assert held("like . agent ( x _ 1 , like . theme ( x _ 1 , Ali ) AND x _ 3 )")
+    assert not held("like . agent ( x _ 1 , Ali ) AND like . ccomp ( x _ 1 , x _ 3 )")
+    assert not held("give Ali the book")
+
 def _moves():
     """Commands of a small grammar of moves, built as SCAN builds them: an action, a way (around: four turns and acts;
     opposite: two turns and an act) and a side, said once, twice or thrice, and two of them joined by "and"."""
