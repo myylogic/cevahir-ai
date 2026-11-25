@@ -2079,6 +2079,8 @@ def members_map(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[i
                 w_pos, w_neg = began.get(target, (0.0, total))
                 c = conviction(w_pos + w_neg, cfg.k)
                 out[target] = c * frequency(w_pos, w_neg) + (1.0 - c) * out.get(target, 0.5)
+    if getattr(cfg, "newest", False):                   # F76: what the sequence was followed by last (a way of its own)
+        _take(mind, out, src, newest_reading(mind, unit, trust), "yeni")
     if getattr(cfg, "known", False) and unit == mind.context and getattr(mind, "topic", None) is not None:
         said_line = 0.5 + cfg.theta / (2.0 * cfg.T)     # F41: when no word would be said, how the members went on
         words = mv_view(mind, "u_channel")              # where their own known sequences stood as the topic's does
@@ -3149,6 +3151,47 @@ def witnessed(mind, unit: int, trust, counted, focus) -> Dict[int, List[Tuple[fl
             w = k * c / (1.0 - c)
             out.setdefault(v, []).append((f * w, (1.0 - f) * w))
     return out
+
+
+def newest_reading(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:
+    """F76 (The Newest Holds, ``Config.newest``): what the sequence going on now was followed by last, before the
+    present run of items. As ``continuation_backoff`` reads it, the end of the sequence after the last perceived
+    event, its longest suffix that has lived continuations: of these, on a world channel and not a word the partner
+    just said (an echo), the one confirmed last before the present run claims to come next, with what one
+    confirmation since gives by the rule (``learn.NEWEST_CLAIM``). How far it is believed is the way's record
+    (``hata.believed`` through ``_take``): where the counts and what came last foresaw apart while the mind lived,
+    which came."""
+    from .learn import NEWEST_CLAIM
+    S = mind.S
+    if S.t_won is None:
+        return {}
+    if mv_view(mind, "u_kind")[unit] & COMPOSED:
+        parts = parts_of(mind, unit)
+        channels, sense = mv_view(mind, "u_channel"), kind_masks(mind)[4]
+        start = 0
+        for j, p in enumerate(parts):
+            if sense[channels[p]]:
+                start = j + 1
+        tail, heard = parts[start:], set(parts[:start])
+    else:
+        tail, heard = (unit,), set()
+    won = S.t_won.numpy()
+    now = mind.episode_start
+    for i in range(len(tail)):
+        suffix = tail[i:]
+        x = suffix[0] if len(suffix) == 1 else S.tuple_index.get(tuple(suffix))
+        if x is None:
+            continue
+        best_t, best = -1, None
+        for target, (w_pos, _) in own_mass(mind, x, 1, trust).items():
+            if w_pos <= 0.0 or target in heard or not _world(mind, target):
+                continue
+            t = int(won[S.find_tie(x, target, EXPECT, 1)])
+            if best_t < t < now:
+                best_t, best = t, target
+        if best is not None:
+            return {best: NEWEST_CLAIM}
+    return {}
 
 
 def continuation_backoff(mind, unit: int, trust: Optional[torch.Tensor] = None) -> Dict[int, float]:

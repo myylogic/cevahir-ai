@@ -28,7 +28,7 @@ stored value, record and relief entry is the same.
 from __future__ import annotations
 
 import math
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -375,6 +375,8 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
     if cfg.general_miss and not cfg.reliability:
         acquired = [v for v, (intensity, _) in occurred.items() if intensity > 0.0]
     born_failures = getattr(cfg, "born_failures", False)
+    newest = getattr(cfg, "newest", False) and S.t_won is not None
+    settled: List[bool] = []                 # F76: what the newest came to where it and the counts foresaw apart
     kinds, channels = S.u_kind.numpy(), S.u_channel.numpy()      # no unit is made in this loop
     for unit, a_u, grounded in mind.last_focus:
         if not grounded or a_u <= 0.0 or int(kinds[unit]) & (CATEGORY | SLOTTED):
@@ -394,6 +396,10 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
         for v, (intensity, slot) in occurred.items():
             if intensity <= 0.0:
                 continue
+            if newest:
+                verdict = newest_verdict(mind, unit, v)
+                if verdict is not None:
+                    settled.append(verdict)
             born = born_failures and S.find_tie(unit, v, EXPECT, 1) < 0
             tie = S.tie(unit, v, EXPECT, 1)
             if v not in record:
@@ -406,6 +412,46 @@ def learn_follow(mind, percepts: List[Tuple[int, float, int, int]]) -> None:
                 born_failure(mind, tie, v, rivals, record[v])
         changes[unit] = record
     induce(mind, changes, occurred, slot_of_channel)
+    if settled:                                  # F76: booked as F49 books a claim of a reading (its own units)
+        from . import hata
+        ways = hata.reading_ways("yeni")
+        for held in settled:
+            hata.settle(mind, ways, held, NEWEST_CLAIM, turn=False)
+
+
+NEWEST_CLAIM = 0.75   # F76: what the newest claims of itself, the rule on one confirmation since: (1 + 1/2) / (1 + 1)
+
+
+def newest_verdict(mind, unit: int, v: int) -> Optional[bool]:
+    """F76: whether what came after ``unit`` now (``v``) was what followed it last before the present run of items
+    (True) or what its counts expected (False), where those two were different items on ``v``'s channel and ``v`` was
+    one of them; None otherwise. The counts' item is the one believed most by the rule on its own evidence (none when
+    two are believed alike); the newest is the one whose last confirmation is the latest before the present run."""
+    from .read import own_mass
+    S, k = mind.S, mind.cfg.k
+    own = own_mass(mind, unit, 1, mind.trust)
+    if len(own) < 2:
+        return None
+    channel = S.u_channel.numpy()
+    won = S.t_won.numpy()
+    start = mind.episode_start
+    best_e, counts, alike = -1.0, None, False
+    best_t, newest = -1, None
+    for target, (w_pos, w_neg) in own.items():
+        if channel[target] != channel[v] or w_pos <= 0.0:
+            continue
+        n = w_pos + w_neg
+        e = (n / (n + k)) * (w_pos / n - 0.5) + 0.5
+        if e > best_e:
+            best_e, counts, alike = e, target, False
+        elif e == best_e:
+            alike = True
+        t = int(won[S.find_tie(unit, target, EXPECT, 1)])
+        if t < start and t > best_t:
+            best_t, newest = t, target
+    if counts is None or newest is None or alike or counts == newest or (counts == v) == (newest == v):
+        return None
+    return newest == v
 
 
 def _follow(mind, unit: int, a_u: float, ids: torch.Tensor, dst: torch.Tensor, sums, occurred, slot_of_channel,

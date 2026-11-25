@@ -286,6 +286,13 @@ class Config:
                                     # the nearest to the context first, T more every later moment it has the
                                     # same context in mind, until the whole family is read; F37 reads the
                                     # places of an item the same way (aile.in_window, read._places_in_mind)
+    newest: bool = False            # F76 (The Newest Holds, with faults): what a context was followed by last,
+                                    # before what is being said now, is a way of reading of its own ("yeni"). While
+                                    # the mind lives, where a context's counts and what followed it last foresaw
+                                    # different items and what came was one of them, the way's record is settled
+                                    # as F49 settles a claim; it is read as far as that record allows
+                                    # (read.newest_reading). Each tie keeps its last confirmed moment
+                                    # (``Substance.track_wins``).
     unknown_outside: bool = False   # F65 (Not Knowing Is of the World; with L7): the amount the mind does not know
                                     # is kept when the *world* has just done something and it decided nothing. An
                                     # end of a turn that only came to mind (the question it asked itself, a
@@ -388,6 +395,8 @@ class Mind:
         self.cfg = cfg if cfg is not None else Config()
         self.S = Substance(n_slots=N_PROV, keep_log=self.cfg.keep_log)
         self.S.bind_repeats = self.cfg.bind_repeats
+        if getattr(self.cfg, "newest", False):
+            self.S.track_wins()
         if self.cfg.keep_log and self.cfg.log_path:
             from .store import DiskLog
             self.S.log = DiskLog(self.cfg.log_path, keep=max(4, self.cfg.undo_depth + 2))

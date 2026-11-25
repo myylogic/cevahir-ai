@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """M3: facts that change. Where someone is, told and told again, and asked after it changed (NOTES.md, 8.30).
 
-    python m3_change.py [--seeds 3] [--variant speaking] [--workers 2] [--out results/m3_change.jsonl]
+    python m3_change.py [--seeds 3] [--variant speaking] [--set newest=1] [--workers 2] [--out ...]
 
 A world of people and places. The people of one half are each told to be somewhere ("Veli evde .") and asked where
 they are, the answer watched ("Veli nerede ?", "Veli evde ."), so that the question and its answer's form are
@@ -83,6 +83,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--variant", default="speaking")
+    ap.add_argument("--set", default="", help="switches of Zihin, e.g. newest=1 (F76)")
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--out", default=os.path.join(HERE, "results", "m3_change.jsonl"))
     a = ap.parse_args()
@@ -90,7 +91,8 @@ def main() -> None:
     torch.set_num_threads(1)
     for seed in range(a.seeds):
         life, questions = world(seed)
-        c = Cevahir(variant=a.variant, seed=seed)
+        switches = {k: bool(int(v)) for k, v in (kv.split("=") for kv in filter(None, a.set.split(",")))}
+        c = Cevahir(variant=a.variant, seed=seed, switches=switches)
         t0 = time.time()
         for item in life:
             if item[0] == "tell":
@@ -118,7 +120,8 @@ def main() -> None:
                 examples.append({"q": "%s nerede ?" % name, "kind": kind, "last": last, "old": old,
                                  **{w: s.get(w) for w in ("zihin", "analogy", "cevahir")},
                                  "thought": s.get("thought")})
-        row = {"test": "m3_change", "code": CODE, "seed": seed, "variant": a.variant, "life_items": len(life),
+        row = {"test": "m3_change", "code": CODE, "seed": seed, "variant": a.variant, "switches": switches,
+               "life_items": len(life),
                "life_s": round(life_s, 1), "za": [c.za_won, c.za_all],
                "scores": {k: {w: dict(v) for w, v in ways.items()} for k, ways in scores.items()},
                "examples": examples}

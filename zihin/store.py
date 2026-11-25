@@ -277,7 +277,8 @@ class DiskLog:
         return (e.m, e.units0, e.ties0, e.units1, e.ties1, e.alpha0,
                 [(table, slot, arr(i), arr(a)) for table, slot, i, a in e.ev],
                 [(arr(i), arr(a)) for i, a in e.tie_use], [(arr(i), arr(a)) for i, a in e.unit_use],
-                None if e.last is None else (arr(e.last[0]), arr(e.last[1])), getattr(e, "rows0", None))
+                None if e.last is None else (arr(e.last[0]), arr(e.last[1])), getattr(e, "rows0", None),
+                None if getattr(e, "won", None) is None else (arr(e.won[0]), arr(e.won[1])))
 
     @staticmethod
     def _unpack(p) -> "MomentLog":
@@ -297,6 +298,8 @@ class DiskLog:
         e.tie_use = [(ten(i), ten(a)) for i, a in tu]
         e.unit_use = [(ten(i), ten(a)) for i, a in uu]
         e.last = None if last is None else (ten(last[0]), ten(last[1]))
+        won = p[11] if len(p) > 11 else None
+        e.won = None if won is None else (ten(won[0]), ten(won[1]))
         return e
 
     def mark_retracted(self, m: int) -> None:
@@ -336,7 +339,7 @@ class MomentLog:
     """What one moment changed: the increments, the structure it created, and the last-use times it replaced."""
 
     __slots__ = ("m", "units0", "ties0", "units1", "ties1", "alpha0", "ev", "tie_use", "unit_use", "last",
-                 "undo", "retracted", "rows0")
+                 "undo", "retracted", "rows0", "won")
 
     def __init__(self, m: int, n_units: int, n_ties: int, alpha: List[int], rows0: Optional[int] = None) -> None:
         self.m, self.units0, self.ties0, self.alpha0 = m, n_units, n_ties, alpha
@@ -346,6 +349,7 @@ class MomentLog:
         self.tie_use: List[Tuple[torch.Tensor, torch.Tensor]] = []
         self.unit_use: List[Tuple[torch.Tensor, torch.Tensor]] = []
         self.last: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
+        self.won: Optional[Tuple[torch.Tensor, torch.Tensor]] = None   # F76: the confirmation times it replaced
         self.undo = None
         self.retracted = False
 
@@ -416,6 +420,8 @@ class Substance:
         self.t_last = torch.zeros(cap_ties, dtype=I64)
         self.t_birth = torch.zeros(cap_ties, dtype=I64)
         self.t_alive = torch.zeros(cap_ties, dtype=torch.bool)
+        self.t_won: Optional[torch.Tensor] = None   # F76: each tie's last confirmed moment (kept with ``track_wins``)
+        self._won: list = []
         self.log: Dict[int, MomentLog] = {}
         self.cur: Optional[MomentLog] = None
         self.now = 0
@@ -538,10 +544,20 @@ class Substance:
         for name in self._ROW_ARRAYS:
             state[name] = getattr(self, name)[:r].clone()
         state["ex"] = self.ex[:, :r].clone()
+        if self.t_won is not None:
+            state["t_won"] = self.t_won[:max(t, 1)].clone()
         state["_cu"], state["_ct"], state["_cr"] = max(n, 1), max(t, 1), r
         for name in self._CACHES:
             state.pop(name, None)
+        state.pop("_won", None)
         return state
+
+    def track_wins(self) -> None:
+        """F76: keep each tie's last confirmed moment (the last moment its positive evidence grew), from now on. The
+        ties a mind holds already take their last written moment, the nearest the substance kept."""
+        if self.t_won is None:
+            self.t_won = self.t_last.clone()
+            self._won = []
 
     def drop_caches(self) -> None:
         """Drop what reading keeps beside the substance (the tensors of out lists, views, parts, slot keys, tables):
@@ -555,6 +571,8 @@ class Substance:
         touched = state.pop("_touched", None)    # the moment's touched ties as kept before ``_touch`` (a set)
         state.pop("_views", None)
         self.__dict__.update(state)
+        self.__dict__.setdefault("t_won", None)  # F76 (saved before it, or without it)
+        self._won = []
         self._out_ids, self._npv, self._parts, self._abstract_in = {}, None, {}, None
         self.__dict__.setdefault("_touch", [])
         self.__dict__.setdefault("_touch1", sorted(touched) if touched else [])
@@ -923,6 +941,8 @@ class Substance:
         for name in self._TIE_ARRAYS:
             setattr(self, name, self._grown(getattr(self, name), extra))
         self.t_ev = self._grown(self.t_ev, extra, dim=1)
+        if self.t_won is not None:
+            self.t_won = self._grown(self.t_won, extra)
         self._ct += extra
         self._npv = None
 
@@ -1029,6 +1049,8 @@ class Substance:
         self._put_np(table, slot, live_i, live)
         if table <= W_NEG:
             self._touch.append(live_i)
+            if table == W_POS and self.t_won is not None:
+                self._won.append(live_i[live > 0])
         if self.cur is not None and self.keep_log:
             self.cur.ev.append((table, slot, torch.from_numpy(live_i), torch.from_numpy(live)))
         return out
@@ -1049,6 +1071,8 @@ class Substance:
                 self._np().ex[table, r, slot] += amount
             if table <= W_NEG:
                 self._touch1.append(tie)
+                if table == W_POS and amount > 0.0 and self.t_won is not None:
+                    self._won.append(tie)
             if self.cur is not None and self.keep_log:
                 self.cur.ev.append((table, slot, tie, amount))
         return amount
@@ -1108,6 +1132,7 @@ class Substance:
     def begin(self, m: int, alpha: List[int]) -> None:
         self.now = m
         self._touch, self._touch1 = [], []
+        self._won = []
         self.cur = MomentLog(m, self.n_units, self.n_ties, alpha, self.n_rows)
 
     def end(self) -> MomentLog:
@@ -1124,7 +1149,14 @@ class Substance:
                 self.t_last[ids] = cur.m
             else:
                 self._np().last[touched] = cur.m
+        if self._won and self.t_won is not None:  # F76: the ties confirmed in this moment (positive evidence)
+            won = np.unique(np.concatenate([np.asarray(w, dtype=np.int64).ravel() for w in self._won]))
+            ids = torch.from_numpy(won)
+            if self.keep_log:
+                cur.won = (ids, self.t_won[ids].clone())
+            self.t_won[ids] = cur.m
         self._touch, self._touch1 = [], []
+        self._won = []
         self.version += 1
         if self.keep_log:
             self._compact(cur)
@@ -1181,6 +1213,11 @@ class Substance:
             ids, old = entry.last
             mine = self.t_last[ids] == entry.m
             self.t_last[ids[mine]] = old[mine]
+        won = getattr(entry, "won", None)
+        if won is not None and self.t_won is not None:
+            ids, old = won
+            mine = self.t_won[ids] == entry.m
+            self.t_won[ids[mine]] = old[mine]
 
     def retract(self, m: int) -> Dict[str, int]:
         """Remove exactly what moment m added. Structure born in m that nothing else supports is removed."""
@@ -1306,7 +1343,7 @@ class Substance:
                 "u_alive": self.u_alive[:n], "t_src": self.t_src[:t], "t_dst": self.t_dst[:t],
                 "t_form": self.t_form[:t], "t_lag": self.t_lag[:t], "t_w": self.t_w[:, :t],
                 "t_use": self.t_use[:t], "t_last": self.t_last[:t], "t_birth": self.t_birth[:t],
-                "t_alive": self.t_alive[:t]}
+                "t_alive": self.t_alive[:t], **({"t_won": self.t_won[:t]} if self.t_won is not None else {})}
 
     def digest(self) -> str:
         """sha256 over the live part of every persistent tensor, the evidence as the four tables [4, n_ties, P] in
@@ -1323,6 +1360,9 @@ class Substance:
                         h.update(self.w(table, ids).numpy().tobytes())
             else:
                 h.update(getattr(self, name)[:n if name.startswith("u_") else t].contiguous().numpy().tobytes())
+        if self.t_won is not None:               # F76: kept only by a mind that tracks it (the digest of the rest
+            h.update(b"t_won")                   # is unchanged)
+            h.update(self.t_won[:t].contiguous().numpy().tobytes())
         return h.hexdigest()
 
     def physical(self) -> Dict[str, torch.Tensor]:
