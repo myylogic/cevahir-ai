@@ -120,6 +120,7 @@ TOKEN = re.compile(r"\w+|[^\w\s]", re.UNICODE)
 PARTS_BUDGET = 4000                                            # parts tried, at most, for one utterance
 PARTS_DEPTH = 16                                               # parts taken out, at most, one after another
 PARTS_AROUND = 3                                               # tokens on each side of a part an example must share
+RECORD_STEP = 50                                               # parts tried to answer a record's example one step on
 EXCHANGE_FIRST = 2                                             # parts lived in a place, tried first for an exchange ...
 EXCHANGE_MORE = 10                                             # ... and then up to this many, on a bound of their own
 PART = "\u27e8%d\u27e9"                                         # a place of a part put in for another, while it stands
@@ -157,6 +158,9 @@ class Episodes:
         self._slots: Dict[tuple, list] = {}
         self._shapes: Dict[tuple, list] = {}
         self._units: Dict[tuple, float] = {}
+        self._units_plain: Dict[tuple, float] = {}             # ... read inside a record's own step (below)
+        self._steps: Dict[tuple, Optional[List[str]]] = {}     # the rests a record read one step on
+        self._in_step = False
         self._rests: Dict[tuple, Optional[List[str]]] = {}     # the answers of rests, as the parts read them
         self._windows: Dict[tuple, Dict[tuple, List[int]]] = {}  # each frame's examples, by what stands around them
         self._exchanges: Dict[tuple, float] = {}               # the record of each kind of exchange
@@ -483,6 +487,8 @@ class Episodes:
         self._elsewhere = {}
         self._here = {}
         self._units = {}
+        self._units_plain = {}
+        self._steps = {}
         self._rests = {}
         self._windows = {}
         self._exchanges = {}
@@ -643,12 +649,14 @@ class Episodes:
     def unit(self, fr: tuple, sample: int = 24) -> float:
         """How far a part of this frame is a whole of its own: the rule on lived examples of the frame, each
         foreseen as if it had not been lived: its part taken out, the rest's answer read (lived, or the analogy's at
-        the speaking line), and the change the nearest other example with the same surroundings shows put back. An
-        example counts as right when that gives the answer that was lived; one whose rest has no answer, or that no
-        other example can be put into, counts as not right: a part is a whole as far as taking it out leaves what can
-        be answered and putting it back gives what was lived."""
-        if fr in self._units:
-            return self._units[fr]
+        the speaking line, or by parts one step on: ``_rest_read``), and the change the nearest other example with
+        the same surroundings shows put back. An example counts as right when that gives the answer that was lived;
+        one whose rest has no answer, or that no other example can be put into, counts as not right: a part is a
+        whole as far as taking it out leaves what can be answered and putting it back gives what was lived."""
+        units = self._units_plain if getattr(self, "_in_step", False) else self._units
+        if fr in units:
+            return units[fr]
+        units[fr] = 0.0                                        # while it is read, a frame is no whole
         m = fr[0]
         ex = self._frames.get(fr, [])
         groups = self._windows_of(fr)
@@ -660,7 +668,7 @@ class Episodes:
             if u is None:
                 continue
             n += 1
-            rest = self._rest(u[:p2] + u[p2 + m:])
+            rest = self._rest_read(u[:p2] + u[p2 + m:])
             if rest is None:
                 continue
             others = []
@@ -671,15 +679,15 @@ class Episodes:
                     others.append((-self._near(u, p2, o, q2, m), j, q2, o))
             others.sort(key=lambda x: x[0])
             for _, j, q2, o in others[:3]:
-                o_rest = self._rest(o[:q2] + o[q2 + m:])
+                o_rest = self._rest_read(o[:q2] + o[q2 + m:])
                 if o_rest is None:
                     continue
                 got = self._transplant(o, q2, m, o_rest, list(self.answers[j]), u, p2, rest)
                 if got is not None:
                     right += got == list(self.answers[i])
                     break
-        self._units[fr] = (right + 0.5) / (n + 1.0)
-        return self._units[fr]
+        units[fr] = (right + 0.5) / (n + 1.0)
+        return units[fr]
 
     # ----- answering by parts -----
 
@@ -837,7 +845,7 @@ class Episodes:
             if u is None:
                 continue
             n += 1
-            rest = self._rest(u[:p2] + u[p2 + m:])
+            rest = self._rest_read(u[:p2] + u[p2 + m:])
             if rest is None:
                 continue
             around = self._window(u, p2, m)
@@ -849,7 +857,7 @@ class Episodes:
                     others.append((-self._near(u, p2, o, q2, m), j, q2, o))
             others.sort(key=lambda x: x[:3])
             for _, j, q2, o in others[:3]:
-                o_rest = self._rest(o[:q2] + o[q2 + m:])
+                o_rest = self._rest_read(o[:q2] + o[q2 + m:])
                 if o_rest is None:
                     continue
                 got = self._transplant(o, q2, m, o_rest, list(self.answers[j]), u, p2, rest, items=True)
@@ -985,6 +993,26 @@ class Episodes:
         if not found and self.relation(w[k]) == w[k]:
             found = chain(w[k])
         return found
+
+    def _rest_read(self, r: Tuple[str, ...]) -> Optional[List[str]]:
+        """The answer of a record's example once its part is out, read as an asked rest is: the one lived, or the
+        analogy's own at the speaking line, or, where neither answers, by parts, one part taken out (at most
+        RECORD_STEP tried); within that step records read their examples' rests by the analogy alone, so that no
+        record waits on another being read. Only an example whose rest none of these answers counts against its
+        frame for want of an answer."""
+        got = self._rest(r)
+        if got is not None or getattr(self, "_in_step", False):
+            return got
+        if r not in self._steps:
+            self._steps[r] = None
+            self._in_step = True
+            try:
+                plan, e, _ = self._by_parts(tuple(r), {}, [RECORD_STEP], PARTS_DEPTH)
+            finally:
+                self._in_step = False
+            self._steps[r] = list(plan) if plan is not None and e >= SPEAKING_LINE else None
+        got = self._steps[r]
+        return list(got) if got is not None else None
 
     def _rest_believed(self, r: Tuple[str, ...]) -> Tuple[Optional[List[str]], float]:
         """The answer of a rest as a record reads its examples' rests (``_rest``: the one lived, or the analogy's own

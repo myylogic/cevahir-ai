@@ -396,6 +396,20 @@ def test_parts_answer_nesting_deeper_than_any_lived(FastCortex):
     assert right >= 13
 
 
+def test_a_record_reads_the_rest_of_its_example_one_step_on(FastCortex):
+    from living.analogy import Episodes
+    rng = random.Random(0)
+    ep = Episodes()
+    for _ in range(400):
+        ep.live(*_nested(rng, rng.choice([0, 1, 1, 2, 2])))               # one or two parts inside, never three
+    ep.ready()
+    said, answer = _nested(random.Random(7), 3)
+    said = tuple(said)
+    assert ep._rest(said) is None                                       # the analogy alone does not answer it ...
+    assert ep._rest_read(said) == answer                                # ... with one part taken out it is answered
+    assert ep._units_plain and not ep._in_step                          # records read in that step, by the analogy
+
+
 def test_a_part_that_cannot_be_taken_out_is_exchanged_for_one_lived_in_its_place(FastCortex):
     from living.analogy import Episodes
     from living.evidence import SPEAKING_LINE
