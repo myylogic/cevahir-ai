@@ -256,6 +256,7 @@ class Cevahir:
                     self.mind.step(s.events(symbol, prov, speaker))
                 return bits
             prev = 0
+            on_track = foreseen is not None                  # the analogy's plan, while it agrees with what was said
             for i, (a, b) in enumerate(spans):
                 form = (lead if i == 0 else "") + text[prev:a] + text[a:b]
                 if i < len(body):
@@ -271,11 +272,15 @@ class Cevahir:
                         cell = self.situation(answer, i == 0, z_e)
                         self.dis_all[cell] += 1
                         self.dis_won[cell] += 1 if z_tok == body[i] else 0
-                    a_tok = foreseen[i] if foreseen is not None and i < len(foreseen) else None
+                    # The analogy's plan is made once, whole, before the answer is heard; Zihin guesses each token
+                    # knowing those said before it. A plan is a guess of a token only while it has agreed with
+                    # every token said before it: once astray, it says nothing of the rest.
+                    a_tok = foreseen[i] if on_track and i < len(foreseen) else None
                     if a_tok is not None and z_tok is not None and a_tok != z_tok and \
                             (a_tok == body[i]) != (z_tok == body[i]):    # the analogy and Zihin, one of them right
                         self.az_all += 1
                         self.az_won += 1 if a_tok == body[i] else 0
+                    on_track = on_track and a_tok == body[i]
                     if self.record and z_tok is None and h_tok is not None:
                         cell = self.situation(answer, i == 0, 0.0)
                         self.alone_all[cell] += 1

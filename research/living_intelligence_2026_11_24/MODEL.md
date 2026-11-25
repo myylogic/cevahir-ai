@@ -612,7 +612,11 @@ as a frame, done on the episodes the hippocampus keeps.
   line. Where Zihin has no plan, the analogy's is the thought. Where the two plans differ, a record decides, kept
   while Cevahir lives: before a dialogue's answer is heard, the analogy foresees it, and at each token of the answer
   where the analogy's token and Zihin's expected one differ and exactly one of them is right, the record counts
-  whether it was the analogy's. The analogy leads if the rule on that record is at least one half. The thought is
+  whether it was the analogy's. Zihin's token is guessed knowing the tokens said before it; the analogy's plan is made
+  once, whole, before any of them. So the plan is a guess of a token only while it has agreed with every token said
+  before it: from its first slip on it says nothing of the rest (counting every later token against it made the
+  record favour Zihin wherever answers are long; on COGS's generalisation set Cevahir then answered 13 fewer than the
+  analogy alone, NOTES.md 8.7). The analogy leads if the rule on that record is at least one half. The thought is
   then said token by token as in 12.3. Measured alone, the analogy answers 0 to 27 of 200 test commands of each
   published SCAN split (a word there changes how often an action is repeated, which one substitution cannot carry),
   where Zihin answers 199 or 200; on COGS it is the other way round. Each mechanism covers structure the other does
