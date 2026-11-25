@@ -887,9 +887,10 @@ studied in conversation, in four conditions; the other half (nine per seed) is a
   Answering by parts is held to records read from what was lived (8.14); a change that carries differently in
   surroundings no lived example shares, and that the three tokens around a part do not show, can still be said. On
   COGS 13 answers in 300 on the generalisation set are wrong; alone on SCAN, none of 300.
-- **The prefrontal decision on COGS** (8.7): the record that chooses between Zihin's plan and the analogy's is kept
-  token by token, Zihin guessing each token knowing those before it and the analogy's plan made once; it favours
-  Zihin, and on COGS's generalisation set Cevahir answers 13 fewer than the analogy alone.
+- **The prefrontal decision.** The record that chooses between Zihin's plan and the analogy's was kept unfairly
+  (8.7, mended in 8.15); and it is earned by the analogy's plans over places alone, because plans by parts are not
+  foreseen while Cevahir lives (they would cost seconds a dialogue). A plan by parts therefore leads over Zihin's on
+  the strength of a record that is not its own: on SCAN, twice in 300, where Zihin was right (8.13).
 - **Scale.** Every measurement here is at most ten million characters on one machine with four cores; no standard
   large benchmark was run (enwik8 could not be downloaded, section 6.6).
 - **Samples.** COGS was measured on samples of 300 of each file, and SCAN on 200 commands of each split, not on the
@@ -926,8 +927,22 @@ A Transformer trained from scratch on exactly the dialogues Cevahir lived for ea
 (`m3_scan_transformer.py`, 1.8 million parameters, 15 minutes of three cores per split, its answers written character
 by character; `results/m3_scan.jsonl`, rows "who": "transformer"). On add jump it answered none of the 200 commands:
 in its 15 minutes it took 235 steps of training (loss 0.57 at the end) while the Cevahir run on COGS (8.7) shared the
-machine. The other five splits, and the six splits again with the final code (`m3_scan.py --test 50`), are running;
-their rows follow.
+machine. The other five splits run with the machine to themselves; their rows follow.
+
+The six splits again, 50 commands each, with the code after 8.15 (`m3_scan.py --test 50`, ad6dea0):
+
+| split | Zihin | Cevahir | Cevahir wrong where Zihin was right |
+|---|---|---|---|
+| add jump | 50 | 49 | 1 |
+| around right | 50 | 50 | 0 |
+| length | 50 | 50 | 0 |
+| jump around right | 50 | 50 | 0 |
+| opposite right | 50 | 50 | 0 |
+| right | 50 | 49 | 1 |
+| **all six** | **300** | **298** | **2** |
+
+With the hippocampus in the layer, Cevahir answers two commands fewer than Zihin alone (8.15): where the two thoughts
+differ, the record that decides was earned by the analogy's plans over places, and it lets a plan by parts lead too.
 
 ### 8.14 Answering by parts, held to its own record
 
@@ -1018,3 +1033,39 @@ records, none wrong and the same 4 right. The world of nested phrases answers 15
 - **What it does not do.** A record measures how changes carried among the examples lived. A change that carries
   differently in surroundings no lived example shares is silenced by the surroundings rule only when those
   surroundings differ within three tokens of the part; and a record is read from 24 examples of a frame, not all.
+
+### 8.15 Four faults found by measuring again
+
+Running the measurements again with the code of 8.14, through the scripts that write the result rows, turned up four
+faults. Each is mended, has a test, and every row after it was written by the mended code.
+
+- **The hippocampus was not the same in every process.** A word's relation was chosen, on equal evidence, by the
+  order in which a set happened to hold its candidate tokens, and that order is drawn anew in every Python process.
+  The first run of `m3_analogy.py` said 256 / 18 / 26 on COGS's generalisation sample where another process said 264
+  / 23 / 13, and the two halves of the whole generalisation file, asked in two processes, were wrong 64 and 107
+  times. The candidates are now counted in the order met, and equal evidence is decided by the word itself, its
+  stem, then the token most the word's own (the rule on how many of the token's own dialogues held the word). Two
+  processes with different hash seeds now give the same 600 answers and beliefs, bit for bit (a digest of all of
+  them is the same). The rows of `results/m3_analogy.jsonl` written before commit ad6dea0 depend on their process.
+- **A word that stands twice.** "run left after run left" was used for "run left after jump left" by turning every
+  I_RUN into I_JUMP, the unchanged first action too. A place whose word also stands, unchanged, elsewhere in the
+  neighbour is no longer filled. Alone on SCAN, add jump by places went from 45 to 50 of 50; in Cevahir's SCAN life,
+  two of its three wrong answers on add jump came from it.
+- **The prefrontal record favoured Zihin** (8.7, MODEL.md 12.5): the analogy's plan counted against it at every token
+  after its first slip. It is now a guess of a token only while it agrees with what was said. In a COGS life of the
+  first 4,000 training lines the record then gave the analogy 4,828 of 4,854 disagreements (0.995).
+- **A plan cut short.** A plan by parts may count a place beyond any lived ("x _ 24" where no lived answer reached
+  24); its token had no written form, and the speaking stopped there. In the life of 4,000 lines, Cevahir lost two
+  of the analogy's right answers this way (pp recursion, the plan right and chosen, the answer cut after "x _"), and
+  no other. A token of the plan never written is now written as it is held.
+
+With the first three mended (ad6dea0), the hippocampus alone (`m3_analogy.py`): SCAN by parts 114 / 186 / 0 (add jump
+by places 50 / 0 / 0); COGS 298 / 0 / 2 in distribution and 264 / 23 / 13 on the generalisation sample, as in 8.14;
+and the whole generalisation file, every seventh sentence (3,000 of 21,000): **2,600 right, 285 silent, 115 wrong**
+(as first built, in a process of its own: 2,620, 207 and 173).
+
+Cevahir on SCAN with the first three mended (`m3_scan.py --test 50`, ad6dea0): Zihin answers 300 of 300 and Cevahir
+298. The two it misses Zihin answered right, and both times the analogy's plan was the thought. The one traced (add
+jump) was a plan by parts believed at 0.60: the analogy's own records rate such a plan as right three times in five,
+and the record that let it lead over Zihin was earned by its plans over places, not by plans by parts. Before the
+fixes (68ab34e) Cevahir missed 6; before the hippocampus existed it answered as Zihin (8.4).
