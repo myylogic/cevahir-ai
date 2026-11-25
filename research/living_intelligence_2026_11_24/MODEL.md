@@ -679,9 +679,12 @@ are mended by the same store of episodes.
   the lived utterances that hold a part of the same frame: what taking their part out changes in their answers (the
   change between the answer of the rest and the answer lived), among those whose part has the same surroundings as
   the asked part: the three tokens on each side, read by shape (a word with a relation as one mark, every other word
-  as itself). What a part changes can depend on what stands near it, and the change carries only what the examples
-  show: SCAN's "around" turns four times for each turn that "twice" or "thrice" asks, so an example with "twice" after
-  the part says nothing of "thrice". That change is put into the answer of the asked rest.
+  as itself), and the token right beside the part on each side read by its kind (below: the token its relation has
+  right after it), for what comes right before or after a part decides what it hangs on: "that a cockroach gave"
+  before "Oliver the cake" is not "that a prisoner liked" before "that the sandwich was slid", though "Oliver" and
+  "that" are one mark (NOTES.md 8.21). What a part changes can depend on what stands near it, and the change carries
+  only what the examples show: SCAN's "around" turns four times for each turn that "twice" or "thrice" asks, so an
+  example with "twice" after the part says nothing of "thrice". That change is put into the answer of the asked rest.
   The part's own words map by their place in the part (each word to its relation, as in 12.5, alike by kind); the
   rest of the example maps through the alignment of the two rests' answers, read by what they say about the places
   near the part (the numbers that name them, and the relations of the words that stand there). A token of an answer

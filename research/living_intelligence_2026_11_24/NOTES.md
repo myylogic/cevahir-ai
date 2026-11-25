@@ -823,6 +823,15 @@ ways (exact of 300):
   generalisation set the analogy answers 275 (silent on 23, wrong on 2) and Cevahir **275**, the thought being the
   analogy's in 559 of the 600 answers. Where the analogy is silent the thought is Zihin's, and Cevahir is silent 7
   times and wrong 18 (35 before).
+- **With the hippocampus of 8.19** (code fc73e36; life 6,651 s and answers 1,653 s with three workers, the machine
+  shared): in distribution both answer 298; on the generalisation set the analogy answers 286 (silent on 12, wrong on
+  2) and Cevahir **286**, the thought being the analogy's in 570 of the 600 answers. Cevahir is silent 6 times and
+  wrong 8: the analogy's two, and six of the twelve sentences the analogy is silent on, where Zihin's plan is said.
+  (Zihin's plan held to a record of its foresight while listening was tried and is not built: Zihin's expectation of
+  a token while it listens is mostly below one half, of the first token never above it, while it answers by drive
+  accumulated over moments; the bit "every token of the answer foreseen" was true in none of 1,000 SCAN dialogues and
+  none of 6,000 COGS ones, though Zihin answers SCAN's test commands right. Such a record has to be read from
+  Zihin's own answers.)
 
 ### 8.8 Sleep
 
@@ -1471,3 +1480,46 @@ Tried and not taken (every seventh generalisation sentence; the in-distribution 
   a name by ")"), the in-distribution file has one wrong answer where it had three, and every seventh generalisation
   sentence 11 where it had 13; but there it answers 43 sentences fewer: it loses all 22 names as second objects
   (their exchanges read the change from the same surroundings, by mark) and 27 clause recursions.
+
+### 8.21 What stands right beside a part
+
+Of the 13 wrong answers left on every seventh generalisation sentence (8.20), eight hang a recipient inside a clause
+on the verb outside it ("Aubrey liked that Grayson gave Lina to a cat ." answered with "like . recipient"). One
+traced: "The girl liked that a cockroach gave Oliver the cake ." had "that a cockroach gave" taken out; the rest, "The
+girl liked Oliver the cake .", was answered by the analogy as if "liked" gave; and the change was read from the
+nearest lived example with the same surroundings, "The boy liked that a prisoner liked that the sandwich was slid .".
+There "that" stands where "Oliver" stands: both are words with a relation, one mark, and the six tokens around the
+two parts read alike. The change that example lends (a clause put in) leaves the recipient on "like".
+
+What was built (MODEL.md 12.6):
+
+- **What stands right beside a part, read by its kind.** An example lends its change only where what stands around
+  its part is what stands around the asked part: the three tokens on each side read by shape, as before, and the one
+  right beside the part on each side read by its kind (the token its relation has right after it, 8.19): "that" is
+  followed by "(", a name by ")". What comes right before or after a part decides what it hangs on.
+
+The hippocampus alone (right / silent / wrong; `m3_analogy.py`, rows of `results/m3_analogy.jsonl` written by
+04b1b45):
+
+| | before (42bfe65) | after 8.21 (04b1b45) |
+|---|---|---|
+| COGS in distribution, the sample of 300 | 298 / 0 / 2 | **299 / 1 / 0** |
+| COGS in distribution, the whole test file (3,000) | 2,995 / 2 / 3 | **2,998 / 2 / 0** |
+| COGS generalisation, the sample of 300 | 298 / 1 / 1 | 298 / 1 / 1 |
+| COGS generalisation, every seventh sentence (3,000) | 2,939 / 48 / 13 | **2,942 / 48 / 10** |
+| SCAN, by places and by parts (300) | 100 / 200 / 0 and 114 / 186 / 0 | the same |
+
+The in-distribution file is answered with no wrong answer: of the three it had, two are right ("A boy imagined that
+the teacher wired Emma the cake .") and one silent, and one silent sentence is right. On every seventh generalisation
+sentence four wrong answers are right ("The girl liked that a cockroach gave Oliver the cake .", "The frog said that a
+teacher shipped Emma the cake .") and one right answer is wrong: "The baby liked that Benjamin forwarded Paula to the
+boy .", which the first search no longer answers; the second search takes "to the boy" out and reads its change from
+"The child lended a banana in a pit to the boy .", whose verb stands five tokens before the part, and puts the
+recipient on "liked". What is left wrong: four of prim_to_obj_proper, two each of do_dative_to_pp_dative and pp
+recursion, one each of obj_to_subj_common and subj_to_obj_proper; "Aubrey liked that Grayson gave Lina to a cat ." is
+answered by an exchange of "that Grayson gave Lina" for "the ring", a part that is no clause of its own, and the
+analogy answers the rest, "Aubrey liked the ring to a cat .", at 0.999.
+
+Reading all six tokens around a part by kind (8.20) answers 43 generalisation sentences fewer; reading only the two
+right beside it keeps every clause recursion and all names asked as objects but the one above: further out, the
+marks keep together what an example needs to lend its change.
