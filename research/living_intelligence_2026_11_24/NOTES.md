@@ -1257,8 +1257,8 @@ places: no pair is read, and nothing is reordered.
 
 Applied to the answers of 8.17 (with the bound of 4,000), every right answer stays as it was, since a right answer
 keeps the lived order already, and 7 of the 20 wrong ones on every seventh generalisation sentence come out right; on
-the whole in-distribution file 1 of 4. The hippocampus alone, with what 8.16 to 8.18 add (rows to follow from
-`m3_analogy.py` with the committed code):
+the whole in-distribution file 1 of 4. The hippocampus alone, with what 8.16 to 8.18 add (`m3_analogy.py`, rows of
+`results/m3_analogy.jsonl` written by 25a9c44):
 
 | | before 8.16 (297471c) | after 8.18 |
 |---|---|---|
