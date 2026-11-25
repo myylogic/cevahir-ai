@@ -48,7 +48,9 @@ with several places at once, done on the episodes the hippocampus keeps.
 - **Answering by parts.** An utterance no lived one is near (no plan reaches the line) is answered by taking a whole
   out, answering the rest (by the analogy, or again by parts), and putting the whole's effect back. The effect is read
   from lived utterances holding a part of the same frame with the same surroundings (the PARTS_AROUND tokens on each
-  side, read by shape): what taking their part out changes in their answers. The change is put into the rest's answer:
+  side, read by shape, the one right beside the part on each side by its kind: "that" and a name are one mark but
+  not one kind, and what comes right after a part decides what it hangs on): what taking their part out changes in
+  their answers. The change is put into the rest's answer:
   the part's own words and places by their place in the part, everything else through the alignment of the two rests'
   answers (read by what they say about the places near the part: the numbers that name them and the relations of the
   words there); a token of an answer that is a whole number smaller than the utterance's length is read as a place of
@@ -610,10 +612,18 @@ class Episodes:
                    if 0 <= p + r < len(u) and 0 <= p2 + r < len(o) and u[p + r] == o[p2 + r])
 
     def _window(self, u: Sequence[str], p: int, m: int) -> tuple:
-        """What stands around a part (u, at p, m tokens): the shapes of the PARTS_AROUND tokens on each side of it."""
+        """What stands around a part (u, at p, m tokens): the PARTS_AROUND tokens on each side of it, read by shape,
+        and the one right beside it on each side read by its kind: what comes right before or after a part decides
+        what it hangs on ("that" and a name are one mark, a word with a relation, but not one kind)."""
         w = PARTS_AROUND
-        return tuple("^" if k < 0 else ("$" if k >= len(u) else self._shape(u[k]))
-                     for k in list(range(p - w, p)) + list(range(p + m, p + m + w)))
+
+        def read(k: int) -> str:
+            if k < 0:
+                return "^"
+            if k >= len(u):
+                return "$"
+            return self._kind(u[k]) if k in (p - 1, p + m) else self._shape(u[k])
+        return tuple(read(k) for k in list(range(p - w, p)) + list(range(p + m, p + m + w)))
 
     def _windows_of(self, fr: tuple) -> Dict[tuple, List[int]]:
         """The lived examples of a frame, by what stands around their part."""

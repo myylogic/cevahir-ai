@@ -338,6 +338,20 @@ def test_words_stand_for_each_other_only_if_their_relations_play_alike_parts_in_
     assert ep.alike("on", "in") and ep.alike("cup", "mat") and ep.alike("see", "take")
 
 
+def test_what_stands_right_beside_a_part_is_read_by_its_kind(FastCortex):
+    from living.analogy import Episodes
+    rng = random.Random(4)
+    ep = Episodes()
+    for _ in range(200):
+        ep.live(*_nested(rng, rng.choice([0, 1, 2]), gave=rng.random() < 0.3))
+    ep.ready()
+    ep._make()
+    assert ep._shape("Can") == ep._shape("to") and ep._kind("Can") != ep._kind("to")   # one mark, not one kind
+    a = ep._window(("Ali", "gave", "the", "cup", "to", "Can", "."), 2, 2)
+    b = ep._window(("Ali", "gave", "the", "cup", "Can", "to", "."), 2, 2)
+    assert a[3] != b[3] and a[4] == b[4]          # right beside the part read by kind, one further on by shape
+
+
 def test_parts_answer_nesting_deeper_than_any_lived(FastCortex):
     from living.analogy import Episodes
     from living.evidence import SPEAKING_LINE
