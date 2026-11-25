@@ -1221,14 +1221,14 @@ to subject (common) 144 / 0 / 2 → 140 / 5 / 1, pp dative to do dative 135 / 0 
   innermost clause of a right-branching sentence) answered 75 of the 134 cp recursions, but said 9 pp recursions
   wrong where the records' order says 3; the rule above answers them by mending what the search was spent on.
 - **The search's bound.** With the rule, 69 nested sentences were still silent, and the bound on parts tried was
-  what stopped them (with 4,000 parts instead of 400, 26 of them were answered, all right; 40 steps instead of 16
-  changed nothing; the 69 searches took 48 s together, 12 s with the smaller bound). The bound decides only where a
-  search is spent: the order of the search is the same, so a plan found within 400 is the one found within 4,000,
-  and only a silent utterance can change. It is now 4,000, and exchanges, tried on a quarter of it, get 1,000 instead
-  of 100. On every seventh generalisation sentence 39 silent sentences were then answered, 36 right and 3 wrong
-  (2,772 / 208 / 20; two put a recipient on the wrong verb and one links nested clauses to the wrong places, at
-  beliefs of 0.62 to 0.70); the in-distribution
-  file's three silent sentences stay silent, and SCAN is unchanged.
+  what stopped them (with 4,000 parts instead of 400 for the parts taken out, exchanges left at 100, 26 of them were
+  answered, all right; 40 steps instead of 16 changed nothing; the 69 searches took 48 s together, 12 s with the
+  smaller bound). The bound decides only where a search is spent: the order of the search is the same, so a plan
+  found within 400 is the one found within 4,000, and only a silent utterance can change. It is now 4,000, and
+  exchanges, tried on a quarter of it, get 1,000 instead of 100. On every seventh generalisation sentence 39 silent
+  sentences were then answered, 36 right and 3 wrong (2,772 / 208 / 20; two put a recipient on the wrong verb and one
+  links nested clauses to the wrong places, at beliefs of 0.62 to 0.70); the in-distribution file's three silent
+  sentences stay silent, and SCAN is unchanged.
 
 ### 8.18 The order of an answer's lists
 
