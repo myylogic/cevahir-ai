@@ -842,6 +842,10 @@ ways (exact of 300):
   Cevahir **288**, silent 5 times and wrong 7: the analogy's three, and four where the analogy is silent and Zihin's
   plan is said. (Inside Cevahir the hippocampus lives what was said without its closing mark, so its answers differ
   from those of the hippocampus asked alone, 297 / 1 / 2 on the same sample.)
+- **With the hippocampus of 8.24** (the rows written by 19e589d, the code of b003819; life 5,438 s and answers 3,570 s
+  with two workers, the machine shared): in distribution both answer 299, Cevahir wrong on one (the analogy silent on
+  it); on the generalisation set the analogy answers 289 and is wrong on none (silent on 11), and Cevahir **289**,
+  silent 5 times and wrong 6, every one of them Zihin's plan where the analogy is silent.
 
 ### 8.8 Sleep
 
