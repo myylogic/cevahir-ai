@@ -64,8 +64,10 @@ class Cevahir:
 
     ``variant`` and ``switches`` configure Zihin (``zihin_config``); ``window`` is Zihin's focus F (its window);
     ``cortex`` changes the cortex's configuration (``CORTEX``); ``dil`` is Zihin's language convention. Switches of
-    Cevahir's own (``OWN_SWITCHES``) may be given among ``switches``."""
+    Cevahir's own (``OWN_SWITCHES``) may be given among ``switches``. Zihin's switches Cevahir turns on unless told
+    otherwise: ``ZIHIN_ON``."""
 
+    ZIHIN_ON = {"newest": True}      # F76, the newest holds: measured on every battery (NOTES.md 8.30, 8.31)
     OWN_SWITCHES = ("hold_alone", "alone_now")   # Zihin's plan held back by its record alone (off); that record as
     #                                              Zihin speaks, read as far as it believes (off; holds as hold_alone)
 
@@ -76,7 +78,7 @@ class Cevahir:
         from zihin import Mind
         from zihin.__main__ import CHANNEL, Session, _log_path
         torch.manual_seed(seed)
-        switches = dict(switches or {})
+        switches = {**self.ZIHIN_ON, **(switches or {})}
         self.alone_now = bool(switches.pop("alone_now", False))
         self.hold_alone = bool(switches.pop("hold_alone", False)) or self.alone_now
         cfg_z = zihin_config(variant, switches)

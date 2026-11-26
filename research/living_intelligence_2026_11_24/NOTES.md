@@ -2083,7 +2083,11 @@ have caught none of them.
 **F76 on the published sets, first.** With the newest (8.30) and the record not holding, Cevahir says the place
 told last in the world of 8.30 (36 of 36), and on SCAN and in the school it says every answer it says without F76
 (rows of 5f6282d: SCAN 50 of 50 in five splits and the same 49 and one wrong in "right"; the school as Zihin in every
-kind and seed). COGS with F76 is measured in turn.
+kind and seed). On COGS (the row of 5f6282d with F76): in distribution 300 of 300, on the generalisation set 299
+and the same one wrong, as without it; Zihin alone answers one more in distribution (18 of 300). What it costs is
+time: COGS's life took 8,528 s against 5,769 (+48 %), the newest read with every silent claim (8.28). Measured on
+every battery and losing no answer, F76 is on in Cevahir (``Cevahir.ZIHIN_ON``; Zihin's own configurations keep it
+off, not measured there): a new mind says what it was told last, and a mind saved before keeps what it was.
 
 **The wrong answer in "right"** ("walk right twice and look opposite left twice"): the analogy's plan, chosen over
 Zihin's by the record of their disagreements (12.5), with its two halves' actions exchanged ("I_TURN_RIGHT

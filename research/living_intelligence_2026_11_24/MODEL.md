@@ -597,8 +597,8 @@ not know.
   Cevahir reads at Zihin's speed.
 - **Facts that change.** Zihin's counts weigh every telling alike, whenever it came: three tellings of an old place
   outweigh one of a new. F76 (the newest holds, a switch of Zihin, off) reads what came last as a way of its own with
-  its own record, and Zihin, and Cevahir with it, then says the place told last (NOTES.md 8.30, 8.31). It is off until
-  measured on the published sets. A record that follows how far a voice can be trusted now, not how far it could be
+  its own record, and Zihin, and Cevahir with it, then says the place told last (NOTES.md 8.30, 8.31). Measured on
+  every battery and losing no answer, it is on in Cevahir; it costs time (COGS's life +48 %). A record that follows how far a voice can be trusted now, not how far it could be
   at first, is not built: read from the past, the record of Zihin alone holds back what Zihin has learned since.
 
 ### 12.5 The hippocampus's analogy: several places at once (`living/analogy.py`)
