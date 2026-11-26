@@ -251,8 +251,9 @@ def test_a_word_first_met_in_the_question_is_said_back_as_it_was_written(FastCor
     for q, a in life:
         c.watch(q, a)
     c.session.close_turn()
-    c.za_won = c.za_all = 0          # Zihin alone guessed few places right, and its plan would be held back (no
-    #                                  place is known of a name never met): what is asked here is how a plan is said
+    c.za_won, c.za_all, c.za_claims = 0, 0, []   # Zihin alone guessed few places right, and its plan would be
+    #                                  held back (no place is known of a name never met): what is asked here is how
+    #                                  a plan is said
     said = c.answers(["Zorbek nerede ?", "Yıldız nerede ?"], way="every", workers=2)
     for s, name in zip(said, ["Zorbek", "Yıldız"]):
         if s["zihin"] != "(sessiz)":
@@ -340,23 +341,38 @@ def test_zihin_keeps_the_day_at_night_without_changing_what_it_knows(FastCortex)
 
 def test_zihin_alone_is_believed_as_far_as_its_record_where_the_analogy_foresees_nothing(FastCortex):
     """While Cevahir lives, the answers the analogy foresaw nothing of are where Zihin's guesses are kept as its record
-    alone. Where the analogy foresees nothing when it is asked, Zihin's plan is the thought only as far as that
-    record allows: under the speaking line it is held back and nothing is said; with no record it stands."""
+    alone, each claim with how far Zihin believed it. Where the analogy foresees nothing when it is asked, Zihin's
+    plan is the thought only as far as that record allows: under the speaking line it is held back and nothing is
+    said; with no record it stands. With ``alone_now`` the guesses are Zihin's as it would speak, and only the claims
+    it believed at least as far as the plan are counted: what Zihin came to while it guessed less surely says nothing
+    of a plan it is surer of."""
     from living.cevahir import Cevahir
     life, _ = _world()
     c = Cevahir(variant="speaking")
     for q, a in life[:40]:
         c.watch(q, a + " .")
     assert c.za_all > 0 and 0 <= c.za_won <= c.za_all          # the first answers: nothing foreseen them yet
+    assert len(c.za_claims) == c.za_all and sum(w for _, w in c.za_claims) == c.za_won
     c.episodes.plan = lambda said, parts=True: (None, 0.0, 0)  # the analogy foresees nothing
     plan, es = ["walk", "walk"], [0.9, 0.9]
-    c.za_won, c.za_all = 0, 6
+    c.za_won, c.za_all, c.za_claims = 1, 7, [(0.6, 0)] * 6 + [(0.95, 1)]
+    assert c.choose_plan("walk twice", plan, es) == ([], [], "held")   # without alone_now: every claim counts
+    c = Cevahir(variant="speaking", switches={"alone_now": True})
+    for q, a in life[:40]:
+        c.watch(q, a + " .")
+    assert c.alone_now and len(c.za_claims) == c.za_all > 0 and sum(w for _, w in c.za_claims) == c.za_won
+    assert all(0.0 <= e <= 1.0 for e, _ in c.za_claims)
+    c.episodes.plan = lambda said, parts=True: (None, 0.0, 0)
+    c.za_won, c.za_all, c.za_claims = 0, 6, [(0.95, 0)] * 6     # as sure, and wrong
     assert c.choose_plan("walk twice", plan, es) == ([], [], "held")
     got = c.every_way("walk twice")
     assert got["thought"] == "held" and got["cevahir"] == ""
-    c.za_won, c.za_all = 6, 6
+    c.za_won, c.za_all, c.za_claims = 6, 6, [(0.95, 1)] * 6     # as sure, and right
     assert c.choose_plan("walk twice", plan, es)[2] == "zihin"
-    c.za_won, c.za_all = 0, 0
+    c.za_won, c.za_all, c.za_claims = 1, 7, [(0.6, 0)] * 6 + [(0.95, 1)]   # wrong only while it was less sure
+    assert c.choose_plan("walk twice", plan, es)[2] == "zihin"
+    assert c.choose_plan("walk twice", plan, [0.6, 0.9]) == ([], [], "held")   # a plan as unsure as they were
+    c.za_won, c.za_all, c.za_claims = 0, 0, []
     assert c.choose_plan("walk twice", plan, es)[2] == "zihin"
 
 def test_the_hippocampus_answers_an_utterance_that_differs_in_two_places_from_every_one_lived(FastCortex):

@@ -63,7 +63,10 @@ class Cevahir:
     """One mind: Zihin and the cortex, meeting in the harmony.
 
     ``variant`` and ``switches`` configure Zihin (``zihin_config``); ``window`` is Zihin's focus F (its window);
-    ``cortex`` changes the cortex's configuration (``CORTEX``); ``dil`` is Zihin's language convention."""
+    ``cortex`` changes the cortex's configuration (``CORTEX``); ``dil`` is Zihin's language convention. Switches of
+    Cevahir's own (``OWN_SWITCHES``) may be given among ``switches``."""
+
+    OWN_SWITCHES = ("alone_now",)    # the record of Zihin alone as it speaks, read as far as it believes (off)
 
     def __init__(self, variant: str = "full", switches: Optional[Dict[str, bool]] = None, window: int = 0,
                  cortex: Optional[dict] = None, dil: str = "tr", seed: int = 0, top: int = 12, forms_per: int = 2,
@@ -72,6 +75,8 @@ class Cevahir:
         from zihin import Mind
         from zihin.__main__ import CHANNEL, Session, _log_path
         torch.manual_seed(seed)
+        switches = dict(switches or {})
+        self.alone_now = bool(switches.pop("alone_now", False))
         cfg_z = zihin_config(variant, switches)
         if ledger:                                       # Zihin keeps its ledger: it can forget exactly. On disk (a
             cfg_z.keep_log = True                        # folder given, or a temporary one), see ``keep_ledger``
@@ -102,6 +107,7 @@ class Cevahir:
         self.az_all = 0                                          # ... the analogy's token was it (per token)
         self.za_won = 0                                          # answers the analogy foresaw nothing of, Zihin
         self.za_all = 0                                          # ... guessing them: every token of it right
+        self.za_claims: List[Tuple[float, int]] = []             # ... each claim: (how far Zihin believed it, right)
         self.outcome_good = Counter()                            # the amygdala: answers judged, per (who led, situation)
         self.outcome_all = Counter()
         self.last_leads: List[Tuple[str, int]] = []              # who led each token of the last answer, and where
@@ -151,6 +157,14 @@ class Cevahir:
             weights += w
         self.cortex.set_voice(forms, weights, know)
         return believed[0][1], believed[0][0]
+
+    def zihin_would(self) -> Tuple[Optional[str], float]:
+        """Zihin's next token as it would say it, and its e: the present context read as when it speaks, with every
+        way of reading it has (``predictions`` "specific"); the voice of the harmony is the cheaper reading made
+        while it listens (the context's own memory)."""
+        expected = self.mind.expected(self.channel, "specific")
+        believed = max(((e, s) for s, e in expected.items() if isinstance(s, str)), default=(0.0, None))
+        return believed[1], believed[0]
 
     @staticmethod
     def situation(answer: bool, first: bool, e: float) -> int:
@@ -266,6 +280,7 @@ class Cevahir:
             on_track = foreseen is not None                  # the analogy's plan, while it agrees with what was said
             own = None                                       # Zihin alone where the analogy foresaw nothing: right
             #                                                  so far (None: it would not say a first token)
+            own_e = 1.0                                      # ... and how far it believed what it would say
             for i, (a, b) in enumerate(spans):
                 form = (lead if i == 0 else "") + text[prev:a] + text[a:b]
                 if i < len(body):
@@ -290,12 +305,15 @@ class Cevahir:
                         self.az_all += 1
                         self.az_won += 1 if a_tok == body[i] else 0
                     on_track = on_track and a_tok == body[i]
-                    if answer and unforeseen:                # a claim begins where Zihin would say the first
-                        said_it = z_tok is not None and z_e >= SPEAKING_LINE   # token, and holds while it would
-                        if i == 0:                           # say each token and each is the one said
-                            own = (z_tok == body[0]) if said_it else None
-                        elif own is not None:
-                            own = own and said_it and z_tok == body[i]
+                    if answer and unforeseen and (i == 0 or own):   # a claim begins where Zihin would say the
+                        f_tok, f_e = self.zihin_would() if self.alone_now else (z_tok, z_e)   # first token (as it
+                        said_it = f_tok is not None and f_e >= SPEAKING_LINE   # speaks, with alone_now), and holds
+                        if i == 0:                           # while it would say each token and each is the one
+                            own = (f_tok == body[0]) if said_it else None   # said; it is believed as far as the
+                            own_e = f_e                      # least believed of them
+                        else:
+                            own = said_it and f_tok == body[i]
+                            own_e = min(own_e, f_e)
                     if self.record and z_tok is None and h_tok is not None:
                         cell = self.situation(answer, i == 0, 0.0)
                         self.alone_all[cell] += 1
@@ -314,6 +332,7 @@ class Cevahir:
             if own is not None:                              # the whole answer, as Zihin alone would have said it
                 self.za_all += 1
                 self.za_won += 1 if own else 0
+                self.za_claims.append((own_e, 1 if own else 0))
             if not spans and lead:
                 bits += self._live_text(lead)
             if text[prev:]:
@@ -555,12 +574,20 @@ class Cevahir:
         Cevahir lives a dialogue and one of the two is right."""
         return (self.az_won + 0.5) / (self.az_all + 1.0)
 
-    def trust_unforeseen(self) -> Optional[float]:
+    def trust_unforeseen(self, believed: Optional[float] = None) -> Optional[float]:
         """The belief, by the one rule, that Zihin's answer is right where the analogy foresees nothing: of the
         answers Cevahir lived that the analogy foresaw nothing of (no plan, or one under the speaking line) and
-        whose first token Zihin would have said (its guess at the speaking line), how many it would have said
-        whole, each token its guess at the line, knowing the tokens said before it, and the one said. None while
-        there are none: nothing lived says how far Zihin goes alone."""
+        whose first token Zihin would have said (as it speaks, at the speaking line), how many it would have said
+        whole, each token its guess at the line, knowing the tokens said before it, and the one said. With
+        ``believed`` (how far Zihin believes the plan asked about: its least believed word), only the claims it
+        believed at least as far are counted: what Zihin came to while it knew less, and guessed less surely, says
+        nothing of a plan it is surer of now. None while there are none: nothing lived says how far Zihin goes
+        alone so surely."""
+        if believed is not None and len(self.za_claims) == self.za_all:
+            seen = [won for e, won in self.za_claims if e >= believed]
+            if not seen:
+                return None
+            return (sum(seen) + 0.5) / (len(seen) + 1.0)
         if not self.za_all:
             return None
         return (self.za_won + 0.5) / (self.za_all + 1.0)
@@ -583,7 +610,7 @@ class Cevahir:
                 return low, [a_e] * len(low), "analogy"
             self.last_choice = ("zihin", differ)
             return plan, plan_e, "zihin"
-        alone = self.trust_unforeseen()
+        alone = self.trust_unforeseen(min(plan_e) if plan_e and self.alone_now else None)
         if plan and alone is not None and alone < SPEAKING_LINE:
             self.last_choice = ("held", False)
             return [], [], "held"
@@ -922,7 +949,7 @@ class Cevahir:
             "outcome_all": [[w, c, n] for (w, c), n in self.outcome_all.items()],
             "alphabets": {k: "".join(sorted(v)) for k, v in self.alphabets.items()},
             "episodes": self.episodes.state(), "marks": self.marks_kept, "az": [self.az_won, self.az_all],
-            "za": [self.za_won, self.za_all],
+            "za": [self.za_won, self.za_all], "za_claims": list(self.za_claims), "alone_now": self.alone_now,
             "others": [[name, ch["won"], ch["seen"]] for name, ch in sorted(self.others.items())]}
         with open(os.path.join(folder, "cevahir.json"), "w", encoding="utf-8") as f:
             json.dump(state, f, ensure_ascii=False)
@@ -1006,6 +1033,8 @@ class Cevahir:
         self.marks_kept = state.get("marks", False)
         self.az_won, self.az_all = state.get("az", [0, 0])
         self.za_won, self.za_all = state.get("za", [0, 0])
+        self.za_claims = [tuple(c) for c in state.get("za_claims", [])]
+        self.alone_now = state.get("alone_now", False)
         self.alphabets = {k: set(v) for k, v in state.get("alphabets", {self.channel: ""}).items()}
         self.others = {}
         for i, (name, won, seen) in enumerate(state.get("others", [])):
