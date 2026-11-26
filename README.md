@@ -26,9 +26,11 @@
 >   0.4–1.1 % more bits); a script never met opens a channel that is watched until it shows structure; any entry can be
 >   forgotten exactly; the whole mind is kept and loaded bit for bit.
 >
->   Measured: on the six published SCAN splits it answers 1,199 of 1,200 test commands (200 of each), and with the final
->   code 300 of 300 (50 of each), wrong and silent on none. Where an answer has to put together facts read apart, it
->   answers every question, and a Transformer trained on the very stream it lived answers none. At school it answers 342
+>   Measured: on the six published SCAN splits it answers 1,199 of 1,200 test commands (200 of each), and with the code
+>   of 26 November 299 of 300 (50 of each), the one wrong an analogy of the hippocampus (research notes 8.31). Where an
+>   answer has to put together facts read apart, it answers every question, and a Transformer trained on the very
+>   stream it lived answers none. Where facts change (a place told three times, then another once), it says the place
+>   told last (36 of 36 people asked; 9 by the counts alone: F76, the newest holds, notes 8.30 and 8.31). At school it answers 342
 >   of 405 examination questions, every one of the 63 deductions among them (a Transformer trained on the same lessons:
 >   203, and none of the deductions). On COGS the hippocampus alone answers all 3,000 in-distribution test sentences and
 >   20,914 of the 21,000 sentences of the generalisation set (99.6 %; 2 wrong, 84 silent), every sentence of twelve of
