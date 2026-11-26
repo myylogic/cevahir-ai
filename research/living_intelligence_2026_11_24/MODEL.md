@@ -597,9 +597,9 @@ not know.
   Cevahir reads at Zihin's speed.
 - **Facts that change.** Zihin's counts weigh every telling alike, whenever it came: three tellings of an old place
   outweigh one of a new. F76 (the newest holds, a switch of Zihin, off) reads what came last as a way of its own with
-  its own record, and Zihin then says the place told last; but the record by which Cevahir trusts Zihin alone (12.5)
-  is read from Zihin's voice while it lives, which reads the counts, and Cevahir stays silent there. A record that
-  follows how far a voice can be trusted now, not how far it could be at first, is not built (NOTES.md 8.30).
+  its own record, and Zihin, and Cevahir with it, then says the place told last (NOTES.md 8.30, 8.31). It is off until
+  measured on the published sets. A record that follows how far a voice can be trusted now, not how far it could be
+  at first, is not built: read from the past, the record of Zihin alone holds back what Zihin has learned since.
 
 ### 12.5 The hippocampus's analogy: several places at once (`living/analogy.py`)
 
@@ -658,12 +658,14 @@ as a frame, done on the episodes the hippocampus keeps.
   before it: from its first slip on it says nothing of the rest (counting every later token against it made the
   record favour Zihin wherever answers are long; on COGS's generalisation set Cevahir then answered 13 fewer than the
   analogy alone, NOTES.md 8.7). The analogy leads if the rule on that record is at least one half. The thought is
-  then said token by token as in 12.3. Where the analogy foresees nothing, Zihin's plan is the thought only as far as
-  Zihin's record alone allows: of the answers lived that the analogy foresaw nothing of (no plan, or one under the
-  line) and whose first token Zihin would have said (its guess at the line), how many it would have said whole, each
-  token its guess at the line, knowing those said before it. Under the line the plan is held back and nothing is said
-  (not the harmony alone either: the thought was there, and was not trusted); with no record it stands (NOTES.md
-  8.29). Measured alone, the analogy answers 0 to 27 of 200 test commands of each
+  then said token by token as in 12.3. Where the analogy foresees nothing, Zihin's plan is the thought. A record of
+  Zihin alone is kept: of the answers lived that the analogy foresaw nothing of (no plan, or one under the line) and
+  whose first token Zihin would have said (its guess at the line), how many it would have said whole, each token its
+  guess at the line, knowing those said before it, each claim with how far Zihin believed it. Holding the plan back
+  where that record is under the line (``hold_alone``) is a switch, off: it silenced Cevahir's two wrong answers on
+  COGS's samples (NOTES.md 8.29), but on SCAN one failed claim held back 21 of 50 answers Zihin had right, and the
+  record read as Zihin speaks and as far as it believes (``alone_now``) held back every answer of four splits
+  (NOTES.md 8.31). Measured alone, the analogy answers 0 to 27 of 200 test commands of each
   published SCAN split (a word there changes how often an action is repeated, which one substitution cannot carry),
   where Zihin answers 199 or 200; on COGS it is the other way round. Each mechanism covers structure the other does
   not, and the record says which to follow.
