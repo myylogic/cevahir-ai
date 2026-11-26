@@ -66,7 +66,8 @@ class Cevahir:
     ``cortex`` changes the cortex's configuration (``CORTEX``); ``dil`` is Zihin's language convention. Switches of
     Cevahir's own (``OWN_SWITCHES``) may be given among ``switches``."""
 
-    OWN_SWITCHES = ("alone_now",)    # the record of Zihin alone as it speaks, read as far as it believes (off)
+    OWN_SWITCHES = ("hold_alone", "alone_now")   # Zihin's plan held back by its record alone (off); that record as
+    #                                              Zihin speaks, read as far as it believes (off; holds as hold_alone)
 
     def __init__(self, variant: str = "full", switches: Optional[Dict[str, bool]] = None, window: int = 0,
                  cortex: Optional[dict] = None, dil: str = "tr", seed: int = 0, top: int = 12, forms_per: int = 2,
@@ -77,6 +78,7 @@ class Cevahir:
         torch.manual_seed(seed)
         switches = dict(switches or {})
         self.alone_now = bool(switches.pop("alone_now", False))
+        self.hold_alone = bool(switches.pop("hold_alone", False)) or self.alone_now
         cfg_z = zihin_config(variant, switches)
         if ledger:                                       # Zihin keeps its ledger: it can forget exactly. On disk (a
             cfg_z.keep_log = True                        # folder given, or a temporary one), see ``keep_ledger``
@@ -596,9 +598,9 @@ class Cevahir:
         """The prefrontal choice of the thought (MODEL.md 12.5): Zihin's plan or the hippocampus's analogy. The
         analogy is a thought only if its own belief reaches the speaking line. Where Zihin has no plan, it is the
         thought; where the two plans differ, the record of their disagreements decides (``trust_analogy``). Where
-        the analogy foresees nothing, Zihin's plan is the thought as far as its record alone allows
-        (``trust_unforeseen``): under the speaking line it is held back, and nothing is said ("held"). Returns
-        (plan, beliefs, whose)."""
+        the analogy foresees nothing, Zihin's plan is the thought; with ``hold_alone``, only as far as its record
+        alone allows (``trust_unforeseen``): under the speaking line it is held back, and nothing is said ("held").
+        Returns (plan, beliefs, whose)."""
         from living.evidence import SPEAKING_LINE
         a_plan, a_e, _ = self.episodes.plan(self._heard(question))
         self.last_choice = None
@@ -610,7 +612,9 @@ class Cevahir:
                 return low, [a_e] * len(low), "analogy"
             self.last_choice = ("zihin", differ)
             return plan, plan_e, "zihin"
-        alone = self.trust_unforeseen(min(plan_e) if plan_e and self.alone_now else None)
+        alone = None
+        if self.hold_alone:                                  # (off: one failed claim held back 21 of 50 SCAN answers)
+            alone = self.trust_unforeseen(min(plan_e) if plan_e and self.alone_now else None)
         if plan and alone is not None and alone < SPEAKING_LINE:
             self.last_choice = ("held", False)
             return [], [], "held"
@@ -950,6 +954,7 @@ class Cevahir:
             "alphabets": {k: "".join(sorted(v)) for k, v in self.alphabets.items()},
             "episodes": self.episodes.state(), "marks": self.marks_kept, "az": [self.az_won, self.az_all],
             "za": [self.za_won, self.za_all], "za_claims": list(self.za_claims), "alone_now": self.alone_now,
+            "hold_alone": self.hold_alone,
             "others": [[name, ch["won"], ch["seen"]] for name, ch in sorted(self.others.items())]}
         with open(os.path.join(folder, "cevahir.json"), "w", encoding="utf-8") as f:
             json.dump(state, f, ensure_ascii=False)
@@ -1035,6 +1040,7 @@ class Cevahir:
         self.za_won, self.za_all = state.get("za", [0, 0])
         self.za_claims = [tuple(c) for c in state.get("za_claims", [])]
         self.alone_now = state.get("alone_now", False)
+        self.hold_alone = state.get("hold_alone", False)
         self.alphabets = {k: set(v) for k, v in state.get("alphabets", {self.channel: ""}).items()}
         self.others = {}
         for i, (name, won, seen) in enumerate(state.get("others", [])):

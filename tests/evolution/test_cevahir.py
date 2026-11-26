@@ -341,9 +341,9 @@ def test_zihin_keeps_the_day_at_night_without_changing_what_it_knows(FastCortex)
 
 def test_zihin_alone_is_believed_as_far_as_its_record_where_the_analogy_foresees_nothing(FastCortex):
     """While Cevahir lives, the answers the analogy foresaw nothing of are where Zihin's guesses are kept as its record
-    alone, each claim with how far Zihin believed it. Where the analogy foresees nothing when it is asked, Zihin's
-    plan is the thought only as far as that record allows: under the speaking line it is held back and nothing is
-    said; with no record it stands. With ``alone_now`` the guesses are Zihin's as it would speak, and only the claims
+    alone, each claim with how far Zihin believed it. With ``hold_alone``, where the analogy foresees nothing when it
+    is asked, Zihin's plan is the thought only as far as that record allows: under the speaking line it is held back
+    and nothing is said; with no record it stands. Without it, the plan stands. With ``alone_now`` the guesses are Zihin's as it would speak, and only the claims
     it believed at least as far as the plan are counted: what Zihin came to while it guessed less surely says nothing
     of a plan it is surer of."""
     from living.cevahir import Cevahir
@@ -356,7 +356,9 @@ def test_zihin_alone_is_believed_as_far_as_its_record_where_the_analogy_foresees
     c.episodes.plan = lambda said, parts=True: (None, 0.0, 0)  # the analogy foresees nothing
     plan, es = ["walk", "walk"], [0.9, 0.9]
     c.za_won, c.za_all, c.za_claims = 1, 7, [(0.6, 0)] * 6 + [(0.95, 1)]
-    assert c.choose_plan("walk twice", plan, es) == ([], [], "held")   # without alone_now: every claim counts
+    assert c.choose_plan("walk twice", plan, es)[2] == "zihin"      # without hold_alone the plan stands
+    c.hold_alone = True
+    assert c.choose_plan("walk twice", plan, es) == ([], [], "held")   # held, every claim counted (no alone_now)
     c = Cevahir(variant="speaking", switches={"alone_now": True})
     for q, a in life[:40]:
         c.watch(q, a + " .")
