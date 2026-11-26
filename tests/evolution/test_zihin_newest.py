@@ -6,7 +6,8 @@ What is pinned here
 * A mind that tracks its confirmations (``Config.newest``) writes a tie's last confirmed moment when its positive
   evidence grows, not when it fails; ``undo_last`` and ``retract`` give back the moment it had, bit for bit, and a
   saved mind keeps it. A mind that does not track them keeps nothing and its substance is as before.
-* Where people's places change, Zihin with the newest says the place told last, and without it the counts.
+* Where people's places change, Zihin with the newest says the place told last, and Cevahir with it; without it
+  the counts.
 """
 from __future__ import annotations
 
@@ -86,10 +87,12 @@ def _answers(newest):
     for item in _moving_world():
         c.tell(item[1]) if item[0] == "tell" else c.watch(item[1], item[2])
     c.session.close_turn()
-    return [c.session.words(s["zihin"]) for s in c.answers(["Mert nerede ?", "Zeynep nerede ?"], way="every",
-                                                            workers=1)]
+    said = c.answers(["Mert nerede ?", "Zeynep nerede ?"], way="every", workers=1)
+    return [c.session.words(s["zihin"]) for s in said], [c.session.words(s["cevahir"]) for s in said]
 
 
 def test_where_places_change_the_newest_says_the_place_told_last():
-    assert _answers(True) == [["mert", "okulda"], ["zeynep", "bahçede"]]
-    assert _answers(False) != [["mert", "okulda"], ["zeynep", "bahçede"]]   # the counts: the old place, or none
+    zihin, cevahir = _answers(True)
+    assert zihin == [["mert", "okulda"], ["zeynep", "bahçede"]]
+    assert cevahir == zihin                       # the whole of Cevahir says it too (its plan is not held back)
+    assert _answers(False)[0] != [["mert", "okulda"], ["zeynep", "bahçede"]]   # the counts: the old place, or none
