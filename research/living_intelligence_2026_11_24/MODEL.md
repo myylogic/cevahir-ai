@@ -662,10 +662,10 @@ as a frame, done on the episodes the hippocampus keeps.
   Zihin alone is kept: of the answers lived that the analogy foresaw nothing of (no plan, or one under the line) and
   whose first token Zihin would have said (its guess at the line), how many it would have said whole, each token its
   guess at the line, knowing those said before it, each claim with how far Zihin believed it. Holding the plan back
-  where that record is under the line (``hold_alone``) is a switch, off: it silenced Cevahir's two wrong answers on
-  COGS's samples (NOTES.md 8.29), but on SCAN one failed claim held back 21 of 50 answers Zihin had right, and the
-  record read as Zihin speaks and as far as it believes (``alone_now``) held back every answer of four splits
-  (NOTES.md 8.31). Measured alone, the analogy answers 0 to 27 of 200 test commands of each
+  where that record is under the line (``hold_alone``) is a switch, off: built for Cevahir's wrong answers on COGS,
+  it holds nothing there (no claim is lived in COGS's life), while on SCAN one failed claim held back 21 of 50
+  answers Zihin had right, and the record read as Zihin speaks and as far as it believes (``alone_now``) held back
+  every answer of four splits (NOTES.md 8.31). Measured alone, the analogy answers 0 to 27 of 200 test commands of each
   published SCAN split (a word there changes how often an action is repeated, which one substitution cannot carry),
   where Zihin answers 199 or 200; on COGS it is the other way round. Each mechanism covers structure the other does
   not, and the record says which to follow.

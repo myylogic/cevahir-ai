@@ -854,6 +854,12 @@ ways (exact of 300):
   does Cevahir: **299 of 300 in distribution and 299 of 300 on the generalisation set**, each wrong on one, Zihin's
   plan where the analogy is silent (a chain of clauses on the generalisation set). Zihin's plan was the thought 20
   times of the 600.
+- **With tokens that take turns, Zihin's plan not held back** (the row written by 5f6282d, the hippocampus of 8.29;
+  life 5,769 s and answers 7,149 s with two workers): in distribution the analogy answers 300 and so does Cevahir,
+  **300 of 300**; on the generalisation set the analogy answers 299 (silent on 1) and Cevahir **299**, wrong on one,
+  again a chain of clauses said by Zihin's plan where the analogy is silent. Zihin's plan was the thought 19 times of
+  the 600. The record of Zihin alone (8.29) holds no claim in COGS's life (0 of 0): holding Zihin's plan back by it
+  would have changed nothing here (8.31).
 
 ### 8.8 Sleep
 
@@ -1948,8 +1954,9 @@ is asked, Zihin's plan is the thought only as far as this record allows (the rul
 is held back and nothing is said, not even the harmony alone. With no record, the plan stands (nothing lived says how
 far Zihin goes alone). On the worlds of deduction and chains (m3_worlds) and in the school (m3_school), Cevahir still
 says every answer Zihin says, in each of three seeds (rows of 8dfba6e, whose Cevahir without F76 is this one, written
-without the Transformer: deduction 16 of 16, chains 13 of 13, the school as at 79a2e77). Cevahir on COGS with it:
-8.7.
+without the Transformer: deduction 16 of 16, chains 13 of 13, the school as at 79a2e77). On COGS it holds nothing
+(no claim is lived there), and on SCAN one failed claim held back 21 answers of 50; it is a switch, off, since
+5f6282d (8.31).
 
 Tried and not taken: the record read from what Zihin would say, not from its voice (68480d1). The voice Cevahir
 hears while it lives is Zihin's cheap reading of the present context's own memory (predictions "own"); what Zihin
@@ -2031,3 +2038,73 @@ and how to ask Zihin now without the answer it lived is open.
 In one run of one seed, made before the rows were written, one person
 of the three told three times then once elsewhere came out otherwise (the same code; how far a run depends on the
 order Python gives its sets was not separated).
+
+### 8.31 Zihin alone, measured where it had not been: SCAN
+
+The record of Zihin alone (8.29, 273836a) was measured on COGS's samples, the worlds of deduction and chains and the
+school, and made the default. The whole-Cevahir SCAN battery (`m3_scan.py --test 50`: 50 commands of each published
+split, the life of 8.4) had last been written at 31fc5b9, before it: 50 of 50 in every split. Written again (rows of
+821f421 in `results/m3_scan.jsonl`, each with the record):
+
+| split | Zihin | Cevahir, the plan held back by the record (273836a to 821f421) | the record | with `alone_now` | its record |
+|---|---|---|---|---|---|
+| add_jump | 50 | 29, 21 held back | 0 of 1 | 29, 21 held back | 21 of 326 |
+| around_right | 50 | 50 | 1 of 1 | 0, 50 held back | 22 of 349 |
+| length | 50 | 50 | 1 of 1 | 0, 50 held back | 19 of 248 |
+| jump_around_right | 50 | 50 | 1 of 1 | 25, 25 held back | 15 of 255 |
+| opposite_right | 50 | 50 | 1 of 1 | 0, 50 held back | 12 of 330 |
+| right | 50 | 49, 1 wrong | 1 of 1 | 0, 49 held back, 1 wrong | 18 of 321 |
+
+In SCAN's life the analogy foresees little (12.5), and Zihin's voice reached the speaking line at the first token of
+an answer it foresaw nothing of once in each split. In add_jump that one claim failed, and the rule on it, (0 + ½) /
+(1 + 1) = 0.25, held back every answer the analogy did not foresee, though Zihin had each right. Read as Zihin speaks
+(`alone_now`, 6d57613: Zihin's guesses with every way it has, each claim kept with how far Zihin believed it, and a
+plan believed by the claims Zihin believed at least as far), the claims are hundreds and nine in ten failed: through
+most of SCAN's life Zihin as it speaks cannot answer a command it has not met, and it learns to by the end (199 or 200
+of 200 asked, 8.4). The claims it was as sure of as of the plans asked failed too; how sure Zihin is does not say how
+much it has learned since. The record says what Zihin came to while it learned, as in 8.30. With `alone_now` the
+school's compositions were 12, 36 and 36 of 41 (Zihin 39 in each seed) and its relations 6, 14 and 8 of 22 (Zihin
+11, 14, 8); the worlds of deduction and chains whole; the world of 8.30 36 of 36 with F76 and silent without (rows of
+821f421). Measured first on those three worlds alone, `alone_now` had looked like the answer.
+
+**What was taken** (5f6282d). Holding Zihin's plan back by its record alone is a switch of Cevahir's own,
+`hold_alone`, off (`alone_now` holds as it does). Without it, where the analogy foresees nothing Zihin's plan is the
+thought, as before 273836a; the record is still kept and saved, each claim with how far Zihin believed it. With the
+switch off (rows of 5f6282d): SCAN 50 of 50 in five splits and 49 and one wrong in "right"; the school as Zihin in
+every kind and seed; the worlds of deduction and chains whole; in the world of 8.30 Cevahir says what Zihin says,
+without F76 the old place or the name alone (9 of 36 right, as Zihin) and with F76 every place told last (36 of 36).
+COGS (the row of 5f6282d, the samples of 8.7): in distribution 300 of 300; on the generalisation set 299,
+and one wrong, a chain of clauses said by Zihin's plan where the analogy is silent, as at 541a35f. The record of
+Zihin alone holds no claim in COGS's life (0 of 0): Zihin's voice never reached the speaking line at the first token
+of an answer the analogy foresaw nothing of. Held back by it, the plan would have been held back nowhere on COGS: the
+gate was built for COGS's wrong answers (8.29), was never measured there before it was made the default, and would
+have caught none of them.
+
+**F76 on the published sets, first.** With the newest (8.30) and the record not holding, Cevahir says the place
+told last in the world of 8.30 (36 of 36), and on SCAN and in the school it says every answer it says without F76
+(rows of 5f6282d: SCAN 50 of 50 in five splits and the same 49 and one wrong in "right"; the school as Zihin in every
+kind and seed). COGS with F76 is measured in turn.
+
+**The wrong answer in "right"** ("walk right twice and look opposite left twice"): the analogy's plan, chosen over
+Zihin's by the record of their disagreements (12.5), with its two halves' actions exchanged ("I_TURN_RIGHT
+I_TURN_RIGHT I_LOOK ... I_TURN_LEFT I_WALK ..."); Zihin's plan was right. It came with 06123df (8.27): the
+hippocampus alone, living the same dialogues, is silent on it at every commit from 31fc5b9 to bd2255e and says this
+plan from 06123df on. The analogy exchanges "walk" for "look and look opposite", a run lived between an utterance's
+start and "right"; reads the rest, "look and look opposite right twice and look opposite left twice", by parts one
+step on (rightly, believed 0.75); and puts back what the same exchange changed in "walk left twice", whose rest is
+"look and look opposite left twice". What it puts back is not what this exchange changes, and the plan, believed by
+the exchange's record and the examples' agreement (0.64), is wrong. Before 06123df that rest had no plan of the
+analogy's own at the speaking line, and nothing was said. Tried and not taken: no run exchanged for a part whose words
+stand elsewhere in the utterance (the change put back can then be found in two places). The analogy is silent on
+this command again, the samples of SCAN and COGS are as before (COGS 300 / 0 / 0 and 299 / 1 / 0), but on the whole
+generalisation file 10 right answers fall silent (20,904 / 94 / 2 against 20,914 / 84 / 2 at 273836a), five of
+"prim_to_obj_proper" and five of "subj_to_obj_proper": a name asked as an object is answered there through such
+exchanges. One wrong answer of SCAN is not worth ten right ones of COGS; what tells the two kinds of exchange apart
+is not found.
+
+What this says. A record of how far one voice of the mind goes alone is a count over its past, and the mind it
+counts learns: where the record is short (one claim) it says nothing that should silence anything, and where it is
+long it says what the voice was. Zihin's own beliefs already rest on the records of its ways of reading (F49), kept
+per way and per context; a second, global record over them, read as a gate, caught nothing on COGS, where it was
+built to, and held back 21 right answers of 50 on SCAN. A mechanism is not taken into the default before every
+battery has measured it: here the batteries it was not measured on were the ones it changed.
