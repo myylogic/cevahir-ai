@@ -45,6 +45,21 @@ def code_version() -> str:
 
 CODE = code_version()                                   # the code that runs, read when it starts
 
+def own_record(c) -> dict:
+    """Cevahir's record of Zihin alone: [right, all], and the claims by how far Zihin believed them (in twentieths)."""
+    bins = {}
+    for e, won in getattr(c, "za_claims", []):
+        cell = bins.setdefault("%.2f" % (int(e * 20) / 20.0), [0, 0])
+        cell[0] += won
+        cell[1] += 1
+    return {"za": [c.za_won, c.za_all], "za_by_belief": dict(sorted(bins.items()))}
+
+
+def parse_switches(text: str) -> dict:
+    """``--set`` as switches: "inherit=1,alone_now=1"."""
+    return {k: bool(int(v)) for k, v in (kv.split("=") for kv in filter(None, text.split(",")))}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cogs", required=True)
@@ -52,6 +67,7 @@ def main() -> None:
     ap.add_argument("--gen", type=int, default=300)
     ap.add_argument("--train", type=int, default=0, help="only the first N training lines (0: all)")
     ap.add_argument("--workers", type=int, default=3)
+    ap.add_argument("--set", default="", help="more switches, e.g. alone_now=1")
     ap.add_argument("--out", default=os.path.join(HERE, "results", "m3_cogs.jsonl"))
     a = ap.parse_args()
     import torch
@@ -62,7 +78,8 @@ def main() -> None:
     rng = random.Random(0)
     test = rng.sample(read(os.path.join(a.cogs, "test.tsv")), a.test)
     gen = rng.sample(read(os.path.join(a.cogs, "gen.tsv")), a.gen)
-    c = Cevahir(variant="speaking", switches={"wholes": True, "told_apart": True}, window=13)
+    switches = {"wholes": True, "told_apart": True, **parse_switches(a.set)}
+    c = Cevahir(variant="speaking", switches=switches, window=13)
     t0 = time.time()
     for sentence, form, _ in train:
         c.watch(sentence, form)
@@ -73,7 +90,8 @@ def main() -> None:
     said = c.answers([s for s, _, _ in asked], way="every", limit=120, workers=a.workers)
     row = {"test": "m3_cogs", "code": CODE, "train_lines": len(train), "zihin_moments": c.mind.t, "episodes": len(c.episodes),
            "life_s": round(lived_s, 1), "answers_s": round(time.time() - t1, 1), "workers": a.workers,
-           "thought": dict(Counter(s.get("thought", "?") for s in said))}
+           "thought": dict(Counter(s.get("thought", "?") for s in said)), "switches": switches,
+           **own_record(c)}
     for part, rows, got in (("test", test, said[:len(test)]), ("gen", gen, said[len(test):])):
         cell = {}
         kinds = Counter(k for _, _, k in rows)

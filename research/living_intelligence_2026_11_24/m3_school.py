@@ -22,6 +22,7 @@ import os
 import subprocess
 import sys
 import time
+from typing import Optional
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
@@ -30,11 +31,26 @@ sys.path.insert(0, os.path.join(REPO, "research", "living_mind_2026_11_22"))
 from living.cevahir import Cevahir  # noqa: E402
 
 
-def run(seed: int, steps: int, workers: int) -> dict:
+def own_record(c) -> dict:
+    """Cevahir's record of Zihin alone: [right, all], and the claims by how far Zihin believed them (in twentieths)."""
+    bins = {}
+    for e, won in getattr(c, "za_claims", []):
+        cell = bins.setdefault("%.2f" % (int(e * 20) / 20.0), [0, 0])
+        cell[0] += won
+        cell[1] += 1
+    return {"za": [c.za_won, c.za_all], "za_by_belief": dict(sorted(bins.items()))}
+
+
+def parse_switches(text: str) -> dict:
+    """``--set`` as switches: "inherit=1,alone_now=1"."""
+    return {k: bool(int(v)) for k, v in (kv.split("=") for kv in filter(None, text.split(",")))}
+
+
+def run(seed: int, steps: int, workers: int, switches: Optional[dict] = None) -> dict:
     import torch
     import t_school as S
     torch.set_num_threads(1)
-    c = Cevahir(variant="full", window=S.WINDOW, seed=seed)
+    c = Cevahir(variant="full", window=S.WINDOW, seed=seed, switches=switches)
     t0 = time.process_time()
     for lesson in S.course(seed):
         if lesson[0] == "tell":
@@ -55,7 +71,8 @@ def run(seed: int, steps: int, workers: int) -> dict:
         cell["asked"] += 1
         for way in ("zihin", "harmony", "cevahir"):
             cell[way] += got[way] != "(sessiz)" and c.session.body(got[way]) == want
-    row = {"test": "m3_school", "code": CODE, "seed": seed, "lessons": len(S.course(seed)), "zihin_moments": c.mind.t,
+    row = {"test": "m3_school", "code": CODE, "seed": seed, "switches": switches or {}, **own_record(c),
+           "lessons": len(S.course(seed)), "zihin_moments": c.mind.t,
            "learn_cpu_s": round(lived, 1), "answer_wall_s": round(answered, 1), "workers": workers}
     if steps > 0:
         tf = S.run_transformer(seed, steps)
@@ -84,10 +101,11 @@ def main() -> None:
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--steps", type=int, default=8000)
     ap.add_argument("--workers", type=int, default=2)
+    ap.add_argument("--set", default="", help="switches, e.g. alone_now=1")
     ap.add_argument("--out", default=os.path.join(HERE, "results", "m3_school.jsonl"))
     a = ap.parse_args()
     for seed in range(a.seeds):
-        row = run(seed, a.steps, a.workers)
+        row = run(seed, a.steps, a.workers, parse_switches(a.set))
         print(json.dumps(row, ensure_ascii=False), flush=True)
         with open(a.out, "a", encoding="utf-8") as f:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")

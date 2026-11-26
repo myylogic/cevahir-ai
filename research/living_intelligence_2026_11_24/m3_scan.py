@@ -59,11 +59,27 @@ def life_of(args, split):
     return train, lived, life, test
 
 
+def own_record(c) -> dict:
+    """Cevahir's record of Zihin alone: [right, all], and the claims by how far Zihin believed them (in twentieths)."""
+    bins = {}
+    for e, won in getattr(c, "za_claims", []):
+        cell = bins.setdefault("%.2f" % (int(e * 20) / 20.0), [0, 0])
+        cell[0] += won
+        cell[1] += 1
+    return {"za": [c.za_won, c.za_all], "za_by_belief": dict(sorted(bins.items()))}
+
+
+def parse_switches(text: str) -> dict:
+    """``--set`` as switches: "inherit=1,alone_now=1"."""
+    return {k: bool(int(v)) for k, v in (kv.split("=") for kv in filter(None, text.split(",")))}
+
+
 def run(args, split):
     import torch
     train, lived, life, test = life_of(args, split)
     torch.set_num_threads(1)
-    c = Cevahir(variant="speaking", switches={"wholes": True, "told_apart": True}, window=13, seed=args.seed)
+    switches = {"wholes": True, "told_apart": True, **parse_switches(args.set)}
+    c = Cevahir(variant="speaking", switches=switches, window=13, seed=args.seed)
     t0 = time.time()
     for command, answer in life:
         c.watch(" ".join(command), " ".join(answer) + " .")
@@ -73,7 +89,8 @@ def run(args, split):
     said = c.answers([" ".join(cmd) for cmd, _ in test], way="every", limit=400, workers=args.workers)
     answered_s = time.time() - t0
     truth = [c.session.words(" ".join(a)) for _, a in test]
-    row = {"test": "m3_scan", "code": CODE, "split": split, "seed": args.seed, "train_watched": len(lived),
+    row = {"test": "m3_scan", "code": CODE, "split": split, "seed": args.seed, "switches": switches, **own_record(c),
+           "train_watched": len(lived),
            "train_published": len(train), "asked": len(test), "zihin_moments": c.mind.t,
            "cortex": c.cortex.size(), "life_s": round(lived_s, 1), "answers_s": round(answered_s, 1),
            "workers": args.workers, "voiced_tokens": c.counts["voiced"], "unaligned": c.counts["unaligned"],
@@ -117,6 +134,7 @@ def main() -> None:
     ap.add_argument("--test", type=int, default=200)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--workers", type=int, default=3)
+    ap.add_argument("--set", default="", help="more switches, e.g. alone_now=1")
     ap.add_argument("--out", default=os.path.join(HERE, "results", "m3_scan.jsonl"))
     args = ap.parse_args()
     for split in args.split:
