@@ -27,10 +27,12 @@ import numpy as np
 
 from cevher.units import LINE, body, code_of, fold, mix, rule, tokens
 
-R_SAME, R_HOLDS, R_FORM, R_WAY, R_COVER, R_MARK, R_MARKS, R_FREE, R_SEEN, PLACE = (
+R_SAME, R_HOLDS, R_FORM, R_WAY, R_COVER, R_MARK, R_FREE, R_SEEN, PLACE = (
     code_of("\0telling " + name) for name in ("the sentence", "holds", "form of request", "way", "covered", "mark",
-                                              "marks of all forms", "through marks", "shown of", "place"))
+                                              "through its own words", "shown of", "place"))
 R_LINK, BEGINS, ENDS = (code_of("\0telling " + name) for name in ("the place of what it is", "begins", "ends"))
+R_ECHO, R_NEW, R_HEARD = (code_of("\0telling " + name) for name in (
+    "a word of the request it holds", "a word never met in a request", "a request heard"))
 WAYS = ("first of its text", "first", "its text", "named", "marked in its text", "marked among named",
         "what is told of what it is")
 FIXED = 4                                                    # the first four are not made from what was answered
@@ -55,6 +57,7 @@ class Telling:
         self.words = set()                                   # the words told (their forms are found among them)
         self.heard = set()                                   # the words of requests watched: they attest endings too
         self._memo = None                                    # while one request is read: the sentences that name a word
+        self._like: Dict[tuple, bool] = {}                   # ... and the pairs of words heard as forms of one word
         self._said: Dict[int, list] = {}                     # the words of a told sentence
         self._stem = None
 
@@ -120,6 +123,7 @@ class Telling:
             if r not in memo:
                 memo[r] = any(r.startswith(e) and chain(r[len(e):]) for e in known)
             return memo[r]
+        self._chain = chain
         self._stem = {w: next((w[:k] for k in range(3, len(w)) if w[:k] in V and chain(w[k:])), w) for w in V}
         self._forms: Dict[str, list] = {}
         for w, s in self._stem.items():
@@ -135,6 +139,23 @@ class Telling:
             if w[:k] in self._stem:
                 return self._stem[w[:k]]
         return w
+
+    def _alike(self, a: str, b: str) -> bool:
+        """Two words heard as forms of one word, where a word of a request is held against the words of a thing's
+        own sentences: they have one stem, or they begin alike (three letters or more) and what remains of each is
+        made of known endings."""
+        if a == b:
+            return True
+        got = self._like.get((a, b))
+        if got is None:
+            got = self.stem(a) == self.stem(b)
+            if not got and a[:3] == b[:3]:
+                k = 3
+                while k < min(len(a), len(b)) and a[k] == b[k]:
+                    k += 1
+                got = any(self._chain(a[j:]) and self._chain(b[j:]) for j in range(k, 2, -1))
+            self._like[(a, b)] = got
+        return got
 
     def named(self, w: str) -> List[int]:
         """The told sentences that name a word, in any of its forms, in the order they were told."""
@@ -231,12 +252,13 @@ class Telling:
         else:
             self.mind._bump(key)
 
+    def _believed(self, key: int) -> bool:
+        a, t = self._record(key)
+        return bool(t) and rule(a, t) >= LINE
+
     def _marks(self, frame: int, n: int) -> bool:
-        for s in self.stems_of(n):
-            a, t = self._record(mix(mix(R_MARK, frame), code_of(s)) if frame else mix(R_MARKS, code_of(s)))
-            if t and rule(a, t) >= LINE:
-                return True
-        return False
+        """A sentence is marked for a form of request by a word it holds."""
+        return any(self._believed(mix(mix(R_MARK, frame), code_of(s))) for s in self.stems_of(n))
 
     def _admits(self, frame: int, n: int) -> bool:
         """A sentence that holds something the answers to this form held is admitted; so is one that holds
@@ -267,26 +289,44 @@ class Telling:
             if w[:1].isalnum() and self.named(w):
                 yield fold(tuple(codes[:k]) + (PLACE,) + tuple(codes[k + 1:]), R_FORM), w
 
-    def through_marks(self, q: List[str]) -> List[int]:
-        """A request in no known form, read through what the known forms have learned: of the thing's text (or of
-        the sentences that name it), those that hold a word of the request which marked answers before."""
-        asked = {self.stem(w) for w in _words(q)}
-        marks = {s for s in asked if (lambda a, t: t and rule(a, t) >= LINE)(*self._record(mix(R_MARKS, code_of(s))))}
-        best: List[int] = []
-        for w in _words(q):
-            named = self.named(w)
-            if named:
-                aspects = marks - {self.stem(w)}
-                out = [n for n in (self.its_text(named) or named) if self.stems_of(n) & aspects]
-                if len(out) > len(best):
-                    best = out
-        return best
+    def _trusts(self, u: str) -> bool:
+        """Is a sentence that holds this word of the request asked for? By the word's own record; a word never
+        met in a request is trusted as such words have deserved."""
+        a, t = self._record(mix(R_ECHO, code_of(self.stem(u))))
+        if not t:
+            a, t = self._record(R_NEW)
+        return bool(t) and rule(a, t) >= LINE
+
+    def echo(self, q: List[str]):
+        """A request in no known form, read through its own words. The thing is the word of the request that has
+        a text of its own and names the fewest told sentences (the rarest word a text begins with); where no word
+        has a text, the word whose naming sentences hold most of what the other words call for. A sentence is
+        called for when it holds a form of a word of the request that is trusted. Gives the thing, the sentences,
+        and for every word of the request the sentences that hold it."""
+        words = list(dict.fromkeys(_words(q)))
+        cands = [(w, self.named(w)) for w in words]
+        cands = [(w, named, self.its_text(named)) for w, named in cands if named]
+        if any(text for _, _, text in cands):
+            cands = [min((c for c in cands if c[2]), key=lambda c: len(c[1]))]
+        best = (-1, None, [], {})
+        for w, named, text in cands:
+            pool, shares = text or named, {}
+            for u in words:
+                if not self._alike(u, w):
+                    got = [n for n in pool if any(self._alike(u, x) for x in self.said_in(n))]
+                    if got:
+                        shares[u] = got
+            held = {n for u, got in shares.items() if self._trusts(u) for n in got}
+            found = [n for n in pool if n in held]
+            if len(found) > best[0]:
+                best = (len(found), w, found, shares)
+        return best[1:]
 
     def watch(self, q: List[str], answer: str) -> None:
         """A dialogue watched. If its answer is made of told sentences, or of what is told of what the thing is
         said to be, every way of reading the request is judged by what it would have said, before anything of the
         dialogue is written."""
-        self._memo = {}
+        self._memo, self._like = {}, {}
         try:
             self._watch(q, answer)
         finally:
@@ -309,9 +349,18 @@ class Telling:
         if not want and not any(self.words_of((g, filler)) in answered
                                 for filler, found in steps.items() for _, _, _, begun in found for g in begun):
             return
-        out = self.through_marks(q)
-        if out:
-            self._judge(R_FREE, rule(len(want & set(out)), len(out)) >= LINE)
+        thing, out, shares = self.echo(q)
+        heard = mix(R_HEARD, fold(tuple(m.code(t) for t in q), R_FORM))
+        if want and thing is not None and not S.tot(heard):  # the same request watched again shows nothing new
+            m._bump(heard)
+            if out:
+                self._judge(R_FREE, rule(len(want & set(out)), len(out)) >= LINE)
+            for u, got in shares.items():                    # was a sentence that holds this word of the request asked for?
+                key = mix(R_ECHO, code_of(self.stem(u)))
+                if not S.tot(key):
+                    self._judge(R_NEW, rule(sum(n in want for n in got), len(got)) >= LINE)
+                for n in got:
+                    self._judge(key, n in want)
         for frame, filler in forms:
             seen = mix(mix(R_SEEN, frame), code_of(self.stem(filler)))
             if S.tot(seen):                                  # the same thing asked again shows nothing new
@@ -335,16 +384,14 @@ class Telling:
             named = self.named(filler)
             for n in sorted(set(self.its_text(named)) | set(named)):     # what the answer's sentences hold, and the others
                 for s in sorted(self.stems_of(n) - {own}):
-                    c = code_of(s)
-                    self._judge(mix(mix(R_MARK, frame), c), n in want)
-                    self._judge(mix(R_MARKS, c), n in want)
+                    self._judge(mix(mix(R_MARK, frame), code_of(s)), n in want)
 
     def answer(self, q: List[str]) -> Tuple[str, List[int]]:
         """The told sentences a request asks for, and the way that found them; nothing where no way is believed.
         Of the believed ways of a form, the one that covered most of what was answered speaks. Where a way that
         takes sentences for where they stand and a way that takes them for what they hold covered the answers
         alike, nothing in the life tells them apart: only what both would say is said."""
-        self._memo = {}
+        self._memo, self._like = {}, {}
         try:
             return self._answer(q)
         finally:
@@ -379,9 +426,9 @@ class Telling:
         if best is None:
             right, tried = self._record(R_FREE)
             if tried >= 2 and rule(right, tried) >= LINE:
-                out = self.through_marks(q)
+                out = self.echo(q)[1]
                 if out:
-                    return "through marks", out
+                    return "through its own words", out
             return "", []
         return best[1], best[2]
 

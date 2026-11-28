@@ -82,6 +82,8 @@ def main():
     les = [r for r in rows if r["form"] == "what is known of it"]
     kinds = [r for r in rows if r["form"] in ("parts", "works", "made", "care", "two kinds")]
     code = subprocess.run(["git", "-C", HERE, "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+    if subprocess.run(["git", "-C", REPO, "diff", "--quiet", "HEAD", "--", "cevher"]).returncode:
+        code += " and changes not committed"                 # such a row is for the bench; it is not kept
     out = {"code": code, "what": "speaking at length, by the package", "set": a.set, "ledger": a.ledger, "note": a.note,
            "life_s": round(life_s, 1), "answer_s_mean": round(sum(seconds) / len(seconds), 4),
            "answer_s_max": round(max(seconds), 4), "said": said, "wrong": wrong,
@@ -96,8 +98,9 @@ def main():
            "no_shown_form": [(r["right"], r["must"], r["wrong"]) for r in rows if r["form"] == "in no shown form"],
            "size": c.size(), "rows": rows}
     os.makedirs(os.path.join(HERE, "results"), exist_ok=True)
-    with open(os.path.join(HERE, "results", "speak.jsonl"), "a", encoding="utf-8") as f:
-        f.write(json.dumps(out, ensure_ascii=False) + "\n")
+    if "not committed" not in code or a.note:                # ... unless it is named as what was tried
+        with open(os.path.join(HERE, "results", "speak.jsonl"), "a", encoding="utf-8") as f:
+            f.write(json.dumps(out, ensure_ascii=False) + "\n")
     print(json.dumps({k: v for k, v in out.items() if k not in ("rows", "size")}, ensure_ascii=False))
     print("library:", out["size"]["library"], "| lived table:", out["size"]["lived"])
 
