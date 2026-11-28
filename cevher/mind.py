@@ -565,8 +565,11 @@ class Mind:
     def answer(self, toks: List[str]) -> Optional[Tuple[List[str], float, str]]:
         """What the mind says to a question (its body): (the answer's words, its belief, the closing mark)."""
         got = self._answer(self.codes(toks), {})
+        self.quoted = False                                  # did the answer read what followed in what was told?
         if got is None:
             return None
+        items = (self.spell.get(got[3]) or "")[len(SKELETON):].split()
+        self.quoted = any(item[:2] in ("x:", "n:", "e:") for item in items)
         mark = self.tone(got[2], got[3])
         return self.words(got[0]), got[1], (self.spell.get(mark, "") if mark else "")
 

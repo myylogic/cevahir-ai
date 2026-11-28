@@ -1,0 +1,13 @@
+saat zamanı ölçen ve gösteren bir araçtır .
+mekanik saat pil kullanmadan çalışır .
+mekanik saat yay , dişliler , maşa , kadran , akrep ve yelkovandan oluşur .
+kadran saatin yüzüdür ve rakamları taşır .
+akrep saati , yelkovan dakikayı gösterir .
+kurulan yay enerjiyi biriktirir ve yavaş yavaş dişlilere aktarır .
+maşa dişlilerin hızını düzenler ve saatin tik tak sesini çıkarır .
+saatin tasarımında dişlilerin oranı akrebin ve yelkovanın hızını belirler .
+saat dişlileri pirinçten yapılır .
+yay sertleştirilmiş çelikten üretilir .
+kadranın önündeki cam safir ya da mineral camdan yapılır .
+mekanik saat her gün kurulmalıdır .
+saat sudan ve mıknatıstan uzak tutulmalıdır .

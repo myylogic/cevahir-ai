@@ -423,3 +423,52 @@ def test_said_in_conversation_asked_later():
     assert c.converse("babamın adı ne ?") == ""              # never told: silence, not the nearest name
     assert c.converse("benim adım murat") == ""
     assert c.converse("benim adım ne ?") == "murat"
+
+
+# ------------------------------------------------------------------------------------- speaking at length --------
+THINGS = {
+    "saat": ["saat zamanı gösteren bir araçtır .", "saat yay , dişliler ve kadrandan oluşur .",
+             "yay enerjiyi biriktirir .", "saat dişlileri pirinçten yapılır ."],
+    "gitar": ["gitar telli bir çalgıdır .", "gitar gövde , sap ve tellerden oluşur .",
+              "gövde sesi büyütür .", "gövde ladin ağacından yapılır ."],
+    "çadır": ["çadır taşınabilir bir barınaktır .", "çadır direkler , kumaş ve kazıklardan oluşur .",
+              "kazıklar çadırı toprağa bağlar .", "kumaş naylondan yapılır ."]}
+
+
+def _shown(c, name, form="{0}ı anlat"):
+    text = THINGS[name]
+    c.watch("%s nedir ?" % name, text[0])
+    c.watch(form.format(name), " ".join(text))
+
+
+def test_a_sentence_when_asked_for_one_and_the_text_when_asked_to_tell():
+    c = Cevahir(ledger=True)
+    c.tell("kampçılar geceyi çadırda geçirir .")              # the tent is named before its text is read
+    for name in ("saat", "gitar", "çadır"):
+        c.read("\n".join(THINGS[name]) + "\n")
+    _shown(c, "saat", "{0}i anlat")
+    assert c.reply("çadır nedir ?") == "" and c.reply("çadırı anlat") == ""      # shown of one thing: nothing yet
+    c.watch("saat nedir ?", THINGS["saat"][0])                # the same thing shown again shows nothing new
+    assert c.reply("çadır nedir ?") == ""
+    _shown(c, "gitar")
+    assert c.reply("çadır nedir ?") == THINGS["çadır"][0]     # one sentence, the first of its own text
+    assert c.reply("çadırı anlat") == " ".join(THINGS["çadır"])
+    assert c.reply("çadır nasıl onarılır ?") == "" and c.reply("fener nedir ?") == ""    # never shown, never told
+    before, moments, held = c.digest(), c.moments(), c.telling.size()["sentences"]
+    c.read("fener karanlıkta yolu aydınlatan bir araçtır .\nfener pille çalışır .\n")
+    assert c.reply("fener nedir ?") == "fener karanlıkta yolu aydınlatan bir araçtır ."
+    c.forget(len(c.entries) - 1)                              # what was read is forgotten: it is not told again
+    assert c.reply("fener nedir ?") == "" and c.telling.size()["sentences"] == held
+    assert c.digest() == before and c.moments() == moments
+
+
+def test_what_was_told_is_kept_with_the_mind(tmp_path):
+    c = Cevahir()
+    for name in ("saat", "gitar", "çadır"):
+        c.read("\n".join(THINGS[name]) + "\n")
+    _shown(c, "saat", "{0}i anlat")
+    _shown(c, "gitar")
+    c.save(str(tmp_path))
+    again = Cevahir.load(str(tmp_path))
+    assert again.reply("çadırı anlat") == c.reply("çadırı anlat") == " ".join(THINGS["çadır"])
+    assert again.telling.size() == c.telling.size()

@@ -1,0 +1,16 @@
+bisiklet iki tekerlekli ve pedalla çalışan bir taşıttır .
+bisikleti süren kişinin kas gücü onu hareket ettirir .
+bisiklet kadro , tekerlekler , zincir , pedallar , gidon ve frenlerden oluşur .
+kadro bisikletin iskeletidir ve bütün parçaları bir arada tutar .
+tekerlekler jant , teller ve lastikten oluşur .
+gidon ön tekerleği yönlendirir .
+pedallar çevrildiğinde zincir gücü arka tekerleğe aktarır .
+vites dişlileri yokuşta daha az güçle pedal çevirmeyi sağlar .
+bisikletin tasarımında ağırlık merkezi alçak tutulur ve böylece denge kolaylaşır .
+kadronun üçgen biçimi yükü eşit dağıtır ve sağlamlık verir .
+bisiklet kadrosu çelik , alüminyum ya da karbon fiberden yapılır .
+alüminyum hafif olduğu için en çok kullanılan kadro malzemesidir .
+lastikler kauçuktan yapılır ve içleri havayla doldurulur .
+zincir ve dişliler aşınmaya dayanıklı sertleştirilmiş çelikten üretilir .
+zincir düzenli olarak yağlanmalıdır .
+frenler her sürüşten önce denetlenmelidir .

@@ -36,6 +36,15 @@ def main() -> None:
         print("  %s: rounds %s of %d, examination %d/%d" % (row["lesson"], row["rounds"], row["asked"], *row["exam"]),
               flush=True)
     m.flush()
+    lessons = os.path.join(REPO, "cevher", "dersler")       # the lesson that shows telling: two texts, read each as
+    for name in ("saat", "gitar"):                           # one text, and the requests shown about them
+        with open(os.path.join(lessons, "metinler", name + ".txt"), encoding="utf-8") as f:
+            m.c.read(f.read())
+    with open(os.path.join(lessons, "anlatma.tsv"), encoding="utf-8") as f:
+        told = [line.rstrip("\n").split("\t", 1) for line in f if "\t" in line and not line.startswith("#")]
+    for q, a in told:
+        m.c.watch(q, a)
+    print("  anlatma: 2 texts read, %d dialogues watched" % len(told), flush=True)
     manifest = m.save(out)
     report = {"lessons": rows, "seconds": round(time.time() - t0, 1), "manifest": manifest}
     with open(os.path.join(out, "study.json"), "w", encoding="utf-8") as f:

@@ -28,6 +28,7 @@ import numpy as np
 from cevher.letters import Counts, Letters
 from cevher.mind import O_ASKED, Mind
 from cevher.store import Slots, Two
+from cevher.telling import Telling
 from cevher.units import LINE, TOKEN, Spellings, body, code_of, lower_tr, mix, rule, tokens
 
 SEPARATOR = re.compile(r"(?<=[.!?…])\s+|\n+")              # Zihin's sentence split (zihin.__main__.sentences)
@@ -39,7 +40,7 @@ PER_CHARACTER = 8                                            # bytes the tables 
 FLOOR_MB = 32                                                # ... and what they may hold however little was lived
 BULK = 4096                                                  # a text longer than this is read many ties at once
 GROUP = 1 << 15                                              # ... so many of its words at a time, about
-VERSION = 4                                                  # of the file a mind is kept in
+VERSION = 5                                                  # of the file a mind is kept in
 
 
 def _spans(text: str, lines: bool):
@@ -94,6 +95,7 @@ class Cevahir:
         self.store = Two(Slots(max_bytes=rest // 8), Slots(max_bytes=rest * 5 // 8, admit_new=True))
         self.mind = Mind(self.store)
         self.mind.spell.most = max(100000, budget_mb * 2000) # the words it can spell are bounded with the budget
+        self.telling = Telling(self.mind)                    # what was told, kept to be told again at length
         self.letters = Letters(Counts(max_bytes=rest // 4), depth=depth)
         self.entries: Optional[List[dict]] = None
         self._ledger = None
@@ -118,7 +120,8 @@ class Cevahir:
         if self.entries is None:
             return None
         self.mind.entry = []
-        return {"tail": self.letters.tail, "lgone": [], "sgone": [], "sprev": [], "smoment": []}
+        return {"tail": self.letters.tail, "lgone": [], "sgone": [], "sprev": [], "smoment": [],
+                "told": len(self.telling)}
 
     def _end(self, open_entry: Optional[dict], kind: str, text: str, stream: str, bulk: int = 0) -> None:
         """An entry of the history is closed and written to the ledger: what was lived (``stream``, as the letters
@@ -151,7 +154,8 @@ class Cevahir:
         self._ledger.seek(0, os.SEEK_END)
         at = self._ledger.tell()
         self._ledger.write(blob)
-        self.entries.append({"kind": kind, "text": text[:80], "at": at, "size": len(blob), "forgotten": False})
+        self.entries.append({"kind": kind, "text": text[:80], "at": at, "size": len(blob), "forgotten": False,
+                             "told": (open_entry["told"], len(self.telling))})
 
     def ledger_bytes(self) -> int:
         if self._ledger is None:
@@ -179,6 +183,7 @@ class Cevahir:
         toks, _ = body(tokens(sentence))
         if toks:
             self.mind.tell(toks)
+            self.telling.tell(sentence.strip(), toks)
         self._end(e, "tell", sentence, stream)
         return bits
 
@@ -192,6 +197,7 @@ class Cevahir:
         a, mark = body(tokens(answer))
         self.mind.watch(q, a, mark)
         self._forms(answer)
+        self.telling.watch(q, answer)
         self._end(e, "watch", first + " | " + answer, stream)
         return bits
 
@@ -202,15 +208,19 @@ class Cevahir:
         e = self._begin()
         bits = self._letters(text, e)
         bulk = len(text) >= BULK
-        for group, _, _ in _groups(text, code):
-            if bulk:
+        if bulk:
+            for group, _, _ in _groups(text, code):
                 gone = self.mind.sequences(group, before=None if e is None else e["sprev"])
                 if e is not None:
                     e["sgone"].append(gone)
                     e["smoment"].append(self.mind.clock)
-            else:
-                for s in group:
+        else:                                                # a short text: a sentence at a time, and kept to be told
+            together = self.telling.new_text()
+            for a, b in _spans(text, code):
+                s = body(tokens(text[a:b]))[0]
+                if len(s) >= 2:
                     self.mind.tell(s)
+                    self.telling.tell(text[a:b].strip(), s, together)
         self._end(e, "read", text, text, bulk=(2 if code else 1) if bulk else 0)
         return bits
 
@@ -264,8 +274,12 @@ class Cevahir:
         """What Cevahir answers, as it stands; nothing is lived."""
         q, _ = body(tokens(said))
         got = self.mind.answer(q) if q else None
-        if got is None or None in got[0]:                    # nothing believed, or a word it can no longer spell
-            return ""
+        if got is None or None in got[0]:                    # nothing believed, or a word it can no longer spell:
+            return self.telling.say(self.telling.answer(q)[1]) if q else ""      # what was told of it, at length
+        if self.mind.quoted:                                 # an answer that reads what followed a word wherever it
+            way, told = self.telling.answer(q)               # was told gives way to what the thing's own text says,
+            if told and "its text" in way:                   # by a way of telling confirmed for this form of request
+                return self.telling.say(told)
         return self._say(got[0], got[2])
 
     def answers(self, questions: List[str], limit: int = 400, workers: int = 0) -> List[str]:
@@ -355,6 +369,7 @@ class Cevahir:
             gone.append((start, end, (a["lg_k"][at:at + n], a["lg_c"][at:at + n])))
             at += n
         self.letters.forget(stream, a["tail"].tobytes(), gone)
+        self.telling.kill(*e.get("told", (0, 0)))
         e["forgotten"] = True
         return {"forgotten": True, "writes": len(log), "characters": len(stream)}
 
@@ -383,7 +398,7 @@ class Cevahir:
 
     def size(self) -> dict:
         return {"ties": self.store.size(), "lived": self.store.lived.size(), "read": self.store.read.size(),
-                "letters": self.letters.size(), "words": len(self.mind.spell),
+                "letters": self.letters.size(), "library": self.telling.size(), "words": len(self.mind.spell),
                 "table_bytes": self.store.nbytes() + self.letters.T.nbytes(),
                 "spelling_bytes": self.mind.spell.nbytes(), "moments": self.mind.clock}
 
@@ -394,7 +409,8 @@ class Cevahir:
         os.makedirs(folder, exist_ok=True)
         arrays = {}
         for prefix, st in (("s_", self.store.lived.state()), ("r_", self.store.read.state()),
-                           ("l_", self.letters.T.state()), ("w_", self.mind.spell.state())):
+                           ("l_", self.letters.T.state()), ("w_", self.mind.spell.state()),
+                           ("t_", self.telling.state())):
             for k, v in st.items():
                 arrays[prefix + k] = v
         arrays["zero"], arrays["sit"] = self.letters.zero, self.letters.sit
@@ -448,6 +464,7 @@ class Cevahir:
         self.letters.T = Counts.from_state(st, allowed // 4)
         self.mind.spell = Spellings.from_state({k[2:]: v for k, v in a.items() if k.startswith("w_")},
                                                most=self.mind.spell.most)
+        self.telling = Telling.from_state(self.mind, {k[2:]: v for k, v in a.items() if k.startswith("t_")})
         self.letters.zero, self.letters.sit = a["zero"], a["sit"]
         self.letters.tail, self.letters.lived = a["tail"].tobytes(), lived
         self.mind.clock, self.nights = clock, nights
