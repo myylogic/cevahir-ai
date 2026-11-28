@@ -294,15 +294,16 @@ class Telling:
         alone = mix(R_ECHO, code_of(self.stem(u)))
         return mix(alone, code_of(before) if before else BEGINS), alone
 
-    def _trusts(self, u: str, before: str) -> bool:
+    def _trusts(self, u: str, before: str, rare: int) -> bool:
         """Is a sentence that holds this word of the request asked for? By the narrowest record there is: the
-        word after the word that stands before it here, else the word alone; a word never met in a request is
-        trusted as such words have deserved."""
-        for key in self._cue(u, before) + (R_NEW,):
+        word after the word that stands before it here, else the word alone. A word never met in a request is
+        trusted as such words have deserved, and only if it names fewer told sentences than the thing does: what
+        is said of more than the thing is tells nothing of it."""
+        for key in self._cue(u, before):
             a, t = self._record(key)
             if t:
                 return rule(a, t) >= LINE
-        return False
+        return len(self.named(u)) < rare and self._believed(R_NEW)
 
     def echo(self, q: List[str]):
         """A request in no known form, read through its own words. The thing is the word of the request that has
@@ -325,7 +326,7 @@ class Telling:
                     got = [n for n in pool if any(self._alike(u, x) for x in self.said_in(n))]
                     if got:
                         shares[(u, before)] = got
-            held = {n for cue, got in shares.items() if self._trusts(*cue) for n in got}
+            held = {n for cue, got in shares.items() if self._trusts(*cue, len(named)) for n in got}
             found = [n for n in pool if n in held]
             if len(found) > best[0]:
                 best = (len(found), w, found, shares)
@@ -367,7 +368,7 @@ class Telling:
             first = set()
             for cue, got in shares.items():                  # was a sentence that holds this word of the request asked for?
                 after, alone = self._cue(*cue)
-                if not S.tot(alone) and alone not in first:
+                if not S.tot(alone) and alone not in first and len(self.named(cue[0])) < len(self.named(thing)):
                     first.add(alone)
                     self._judge(R_NEW, rule(sum(n in want for n in got), len(got)) >= LINE)
                 for n in got:

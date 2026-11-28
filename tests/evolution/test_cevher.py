@@ -501,8 +501,9 @@ def test_a_sentence_never_told_by_what_a_thing_is_said_to_be():
 def test_a_request_in_no_known_form_is_read_through_its_own_words():
     """Shown what to say when asked what a thing is made up of and, apart, what it is made from, the mind answers a
     request that asks both in a form it was never shown: of the thing's own text it says the sentences that hold a
-    word of the request, for the words that deserved it. A word that was beside the answers is not followed; what
-    no word of the request calls for is not said; forgetting the dialogues takes the reading back exactly."""
+    word of the request, for the words that deserved it. A word that was beside the answers is not followed, nor
+    is a word never met in a request that names no fewer told sentences than the thing does; what no word of the
+    request calls for is not said; forgetting the dialogues takes the reading back exactly."""
     c = Cevahir(ledger=True)
     texts = {"masa": ("masa üzerinde iş yapılan bir eşyadır .", "masa bir tabla ve dört ayaktan oluşur .",
                       "masa tahtadan yapılır .", "masa kuru bezle silinmelidir ."),
@@ -527,6 +528,6 @@ def test_a_request_in_no_known_form_is_read_through_its_own_words():
     from cevher.units import body, tokens
     assert c.telling.answer(body(tokens(both))[0])[0] == "through its own words"
     assert c.reply("kayık nerede durur ve kimindir") == ""
-    for _ in range(len(c.entries) - start):
-        c.forget(len(c.entries) - 1)
+    for i in range(len(c.entries) - 1, start - 1, -1):
+        c.forget(i)
     assert c.reply(both) == "" and c.digest() == before and c.moments() == moments
