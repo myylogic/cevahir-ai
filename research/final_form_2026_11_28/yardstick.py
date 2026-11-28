@@ -636,6 +636,17 @@ def heldout(args) -> None:
     for w in worlds:
         if args.world and w["name"] not in args.world:
             continue
+        try:
+            _heldout_world(args, w)
+        except Exception as err:                             # the set is run once: a world that breaks is a row
+            import traceback
+            traceback.print_exc()
+            print("-- %s: broke (%s)" % (w["name"], err), flush=True)
+            put(args, {"battery": "heldout", "world": w["name"], "broke": repr(err)})
+
+
+def _heldout_world(args, w) -> None:
+    if True:
         t0 = time.time()
         if w["name"] == "text":
             with open(os.path.join(REPO, w["path"]), "rb") as f:
@@ -650,7 +661,7 @@ def heldout(args) -> None:
                 w["path"], len(text), bits / len(text), time.time() - t0), flush=True)
             put(args, {"battery": "heldout", "world": "text", "chars": len(text),
                        "bits_per_char": round(bits / len(text), 4), "seconds": round(time.time() - t0, 1)})
-            continue
+            return
         if w["mind"] == "raised":
             if not args.raised:
                 raise SystemExit("--raised FOLDER: the mind kept by the dialogues battery")
