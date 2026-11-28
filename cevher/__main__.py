@@ -70,6 +70,9 @@ def main() -> None:
     print("Cevahir %s (%.1f sn; %d bağ, %d kelime, bütçe %d MB). !cik ile çıkılır." % (
         "yüklendi: " + source if source else "doğdu", time.time() - t0, size["ties"]["ties"], size["words"],
         c.budget_mb), flush=True)
+    print("  Bildiğini sorun (ör. güneş nedir ?). Sessiz kalırsa cevabını öğretin: !cevap <cevap>\n"
+          "  Soru olmayan satır söylenmiş sayılır ve yaşanır; !gecmis ile görülür, !unut <no> ile tam geri alınır.",
+          flush=True)
     last = ""
     for raw in sys.stdin:
         line = raw.rstrip("\r\n")
