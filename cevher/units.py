@@ -118,16 +118,27 @@ class Spellings:
             self.pack()
 
     def pack(self) -> None:
+        """The words met since the last packing go into the packed table, each where its code belongs. The old
+        table is cut where they go in, never unpacked: the work and the memory are those of the new words."""
         if not self.new:
             return
-        codes = np.concatenate([self.codes, np.fromiter(self.new, dtype=np.uint64, count=len(self.new))])
-        words = [self.blob[int(self.offs[i]):int(self.offs[i + 1])] for i in range(len(self.codes))]
-        words += [w.encode("utf-8", "surrogatepass") for w in self.new.values()]
+        codes = np.fromiter(self.new, dtype=np.uint64, count=len(self.new))
         order = np.argsort(codes, kind="stable")
-        words = [words[i] for i in order.tolist()]
-        self.codes = codes[order]
-        self.offs = np.concatenate([[0], np.cumsum([len(w) for w in words])]).astype(np.int64)
-        self.blob = b"".join(words)
+        codes = codes[order]
+        spelt = list(self.new.values())
+        words = [spelt[i].encode("utf-8", "surrogatepass") for i in order.tolist()]
+        where = np.searchsorted(self.codes, codes)
+        lengths = np.insert(np.diff(self.offs), where, np.array([len(w) for w in words], dtype=np.int64))
+        old, parts, at = memoryview(self.blob), [], 0
+        for cut, w in zip(self.offs[where].tolist(), words):
+            if cut > at:
+                parts.append(old[at:cut])
+                at = cut
+            parts.append(w)
+        parts.append(old[at:])
+        self.blob = b"".join(parts)
+        self.codes = np.insert(self.codes, where, codes)
+        self.offs = np.concatenate([[0], np.cumsum(lengths)]).astype(np.int64)
         self.new = {}
 
     def state(self) -> dict:

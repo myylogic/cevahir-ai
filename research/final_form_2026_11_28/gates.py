@@ -68,7 +68,7 @@ def exact(args):
             ("source code read by lines, tables full (2 MB for both)", 98, english[:400000], source, True)):
         c = Cevahir(budget_mb=budget, ledger=True)
         c.read(first)
-        before = c.digest()
+        before, moments = c.digest(), c.moments()
         size_before = c.size()
         c.read(then, code=lines)
         lived = c.digest()
@@ -77,7 +77,8 @@ def exact(args):
         c.forget(len(c.entries) - 1)
         put(args, {"gate": "G4", "case": name, "chars_lived_before": len(first), "chars_lived_and_forgotten": len(then),
                    "digest_before": before, "digest_after_living": lived, "digest_after_forgetting": c.digest(),
-                   "equal": c.digest() == before, "changed_by_living": lived != before,
+                   "equal": c.digest() == before, "moments_equal": c.moments() == moments,
+                   "changed_by_living": lived != before,
                    "ties_given_way_while_living": [size_lived["ties"]["let_go"] - size_before["ties"]["let_go"],
                                                    size_lived["letters"]["let_go"] - size_before["letters"]["let_go"]],
                    "forget_s": round(time.time() - t0, 2), "ledger_bytes": c.ledger_bytes()})
@@ -90,7 +91,7 @@ def exact(args):
         marks = []
         for path in paths[:12]:
             taught, _, _ = Y.lesson_lines(path)
-            marks.append((c.digest(), len(c.entries)))
+            marks.append((c.digest() + c.moments(), len(c.entries)))
             for line in taught:
                 if "\t" in line:
                     c.watch(*[x.strip() for x in line.split("\t", 1)])
@@ -100,10 +101,32 @@ def exact(args):
         for digest, n in reversed(marks):                    # the lessons forgotten again, the last first
             for k in range(len(c.entries) - 1, n - 1, -1):
                 c.forget(k)
-            ok.append(c.digest() == digest)
+            ok.append(c.digest() + c.moments() == digest)
         put(args, {"gate": "G4", "case": "12 lessons lived one by one and forgotten again, the last first; tables "
                    + ("with room" if budget == 512 else "full (2 MB for both)"),
-                   "entries": len(c.entries), "equal_after_each_lesson_forgotten": ok, "equal": all(ok)})
+                   "entries": len(c.entries), "equal_after_each_lesson_forgotten": ok, "equal": all(ok),
+                   "note": "the digest of the counts and the digest of the moments, both"})
+    # what was told last: said, said otherwise, said as at first; the last telling forgotten
+    c = Cevahir(ledger=True)
+    with open(os.path.join(REPO, "cevher", "dersler", "konusma.txt"), encoding="utf-8") as f:
+        for row in f:
+            row = row.rstrip("\n")
+            if not row.strip() or row.startswith("#"):
+                continue
+            if "\t" in row:
+                c.watch(*[x.strip() for x in row.split("\t", 1)])
+            else:
+                c.tell(row.strip())
+    c.tell("halının rengi mavi .")
+    c.tell("halının rengi sarı .")
+    never, before, moments = c.reply("halının rengi ne ?"), c.digest(), c.moments()
+    c.tell("halının rengi mavi .")
+    lived = c.reply("halının rengi ne ?")
+    c.forget(len(c.entries) - 1)
+    put(args, {"gate": "G4", "case": "told one thing, then another, then the first again; the last telling forgotten",
+               "answer_before_the_last_telling": never, "answer_after_it": lived,
+               "answer_after_forgetting_it": c.reply("halının rengi ne ?"),
+               "equal": c.digest() == before, "moments_equal": c.moments() == moments})
     # not in the order lived: an early entry forgotten after later ones were lived
     c = Cevahir(ledger=True)
     c.watch("gizli söz nedir ?", "mavi fil .")

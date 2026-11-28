@@ -333,6 +333,22 @@ def test_a_mind_loaded_holds_no_more_than_a_mind_that_lived():
     assert again.size()["table_bytes"] <= c.size()["table_bytes"]      # the growth law holds for a loaded mind too
 
 
+def test_the_spellings_are_packed_where_they_belong():
+    from cevher.units import Spellings, code_of
+    rng = random.Random(2)
+    table, kept = Spellings(), {}
+    table.PENDING = 37                                       # packed many times over, a few words at a time
+    for _ in range(3000):
+        w = "".join(rng.choice("abcçğıöşü") for _ in range(rng.randint(1, 9)))
+        table.setdefault(code_of(w), w)
+        kept[code_of(w)] = w
+    table.pack()
+    assert len(table) == len(kept) and bool((np.diff(table.codes.astype(np.float64)) > 0).all())
+    assert all(table.get(c) == w for c, w in kept.items()) and table.get(code_of("hiç görülmedi")) is None
+    again = Spellings.from_state(table.state())
+    assert all(again.get(c) == w for c, w in kept.items())
+
+
 def test_the_letters_take_back_exactly_what_a_text_wrote():
     text = "ev evler evlerimiz evde evden okul okullar okulda okuldan " * 60
     L = Letters(Counts(max_bytes=1 << 20, buckets=4))
