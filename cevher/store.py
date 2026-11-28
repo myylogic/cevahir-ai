@@ -130,11 +130,11 @@ class Slots:
     give way: the least evident key of the bucket, the oldest among equals, whole. To what? Two tables answer
     differently, and each answer was measured (docs/architecture/FINAL_FORM.md, sections 9 and 11):
 
-    - ``admit_new=False`` (what the mind was told and shown): only to a tie counted no less than it. What was
-      confirmed is not pushed out by what was met once; what was met once is a pool that turns over. A life twice
-      the size of its table kept 299 of 300 answers this way, and 37 the other way.
-    - ``admit_new=True`` (what long texts wrote): to whatever is new. A table that kept only what is counted most
-      could take in no new text once it was full.
+    - ``admit_new=False`` (what the mind was told and shown): only to a tie counted no less than it, and among
+      keys counted alike none goes before another for its age. What was confirmed is not pushed out by what was
+      met once; what was met once is a pool that turns over; what was taught first is not the first to go.
+    - ``admit_new=True`` (what long texts wrote): to whatever is new, the oldest among equals first. A table that
+      kept only what is counted most could take in no new text once it was full.
 
     ``let_go`` counts the ties that gave way and ``not_kept`` the new ties that found no place; ``add`` returns
     what gave way, so that a ledger can put it back. While nothing has given way the table is exactly the multiset
@@ -279,7 +279,9 @@ class Slots:
         if not totals or (min(totals)[0] > c and not self.admit_new):
             self.not_kept += 1
             return None
-        victim = min(totals)[2]
+        # among keys counted alike: where what is new always finds a place, the oldest; where what was confirmed
+        # stays, no key before another for its age (what was taught first and once is not the first to go)
+        victim = min(totals)[2] if self.admit_new else min(totals, key=lambda x: (x[0], x[2]))[2]
         gone = []
         for i in range(self.WAYS):
             if int(keys[i]) == victim:
