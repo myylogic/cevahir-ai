@@ -247,7 +247,14 @@ class Mind:
                             best = (v2[0][0], e)
             if best is not None:
                 return best
-        e = rule(vs[0][1], self.S.tot(key))
+        total = self.S.tot(key)
+        if len(vs) == 1:
+            e = rule(vs[0][1], total)
+        else:
+            # the place holds different tokens for different fillers, and nothing lived says which this filler
+            # brings: what stood here most is believed only as far as "what stands here is one already met" is
+            # (the novelty event, MODEL.md 2.2: nu = (t + 1/2) / (n + 1), the rest shared by the counts)
+            e = (1.0 - rule(len(vs), total)) * vs[0][1] / total
         return (vs[0][0], e) if e >= LINE else None
 
     def _fill(self, elements: tuple, holes: tuple, fcode: int, sk: int, qc: tuple, memo: dict,
@@ -692,7 +699,7 @@ class Mind:
                         made.append((spec, e_way, min(e_way, claim[1]), claim[0], fcode, sk, elements, holes))
                     consts = self._fit(elements, holes, sk, qc, ac, memo)
                     if consts is not None:
-                        fits.append((fcode, sk, consts, holes))
+                        fits.append((fcode, sk, consts, holes, claim is not None and claim[0] == ac))
             said = self.chosen(made)
             right = [c for c in made if c[3] == ac]
             told["claims"] = len(made)
@@ -708,30 +715,32 @@ class Mind:
                 self._add(mix(R_WAY, c[4]), c[5])
             if said is not None and said[3] != ac:
                 self._add(mix(R_WAYT, said[4]), said[5])
+            # 3. a way whose structure gives the answer, but which did not say it, learns the tokens of its own
+            # (each way learns from what it did not foresee, whoever else did)
+            for fcode, sk, consts, holes, foresaw in fits:
+                if not foresaw:
+                    self._write_consts(fcode, sk, consts, holes, qc, mk)
+            run = memo[("runs", qc)]
             if said is not None and said[3] == ac:
                 told["right"] = 1
                 if self.widen:
                     self._open_constant(said, qc, ac, mk, memo, told)
-            else:
-                # 3. a surprise: the ways whose structure gives the answer learn the tokens of their own; the
-                # answer as lived is written where the store holds no memory of the question it can correct; and
-                # where no way would have been right, the frame that explains the answer from the question and
-                # from what the store holds is written.
-                for fcode, sk, consts, holes in fits:
-                    self._write_consts(fcode, sk, consts, holes, qc, mk)
-                run = memo[("runs", qc)]
-                if not any(not holes for _, _, _, holes in fits):
-                    self._born(mix(F0, run[0][len(qc)]), self._skeleton(["*"] * len(ac)), qc, (), qc, ac, mk, memo,
-                               told)
-                if not right:
-                    got = self.explain(qc, ac, memo)
-                    if got is not None and len(got[1]) <= 2:     # a frame is read with at most two places open
-                        for items in got[2]:
-                            self._born(self.frame_code(run, len(qc), got[1]), self._skeleton(items), got[0], got[1],
-                                       qc, ac, mk, memo, told)
-                    elif got is not None:
-                        told["wider"] = 1
-            # 4. what each word of the question brings
+            elif not any(not f[3] for f in fits):
+                # 4. a surprise, and the store holds no memory of the question that it can correct: the answer as
+                # lived is written
+                self._born(mix(F0, run[0][len(qc)]), self._skeleton(["*"] * len(ac)), qc, (), qc, ac, mk, memo, told)
+            if not any(c[7] for c in right):
+                # 5. no frame would have given the answer (the mind may remember it, but that is not to have read
+                # it from the question): the frame that explains the answer from the question and from what the
+                # store holds now is written
+                got = self.explain(qc, ac, memo)
+                if got is not None and len(got[1]) <= 2:         # a frame is read with at most two places open
+                    for items in got[2]:
+                        self._born(self.frame_code(run, len(qc), got[1]), self._skeleton(items), got[0], got[1],
+                                   qc, ac, mk, memo, told)
+                elif got is not None:
+                    told["wider"] = 1
+            # 6. what each word of the question brings
             qs, as_ = sorted(set(qc)), sorted(set(ac))
             self._bump(R_REL)
             for x in qs:
@@ -742,7 +751,7 @@ class Mind:
                 self._bump(mix(R_RELR, t))
                 for x in qs:
                     self._add(mix(R_RELR, t), x)
-        # 5. both as sequences
+        # 7. both as sequences
         self.sequence(qc, O_ASKED)
         self.sequence(ac, O_ANSWER)
         return told
