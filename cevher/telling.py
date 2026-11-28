@@ -30,7 +30,9 @@ from cevher.units import LINE, body, code_of, fold, mix, rule, tokens
 R_SAME, R_HOLDS, R_FORM, R_WAY, R_COVER, R_MARK, R_MARKS, R_FREE, R_SEEN, PLACE = (
     code_of("\0telling " + name) for name in ("the sentence", "holds", "form of request", "way", "covered", "mark",
                                               "marks of all forms", "through marks", "shown of", "place"))
-WAYS = ("first of its text", "first", "its text", "named", "marked in its text", "marked among named")
+R_LINK, BEGINS, ENDS = (code_of("\0telling " + name) for name in ("the place of what it is", "begins", "ends"))
+WAYS = ("first of its text", "first", "its text", "named", "marked in its text", "marked among named",
+        "what is told of what it is")
 FIXED = 4                                                    # the first four are not made from what was answered
 PAGE = 4                                                     # sentences a page of a word's ties
 CLOSE = re.compile(r"(?<=[.!?…])\s+")
@@ -52,6 +54,8 @@ class Telling:
         self.not_kept = 0
         self.words = set()                                   # the words told (their forms are found among them)
         self.heard = set()                                   # the words of requests watched: they attest endings too
+        self._memo = None                                    # while one request is read: the sentences that name a word
+        self._said: Dict[int, list] = {}                     # the words of a told sentence
         self._stem = None
 
     def __len__(self) -> int:
@@ -135,15 +139,64 @@ class Telling:
     def named(self, w: str) -> List[int]:
         """The told sentences that name a word, in any of its forms, in the order they were told."""
         s = self.stem(w)
+        if self._memo is not None and s in self._memo:
+            return self._memo[s]
         S, out = self.lived, set()
         for form in self._forms.get(s, ()):
             base = mix(R_HOLDS, code_of(form))
             for page in range(S.tot(base) // PAGE + 1):
                 out.update(v - 1 for v, _, _ in S.vals(mix(base, page + 1)))
-        return sorted(n for n in out if n < len(self.text) and n not in self.dead)
+        out = sorted(n for n in out if n < len(self.text) and n not in self.dead)
+        if self._memo is not None:
+            self._memo[s] = out
+        return out
+
+    def said_in(self, n: int) -> list:
+        """The words of a told sentence."""
+        ws = self._said.get(n)
+        if ws is None:
+            ws = self._said[n] = _words(body(tokens(self.sentence(n)))[0])
+        return ws
+
+    # ------------------------------------------------------------------- what a thing is said to be -------------
+    def _steps(self, thing: str, seen: set = frozenset()) -> list:
+        """From a thing to what is told of what it is said to be. A sentence that names the thing holds other
+        words; of some of them told sentences begin (in any of their forms). Each such word is a step: the place
+        it stands in (the word before it and the word after), the word, and the sentences that begin with it."""
+        out, own = [], self.stem(thing)
+        for n in self.named(thing):
+            ws = self.said_in(n)
+            for i, k in enumerate(ws):
+                ks = self.stem(k)
+                if ks == own or ks in seen:
+                    continue
+                begun = [g for g in self.named(k) if g != n and self.stem(self.said_in(g)[0]) == ks
+                         and own not in {self.stem(x) for x in self.said_in(g)}]
+                if begun:
+                    place = mix(code_of(ws[i - 1]) if i else BEGINS, code_of(ws[i + 1]) if i + 1 < len(ws) else ENDS)
+                    out.append((place, ks, k, begun))
+        return out
+
+    def _inherit(self, frame: int, thing: str, depth: int = 0, seen: set = frozenset()) -> List[int]:
+        """The sentences told of what a thing is said to be, and of what that is said to be: through the places
+        this form of request has found to hold what a thing is."""
+        out: List[int] = []
+        for place, ks, k, begun in self._steps(thing, seen):
+            a, t = self._record(mix(mix(R_LINK, frame), place))
+            if t and rule(a, t) >= LINE:
+                out += begun
+                if depth < 2:
+                    out += self._inherit(frame, k, depth + 1, seen | {self.stem(thing), ks})
+        return out
+
+    def words_of(self, item) -> tuple:
+        """The words of what would be said: a told sentence, or one with the thing in the place of its first word."""
+        if isinstance(item, tuple):
+            return (item[1],) + tuple(self.said_in(item[0])[1:])
+        return tuple(self.said_in(item))
 
     def stems_of(self, n: int) -> set:
-        return {self.stem(w) for w in _words(body(tokens(self.sentence(n)))[0])}
+        return {self.stem(w) for w in self.said_in(n)}
 
     def its_text(self, numbers: List[int]) -> List[int]:
         """The texts that begin with one of these sentences, whole."""
@@ -194,7 +247,8 @@ class Telling:
         text = self.its_text(named)
         return [[n for n in text[:1] if self._admits(frame, n)], [n for n in named[:1] if self._admits(frame, n)],
                 [n for n in text if self._admits(frame, n)], [n for n in named if self._admits(frame, n)],
-                [n for n in text if self._marks(frame, n)], [n for n in named if self._marks(frame, n)]]
+                [n for n in text if self._marks(frame, n)], [n for n in named if self._marks(frame, n)],
+                list(dict.fromkeys((g, filler) for g in self._inherit(frame, filler)))]
 
     def forms_of(self, q: List[str]):
         """The forms a request may have: the request with one word that names something left open."""
@@ -219,9 +273,17 @@ class Telling:
         return best
 
     def watch(self, q: List[str], answer: str) -> None:
-        """A dialogue watched. If its answer is made of told sentences, every way of reading the request is judged
-        by what it would have said, before anything of the dialogue is written."""
-        S, m, want = self.mind.S, self.mind, set()
+        """A dialogue watched. If its answer is made of told sentences, or of what is told of what the thing is
+        said to be, every way of reading the request is judged by what it would have said, before anything of the
+        dialogue is written."""
+        self._memo = {}
+        try:
+            self._watch(q, answer)
+        finally:
+            self._memo = None
+
+    def _watch(self, q: List[str], answer: str) -> None:
+        S, m, want, answered = self.mind.S, self.mind, set(), set()
         fresh = [w for w in _words(q) if w not in self.heard and w not in self.words]
         if fresh and len(self.heard) < self.most_words:
             self.heard.update(fresh)
@@ -229,14 +291,18 @@ class Telling:
         for piece in CLOSE.split(answer.strip()):
             words = _words(body(tokens(piece))[0])
             if words:
+                answered.add(tuple(words))
                 want.update(v - 1 for v, _, _ in S.vals(fold(tuple(m.code(w) for w in words), R_SAME)))
         want = {n for n in want if n < len(self.text) and n not in self.dead}
-        if not want:
+        forms = list(self.forms_of(q))
+        steps = {filler: self._steps(filler) for _, filler in forms}
+        if not want and not any(self.words_of((g, filler)) in answered
+                                for filler, found in steps.items() for _, _, _, begun in found for g in begun):
             return
         out = self.through_marks(q)
         if out:
             self._judge(R_FREE, rule(len(want & set(out)), len(out)) >= LINE)
-        for frame, filler in list(self.forms_of(q)):
+        for frame, filler in forms:
             seen = mix(mix(R_SEEN, frame), code_of(self.stem(filler)))
             if S.tot(seen):                                  # the same thing asked again shows nothing new
                 continue
@@ -246,12 +312,15 @@ class Telling:
             m._bump(frame)
             for j, out in enumerate(said):
                 if out and not (born and j >= FIXED):
-                    hit = len(want & set(out))
+                    hit = sum(self.words_of(x) in answered for x in out)
                     self._judge(mix(mix(R_WAY, frame), j + 1), rule(hit, len(out)) >= LINE)
                     cover = mix(mix(R_COVER, frame), j + 1)
                     if hit:
                         m._add(cover, 1, hit)
-                    m._bump(cover, len(want))
+                    m._bump(cover, len(answered))
+            for place, _, _, begun in steps[filler]:         # was what stands in this place what the thing is?
+                hit = sum(self.words_of((g, filler)) in answered for g in begun)
+                self._judge(mix(mix(R_LINK, frame), place), rule(hit, len(begun)) >= LINE)
             own = self.stem(filler)
             named = self.named(filler)
             for n in sorted(set(self.its_text(named)) | set(named)):     # what the answer's sentences hold, and the others
@@ -265,6 +334,13 @@ class Telling:
         Of the believed ways of a form, the one that covered most of what was answered speaks. Where a way that
         takes sentences for where they stand and a way that takes them for what they hold covered the answers
         alike, nothing in the life tells them apart: only what both would say is said."""
+        self._memo = {}
+        try:
+            return self._answer(q)
+        finally:
+            self._memo = None
+
+    def _answer(self, q: List[str]) -> Tuple[str, list]:
         S, best = self.mind.S, None
         for frame, filler in self.forms_of(q):
             if S.tot(frame) < 2:
@@ -299,8 +375,17 @@ class Telling:
             return "", []
         return best[1], best[2]
 
-    def say(self, numbers: List[int]) -> str:
-        return " ".join(self.sentence(n) for n in numbers)
+    def say(self, items: list) -> str:
+        """What is said: told sentences as they were told; a sentence of the mind's own is a told sentence with
+        the thing in the place of its first word."""
+        out = []
+        for x in items:
+            if isinstance(x, tuple):
+                rest = self.sentence(x[0]).split(None, 1)
+                out.append(x[1] + (" " + rest[1] if len(rest) > 1 else ""))
+            else:
+                out.append(self.sentence(x))
+        return " ".join(out)
 
     # ------------------------------------------------------------------------------------------- keeping --------
     def size(self) -> dict:
