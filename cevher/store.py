@@ -15,6 +15,8 @@ total of a key is kept beside its ties. Every store here offers the same four ca
 """
 from __future__ import annotations
 
+from array import array
+
 import numpy as np
 
 from cevher.units import MASK, mix, mix_np
@@ -345,9 +347,13 @@ class Slots:
     def _find(self, keys: np.ndarray, values: np.ndarray):
         ways = np.arange(self.WAYS, dtype=np.int64)
         base = (mix_np(keys, _SALT[0]) & np.uint64(self.nb - 1)).astype(np.int64) * self.WAYS
-        at = base[:, None] + ways[None, :]
-        match = (self.key[at] == keys[:, None]) & (self.val[at] == values[:, None])
-        return base, match.any(axis=1), base + match.argmax(axis=1)
+        found, slot = np.zeros(len(keys), dtype=bool), np.empty(len(keys), dtype=np.int64)
+        for a in range(0, len(keys), 1 << 16):               # a piece at a time: the working memory is a piece's
+            b = a + (1 << 16)
+            at = base[a:b, None] + ways[None, :]
+            match = (self.key[at] == keys[a:b, None]) & (self.val[at] == values[a:b, None])
+            found[a:b], slot[a:b] = match.any(axis=1), base[a:b] + match.argmax(axis=1)
+        return base, found, slot
 
     def add_many(self, keys: np.ndarray, values: np.ndarray, w: np.ndarray, t: int = 0):
         """W(key, value) += w for arrays of distinct (key, value) pairs with w > 0 (totals as value 0). Returns the
@@ -360,18 +366,19 @@ class Slots:
         self.cnt[slot[found]] += w[found].astype(np.int32)
         self.tim[slot[found]] = t
         rest = np.flatnonzero(~found)
-        gone: list = []
+        gk, gv, gc, gt = array("Q"), array("Q"), array("q"), array("Q")      # what gives way, in the order it does
         if len(rest) and self.spill:                         # ties that wait beside the table
-            keep = []
-            for i in rest.tolist():
+            beside = np.fromiter(self.spill, dtype=np.uint64, count=len(self.spill))
+            waits = np.zeros(len(rest), dtype=bool)
+            for j in np.flatnonzero(np.isin(keys[rest], beside)).tolist():
+                i = int(rest[j])
                 row = self.spill.get(int(keys[i]))
                 if row is not None and int(values[i]) in row:
                     cell = row[int(values[i])]
                     cell[0] += int(w[i])
                     cell[1] = t
-                else:
-                    keep.append(i)
-            rest = np.array(keep, dtype=np.int64)
+                    waits[j] = True
+            rest = rest[~waits]
         if len(rest):                                        # new ties: one a bucket at a time, the weightiest first
             ways = np.arange(self.WAYS, dtype=np.int64)
             order = rest[np.lexsort((-w[rest].astype(np.int64), base[rest]))]
@@ -392,21 +399,40 @@ class Slots:
                 self.cnt[target], self.tim[target] = w[pick[has]].astype(np.int32), t
                 for i in pick[~has].tolist():                # the bucket is full: beside the table, or give way
                     out = self._place(int(keys[i]), int(values[i]), int(w[i]), t)
-                    if isinstance(out, tuple):
-                        gone.append(out)
-                    elif out:
-                        gone.extend(out)
-        if not gone:
+                    if out:
+                        for k_, v_, c_, t_ in ((out,) if isinstance(out, tuple) else out):
+                            gk.append(k_)
+                            gv.append(v_)
+                            gc.append(c_)
+                            gt.append(t_)
+        if not len(gk):
             return None
         # what gave way is kept as it stood before this breath: without what this breath itself added to it (a
         # tie written and let go in one breath was never kept)
-        added = dict(zip(zip(keys.tolist(), values.tolist()), w.tolist()))
-        gone = [(k, v, c - added.get((k, v), 0), t) for k, v, c, t in gone]
-        gone = [x for x in gone if x[2] > 0]
-        if not gone:
+        gk, gv = np.array(gk, dtype=np.uint64), np.array(gv, dtype=np.uint64)
+        before = np.array(gc, dtype=np.int64) - self._written(keys, values, w, gk, gv)
+        keep = before > 0
+        if not keep.any():
             return None
-        g = np.array(gone, dtype=np.uint64)
-        return g[:, 0].copy(), g[:, 1].copy(), g[:, 2].astype(np.int32), g[:, 3].astype(np.uint32)
+        return gk[keep], gv[keep], before[keep].astype(np.int32), np.array(gt, dtype=np.uint64)[keep].astype(np.uint32)
+
+    @staticmethod
+    def _written(keys: np.ndarray, values: np.ndarray, w: np.ndarray, gk: np.ndarray, gv: np.ndarray) -> np.ndarray:
+        """For each tie (gk, gv): what a breath of distinct ties (keys, values, w) writes to it, 0 if nothing."""
+        code = mix_np(keys, values)
+        order = np.argsort(code, kind="stable")
+        code = code[order]
+        asked = mix_np(gk, gv)
+        at = np.minimum(np.searchsorted(code, asked), len(code) - 1)
+        cand = order[at]
+        hit = (keys[cand] == gk) & (values[cand] == gv)
+        out = np.where(hit, w[cand], 0).astype(np.int64)
+        twin = np.flatnonzero((code[at] == asked) & ~hit)    # two ties of the breath with one code: look, one by one
+        if len(twin):
+            written = dict(zip(zip(keys.tolist(), values.tolist()), w.tolist()))
+            for i in twin.tolist():
+                out[i] = written.get((int(gk[i]), int(gv[i])), 0)
+        return out
 
     def sub_many(self, keys: np.ndarray, values: np.ndarray, w: np.ndarray) -> None:
         """W(key, value) -= w for arrays of distinct pairs; a tie whose count returns to zero is removed."""

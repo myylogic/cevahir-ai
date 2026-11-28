@@ -211,9 +211,7 @@ def test_a_long_text_is_written_a_group_of_sentences_at_a_time_and_forgotten_exa
     rng = random.Random(9)
     words = ["".join(rng.choice("abcçdefgğhıijklmnoöprsştuüvyz") for _ in range(rng.randint(2, 8))) for _ in range(3000)]
     text = "".join(" ".join(rng.choice(words) for _ in range(9)) + ". " for _ in range(2500))
-    whole = Cevahir(budget_mb=97)
-    whole.read(text)                                         # one group (the default is 20,000 sentences)
-    monkeypatch.setattr(module, "GROUP", 64)                 # the same text in forty groups, in a table that fills
+    monkeypatch.setattr(module, "GROUP", 64 * 9)             # forty groups of this text, in a table that fills
     c = Cevahir(budget_mb=97, ledger=True)
     c.read("".join(" ".join(rng.choice(words) for _ in range(9)) + ". " for _ in range(4000)))
     assert c.store.let_go + c.store.not_kept > 0
@@ -237,6 +235,17 @@ def test_source_code_read_by_lines_is_forgotten_exactly():
     assert c.digest() != before
     c.forget(len(c.entries) - 1)
     assert c.digest() == before
+
+
+def test_a_long_file_is_given_a_piece_at_a_time():
+    import io
+    from cevher.__main__ import pieces
+    text = "".join("satır %d burada biter.\n" % i for i in range(4000)) + "sonu olmayan satır"
+    got = list(pieces(io.StringIO(text), most=5000))
+    assert "".join(got) == text and len(got) > 10
+    assert all(piece.endswith("\n") for piece in got[:-1]) and max(map(len, got)) < 10000
+    assert list(pieces(io.StringIO("kısa"), most=5000)) == ["kısa"] and list(pieces(io.StringIO(""))) == []
+    assert "".join(pieces(io.StringIO("x" * 12000), most=5000)) == "x" * 12000      # no line's end: cut where it is
 
 
 def test_the_letters_take_back_exactly_what_a_text_wrote():

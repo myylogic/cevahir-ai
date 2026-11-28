@@ -7,7 +7,8 @@ Yazdığınız her satır Cevahir'e söylenir; cevap verir ya da susar ("(sessiz
 yaşar ($CEVAHIR_HOME, yoksa ~/.cevahir/cevher) ve çıkarken kendiliğinden kaydedilir. İlk açılışta ev boşsa depodaki
 açık zihin (cevher/zihin) getirilir; ``--load`` başka bir zihni getirir, ``--yeni`` boş bir zihinle başlar.
 
-    !oku YOL         bir metin dosyasını ya da bir klasördeki .txt/.md/.py dosyalarını okur
+    !oku YOL         bir metin dosyasını ya da bir klasördeki .txt/.md/.py dosyalarını okur (uzun dosya parça
+                     parça okunur: bellek dosyanın boyuyla büyümez; her parça ayrı bir kayıttır)
     !ogret YOL       bir .tsv dosyasındaki diyalogları izler ("söylenen<TAB>cevap", satır başına bir tane)
     !cevap METIN     son söylediğinize doğru cevabı gösterir (o diyaloğu izlemiş olur)
     !dogru / !yanlis son cevabının nasıl karşılandığı (yanlış cevap doğru söylenmiş gibi yaşanmaz)
@@ -23,6 +24,24 @@ import argparse
 import os
 import sys
 import time
+
+PIECE = 1 << 20                                              # a file is read so many characters at a time
+
+
+def pieces(f, most: int = PIECE):
+    """A file in pieces of at most about ``most`` characters, each ending at a line's end where it has one. Cevahir
+    holds the text it is given while it reads it, so a long file is given a piece at a time."""
+    rest = ""
+    while True:
+        chunk = f.read(most)
+        if not chunk:
+            break
+        chunk = rest + chunk
+        cut = chunk.rfind("\n") + 1 or len(chunk)
+        yield chunk[:cut]
+        rest = chunk[cut:]
+    if rest:
+        yield rest
 
 
 def main() -> None:
@@ -87,13 +106,18 @@ def main() -> None:
             path = os.path.expanduser(line[len("!oku "):].strip().strip('"'))
             files = [path] if os.path.isfile(path) else sorted(
                 os.path.join(r, f) for r, _, fs in os.walk(path) for f in fs if f.endswith((".txt", ".md", ".py")))
-            n, t1 = 0, time.time()
+            n, parts, t1 = 0, 0, time.time()
             for name in files:
                 with open(name, encoding="utf-8", errors="replace") as f:
-                    text = f.read()
-                c.read(text + "\n", code=name.endswith(".py"))
-                n += len(text)
-            print("  okundu: %d dosya, %d karakter, %.1f sn" % (len(files), n, time.time() - t1), flush=True)
+                    held = None
+                    for text in pieces(f):
+                        if held is not None:
+                            c.read(held, code=name.endswith(".py"))
+                        held, n, parts = text, n + len(text), parts + 1
+                    if held is not None:                     # the last piece of a file ends its last line
+                        c.read(held + "\n", code=name.endswith(".py"))
+            print("  okundu: %d dosya, %d karakter, %d parça, %.1f sn" % (len(files), n, parts, time.time() - t1),
+                  flush=True)
         elif line.startswith("!ogret "):
             n = 0
             with open(os.path.expanduser(line[len("!ogret "):].strip().strip('"')), encoding="utf-8") as f:

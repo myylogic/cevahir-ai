@@ -36,7 +36,7 @@ OVERHEAD_MB = 96                                             # the interpreter, 
 PER_CHARACTER = 8                                            # bytes the tables may hold for every character lived
 FLOOR_MB = 32                                                # ... and what they may hold however little was lived
 BULK = 4096                                                  # a text longer than this is read many ties at once
-GROUP = 20000                                                # ... so many of its sentences at a time
+GROUP = 1 << 15                                              # ... so many of its words at a time, about
 VERSION = 1
 
 
@@ -58,19 +58,21 @@ def _spans(text: str, lines: bool):
 
 
 def _groups(text: str, lines: bool):
-    """The sentences of two words or more of a text, ``GROUP`` at a time, and where each group lies in it. A text
-    is never held whole as words: the working memory of reading is a group's, however long the text."""
-    group, first, last = [], 0, 0
+    """The sentences of two words or more of a text, in groups of about ``GROUP`` words (a group ends with the
+    sentence that fills it), and where each group lies in the text. A text is never held whole as words: the
+    working memory of reading is a group's, however long the text."""
+    group, held, first, last = [], 0, 0, 0
     for a, b in _spans(text, lines):
         s = body(tokens(text[a:b]))[0]
         if len(s) >= 2:
             if not group:
                 first = a
             group.append(s)
+            held += len(s)
             last = b
-            if len(group) == GROUP:
+            if held >= GROUP:
                 yield group, first, last
-                group = []
+                group, held = [], 0
     if group:
         yield group, first, last
 
@@ -137,7 +139,7 @@ class Cevahir:
             arrays[name] = np.concatenate(parts) if parts else np.zeros(0, dtype=np.uint64)
         buf = io.BytesIO()
         np.savez(buf, **arrays)
-        blob = zlib.compress(buf.getvalue(), 1)
+        blob = zlib.compress(buf.getbuffer(), 1)
         self._ledger.seek(0, os.SEEK_END)
         at = self._ledger.tell()
         self._ledger.write(blob)
