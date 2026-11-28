@@ -1,0 +1,1588 @@
+{
+ "what": "free conversation: a lesson and conversations graded a turn at a time",
+ "dont_know": "bunu bilmiyorum",
+ "lesson": [
+  [
+   "tell",
+   "benim adım ali ."
+  ],
+  [
+   "watch",
+   "benim adım ne ?",
+   "senin adın ali"
+  ],
+  [
+   "tell",
+   "benim adım veli ."
+  ],
+  [
+   "watch",
+   "benim adım ne ?",
+   "senin adın veli"
+  ],
+  [
+   "tell",
+   "benim adım ayşe ."
+  ],
+  [
+   "watch",
+   "benim adım ne ?",
+   "senin adın ayşe"
+  ],
+  [
+   "tell",
+   "ben ankara da yaşıyorum ."
+  ],
+  [
+   "watch",
+   "ben nerede yaşıyorum ?",
+   "sen ankara da yaşıyorsun"
+  ],
+  [
+   "tell",
+   "ben izmir da yaşıyorum ."
+  ],
+  [
+   "watch",
+   "ben nerede yaşıyorum ?",
+   "sen izmir da yaşıyorsun"
+  ],
+  [
+   "tell",
+   "ben bursa da yaşıyorum ."
+  ],
+  [
+   "watch",
+   "ben nerede yaşıyorum ?",
+   "sen bursa da yaşıyorsun"
+  ],
+  [
+   "tell",
+   "benim mesleğim doktor ."
+  ],
+  [
+   "watch",
+   "benim mesleğim ne ?",
+   "senin mesleğin doktor"
+  ],
+  [
+   "tell",
+   "benim mesleğim öğretmen ."
+  ],
+  [
+   "watch",
+   "benim mesleğim ne ?",
+   "senin mesleğin öğretmen"
+  ],
+  [
+   "tell",
+   "benim mesleğim mühendis ."
+  ],
+  [
+   "watch",
+   "benim mesleğim ne ?",
+   "senin mesleğin mühendis"
+  ],
+  [
+   "tell",
+   "veli nin mesleği doktor ."
+  ],
+  [
+   "watch",
+   "veli nin mesleği ne ?",
+   "veli nin mesleği doktor"
+  ],
+  [
+   "tell",
+   "ayşe nin mesleği öğretmen ."
+  ],
+  [
+   "watch",
+   "ayşe nin mesleği ne ?",
+   "ayşe nin mesleği öğretmen"
+  ],
+  [
+   "tell",
+   "ali nin mesleği mühendis ."
+  ],
+  [
+   "watch",
+   "ali nin mesleği ne ?",
+   "ali nin mesleği mühendis"
+  ],
+  [
+   "tell",
+   "veli ankara da yaşıyor ."
+  ],
+  [
+   "watch",
+   "veli nerede yaşıyor ?",
+   "veli ankara da yaşıyor"
+  ],
+  [
+   "tell",
+   "ayşe izmir da yaşıyor ."
+  ],
+  [
+   "watch",
+   "ayşe nerede yaşıyor ?",
+   "ayşe izmir da yaşıyor"
+  ],
+  [
+   "tell",
+   "ali bursa da yaşıyor ."
+  ],
+  [
+   "watch",
+   "ali nerede yaşıyor ?",
+   "ali bursa da yaşıyor"
+  ],
+  [
+   "tell",
+   "kedimin adı tekir ."
+  ],
+  [
+   "watch",
+   "kedimin adı ne ?",
+   "kedinin adı tekir"
+  ],
+  [
+   "tell",
+   "kedimin adı karabaş ."
+  ],
+  [
+   "watch",
+   "kedimin adı ne ?",
+   "kedinin adı karabaş"
+  ],
+  [
+   "tell",
+   "kedimin adı boncuk ."
+  ],
+  [
+   "watch",
+   "kedimin adı ne ?",
+   "kedinin adı boncuk"
+  ],
+  [
+   "tell",
+   "köpeğimin adı tekir ."
+  ],
+  [
+   "watch",
+   "köpeğimin adı ne ?",
+   "köpeğinin adı tekir"
+  ],
+  [
+   "tell",
+   "köpeğimin adı karabaş ."
+  ],
+  [
+   "watch",
+   "köpeğimin adı ne ?",
+   "köpeğinin adı karabaş"
+  ],
+  [
+   "tell",
+   "köpeğimin adı boncuk ."
+  ],
+  [
+   "watch",
+   "köpeğimin adı ne ?",
+   "köpeğinin adı boncuk"
+  ],
+  [
+   "tell",
+   "kuşumun adı tekir ."
+  ],
+  [
+   "watch",
+   "kuşumun adı ne ?",
+   "kuşunun adı tekir"
+  ],
+  [
+   "tell",
+   "kuşumun adı karabaş ."
+  ],
+  [
+   "watch",
+   "kuşumun adı ne ?",
+   "kuşunun adı karabaş"
+  ],
+  [
+   "tell",
+   "kuşumun adı boncuk ."
+  ],
+  [
+   "watch",
+   "kuşumun adı ne ?",
+   "kuşunun adı boncuk"
+  ],
+  [
+   "watch",
+   "senin adın ne ?",
+   "benim adım cevahir"
+  ],
+  [
+   "watch",
+   "sen kimsin ?",
+   "ben cevahirim"
+  ],
+  [
+   "watch",
+   "sen nerede yaşıyorsun ?",
+   "ben bu bilgisayarda yaşıyorum"
+  ],
+  [
+   "tell",
+   "zürafa bir hayvandır ."
+  ],
+  [
+   "watch",
+   "zürafa nedir ?",
+   "zürafa bir hayvandır"
+  ],
+  [
+   "tell",
+   "menekşe bir çiçektir ."
+  ],
+  [
+   "watch",
+   "menekşe nedir ?",
+   "menekşe bir çiçektir"
+  ],
+  [
+   "tell",
+   "keman bir çalgıdır ."
+  ],
+  [
+   "watch",
+   "keman nedir ?",
+   "keman bir çalgıdır"
+  ],
+  [
+   "watch",
+   "zeplin nedir ?",
+   "bunu bilmiyorum"
+  ],
+  [
+   "watch",
+   "pusula nedir ?",
+   "bunu bilmiyorum"
+  ],
+  [
+   "watch",
+   "kervan nedir ?",
+   "bunu bilmiyorum"
+  ],
+  [
+   "tell",
+   "ali izmir da yaşıyor ."
+  ],
+  [
+   "tell",
+   "izmir ege bölgesindedir ."
+  ],
+  [
+   "watch",
+   "ali hangi bölgede yaşıyor ?",
+   "ali ege bölgesinde yaşıyor"
+  ],
+  [
+   "tell",
+   "veli bursa da yaşıyor ."
+  ],
+  [
+   "tell",
+   "bursa marmara bölgesindedir ."
+  ],
+  [
+   "watch",
+   "veli hangi bölgede yaşıyor ?",
+   "veli marmara bölgesinde yaşıyor"
+  ],
+  [
+   "tell",
+   "ayşe ankara da yaşıyor ."
+  ],
+  [
+   "tell",
+   "ankara iç anadolu bölgesindedir ."
+  ],
+  [
+   "watch",
+   "ayşe hangi bölgede yaşıyor ?",
+   "ayşe iç anadolu bölgesinde yaşıyor"
+  ]
+ ],
+ "talks": [
+  {
+   "kind": "told then asked",
+   "turns": [
+    {
+     "said": "benim adım kerem .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın kerem"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "told then asked",
+   "turns": [
+    {
+     "said": "benim adım elif .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın elif"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "told then asked",
+   "turns": [
+    {
+     "said": "ben mardin da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben nerede yaşıyorum ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "sen mardin da yaşıyorsun"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "told then asked",
+   "turns": [
+    {
+     "said": "ben edirne da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben nerede yaşıyorum ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "sen edirne da yaşıyorsun"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "told then asked",
+   "turns": [
+    {
+     "said": "benim mesleğim marangoz .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim mesleğim ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin mesleğin marangoz"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "told then asked",
+   "turns": [
+    {
+     "said": "benim mesleğim pilot .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim mesleğim ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin mesleğin pilot"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "the newest told holds",
+   "turns": [
+    {
+     "said": "benim adım kerem .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın kerem"
+      ]
+     }
+    },
+    {
+     "said": "benim adım deniz .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın deniz"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "the newest told holds",
+   "turns": [
+    {
+     "said": "ben samsun da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben nerede yaşıyorum ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "sen samsun da yaşıyorsun"
+      ]
+     }
+    },
+    {
+     "said": "ben edirne da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben nerede yaşıyorum ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "sen edirne da yaşıyorsun"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "the newest told holds",
+   "turns": [
+    {
+     "said": "benim mesleğim aşçı .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim mesleğim ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin mesleğin aşçı"
+      ]
+     }
+    },
+    {
+     "said": "benim mesleğim marangoz .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim mesleğim ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin mesleğin marangoz"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "the newest told holds",
+   "turns": [
+    {
+     "said": "benim adım baran .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın baran"
+      ]
+     }
+    },
+    {
+     "said": "benim adım elif .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın elif"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "not repeating the speaker",
+   "turns": [
+    {
+     "said": "benim adım kerem .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben konya da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım kerem ve ben konya da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım kerem .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "bugün hava çok güzel .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben konya da yaşıyorum ve mesleğim marangoz .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın kerem"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "not repeating the speaker",
+   "turns": [
+    {
+     "said": "benim adım elif .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben samsun da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım elif ve ben samsun da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım elif .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "bugün hava çok güzel .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben samsun da yaşıyorum ve mesleğim pilot .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın elif"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "not repeating the speaker",
+   "turns": [
+    {
+     "said": "benim adım deniz .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben mardin da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım deniz ve ben mardin da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım deniz .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "bugün hava çok güzel .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben mardin da yaşıyorum ve mesleğim aşçı .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın deniz"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "not repeating the speaker",
+   "turns": [
+    {
+     "said": "benim adım baran .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben edirne da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım baran ve ben edirne da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım baran .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "bugün hava çok güzel .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben edirne da yaşıyorum ve mesleğim terzi .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın baran"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "a third one's facts",
+   "turns": [
+    {
+     "said": "baran nin mesleği marangoz .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "baran nin mesleği ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "baran nin mesleği marangoz"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "a third one's facts",
+   "turns": [
+    {
+     "said": "selin samsun da yaşıyor .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "selin nerede yaşıyor ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "selin samsun da yaşıyor"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "a third one's facts",
+   "turns": [
+    {
+     "said": "tolga nin mesleği aşçı .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "tolga nin mesleği ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "tolga nin mesleği aşçı"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "a third one's facts",
+   "turns": [
+    {
+     "said": "kerem edirne da yaşıyor .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "kerem nerede yaşıyor ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "kerem edirne da yaşıyor"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "never told, then told",
+   "turns": [
+    {
+     "said": "uçurtma nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "kerevit nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "kerevit bir kabukludur .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "kerevit nedir ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "kerevit bir kabukludur"
+      ]
+     }
+    },
+    {
+     "said": "değirmen nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    }
+   ]
+  },
+  {
+   "kind": "never told, then told",
+   "turns": [
+    {
+     "said": "değirmen nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "ıhlamur nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "ıhlamur bir ağaçtır .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ıhlamur nedir ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "ıhlamur bir ağaçtır"
+      ]
+     }
+    },
+    {
+     "said": "kandil nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    }
+   ]
+  },
+  {
+   "kind": "never told, then told",
+   "turns": [
+    {
+     "said": "kandil nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "kanun nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "kanun bir çalgıdır .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "kanun nedir ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "kanun bir çalgıdır"
+      ]
+     }
+    },
+    {
+     "said": "pergel nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    }
+   ]
+  },
+  {
+   "kind": "never told, then told",
+   "turns": [
+    {
+     "said": "pergel nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "sincap nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "sincap bir kemirgendir .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "sincap nedir ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "sincap bir kemirgendir"
+      ]
+     }
+    },
+    {
+     "said": "uçurtma nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    }
+   ]
+  },
+  {
+   "kind": "asked after other turns",
+   "turns": [
+    {
+     "said": "benim adım deniz .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben samsun da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "uçurtma nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "benim mesleğim pilot .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "kedimin adı pamuk .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "sen kimsin ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "ben cevahirim"
+      ]
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın deniz"
+      ]
+     }
+    },
+    {
+     "said": "ben nerede yaşıyorum ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "sen samsun da yaşıyorsun"
+      ]
+     }
+    },
+    {
+     "said": "kedimin adı ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "kedinin adı pamuk"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "asked after other turns",
+   "turns": [
+    {
+     "said": "benim adım baran .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben mardin da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "değirmen nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "benim mesleğim aşçı .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "kedimin adı duman .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "sen kimsin ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "ben cevahirim"
+      ]
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın baran"
+      ]
+     }
+    },
+    {
+     "said": "ben nerede yaşıyorum ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "sen mardin da yaşıyorsun"
+      ]
+     }
+    },
+    {
+     "said": "kedimin adı ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "kedinin adı duman"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "asked after other turns",
+   "turns": [
+    {
+     "said": "benim adım selin .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "ben edirne da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "kandil nedir ?",
+     "expect": {
+      "type": "unknown"
+     }
+    },
+    {
+     "said": "benim mesleğim terzi .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "kedimin adı zeytin .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "sen kimsin ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "ben cevahirim"
+      ]
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın selin"
+      ]
+     }
+    },
+    {
+     "said": "ben nerede yaşıyorum ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "sen edirne da yaşıyorsun"
+      ]
+     }
+    },
+    {
+     "said": "kedimin adı ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "kedinin adı zeytin"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "the mind's own against the speaker's",
+   "turns": [
+    {
+     "said": "senin adın ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "benim adım cevahir"
+      ]
+     }
+    },
+    {
+     "said": "benim adım baran .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "senin adın ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "benim adım cevahir"
+      ]
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın baran"
+      ]
+     }
+    },
+    {
+     "said": "sen kimsin ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "ben cevahirim"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "the mind's own against the speaker's",
+   "turns": [
+    {
+     "said": "senin adın ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "benim adım cevahir"
+      ]
+     }
+    },
+    {
+     "said": "benim adım selin .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "senin adın ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "benim adım cevahir"
+      ]
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın selin"
+      ]
+     }
+    },
+    {
+     "said": "sen kimsin ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "ben cevahirim"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "the mind's own against the speaker's",
+   "turns": [
+    {
+     "said": "senin adın ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "benim adım cevahir"
+      ]
+     }
+    },
+    {
+     "said": "benim adım tolga .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "senin adın ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "benim adım cevahir"
+      ]
+     }
+    },
+    {
+     "said": "benim adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın tolga"
+      ]
+     }
+    },
+    {
+     "said": "sen kimsin ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "ben cevahirim"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "a form never shown",
+   "turns": [
+    {
+     "said": "benim adım elif .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "adım ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın elif",
+       "elif"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "a form never shown",
+   "turns": [
+    {
+     "said": "benim adım deniz .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "benim adım neydi ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin adın deniz",
+       "deniz"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "a form never shown",
+   "turns": [
+    {
+     "said": "ben edirne da yaşıyorum .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "nerede yaşıyorum ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "sen edirne da yaşıyorsun",
+       "edirne"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "a form never shown",
+   "turns": [
+    {
+     "said": "benim mesleğim marangoz .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "mesleğim ne benim ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "senin mesleğin marangoz",
+       "marangoz"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "from two told facts",
+   "turns": [
+    {
+     "said": "kerem samsun da yaşıyor .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "samsun karadeniz bölgesindedir .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "kerem hangi bölgede yaşıyor ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "kerem karadeniz bölgesinde yaşıyor"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "from two told facts",
+   "turns": [
+    {
+     "said": "elif mardin da yaşıyor .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "mardin akdeniz bölgesindedir .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "elif hangi bölgede yaşıyor ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "elif akdeniz bölgesinde yaşıyor"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "from two told facts",
+   "turns": [
+    {
+     "said": "deniz edirne da yaşıyor .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "edirne doğu anadolu bölgesindedir .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "deniz hangi bölgede yaşıyor ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "deniz doğu anadolu bölgesinde yaşıyor"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "the inside of a word never shown",
+   "turns": [
+    {
+     "said": "atımın adı duman .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "atımın adı ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "atının adı duman"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "the inside of a word never shown",
+   "turns": [
+    {
+     "said": "balığımın adı zeytin .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "balığımın adı ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "balığının adı zeytin"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "kind": "the inside of a word never shown",
+   "turns": [
+    {
+     "said": "kaplumbağamın adı fıstık .",
+     "expect": {
+      "type": "silent"
+     }
+    },
+    {
+     "said": "kaplumbağamın adı ne ?",
+     "expect": {
+      "type": "say",
+      "answers": [
+       "kaplumbağanın adı fıstık"
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}
