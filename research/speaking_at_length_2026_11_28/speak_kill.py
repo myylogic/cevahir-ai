@@ -20,12 +20,26 @@ Killed if any of these fails on the requests asked (speak.json, frozen):
   4. of the lessons' subjects, at least 80 % of the sentences that name them are said.
 Reported, not a criterion: how much of the kinds of sentence (parts, works, made, care, two kinds) is said, and
 of the request in no shown form.
+
+The first candidate (A) failed criterion 2 on the first set: of the bridge it said the lessons' one sentence that
+names a bridge. Two ways (the first sentence that names the thing; the first sentence of the text that begins
+with it) had the same record, for nothing in the life told them apart, and the order they are written in chose.
+The second candidate (B), fixed before it was run and before the second set (speak2.json) was read by any code:
+  B1. a way that is not made from the dialogue (first, first of its text, named, its text) is judged on every
+      dialogue of its frame, the first too; a frame speaks once two dialogues have shown it;
+  B2. of ways with equal records, the one that reads the thing in its own text speaks before the one that reads
+      it wherever it was named;
+  B3. a request in no known form is read through what the known forms have learned: of the thing's text (or of
+      the sentences that name it), those that hold a word of the request which marked answers before. This way
+      has one record over all the dialogues watched, and speaks only at the speaking line.
+On the first set B is run after its questions were seen (said as such); on the second set it is blind.
 """
 import argparse, hashlib, json, os, re
 from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SHA = "3ba5745dd3db795f6bdc9528957b6b2e02d3c6d7d2747fbd7fd922e85f8c03b1"
+SHA2 = "73d450f32294685974a4927891ba95d61f9b2b7b32536f05812b9a338069179f"
 LINE = 0.5 + 1 / 12
 WAYS = ("first", "first of its text", "named", "its text", "marked among named", "marked in its text")
 
@@ -38,8 +52,15 @@ def words(s):
     return re.findall(r"\w+", s.lower())
 
 
+TEXT_FIRST = ("first of its text", "first", "its text", "named", "marked in its text", "marked among named")
+FIXED = ("first", "first of its text", "named", "its text")
+
+
 class Proto:
+    candidate = "A"
+
     def __init__(self):
+        self.free = [0, 0]                                   # the record of reading through marks (B3)
         self.told, self.toks, self.text_of, self.texts = [], [], [], []
         self.holds = defaultdict(list)                       # word -> the sentences that hold it
         self.frames = {}                                     # frame -> ways' records and marks
@@ -116,15 +137,45 @@ class Proto:
             if self.named(w):
                 yield " ".join(toks[:k] + ["_"] + toks[k + 1:]), w
 
+    def marks(self):
+        pooled = defaultdict(lambda: [0, 0])
+        for f in self.frames.values():
+            for s, (a, b) in f["marks"].items():
+                pooled[s][0] += a
+                pooled[s][1] += b
+        return {s for s, (a, b) in pooled.items() if rule(a, a + b) >= LINE}
+
+    def through_marks(self, request):
+        toks, best, marks = words(request), [], self.marks()
+        asked = {self.stem(w) for w in toks}
+        for w in toks:
+            n = self.named(w)
+            if n:
+                pool = [i for a, b in self.texts if a in n for i in range(a, b)] or n
+                aspects = (asked - {self.stem(w)}) & marks
+                out = [i for i in pool if self.stems_of(i) & aspects]
+                if len(out) > len(best):
+                    best = out
+        return best
+
     def watch(self, request, answer):
         want = {self.told.index(s) for s in answer if s in self.told}
+        if self.candidate == "B":
+            out = self.through_marks(request)
+            if out:
+                self.free[0] += rule(len(want & set(out)), len(out)) >= LINE
+                self.free[1] += 1
         for frame, filler in self.frames_of(request):
             said = self.ways(frame, filler)                  # foreseen before anything is written
             f = self.frames.get(frame)
-            if f is None:                                    # born of this dialogue: it says nothing yet
-                f = self.frames[frame] = {"ways": {w: [0, 0, 0, 0] for w in WAYS}, "marks": {}}
-            else:
+            born = f is None
+            if born:                                         # born of this dialogue: it says nothing yet
+                f = self.frames[frame] = {"ways": {w: [0, 0, 0, 0] for w in WAYS}, "marks": {}, "shown": 0}
+            f["shown"] += 1
+            if not born or self.candidate == "B":
                 for w, out in said.items():
+                    if born and w not in FIXED:
+                        continue
                     if out:
                         rec, hit = f["ways"][w], len(want & set(out))
                         rec[0] += rule(hit, len(out)) >= LINE        # what it would have said was the answer
@@ -144,22 +195,32 @@ class Proto:
             if f is None:
                 continue
             said = self.ways(frame, filler)
-            for order, w in enumerate(WAYS):
+            if self.candidate == "B" and f["shown"] < 2:
+                continue
+            for order, w in enumerate(TEXT_FIRST if self.candidate == "B" else WAYS):
                 right, tried, covered, of = f["ways"][w]
                 if tried and said[w] and rule(right, tried) >= LINE:
                     rank = (covered / max(1, of), rule(right, tried), -len(said[w]), -order)
                     if best is None or rank > best[0]:
                         best = (rank, w, said[w])
+        if best is None and self.candidate == "B" and self.free[1] >= 2 and rule(*self.free) >= LINE:
+            out = self.through_marks(request)
+            if out:
+                return "through marks", out
         return (best[1], best[2]) if best else ("", [])
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--show", action="store_true")
+    ap.add_argument("--candidate", default="A", choices=["A", "B"])
+    ap.add_argument("--set", type=int, default=1, choices=[1, 2])
     a = ap.parse_args()
-    blob = open(os.path.join(HERE, "speak.json"), "rb").read()
-    assert hashlib.sha256(blob).hexdigest() == SHA, "speak.json is not the frozen set"
+    name, sha = ("speak.json", SHA) if a.set == 1 else ("speak2.json", SHA2)
+    blob = open(os.path.join(HERE, name), "rb").read()
+    assert hashlib.sha256(blob).hexdigest() == sha, "%s is not the frozen set" % name
     Y = json.loads(blob.decode("utf-8"))
+    Proto.candidate = a.candidate
     m = Proto()
     for s in Y["lessons"]:
         m.tell(s)
@@ -190,7 +251,8 @@ def main():
     les = [r for r in rows if r["world"] == "lessons"]
     c4 = sum(r["right"] for r in les) >= 0.8 * sum(r["must"] for r in les)
     kinds = [r for r in rows if r["form"] in ("parts", "works", "made", "care", "two kinds")]
-    result = {"what": "kill experiment: speaking at length on an exact store", "sha256": SHA,
+    result = {"what": "kill experiment: speaking at length on an exact store", "sha256": sha, "set": a.set,
+              "candidate": a.candidate, "record_through_marks": m.free,
               "said": said, "wrong": wrong, "wrong_share": round(wrong / max(1, said), 4),
               "1_wrong_at_most_5_percent": c1, "2_one_sentence": c2, "3_all_of_it": c3,
               "4_lessons": [sum(r["right"] for r in les), sum(r["must"] for r in les), c4],
