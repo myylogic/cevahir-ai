@@ -5,6 +5,8 @@ start, and the seconds an answer takes in conversation (G2).
     python gates.py exact                     # G4: live and forget; the digest of the substance before and after
     python gates.py start [--mind FOLDER]     # G5: python -m cevher as cevahir.ps1 runs it, timed from outside
     python gates.py answers --mind FOLDER     # G2: seconds an answer, on the raised mind
+    python gates.py bound --file TEXT         # G1: the whole process, born empty, reads a long file; started again
+    python gates.py lives_on --mind FOLDER    # does it go on learning, and keep what it learned, once it has read much
 
 Rows are appended to results/gates.jsonl.
 """
@@ -31,6 +33,23 @@ def put(args, row):
     with open(args.out, "a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
     print(json.dumps(row, ensure_ascii=False)[:1500], flush=True)
+
+
+def measured(cmd, said, env):
+    """A command run with lines on its standard input: what it printed, its seconds, and the most resident memory
+    the process reached, megabytes (the kernel's own account of that child, read when it is waited for)."""
+    with tempfile.TemporaryFile("w+", encoding="utf-8") as fin, tempfile.TemporaryFile("w+", encoding="utf-8") as fout:
+        fin.write("\n".join(said) + "\n")
+        fin.flush()
+        fin.seek(0)
+        t0 = time.time()
+        p = subprocess.Popen(cmd, stdin=fin, stdout=fout, stderr=subprocess.DEVNULL, cwd=REPO, env=env)
+        _, status, usage = os.wait4(p.pid, 0)
+        seconds = time.time() - t0
+        p.returncode = os.waitstatus_to_exitcode(status)
+        fout.seek(0)
+        printed = [x.strip() for x in fout.read().splitlines()]
+    return printed, round(seconds, 2), round(usage.ru_maxrss / 1024.0, 1)
 
 
 def exact(args):
@@ -107,14 +126,8 @@ def start(args):
     home = tempfile.mkdtemp(prefix="gates-home-")
     env = dict(os.environ, CEVAHIR_HOME=home, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
     cmd = [sys.executable, "-m", "cevher"] + (["--load", args.mind] if args.mind else [])
-    t0 = time.time()
-    p = subprocess.run(["/usr/bin/time", "-v"] + cmd, input="\n".join(said) + "\n", capture_output=True, text=True,
-                       cwd=REPO, env=env)
-    seconds = time.time() - t0
-    peak = [line for line in p.stderr.splitlines() if "Maximum resident" in line]
-    lines = [x.strip() for x in p.stdout.splitlines()]
-    put(args, {"gate": "G5", "command": " ".join(cmd[1:]), "whole_run_s": round(seconds, 2),
-               "peak_resident_mb": round(int(peak[0].split()[-1]) / 1024, 1) if peak else None,
+    lines, seconds, peak = measured(cmd, said, env)
+    put(args, {"gate": "G5", "command": " ".join(cmd[1:]), "whole_run_s": seconds, "peak_resident_mb": peak,
                "imports": sorted(m for m in ("torch", "numpy") if subprocess.run(
                    [sys.executable, "-c", "import sys, cevher; sys.exit(0 if %r in sys.modules else 1)" % m],
                    cwd=REPO).returncode == 0),
@@ -122,6 +135,72 @@ def start(args):
     again = subprocess.run(cmd, input="benim adım ne ?\n!cik\n", capture_output=True, text=True, cwd=REPO, env=env)
     put(args, {"gate": "G5", "what": "started again from the home it saved itself to",
                "transcript": [x.strip() for x in again.stdout.splitlines()]})
+
+
+def bound(args):
+    """Gate G1's bound on the whole process, as the owner would run it: ``python -m cevher`` born empty with the
+    budget reads a long file and tells its state; then it is started again from what it saved. The most resident
+    memory of each process is the kernel's account of it."""
+    home = tempfile.mkdtemp(prefix="gates-bound-")
+    env = dict(os.environ, CEVAHIR_HOME=home, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+
+    def run(cmd, said):
+        printed, seconds, peak = measured(cmd, said, env)
+        return {"command": " ".join(cmd[1:]), "said": said, "whole_run_s": seconds, "peak_resident_mb": peak,
+                "printed": [x[:600] for x in printed]}
+
+    row = run([sys.executable, "-m", "cevher", "--yeni", "--butce", str(args.budget)],
+              ["!oku " + args.file, "!durum", "benim adım yasin", "benim adım ne ?"])
+    kept = {f: os.path.getsize(os.path.join(home, f)) for f in sorted(os.listdir(home))}
+    put(args, {"gate": "G1", "what": "the whole process: born empty, a long file read, kept on leaving",
+               "budget_mb": args.budget, "file_bytes": os.path.getsize(args.file), **row, "kept_bytes": kept,
+               "within_budget": row["peak_resident_mb"] <= args.budget})
+    row = run([sys.executable, "-m", "cevher"], ["!durum", "benim adım ne ?"])
+    put(args, {"gate": "G1", "what": "the whole process: started again from what it kept", "budget_mb": args.budget,
+               **row, "within_budget": row["peak_resident_mb"] <= args.budget})
+
+
+def lives_on(args):
+    """Does the mind go on learning once it has read much, and does it keep what it had learned? The raised mind
+    reads the first N characters of a text. Then: the dialogues of the lessons it was raised on are asked again
+    (keeping); a dialogue is watched once and asked, another is watched three times (learning a new thing); five
+    dialogues of a made-up world are watched and a combination never shown is asked (learning a new rule); and
+    after 100,000 more characters of the text the three are asked once more. One row for each N."""
+    from cevher import Cevahir
+    folder = tempfile.mkdtemp(prefix="gates-lessons-")
+    asked = []
+    for path in Y.lesson_files(folder):
+        asked += Y.lesson_lines(path)[1]
+    text = Y.text_of(args.corpus, 0)
+
+    def kept(c):
+        return sum(1 for (_, a), said in zip(asked, c.answers([q for q, _ in asked])) if Y.judge(said, a)[0])
+
+    def three(c):
+        return {"watched once": c.reply("gizli söz nedir ?"), "watched three times": c.reply("saklı sayı kaç ?"),
+                "a new rule (wif twice)": c.reply("wif twice")}
+
+    for n in args.chars:
+        c = Cevahir.load(args.mind)
+        row = {"gate": "lives on", "corpus": os.path.basename(args.corpus), "chars_read": n,
+               "lesson_dialogues": len(asked), "answered_before_reading": kept(c)}
+        t0 = time.time()
+        for i in range(0, n, 1000000):
+            c.read(text[i:min(n, i + 1000000)])
+        row["read_s"] = round(time.time() - t0, 1)
+        row["answered_after_reading"] = kept(c)
+        c.watch("gizli söz nedir ?", "mavi fil .")
+        for _ in range(3):
+            c.watch("saklı sayı kaç ?", "kırk iki .")
+        for q, a in (("zap", "Z"), ("zap twice", "Z Z"), ("dax", "D"), ("dax twice", "D D"), ("wif", "W")):
+            c.watch(q, a + " .")
+        row["asked_at_once"] = three(c)
+        c.read(text[n:n + 100000])
+        row["asked_after_100000_more"] = three(c)
+        row["answered_at_the_end"] = kept(c)
+        size = c.size()
+        row["ties"] = size["ties"]
+        put(args, row)
 
 
 def answers(args):
@@ -148,11 +227,15 @@ def answers(args):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("what", choices=["exact", "start", "answers"])
+    ap.add_argument("what", choices=["exact", "start", "answers", "bound", "lives_on"])
+    ap.add_argument("--corpus", default="all", help="lives_on: a corpus of corpora.py, 'all', or a text file")
+    ap.add_argument("--chars", type=int, nargs="*", default=[0, 100000, 1000000, 3000000, 10000000])
     ap.add_argument("--mind", default="")
+    ap.add_argument("--file", default="", help="bound: the long text to read")
+    ap.add_argument("--budget", type=int, default=512)
     ap.add_argument("--out", default=os.path.join(HERE, "results", "gates.jsonl"))
     a = ap.parse_args()
-    {"exact": exact, "start": start, "answers": answers}[a.what](a)
+    {"exact": exact, "start": start, "answers": answers, "bound": bound, "lives_on": lives_on}[a.what](a)
 
 
 if __name__ == "__main__":
