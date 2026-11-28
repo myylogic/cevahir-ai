@@ -733,9 +733,10 @@ cevher/letters.py    Counts (the bounded table of counters) and the letter grain
 cevher/mind.py       the word grain: sequences, frames, skeletons, the records of ways
 cevher/cevahir.py    Cevahir: tell, watch, read, converse, feedback, forget, sleep, save, load, answers
 cevher/__main__.py   python -m cevher (what cevahir.ps1 starts)
-cevher/dersler/      the conversation lesson
-cevher/zihin/        the open mind (36 public lessons and the conversation lesson; 1.2 MB)
-tests/evolution/test_cevher.py                       26 tests
+cevher/telling.py    the telling grain: what was told kept as told, the ways of reading a request (section 18)
+cevher/dersler/      the conversation lesson; the lesson that shows telling (two texts and fourteen dialogues)
+cevher/zihin/        the open mind (36 public lessons, the conversation lesson and the telling lesson; 1.4 MB)
+tests/evolution/test_cevher.py                       28 tests
 research/final_form_2026_11_28/raise_cevher.py       the open mind's recipe (6 s)
 ```
 
@@ -772,3 +773,122 @@ was lived holds (the final form as it is), or must a thing read or told once be 
 Cevahir recalls it at 1.1 kilobytes a character?** The two abilities lost on the held-out set (a fact told
 once, a conclusion from two told facts) and the letters' weaker prediction are the same question from the other
 side.
+
+## 18. Speaking at length (added 28 November, after the owner asked for it)
+
+Study folder: `research/speaking_at_length_2026_11_28/`. The owner's question: a mind that answers "bisiklet
+nedir ?" in seven words should answer a question about the bicycle's parts, design and materials in paragraphs,
+without a language model. Sections 0 to 17 stand as they were written; this section adds one grain to the form.
+
+**What failed, first**
+
+- **The first candidate was killed by a criterion fixed in advance** (below): asked what a bridge is, it said the
+  lessons' one sentence that names a bridge, not the first sentence of the bridge's text. It failed again on a
+  second set it had not seen. The second candidate was written after that failure; it is blind only on the
+  second set (two things, 47 sentences said), and the texts of both sets are by the hand that built it.
+- **Nothing but told sentences is said.** No sentence of its own, no paraphrase, no connective, no summary. This
+  is quoting in the right amount and order, not writing.
+- **A kind of sentence is found about half the time** (41 of 73 sentences over four things never shown): parts 4
+  of 13, how it works 7 of 13, what it is made of 11 of 13, two kinds at once 19 of 26, **care 0 of 8**. The
+  mind finds a kind by the words that answers of that kind held before; sentences of care share an ending
+  ("-malıdır"), not a word, and the forms of words drop endings.
+- **A request in no shown form is not answered**: 0 of 27 sentences over three requests, the owner's own question
+  among them ("bisiklet kaç parçadan oluşur parçalarının tasarım dinamiği nedir hangi malzemeler
+  kullanılmalıdır"). The way that reads such a request through what the known forms learned was right once in two
+  in the life of the sets, and so it stays silent.
+- **The forms of a word are found only at its end, and only where the bare word was told.** Of a subject whose
+  bare form was never told ("veri") nothing is said; "dünyayı" and "enerjiyi" are not taken for forms of "dünya"
+  and "enerji". And the forms get worse as more words are met: in the open mind "kanser" was taken for a form of
+  "kan" once the words of 440 questions had been heard.
+- **Long texts are not told from yet.** A text of 4,096 characters or more is lived many ties at once, as before,
+  and the telling grain does not see it. What is kept to be told is held in memory, 32 MB at most.
+- **"X nedir ?" about a thing with no text of its own is still answered wrongly in the open mind**: "kalp nedir ?"
+  gives "krizinde acil yardım çağrılır ." (the word grain reads what followed the word last). Found on 27
+  November, not corrected here: letting the telling grain speak first made 18 of the lessons' 481 lines longer or
+  wrong.
+- Three rules were added in the package after the kill experiment, from the lessons' examination lines and not
+  from the sets (they are named below). The sets' rows did not change; the rules were not tested blind.
+
+**The thesis.** To speak at length is to walk in what was told. The mind keeps the sentences it was told as they
+were told, and ties in the substance from every word to the sentences that hold it. A request names a thing; the
+mind gathers told sentences about it and says them. How much it says is not given by a rule. A request is read in
+several ways:
+
+- the first sentence of the text that begins with the thing; the first sentence that names it;
+- its whole text; every sentence that names it;
+- of its text, or of the sentences that name it, those that hold what answers to this form of request held
+  before (for each form the substance counts, word by word, the sentences of answers that held it and the
+  sentences beside them that did; a word marks an answer where the rule on those two counts is at the line).
+
+A form of request is the request with the word that names the thing left open. Every way of every form keeps
+its record in the substance: before a watched dialogue is written, each way's sentences are compared with the
+answer's (right if what it would have said was the answer; and how much of the answer it covered). The way that
+was right and covered most speaks. A form says nothing until it has been shown of two things. So "X nedir ?",
+shown twice with one sentence, is answered with one sentence; "X i anlat", shown twice with a whole text, with
+the whole text; and nothing is hard-wired about either request.
+
+**The yardstick** (`speak_make.py`, frozen before the mechanism; sha256 `3ba5745d…03b1`): the 301 sentences told
+in the owner's 24 lessons; four texts written for it (a clock, a guitar, a bicycle, a bridge: 13 to 16 sentences
+each, no paragraph breaks); seven forms of request shown with their answers for the clock and the guitar; the
+same forms asked of the bicycle and the bridge, which were never shown; "X hakkında ne biliyorsun ?" shown for
+four subjects of the lessons and asked of nine others; and the owner's question, in no shown form. A key is the
+sentences that must be said, those of the same thing that may be (counted apart, "beside"), and every other
+told sentence is wrong. The second set (`speak2_make.py`, sha256 `73d450f3…179f`), frozen after the first
+candidate failed and before the second was run: a tent and a torch, each named once in a sentence told before
+its text.
+
+**The kill experiment** (`speak_kill.py`, an exact store, nothing of the package; `results/kill.jsonl`).
+Killed if: (1) wrong sentences are more than 5 % of those said; (2) "X nedir ?" is not answered with exactly the
+first sentence of the thing's text; (3) "X anlat" gives under 90 % of the text; (4) under 80 % of the sentences
+that name a lessons' subject are said.
+
+| candidate, set | said | wrong | one sentence | the whole text | lessons | kinds of sentence | verdict |
+|---|---|---|---|---|---|---|---|
+| A, first set | 138 | 1 | **fails** (the bridge) | 16 of 16, 13 of 13 | 74 of 83 | 23 of 39, 10 beside | **killed** |
+| A, second set (not seen before) | 47 | 2 | **fails** (both things) | 13 of 13, twice | – | 18 of 34, 1 beside | **killed** |
+| B, second set (not seen before) | 47 | **0** | yes, both | 13 of 13, twice | – | 18 of 34, 1 beside | survives |
+| B, first set (after its questions were seen) | 138 | **0** | yes, both | 16 of 16, 13 of 13 | 74 of 83 | 23 of 39, 10 beside | survives |
+
+Candidate A judged a way only from the second dialogue of its form and broke ties by the order the ways are
+written in; nothing in the life told "the first sentence that names it" from "the first sentence of its text".
+Candidate B, written down before it was run: a way that is not made from the dialogue is judged on every
+dialogue; of ways with equal records the one that reads the thing in its own text speaks first; and a request in
+no known form is read through the marks of the known forms, under one record of its own.
+
+**In the package** (`cevher/telling.py`, code 0e3e325; `speak_run.py`, `results/speak.jsonl`): the same rows as
+candidate B on both sets, on the bounded tables, with and without a ledger: 185 sentences said over the two
+sets, none wrong; a life of 359 told sentences, six texts and eighteen dialogues is lived in 1.0 s and an answer
+takes 0.002 s. What was told lives in the table of what was lived (a sentence costs a tie for each of its words,
+in pages of four); its ties are written and taken back like any others, so forgetting a text takes its
+sentences out of what can be told and the digests of gate G4 come back (a test). Kept and loaded with the mind.
+
+Added in the package after the kill experiment, each because the open mind's examination lines showed a wrong
+answer: a form counts as shown by different things only (one dialogue studied twice had counted as two); a way
+that takes a sentence for where it stands does not say one that holds only what stood beside the answers; where
+such a way and a way that goes by what sentences hold covered the answers alike, only what both would say is
+said; and an answer of the word grain that only quotes what followed a word gives way to what the thing's own
+text says. With them, of the 481 lines of the 36 lessons (440 dialogues, 41 examination lines) one answer
+changes, from silence to the key. The batteries of section 10 give the same rows, except the examination lines:
+19 of 41 (17).
+
+**The open mind, in the terminal** (it has lived the telling lesson: the clock and the guitar; the bicycle's text
+is read with `!oku cevher/dersler/metinler/bisiklet.txt`, 956 characters, never shown):
+
+    bisiklet nedir ?                          (before the text is read: silent)
+    bisiklet nedir ?                       →  bisiklet iki tekerlekli ve pedalla çalışan bir taşıttır .
+    bisiklet hangi parçalardan oluşur ?    →  1 sentence (the list of its parts; 3 of 4 missing)
+    bisiklet hangi malzemelerden yapılır ? →  3 sentences (frame, tyres, chain and gears)
+    bisiklet nasıl çalışır ?               →  5 sentences (the 4 of how it works, 1 beside)
+    bisikleti anlat                        →  the 16 sentences of the text, in order
+    bisikletin bakımı nasıl yapılır ?         silent
+    the owner's question, in no shown form    silent
+    uçak nedir ?                              silent (nothing was told of it)
+
+**What this is, and is not.** It is the first measured step from one sentence to a page: the amount said follows
+the request, by ways the mind was shown and not told, and in 185 sentences nothing beside the thing was said. It
+is not writing. A book would be this walk carried through everything the mind was told of a thing and of what
+that names, and three things stand between: kinds of sentence must be found better than half the time; a
+request the mind was never shown must be read by its parts; and long texts must be told from. Whether sentences
+of its own can come from the same substance (a told sentence with a place open, filled by what the mind knows
+of another thing) is not measured here.
+
