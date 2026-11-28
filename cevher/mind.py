@@ -310,9 +310,14 @@ class Mind:
         if not holes and len(vs) > 1:
             # the question as lived, answered differently at different times: with no place open there is no
             # filler the token could depend on, so the answer has changed, and what was answered last holds
-            # (believed as one confirmation since, or by its count where that is more)
+            # (believed as one confirmation since, or by its count where that is more; where the answer was
+            # judged wrong since, by its count against those judgements)
             last = max(vs, key=lambda x: (x[2], x[1]))
-            return last[0], max(0.75, rule(last[1], self.S.tot(key)))
+            total = self.S.tot(key)
+            against = total - sum(c for _, c, _ in vs)
+            if against > 0:
+                return last[0], rule(last[1], last[1] + against)
+            return last[0], max(0.75, rule(last[1], total))
         single = [(h, qc[i]) for h, (i, j) in enumerate(holes) if j - i == 1]
         if single and len(vs) > 1:
             lived = {v for v, _, _ in vs}
@@ -520,13 +525,30 @@ class Mind:
             memo[qc] = (best[3], best[2], best[4], best[5])
         return memo[qc]
 
+    def asks(self, q: List[str]) -> bool:
+        """Whether an utterance is, to this mind, a question: one it knows how to read (the utterance with places
+        open is a frame whose way is believed), whether or not it has anything to answer it with."""
+        qc, memo = self.codes(q), {}
+        for fcode, holes in self._frames(qc, memo):
+            if holes:
+                for sk, _, _ in self.S.vals(mix(R_KNOWN, fcode)):
+                    if rule(self.S.get(mix(R_WAY, fcode), sk), self.S.get(mix(R_WAYT, fcode), sk)) >= LINE:
+                        return True
+        return False
+
     def wrong(self, q: List[str]) -> None:
-        """What the mind said to a question was judged wrong: the way that spoke is believed less."""
+        """What the mind said to a question was judged wrong: the way that spoke is believed less; where it spoke
+        from memory (the question as lived), the memory is spoken against."""
         self.clock += 1
         qc = self.codes(q)
         said = self.chosen(self.claims(qc, {}))
-        if said is not None:
+        if said is None:
+            return
+        if said[7]:                                          # a frame's way: one more claim that was not right
             self._add(mix(R_WAYT, said[4]), said[5])
+        else:                                                # a memory: each of its tokens is spoken against
+            for p in range(len(self._items(said[5]))):
+                self._bump(fold((said[4], said[5], p), R_CONST))
 
     def tone(self, fcode: int, sk: int) -> int:
         vs = self.S.vals(fold((fcode, sk), R_TONE))
@@ -836,8 +858,8 @@ class Mind:
                     continue
                 self._add(mix(R_WAYT, c[4]), c[5])
                 self._add(mix(R_WAY, c[4]), c[5])
-            if said is not None and said[3] != ac:
-                self._add(mix(R_WAYT, said[4]), said[5])
+            if said is not None and said[3] != ac and said[7]:
+                self._add(mix(R_WAYT, said[4]), said[5])     # (a memory is not a rule: it is corrected below)
             # 3. a way whose structure gives the answer, but which did not say it, learns the tokens of its own
             # (each way learns from what it did not foresee, whoever else did)
             for fcode, sk, consts, holes, foresaw in fits:

@@ -460,59 +460,66 @@ def judge(said: str, answer: str):
     return right, right and any(w not in FINAL for w in got[len(want):])
 
 
+def etut(m, path: str, seed: int, workers: int = 2) -> dict:
+    """One lesson studied as m3_etut.py studies it: taught, then asked in conversation in a shuffled order (a right
+    answer confirmed; a wrong one judged so, forgotten exactly and the answer shown), three rounds at most, then
+    its examination lines asked."""
+    taught, asked, exam = lesson_lines(path)
+    t0 = time.time()
+    chars, seconds = 0, []
+    for line in taught:
+        chars += len(line) + 1
+        if "\t" in line:
+            q, a = line.split("\t", 1)
+            m.watch(q.strip(), a.strip())
+        else:
+            m.tell(line.strip())
+    rng = random.Random(seed)
+    scores = []
+    for r in range(3):
+        order = list(asked)
+        rng.shuffle(order)
+        right = 0
+        for q, a in order:
+            m.pause()
+            t1 = time.time()
+            said = m.converse(q, limit=40)
+            seconds.append(round(time.time() - t1, 4))
+            ok, went = judge(said, a)
+            if ok and not went:
+                right += 1
+                m.feedback(True)
+            else:
+                right += 1 if ok else 0
+                m.feedback(False)
+                m.forget(m.entries() - 1)                    # the attempt, taken back exactly
+                m.watch(q, a)                                # and the right answer shown
+        scores.append(right)
+        if right == len(asked):
+            break
+    passed = 0
+    if exam:
+        said = m.answers([q for q, _ in exam], limit=40, workers=workers)
+        passed = sum(judge(x, a)[0] for x, (_, a) in zip(said, exam))
+    return {"lesson": os.path.splitext(os.path.basename(path))[0], "lines": len(taught), "asked": len(asked),
+            "rounds": scores, "exam": [passed, len(exam)], "seconds": round(time.time() - t0, 1), "chars": chars,
+            "converse_seconds": seconds}
+
+
 def dialogues(args) -> None:
     tmp = tempfile.mkdtemp(prefix="yardstick-lessons-")
     paths = lesson_files(tmp)
     m = MINDS[args.who](variant="full", ledger=True, seed=0)
     t_all = time.time()
-    rows, seconds, first_right, asked_n, exam_right, exam_n, chars = [], [], 0, 0, 0, 0, 0
+    rows, seconds = [], []
     for i, path in enumerate(paths):
-        taught, asked, exam = lesson_lines(path)
-        t0 = time.time()
-        for line in taught:
-            chars += len(line) + 1
-            if "\t" in line:
-                q, a = line.split("\t", 1)
-                m.watch(q.strip(), a.strip())
-            else:
-                m.tell(line.strip())
-        rng = random.Random(i)                               # m3_etut.py: seed + the lesson's number
-        scores = []
-        for r in range(3):
-            order = list(asked)
-            rng.shuffle(order)
-            right = 0
-            for q, a in order:
-                m.pause()
-                t1 = time.time()
-                said = m.converse(q, limit=40)
-                seconds.append(round(time.time() - t1, 4))
-                ok, went = judge(said, a)
-                if ok and not went:
-                    right += 1
-                    m.feedback(True)
-                else:
-                    right += 1 if ok else 0
-                    m.feedback(False)
-                    m.forget(m.entries() - 1)                # the attempt, taken back exactly
-                    m.watch(q, a)                            # and the right answer shown
-            scores.append(right)
-            if right == len(asked):
-                break
-        passed = 0
-        if exam:
-            said = m.answers([q for q, _ in exam], limit=40, workers=args.workers)
-            passed = sum(judge(x, a)[0] for x, (_, a) in zip(said, exam))
-        first_right += scores[0] if scores else 0
-        asked_n += len(asked)
-        exam_right += passed
-        exam_n += len(exam)
-        rows.append({"lesson": os.path.splitext(os.path.basename(path))[0], "lines": len(taught),
-                     "asked": len(asked), "rounds": scores, "exam": [passed, len(exam)],
-                     "seconds": round(time.time() - t0, 1)})
+        row = etut(m, path, i, args.workers)                 # m3_etut.py: seed + the lesson's number
+        seconds += row.pop("converse_seconds")
+        rows.append(row)
         print("  %s: rounds %s of %d, examination %d/%d, %.0f s" % (
-            rows[-1]["lesson"], scores, len(asked), passed, len(exam), rows[-1]["seconds"]), flush=True)
+            row["lesson"], row["rounds"], row["asked"], row["exam"][0], row["exam"][1], row["seconds"]), flush=True)
     study_s = time.time() - t_all
+    asked_n = sum(r["asked"] for r in rows)
     review, kept, lost = {}, 0, []
     for path in paths:                                       # m3_etut.review: every dialogue asked again
         _, asked, _ = lesson_lines(path)
@@ -532,10 +539,12 @@ def dialogues(args) -> None:
         m.flush()
         saved = sorted(m.save(args.save)["files"]) if args.who == "old" else m.save(args.save)
     seconds.sort()
-    put(args, {"battery": "dialogues", "lessons_n": len(paths), "asked": asked_n, "first_round_right": first_right,
+    put(args, {"battery": "dialogues", "lessons_n": len(paths), "asked": asked_n,
+               "first_round_right": sum(r["rounds"][0] for r in rows if r["rounds"]),
                "after_rounds_right": sum(r["rounds"][-1] for r in rows if r["rounds"]),
-               "exam": [exam_right, exam_n], "kept_after_all": [kept, asked_n], "study_s": round(study_s, 1),
-               "life_chars": chars, "converse_n": len(seconds),
+               "exam": [sum(r["exam"][0] for r in rows), sum(r["exam"][1] for r in rows)],
+               "kept_after_all": [kept, asked_n], "study_s": round(study_s, 1),
+               "life_chars": sum(r["chars"] for r in rows), "converse_n": len(seconds),
                "converse_s": {"mean": round(sum(seconds) / max(1, len(seconds)), 4),
                               "median": seconds[len(seconds) // 2] if seconds else None,
                               "p95": seconds[int(len(seconds) * 0.95)] if seconds else None,

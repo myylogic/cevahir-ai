@@ -39,12 +39,17 @@ masanın rengi kahverengi .
 masanın rengi kahverengi .
 masanın rengi beyaz .
 masanın rengi ne ?	beyaz
-sınıfın mevcudu 24 .
-sınıfın mevcudu 26 .
-sınıfın mevcudu kaç ?	26
-okulun müdürü kemal .
-okulun müdürü zeynep .
-okulun müdürü kim ?	zeynep
-ayşe nin yaşadığı şehir trabzon .
-ayşe nin yaşadığı şehir rize .
-ayşe nin yaşadığı şehir neresi ?	rize
+perdenin rengi mor .
+perdenin rengi gri .
+perdenin rengi ne ?	gri
+takımın oyuncu sayısı 11 .
+takımın oyuncu sayısı 11 .
+takımın oyuncu sayısı 12 .
+takımın oyuncu sayısı kaç ?	12
+mahallenin muhtarı hasan .
+mahallenin muhtarı hatice .
+mahallenin muhtarı kim ?	hatice
+dedesinin yaşadığı köy çamlıca .
+dedesinin yaşadığı köy çamlıca .
+dedesinin yaşadığı köy yeşilova .
+dedesinin yaşadığı köy neresi ?	yeşilova

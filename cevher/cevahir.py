@@ -44,7 +44,7 @@ class Cevahir:
     given)."""
 
     def __init__(self, budget_mb: int = 512, ledger=False, depth: int = 5):
-        rest = max(16, budget_mb - OVERHEAD_MB) << 20
+        rest = max(1, budget_mb - OVERHEAD_MB) << 20
         self.budget_mb = budget_mb
         self.store = Slots(max_bytes=rest * 3 // 4)
         self.mind = Mind(self.store)
@@ -226,20 +226,22 @@ class Cevahir:
 
     def flush(self) -> None:
         """The last turn, lived as it was: nobody judged it. What Cevahir answered is lived as something asked and
-        something said, and as no evidence that the answer was right; what it could not answer is something it
-        was told."""
+        something said, and as no evidence that the answer was right. What it could not answer is something it
+        was told, unless it reads it as a question (one it knows how to read and has nothing to answer with):
+        that is lived as asked."""
         if self.pending is None:
             return
         said, answer = self.pending
         self.pending = None
-        if not answer:
-            self.tell(said)
+        q = body(tokens(said))[0]
+        if not answer and not self.mind.asks(q):
+            self.tell(said)                                  # nothing in it is a question to this mind: it was told
             return
         e = self._begin()
         stream = said + "\t" + answer + "\n"
         self._letters(stream, e)
-        self.mind.heard(body(tokens(said))[0], body(tokens(answer))[0])
-        self._end(e, "converse", said + " | " + answer, stream)
+        self.mind.heard(q, body(tokens(answer))[0])
+        self._end(e, "converse", said + " | " + (answer or "(sessiz)"), stream)
 
     def feedback(self, good: bool) -> None:
         """How Cevahir's last answer was received. A right answer is lived as a dialogue (evidence for the way

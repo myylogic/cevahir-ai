@@ -125,8 +125,10 @@ class Slots:
     SPILL = 16                                               # the overflow holds one tie for every 16 slots
 
     def __init__(self, max_bytes: int = 256 << 20, buckets: int = 1 << 10):
+        # a bucket costs its slots, its share of the filter (a byte a slot) and its share of the overflow
+        per_bucket = self.WAYS * (self.SLOT + 1) + 120 * self.WAYS // self.SPILL
         self.max_buckets = 1
-        while self.max_buckets * 2 * self.WAYS * self.SLOT <= max_bytes:
+        while self.max_buckets * 2 * per_bucket <= max_bytes:
             self.max_buckets *= 2
         self.nb = min(buckets, self.max_buckets)
         self._alloc(self.nb)
