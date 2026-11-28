@@ -127,19 +127,27 @@ class Slots:
     The table doubles while more than a third of it is used, up to ``max_bytes`` (and to what ``allow`` permits).
     A tie that finds its bucket full waits beside the table (a small overflow, at most one tie for every ``SPILL``
     slots) until the table doubles. Only when the table can no longer grow and the overflow is full does a key
-    give way: the least evident key of the bucket, the oldest among equals, whole. **What is new always finds a
-    place** (a mind that kept only what is counted most could learn nothing new once it was full); what is counted
-    much is safe as long as its bucket holds anything counted less. ``let_go`` counts the ties that gave way;
-    ``add`` returns them, so that a ledger can put them back. While nothing has given way the table is exactly the
-    multiset of what was written, and its digest equals the exact store's. Collisions cost ties forgotten, never
-    evidence invented.
+    give way: the least evident key of the bucket, the oldest among equals, whole. To what? Two tables answer
+    differently, and each answer was measured (docs/architecture/FINAL_FORM.md, sections 9 and 11):
+
+    - ``admit_new=False`` (what the mind was told and shown): only to a tie counted no less than it. What was
+      confirmed is not pushed out by what was met once; what was met once is a pool that turns over. A life twice
+      the size of its table kept 299 of 300 answers this way, and 37 the other way.
+    - ``admit_new=True`` (what long texts wrote): to whatever is new. A table that kept only what is counted most
+      could take in no new text once it was full.
+
+    ``let_go`` counts the ties that gave way and ``not_kept`` the new ties that found no place; ``add`` returns
+    what gave way, so that a ledger can put it back. While nothing has given way the table is exactly the multiset
+    of what was written, and its digest equals the exact store's. Collisions cost ties forgotten, never evidence
+    invented.
     """
     WAYS = 8
     SLOT = 20                                                # bytes a slot
     LOAD = 3                                                 # the table doubles when a third of it is used
     SPILL = 32                                               # the overflow holds one tie for every 32 slots
 
-    def __init__(self, max_bytes: int = 256 << 20, buckets: int = 1 << 10):
+    def __init__(self, max_bytes: int = 256 << 20, buckets: int = 1 << 10, admit_new: bool = False):
+        self.admit_new = admit_new
         # a bucket costs its slots, its share of the filter (a byte a slot) and its share of the overflow
         per_bucket = self.WAYS * (self.SLOT + 1) + 120 * self.WAYS // self.SPILL
         self.max_buckets = 1
@@ -259,8 +267,8 @@ class Slots:
             self.spilled += 1
             return None
         # no room anywhere: the least evident of the other keys of the bucket gives way whole (its total and its
-        # values, those that wait beside the table too), the oldest among equals. What is new is written whatever
-        # it is counted: what is counted much is safe as long as the bucket holds anything counted less
+        # values, those that wait beside the table too), the oldest among equals: to any new tie where what is new
+        # always finds a place, and elsewhere only to a tie counted no less than it
         vals_, cnts = self.val[base:base + self.WAYS], self.cnt[base:base + self.WAYS]
         totals = [] if room_only else [
             (int(cnts[i]), int(self.tim[base + i]), int(keys[i])) for i in range(self.WAYS)
@@ -268,7 +276,7 @@ class Slots:
         if not totals and not room_only:                     # values whose total waits elsewhere: the least of them
             totals = [(int(cnts[i]), int(self.tim[base + i]), int(keys[i])) for i in range(self.WAYS)
                       if int(keys[i]) != key]
-        if not totals:
+        if not totals or (min(totals)[0] > c and not self.admit_new):
             self.not_kept += 1
             return None
         victim = min(totals)[2]
@@ -571,10 +579,11 @@ class Slots:
                 "nb": np.array([self.nb, self.max_buckets, self.let_go, self.not_kept], dtype=np.int64)}
 
     @classmethod
-    def from_state(cls, st: dict, allowed: int = 0) -> "Slots":
+    def from_state(cls, st: dict, allowed: int = 0, admit_new: bool = False) -> "Slots":
         """The table put back as it stood (nothing is placed again, so nothing can give way in loading)."""
         nb, max_buckets, let_go, not_kept = (int(x) for x in st["nb"])
         self = cls.__new__(cls)
+        self.admit_new = admit_new
         self.max_buckets, self.nb = max_buckets, nb
         self.now_buckets = max_buckets
         if allowed:
@@ -595,7 +604,8 @@ class Two:
     the mind was told, shown and asked), and what long texts wrote many ties at once (``read``). The evidence of a
     tie is the sum of what the two hold for it, so the mind reads one substance; but each table is bounded on its
     own, so that reading, however much of it, cannot push out what the mind was taught (in one table it did:
-    docs/architecture/FINAL_FORM.md). A tie written one at a time goes to ``lived``, a batch to ``read``."""
+    docs/architecture/FINAL_FORM.md). A tie written one at a time goes to ``lived``, a batch to ``read``. In
+    ``lived`` what was confirmed stays; in ``read`` what is new always finds a place (``Slots``)."""
 
     def __init__(self, lived: "Slots", read: "Slots"):
         self.lived, self.read = lived, read

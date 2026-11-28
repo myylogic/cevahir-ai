@@ -91,7 +91,7 @@ class Cevahir:
     def __init__(self, budget_mb: int = 512, ledger=False, depth: int = 5, per_character: int = PER_CHARACTER):
         rest = max(1, budget_mb - OVERHEAD_MB) << 20
         self.budget_mb, self.rest, self.per_character = budget_mb, rest, per_character
-        self.store = Two(Slots(max_bytes=rest // 8), Slots(max_bytes=rest * 5 // 8))
+        self.store = Two(Slots(max_bytes=rest // 8), Slots(max_bytes=rest * 5 // 8, admit_new=True))
         self.mind = Mind(self.store)
         self.mind.spell.most = max(100000, budget_mb * 2000) # the words it can spell are bounded with the budget
         self.letters = Letters(Counts(max_bytes=rest // 4), depth=depth)
@@ -439,7 +439,7 @@ class Cevahir:
                                   ("r_", self.store.read.max_buckets, allowed * 3 // 4)):
             st = {k[2:]: v for k, v in a.items() if k.startswith(prefix)}
             st["nb"] = np.array([st["nb"][0], max(int(st["nb"][0]), most), st["nb"][2], st["nb"][3]])
-            tables.append(Slots.from_state(st, law))
+            tables.append(Slots.from_state(st, law, admit_new=prefix == "r_"))
         self.store = Two(*tables)
         self.mind.S = self.store
         st = {k[2:]: v for k, v in a.items() if k.startswith("l_")}

@@ -250,28 +250,43 @@ def test_a_long_file_is_given_a_piece_at_a_time():
     assert "".join(pieces(io.StringIO("x" * 12000), most=5000)) == "x" * 12000      # no line's end: cut where it is
 
 
-def test_a_full_mind_goes_on_learning():
-    """A table that kept only what is counted most could learn nothing new once it was full. What is new always
-    finds a place; what gives way is the least evident of what the bucket held before."""
-    c = Cevahir(budget_mb=OVERHEAD_MB + 1)                                # 1 MB for the three tables
+def test_what_gives_way_in_a_full_table():
+    """Two answers, each measured (FINAL_FORM.md). Where the mind keeps what it was told and shown, what was
+    confirmed is not pushed out by what was met once. Where it keeps what texts wrote, what is new always finds a
+    place: a table that kept only what is counted most could take in nothing new once it was full."""
+    def full(admit_new):
+        T = Slots(max_bytes=300, buckets=1, admit_new=admit_new)             # one bucket, and it cannot grow
+        assert T.max_buckets == 1
+        for key in (11, 12, 13, 14):                         # four keys, each with its total: the bucket is full
+            for _ in range(2):
+                T.add(key, 5, 1, 1)
+                T.bump(key, 1, 1)
+        for extra in range(900, 1100):                       # and no room is left beside the table
+            if not T._room_beside():
+                break
+            T.add(extra, 5, 3, 1)
+        assert not T._room_beside() and T.let_go == 0
+        return T
+    T = full(False)
+    T.add(21, 5, 1, 2)
+    assert T.get(21, 5) == 0 and all(T.get(key, 5) == 2 for key in (11, 12, 13, 14))     # confirmed: it stays
+    T = full(True)
+    gone = T.add(21, 5, 1, 2)
+    assert T.get(21, 5) == 1 and sum(T.get(key, 5) == 2 for key in (11, 12, 13, 14)) == 3
+    assert sorted(g[1] for g in gone) == [0, 5] and len({g[0] for g in gone}) == 1         # a key gives way whole
+
+
+def test_the_letters_go_on_learning_in_a_full_table():
+    c = Cevahir(budget_mb=OVERHEAD_MB + 1)
     rng = random.Random(11)
     words = ["".join(rng.choice("abcçdefgğhıijklmnoöprsştuüvyz") for _ in range(rng.randint(2, 8))) for _ in range(300)]
-    for _ in range(700):                                     # told a sentence at a time, until that table is full
-        c.tell(" ".join(rng.choice(words) for _ in range(10)) + " .")
-    lived = c.size()["lived"]
-    assert lived["let_go"] > 0 and lived["slots"] == 4096    # it cannot grow, and ties have given way
-    c.watch("gizli söz nedir ?", "mavi fil .")
-    assert c.reply("gizli söz nedir ?") == "mavi fil ."
-    for q, a in (("zap", "Z"), ("zap twice", "Z Z"), ("dax", "D"), ("dax twice", "D D"), ("wif", "W")):
-        c.watch(q, a + " .")
-    assert c.reply("wif twice") == "W W ."
-    for _ in range(3):                                       # and the letters, full of what one text wrote,
+    for _ in range(3):
         c.read("".join(" ".join(rng.choice(words) for _ in range(10)) + ". " for _ in range(6000)))
     assert c.size()["letters"]["let_go"] > 0
     new = "yepyeni bir dil: qwx zvk qwx zvk qwx zvk. " * 40
     first = c.letters.live(new[:len(new) // 2])
     second = c.letters.live(new[len(new) // 2:])
-    assert second < first / 2                                # go on learning a text they had not met
+    assert second < first / 2                                # a text they had not met is foreseen once it is met
 
 
 def test_reading_does_not_push_out_what_was_taught():
