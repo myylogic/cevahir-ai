@@ -189,6 +189,16 @@ class Telling:
                     out += self._inherit(frame, k, depth + 1, seen | {self.stem(thing), ks})
         return out
 
+    def _own(self, thing: str, begun: List[int]) -> list:
+        """Sentences of the mind's own: each told sentence with the thing in the place of its first word, once."""
+        out, had = [], set()
+        for g in begun:
+            words = self.words_of((g, thing))
+            if words not in had:
+                had.add(words)
+                out.append((g, thing))
+        return out
+
     def words_of(self, item) -> tuple:
         """The words of what would be said: a told sentence, or one with the thing in the place of its first word."""
         if isinstance(item, tuple):
@@ -248,7 +258,7 @@ class Telling:
         return [[n for n in text[:1] if self._admits(frame, n)], [n for n in named[:1] if self._admits(frame, n)],
                 [n for n in text if self._admits(frame, n)], [n for n in named if self._admits(frame, n)],
                 [n for n in text if self._marks(frame, n)], [n for n in named if self._marks(frame, n)],
-                list(dict.fromkeys((g, filler) for g in self._inherit(frame, filler)))]
+                self._own(filler, self._inherit(frame, filler))]
 
     def forms_of(self, q: List[str]):
         """The forms a request may have: the request with one word that names something left open."""

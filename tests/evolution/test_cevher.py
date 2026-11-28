@@ -472,3 +472,27 @@ def test_what_was_told_is_kept_with_the_mind(tmp_path):
     again = Cevahir.load(str(tmp_path))
     assert again.reply("çadırı anlat") == c.reply("çadırı anlat") == " ".join(THINGS["çadır"])
     assert again.telling.size() == c.telling.size()
+
+
+def test_a_sentence_never_told_by_what_a_thing_is_said_to_be():
+    """A sparrow is a bird; birds lay eggs: the sparrow lays eggs. Which word of a sentence about a thing says what
+    it is, is learned from the dialogues watched; a thing nothing of the sort was told of gets no sentence."""
+    c = Cevahir(ledger=True)
+    for s in ("kuş bir canlıdır .", "kuşlar yumurtlar .", "kurt bir canlıdır .", "kurtlar ulur .", "balık bir canlıdır .",
+              "balıklar yüzer .", "ağaç bir canlıdır .", "ağaçlar gölge verir .", "metal sert bir maddedir .",
+              "metaller ısıyı iletir .", "mineral sert bir maddedir .", "mineraller toprakta bulunur .",
+              "serçe bir kuştur .", "çakal bir kurttur .", "sazan bir balıktır .", "çınar bir ağaçtır .",
+              "bakır bir metaldir .", "kuvars bir mineraldir .", "martı bir kuştur .", "deniz tuzludur ."):
+        c.tell(s)
+    c.watch("serçe ne yapar ?", "serçe bir canlıdır . serçe yumurtlar .")
+    assert c.reply("sazan ne yapar ?") == ""                 # shown of one thing: nothing yet
+    c.watch("bakır ne yapar ?", "bakır sert bir maddedir . bakır ısıyı iletir .")
+    assert c.reply("sazan ne yapar ?") == "sazan bir canlıdır . sazan yüzer ."       # never told; a kind never asked
+    assert c.reply("kuvars ne yapar ?") == "kuvars sert bir maddedir . kuvars toprakta bulunur ."
+    assert c.reply("martı ne yapar ?") == "martı bir canlıdır . martı yumurtlar ."
+    assert c.reply("deniz ne yapar ?") == "" and c.reply("bulut ne yapar ?") == ""
+    before, moments = c.digest(), c.moments()
+    c.tell("levrek bir balıktır .")
+    assert c.reply("levrek ne yapar ?") == "levrek bir canlıdır . levrek yüzer ."    # from one sentence, at once
+    c.forget(len(c.entries) - 1)
+    assert c.reply("levrek ne yapar ?") == "" and c.digest() == before and c.moments() == moments
