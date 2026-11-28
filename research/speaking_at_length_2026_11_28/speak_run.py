@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """The frozen sets of speaking at length, lived and answered by the package (cevher.Cevahir).
 
-    python speak_run.py [--set 1|2|3] [--show] [--ledger] [--note TEXT]
+    python speak_run.py [--set 1|2|3|4] [--show] [--ledger] [--note TEXT]
 
 The life: the lessons told a sentence at a time, each text read as one text, the dialogues watched (a request and
 its answer, the answer's sentences one after another). Then every request asked is answered by ``reply`` and the
@@ -32,7 +32,8 @@ from cevher.units import body, tokens  # noqa: E402
 
 SHA = {1: ("speak.json", "3ba5745dd3db795f6bdc9528957b6b2e02d3c6d7d2747fbd7fd922e85f8c03b1"),
        2: ("speak2.json", "73d450f32294685974a4927891ba95d61f9b2b7b32536f05812b9a338069179f"),
-       3: ("speak3.json", "85e7ca8f15ae78a6fcce319c4a6aa48e5f9b4a7a1fc52c41631d091c517db691")}
+       3: ("speak3.json", "85e7ca8f15ae78a6fcce319c4a6aa48e5f9b4a7a1fc52c41631d091c517db691"),
+       4: ("speak4.json", "ad60ecdbec1229ff0337c2dac18b9204e8bf3cbbbf28635da7ed238fc8365807")}
 CLOSE = re.compile(r"(?<=[.!?…])\s+")
 
 
@@ -47,7 +48,7 @@ def live(c, Y):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--set", type=int, default=1, choices=[1, 2, 3])
+    ap.add_argument("--set", type=int, default=1, choices=[1, 2, 3, 4])
     ap.add_argument("--show", action="store_true")
     ap.add_argument("--ledger", action="store_true")
     ap.add_argument("--note", default="")
