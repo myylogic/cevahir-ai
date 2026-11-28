@@ -528,6 +528,7 @@ def test_a_request_in_no_known_form_is_read_through_its_own_words():
     from cevher.units import body, tokens
     assert c.telling.answer(body(tokens(both))[0])[0] == "through its own words"
     assert c.reply("kayık nerede durur ve kimindir") == ""
+    assert c.reply("uçak nelerden oluşur ve neyden yapılır") == ""          # nothing was told of it
     for i in range(len(c.entries) - 1, start - 1, -1):
         c.forget(i)
     assert c.reply(both) == "" and c.digest() == before and c.moments() == moments

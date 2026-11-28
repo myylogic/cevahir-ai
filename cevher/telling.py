@@ -31,8 +31,8 @@ R_SAME, R_HOLDS, R_FORM, R_WAY, R_COVER, R_MARK, R_FREE, R_SEEN, PLACE = (
     code_of("\0telling " + name) for name in ("the sentence", "holds", "form of request", "way", "covered", "mark",
                                               "through its own words", "shown of", "place"))
 R_LINK, BEGINS, ENDS = (code_of("\0telling " + name) for name in ("the place of what it is", "begins", "ends"))
-R_ECHO, R_NEW, R_HEARD = (code_of("\0telling " + name) for name in (
-    "a word of the request it holds", "a word never met in a request", "a request heard"))
+R_ECHO, R_NEW, R_HEARD, R_STOOD = (code_of("\0telling " + name) for name in (
+    "a word of the request it holds", "a word never met in a request", "a request heard", "where the thing stood"))
 WAYS = ("first of its text", "first", "its text", "named", "marked in its text", "marked among named",
         "what is told of what it is")
 FIXED = 4                                                    # the first four are not made from what was answered
@@ -305,32 +305,49 @@ class Telling:
                 return rule(a, t) >= LINE
         return len(self.named(u)) < rare and self._believed(R_NEW)
 
-    def echo(self, q: List[str]):
-        """A request in no known form, read through its own words. The thing is the word of the request that has
-        a text of its own and names the fewest told sentences (the rarest word a text begins with); where no word
-        has a text, the word whose naming sentences hold most of what the other words call for. A sentence is
-        called for when it holds a form of a word of the request that is trusted. Gives the thing, the sentences,
-        and for every word of the request (with the word before it) the sentences that hold it."""
+    def _pool(self, w: str) -> List[int]:
+        named = self.named(w)
+        return self.its_text(named) or named
+
+    def _about(self, q: List[str], want: set):
+        """The word of a watched request whose own sentences hold most of the answer (the fewest sentences, where
+        two hold as much)."""
+        best = None
+        for w in dict.fromkeys(_words(q)):
+            pool = self._pool(w)
+            rank = (len(want.intersection(pool)), -len(pool))
+            if rank[0] and (best is None or rank > best[0]):
+                best = (rank, w)
+        return best and best[1]
+
+    def _stands(self, q: List[str]):
+        """The word that stands where the thing has stood in the requests watched; none where no place has held."""
+        best = None
+        for i, w in enumerate(_words(q)):
+            a, t = self._record(mix(R_STOOD, i + 1))
+            if t and rule(a, t) >= LINE and (best is None or rule(a, t) > best[0]):
+                best = (rule(a, t), w)
+        return best and best[1]
+
+    def echo(self, q: List[str], thing: str = None):
+        """A request in no known form, read through its own words. The thing is the word that stands where the
+        thing stood in the requests watched; if that word names nothing told, nothing is said. Of the thing's own
+        text (of the sentences that name it, where it has no text) a sentence is called for when it holds a form
+        of a word of the request that is trusted. Gives the thing, the sentences, and for every word of the
+        request (with the word before it) the sentences that hold it."""
+        thing = thing or self._stands(q)
+        named = self.named(thing) if thing else []
+        if not named:
+            return None, [], {}
         seq = _words(q)
-        pairs = list(dict.fromkeys(zip(seq, [""] + seq[:-1])))
-        words = list(dict.fromkeys(seq))
-        cands = [(w, self.named(w)) for w in words]
-        cands = [(w, named, self.its_text(named)) for w, named in cands if named]
-        if any(text for _, _, text in cands):
-            cands = [min((c for c in cands if c[2]), key=lambda c: len(c[1]))]
-        best = (-1, None, [], {})
-        for w, named, text in cands:
-            pool, shares = text or named, {}
-            for u, before in pairs:
-                if not self._alike(u, w):
-                    got = [n for n in pool if any(self._alike(u, x) for x in self.said_in(n))]
-                    if got:
-                        shares[(u, before)] = got
-            held = {n for cue, got in shares.items() if self._trusts(*cue, len(named)) for n in got}
-            found = [n for n in pool if n in held]
-            if len(found) > best[0]:
-                best = (len(found), w, found, shares)
-        return best[1:]
+        pool, shares = self._pool(thing), {}
+        for u, before in dict.fromkeys(zip(seq, [""] + seq[:-1])):
+            if not self._alike(u, thing):
+                got = [n for n in pool if any(self._alike(u, x) for x in self.said_in(n))]
+                if got:
+                    shares[(u, before)] = got
+        held = {n for cue, got in shares.items() if self._trusts(*cue, len(named)) for n in got}
+        return thing, [n for n in pool if n in held], shares
 
     def watch(self, q: List[str], answer: str) -> None:
         """A dialogue watched. If its answer is made of told sentences, or of what is told of what the thing is
@@ -359,13 +376,16 @@ class Telling:
         if not want and not any(self.words_of((g, filler)) in answered
                                 for filler, found in steps.items() for _, _, _, begun in found for g in begun):
             return
-        thing, out, shares = self.echo(q)
+        out = self.echo(q)[1]                                # as the request would have been read before this dialogue
+        thing = self._about(q, want)
         heard = mix(R_HEARD, fold(tuple(m.code(t) for t in q), R_FORM))
-        if want and thing is not None and not S.tot(heard):  # the same request watched again shows nothing new
+        if thing is not None and not S.tot(heard):           # the same request watched again shows nothing new
             m._bump(heard)
             if out:
                 self._judge(R_FREE, rule(len(want & set(out)), len(out)) >= LINE)
-            first = set()
+            for i, w in enumerate(_words(q)):                # where did the thing stand?
+                self._judge(mix(R_STOOD, i + 1), w == thing)
+            shares, first = self.echo(q, thing)[2], set()
             for cue, got in shares.items():                  # was a sentence that holds this word of the request asked for?
                 after, alone = self._cue(*cue)
                 if not S.tot(alone) and alone not in first and len(self.named(cue[0])) < len(self.named(thing)):
