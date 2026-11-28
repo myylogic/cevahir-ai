@@ -289,21 +289,30 @@ class Telling:
             if w[:1].isalnum() and self.named(w):
                 yield fold(tuple(codes[:k]) + (PLACE,) + tuple(codes[k + 1:]), R_FORM), w
 
-    def _trusts(self, u: str) -> bool:
-        """Is a sentence that holds this word of the request asked for? By the word's own record; a word never
-        met in a request is trusted as such words have deserved."""
-        a, t = self._record(mix(R_ECHO, code_of(self.stem(u))))
-        if not t:
-            a, t = self._record(R_NEW)
-        return bool(t) and rule(a, t) >= LINE
+    def _cue(self, u: str, before: str) -> Tuple[int, int]:
+        """The records of a word of a request: with the word that stood before it, and alone."""
+        alone = mix(R_ECHO, code_of(self.stem(u)))
+        return mix(alone, code_of(before) if before else BEGINS), alone
+
+    def _trusts(self, u: str, before: str) -> bool:
+        """Is a sentence that holds this word of the request asked for? By the narrowest record there is: the
+        word after the word that stands before it here, else the word alone; a word never met in a request is
+        trusted as such words have deserved."""
+        for key in self._cue(u, before) + (R_NEW,):
+            a, t = self._record(key)
+            if t:
+                return rule(a, t) >= LINE
+        return False
 
     def echo(self, q: List[str]):
         """A request in no known form, read through its own words. The thing is the word of the request that has
         a text of its own and names the fewest told sentences (the rarest word a text begins with); where no word
         has a text, the word whose naming sentences hold most of what the other words call for. A sentence is
         called for when it holds a form of a word of the request that is trusted. Gives the thing, the sentences,
-        and for every word of the request the sentences that hold it."""
-        words = list(dict.fromkeys(_words(q)))
+        and for every word of the request (with the word before it) the sentences that hold it."""
+        seq = _words(q)
+        pairs = list(dict.fromkeys(zip(seq, [""] + seq[:-1])))
+        words = list(dict.fromkeys(seq))
         cands = [(w, self.named(w)) for w in words]
         cands = [(w, named, self.its_text(named)) for w, named in cands if named]
         if any(text for _, _, text in cands):
@@ -311,12 +320,12 @@ class Telling:
         best = (-1, None, [], {})
         for w, named, text in cands:
             pool, shares = text or named, {}
-            for u in words:
+            for u, before in pairs:
                 if not self._alike(u, w):
                     got = [n for n in pool if any(self._alike(u, x) for x in self.said_in(n))]
                     if got:
-                        shares[u] = got
-            held = {n for u, got in shares.items() if self._trusts(u) for n in got}
+                        shares[(u, before)] = got
+            held = {n for cue, got in shares.items() if self._trusts(*cue) for n in got}
             found = [n for n in pool if n in held]
             if len(found) > best[0]:
                 best = (len(found), w, found, shares)
@@ -355,12 +364,15 @@ class Telling:
             m._bump(heard)
             if out:
                 self._judge(R_FREE, rule(len(want & set(out)), len(out)) >= LINE)
-            for u, got in shares.items():                    # was a sentence that holds this word of the request asked for?
-                key = mix(R_ECHO, code_of(self.stem(u)))
-                if not S.tot(key):
+            first = set()
+            for cue, got in shares.items():                  # was a sentence that holds this word of the request asked for?
+                after, alone = self._cue(*cue)
+                if not S.tot(alone) and alone not in first:
+                    first.add(alone)
                     self._judge(R_NEW, rule(sum(n in want for n in got), len(got)) >= LINE)
                 for n in got:
-                    self._judge(key, n in want)
+                    self._judge(after, n in want)
+                    self._judge(alone, n in want)
         for frame, filler in forms:
             seen = mix(mix(R_SEEN, frame), code_of(self.stem(filler)))
             if S.tot(seen):                                  # the same thing asked again shows nothing new
