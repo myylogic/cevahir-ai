@@ -40,15 +40,18 @@ def exact(args):
     from cevher import Cevahir
     text = corpora.stream("tr-lessons")
     english = corpora.stream("en-pydoc")
-    for name, budget, first, then in (
-            ("a text, tables with room", 512, english[:200000], text),
-            ("a text, tables full (2 MB for both)", 98, english[:400000], text),
-            ("a longer text, tables full (2 MB for both)", 98, english[:400000], english[400000:500000])):
+    source = corpora.stream("code-pystdlib")[:150000]
+    for name, budget, first, then, lines in (
+            ("a text, tables with room", 512, english[:200000], text, False),
+            ("a text, tables full (2 MB for both)", 98, english[:400000], text, False),
+            ("a longer text, tables full (2 MB for both)", 98, english[:400000], english[400000:500000], False),
+            ("source code read by lines, tables with room", 512, english[:200000], source, True),
+            ("source code read by lines, tables full (2 MB for both)", 98, english[:400000], source, True)):
         c = Cevahir(budget_mb=budget, ledger=True)
         c.read(first)
         before = c.digest()
         size_before = c.size()
-        c.read(then)
+        c.read(then, code=lines)
         lived = c.digest()
         size_lived = c.size()
         t0 = time.time()
