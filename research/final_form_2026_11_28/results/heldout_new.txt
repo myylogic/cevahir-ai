@@ -1,0 +1,248 @@
+== held-out set 854506933efb9fa274bf9d5b40745b99d20b585d63c0057dfe452e1a0c5de45d, answered by new ==
+-- compose (698 items lived, 50 asked)
+   [right ] a primitive lived only alone       Q: del dolan yukarı çift | said: M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 . | key: M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1
+   [right ] a primitive lived only alone       Q: del yukarı katla | said: M2 K1 M2 K1 . | key: M2 K1 M2 K1
+   [right ] a primitive lived only alone       Q: del katla | said: K1 K1 . | key: K1 K1
+   [right ] a primitive lived only alone       Q: del dolan yukarı katla | said: M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 . | key: M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1
+   [right ] a primitive lived only alone       Q: del yukarı | said: M2 K1 . | key: M2 K1
+   [right ] a primitive lived only alone       Q: del yukarı çift | said: M2 K1 M2 K1 M2 K1 . | key: M2 K1 M2 K1 M2 K1
+   [right ] a primitive lived only alone       Q: del ileri çift | said: G0 K1 G0 K1 G0 K1 . | key: G0 K1 G0 K1 G0 K1
+   [right ] a primitive lived only alone       Q: del ileri katla | said: G0 K1 G0 K1 . | key: G0 K1 G0 K1
+   [right ] a primitive lived only alone       Q: del ileri | said: G0 K1 . | key: G0 K1
+   [right ] a primitive lived only alone       Q: del çift | said: K1 K1 K1 . | key: K1 K1 K1
+   [right ] a primitive lived only alone       Q: sar yukarı sonra del katla | said: M2 V7 K1 K1 . | key: M2 V7 K1 K1
+   [right ] a primitive lived only alone       Q: bük ileri katla sonra del çift | said: G0 T6 G0 T6 K1 K1 K1 . | key: G0 T6 G0 T6 K1 K1 K1
+   [right ] a primitive lived only alone       Q: del ileri katla önce bük yukarı | said: M2 T6 G0 K1 G0 K1 . | key: M2 T6 G0 K1 G0 K1
+   [right ] a primitive lived only alone       Q: sar katla sonra del dolan yukarı çift | said: V7 V7 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 . | key: V7 V7 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1
+   [right ] a primitive lived only alone       Q: tara ileri sonra del çift | said: G0 D9 K1 K1 K1 . | key: G0 D9 K1 K1 K1
+   [right ] a template never lived             Q: tara dolan ileri katla | said: G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 . | key: G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9
+   [right ] a template never lived             Q: sar dolan ileri | said: G0 V7 G0 V7 G0 V7 . | key: G0 V7 G0 V7 G0 V7
+   [right ] a template never lived             Q: bük dolan ileri çift | said: G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 . | key: G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6
+   [right ] a template never lived             Q: tara dolan ileri | said: G0 D9 G0 D9 G0 D9 . | key: G0 D9 G0 D9 G0 D9
+   [right ] a template never lived             Q: sar dolan ileri çift | said: G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 . | key: G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7
+   [right ] a template never lived             Q: sil dolan ileri çift | said: G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 . | key: G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7
+   [right ] a template never lived             Q: tara dolan ileri katla önce tara ileri | said: G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 . | key: G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9
+   [right ] a template never lived             Q: bük dolan ileri çift sonra bük dolan yukarı çift | said: G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 . | key: G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6
+   [right ] a template never lived             Q: tara dolan ileri katla önce bük dolan yukarı katla | said: M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 . | key: M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9
+   [right ] a template never lived             Q: sar dolan ileri çift sonra sil çift | said: G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 N7 N7 N7 . | key: G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 N7 N7 N7
+   [right ] a new combination                  Q: bük katla sonra bük yukarı | said: T6 T6 M2 T6 . | key: T6 T6 M2 T6
+   [right ] a new combination                  Q: sar yukarı sonra tara yukarı | said: M2 V7 M2 D9 . | key: M2 V7 M2 D9
+   [right ] a new combination                  Q: bük ileri sonra bük | said: G0 T6 T6 . | key: G0 T6 T6
+   [right ] a new combination                  Q: sil ileri önce sar ileri katla | said: G0 V7 G0 V7 G0 N7 . | key: G0 V7 G0 V7 G0 N7
+   [right ] a new combination                  Q: sar yukarı katla önce tara çift | said: D9 D9 D9 M2 V7 M2 V7 . | key: D9 D9 D9 M2 V7 M2 V7
+   [right ] a new combination                  Q: bük dolan yukarı çift sonra tara yukarı çift | said: M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 D9 M2 D9 M2 D9 . | key: M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 D9 M2 D9 M2 D9
+   [right ] a new combination                  Q: bük dolan yukarı katla önce sil dolan yukarı çift | said: M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 . | key: M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6
+   [right ] a new combination                  Q: bük dolan yukarı katla önce tara | said: D9 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 . | key: D9 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6
+   [right ] a new combination                  Q: sar dolan yukarı çift önce tara ileri katla | said: G0 D9 G0 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 . | key: G0 D9 G0 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7
+   [right ] a new combination                  Q: sil ileri sonra sar ileri katla | said: G0 N7 G0 V7 G0 V7 . | key: G0 N7 G0 V7 G0 V7
+   [right ] a new combination                  Q: sil çift önce sil çift | said: N7 N7 N7 N7 N7 N7 . | key: N7 N7 N7 N7 N7 N7
+   [right ] a new combination                  Q: tara yukarı sonra sar ileri çift | said: M2 D9 G0 V7 G0 V7 G0 V7 . | key: M2 D9 G0 V7 G0 V7 G0 V7
+   [right ] a new combination                  Q: bük dolan yukarı sonra sil dolan yukarı katla | said: M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 . | key: M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7
+   [right ] a new combination                  Q: sar ileri önce sar çift | said: V7 V7 V7 G0 V7 . | key: V7 V7 V7 G0 V7
+   [right ] a new combination                  Q: bük katla sonra sil ileri çift | said: T6 T6 G0 N7 G0 N7 G0 N7 . | key: T6 T6 G0 N7 G0 N7 G0 N7
+   [right ] the longest new combinations       Q: sar dolan yukarı çift önce tara dolan yukarı çift | said: M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 . | key: M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7
+   [right ] the longest new combinations       Q: sar dolan yukarı çift önce bük dolan yukarı çift | said: M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 . | key: M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7
+   [right ] the longest new combinations       Q: bük dolan yukarı çift önce tara dolan yukarı çift | said: M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 . | key: M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6
+   [right ] the longest new combinations       Q: tara dolan yukarı çift sonra sar dolan yukarı çift | said: M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 . | key: M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7
+   [right ] the longest new combinations       Q: bük dolan yukarı çift önce sar dolan yukarı çift | said: M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 . | key: M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6
+   [right ] the longest new combinations       Q: sil dolan yukarı çift sonra bük dolan yukarı çift | said: M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 . | key: M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6
+   [right ] the longest new combinations       Q: sil dolan yukarı çift önce tara dolan yukarı çift | said: M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 . | key: M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7
+   [right ] the longest new combinations       Q: sar dolan yukarı çift sonra sil dolan yukarı çift | said: M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 . | key: M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7
+   [right ] the longest new combinations       Q: bük dolan yukarı çift sonra sar dolan yukarı çift | said: M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 . | key: M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7
+   [right ] the longest new combinations       Q: bük dolan yukarı çift önce bük dolan yukarı çift | said: M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 . | key: M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6
+-- deduce (88 items lived, 27 asked)
+   [right ] recall                             Q: kalay ne yapar ? | said: kalay paslanır . | key: kalay paslanır
+   [right ] recall                             Q: nikel ne yapar ? | said: nikel paslanır . | key: nikel paslanır
+   [right ] deduction: a member never asked    Q: krom ne yapar ? | said: krom paslanır . | key: krom paslanır
+   [right ] deduction: a member never asked    Q: bakır ne yapar ? | said: bakır paslanır . | key: bakır paslanır
+   [right ] deduction: a member never asked    Q: çinko ne yapar ? | said: çinko paslanır . | key: çinko paslanır
+   [right ] recall                             Q: karınca ne yapar ? | said: karınca vızıldar . | key: karınca vızıldar
+   [right ] recall                             Q: sinek ne yapar ? | said: sinek vızıldar . | key: sinek vızıldar
+   [right ] deduction: a member never asked    Q: arı ne yapar ? | said: arı vızıldar . | key: arı vızıldar
+   [right ] deduction: a member never asked    Q: çekirge ne yapar ? | said: çekirge vızıldar . | key: çekirge vızıldar
+   [right ] deduction: a member never asked    Q: kelebek ne yapar ? | said: kelebek vızıldar . | key: kelebek vızıldar
+   [right ] recall                             Q: zambak ne yapar ? | said: zambak açar . | key: zambak açar
+   [right ] recall                             Q: lale ne yapar ? | said: lale açar . | key: lale açar
+   [right ] deduction: a member never asked    Q: menekşe ne yapar ? | said: menekşe açar . | key: menekşe açar
+   [right ] deduction: a member never asked    Q: papatya ne yapar ? | said: papatya açar . | key: papatya açar
+   [right ] deduction: a member never asked    Q: gül ne yapar ? | said: gül açar . | key: gül açar
+   [right ] recall                             Q: antares ne yapar ? | said: antares parlar . | key: antares parlar
+   [right ] recall                             Q: rigel ne yapar ? | said: rigel parlar . | key: rigel parlar
+   [right ] deduction: a member never asked    Q: sirius ne yapar ? | said: sirius parlar . | key: sirius parlar
+   [right ] deduction: a member never asked    Q: vega ne yapar ? | said: vega parlar . | key: vega parlar
+   [silent] deduction: no member of its class  Q: elma ne yapar ? | said: (sessiz) | key: elma olgunlaşır
+   [silent] deduction: no member of its class  Q: armut ne yapar ? | said: (sessiz) | key: armut olgunlaşır
+   [silent] deduction: no member of its class  Q: kiraz ne yapar ? | said: (sessiz) | key: kiraz olgunlaşır
+   [silent] deduction: no member of its class  Q: şeftali ne yapar ? | said: (sessiz) | key: şeftali olgunlaşır
+   [silent] deduction: no member of its class  Q: incir ne yapar ? | said: (sessiz) | key: incir olgunlaşır
+   [right ] the exception                      Q: kapella ne yapar ? | said: kapella vızıldar . | key: kapella vızıldar
+   [right ] control: nothing was told of it    Q: deniz ne yapar ? | said: (sessiz) | key: (silence)
+   [right ] control: nothing was told of it    Q: masa ne yapar ? | said: (sessiz) | key: (silence)
+-- change (90 items lived, 10 asked)
+   [right ] unchanged                          Q: ilaç nerede ? | said: ilaç masada . | key: ilaç masada
+   [right ] changed once                       Q: harita nerede ? | said: harita dolapta . | key: harita dolapta
+   [right ] changed after three                Q: bardak nerede ? | said: bardak masada . | key: bardak masada
+   [right ] changed twice after three          Q: gözlük nerede ? | said: gözlük dolapta . | key: gözlük dolapta
+   [right ] changed back                       Q: terlik nerede ? | said: terlik rafta . | key: terlik rafta
+   [right ] unchanged                          Q: bilet nerede ? | said: bilet rafta . | key: bilet rafta
+   [right ] changed once                       Q: makas nerede ? | said: makas masada . | key: makas masada
+   [right ] changed after three                Q: defter nerede ? | said: defter dolapta . | key: defter dolapta
+   [right ] changed twice after three          Q: cüzdan nerede ? | said: cüzdan çekmecede . | key: cüzdan çekmecede
+   [right ] changed back                       Q: mektup nerede ? | said: mektup sepette . | key: mektup sepette
+-- substitute (36 items lived, 19 asked)
+   [right ] a new pair of lived fillers        Q: hız ile sıcaklık çarp | said: hız * sıcaklık . | key: hız * sıcaklık
+   [right ] a new pair of lived fillers        Q: alan ile hız çarp | said: alan * hız . | key: alan * hız
+   [right ] a new pair of lived fillers        Q: yol ile süre çarp | said: yol * süre . | key: yol * süre
+   [right ] a new pair of lived fillers        Q: hız ile yol çarp | said: hız * yol . | key: hız * yol
+   [right ] a filler lived in another frame    Q: enerji ile basınç çarp | said: enerji * basınç . | key: enerji * basınç
+   [right ] a filler lived in another frame    Q: yol ile basınç çarp | said: yol * basınç . | key: yol * basınç
+   [right ] a filler lived in another frame    Q: basınç ile hız çarp | said: basınç * hız . | key: basınç * hız
+   [right ] a word never lived                 Q: derinlik ile sıcaklık çarp | said: derinlik * sıcaklık . | key: derinlik * sıcaklık
+   [right ] a word never lived                 Q: ağırlık ile hız çarp | said: ağırlık * hız . | key: ağırlık * hız
+   [right ] a word never lived                 Q: güç ile yol çarp | said: güç * yol . | key: güç * yol
+   [right ] a filler lived in another frame    Q: yol değerini göster | said: göster ( yol ) . | key: göster ( yol )
+   [right ] a filler lived in another frame    Q: alan değerini göster | said: göster ( alan ) . | key: göster ( alan )
+   [right ] a filler lived in another frame    Q: enerji değerini göster | said: göster ( enerji ) . | key: göster ( enerji )
+   [right ] a word never lived                 Q: derinlik değerini göster | said: göster ( derinlik ) . | key: göster ( derinlik )
+   [right ] a word never lived                 Q: ağırlık değerini göster | said: göster ( ağırlık ) . | key: göster ( ağırlık )
+   [right ] a word never lived                 Q: güç değerini göster | said: göster ( güç ) . | key: göster ( güç )
+   [right ] a word never lived                 Q: 4 kere dön | said: tekrar 4 : | key: tekrar 4 :
+   [right ] a word never lived                 Q: 20 kere dön | said: tekrar 20 : | key: tekrar 20 :
+   [right ] a word never lived                 Q: 15 kere dön | said: tekrar 15 : | key: tekrar 15 :
+-- sequence (28 items lived, 22 asked)
+   [right ] recall                             Q: perşembe den sonra ne gelir ? | said: cuma . | key: cuma
+   [right ] recall                             Q: cumartesi den sonra ne gelir ? | said: pazar . | key: pazar
+   [right ] recall                             Q: pazartesi den sonra ne gelir ? | said: salı . | key: salı
+   [right ] relation: what follows             Q: cuma den sonra ne gelir ? | said: cumartesi . | key: cumartesi
+   [right ] relation: what follows             Q: çarşamba den sonra ne gelir ? | said: perşembe . | key: perşembe
+   [right ] relation: what follows             Q: salı den sonra ne gelir ? | said: çarşamba . | key: çarşamba
+   [right ] recall                             Q: temmuz ayından sonraki ay hangisi ? | said: ağustos . | key: ağustos
+   [right ] recall                             Q: ekim ayından sonraki ay hangisi ? | said: kasım . | key: kasım
+   [right ] recall                             Q: eylül ayından sonraki ay hangisi ? | said: ekim . | key: ekim
+   [right ] recall                             Q: şubat ayından sonraki ay hangisi ? | said: mart . | key: mart
+   [right ] recall                             Q: haziran ayından sonraki ay hangisi ? | said: temmuz . | key: temmuz
+   [right ] relation: what follows             Q: ağustos ayından sonraki ay hangisi ? | said: eylül . | key: eylül
+   [right ] relation: what follows             Q: nisan ayından sonraki ay hangisi ? | said: mayıs . | key: mayıs
+   [right ] relation: what follows             Q: ocak ayından sonraki ay hangisi ? | said: şubat . | key: şubat
+   [right ] relation: what follows             Q: kasım ayından sonraki ay hangisi ? | said: aralık . | key: aralık
+   [right ] relation: what follows             Q: mart ayından sonraki ay hangisi ? | said: nisan . | key: nisan
+   [right ] relation: what follows             Q: mayıs ayından sonraki ay hangisi ? | said: haziran . | key: haziran
+   [right ] recall                             Q: salı den iki gün sonrası hangi gün ? | said: perşembe . | key: perşembe
+   [right ] recall                             Q: perşembe den iki gün sonrası hangi gün ? | said: cumartesi . | key: cumartesi
+   [right ] recall                             Q: cuma den iki gün sonrası hangi gün ? | said: pazar . | key: pazar
+   [silent] relation: two steps on             Q: pazartesi den iki gün sonrası hangi gün ? | said: (sessiz) | key: çarşamba
+   [silent] relation: two steps on             Q: çarşamba den iki gün sonrası hangi gün ? | said: (sessiz) | key: cuma
+-- recall (40 items lived, 40 asked)
+   [right ] watched once                       Q: kemer hangi renk ? | said: kemer mavi . | key: kemer mavi
+   [right ] watched once                       Q: çit hangi renk ? | said: çit mor . | key: çit mor
+   [right ] watched once                       Q: kulübe hangi renk ? | said: kulübe yeşil . | key: kulübe yeşil
+   [right ] watched once                       Q: koltuk hangi renk ? | said: koltuk turuncu . | key: koltuk turuncu
+   [right ] watched once                       Q: kule hangi renk ? | said: kule kırmızı . | key: kule kırmızı
+   [right ] watched once                       Q: süpürge hangi renk ? | said: süpürge pembe . | key: süpürge pembe
+   [silent] told once, never asked             Q: battaniye hangi renk ? | said: (sessiz) | key: battaniye turuncu
+   [right ] watched once                       Q: sabun hangi renk ? | said: sabun mor . | key: sabun mor
+   [right ] watched once                       Q: eldiven hangi renk ? | said: eldiven gri . | key: eldiven gri
+   [silent] told once, never asked             Q: ayna hangi renk ? | said: (sessiz) | key: ayna kırmızı
+   [right ] watched once                       Q: bahçe hangi renk ? | said: bahçe gri . | key: bahçe gri
+   [right ] watched once                       Q: perde hangi renk ? | said: perde gri . | key: perde gri
+   [right ] watched once                       Q: yelken hangi renk ? | said: yelken mavi . | key: yelken mavi
+   [right ] watched once                       Q: şapka hangi renk ? | said: şapka sarı . | key: şapka sarı
+   [silent] told once, never asked             Q: pencere hangi renk ? | said: (sessiz) | key: pencere turuncu
+   [silent] told once, never asked             Q: duvar hangi renk ? | said: (sessiz) | key: duvar beyaz
+   [right ] watched once                       Q: tarak hangi renk ? | said: tarak yeşil . | key: tarak yeşil
+   [right ] watched once                       Q: köprü hangi renk ? | said: köprü gri . | key: köprü gri
+   [right ] watched once                       Q: kaşık hangi renk ? | said: kaşık siyah . | key: kaşık siyah
+   [right ] watched once                       Q: tabak hangi renk ? | said: tabak sarı . | key: tabak sarı
+   [right ] watched once                       Q: çatı hangi renk ? | said: çatı pembe . | key: çatı pembe
+   [right ] watched once                       Q: çorap hangi renk ? | said: çorap siyah . | key: çorap siyah
+   [right ] watched once                       Q: çatal hangi renk ? | said: çatal yeşil . | key: çatal yeşil
+   [right ] watched once                       Q: yastık hangi renk ? | said: yastık siyah . | key: yastık siyah
+   [right ] watched once                       Q: atkı hangi renk ? | said: atkı mavi . | key: atkı mavi
+   [right ] watched once                       Q: fincan hangi renk ? | said: fincan mor . | key: fincan mor
+   [right ] watched once                       Q: lamba hangi renk ? | said: lamba mor . | key: lamba mor
+   [right ] watched once                       Q: çadır hangi renk ? | said: çadır turuncu . | key: çadır turuncu
+   [silent] told once, never asked             Q: tencere hangi renk ? | said: (sessiz) | key: tencere beyaz
+   [right ] watched once                       Q: sandalye hangi renk ? | said: sandalye mor . | key: sandalye mor
+   [right ] watched once                       Q: sürahi hangi renk ? | said: sürahi turuncu . | key: sürahi turuncu
+   [right ] watched once                       Q: kazak hangi renk ? | said: kazak beyaz . | key: kazak beyaz
+   [right ] watched once                       Q: kova hangi renk ? | said: kova kırmızı . | key: kova kırmızı
+   [silent] told once, never asked             Q: vazo hangi renk ? | said: (sessiz) | key: vazo yeşil
+   [right ] watched once                       Q: havlu hangi renk ? | said: havlu mor . | key: havlu mor
+   [silent] told once, never asked             Q: tekne hangi renk ? | said: (sessiz) | key: tekne turuncu
+   [silent] told once, never asked             Q: merdiven hangi renk ? | said: (sessiz) | key: merdiven beyaz
+   [silent] told once, never asked             Q: kapı hangi renk ? | said: (sessiz) | key: kapı mor
+   [right ] watched once                       Q: halı hangi renk ? | said: halı kırmızı . | key: halı kırmızı
+   [silent] told once, never asked             Q: fırça hangi renk ? | said: (sessiz) | key: fırça mor
+-- conversation (fresh mind) (31 items lived, 12 asked)
+   said to it: benim yaşım 52                           it said: (sessiz)
+   said to it: akşam yürüyüşe çıkacağım                 it said: (sessiz)
+   said to it: biraz yorgunum                           it said: (sessiz)
+   said to it: doğduğum şehir izmir                     it said: (sessiz)
+   said to it: merhaba                                  it said: (sessiz)
+   said to it: en sevdiğim renk mor                     it said: (sessiz)
+   said to it: nasılsın                                 it said: (sessiz)
+   said to it: akşam yürüyüşe çıkacağım                 it said: (sessiz)
+   said to it: kedimin adı zeytin                       it said: (sessiz)
+   said to it: teşekkür ederim                          it said: (sessiz)
+   said to it: kahve içtim                              it said: (sessiz)
+   said to it: en sevdiğim yemek börek                  it said: (sessiz)
+   said to it: bugün hava çok güzel                     it said: (sessiz)
+   said to it: akşam yürüyüşe çıkacağım                 it said: (sessiz)
+   said to it: benim adım yasin                         it said: (sessiz)
+   said to it: nasılsın                                 it said: (sessiz)
+   said to it: dün geç yattım                           it said: (sessiz)
+   said to it: benim adım orhan                         it said: (sessiz)
+   said to it: nasılsın                                 it said: (sessiz)
+   [silent] told in conversation, asked later  Q: en sevdiğim yemek ne ? | said: (sessiz) | key: börek
+   [silent] told in conversation, asked later  Q: kedimin adı ne ? | said: (sessiz) | key: zeytin
+   [silent] told in conversation, asked later  Q: doğduğum şehir neresi ? | said: (sessiz) | key: izmir
+   [silent] told in conversation, asked later  Q: benim adım ne ? | said: (sessiz) | key: yasin
+   [silent] told in conversation, asked later  Q: en sevdiğim renk ne ? | said: (sessiz) | key: mor
+   [silent] told in conversation, asked later  Q: benim yaşım kaç ? | said: (sessiz) | key: 52
+   [silent] told again otherwise, asked later  Q: benim adım ne ? | said: (sessiz) | key: orhan
+   [right ] control: never told                Q: babamın adı ne ? | said: (sessiz) | key: (silence)
+   [right ] control: never told                Q: arabamın rengi ne ? | said: (sessiz) | key: (silence)
+   [no key] everyday line, no key              Q: ne düşünüyorsun ? | said: (sessiz) | key: -
+   [no key] everyday line, no key              Q: bana bir şey anlat | said: (sessiz) | key: -
+   [no key] everyday line, no key              Q: bugün ne yapalım ? | said: (sessiz) | key: -
+-- conversation (raised mind) (28 items lived, 12 asked)
+   said to it: en sevdiğim yemek pilav                  it said: (sessiz)
+   said to it: biraz yorgunum                           it said: (sessiz)
+   said to it: dün geç yattım                           it said: (sessiz)
+   said to it: benim yaşım 63                           it said: (sessiz)
+   said to it: teşekkür ederim                          it said: (sessiz)
+   said to it: benim adım aylin                         it said: (sessiz)
+   said to it: bugün hava çok güzel                     it said: (sessiz)
+   said to it: kedimin adı boncuk                       it said: (sessiz)
+   said to it: kahve içtim                              it said: (sessiz)
+   said to it: en sevdiğim renk mor                     it said: (sessiz)
+   said to it: bugün hava çok güzel                     it said: (sessiz)
+   said to it: doğduğum şehir bursa                     it said: (sessiz)
+   said to it: teşekkür ederim                          it said: (sessiz)
+   said to it: kahve içtim                              it said: (sessiz)
+   said to it: benim adım yasin                         it said: (sessiz)
+   said to it: biraz yorgunum                           it said: (sessiz)
+   [right ] told in conversation, asked later  Q: benim yaşım kaç ? | said: 63 | key: 63
+   [right ] told in conversation, asked later  Q: en sevdiğim yemek ne ? | said: pilav | key: pilav
+   [right ] told in conversation, asked later  Q: doğduğum şehir neresi ? | said: bursa | key: bursa
+   [right ] told in conversation, asked later  Q: kedimin adı ne ? | said: boncuk | key: boncuk
+   [right ] told in conversation, asked later  Q: benim adım ne ? | said: aylin | key: aylin
+   [right ] told in conversation, asked later  Q: en sevdiğim renk ne ? | said: mor | key: mor
+   [right ] told again otherwise, asked later  Q: benim adım ne ? | said: yasin | key: yasin
+   [right ] control: never told                Q: babamın adı ne ? | said: (sessiz) | key: (silence)
+   [right ] control: never told                Q: arabamın rengi ne ? | said: (sessiz) | key: (silence)
+   [no key] everyday line, no key              Q: ne düşünüyorsun ? | said: (sessiz) | key: -
+   [no key] everyday line, no key              Q: bana bir şey anlat | said: (sessiz) | key: -
+   [no key] everyday line, no key              Q: bugün ne yapalım ? | said: (sessiz) | key: -
+-- forget (10 items lived, 8 asked)
+   forgotten: item 7 of its life
+   forgotten: item 3 of its life
+   [right ] kept                               Q: tarık in kodu nedir ? | said: nemeto . | key: nemeto
+   [right ] kept                               Q: gönül in kodu nedir ? | said: rivido . | key: rivido
+   [right ] kept                               Q: nermin in kodu nedir ? | said: satoka . | key: satoka
+   [right ] forgotten                          Q: fatoş in kodu nedir ? | said: (sessiz) | key: (silence)
+   [right ] kept                               Q: ilker in kodu nedir ? | said: lutone . | key: lutone
+   [right ] kept                               Q: necati in kodu nedir ? | said: lunevi . | key: lunevi
+   [right ] kept                               Q: sevgi in kodu nedir ? | said: lusame . | key: lusame
+   [right ] forgotten                          Q: bülent in kodu nedir ? | said: (sessiz) | key: (silence)
+-- text: docs/ZIHIN_KILAVUZ.md, 384 characters, 6.3875 bits a character, 0.0 s
