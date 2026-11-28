@@ -1,8 +1,8 @@
 {
  "what": "Cevahir, the final form (cevher)",
  "version": 1,
- "sha256": "98731d3c094a2e1e1ecb95e13339cc98ea0488d685d4931e06ea6b8dde64edf2",
- "digest": "10529aa447630c9779e9fad67d7c864e",
+ "sha256": "027062242fcb814e1e4e33c35a3de3db713746ec26e83933dace9cb26ac3a3cd",
+ "digest": "10529aa447630c97d9b29a67cedbc327",
  "size": {
   "ties": {
    "ties": 28552,
@@ -13,15 +13,15 @@
    "not_kept": 6923
   },
   "letters": {
-   "ties": 60727,
-   "slots": 262144,
-   "let_go": 57,
-   "not_written": 54,
+   "ties": 60230,
+   "slots": 131072,
+   "let_go": 547,
+   "not_written": 768,
    "lived": 63866,
-   "bytes": 3145728
+   "bytes": 1572864
   },
   "words": 1521,
-  "table_bytes": 8737152,
+  "table_bytes": 7164288,
   "spelling_bytes": 38113,
   "moments": 1349
  }

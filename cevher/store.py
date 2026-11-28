@@ -112,7 +112,7 @@ class Slots:
     bytes). All the ties of one key sit in the bucket its code names, with its total (the tie whose value is 0), so
     reading a key gives its values without asking about every unit. Two keys never add into one count.
 
-    The table doubles while more than a third of it is used, up to ``max_bytes``. A tie that finds its bucket full
+    The table doubles while more than a third of it is used, up to ``max_bytes`` (and to what ``allow`` permits). A tie that finds its bucket full
     waits beside the table (a small overflow, at most one tie for every ``SPILL`` slots) until the table doubles.
     Only when the table can no longer grow and the overflow is full does a tie give way: the one with the least
     evidence in the bucket, the oldest among equals. ``let_go`` counts those; ``add`` returns the tie that gave
@@ -122,7 +122,7 @@ class Slots:
     WAYS = 8
     SLOT = 20                                                # bytes a slot
     LOAD = 3                                                 # the table doubles when a third of it is used
-    SPILL = 16                                               # the overflow holds one tie for every 16 slots
+    SPILL = 32                                               # the overflow holds one tie for every 32 slots
 
     def __init__(self, max_bytes: int = 256 << 20, buckets: int = 1 << 10):
         # a bucket costs its slots, its share of the filter (a byte a slot) and its share of the overflow
@@ -131,6 +131,7 @@ class Slots:
         while self.max_buckets * 2 * per_bucket <= max_bytes:
             self.max_buckets *= 2
         self.nb = min(buckets, self.max_buckets)
+        self.now_buckets = self.max_buckets                  # how far the table may grow now (``allow``)
         self._alloc(self.nb)
         self.used = 0
         self.let_go = 0
@@ -172,11 +173,20 @@ class Slots:
         return (mix(key, _SALT[0]) & (self.nb - 1)) * self.WAYS
 
     def _room_beside(self) -> bool:
-        return self.spilled < min(65536, max(64, self.nb * self.WAYS // self.SPILL))
+        return self.spilled < min(16384, max(64, self.nb * self.WAYS // self.SPILL))
 
     # -- growth -----------------------------------------------------------------------------------------------------
+    def allow(self, nbytes: int) -> None:
+        """How large the table may be now (never more than ``max_bytes``): the mind keeps a bounded number of
+        bytes for every character it has lived."""
+        per_bucket = self.WAYS * (self.SLOT + 1) + 120 * self.WAYS // self.SPILL
+        n = 1
+        while n * 2 * per_bucket <= nbytes:
+            n *= 2
+        self.now_buckets = max(self.nb, min(self.max_buckets, n))
+
     def _grow(self) -> bool:
-        if self.nb >= self.max_buckets:
+        if self.nb >= min(self.max_buckets, self.now_buckets):
             return False
         old = (self.key, self.val, self.cnt, self.tim)
         nb = self.nb * 2
@@ -459,6 +469,7 @@ class Slots:
         nb, max_buckets, let_go, not_kept = (int(x) for x in st["nb"])
         self = cls.__new__(cls)
         self.max_buckets, self.nb = max_buckets, nb
+        self.now_buckets = max_buckets
         self._alloc(nb)
         self.used, self.let_go, self.not_kept, self.spill, self.spilled = 0, 0, 0, {}, 0
         self.filter = bytearray(1)

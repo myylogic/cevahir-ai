@@ -33,6 +33,8 @@ SEPARATOR = re.compile(r"(?<=[.!?…])\s+|\n+")              # Zihin's sentence 
 R_FORM, R_GLUE = code_of("\0role written form"), code_of("\0role gap")
 GLUED, APART = 1, 2
 OVERHEAD_MB = 96                                             # the interpreter, NumPy and the mind's working memory
+PER_CHARACTER = 8                                            # bytes the tables may hold for every character lived
+FLOOR_MB = 32                                                # ... and what they may hold however little was lived
 BULK = 4096                                                  # a text longer than this is read many ties at once
 VERSION = 1
 
@@ -40,12 +42,14 @@ VERSION = 1
 class Cevahir:
     """One mind. ``budget_mb`` bounds its resident memory for any length of life: the two tables may grow to what
     is left of it after ``OVERHEAD_MB``, three quarters for the ties and a quarter for the letters, and no further.
+    On the way there they hold at most ``per_character`` bytes for every character lived (and ``FLOOR_MB`` however
+    little was lived): memory a character is bounded by a constant first, and by the budget in the end.
     ``ledger``: keep what is needed to forget an entry exactly (a file in a temporary folder, or in the folder
     given)."""
 
-    def __init__(self, budget_mb: int = 512, ledger=False, depth: int = 5):
+    def __init__(self, budget_mb: int = 512, ledger=False, depth: int = 5, per_character: int = PER_CHARACTER):
         rest = max(1, budget_mb - OVERHEAD_MB) << 20
-        self.budget_mb = budget_mb
+        self.budget_mb, self.rest, self.per_character = budget_mb, rest, per_character
         self.store = Slots(max_bytes=rest * 3 // 4)
         self.mind = Mind(self.store)
         self.letters = Letters(Counts(max_bytes=rest // 4), depth=depth)
@@ -111,6 +115,12 @@ class Cevahir:
 
     # ------------------------------------------------------------------------------------------------- living ----
     def _letters(self, stream: str, open_entry: Optional[dict]) -> float:
+        """The letters live a stream. Before it, the tables are told how far they may grow: so many bytes for
+        every character lived (this stream counted), a floor, and never more than the budget leaves."""
+        lived = self.letters.lived + len(stream)
+        allowed = min(self.rest, max(FLOOR_MB << 20, self.per_character * lived))
+        self.store.allow(allowed * 3 // 4)
+        self.letters.T.allow(allowed // 4)
         return self.letters.live(stream, gone=None if open_entry is None else open_entry["lgone"])
 
     def tell(self, sentence: str) -> float:
@@ -364,6 +374,7 @@ class Cevahir:
             a = {name: z[name] for name in z.files}
         clock, lived, depth, nights, budget = (int(x) for x in a["misc"])
         self = cls(budget_mb=budget_mb or budget, depth=depth)
+        self.letters.lived = lived
         st = {k[2:]: v for k, v in a.items() if k.startswith("s_")}
         st["nb"] = np.array([st["nb"][0], max(int(st["nb"][0]), self.store.max_buckets), st["nb"][2], st["nb"][3]])
         self.store = Slots.from_state(st)

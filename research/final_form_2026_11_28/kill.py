@@ -176,13 +176,13 @@ def run(store, split, folder, seed):
 def scan(args):
     with open(os.path.join(HERE, "results", "old_scan_memory.json"), encoding="utf-8") as f:
         today = json.loads(f.readline())["walked_bytes"]
-    makers = [("exact", None, lambda: Exact())]
+    makers = [("exact", None, lambda: Exact())] if "exact" in args.stores else []
     for frac in args.fractions:
         n = today // frac
-        makers += [("slots", frac, lambda n=n: Slots(max_bytes=n, buckets=4)),
-                   ("countmin", frac, lambda n=n: CountMin(n)),
-                   ("sketch", frac, lambda n=n: CountSketch(n)),
-                   ("cells", frac, lambda n=n: Cells(n))]
+        makers += [m for m in (("slots", frac, lambda n=n: Slots(max_bytes=n, buckets=4)),
+                               ("countmin", frac, lambda n=n: CountMin(n)),
+                               ("sketch", frac, lambda n=n: CountSketch(n)),
+                               ("cells", frac, lambda n=n: Cells(n))) if m[0] in args.stores]
     for name, frac, make in makers:
         total, held, bytes_, secs = Counter(), [], [], 0.0
         for split in Y.SCAN_FILES:
@@ -343,6 +343,7 @@ def main():
     ap.add_argument("--scan", default="")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--fractions", type=int, nargs="*", default=[100, 1000, 10000])
+    ap.add_argument("--stores", nargs="*", default=["exact", "slots", "countmin", "sketch", "cells"])
     ap.add_argument("--corpora", nargs="*", default=["tr-lessons", "en-pydoc", "en-repo"])
     ap.add_argument("--bytes-per-char", type=float, default=11.0)
     ap.add_argument("--depth", type=int, default=5)

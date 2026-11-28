@@ -33,7 +33,7 @@ _SALT = 0x2545F4914F6CDD1D
 
 class Counts:
     """Checked counters for the letters: one slot a tie, the tie's code and its count (12 bytes), eight slots a
-    bucket. The table doubles while more than a third of it is used, up to ``max_bytes``; after that a new tie
+    bucket. The table doubles while more than half of it is used, up to ``max_bytes``; after that a new tie
     takes the place of the least counted tie of its bucket if that one is counted no more than the new one, and is
     not written otherwise. ``let_go`` counts the ties that gave way, ``not_written`` those that found no place."""
     WAYS = 8
@@ -44,12 +44,20 @@ class Counts:
         while self.max_buckets * 2 * self.WAYS * self.SLOT <= max_bytes:
             self.max_buckets *= 2
         self.nb = min(buckets, self.max_buckets)
+        self.now_buckets = self.max_buckets
         self.key = np.zeros(self.nb * self.WAYS, dtype=np.uint64)
         self.cnt = np.zeros(self.nb * self.WAYS, dtype=np.uint32)
         self.used = self.let_go = self.not_written = 0
 
+    def allow(self, nbytes: int) -> None:
+        """How large the table may be now (never more than ``max_bytes``)."""
+        n = 1
+        while n * 2 * self.WAYS * self.SLOT <= nbytes:
+            n *= 2
+        self.now_buckets = max(self.nb, min(self.max_buckets, n))
+
     def _grow(self) -> bool:
-        if self.nb >= self.max_buckets:
+        if self.nb >= min(self.max_buckets, self.now_buckets):
             return False
         key, cnt = self.key, self.cnt
         nb = self.nb * 2
@@ -84,7 +92,7 @@ class Counts:
             self.key[dead], self.cnt[dead] = 0, 0
             self.used -= len(dead)
             return None
-        while (self.used + len(keys)) * 3 > self.nb * self.WAYS and self._grow():
+        while (self.used + len(keys)) * 2 > self.nb * self.WAYS and self._grow():
             pass
         base, found, slot = self._find(keys)
         self.cnt[slot[found]] += w[found].astype(np.uint32)
@@ -155,6 +163,7 @@ class Counts:
         nb, max_buckets, let_go, not_written = (int(x) for x in st["nb"])
         self = cls.__new__(cls)
         self.max_buckets, self.nb = max_buckets, nb
+        self.now_buckets = max_buckets
         self.key = np.zeros(nb * self.WAYS, dtype=np.uint64)
         self.cnt = np.zeros(nb * self.WAYS, dtype=np.uint32)
         self.used = self.let_go = self.not_written = 0
