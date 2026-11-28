@@ -24,7 +24,8 @@ Batteries (the protocol of each is the earlier script's, which is named):
                 dialogues asked again. ``--save FOLDER`` keeps the raised mind. The seconds of every answer given
                 in conversation are kept.
 - ``scale``     m3_scale.py memory: the first ``--chars`` characters of a corpus read in ten pieces; seconds,
-                resident memory gained, and the bytes reached by the same walk of objects.
+                resident memory gained (at the end, and the most of it while living), and the bytes reached by
+                the same walk of objects.
 - ``heldout``   the set frozen in heldout.json before the design (gate G6), its sha256 checked; the transcript is
                 printed in full.
 
@@ -44,6 +45,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from collections import Counter
 
@@ -100,6 +102,27 @@ PAGE = os.sysconf("SC_PAGE_SIZE") if hasattr(os, "sysconf") else 4096
 def resident_mb() -> float:
     with open("/proc/self/statm") as f:
         return int(f.read().split()[1]) * PAGE / 1e6
+
+
+class Peak:
+    """The most resident memory of this process while it runs, looked at twenty times a second (a bound on memory
+    is a bound on the most of it, not on what is left at the end)."""
+
+    def __init__(self):
+        self.most = resident_mb()
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def _run(self) -> None:
+        while not self._stop.wait(0.05):
+            self.most = max(self.most, resident_mb())
+
+    def stop(self) -> float:
+        self._stop.set()
+        self._thread.join()
+        self.most = max(self.most, resident_mb())
+        return self.most
 
 
 # ------------------------------------------------------------------------------------------------- the minds -----
@@ -575,6 +598,7 @@ def scale(args) -> None:
     MINDS[args.who](variant="full")                          # the code is loaded before memory is measured
     gc.collect()
     base = resident_mb()
+    peak = Peak()
     m = MINDS[args.who](variant="full", ledger=(args.ledger != "none"))
     t0 = time.time()
     step = max(1, len(text) // 10)
@@ -583,6 +607,7 @@ def scale(args) -> None:
         bits += m.read(text[i:i + step]) or 0.0
     seconds = time.time() - t0
     m.flush()
+    most = peak.stop()
     gc.collect()
     rss = resident_mb() - base
     try:
@@ -597,6 +622,9 @@ def scale(args) -> None:
                "seconds": round(seconds, 2), "chars_per_second": round(n / max(seconds, 1e-9), 1),
                "bits_per_char": round(bits / n, 4) if bits else None,
                "resident_mb": round(rss, 1), "resident_trimmed_mb": round(rss_trimmed, 1),
+               "resident_peak_mb": round(most - base, 1), "process_peak_mb": round(most, 1),
+               "process_base_mb": round(base, 1), "given_at_once": step,
+               "ledger_bytes": m.c.ledger_bytes() if hasattr(m.c, "ledger_bytes") else None,
                "walked_mb": round(walked / 1e6, 2), "walked_bytes_per_char": round(walked / n, 2),
                "resident_bytes_per_char": round(rss_trimmed * 1e6 / n, 2), "stats": m.stats(),
                "parts": [[k, v, round(v / n, 2)] for k, v in sorted(parts.items(), key=lambda x: -x[1])
