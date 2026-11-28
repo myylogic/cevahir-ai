@@ -24,7 +24,7 @@ def main():
     assert hashlib.sha256(blob).hexdigest() == open(os.path.join(HERE, "curve.sha256")).read().split()[0]
     Y = json.loads(blob.decode("utf-8"))
     code = subprocess.run(["git", "-C", HERE, "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
-    if subprocess.run(["git", "-C", REPO, "diff", "--quiet", "HEAD", "--", "cevher"]).returncode:
+    if subprocess.run(["git", "-C", REPO, "diff", "--quiet", "HEAD", "--", ":(glob)cevher/**/*.py"]).returncode:
         code += " and changes not committed"
     lives = []
     for shown in ("2", "4", "6"):

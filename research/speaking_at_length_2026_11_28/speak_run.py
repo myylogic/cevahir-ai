@@ -83,7 +83,7 @@ def main():
     les = [r for r in rows if r["form"] == "what is known of it"]
     kinds = [r for r in rows if r["form"] in ("parts", "works", "made", "care", "two kinds")]
     code = subprocess.run(["git", "-C", HERE, "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
-    if subprocess.run(["git", "-C", REPO, "diff", "--quiet", "HEAD", "--", "cevher"]).returncode:
+    if subprocess.run(["git", "-C", REPO, "diff", "--quiet", "HEAD", "--", ":(glob)cevher/**/*.py"]).returncode:
         code += " and changes not committed"                 # such a row is for the bench; it is not kept
     out = {"code": code, "what": "speaking at length, by the package", "set": a.set, "ledger": a.ledger, "note": a.note,
            "life_s": round(life_s, 1), "answer_s_mean": round(sum(seconds) / len(seconds), 4),

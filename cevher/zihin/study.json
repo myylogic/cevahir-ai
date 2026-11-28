@@ -109,7 +109,7 @@
     0,
     0
    ],
-   "seconds": 0.2,
+   "seconds": 0.3,
    "chars": 1547
   },
   {
@@ -193,7 +193,7 @@
     0,
     2
    ],
-   "seconds": 0.2,
+   "seconds": 0.3,
    "chars": 1666
   },
   {
@@ -307,7 +307,7 @@
     0,
     1
    ],
-   "seconds": 0.2,
+   "seconds": 0.3,
    "chars": 970
   },
   {
@@ -360,7 +360,7 @@
     10
    ],
    "exam": [
-    1,
+    0,
     1
    ],
    "seconds": 0.2,
@@ -374,7 +374,7 @@
     10
    ],
    "exam": [
-    1,
+    2,
     2
    ],
    "seconds": 0.2,
@@ -416,10 +416,10 @@
     10
    ],
    "exam": [
-    0,
+    1,
     1
    ],
-   "seconds": 0.1,
+   "seconds": 0.2,
    "chars": 1065
   },
   {
@@ -447,7 +447,7 @@
     0,
     2
    ],
-   "seconds": 0.3,
+   "seconds": 0.4,
    "chars": 998
   },
   {
@@ -475,7 +475,7 @@
     0,
     2
    ],
-   "seconds": 0.2,
+   "seconds": 0.1,
    "chars": 992
   },
   {
@@ -521,26 +521,26 @@
    "chars": 1479
   }
  ],
- "seconds": 7.4,
+ "seconds": 7.7,
  "manifest": {
   "what": "Cevahir, the final form (cevher)",
   "version": 5,
-  "sha256": "74a2a0e1eb9ce7402afabf8e3bd55059e6bb85cc95117cbed71f6c5707447876",
-  "digest": "f0ea70591e5440c8abedcc4233a4befe",
+  "sha256": "2e7663ec2c7f96958eff41af295c295a21c3428c05afecd8a6d91986587ce863",
+  "digest": "3cd7ace073fb0c20abedcc4233a4befe",
   "size": {
    "ties": {
-    "ties": 36908,
-    "keys": 35261,
+    "ties": 36551,
+    "keys": 34747,
     "slots": 270336,
-    "beside": 1424,
+    "beside": 1397,
     "let_go": 4841,
     "not_kept": 7488
    },
    "lived": {
-    "ties": 36908,
-    "keys": 35261,
+    "ties": 36551,
+    "keys": 34747,
     "slots": 262144,
-    "beside": 1424,
+    "beside": 1397,
     "let_go": 4841,
     "not_kept": 7488
    },
@@ -567,7 +567,7 @@
     "not_kept": 0
    },
    "words": 1645,
-   "table_bytes": 8993664,
+   "table_bytes": 8990424,
    "spelling_bytes": 42650,
    "moments": 1390
   }

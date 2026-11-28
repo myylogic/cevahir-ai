@@ -736,7 +736,7 @@ cevher/__main__.py   python -m cevher (what cevahir.ps1 starts)
 cevher/telling.py    the telling grain: what was told kept as told, the ways of reading a request (section 18)
 cevher/dersler/      the conversation lesson; the lesson that shows telling (two texts and fourteen dialogues)
 cevher/zihin/        the open mind (36 public lessons, the conversation lesson and the telling lesson; 1.4 MB)
-tests/evolution/test_cevher.py                       28 tests
+tests/evolution/test_cevher.py                       30 tests
 research/final_form_2026_11_28/raise_cevher.py       the open mind's recipe (6 s)
 ```
 
@@ -892,3 +892,104 @@ request the mind was never shown must be read by its parts; and long texts must 
 of its own can come from the same substance (a told sentence with a place open, filled by what the mind knows
 of another thing) is not measured here.
 
+## 19. Sentences of its own, and a request it was never shown (added 28 November, after the owner asked how a human mind does it)
+
+Study folder: `research/speaking_at_length_2026_11_28` (yardsticks frozen with their sha256 before the mechanism
+they measure; criteria in the docstrings of `inherit_run.py`, `speak_run.py`, `speak4_make.py`, `curve_make.py`).
+Final code: a3bfcf6.
+
+**What failed, first.**
+
+1. *Showing more does not sharpen the kinds.* The same sixteen requests about two things, after the seven forms
+   were shown of 2, 4 and 6 other things (`curve.json`): kinds right 24, 26, 26 of 34, and the sentences said
+   beside the question 8, 15, 15; care 0, 2, 0 of 4. The criterion (no more beside for each one right at six than
+   at two) fails, and the yardstick as a whole is not survived. The code before this section (f05c10c) gives the
+   same numbers: the fault is in how a sentence is marked for a form of request (by any one word it holds that
+   was in answers; every thing shown adds such words and none is taken away). No wrong sentence in any life.
+2. *A request in no shown form fails the criteria it was held to.* With two things shown, over four sets (seven
+   requests, 52 sentences asked for): 13 said, 10 right, 3 beside, none wrong; four requests answered in part,
+   three not at all. Third set: one of two answered, 2 of 14 (criterion: both, 4 of 14). Fourth set, written
+   after the first two forms of the reading and run once on the form before last (b5636ef; the final form gives
+   the same row): one of two answered, 3 of 11, nothing beside (criterion: both). The owner's question of the
+   first set: 2 of 12. The reading reached this form in four steps, each after a fault of the one before was
+   seen (silent at two shown; the same; a joining word never met followed as if it called for a sentence; a
+   thing never told answered with other things' sentences): the sets were seen while it was built, the fourth
+   until its first run excepted.
+3. *How a sentence ends, as a mark* (the last letters of its last word, the narrowest pattern the answers allow):
+   tried and not taken. Kinds fell from 23 to 15 of 39 and from 18 to 13 of 34 on the two older sets and a wrong
+   sentence was said. Care (sentences that end in -malıdır, -melidir) stays 0 of 16 over the four sets.
+4. *Kinds of words from sums of contexts* (`kinds_kill.py`): the five nearest words foresee 7.3 % of a word's new
+   places, 3.7 times chance, under the one in ten fixed in advance. Forgetting was exact.
+5. *Forms of a word whose bare form was never told*, found from a beginning shared with another told word, as a
+   rule for the whole vocabulary: tried and not taken (4 wrong sentences in 151; the kinds never asked fell
+   silent). The same test is kept only where a word of a request is held against the words of one thing's own
+   sentences.
+6. *Sentences of its own* (below): a member told to do otherwise is still said to do what its kind does (told
+   "penguen uçmaz", it says "penguen uçar"); a kind whose bare name was never told gives nothing (0 of 2); what is
+   told two steps up is not reached where the name between was never told bare; which place of a sentence holds
+   what a thing is depends on what the answers shown include.
+7. *In the open mind*, one examination line that was right is not right when it is asked (straight after its
+   lesson the reading has no record yet; at the end of the life the open mind answers it with the key), and one
+   lesson question is answered with four sentences of its thing where the key is one of them.
+
+**How a human mind does it, and what is taken from it.** (References are given from memory and are to be checked
+against the sources before they are cited anywhere else.)
+
+| in a human mind | here |
+|---|---|
+| two learning systems: one keeps an event after one exposure, apart from the others; one learns slowly what events share, and is taught by replay (McClelland, McNaughton and O'Reilly 1995) | only the first is a store. The second is not stored at all: what events share is computed when it is asked for, from what is held |
+| generalisation at the moment of recall, from the stored events themselves (Hintzman 1986; Kumaran and McClelland 2012) | every generalisation of the mind is of this kind: the forms of a word, the forms of request, the ways of reading and their records, marks, the place of what a thing is, sentences of its own |
+| a hierarchy of what things are, with what is told of the kind true of its members (Collins and Quillian 1969) | the way "what is told of what it is" |
+| constructions learned from use: a heard utterance with one place open (Tomasello 2003) | a form of request is a request with one word left open; it speaks once it was shown of two things |
+| the narrowest generalisation the evidence allows (Berwick 1985) | a word of a request is read by the narrowest record there is: after the word before it, alone, as words never met have deserved |
+| speaking: what to say is chosen before how; a monitor listens (Levelt 1989) | a way gathers sentences; two rules decide whether they are said (section 18) |
+| a long text answers a tree of questions (Roberts 1996; McKeown 1985) | a request with several parts is read through its own words, a sentence for each word that calls for one; the walk through what a thing's sentences name is not built |
+
+The consequence is the one property no network of weights has: because nothing general is stored, one told
+sentence changes at once everything that is derived from it, and forgetting that sentence takes all of it back
+exactly (the tests below check the digest and the moments). The idea of recall-time generalisation is in the
+literature named above; what is put together here is a bounded store, one rule, an exact ledger, and ways of
+reading whose trust is itself counted evidence in the same store.
+
+**Sentences of its own.** "serçe bir kuştur" and "kuşlar yumurtlar" were told; "serçe yumurtlar" never was. The
+way takes a sentence that names the thing, finds in it a word of which told sentences begin, and says those
+sentences with the thing in the place of their first word. Which place of a sentence holds what a thing is (the
+word before, the word after) is not given: it is learned per form of request from the dialogues watched. Yardstick
+`inherit.json` (sha256 adc240b7…26be8), criteria fixed before the first run: of the members of kinds never asked,
+at least 80 % of what is asked; wrong at most 5 %; silent where nothing was told. First run (f73557f): 12 of 12,
+no wrong sentence in 50, silent on the controls. Final code: 47 said, none wrong, 12 of 12. One sentence is
+enough ("levrek bir balıktır ." gives "levrek bir canlıdır . levrek yüzer ." at once) and forgetting it takes the
+sentences back.
+
+**A request in no shown form.** Read through its own words: the thing is the word that stands where the thing
+stood in the requests watched (learned; if that word names nothing told, nothing is said); of the thing's own
+text a sentence is called for when it holds a form of a word of the request that is trusted. A word's trust is
+its record (was a sentence that holds it asked for?), kept after the word that stood before it and alone; a word
+never met is trusted as such words have deserved, and only if it names fewer told sentences than the thing. The
+reading speaks once it has been right above the line in the dialogues watched.
+
+| life | requests in no shown form | the reading's record |
+|---|---|---|
+| two shown, four sets | 10 right, 3 beside, 0 wrong of 52 asked; 4 of 7 requests answered | 4 of 5 (third set) |
+| four shown | 4 of 14, 1 beside | 10 of 11 |
+| six shown | 4 of 14, 0 beside (criterion met: both answered) | 15 of 17 |
+| the code before (any number shown) | 0 | |
+
+**The open mind, in the terminal** (36 lessons and the telling lesson; the bicycle's text read with `!oku`):
+
+    bisiklet kaç parçadan oluşur parçalarının tasarım dinamiği nedir hangi malzemeler kullanılmalıdır
+      →  5 sentences, all among the 12 of the key, none beside: the list of its parts, the frame, the wheels,
+         the sentence of its design, the material of the frame
+    bisiklet nelerden oluşur ve neyden yapılır        →  4 sentences (two of its parts, two of what it is made from)
+    uçak nelerden oluşur ve neyden yapılır            →  silent (nothing was told of it)
+
+The older batteries under b5636ef: the rows of school, change and SCAN equal (12 rows); dialogues 437, 440 and
+433 of 440 as before; under the final code the examination lines are 20 of 41 (19), with the two faults of point 7.
+30 tests.
+
+**What this is, and is not.** The mind now says sentences it was never told and answers some requests it was never
+shown how to answer, without a wrong sentence in any measured life, and all of it is learned from one telling and
+forgotten exactly. It does not write: of a request in no shown form it says a fifth of what is asked, and showing
+it more makes it say more beside the question. The next question is the one point 1 names: a mark must be
+weighed with what speaks against it and must be able to lose what it gained; until then more showing cannot make
+the kinds sharper. After it: forms of words never told bare, a member's own word against its kind's, long texts.
