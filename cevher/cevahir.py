@@ -3,78 +3,214 @@
 
 The interface is the one ``living.cevahir.Cevahir`` has, so that the same batteries run on both: ``tell``,
 ``watch``, ``read``, ``converse``, ``feedback``, ``forget``, ``sleep``, ``save``, ``load``, ``answers``.
+
+The substance is two tables of fixed capacity (``cevher.store.Slots`` for the ties of words and frames,
+``cevher.letters.Counts`` for the letters' contexts) and the spellings of the words met. Everything lived is written
+into them in one forward pass; nothing is kept per experience except, with a ledger, what is needed to take the
+experience back: its text, the writes that were not a function of the text alone, and the ties that gave way to it.
+
+NumPy and the standard library only: no compiled code, no network, no pickle.
 """
 from __future__ import annotations
 
+import hashlib
+import io
+import json
+import os
 import re
+import tempfile
+import zlib
 from typing import List, Optional
 
-from cevher.mind import Mind
-from cevher.store import Exact
-from cevher.units import body, tokens
+import numpy as np
+
+from cevher.letters import Counts, Letters
+from cevher.mind import O_ASKED, Mind
+from cevher.store import Slots
+from cevher.units import LINE, TOKEN, Spellings, body, code_of, lower_tr, mix, rule, tokens
 
 SEPARATOR = re.compile(r"(?<=[.!?…])\s+|\n+")              # Zihin's sentence split (zihin.__main__.sentences)
+R_FORM, R_GLUE = code_of("\0role written form"), code_of("\0role gap")
+GLUED, APART = 1, 2
+OVERHEAD_MB = 96                                             # the interpreter, NumPy and the mind's working memory
+BULK = 4096                                                  # a text longer than this is read many ties at once
+VERSION = 1
 
 
 class Cevahir:
-    def __init__(self, ledger: bool = False, store=None):
-        self.store = store if store is not None else Exact()
-        self.mind = Mind(self.store, ledger=ledger)
-        self.entries: Optional[List[dict]] = [] if ledger else None
+    """One mind. ``budget_mb`` bounds its resident memory for any length of life: the two tables may grow to what
+    is left of it after ``OVERHEAD_MB``, three quarters for the ties and a quarter for the letters, and no further.
+    ``ledger``: keep what is needed to forget an entry exactly (a file in a temporary folder, or in the folder
+    given)."""
+
+    def __init__(self, budget_mb: int = 512, ledger=False, depth: int = 5):
+        rest = max(16, budget_mb - OVERHEAD_MB) << 20
+        self.budget_mb = budget_mb
+        self.store = Slots(max_bytes=rest * 3 // 4)
+        self.mind = Mind(self.store)
+        self.letters = Letters(Counts(max_bytes=rest // 4), depth=depth)
+        self.entries: Optional[List[dict]] = None
+        self._ledger = None
         self.pending = None                                  # the last turn of a conversation, not yet judged
+        self.nights = 0
+        if ledger:
+            self.keep_ledger(ledger if isinstance(ledger, str) else None)
 
     # --------------------------------------------------------------------------------------------- the ledger ----
-    def _begin(self, kind: str, text: str):
+    def keep_ledger(self, folder: Optional[str] = None) -> str:
+        """Keep a ledger from now on: one file, an entry appended for every experience lived."""
+        if folder is None:
+            self._tmp = tempfile.TemporaryDirectory(prefix="cevher-ledger-")
+            folder = self._tmp.name
+        os.makedirs(folder, exist_ok=True)
+        path = os.path.join(folder, "ledger.bin")
+        self._ledger = open(path, "a+b")
+        self.entries = []
+        return path
+
+    def _begin(self) -> Optional[dict]:
         if self.entries is None:
             return None
         self.mind.entry = []
-        return {"kind": kind, "text": text, "forgotten": False}
+        return {"tail": self.letters.tail, "lgone": [], "sgone": []}
 
-    def _end(self, entry) -> None:
-        if entry is None:
+    def _end(self, open_entry: Optional[dict], kind: str, text: str, stream: str, bulk: bool = False) -> None:
+        """An entry of the history is closed and written to the ledger: what was lived (``stream``, as the letters
+        lived it), the writes of the word grain that are not a function of the text alone, and what gave way."""
+        if open_entry is None:
             return
-        entry["writes"] = self.mind.entry
+        log = self.mind.entry or []
         self.mind.entry = None
-        self.entries.append(entry)
+        arrays = {"stream": np.frombuffer(stream.encode("utf-8", "surrogatepass"), dtype=np.uint8),
+                  "tail": np.frombuffer(open_entry["tail"], dtype=np.uint8),
+                  "log": np.array([(1, r[0], r[1], r[2], r[3]) if len(r) == 4 else (0, r[0], r[1], r[2], 0)
+                                   for r in log], dtype=np.uint64).reshape(-1, 5),
+                  "bulk": np.array([1 if bulk else 0])}
+        lg = open_entry["lgone"]
+        arrays["lg_at"] = np.array([(a, b, len(g[0])) for a, b, g in lg], dtype=np.int64).reshape(-1, 3)
+        arrays["lg_k"] = np.concatenate([g[0] for _, _, g in lg]) if lg else np.zeros(0, dtype=np.uint64)
+        arrays["lg_c"] = np.concatenate([g[1] for _, _, g in lg]) if lg else np.zeros(0, dtype=np.uint32)
+        sg = open_entry["sgone"]
+        arrays["sg_n"] = np.array([0 if g is None else len(g[0]) for g in sg], dtype=np.int64)
+        for i, name in enumerate(("sg_k", "sg_v", "sg_c", "sg_t")):
+            parts = [g[i] for g in sg if g is not None]
+            arrays[name] = np.concatenate(parts) if parts else np.zeros(0, dtype=np.uint64)
+        buf = io.BytesIO()
+        np.savez(buf, **arrays)
+        blob = zlib.compress(buf.getvalue(), 1)
+        self._ledger.seek(0, os.SEEK_END)
+        at = self._ledger.tell()
+        self._ledger.write(blob)
+        self.entries.append({"kind": kind, "text": text[:80], "at": at, "size": len(blob), "forgotten": False})
+
+    def ledger_bytes(self) -> int:
+        if self._ledger is None:
+            return 0
+        self._ledger.seek(0, os.SEEK_END)
+        return self._ledger.tell()
 
     # ------------------------------------------------------------------------------------------------- living ----
-    def tell(self, sentence: str) -> None:
+    def _letters(self, stream: str, open_entry: Optional[dict]) -> float:
+        return self.letters.live(stream, gone=None if open_entry is None else open_entry["lgone"])
+
+    def tell(self, sentence: str) -> float:
         """A sentence told."""
         self.flush()
-        entry = self._begin("tell", sentence)
+        e = self._begin()
+        stream = sentence + "\n"
+        bits = self._letters(stream, e)
         toks, _ = body(tokens(sentence))
         if toks:
             self.mind.tell(toks)
-        self._end(entry)
+        self._end(e, "tell", sentence, stream)
+        return bits
 
-    def watch(self, first: str, answer: str) -> None:
+    def watch(self, first: str, answer: str) -> float:
         """A dialogue watched: someone says ``first``, someone answers."""
         self.flush()
-        entry = self._begin("watch", first + "\t" + answer)
+        e = self._begin()
+        stream = first + "\t" + answer + "\n"
+        bits = self._letters(stream, e)
         q, _ = body(tokens(first))
         a, mark = body(tokens(answer))
         self.mind.watch(q, a, mark)
-        self._end(entry)
+        self._forms(answer)
+        self._end(e, "watch", first + " | " + answer, stream)
+        return bits
 
-    def read(self, text: str) -> float:
-        """A document read: each of its sentences told."""
+    def read(self, text: str, code: bool = False) -> float:
+        """A document read: the letters live every byte of it; the words live each of its sentences of two words
+        or more (each line, for source code). A long text is written many ties at once."""
         self.flush()
-        entry = self._begin("read", text[:60])
-        for piece in SEPARATOR.split(text):
-            toks, _ = body(tokens(piece))
-            if len(toks) >= 2:
-                self.mind.tell(toks)
-        self._end(entry)
-        return 0.0
+        e = self._begin()
+        bits = self._letters(text, e)
+        pieces = text.split("\n") if code else SEPARATOR.split(text)
+        sentences = [s for s in (body(tokens(p))[0] for p in pieces) if len(s) >= 2]
+        bulk = len(text) >= BULK
+        if bulk:
+            for at in range(0, len(sentences), 20000):
+                gone = self.mind.sequences(sentences[at:at + 20000])
+                if e is not None:
+                    e["sgone"].append(gone)
+        else:
+            for s in sentences:
+                self.mind.tell(s)
+        self._end(e, "read", text, text, bulk=bulk)
+        return bits
+
+    def _forms(self, answer: str) -> None:
+        """How an answer was written: the form of each token where it is not its lower case, and whether it stood
+        apart from the token before it. Ties like any others."""
+        prev, end = None, 0
+        for m in TOKEN.finditer(answer):
+            raw = m.group()
+            c = self.mind.code(lower_tr(raw))
+            if raw != lower_tr(raw):
+                form = code_of(raw)
+                self.mind.spell.setdefault(form, raw)
+                self.mind._tie(mix(R_FORM, c), form)
+            if prev is not None:                             # of the pair, and of each of the two whatever the other
+                gap = GLUED if m.start() == end else APART
+                self.mind._tie(mix(mix(R_GLUE, prev), c), gap)
+                self.mind._tie(mix(mix(R_GLUE, prev), 1), gap)
+                self.mind._tie(mix(mix(R_GLUE, 2), c), gap)
+            prev, end = c, m.end()
 
     # ----------------------------------------------------------------------------------------------- speaking ----
+    def _say(self, words: List[str], mark: str) -> str:
+        """An answer as it is written: each token in the form it was written in, apart from the one before it or
+        not, as lived (each by the rule, at the speaking line; a token never written so is written as it is)."""
+        S, out, prev = self.store, "", None
+        for w in words + ([mark] if mark else []):
+            c = self.mind.code(w)
+            key = mix(R_FORM, c)
+            vs = S.vals(key)
+            form = w
+            if vs and rule(vs[0][1], S.tot(key)) >= LINE:
+                form = self.mind.spell.get(vs[0][0], w)
+            gap = " "
+            if prev is not None:
+                pair = self._gap(mix(mix(R_GLUE, prev), c))
+                if pair is None:                             # the two never stood together: each as it was written
+                    after, before = self._gap(mix(mix(R_GLUE, prev), 1)), self._gap(mix(mix(R_GLUE, 2), c))
+                    pair = GLUED if GLUED in (after, before) and APART not in (after, before) else APART
+                if pair == GLUED:
+                    gap = ""
+            out += (gap if out else "") + form
+            prev = c
+        return out
+
+    def _gap(self, key: int):
+        vs = self.store.vals(key)
+        return vs[0][0] if vs and rule(vs[0][1], self.store.tot(key)) >= LINE else None
+
     def reply(self, said: str) -> str:
         """What Cevahir answers, as it stands; nothing is lived."""
         q, _ = body(tokens(said))
         got = self.mind.answer(q) if q else None
-        if got is None:
+        if got is None or None in got[0]:                    # nothing believed, or a word it can no longer spell
             return ""
-        return " ".join(got[0]) + ((" " + got[2]) if got[2] else "")
+        return self._say(got[0], got[2])
 
     def answers(self, questions: List[str], limit: int = 400, workers: int = 0) -> List[str]:
         """What Cevahir answers to each question as it stands now; nothing of the answers is lived."""
@@ -89,49 +225,155 @@ class Cevahir:
         return answer
 
     def flush(self) -> None:
-        """The last turn, lived as it was: nobody judged it. What Cevahir answered is a dialogue it watched itself
-        give; what it could not answer is something it was told."""
+        """The last turn, lived as it was: nobody judged it. What Cevahir answered is lived as something asked and
+        something said, and as no evidence that the answer was right; what it could not answer is something it
+        was told."""
         if self.pending is None:
             return
         said, answer = self.pending
         self.pending = None
-        if answer:
-            self.watch(said, answer)
-        else:
+        if not answer:
             self.tell(said)
+            return
+        e = self._begin()
+        stream = said + "\t" + answer + "\n"
+        self._letters(stream, e)
+        self.mind.heard(body(tokens(said))[0], body(tokens(answer))[0])
+        self._end(e, "converse", said + " | " + answer, stream)
 
     def feedback(self, good: bool) -> None:
-        """How Cevahir's last answer was received. A right answer is lived as a dialogue; a wrong one is not lived
-        as something said rightly: the question alone is, and the way that spoke is believed less."""
+        """How Cevahir's last answer was received. A right answer is lived as a dialogue (evidence for the way
+        that gave it). A wrong one is not lived as something said rightly: the question alone is, and the way
+        that spoke is believed less."""
         if self.pending is None:
             return
         said, answer = self.pending
         self.pending = None
         if good and answer:
             self.watch(said, answer)
-        else:
-            entry = self._begin("judged wrong", said + "\t" + answer)
-            q, _ = body(tokens(said))
-            if answer:
-                self.mind.wrong(q)
-            self.mind.sequence(self.mind.codes(q), __import__("cevher.mind", fromlist=["O_ASKED"]).O_ASKED)
-            self._end(entry)
+            self.entries and self.entries[-1].update(kind="converse, judged right")
+            return
+        e = self._begin()
+        stream = said + "\n"
+        self._letters(stream, e)
+        q, _ = body(tokens(said))
+        if answer:
+            self.mind.wrong(q)
+        self.mind.sequence(self.mind.codes(q), O_ASKED)
+        self._end(e, "converse, judged wrong", said + " | " + answer, stream)
 
     def forget(self, k: int) -> dict:
-        """Forget entry ``k`` of the history exactly: the same writes with the opposite sign."""
+        """Forget entry ``k`` of the history: everything it wrote is taken back, the last write first, and every tie
+        that gave way to it is put back. Forgetting the latest entry leaves the substance as if the entry had
+        never been lived (its digest is equal); so does forgetting an earlier one unless ties gave way since."""
         if self.entries is None:
             raise ValueError("Cevahir keeps no ledger (Cevahir(ledger=True))")
         self.flush()
         e = self.entries[k]
         if e["forgotten"]:
             return {"forgotten": False}
-        self.mind.take_back(e["writes"])
+        self._ledger.seek(e["at"])
+        with np.load(io.BytesIO(zlib.decompress(self._ledger.read(e["size"])))) as z:
+            a = {name: z[name] for name in z.files}
+        stream = a["stream"].tobytes().decode("utf-8", "surrogatepass")
+        # the word grain: the writes kept, the last first; then what a long text wrote, a function of the text
+        log = [tuple(int(x) for x in r[1:]) if r[0] else tuple(int(x) for x in r[1:4]) for r in a["log"]]
+        self.mind.take_back(log)
+        if int(a["bulk"][0]):
+            sentences = [s for s in (body(tokens(p))[0] for p in SEPARATOR.split(stream)) if len(s) >= 2]
+            chunks = [sentences[at:at + 20000] for at in range(0, len(sentences), 20000)]
+            at = len(a["sg_k"])
+            for chunk, n in reversed(list(zip(chunks, a["sg_n"].tolist()))):
+                self.mind.sequences(chunk, sign=-1)
+                if n:
+                    self.store.put_back_many(tuple(a[x][at - n:at] for x in ("sg_k", "sg_v", "sg_c", "sg_t")))
+                    at -= n
+        # the letters
+        gone, at = [], 0
+        for start, end, n in a["lg_at"].tolist():
+            gone.append((start, end, (a["lg_k"][at:at + n], a["lg_c"][at:at + n])))
+            at += n
+        self.letters.forget(stream, a["tail"].tobytes(), gone)
         e["forgotten"] = True
-        return {"forgotten": True, "writes": len(e["writes"])}
+        return {"forgotten": True, "writes": len(log), "characters": len(stream)}
 
-    def sleep(self) -> dict:
+    def sleep(self, keep_min: int = 2) -> dict:
+        """A night: the letters let go of the contexts met fewer than ``keep_min`` times (what recurred stays
+        exactly); the words keep everything (among the ties met once is what one reading taught); the spellings
+        are packed."""
         self.flush()
-        return {}
+        self.nights += 1
+        T = self.letters.T
+        weak = np.flatnonzero((T.key != 0) & (T.cnt < keep_min))
+        T.key[weak], T.cnt[weak] = 0, 0
+        T.used -= len(weak)
+        self.mind.spell.pack()
+        return {"letters_forgotten": int(len(weak)), "letters_kept": int(T.used)}
+
+    # ------------------------------------------------------------------------------------------------ keeping ----
+    def digest(self) -> str:
+        """A digest of the substance: every tie of both tables with its count, wherever it sits."""
+        return "%016x%016x" % (self.store.digest(), self.letters.T.digest())
 
     def size(self) -> dict:
-        return dict(self.store.size(), words=len(self.mind.spell), bytes=self.store.nbytes())
+        return {"ties": self.store.size(), "letters": self.letters.size(), "words": len(self.mind.spell),
+                "table_bytes": self.store.nbytes() + self.letters.T.nbytes(),
+                "spelling_bytes": self.mind.spell.nbytes(), "moments": self.mind.clock}
+
+    def save(self, folder: str) -> dict:
+        """Keep Cevahir in ``folder``: one file of arrays (``cevher.npz``, compressed) and a manifest with its
+        SHA-256. No pickle: loading executes nothing."""
+        self.flush()
+        os.makedirs(folder, exist_ok=True)
+        arrays = {}
+        for prefix, st in (("s_", self.store.state()), ("l_", self.letters.T.state()),
+                           ("w_", self.mind.spell.state())):
+            for k, v in st.items():
+                arrays[prefix + k] = v
+        arrays["zero"], arrays["sit"] = self.letters.zero, self.letters.sit
+        arrays["tail"] = np.frombuffer(self.letters.tail, dtype=np.uint8)
+        arrays["misc"] = np.array([self.mind.clock, self.letters.lived, self.letters.depth, self.nights,
+                                   self.budget_mb], dtype=np.int64)
+        path = os.path.join(folder, "cevher.npz")
+        np.savez_compressed(path, **arrays)
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            for block in iter(lambda: f.read(1 << 20), b""):
+                h.update(block)
+        manifest = {"what": "Cevahir, the final form (cevher)", "version": VERSION, "sha256": h.hexdigest(),
+                    "digest": self.digest(), "size": self.size()}
+        with open(os.path.join(folder, "manifest.json"), "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=1)
+        return manifest
+
+    @classmethod
+    def load(cls, folder: str, budget_mb: Optional[int] = None, ledger=False) -> "Cevahir":
+        """Cevahir read back from ``folder`` after the file is checked against the manifest."""
+        with open(os.path.join(folder, "manifest.json"), encoding="utf-8") as f:
+            manifest = json.load(f)
+        path = os.path.join(folder, "cevher.npz")
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            for block in iter(lambda: f.read(1 << 20), b""):
+                h.update(block)
+        if h.hexdigest() != manifest["sha256"]:
+            raise IOError("cevher.npz does not match its manifest")
+        with np.load(path, allow_pickle=False) as z:
+            a = {name: z[name] for name in z.files}
+        clock, lived, depth, nights, budget = (int(x) for x in a["misc"])
+        self = cls(budget_mb=budget_mb or budget, depth=depth)
+        st = {k[2:]: v for k, v in a.items() if k.startswith("s_")}
+        st["nb"] = np.array([st["nb"][0], max(int(st["nb"][0]), self.store.max_buckets), st["nb"][2], st["nb"][3]])
+        self.store = Slots.from_state(st)
+        self.mind.S = self.store
+        st = {k[2:]: v for k, v in a.items() if k.startswith("l_")}
+        st["nb"] = np.array([st["nb"][0], max(int(st["nb"][0]), self.letters.T.max_buckets), st["nb"][2],
+                             st["nb"][3]])
+        self.letters.T = Counts.from_state(st)
+        self.mind.spell = Spellings.from_state({k[2:]: v for k, v in a.items() if k.startswith("w_")})
+        self.letters.zero, self.letters.sit = a["zero"], a["sit"]
+        self.letters.tail, self.letters.lived = a["tail"].tobytes(), lived
+        self.mind.clock, self.nights = clock, nights
+        if ledger:
+            self.keep_ledger(ledger if isinstance(ledger, str) else None)
+        return self

@@ -74,3 +74,71 @@ def mix_np(a: np.ndarray, b) -> np.ndarray:
 def rule(w_plus: float, w: float) -> float:
     """The one rule: e = (W+ + 1/2) / (W + 1)."""
     return (w_plus + 0.5) / (w + 1.0)
+
+
+class Spellings:
+    """What is kept per word type: its spelling, so that a code the store brings back can be said. Packed: the codes
+    sorted, a place and a length for each, and the bytes of all the words (about 16 bytes and the word's length a
+    type). Words met since the last packing wait in a dictionary and are packed when it has grown."""
+    PENDING = 50000
+
+    def __init__(self, most: int = 2_000_000):
+        self.codes = np.zeros(0, dtype=np.uint64)
+        self.offs = np.zeros(1, dtype=np.int64)
+        self.blob = b""
+        self.new: dict = {}
+        self.most = most
+
+    def __len__(self) -> int:
+        return len(self.codes) + len(self.new)
+
+    def get(self, code: int, default=None):
+        s = self.new.get(code)
+        if s is not None:
+            return s
+        i = int(np.searchsorted(self.codes, np.uint64(code)))
+        if i < len(self.codes) and int(self.codes[i]) == code:
+            return self.blob[int(self.offs[i]):int(self.offs[i + 1])].decode("utf-8", "surrogatepass")
+        return default
+
+    def __getitem__(self, code: int) -> str:
+        s = self.get(code)
+        if s is None:
+            raise KeyError(code)
+        return s
+
+    def setdefault(self, code: int, spelling: str) -> None:
+        if code in self.new or len(self) >= self.most:
+            return
+        i = int(np.searchsorted(self.codes, np.uint64(code)))
+        if i < len(self.codes) and int(self.codes[i]) == code:
+            return
+        self.new[code] = spelling
+        if len(self.new) >= self.PENDING:
+            self.pack()
+
+    def pack(self) -> None:
+        if not self.new:
+            return
+        codes = np.concatenate([self.codes, np.fromiter(self.new, dtype=np.uint64, count=len(self.new))])
+        words = [self.blob[int(self.offs[i]):int(self.offs[i + 1])] for i in range(len(self.codes))]
+        words += [w.encode("utf-8", "surrogatepass") for w in self.new.values()]
+        order = np.argsort(codes, kind="stable")
+        words = [words[i] for i in order.tolist()]
+        self.codes = codes[order]
+        self.offs = np.concatenate([[0], np.cumsum([len(w) for w in words])]).astype(np.int64)
+        self.blob = b"".join(words)
+        self.new = {}
+
+    def state(self) -> dict:
+        self.pack()
+        return {"codes": self.codes, "offs": self.offs, "blob": np.frombuffer(self.blob, dtype=np.uint8)}
+
+    @classmethod
+    def from_state(cls, st: dict, most: int = 2_000_000) -> "Spellings":
+        self = cls(most)
+        self.codes, self.offs, self.blob = st["codes"], st["offs"], st["blob"].tobytes()
+        return self
+
+    def nbytes(self) -> int:
+        return self.codes.nbytes + self.offs.nbytes + len(self.blob) + 200 * len(self.new)

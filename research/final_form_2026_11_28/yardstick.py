@@ -563,6 +563,7 @@ def text_of(name: str, chars: int) -> str:
 def scale(args) -> None:
     import m3_scale
     text = text_of(args.corpus, args.chars)
+    MINDS[args.who](variant="full")                          # the code is loaded before memory is measured
     gc.collect()
     base = resident_mb()
     m = MINDS[args.who](variant="full", ledger=(args.ledger != "none"))

@@ -13,7 +13,9 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Tuple
 
-from cevher.units import LINE, code_of, fold, mix, rule
+import numpy as np
+
+from cevher.units import LINE, Spellings, code_of, fold, mix, mix_np, rule
 
 # roles and origins: units like any other, with codes of their own
 R_SEQ, R_SKIP, R_REL, R_RELR = code_of("\0role seq"), code_of("\0role skip"), code_of("\0role rel"), code_of("\0role relr")
@@ -34,7 +36,7 @@ class Mind:
 
     def __init__(self, store, ledger: bool = False):
         self.S = store
-        self.spell: Dict[int, str] = {}
+        self.spell = Spellings()
         self._codes: Dict[str, int] = {}
         self._parsed: Dict[int, list] = {}
         self.clock = 0
@@ -47,6 +49,8 @@ class Mind:
     def code(self, token: str) -> int:
         c = self._codes.get(token)
         if c is None:
+            if len(self._codes) > 300000:                    # a cache of codes, not a store: emptied when large
+                self._codes.clear()
             c = self._codes[token] = code_of(token)
             self.spell.setdefault(c, token)
         return c
@@ -55,30 +59,38 @@ class Mind:
         return tuple(self.code(t) for t in toks)
 
     def words(self, cs) -> list:
-        return [self.spell.get(c, "?") for c in cs]
+        """The spellings of codes (None for a word the mind can no longer spell)."""
+        return [self.spell.get(c) for c in cs]
 
     # ----------------------------------------------------------------------------------------------- writing ----
     def _add(self, key: int, value: int, w: int = 1) -> None:
+        gone = self.S.add(key, value, w, self.clock)
         if self.entry is not None:
+            if gone:
+                self.entry.extend(gone)                      # before the write: taken back after it
             self.entry.append((key, value, w))
-        self.S.add(key, value, w, self.clock)
 
     def _bump(self, key: int, w: int = 1) -> None:
+        gone = self.S.bump(key, w)
         if self.entry is not None:
-            self.entry.append((key, None, w))
-        self.S.bump(key, w)
+            if gone:
+                self.entry.extend(gone)
+            self.entry.append((key, 0, w))
 
     def _tie(self, key: int, value: int, w: int = 1) -> None:
         self._add(key, value, w)
         self._bump(key, w)
 
     def take_back(self, entry: list) -> None:
-        """Forget: the same writes with the opposite sign, the last first."""
-        for key, value, w in reversed(entry):
-            if value is None:
-                self.S.bump(key, -w)
+        """Forget: the same writes with the opposite sign, the last first; a tie that gave way to one of them is
+        put back as it was."""
+        for record in reversed(entry):
+            if len(record) == 4:
+                self.S.put_back(record)
+            elif record[1] == 0:
+                self.S.bump(record[0], -record[2])
             else:
-                self.S.add(key, value, -w, 0)
+                self.S.add(record[0], record[1], -record[2], 0)
 
     def sequence(self, cs: tuple, origin: int) -> None:
         """An utterance as a sequence: what each of its contexts was followed by, and what stood two places on."""
@@ -89,10 +101,57 @@ class Mind:
             if i >= 2:
                 self._tie(mix(mix(R_SKIP, origin), padded[i - 2]), padded[i])
 
+    def sequences(self, sentences: List[List[str]], origin: int = O_TOLD, sign: int = 1):
+        """Many sentences at once (a text read): the same ties as ``sequence`` writes for each, added in one pass.
+        What they write is a function of the sentences alone, so ``sign=-1`` takes exactly them back. Returns the
+        ties that gave way, or None."""
+        seq, where = [], []
+        for toks in sentences:
+            seq.append(BOS)
+            where.append(0)
+            for i, t in enumerate(toks):
+                seq.append(self.code(t))
+                where.append(i + 1)
+            seq.append(END)
+            where.append(len(toks) + 1)
+        if not seq:
+            return None
+        seq, where = np.array(seq, dtype=np.uint64), np.array(where, dtype=np.int64)
+        keys, vals = [], []
+        for n in range(1, NGRAM + 1):
+            at = np.flatnonzero(where >= n)
+            h = np.full(len(at), fold((origin, n), R_SEQ), dtype=np.uint64)
+            for j in range(n, 0, -1):
+                h = mix_np(h, seq[at - j])
+            keys.append(h)
+            vals.append(seq[at])
+        at = np.flatnonzero(where >= 2)
+        keys.append(mix_np(np.full(len(at), mix(R_SKIP, origin), dtype=np.uint64), seq[at - 2]))
+        vals.append(seq[at])
+        keys, vals = np.concatenate(keys), np.concatenate(vals)
+        pairs, counts = np.unique(np.stack([keys, vals], axis=1), axis=0, return_counts=True)
+        tk, tc = np.unique(keys, return_counts=True)
+        k = np.concatenate([pairs[:, 0], tk])
+        v = np.concatenate([pairs[:, 1], np.zeros(len(tk), dtype=np.uint64)])
+        w = np.concatenate([counts, tc]).astype(np.int64)
+        if sign < 0:
+            self.S.sub_many(k, v, w)
+            return None
+        self.clock += 1
+        return self.S.add_many(k, v, w, self.clock)
+
     def tell(self, toks: List[str]) -> None:
         """A sentence told (its body, the closing mark apart)."""
         self.clock += 1
         self.sequence(self.codes(toks), O_TOLD)
+
+    def heard(self, q: List[str], a: List[str]) -> None:
+        """A turn nobody judged: what was asked and what the mind said, lived as sequences and as nothing more (an
+        answer that was not judged is no evidence that it was right)."""
+        self.clock += 1
+        self.sequence(self.codes(q), O_ASKED)
+        if a:
+            self.sequence(self.codes(a), O_ANSWER)
 
     # ----------------------------------------------------------------------------------------- reading a tie ----
     def next(self, ctx: tuple, newest: bool = False, origin: int = O_TOLD) -> Optional[Tuple[int, float]]:
@@ -227,6 +286,12 @@ class Mind:
         vs = self.S.vals(key)
         if not vs:
             return None
+        if not holes and len(vs) > 1:
+            # the question as lived, answered differently at different times: with no place open there is no
+            # filler the token could depend on, so the answer has changed, and what was answered last holds
+            # (believed as one confirmation since, or by its count where that is more)
+            last = max(vs, key=lambda x: (x[2], x[1]))
+            return last[0], max(0.75, rule(last[1], self.S.tot(key)))
         single = [(h, qc[i]) for h, (i, j) in enumerate(holes) if j - i == 1]
         if single and len(vs) > 1:
             lived = {v for v, _, _ in vs}
@@ -725,9 +790,9 @@ class Mind:
                 told["right"] = 1
                 if self.widen:
                     self._open_constant(said, qc, ac, mk, memo, told)
-            elif not any(not f[3] for f in fits):
-                # 4. a surprise, and the store holds no memory of the question that it can correct: the answer as
-                # lived is written
+            if not any(not f[3] for f in fits):
+                # 4. the answer as lived is written, where the store holds no memory of the question (one it holds
+                # was confirmed or corrected above): a dialogue lived leaves its own trace, whoever foresaw it
                 self._born(mix(F0, run[0][len(qc)]), self._skeleton(["*"] * len(ac)), qc, (), qc, ac, mk, memo, told)
             if not any(c[7] for c in right):
                 # 5. no frame would have given the answer (the mind may remember it, but that is not to have read
@@ -748,9 +813,7 @@ class Mind:
                 for t in as_:
                     self._add(mix(R_REL, x), t)
             for t in as_:
-                self._bump(mix(R_RELR, t))
-                for x in qs:
-                    self._add(mix(R_RELR, t), x)
+                self._bump(mix(R_RELR, t))                   # in how many answers the token stood
         # 7. both as sequences
         self.sequence(qc, O_ASKED)
         self.sequence(ac, O_ANSWER)
