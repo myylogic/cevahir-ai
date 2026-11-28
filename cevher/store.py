@@ -53,7 +53,7 @@ class Exact:
     def put_back(self, gone) -> None:
         pass
 
-    def bump(self, key, w=1):
+    def bump(self, key, w=1, t=0):
         n = self.totals.get(key, 0) + w
         if n <= 0:
             self.totals.pop(key, None)
@@ -65,6 +65,16 @@ class Exact:
         cell = row.get(value) if row else None
         return cell[0] if cell else 0
 
+    def moment(self, key, value):
+        row = self.ties.get(key)
+        cell = row.get(value) if row else None
+        return cell[1] if cell else 0
+
+    def set_moment(self, key, value, t) -> None:
+        row = self.ties.get(key)
+        if row and value in row:
+            row[value][1] = t
+
     def tot(self, key):
         return self.totals.get(key, 0)
 
@@ -74,7 +84,7 @@ class Exact:
             return []
         return sorted(((v, c[0], c[1]) for v, c in row.items()), key=lambda x: (-x[1], -x[2], x[0]))
 
-    def add_many(self, keys, values, w, t=0):
+    def add_many(self, keys, values, w, t=0, before=None):
         for k, v, c in zip(keys.tolist(), values.tolist(), w.tolist()):
             if v:
                 self.add(k, v, c, t)
@@ -82,7 +92,7 @@ class Exact:
                 self.bump(k, c)
         return None
 
-    def sub_many(self, keys, values, w):
+    def sub_many(self, keys, values, w, before=None, moment=0):
         for k, v, c in zip(keys.tolist(), values.tolist(), w.tolist()):
             if v:
                 self.add(k, v, -c, 0)
@@ -114,12 +124,15 @@ class Slots:
     bytes). All the ties of one key sit in the bucket its code names, with its total (the tie whose value is 0), so
     reading a key gives its values without asking about every unit. Two keys never add into one count.
 
-    The table doubles while more than a third of it is used, up to ``max_bytes`` (and to what ``allow`` permits). A tie that finds its bucket full
-    waits beside the table (a small overflow, at most one tie for every ``SPILL`` slots) until the table doubles.
-    Only when the table can no longer grow and the overflow is full does a tie give way: the one with the least
-    evidence in the bucket, the oldest among equals. ``let_go`` counts those; ``add`` returns the tie that gave
-    way, so that a ledger can put it back. While nothing has given way the table is exactly the multiset of what
-    was written, and its digest equals the exact store's. Collisions cost ties forgotten, never evidence invented.
+    The table doubles while more than a third of it is used, up to ``max_bytes`` (and to what ``allow`` permits).
+    A tie that finds its bucket full waits beside the table (a small overflow, at most one tie for every ``SPILL``
+    slots) until the table doubles. Only when the table can no longer grow and the overflow is full does a key
+    give way: the least evident of the keys the bucket held before this moment, the oldest among equals. **What is
+    new always finds a place** (a mind that kept only what is counted most could learn nothing new once it was
+    full); what one moment writes does not push itself out. ``let_go`` counts the ties that gave way; ``add``
+    returns them, so that a ledger can put them back. While nothing has given way the table is exactly the multiset
+    of what was written, and its digest equals the exact store's. Collisions cost ties forgotten, never evidence
+    invented.
     """
     WAYS = 8
     SLOT = 20                                                # bytes a slot
@@ -206,16 +219,17 @@ class Slots:
                 self._place(key, value, c, t)
         return True
 
-    def _place(self, key: int, value: int, c: int, t: int):
+    def _place(self, key: int, value: int, c: int, t: int, room_only: bool = False):
         """A new tie. A key holds its total and at most ``WAYS - 1`` values: a further value takes the place of the
         least evident of them (the oldest among equals) if it is counted no less, and is not written otherwise.
         Else the tie goes into its bucket; where other keys fill the bucket, beside the table; and where there is
-        no room beside it either, in place of the least evident tie of the bucket. Returns the tie that gave way."""
+        no room beside it either, in place of the least evident key the bucket held before this moment (with
+        ``room_only``, a tie put back, it is not written there). Returns the ties that gave way."""
         self._mark(key)
         base = self._base(key)
         keys = self.key[base:base + self.WAYS]
         row = self.spill.get(key) if self.spill else None
-        if value:
+        if value and not room_only:                          # (a tie put back was there before: it only needs room)
             own = np.flatnonzero((keys == key) & (self.val[base:base + self.WAYS] != 0))
             beside = [v for v in row if v] if row else []
             if len(own) + len(beside) >= self.WAYS - 1:
@@ -244,15 +258,17 @@ class Slots:
             self.spill.setdefault(key, {})[value] = [c, t]
             self.spilled += 1
             return None
-        # no room anywhere: the least evident key of the bucket gives way whole (its total and its values), if it
-        # is counted no more than the new tie; the new tie is not written otherwise
+        # no room anywhere: the least evident of the other keys the bucket held before this moment gives way whole
+        # (its total and its values), the oldest among equals. What is new is written whatever it is counted; only
+        # where this very moment has filled the bucket is it not kept
         vals_, cnts = self.val[base:base + self.WAYS], self.cnt[base:base + self.WAYS]
-        totals = [(int(cnts[i]), int(self.tim[base + i]), int(keys[i])) for i in range(self.WAYS)
-                  if int(keys[i]) != key and int(vals_[i]) == 0]
-        if not totals:                                       # values whose total waits elsewhere: the least of them
+        totals = [] if room_only else [
+            (int(cnts[i]), int(self.tim[base + i]), int(keys[i])) for i in range(self.WAYS)
+            if int(keys[i]) != key and int(vals_[i]) == 0 and int(self.tim[base + i]) < t]
+        if not totals and not room_only:                     # values whose total waits elsewhere: the least of them
             totals = [(int(cnts[i]), int(self.tim[base + i]), int(keys[i])) for i in range(self.WAYS)
-                      if int(keys[i]) != key]
-        if not totals or min(totals)[0] > c:
+                      if int(keys[i]) != key and int(self.tim[base + i]) < t]
+        if not totals:
             self.not_kept += 1
             return None
         victim = min(totals)[2]
@@ -312,11 +328,33 @@ class Slots:
         key, value, c, t = gone
         if not self.get(key, value):
             before = self.let_go, self.not_kept
-            self._place(key, value, c, t)
+            self._place(key, value, c, t, room_only=True)
             self.let_go, self.not_kept = max(0, before[0] - 1), before[1]
 
-    def bump(self, key, w=1):
-        return self.add(key, 0, w, 0)
+    def bump(self, key, w=1, t=0):
+        return self.add(key, 0, w, t)
+
+    def _slot(self, key, value):
+        base = self._base(key)
+        hit = np.flatnonzero((self.key[base:base + self.WAYS] == key) & (self.val[base:base + self.WAYS] == value))
+        return base + int(hit[0]) if len(hit) else -1
+
+    def moment(self, key, value) -> int:
+        """The last moment a tie was written (0 if the table does not hold it)."""
+        if not self._seen(key):
+            return 0
+        i = self._slot(key, value)
+        if i >= 0:
+            return int(self.tim[i])
+        row = self.spill.get(key) if self.spill else None
+        return row[value][1] if row is not None and value in row else 0
+
+    def set_moment(self, key, value, t) -> None:
+        i = self._slot(key, value) if self._seen(key) else -1
+        if i >= 0:
+            self.tim[i] = t
+        elif self.spill and value in self.spill.get(key, ()):
+            self.spill[key][value][1] = t
 
     def get(self, key, value):
         if not self._seen(key):
@@ -355,14 +393,23 @@ class Slots:
             found[a:b], slot[a:b] = match.any(axis=1), base[a:b] + match.argmax(axis=1)
         return base, found, slot
 
-    def add_many(self, keys: np.ndarray, values: np.ndarray, w: np.ndarray, t: int = 0):
-        """W(key, value) += w for arrays of distinct (key, value) pairs with w > 0 (totals as value 0). Returns the
-        ties that gave way, as four arrays, or None."""
+    def add_many(self, keys: np.ndarray, values: np.ndarray, w: np.ndarray, t: int = 0, before: list = None):
+        """W(key, value) += w for arrays of distinct (key, value) pairs with w > 0 (totals as value 0), at moment
+        ``t``. Returns the ties that gave way, as four arrays, or None. Where a list is given, the moment each tie
+        was last written before this breath (0 for a new one) is appended to it: a ledger keeps it, so that
+        forgetting the breath also brings back what was written last."""
         if not len(keys):
+            if before is not None:
+                before.append(np.zeros(0, dtype=np.uint32))
             return None
         while (self.used + self.spilled + len(keys)) * self.LOAD > self.nb * self.WAYS and self._grow():
             pass
         base, found, slot = self._find(keys, values)
+        prev = None
+        if before is not None:
+            prev = np.zeros(len(keys), dtype=np.uint32)
+            prev[found] = self.tim[slot[found]]
+            before.append(prev)
         self.cnt[slot[found]] += w[found].astype(np.int32)
         self.tim[slot[found]] = t
         rest = np.flatnonzero(~found)
@@ -375,6 +422,8 @@ class Slots:
                 row = self.spill.get(int(keys[i]))
                 if row is not None and int(values[i]) in row:
                     cell = row[int(values[i])]
+                    if prev is not None:
+                        prev[i] = cell[1]
                     cell[0] += int(w[i])
                     cell[1] = t
                     waits[j] = True
@@ -408,17 +457,23 @@ class Slots:
         if not len(gk):
             return None
         # what gave way is kept as it stood before this breath: without what this breath itself added to it (a
-        # tie written and let go in one breath was never kept)
+        # tie written and let go in one breath was never kept), and with the moment it had before the breath
         gk, gv = np.array(gk, dtype=np.uint64), np.array(gv, dtype=np.uint64)
-        before = np.array(gc, dtype=np.int64) - self._written(keys, values, w, gk, gv)
-        keep = before > 0
+        written, where = self._written(keys, values, w, gk, gv)
+        count = np.array(gc, dtype=np.int64) - written
+        moment = np.array(gt, dtype=np.uint64).astype(np.uint32)
+        if prev is not None:
+            mine = where >= 0
+            moment[mine] = prev[where[mine]]
+        keep = count > 0
         if not keep.any():
             return None
-        return gk[keep], gv[keep], before[keep].astype(np.int32), np.array(gt, dtype=np.uint64)[keep].astype(np.uint32)
+        return gk[keep], gv[keep], count[keep].astype(np.int32), moment[keep]
 
     @staticmethod
-    def _written(keys: np.ndarray, values: np.ndarray, w: np.ndarray, gk: np.ndarray, gv: np.ndarray) -> np.ndarray:
-        """For each tie (gk, gv): what a breath of distinct ties (keys, values, w) writes to it, 0 if nothing."""
+    def _written(keys: np.ndarray, values: np.ndarray, w: np.ndarray, gk: np.ndarray, gv: np.ndarray):
+        """For each tie (gk, gv): what a breath of distinct ties (keys, values, w) writes to it (0 if nothing), and
+        where in the breath the tie stands (-1 if it does not)."""
         code = mix_np(keys, values)
         order = np.argsort(code, kind="stable")
         code = code[order]
@@ -426,27 +481,39 @@ class Slots:
         at = np.minimum(np.searchsorted(code, asked), len(code) - 1)
         cand = order[at]
         hit = (keys[cand] == gk) & (values[cand] == gv)
-        out = np.where(hit, w[cand], 0).astype(np.int64)
+        where = np.where(hit, cand, -1).astype(np.int64)
         twin = np.flatnonzero((code[at] == asked) & ~hit)    # two ties of the breath with one code: look, one by one
         if len(twin):
-            written = dict(zip(zip(keys.tolist(), values.tolist()), w.tolist()))
+            index = {kv: i for i, kv in enumerate(zip(keys.tolist(), values.tolist()))}
             for i in twin.tolist():
-                out[i] = written.get((int(gk[i]), int(gv[i])), 0)
-        return out
+                where[i] = index.get((int(gk[i]), int(gv[i])), -1)
+        return np.where(where >= 0, w[np.maximum(where, 0)], 0).astype(np.int64), where
 
-    def sub_many(self, keys: np.ndarray, values: np.ndarray, w: np.ndarray) -> None:
-        """W(key, value) -= w for arrays of distinct pairs; a tie whose count returns to zero is removed."""
+    def sub_many(self, keys: np.ndarray, values: np.ndarray, w: np.ndarray, before: np.ndarray = None,
+                 moment: int = 0) -> None:
+        """W(key, value) -= w for arrays of distinct pairs; a tie whose count returns to zero is removed. With
+        ``before`` (what ``add_many`` gave when the same ties were written at ``moment``), a tie that was last
+        written by that breath has the moment it had before it again."""
         if not len(keys):
             return
         base, found, slot = self._find(keys, values)
+        at = np.flatnonzero(found)
         slot = slot[found]
         self.cnt[slot] -= w[found].astype(np.int32)
-        dead = slot[self.cnt[slot] <= 0]
+        alive = self.cnt[slot] > 0
+        if before is not None:
+            back = alive & (self.tim[slot] == moment) & (before[at] > 0)
+            self.tim[slot[back]] = before[at[back]]
+        dead = slot[~alive]
         self.key[dead], self.val[dead], self.cnt[dead], self.tim[dead] = 0, 0, 0, 0
         self.used -= len(dead)
         if self.spill:
             for i in np.flatnonzero(~found).tolist():
-                self.add(int(keys[i]), int(values[i]), -int(w[i]), 0)
+                k, v = int(keys[i]), int(values[i])
+                last = self.moment(k, v)
+                self.add(k, v, -int(w[i]), 0)
+                if before is not None and last == moment and int(before[i]) > 0:
+                    self.set_moment(k, v, int(before[i]))
 
     def put_back_many(self, gone) -> None:
         for k, v, c, t in zip(gone[0].tolist(), gone[1].tolist(), gone[2].tolist(), gone[3].tolist()):
@@ -485,28 +552,37 @@ class Slots:
             d = mix_np(mix_np(k, v), c.astype(np.int64).astype(np.uint64))
             return int(d.sum(dtype=np.uint64))
 
+    def moments(self) -> int:
+        """A digest of when each tie was last written (what was told last is read from it)."""
+        k, v, _, t = self._all()
+        with np.errstate(over="ignore"):
+            return int(mix_np(mix_np(k, v), t.astype(np.uint64)).sum(dtype=np.uint64)) if len(k) else 0
+
     def state(self) -> dict:
-        k, v, c, t = self._all()
-        return {"key": k, "val": v, "cnt": c, "tim": t,
+        """The table as it stands: each tie with the slot it sits in, and the ties that wait beside it."""
+        at = np.flatnonzero(self.key != 0)
+        beside = [(key, value, cell[0], cell[1]) for key, row in self.spill.items() for value, cell in row.items()]
+        return {"at": at.astype(np.int64), "key": self.key[at], "val": self.val[at], "cnt": self.cnt[at],
+                "tim": self.tim[at], "beside": np.array(beside, dtype=np.uint64).reshape(-1, 4),
                 "nb": np.array([self.nb, self.max_buckets, self.let_go, self.not_kept], dtype=np.int64)}
 
     @classmethod
-    def from_state(cls, st: dict) -> "Slots":
+    def from_state(cls, st: dict, allowed: int = 0) -> "Slots":
+        """The table put back as it stood (nothing is placed again, so nothing can give way in loading)."""
         nb, max_buckets, let_go, not_kept = (int(x) for x in st["nb"])
         self = cls.__new__(cls)
         self.max_buckets, self.nb = max_buckets, nb
         self.now_buckets = max_buckets
+        if allowed:
+            self.allow(allowed)
         self._alloc(nb)
-        self.used, self.let_go, self.not_kept, self.spill, self.spilled = 0, 0, 0, {}, 0
+        at = st["at"]
+        self.key[at], self.val[at], self.cnt[at], self.tim[at] = st["key"], st["val"], st["cnt"], st["tim"]
+        self.used, self.spill, self.spilled = len(at), {}, 0
+        for key, value, c, t in st["beside"].tolist():
+            self.spill.setdefault(key, {})[value] = [c, t]
+            self.spilled += 1
         self.filter = bytearray(1)
         self._refilter()
-        self.add_many(st["key"], st["val"], st["cnt"].astype(np.int64), 0)
-        base, found, slot = self._find(st["key"], st["val"])
-        self.tim[slot[found]] = st["tim"][found]
-        if self.spill:
-            for i in np.flatnonzero(~found).tolist():
-                row = self.spill.get(int(st["key"][i]))
-                if row is not None and int(st["val"][i]) in row:
-                    row[int(st["val"][i])][1] = int(st["tim"][i])
         self.let_go, self.not_kept = let_go, not_kept
         return self

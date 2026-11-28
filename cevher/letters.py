@@ -29,13 +29,16 @@ R_LETTER = code_of("\0role letter context")
 TOTAL = np.uint64(0x101)                                     # the reserved value of a context's total
 N_EDGES = np.array([2, 3, 4, 5, 8, 16, 32, 64], dtype=np.int64)   # how much lived: 1, 2, 3, 4, 5-7, ... 64 or more
 _SALT = 0x2545F4914F6CDD1D
+_NEVER = 1 << 62                                             # a count no tie has: a slot that does not give way
 
 
 class Counts:
     """Checked counters for the letters: one slot a tie, the tie's code and its count (12 bytes), eight slots a
-    bucket. The table doubles while more than half of it is used, up to ``max_bytes``; after that a new tie
-    takes the place of the least counted tie of its bucket if that one is counted no more than the new one, and is
-    not written otherwise. ``let_go`` counts the ties that gave way, ``not_written`` those that found no place."""
+    bucket. The table doubles while more than half of it is used, up to ``max_bytes``; after that a new tie takes
+    the place of the least counted of the ties its bucket held before this breath. What is new always finds a
+    place (a table that kept only what is counted most could learn no new text once it was full); what one breath
+    writes does not push itself out. ``let_go`` counts the ties that gave way, ``not_written`` those that found
+    no place."""
     WAYS = 8
     SLOT = 12
 
@@ -79,8 +82,9 @@ class Counts:
         _, found, slot = self._find(keys)
         return np.where(found, self.cnt[slot], 0).astype(np.int64)
 
-    def add_many(self, keys: np.ndarray, w: np.ndarray, sign: int = 1):
-        """count(key) += sign * w for distinct keys. Returns the ties that gave way as (keys, counts), or None."""
+    def add_many(self, keys: np.ndarray, w: np.ndarray, sign: int = 1, room_only: bool = False):
+        """count(key) += sign * w for distinct keys. Returns the ties that gave way as (keys, counts), or None.
+        With ``room_only`` (ties put back) a new tie is written only where a slot is free."""
         if not len(keys):
             return None
         if sign < 0:
@@ -104,15 +108,19 @@ class Counts:
             b = base[order]
             first = np.r_[True, b[1:] != b[:-1]]
             rank = np.arange(len(b)) - np.maximum.accumulate(np.where(first, np.arange(len(b)), 0))
+            fresh = np.zeros(0, dtype=np.int64)              # the slots this breath has written
             for r in range(min(self.WAYS, int(rank.max()) + 1)):
                 pick = order[rank == r]
                 at = base[pick][:, None] + ways[None, :]
                 c = self.cnt[at].astype(np.int64)
                 c[self.key[at] == 0] = -1
+                if r:
+                    c[np.isin(at, fresh)] = _NEVER
                 col = c.argmin(axis=1)
                 least = c[np.arange(len(pick)), col]
-                ok = least <= w[pick]                        # room, or a tie counted no more than the new one
+                ok = (least < 0) if room_only else (least < _NEVER)      # room, or the least counted gives way
                 target = base[pick[ok]] + col[ok]
+                fresh = np.concatenate([fresh, target])
                 taken = least[ok] >= 0
                 self.used += int((~taken).sum())
                 if taken.any():
@@ -138,7 +146,7 @@ class Counts:
         keys, counts = gone
         _, found, _ = self._find(keys)
         before = self.let_go, self.not_written
-        self.add_many(keys[~found], counts[~found].astype(np.int64))
+        self.add_many(keys[~found], counts[~found].astype(np.int64), room_only=True)
         self.let_go, self.not_written = before[0] - int((~found).sum()), before[1]
 
     def nbytes(self) -> int:
@@ -154,21 +162,25 @@ class Counts:
             return int(mix_np(self.key[at], self.cnt[at].astype(np.uint64)).sum(dtype=np.uint64))
 
     def state(self) -> dict:
+        """The table as it stands: each tie with the slot it sits in."""
         at = np.flatnonzero(self.key != 0)
-        return {"key": self.key[at], "cnt": self.cnt[at],
+        return {"at": at.astype(np.int64), "key": self.key[at], "cnt": self.cnt[at],
                 "nb": np.array([self.nb, self.max_buckets, self.let_go, self.not_written], dtype=np.int64)}
 
     @classmethod
-    def from_state(cls, st: dict) -> "Counts":
+    def from_state(cls, st: dict, allowed: int = 0) -> "Counts":
+        """The table put back as it stood (nothing is placed again, so nothing can give way in loading)."""
         nb, max_buckets, let_go, not_written = (int(x) for x in st["nb"])
         self = cls.__new__(cls)
         self.max_buckets, self.nb = max_buckets, nb
         self.now_buckets = max_buckets
+        if allowed:
+            self.allow(allowed)
         self.key = np.zeros(nb * self.WAYS, dtype=np.uint64)
         self.cnt = np.zeros(nb * self.WAYS, dtype=np.uint32)
-        self.used = self.let_go = self.not_written = 0
-        self.add_many(st["key"], st["cnt"].astype(np.int64))
-        self.let_go, self.not_written = let_go, not_written
+        at = st["at"]
+        self.key[at], self.cnt[at] = st["key"], st["cnt"]
+        self.used, self.let_go, self.not_written = len(at), let_go, not_written
         return self
 
 

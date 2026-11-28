@@ -175,7 +175,7 @@ def test_forgetting_an_entry_leaves_the_substance_as_if_it_had_never_been_lived(
     for q, a in SCAN_LIFE:
         c.watch(q, a + " .")
     c.tell("Kedi süt içer ve uyur.")
-    kept = c.digest()
+    kept, kept_moments = c.digest(), c.moments()
     c.read("Ankara Türkiye'nin başkentidir. İstanbul en kalabalık şehirdir. " * 80)      # a long text, many ties at once
     c.watch("gizli söz nedir ?", "mavi fil .")
     c.converse("zap twice")
@@ -183,7 +183,7 @@ def test_forgetting_an_entry_leaves_the_substance_as_if_it_had_never_been_lived(
     assert c.reply("gizli söz nedir ?") == "mavi fil ."
     for k in range(len(c.entries) - 1, len(SCAN_LIFE), -1):
         c.forget(k)
-    assert c.digest() == kept
+    assert c.digest() == kept and c.moments() == kept_moments
     assert c.reply("gizli söz nedir ?") == ""
     for k in range(len(SCAN_LIFE), -1, -1):
         c.forget(k)
@@ -197,13 +197,14 @@ def test_forgetting_is_exact_in_a_full_table_too():
     text = lambda n: " ".join(rng.choice(words) for _ in range(n)) + ". "
     c.read("".join(text(12) for _ in range(6000)))
     assert c.store.let_go + c.store.not_kept > 0 and c.letters.T.let_go > 0
-    before = c.digest()
+    before, moments = c.digest(), c.moments()
     c.read("".join(text(12) for _ in range(600)))
     c.watch("bu ne ?", "bir deneme .")
+    assert c.reply("bu ne ?") == "bir deneme ."               # what is new finds a place in a full table
     assert c.digest() != before
     c.forget(len(c.entries) - 1)
     c.forget(len(c.entries) - 2)
-    assert c.digest() == before
+    assert c.digest() == before and c.moments() == moments
 
 
 def test_a_long_text_is_written_a_group_of_sentences_at_a_time_and_forgotten_exactly(monkeypatch):
@@ -215,11 +216,11 @@ def test_a_long_text_is_written_a_group_of_sentences_at_a_time_and_forgotten_exa
     c = Cevahir(budget_mb=97, ledger=True)
     c.read("".join(" ".join(rng.choice(words) for _ in range(9)) + ". " for _ in range(4000)))
     assert c.store.let_go + c.store.not_kept > 0
-    before = c.digest()
+    before, moments = c.digest(), c.moments()
     c.read(text)
     assert c.digest() != before
     c.forget(len(c.entries) - 1)
-    assert c.digest() == before
+    assert c.digest() == before and c.moments() == moments
     groups = list(module._groups(text, False))
     assert len(groups) == 40 and sum(len(g) for g, _, _ in groups) == 2500
     again = [s for _, x, y in groups for g, _, _ in module._groups(text[x:y], False) for s in g]
@@ -246,6 +247,71 @@ def test_a_long_file_is_given_a_piece_at_a_time():
     assert all(piece.endswith("\n") for piece in got[:-1]) and max(map(len, got)) < 10000
     assert list(pieces(io.StringIO("kısa"), most=5000)) == ["kısa"] and list(pieces(io.StringIO(""))) == []
     assert "".join(pieces(io.StringIO("x" * 12000), most=5000)) == "x" * 12000      # no line's end: cut where it is
+
+
+def test_a_full_mind_goes_on_learning():
+    """A table that kept only what is counted most could learn nothing new once it was full. What is new always
+    finds a place; what gives way is the least evident of what the bucket held before."""
+    c = Cevahir(budget_mb=97)                                # 1 MB for both tables
+    rng = random.Random(11)
+    words = ["".join(rng.choice("abcçdefgğhıijklmnoöprsştuüvyz") for _ in range(rng.randint(2, 8))) for _ in range(4000)]
+    for _ in range(3):                                       # read until the tables are full of ties met twice and more
+        c.read("".join(" ".join(rng.choice(words[:800]) for _ in range(10)) + ". " for _ in range(6000)))
+    size = c.size()
+    assert size["ties"]["let_go"] > 0 and size["letters"]["let_go"] > 0
+    c.watch("gizli söz nedir ?", "mavi fil .")
+    assert c.reply("gizli söz nedir ?") == "mavi fil ."
+    for q, a in (("zap", "Z"), ("zap twice", "Z Z"), ("dax", "D"), ("dax twice", "D D"), ("wif", "W")):
+        c.watch(q, a + " .")
+    assert c.reply("wif twice") == "W W ."
+    new = "yepyeni bir dil: qwx zvk qwx zvk qwx zvk. " * 40
+    first = c.letters.live(new[:len(new) // 2])
+    second = c.letters.live(new[len(new) // 2:])
+    assert second < first / 2                                # the letters go on learning a text they had not met
+
+
+def test_forgetting_brings_back_what_was_told_last():
+    def lesson(c):
+        c.tell("masanın rengi kahverengi .")
+        c.watch("masanın rengi ne ?", "kahverengi")
+        c.tell("defterin rengi sarı .")
+        c.watch("defterin rengi ne ?", "sarı")
+        c.tell("perdenin rengi mor .")
+        c.tell("perdenin rengi gri .")
+        c.watch("perdenin rengi ne ?", "gri")
+        c.tell("kapının rengi beyaz .")
+        c.tell("kapının rengi yeşil .")
+        c.watch("kapının rengi ne ?", "yeşil")
+    c = Cevahir(ledger=True)
+    lesson(c)
+    c.tell("halının rengi mavi .")
+    c.tell("halının rengi sarı .")
+    assert c.reply("halının rengi ne ?") == "sarı"
+    digest, moments = c.digest(), c.moments()
+    c.tell("halının rengi mavi .")                           # said again: the tie is an old one, written last now
+    assert c.reply("halının rengi ne ?") == "mavi"
+    c.forget(len(c.entries) - 1)
+    assert c.digest() == digest and c.moments() == moments
+    assert c.reply("halının rengi ne ?") == "sarı"           # as if the last telling had never been lived
+    long = "halının rengi mavi . " + "Ankara Türkiye'nin başkentidir. İstanbul en kalabalık şehirdir. " * 80
+    c.read(long)                                             # the same, where a long text said it (many ties at once)
+    assert c.reply("halının rengi ne ?") == "mavi"
+    c.forget(len(c.entries) - 1)
+    assert c.digest() == digest and c.moments() == moments
+    assert c.reply("halının rengi ne ?") == "sarı"
+
+
+def test_a_mind_loaded_holds_no_more_than_a_mind_that_lived():
+    import tempfile
+    c = Cevahir()
+    rng = random.Random(3)
+    words = ["".join(rng.choice("abcdefghijklmnoprstuvyz") for _ in range(rng.randint(2, 9))) for _ in range(30000)]
+    c.read("".join(" ".join(rng.choice(words) for _ in range(10)) + ". " for _ in range(30000)))
+    with tempfile.TemporaryDirectory() as folder:
+        c.save(folder)
+        again = Cevahir.load(folder)
+    assert again.digest() == c.digest() and again.moments() == c.moments()
+    assert again.size()["table_bytes"] <= c.size()["table_bytes"]      # the growth law holds for a loaded mind too
 
 
 def test_the_letters_take_back_exactly_what_a_text_wrote():

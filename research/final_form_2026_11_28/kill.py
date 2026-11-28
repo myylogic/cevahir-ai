@@ -57,7 +57,7 @@ class Indexed:
         elif self.get(key, value) <= 0:
             row.pop(value, None)
 
-    def bump(self, key, w=1):
+    def bump(self, key, w=1, t=0):
         self._inc(key, 0, w)
 
     def add(self, key, value, w=1, t=0):

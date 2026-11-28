@@ -37,7 +37,7 @@ PER_CHARACTER = 8                                            # bytes the tables 
 FLOOR_MB = 32                                                # ... and what they may hold however little was lived
 BULK = 4096                                                  # a text longer than this is read many ties at once
 GROUP = 1 << 15                                              # ... so many of its words at a time, about
-VERSION = 1
+VERSION = 2                                                  # of the file a mind is kept in
 
 
 def _spans(text: str, lines: bool):
@@ -114,7 +114,7 @@ class Cevahir:
         if self.entries is None:
             return None
         self.mind.entry = []
-        return {"tail": self.letters.tail, "lgone": [], "sgone": []}
+        return {"tail": self.letters.tail, "lgone": [], "sgone": [], "sprev": [], "smoment": []}
 
     def _end(self, open_entry: Optional[dict], kind: str, text: str, stream: str, bulk: int = 0) -> None:
         """An entry of the history is closed and written to the ledger: what was lived (``stream``, as the letters
@@ -125,8 +125,8 @@ class Cevahir:
         self.mind.entry = None
         arrays = {"stream": np.frombuffer(stream.encode("utf-8", "surrogatepass"), dtype=np.uint8),
                   "tail": np.frombuffer(open_entry["tail"], dtype=np.uint8),
-                  "log": np.array([(1, r[0], r[1], r[2], r[3]) if len(r) == 4 else (0, r[0], r[1], r[2], 0)
-                                   for r in log], dtype=np.uint64).reshape(-1, 5),
+                  "log": np.array([(1,) + tuple(r) + (0,) if len(r) == 4 else (0,) + tuple(r)
+                                   for r in log], dtype=np.uint64).reshape(-1, 6),
                   "bulk": np.array([int(bulk)])}            # 0, or a text read many ties at once: 1, by lines 2
         lg = open_entry["lgone"]
         arrays["lg_at"] = np.array([(a, b, len(g[0])) for a, b, g in lg], dtype=np.int64).reshape(-1, 3)
@@ -137,6 +137,10 @@ class Cevahir:
         for i, name in enumerate(("sg_k", "sg_v", "sg_c", "sg_t")):
             parts = [g[i] for g in sg if g is not None]
             arrays[name] = np.concatenate(parts) if parts else np.zeros(0, dtype=np.uint64)
+        sp = open_entry["sprev"]                             # the moments a long text's ties had before each group
+        arrays["sp_n"] = np.array([len(x) for x in sp], dtype=np.int64)
+        arrays["sp"] = np.concatenate(sp) if sp else np.zeros(0, dtype=np.uint32)
+        arrays["sm"] = np.array(open_entry["smoment"], dtype=np.int64)
         buf = io.BytesIO()
         np.savez(buf, **arrays)
         blob = zlib.compress(buf.getbuffer(), 1)
@@ -195,9 +199,10 @@ class Cevahir:
         bulk = len(text) >= BULK
         for group, _, _ in _groups(text, code):
             if bulk:
-                gone = self.mind.sequences(group)
+                gone = self.mind.sequences(group, before=None if e is None else e["sprev"])
                 if e is not None:
                     e["sgone"].append(gone)
+                    e["smoment"].append(self.mind.clock)
             else:
                 for s in group:
                     self.mind.tell(s)
@@ -325,15 +330,17 @@ class Cevahir:
             a = {name: z[name] for name in z.files}
         stream = a["stream"].tobytes().decode("utf-8", "surrogatepass")
         # the word grain: the writes kept, the last first; then what a long text wrote, a function of the text
-        log = [tuple(int(x) for x in r[1:]) if r[0] else tuple(int(x) for x in r[1:4]) for r in a["log"]]
+        log = [tuple(int(x) for x in r[1:5]) if r[0] else tuple(int(x) for x in r[1:]) for r in a["log"]]
         self.mind.take_back(log)
         bulk = int(a["bulk"][0])
         if bulk:                                             # the groups as they were written, the last first
             where = [(x, y) for _, x, y in _groups(stream, bulk == 2)]
-            at = len(a["sg_k"])
-            for (x, y), n in reversed(list(zip(where, a["sg_n"].tolist()))):
+            at, sp_at = len(a["sg_k"]), len(a["sp"])
+            for (x, y), n, held, moment in reversed(list(zip(where, a["sg_n"].tolist(), a["sp_n"].tolist(),
+                                                              a["sm"].tolist()))):
                 group = [s for g, _, _ in _groups(stream[x:y], bulk == 2) for s in g]
-                self.mind.sequences(group, sign=-1)
+                self.mind.sequences(group, sign=-1, before=a["sp"][sp_at - held:sp_at], moment=moment)
+                sp_at -= held
                 if n:
                     self.store.put_back_many(tuple(a[name][at - n:at] for name in ("sg_k", "sg_v", "sg_c", "sg_t")))
                     at -= n
@@ -363,6 +370,11 @@ class Cevahir:
     def digest(self) -> str:
         """A digest of the substance: every tie of both tables with its count, wherever it sits."""
         return "%016x%016x" % (self.store.digest(), self.letters.T.digest())
+
+    def moments(self) -> str:
+        """A digest of when each tie of words was last written: what was told last is read from it, so forgetting
+        must bring it back too."""
+        return "%016x" % self.store.moments()
 
     def size(self) -> dict:
         return {"ties": self.store.size(), "letters": self.letters.size(), "words": len(self.mind.spell),
@@ -407,6 +419,9 @@ class Cevahir:
                 h.update(block)
         if h.hexdigest() != manifest["sha256"]:
             raise IOError("cevher.npz does not match its manifest")
+        if manifest.get("version") != VERSION:
+            raise IOError("cevher.npz was kept by another version of the package (%r, this is %d): raise the mind "
+                          "again" % (manifest.get("version"), VERSION))
         with np.load(path, allow_pickle=False) as z:
             a = {name: z[name] for name in z.files}
         clock, lived, depth, nights, budget = (int(x) for x in a["misc"])
@@ -414,12 +429,13 @@ class Cevahir:
         self.letters.lived = lived
         st = {k[2:]: v for k, v in a.items() if k.startswith("s_")}
         st["nb"] = np.array([st["nb"][0], max(int(st["nb"][0]), self.store.max_buckets), st["nb"][2], st["nb"][3]])
-        self.store = Slots.from_state(st)
+        allowed = min(self.rest, max(FLOOR_MB << 20, self.per_character * lived))    # the growth law, as in living
+        self.store = Slots.from_state(st, allowed * 3 // 4)
         self.mind.S = self.store
         st = {k[2:]: v for k, v in a.items() if k.startswith("l_")}
         st["nb"] = np.array([st["nb"][0], max(int(st["nb"][0]), self.letters.T.max_buckets), st["nb"][2],
                              st["nb"][3]])
-        self.letters.T = Counts.from_state(st)
+        self.letters.T = Counts.from_state(st, allowed // 4)
         self.mind.spell = Spellings.from_state({k[2:]: v for k, v in a.items() if k.startswith("w_")})
         self.letters.zero, self.letters.sit = a["zero"], a["sit"]
         self.letters.tail, self.letters.lived = a["tail"].tobytes(), lived

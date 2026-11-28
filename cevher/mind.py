@@ -66,18 +66,15 @@ class Mind:
 
     # ----------------------------------------------------------------------------------------------- writing ----
     def _add(self, key: int, value: int, w: int = 1) -> None:
-        gone = self.S.add(key, value, w, self.clock)
+        last = self.S.moment(key, value) if self.entry is not None else 0
+        gone = self.S.add(key, value, w, self.clock) if value else self.S.bump(key, w, self.clock)
         if self.entry is not None:
             if gone:
                 self.entry.extend(gone)                      # before the write: taken back after it
-            self.entry.append((key, value, w))
+            self.entry.append((key, value, w, last, self.clock))
 
     def _bump(self, key: int, w: int = 1) -> None:
-        gone = self.S.bump(key, w)
-        if self.entry is not None:
-            if gone:
-                self.entry.extend(gone)
-            self.entry.append((key, 0, w))
+        self._add(key, 0, w)
 
     def _tie(self, key: int, value: int, w: int = 1) -> None:
         self._add(key, value, w)
@@ -85,14 +82,20 @@ class Mind:
 
     def take_back(self, entry: list) -> None:
         """Forget: the same writes with the opposite sign, the last first; a tie that gave way to one of them is
-        put back as it was."""
+        put back as it was; and a tie this write was the last to touch has again the moment it had before."""
+        S = self.S
         for record in reversed(entry):
-            if len(record) == 4:
-                self.S.put_back(record)
-            elif record[1] == 0:
-                self.S.bump(record[0], -record[2])
+            if len(record) == 4:                             # a tie that gave way: (key, value, W, its moment)
+                S.put_back(record)
+                continue
+            key, value, w, last, moment = record             # a write, the moment before it, and its own
+            mine = S.moment(key, value) == moment
+            if value:
+                S.add(key, value, -w, 0)
             else:
-                self.S.add(record[0], record[1], -record[2], 0)
+                S.bump(key, -w)
+            if mine and last:
+                S.set_moment(key, value, last)
 
     def sequence(self, cs: tuple, origin: int) -> None:
         """An utterance as a sequence: what each of its contexts was followed by, and what stood two places on."""
@@ -107,10 +110,13 @@ class Mind:
                     begun = mix(begun, padded[i - 1])
                     self._tie(begun, padded[i])
 
-    def sequences(self, sentences: List[List[str]], origin: int = O_TOLD, sign: int = 1):
+    def sequences(self, sentences: List[List[str]], origin: int = O_TOLD, sign: int = 1, before=None,
+                  moment: int = 0):
         """Many sentences at once (a text read): the same ties as ``sequence`` writes for each, added in one pass.
         What they write is a function of the sentences alone, so ``sign=-1`` takes exactly them back. Returns the
-        ties that gave way, or None."""
+        ties that gave way, or None. ``before``: a list that takes the moments the ties had before (writing), or
+        those moments, to be given back to the ties this breath, lived at ``moment``, was the last to touch
+        (taking back)."""
         seq, where = [], []
         for toks in sentences:
             seq.append(BOS)
@@ -148,10 +154,10 @@ class Mind:
         v = np.concatenate([pairs[:, 1], np.zeros(len(tk), dtype=np.uint64)])
         w = np.concatenate([counts, tc]).astype(np.int64)
         if sign < 0:
-            self.S.sub_many(k, v, w)
+            self.S.sub_many(k, v, w, before=before, moment=moment)
             return None
         self.clock += 1
-        return self.S.add_many(k, v, w, self.clock)
+        return self.S.add_many(k, v, w, self.clock, before=before)
 
     def tell(self, toks: List[str]) -> None:
         """A sentence told (its body, the closing mark apart)."""
