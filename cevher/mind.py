@@ -206,6 +206,8 @@ class Mind:
         best = None
         for v, c, _ in self.S.vals(key):
             n_t = self.S.tot(mix(R_RELR, v))
+            if not (c <= n_x <= n_all and c <= n_t <= n_all and n_t - c <= n_all - n_x):
+                continue                                     # part of this evidence gave way: the mind does not know
             e = min(rule(c, n_x), rule(c, n_t),
                     rule((n_all - n_x) - (n_t - c), n_all - n_x), rule((n_all - n_t) - (n_x - c), n_all - n_t))
             if e < LINE:

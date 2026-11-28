@@ -34,11 +34,11 @@ _NEVER = 1 << 62                                             # a count no tie ha
 
 class Counts:
     """Checked counters for the letters: one slot a tie, the tie's code and its count (12 bytes), eight slots a
-    bucket. The table doubles while more than half of it is used, up to ``max_bytes``; after that a new tie takes
-    the place of the least counted of the ties its bucket held before this breath. What is new always finds a
-    place (a table that kept only what is counted most could learn no new text once it was full); what one breath
-    writes does not push itself out. ``let_go`` counts the ties that gave way, ``not_written`` those that found
-    no place."""
+    bucket. The table doubles while more than half of it is used, up to ``max_bytes``; after that, in one breath a
+    bucket gives one place to what is new whatever is counted there (its least counted tie gives way to the
+    weightiest newcomer: a table that kept only what is counted most could learn no new text once it was full);
+    the breath's further newcomers there take only the place of older ties counted no more than they are.
+    ``let_go`` counts the ties that gave way, ``not_written`` those that found no place."""
     WAYS = 8
     SLOT = 12
 
@@ -118,7 +118,12 @@ class Counts:
                     c[np.isin(at, fresh)] = _NEVER
                 col = c.argmin(axis=1)
                 least = c[np.arange(len(pick)), col]
-                ok = (least < 0) if room_only else (least < _NEVER)      # room, or the least counted gives way
+                if room_only:
+                    ok = least < 0
+                elif r:                                      # room, or an older tie counted no more than the new one
+                    ok = least <= w[pick]
+                else:                                        # room, or the least counted gives way, whatever it is
+                    ok = least < _NEVER
                 target = base[pick[ok]] + col[ok]
                 fresh = np.concatenate([fresh, target])
                 taken = least[ok] >= 0

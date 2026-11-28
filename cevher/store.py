@@ -127,12 +127,12 @@ class Slots:
     The table doubles while more than a third of it is used, up to ``max_bytes`` (and to what ``allow`` permits).
     A tie that finds its bucket full waits beside the table (a small overflow, at most one tie for every ``SPILL``
     slots) until the table doubles. Only when the table can no longer grow and the overflow is full does a key
-    give way: the least evident of the keys the bucket held before this moment, the oldest among equals. **What is
-    new always finds a place** (a mind that kept only what is counted most could learn nothing new once it was
-    full); what one moment writes does not push itself out. ``let_go`` counts the ties that gave way; ``add``
-    returns them, so that a ledger can put them back. While nothing has given way the table is exactly the multiset
-    of what was written, and its digest equals the exact store's. Collisions cost ties forgotten, never evidence
-    invented.
+    give way: the least evident key of the bucket, the oldest among equals, whole. **What is new always finds a
+    place** (a mind that kept only what is counted most could learn nothing new once it was full); what is counted
+    much is safe as long as its bucket holds anything counted less. ``let_go`` counts the ties that gave way;
+    ``add`` returns them, so that a ledger can put them back. While nothing has given way the table is exactly the
+    multiset of what was written, and its digest equals the exact store's. Collisions cost ties forgotten, never
+    evidence invented.
     """
     WAYS = 8
     SLOT = 20                                                # bytes a slot
@@ -223,8 +223,8 @@ class Slots:
         """A new tie. A key holds its total and at most ``WAYS - 1`` values: a further value takes the place of the
         least evident of them (the oldest among equals) if it is counted no less, and is not written otherwise.
         Else the tie goes into its bucket; where other keys fill the bucket, beside the table; and where there is
-        no room beside it either, in place of the least evident key the bucket held before this moment (with
-        ``room_only``, a tie put back, it is not written there). Returns the ties that gave way."""
+        no room beside it either, in place of the least evident key of the bucket (with ``room_only``, a tie put
+        back, it is not written there). Returns the ties that gave way."""
         self._mark(key)
         base = self._base(key)
         keys = self.key[base:base + self.WAYS]
@@ -258,16 +258,16 @@ class Slots:
             self.spill.setdefault(key, {})[value] = [c, t]
             self.spilled += 1
             return None
-        # no room anywhere: the least evident of the other keys the bucket held before this moment gives way whole
-        # (its total and its values), the oldest among equals. What is new is written whatever it is counted; only
-        # where this very moment has filled the bucket is it not kept
+        # no room anywhere: the least evident of the other keys of the bucket gives way whole (its total and its
+        # values, those that wait beside the table too), the oldest among equals. What is new is written whatever
+        # it is counted: what is counted much is safe as long as the bucket holds anything counted less
         vals_, cnts = self.val[base:base + self.WAYS], self.cnt[base:base + self.WAYS]
         totals = [] if room_only else [
             (int(cnts[i]), int(self.tim[base + i]), int(keys[i])) for i in range(self.WAYS)
-            if int(keys[i]) != key and int(vals_[i]) == 0 and int(self.tim[base + i]) < t]
+            if int(keys[i]) != key and int(vals_[i]) == 0]
         if not totals and not room_only:                     # values whose total waits elsewhere: the least of them
             totals = [(int(cnts[i]), int(self.tim[base + i]), int(keys[i])) for i in range(self.WAYS)
-                      if int(keys[i]) != key and int(self.tim[base + i]) < t]
+                      if int(keys[i]) != key]
         if not totals:
             self.not_kept += 1
             return None
@@ -278,6 +278,10 @@ class Slots:
                 gone.append((victim, int(vals_[i]), int(cnts[i]), int(self.tim[base + i])))
                 self.key[base + i], self.val[base + i], self.cnt[base + i], self.tim[base + i] = 0, 0, 0, 0
                 self.used -= 1
+        waiting = self.spill.pop(victim, None) if self.spill else None
+        if waiting:                                          # a key gives way whole: nothing of it is left behind
+            gone += [(victim, v, cell[0], cell[1]) for v, cell in waiting.items()]
+            self.spilled -= len(waiting)
         self.let_go += len(gone)
         i = base + int(np.flatnonzero(self.key[base:base + self.WAYS] == 0)[0])
         self.key[i], self.val[i], self.cnt[i], self.tim[i] = key, value, c, t
