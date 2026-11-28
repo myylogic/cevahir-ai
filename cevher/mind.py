@@ -25,6 +25,8 @@ R_CONST, R_CONSTF, R_TONE, R_FEAT = (code_of("\0role const"), code_of("\0role co
                                      code_of("\0role tone"), code_of("\0role feature"))
 O_TOLD, O_ASKED, O_ANSWER = code_of("\0origin told"), code_of("\0origin asked"), code_of("\0origin answer")
 BOS, END, HOLE = code_of("\0begin"), code_of("\0end"), code_of("\0place")
+R_PRE = code_of("\0role beginning")
+PREFIX = 12                                                  # how long a beginning of a sentence is kept as a context
 R_SEG, F0, F1, F2 = code_of("\0role run"), code_of("\0frame 0"), code_of("\0frame 1"), code_of("\0frame 2")
 NGRAM = 3                                                    # the longest context of words (a bound of a search)
 PAIRS_UP_TO = 24                                             # questions up to this long are read with two places open
@@ -95,11 +97,15 @@ class Mind:
     def sequence(self, cs: tuple, origin: int) -> None:
         """An utterance as a sequence: what each of its contexts was followed by, and what stood two places on."""
         padded = (BOS,) + tuple(cs) + (END,)
+        begun = mix(R_PRE, origin)
         for i in range(1, len(padded)):
             for n in range(1, min(NGRAM, i) + 1):
                 self._tie(fold((origin, n) + padded[i - n:i], R_SEQ), padded[i])
             if i >= 2:
                 self._tie(mix(mix(R_SKIP, origin), padded[i - 2]), padded[i])
+                if origin == O_TOLD and i - 1 <= PREFIX:     # what followed the sentence as it began
+                    begun = mix(begun, padded[i - 1])
+                    self._tie(begun, padded[i])
 
     def sequences(self, sentences: List[List[str]], origin: int = O_TOLD, sign: int = 1):
         """Many sentences at once (a text read): the same ties as ``sequence`` writes for each, added in one pass.
@@ -128,6 +134,13 @@ class Mind:
         at = np.flatnonzero(where >= 2)
         keys.append(mix_np(np.full(len(at), mix(R_SKIP, origin), dtype=np.uint64), seq[at - 2]))
         vals.append(seq[at])
+        if origin == O_TOLD:                                 # what followed each sentence as it began
+            begun = np.full(len(seq), mix(R_PRE, origin), dtype=np.uint64)
+            for j in range(2, min(PREFIX + 1, int(where.max())) + 1):
+                at = np.flatnonzero(where == j)
+                begun[at] = mix_np(begun[at - 1], seq[at - 1])
+                keys.append(begun[at])
+                vals.append(seq[at])
         keys, vals = np.concatenate(keys), np.concatenate(vals)
         pairs, counts = np.unique(np.stack([keys, vals], axis=1), axis=0, return_counts=True)
         tk, tc = np.unique(keys, return_counts=True)
@@ -154,12 +167,20 @@ class Mind:
             self.sequence(self.codes(a), O_ANSWER)
 
     # ----------------------------------------------------------------------------------------- reading a tie ----
-    def next(self, ctx: tuple, newest: bool = False, origin: int = O_TOLD) -> Optional[Tuple[int, float]]:
-        """What followed a context in what was told: the longest context held speaks. Read in one of two ways:
-        what followed it most (believed by the rule on its count), or, with ``newest``, what followed it last
+    def next(self, ctx: tuple, newest: bool = False, chain: bool = False) -> Optional[Tuple[int, float]]:
+        """What followed a context in what was told. The context must be all of what is asked about: a told
+        sentence that began so, or else the exact run of words where it is no longer than the contexts kept
+        (a run going on, ``chain``, may be longer: its last words are read). Nothing is read from a shorter
+        context that leaves part of what is asked about out: there the mind does not know. Read in one of two
+        ways: what followed most (believed by the rule on its count), or, with ``newest``, what followed last
         (believed as one confirmation since, (1 + 1/2) / (1 + 1), or by its count where that is more)."""
-        for n in range(min(NGRAM, len(ctx)), 0, -1):
-            key = fold((origin, n) + tuple(ctx[-n:]), R_SEQ)
+        keys = []
+        if 0 < len(ctx) <= PREFIX:
+            keys.append(fold(ctx, mix(R_PRE, O_TOLD)))
+        if 0 < len(ctx) <= NGRAM or (chain and ctx):
+            n = min(NGRAM, len(ctx))
+            keys.append(fold((O_TOLD, n) + tuple(ctx[-n:]), R_SEQ))
+        for key in keys:
             vs = self.S.vals(key)
             if vs:
                 total = self.S.tot(key)
@@ -327,10 +348,13 @@ class Mind:
         """What a way of reading (a frame with a skeleton) claims for the asked question; None where a step is not
         believed at the speaking line."""
         out: list = []
+        run: tuple = ()                                      # the told sequence being followed, if any
         belief = 1.0
         for p, item in enumerate(self._items(sk)):
             kind = item[0]
             e = 1.0
+            if kind not in ("c", "x", "n", "e"):
+                run = ()
             if kind == "*":
                 got = self._const(fcode, sk, p, holes, qc)
                 if got is None:
@@ -338,7 +362,9 @@ class Mind:
                 out.append(got[0])
                 e = got[1]
             elif kind == "c":
-                out.extend(self._ref(item[2:], elements, holes, qc))
+                toks = self._ref(item[2:], elements, holes, qc)
+                out.extend(toks)
+                run += tuple(toks)
             elif kind == "r":
                 toks = self._ref(item[2:], elements, holes, qc)
                 got = self.brings(toks[0]) if len(toks) == 1 else None
@@ -362,21 +388,24 @@ class Mind:
                 if got is None or got[0] == END:
                     return None
                 out.append(got[0])
+                run = ctx + (got[0],)
                 e = got[1]
             elif kind == "n":
-                got = self.next(tuple(out[-NGRAM:]), item[2:] == "n") if out else None
+                got = self.next(run, item[2:] == "n", chain=True) if run else None
                 if got is None or got[0] == END:
                     return None
                 out.append(got[0])
+                run += (got[0],)
                 e = got[1]
             elif kind == "e":
                 for _ in range(64):
-                    got = self.next(tuple(out[-NGRAM:]), item[2:] == "n") if out else None
+                    got = self.next(run, item[2:] == "n", chain=True) if run else None
                     if got is None or got[1] < LINE:
                         return None
                     if got[0] == END:
                         break
                     out.append(got[0])
+                    run += (got[0],)
                     e = min(e, got[1])
                 else:
                     return None
@@ -389,8 +418,11 @@ class Mind:
         """Whether a skeleton's structure gives the answer lived, its own tokens left free; returns those tokens
         with their places."""
         pos, consts, n = 0, [], len(ac)
+        told: tuple = ()                                     # the told sequence being followed, if any
         for p, item in enumerate(self._items(sk)):
             kind = item[0]
+            if kind not in ("c", "x", "n", "e"):
+                told = ()
             if kind == "*":
                 if pos >= n:
                     return None
@@ -399,17 +431,19 @@ class Mind:
                 continue
             if kind == "e":
                 while True:
-                    got = self.next(ac[max(0, pos - NGRAM):pos], item[2:] == "n") if pos else None
+                    got = self.next(told, item[2:] == "n", chain=True) if told else None
                     if got is None:
                         return None
                     if got[0] == END:
                         break
                     if pos >= n or got[0] != ac[pos]:
                         return None
+                    told += (got[0],)
                     pos += 1
                 continue
             if kind == "c":
                 run = self._ref(item[2:], elements, holes, qc)
+                told += tuple(run)
             elif kind == "r":
                 toks = self._ref(item[2:], elements, holes, qc)
                 got = self.brings(toks[0]) if len(toks) == 1 else None
@@ -425,9 +459,11 @@ class Mind:
                     ctx += self._ref(ref, elements, holes, qc)
                 got = self.next(ctx, variant == "n")
                 run = (got[0],) if got and got[0] != END else None
+                told = ctx + (run or ())
             else:                                            # "n"
-                got = self.next(ac[max(0, pos - NGRAM):pos], item[2:] == "n") if pos else None
+                got = self.next(told, item[2:] == "n", chain=True) if told else None
                 run = (got[0],) if got and got[0] != END else None
+                told += run or ()
             if run is None or ac[pos:pos + len(run)] != tuple(run):
                 return None
             pos += len(run)
@@ -547,38 +583,48 @@ class Mind:
                 elif brought[i] is not None and brought[i][0] == ac[a]:
                     runs[a].append((1, "r", (i,), None))
             for i in range(n):
-                for j in range(i + 1, min(n, i + NGRAM) + 1):
+                for j in range(i + 1, min(n, i + PREFIX) + 1):
                     both = [v for v in ("s", "n") if (self.next(qc[i:j], v == "n") or (0,))[0] == ac[a]]
                     if both:
                         runs[a].append((1, "x", tuple(range(i, j)), "".join(both)))
         order = {"a": 0, "c": 1, "n": 2, "x": 3, "r": 4, "*": 5}
         INF = (10 ** 9,)
-        best: Dict[Tuple[int, bool], tuple] = {(0, False): ((0, 0, 0, 0), None)}
+        # a state: (the place in the answer, the told sequence being followed so far or ())
+        best: Dict[tuple, tuple] = {(0, ()): ((0, 0, 0, 0), None)}
         for a in range(m):
-            for seq in (False, True):
-                here = best.get((a, seq))
-                if here is None:
-                    continue
-                cost = here[0]
+            for state in [st for st in best if st[0] == a]:
+                cost, told = best[state][0], state[1]
                 options = [(1, "*", (), None)] + runs[a]
-                if seq:                                      # the told sequence goes on from what was just said
-                    both = [v for v in ("s", "n") if (self.next(ac[max(0, a - NGRAM):a], v == "n") or (0,))[0] == ac[a]]
+                if told:                                     # the told sequence goes on from what was just said
+                    both = [v for v in ("s", "n") if (self.next(told, v == "n", chain=True) or (0,))[0] == ac[a]]
                     if both:
                         options.append((1, "n", (), "".join(both)))
                 for length, kind, pos, payload in options:
+                    # a part answered takes as little of the question as gives the answer; a context read is the
+                    # longest that was followed so
                     apart = bool(pos) and pos[-1] - pos[0] + 1 != len(pos)
-                    new = (cost[0] + (kind == "*"), cost[1] + 1, cost[2] + len(pos) + apart, cost[3] + order[kind])
-                    state = (a + length, kind in ("c", "x", "n"))
-                    if new < best.get(state, (INF,))[0]:
-                        best[state] = (new, (a, seq, kind, pos, payload, length))
-        end = min(((best[s][0], s) for s in ((m, False), (m, True)) if s in best), default=None)
-        if end is None:
+                    took = -len(pos) if kind == "x" else len(pos) + apart
+                    new = (cost[0] + (kind == "*"), cost[1] + 1, cost[2] + took, cost[3] + order[kind])
+                    if kind == "c":
+                        going = told + (ac[a],)
+                    elif kind == "x":
+                        going = tuple(qc[i] for i in pos) + (ac[a],)
+                    elif kind == "n":
+                        going = told + (ac[a],)
+                    else:
+                        going = ()
+                    to = (a + length, going[-PREFIX:])
+                    if new < best.get(to, (INF,))[0]:
+                        best[to] = (new, (state, kind, pos, payload, length))
+        ends = [st for st in best if st[0] == m]
+        if not ends:
             return None
-        chain, state = [], end[1]
+        state = min(ends, key=lambda st: best[st][0])
+        chain = []
         while best[state][1] is not None:
-            a, seq, kind, pos, payload, length = best[state][1]
-            chain.append([kind, pos, payload, a, length])
-            state = (a, seq)
+            prev, kind, pos, payload, length = best[state][1]
+            chain.append([kind, pos, payload, prev[0], length])
+            state = prev
         chain.reverse()
         if all(c[0] == "*" for c in chain):
             return None
@@ -591,9 +637,19 @@ class Mind:
         k = len(merged)                                      # a told sequence followed to its end
         while k and merged[k - 1][0] == "n":
             k -= 1
-        if k < len(merged):
+        if k < len(merged) and k:
+            told: tuple = ()                                 # the sequence the run followed, from where it began
+            for c in merged[:k][::-1]:
+                if c[0] == "c":
+                    told = tuple(qc[i] for i in c[1]) + told
+                elif c[0] == "x":
+                    told = tuple(qc[i] for i in c[1]) + (ac[c[3]],) + told
+                    break
+                else:
+                    break
+            told += tuple(ac[c[3]] for c in merged[k:])
             both = [v for v in ("s", "n") if all(v in c[2] for c in merged[k:])
-                    and (self.next(ac[-NGRAM:], v == "n") or (0,))[0] == END]
+                    and (self.next(told, v == "n", chain=True) or (0,))[0] == END]
             if both:
                 merged[k:] = [["e", (), "".join(both), 0, 0]]
         sets: Dict[int, set] = {}
@@ -659,6 +715,8 @@ class Mind:
         make it confirms it, and says nothing until then."""
         if self.S.get(mix(R_KNOWN, fcode), sk):
             return
+        if holes and self._fit(elements, holes, sk, qc, ac, memo) is None:
+            return                                           # it does not give the answer it was read from
         told["new"] = told.get("new", 0) + 1
         self._add(mix(R_KNOWN, fcode), sk)
         if not holes:

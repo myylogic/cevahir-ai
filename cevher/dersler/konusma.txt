@@ -1,0 +1,50 @@
+# konuşma: söyleneni hatırlamak (bir şey söylenir, sonra sorulur; cevap söylenendir)
+# Bu ders 28 Kasım 2026'da, son biçim için yazıldı. Satırlar: tek başına cümle söylenir; "soru<TAB>cevap" izlenir.
+ayşe nin kedisinin adı tekir .
+ayşe nin kedisinin adı ne ?	tekir
+ali nin köpeğinin adı karabaş .
+ali nin köpeğinin adı ne ?	karabaş
+okulun adı cumhuriyet .
+okulun adı ne ?	cumhuriyet
+kitabın rengi yeşil .
+kitabın rengi ne ?	yeşil
+defterin rengi sarı .
+defterin rengi ne ?	sarı
+ali nin sevdiği meyve kiraz .
+ali nin sevdiği meyve ne ?	kiraz
+ayşe nin sevdiği oyun saklambaç .
+ayşe nin sevdiği oyun ne ?	saklambaç
+ali nin yaşı 12 .
+ali nin yaşı kaç ?	12
+ayşe nin yaşı 9 .
+ayşe nin yaşı kaç ?	9
+sınıfın mevcudu 24 .
+sınıfın mevcudu kaç ?	24
+okulun kat sayısı 3 .
+okulun kat sayısı kaç ?	3
+ali nin doğduğu şehir ankara .
+ali nin doğduğu şehir neresi ?	ankara
+ayşe nin yaşadığı şehir trabzon .
+ayşe nin yaşadığı şehir neresi ?	trabzon
+okulun olduğu şehir eskişehir .
+okulun olduğu şehir neresi ?	eskişehir
+sınıfın öğretmeni elif .
+sınıfın öğretmeni kim ?	elif
+okulun müdürü kemal .
+okulun müdürü kim ?	kemal
+ali nin en yakın arkadaşı mert .
+ali nin en yakın arkadaşı kim ?	mert
+# söylenen değişirse en son söylenen tutulur
+masanın rengi kahverengi .
+masanın rengi kahverengi .
+masanın rengi beyaz .
+masanın rengi ne ?	beyaz
+sınıfın mevcudu 24 .
+sınıfın mevcudu 26 .
+sınıfın mevcudu kaç ?	26
+okulun müdürü kemal .
+okulun müdürü zeynep .
+okulun müdürü kim ?	zeynep
+ayşe nin yaşadığı şehir trabzon .
+ayşe nin yaşadığı şehir rize .
+ayşe nin yaşadığı şehir neresi ?	rize
