@@ -206,6 +206,39 @@ def test_forgetting_is_exact_in_a_full_table_too():
     assert c.digest() == before
 
 
+def test_a_long_text_is_written_a_group_of_sentences_at_a_time_and_forgotten_exactly(monkeypatch):
+    import cevher.cevahir as module
+    rng = random.Random(9)
+    words = ["".join(rng.choice("abcçdefgğhıijklmnoöprsştuüvyz") for _ in range(rng.randint(2, 8))) for _ in range(3000)]
+    text = "".join(" ".join(rng.choice(words) for _ in range(9)) + ". " for _ in range(2500))
+    whole = Cevahir(budget_mb=97)
+    whole.read(text)                                         # one group (the default is 20,000 sentences)
+    monkeypatch.setattr(module, "GROUP", 64)                 # the same text in forty groups, in a table that fills
+    c = Cevahir(budget_mb=97, ledger=True)
+    c.read("".join(" ".join(rng.choice(words) for _ in range(9)) + ". " for _ in range(4000)))
+    assert c.store.let_go + c.store.not_kept > 0
+    before = c.digest()
+    c.read(text)
+    assert c.digest() != before
+    c.forget(len(c.entries) - 1)
+    assert c.digest() == before
+    groups = list(module._groups(text, False))
+    assert len(groups) == 40 and sum(len(g) for g, _, _ in groups) == 2500
+    again = [s for _, x, y in groups for g, _, _ in module._groups(text[x:y], False) for s in g]
+    assert again == [s for g, _, _ in groups for s in g]     # a group read again from where it lies is the same
+
+
+def test_source_code_read_by_lines_is_forgotten_exactly():
+    c = Cevahir(ledger=True)
+    c.read("Ankara Türkiye'nin başkentidir. İstanbul en kalabalık şehirdir. " * 80)
+    before = c.digest()
+    code = "\n".join("x%d = f ( %d ) . y%d + z" % (i % 50, i % 7, i % 11) for i in range(3000))
+    c.read(code, code=True)                                  # each line a sentence, whatever marks stand in it
+    assert c.digest() != before
+    c.forget(len(c.entries) - 1)
+    assert c.digest() == before
+
+
 def test_the_letters_take_back_exactly_what_a_text_wrote():
     text = "ev evler evlerimiz evde evden okul okullar okulda okuldan " * 60
     L = Letters(Counts(max_bytes=1 << 20, buckets=4))

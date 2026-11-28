@@ -36,7 +36,43 @@ OVERHEAD_MB = 96                                             # the interpreter, 
 PER_CHARACTER = 8                                            # bytes the tables may hold for every character lived
 FLOOR_MB = 32                                                # ... and what they may hold however little was lived
 BULK = 4096                                                  # a text longer than this is read many ties at once
+GROUP = 20000                                                # ... so many of its sentences at a time
 VERSION = 1
+
+
+def _spans(text: str, lines: bool):
+    """Where each sentence of a text lies (each line, for source code)."""
+    at = 0
+    if lines:
+        while True:
+            j = text.find("\n", at)
+            if j < 0:
+                break
+            yield at, j
+            at = j + 1
+    else:
+        for m in SEPARATOR.finditer(text):
+            yield at, m.start()
+            at = m.end()
+    yield at, len(text)
+
+
+def _groups(text: str, lines: bool):
+    """The sentences of two words or more of a text, ``GROUP`` at a time, and where each group lies in it. A text
+    is never held whole as words: the working memory of reading is a group's, however long the text."""
+    group, first, last = [], 0, 0
+    for a, b in _spans(text, lines):
+        s = body(tokens(text[a:b]))[0]
+        if len(s) >= 2:
+            if not group:
+                first = a
+            group.append(s)
+            last = b
+            if len(group) == GROUP:
+                yield group, first, last
+                group = []
+    if group:
+        yield group, first, last
 
 
 class Cevahir:
@@ -78,7 +114,7 @@ class Cevahir:
         self.mind.entry = []
         return {"tail": self.letters.tail, "lgone": [], "sgone": []}
 
-    def _end(self, open_entry: Optional[dict], kind: str, text: str, stream: str, bulk: bool = False) -> None:
+    def _end(self, open_entry: Optional[dict], kind: str, text: str, stream: str, bulk: int = 0) -> None:
         """An entry of the history is closed and written to the ledger: what was lived (``stream``, as the letters
         lived it), the writes of the word grain that are not a function of the text alone, and what gave way."""
         if open_entry is None:
@@ -89,7 +125,7 @@ class Cevahir:
                   "tail": np.frombuffer(open_entry["tail"], dtype=np.uint8),
                   "log": np.array([(1, r[0], r[1], r[2], r[3]) if len(r) == 4 else (0, r[0], r[1], r[2], 0)
                                    for r in log], dtype=np.uint64).reshape(-1, 5),
-                  "bulk": np.array([1 if bulk else 0])}
+                  "bulk": np.array([int(bulk)])}            # 0, or a text read many ties at once: 1, by lines 2
         lg = open_entry["lgone"]
         arrays["lg_at"] = np.array([(a, b, len(g[0])) for a, b, g in lg], dtype=np.int64).reshape(-1, 3)
         arrays["lg_k"] = np.concatenate([g[0] for _, _, g in lg]) if lg else np.zeros(0, dtype=np.uint64)
@@ -154,18 +190,16 @@ class Cevahir:
         self.flush()
         e = self._begin()
         bits = self._letters(text, e)
-        pieces = text.split("\n") if code else SEPARATOR.split(text)
-        sentences = [s for s in (body(tokens(p))[0] for p in pieces) if len(s) >= 2]
         bulk = len(text) >= BULK
-        if bulk:
-            for at in range(0, len(sentences), 20000):
-                gone = self.mind.sequences(sentences[at:at + 20000])
+        for group, _, _ in _groups(text, code):
+            if bulk:
+                gone = self.mind.sequences(group)
                 if e is not None:
                     e["sgone"].append(gone)
-        else:
-            for s in sentences:
-                self.mind.tell(s)
-        self._end(e, "read", text, text, bulk=bulk)
+            else:
+                for s in group:
+                    self.mind.tell(s)
+        self._end(e, "read", text, text, bulk=(2 if code else 1) if bulk else 0)
         return bits
 
     def _forms(self, answer: str) -> None:
@@ -291,14 +325,15 @@ class Cevahir:
         # the word grain: the writes kept, the last first; then what a long text wrote, a function of the text
         log = [tuple(int(x) for x in r[1:]) if r[0] else tuple(int(x) for x in r[1:4]) for r in a["log"]]
         self.mind.take_back(log)
-        if int(a["bulk"][0]):
-            sentences = [s for s in (body(tokens(p))[0] for p in SEPARATOR.split(stream)) if len(s) >= 2]
-            chunks = [sentences[at:at + 20000] for at in range(0, len(sentences), 20000)]
+        bulk = int(a["bulk"][0])
+        if bulk:                                             # the groups as they were written, the last first
+            where = [(x, y) for _, x, y in _groups(stream, bulk == 2)]
             at = len(a["sg_k"])
-            for chunk, n in reversed(list(zip(chunks, a["sg_n"].tolist()))):
-                self.mind.sequences(chunk, sign=-1)
+            for (x, y), n in reversed(list(zip(where, a["sg_n"].tolist()))):
+                group = [s for g, _, _ in _groups(stream[x:y], bulk == 2) for s in g]
+                self.mind.sequences(group, sign=-1)
                 if n:
-                    self.store.put_back_many(tuple(a[x][at - n:at] for x in ("sg_k", "sg_v", "sg_c", "sg_t")))
+                    self.store.put_back_many(tuple(a[name][at - n:at] for name in ("sg_k", "sg_v", "sg_c", "sg_t")))
                     at -= n
         # the letters
         gone, at = [], 0
