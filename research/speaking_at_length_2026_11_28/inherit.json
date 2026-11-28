@@ -1,0 +1,848 @@
+{
+ "what": "sentences of the mind's own: what a thing does by what it is said to be",
+ "lessons": [
+  "toplama iki sayıyı birleştirir .",
+  "çıkarma bir sayıdan diğerini eksiltir .",
+  "çarpma tekrarlı toplamadır .",
+  "bölme bir sayıyı eşit parçalara ayırır .",
+  "asal sayı yalnız bire ve kendisine bölünür .",
+  "2 en küçük asal sayıdır .",
+  "bir üçgenin iç açılarının toplamı 180 derecedir .",
+  "bir karenin dört eşit kenarı vardır .",
+  "bir dikdörtgenin karşılıklı kenarları eşittir .",
+  "dairenin alanı pi çarpı yarıçapın karesidir .",
+  "dairenin çevresi 2 çarpı pi çarpı yarıçaptır .",
+  "pi yaklaşık 3,14 tür .",
+  "pisagor teoremi dik üçgende a kare artı b kare eşittir c kare der .",
+  "türev bir fonksiyonun değişim hızıdır .",
+  "integral bir eğrinin altındaki alandır .",
+  "denklem iki ifadenin eşitliğidir .",
+  "olasılık bir olayın gerçekleşme şansıdır .",
+  "logaritma üssün tersidir .",
+  "newton un birinci yasası eylemsizlik yasasıdır .",
+  "bir cisim üzerine kuvvet etki etmezse durumunu korur .",
+  "newton un ikinci yasası kuvvet eşittir kütle çarpı ivme der .",
+  "newton un üçüncü yasası her etkiye eşit ve zıt bir tepki vardır der .",
+  "yerçekimi ivmesi yaklaşık 9,8 metre bölü saniye karedir .",
+  "kuvvetin birimi newton dur .",
+  "enerjinin birimi joule dür .",
+  "gücün birimi watt tır .",
+  "elektrik akımının birimi amper dir .",
+  "gerilimin birimi volt tur .",
+  "direncin birimi ohm dur .",
+  "ışık boşlukta saniyede yaklaşık 300 bin kilometre yol alır .",
+  "enerji yoktan var edilemez ve vardan yok edilemez .",
+  "kinetik enerji hareket enerjisidir .",
+  "potansiyel enerji konum enerjisidir .",
+  "ses boşlukta yayılmaz .",
+  "su 100 derecede kaynar .",
+  "su 0 derecede donar .",
+  "madde katı sıvı ve gaz hâlinde bulunur .",
+  "h hidrojenin simgesidir .",
+  "o oksijenin simgesidir .",
+  "c karbonun simgesidir .",
+  "n azotun simgesidir .",
+  "na sodyumun simgesidir .",
+  "cl klorun simgesidir .",
+  "fe demirin simgesidir .",
+  "au altının simgesidir .",
+  "atom proton nötron ve elektrondan oluşur .",
+  "proton artı yüklüdür .",
+  "elektron eksi yüklüdür .",
+  "nötron yüksüzdür .",
+  "suyun formülü h2o dur .",
+  "tuzun formülü nacl dir .",
+  "karbondioksitin formülü co2 dir .",
+  "asitlerin ph değeri 7 den küçüktür .",
+  "bazların ph değeri 7 den büyüktür .",
+  "saf suyun ph değeri 7 dir .",
+  "periyodik tablo elementleri atom numarasına göre dizer .",
+  "hücre canlının en küçük yapı birimidir .",
+  "dna kalıtım bilgisini taşır .",
+  "çekirdek hücrenin yönetim merkezidir .",
+  "mitokondri hücrenin enerji santralidir .",
+  "kloroplast fotosentez yapar .",
+  "fotosentez ışık enerjisiyle besin üretimidir .",
+  "bitkiler fotosentezle oksijen üretir .",
+  "solunum besinden enerji elde etmektir .",
+  "gen kalıtımın birimidir .",
+  "evrim canlıların nesiller boyunca değişmesidir .",
+  "kedi bir memelidir .",
+  "köpek bir memelidir .",
+  "balina bir memelidir .",
+  "yunus bir memelidir .",
+  "memeliler yavrularını sütle besler .",
+  "kartal bir kuştur .",
+  "serçe bir kuştur .",
+  "penguen bir kuştur .",
+  "kuşlar yumurtlar .",
+  "hamsi bir balıktır .",
+  "sazan bir balıktır .",
+  "balıklar solungaçla solur .",
+  "kalp kanı vücuda pompalar .",
+  "akciğerler kana oksijen verir .",
+  "beyin vücudu yönetir .",
+  "karaciğer zehirli maddeleri temizler .",
+  "böbrekler kanı süzer ve idrar üretir .",
+  "mide besinleri sindirir .",
+  "ince bağırsak besinleri emer .",
+  "deri vücudu dış etkilerden korur .",
+  "yetişkin insanda 206 kemik vardır .",
+  "en uzun kemik uyluk kemiğidir .",
+  "kırmızı kan hücreleri oksijen taşır .",
+  "beyaz kan hücreleri vücudu mikroplara karşı korur .",
+  "trombositler kanın pıhtılaşmasını sağlar .",
+  "dolaşım sistemi kalp damarlar ve kandan oluşur .",
+  "sinir sistemi beyin omurilik ve sinirlerden oluşur .",
+  "solunum sistemi akciğerler ve hava yollarından oluşur .",
+  "pankreas insülin üretir .",
+  "grip bir virüs hastalığıdır .",
+  "nezle bir virüs hastalığıdır .",
+  "kızamık bir virüs hastalığıdır .",
+  "covid 19 bir virüs hastalığıdır .",
+  "virüs hastalıklarına antibiyotik etki etmez .",
+  "tüberküloz bir bakteri hastalığıdır .",
+  "zatürre çoğunlukla bir bakteri hastalığıdır .",
+  "bakteri hastalıkları antibiyotikle tedavi edilir .",
+  "sıtma sivrisineklerin taşıdığı bir parazitle bulaşır .",
+  "diyabet kan şekerinin yüksek olmasıdır .",
+  "diyabette insülin yetersizdir ya da etkisizdir .",
+  "hipertansiyon yüksek tansiyondur .",
+  "astım hava yollarının daralmasıdır .",
+  "aşılar bağışıklık kazandırır .",
+  "el yıkamak mikropların bulaşmasını azaltır .",
+  "tanı ve tedavi için hekime başvurulur .",
+  "inşaat mühendisliği bina köprü ve yol tasarlar .",
+  "makine mühendisliği makineleri ve motorları tasarlar .",
+  "elektrik mühendisliği elektrik sistemlerini tasarlar .",
+  "elektronik mühendisliği devreleri ve cihazları tasarlar .",
+  "bilgisayar mühendisliği yazılım ve donanım geliştirir .",
+  "kimya mühendisliği kimyasal üretim süreçlerini tasarlar .",
+  "endüstri mühendisliği süreçleri verimli hâle getirir .",
+  "yazılım mühendisliği büyük yazılımları planlı geliştirir .",
+  "ohm yasası gerilim eşittir akım çarpı direnç der .",
+  "algoritma bir problemi çözen adımlar dizisidir .",
+  "mukavemet bir malzemenin kuvvete dayanmasıdır .",
+  "termodinamik ısı ve iş ilişkisini inceler .",
+  "python yorumlanan bir programlama dilidir .",
+  "c# microsoft un geliştirdiği nesne yönelimli bir dildir .",
+  "java her yerde çalışan nesne yönelimli bir dildir .",
+  "değişken bir değeri saklayan addır .",
+  "döngü bir işi tekrar eder .",
+  "fonksiyon bir işi yapan adlandırılmış kod bloğudur .",
+  "liste birden çok değeri sırayla tutar .",
+  "koşul ifadesi bir duruma göre karar verir .",
+  "güneş bir yıldızdır .",
+  "güneş sistemi güneş ve çevresinde dönen gök cisimlerinden oluşur .",
+  "güneş sisteminde sekiz gezegen vardır .",
+  "gezegenler güneşe yakınlık sırasıyla merkür venüs dünya mars jüpiter satürn uranüs ve neptündür .",
+  "merkür güneşe en yakın gezegendir .",
+  "jüpiter en büyük gezegendir .",
+  "satürn halkalarıyla bilinir .",
+  "mars kızıl gezegen olarak bilinir .",
+  "venüs en sıcak gezegendir .",
+  "dünya üzerinde yaşam olan tek bilinen gezegendir .",
+  "ay dünyanın uydusudur .",
+  "dünya güneşin çevresini bir yılda dolanır .",
+  "dünya kendi çevresinde bir günde döner .",
+  "plüton artık cüce gezegen sayılır .",
+  "toplum 1.0 avcı toplayıcı toplumdur .",
+  "toplum 2.0 tarım toplumudur .",
+  "toplum 3.0 sanayi toplumudur .",
+  "toplum 4.0 bilgi toplumudur .",
+  "toplum 5.0 süper akıllı toplumdur .",
+  "toplum 5.0 kavramını japonya 2016 yılında ortaya koydu .",
+  "toplum 5.0 sanal ve fiziksel dünyayı birleştirir .",
+  "toplum 5.0 teknolojiyi insan refahı için kullanır .",
+  "sanayi devrimi buhar makinesiyle başladı .",
+  "bilgi toplumu bilgisayar ve internetle doğdu .",
+  "makine öğrenmesi bilgisayarın veriden öğrenmesidir .",
+  "denetimli öğrenme etiketli veriden öğrenir .",
+  "denetimsiz öğrenme etiketsiz veride örüntü bulur .",
+  "pekiştirmeli öğrenme ödül ve cezayla öğrenir .",
+  "yapay sinir ağı katmanlı nöronlardan oluşur .",
+  "geri yayılım ağırlıkları hatayı azaltacak yönde günceller .",
+  "derin öğrenme çok katmanlı sinir ağlarıyla öğrenmedir .",
+  "transformer dikkat mekanizmasıyla çalışan bir sinir ağıdır .",
+  "aşırı öğrenme modelin eğitim verisini ezberlemesidir .",
+  "büyük dil modelleri transformer mimarisiyle eğitilir .",
+  "cevahir zihin yaşayarak öğrenen bir zihindir .",
+  "cevahir zihin bir transformer değildir .",
+  "cevahir zihinde eğitim aşaması yoktur .",
+  "cevahir zihin her anda öğrenir .",
+  "cevahir zihinde ağırlık matrisi ve geri yayılım yoktur .",
+  "cevahir zihin her bağın kanıtını kaynağına göre ayrı tutar .",
+  "cevahir zihin tek bir deneyimi tam olarak geri alabilir .",
+  "cevahir zihin beklentisini tek bir kuraldan okur .",
+  "cevahir zihnin dikkati yedi yerli odaktır .",
+  "cevahir zihin önce hatırlar gerekirse düşünür .",
+  "transformer eğitimden sonra donar .",
+  "x üzeri n nin türevi n çarpı x üzeri n eksi 1 dir .",
+  "sabit sayının türevi sıfırdır .",
+  "sinüs x in türevi kosinüs x tir .",
+  "e üzeri x in türevi e üzeri x tir .",
+  "x in integrali x kare bölü 2 dir .",
+  "limit bir fonksiyonun bir noktaya yaklaşırken aldığı değerdir .",
+  "matris sayıların satır ve sütun düzenidir .",
+  "birim matrisin köşegeni birlerden oluşur .",
+  "vektörün büyüklüğü ve yönü vardır .",
+  "aritmetik ortalama sayıların toplamının sayı adedine bölümüdür .",
+  "medyan sıralanmış verinin ortasındaki değerdir .",
+  "standart sapma verinin ortalamadan ne kadar dağıldığını gösterir .",
+  "bir zarın bir yüzünün gelme olasılığı 1 bölü 6 dır .",
+  "momentum kütle çarpı hızdır .",
+  "iş kuvvet çarpı yoldur .",
+  "güç işin zamana bölümüdür .",
+  "ohm yasasına göre akım gerilimin dirence bölümüdür .",
+  "12 volt gerilim ve 4 ohm dirençte akım 3 amperdir .",
+  "termodinamiğin birinci yasası enerjinin korunumudur .",
+  "termodinamiğin ikinci yasası entropinin artacağını söyler .",
+  "mutlak sıfır eksi 273 santigrat derecedir .",
+  "dalganın hızı frekans çarpı dalga boyudur .",
+  "einstein e eşittir m c kare formülünü buldu .",
+  "ışık hem dalga hem parçacık gibi davranır .",
+  "foton ışığın parçacığıdır .",
+  "yerçekimini newton açıkladı .",
+  "bir mol 6,02 çarpı 10 üzeri 23 tanecik içerir .",
+  "avogadro sayısı 6,02 çarpı 10 üzeri 23 tür .",
+  "iyonik bağ elektron alışverişiyle oluşur .",
+  "kovalent bağ elektron ortaklaşmasıyla oluşur .",
+  "tuz iyonik bağlı bir bileşiktir .",
+  "su kovalent bağlı bir bileşiktir .",
+  "yanma bir maddenin oksijenle tepkimesidir .",
+  "asit ve baz tepkimeye girince tuz ve su oluşur .",
+  "organik kimya karbon bileşiklerini inceler .",
+  "metanın formülü ch4 tür .",
+  "izotoplar aynı elementin farklı nötron sayılı atomlarıdır .",
+  "katalizör tepkimeyi hızlandırır ama harcanmaz .",
+  "dna çift sarmal yapıdadır .",
+  "dnanın bazları adenin timin guanin ve sitozindir .",
+  "adenin timinle eşleşir .",
+  "guanin sitozinle eşleşir .",
+  "rna da timin yerine urasil bulunur .",
+  "ribozom protein sentezler .",
+  "mitoz bir hücreden iki eş hücre oluşturur .",
+  "mayoz üreme hücrelerini oluşturur .",
+  "enzimler tepkimeleri hızlandıran proteinlerdir .",
+  "besin zinciri üreticiyle başlar .",
+  "bitkiler üreticidir .",
+  "ayrışmacılar ölü canlıları çürütür .",
+  "insanda 46 kromozom bulunur .",
+  "kalbin dört odacığı vardır .",
+  "kalbin odacıkları iki kulakçık ve iki karıncıktır .",
+  "atardamarlar kanı kalpten vücuda taşır .",
+  "toplardamarlar kanı vücuttan kalbe taşır .",
+  "kan grupları a b ab ve 0 dır .",
+  "0 rh negatif genel vericidir .",
+  "ab rh pozitif genel alıcıdır .",
+  "sindirim ağızda başlar .",
+  "besinler ağız yemek borusu mide ve bağırsaktan geçer .",
+  "tiroit bezi metabolizmayı düzenler .",
+  "insülin kan şekerini düşürür .",
+  "nöron sinir hücresidir .",
+  "beş duyu görme işitme koklama tatma ve dokunmadır .",
+  "kanser hücrelerin kontrolsüz çoğalmasıdır .",
+  "alzheimer hafızayı bozan bir beyin hastalığıdır .",
+  "parkinson hareketi bozan bir beyin hastalığıdır .",
+  "kalp krizi kalp kasının kansız kalmasıdır .",
+  "inme beyne giden kanın kesilmesidir .",
+  "anemi kansızlıktır .",
+  "anemide kanda hemoglobin azdır .",
+  "sigara akciğer kanseri riskini artırır .",
+  "düzenli egzersiz kalp hastalığı riskini azaltır .",
+  "kalp krizinde acil yardım çağrılır .",
+  "türkiyede acil yardım numarası 112 dir .",
+  "direnç akıma karşı koyar .",
+  "kondansatör elektrik yükü depolar .",
+  "bobin manyetik alanda enerji depolar .",
+  "transistör akımı yükseltir ya da anahtarlar .",
+  "seri bağlı dirençlerin toplam direnci dirençlerin toplamıdır .",
+  "geri besleme bir sistemin çıkışını girişe bağlar .",
+  "pid denetleyici oransal integral ve türevsel kontrol yapar .",
+  "yazılım yaşam döngüsü analiz tasarım kodlama test ve bakımdır .",
+  "çelik demir ve karbon alaşımıdır .",
+  "beton çimento kum çakıl ve sudan oluşur .",
+  "cad bilgisayar destekli tasarımdır .",
+  "python da girinti blokları belirler .",
+  "sözlük anahtar ve değer çiftleri tutar .",
+  "fonksiyon return ile değer döndürür .",
+  "sınıf nesnelerin şablonudur .",
+  "try except hataları yakalar .",
+  "import bir modülü içe aktarır .",
+  "c# ve java da her satır noktalı virgülle biter .",
+  "c# ve java da kod blokları süslü parantezle yazılır .",
+  "ikili arama sıralı dizide ortadan bölerek arar .",
+  "ikili aramanın karmaşıklığı log n dir .",
+  "kabarcık sıralamanın karmaşıklığı n kare dir .",
+  "hızlı sıralama ortalamada n log n dir .",
+  "birleştirme sıralaması n log n dir .",
+  "yığın son giren ilk çıkar yapısıdır .",
+  "kuyruk ilk giren ilk çıkar yapısıdır .",
+  "graf düğüm ve kenarlardan oluşur .",
+  "genişlik öncelikli arama komşuları sırayla gezer .",
+  "derinlik öncelikli arama bir yolda en derine iner .",
+  "özyineleme bir fonksiyonun kendini çağırmasıdır .",
+  "ışık yılı ışığın bir yılda aldığı yoldur .",
+  "samanyolu bizim galaksimizdir .",
+  "evren yaklaşık 13,8 milyar yaşındadır .",
+  "büyük patlama evrenin başlangıcıdır .",
+  "kara delik ışığın bile kaçamadığı bölgedir .",
+  "güneş yaklaşık 4,6 milyar yaşındadır .",
+  "yıldızlar hidrojeni helyuma dönüştürerek parlar .",
+  "süpernova büyük bir yıldızın patlamasıdır .",
+  "ay ın dünyaya uzaklığı yaklaşık 384 bin kilometredir .",
+  "dünyanın güneşe uzaklığı yaklaşık 150 milyon kilometredir .",
+  "dikkat mekanizması bir dizideki önemli parçalara ağırlık verir .",
+  "token bir modelin işlediği metin parçasıdır .",
+  "büyük dil modeli bir sonraki tokeni tahmin eder .",
+  "gradyan inişi hatayı en aza indiren bir yöntemdir .",
+  "nars belirsizlik altında akıl yürüten bir mantık sistemidir .",
+  "cevahir zihnin beklenti kuralı nars ın beklenti kuralıdır .",
+  "cevahir zihin kendi hatasını bulup düzeltebilir .",
+  "cevahir zihin bilmediğini söyleyebilir .",
+  "cevahir zihin bir kez okuduğunu hatırlayabilir .",
+  "transformer aynı veriyle saatlerce eğitilmelidir ."
+ ],
+ "world": [
+  "balık bir hayvandır .",
+  "kavak bir ağaçtır .",
+  "kuşlar yumurtlar .",
+  "böcekler altı bacakla yürür .",
+  "hamsi bir balıktır .",
+  "çiçek bir bitkidir .",
+  "çekirge bir böcektir .",
+  "metaller ısıyı iletir .",
+  "taş serttir .",
+  "vapur bir taşıttır .",
+  "ağaçlar gölge verir .",
+  "sazan bir balıktır .",
+  "çiçekler baharda açar .",
+  "ağaç bir bitkidir .",
+  "nikel bir metaldir .",
+  "böcek bir hayvandır .",
+  "tren bir taşıttır .",
+  "meşe bir ağaçtır .",
+  "papatya bir çiçektir .",
+  "karınca bir böcektir .",
+  "levrek bir balıktır .",
+  "penguen bir kuştur .",
+  "penguen uçamaz .",
+  "pervane bir böcektir .",
+  "hayvanlar nefes alır .",
+  "çinko bir metaldir .",
+  "taşıt insanları bir yerden bir yere götürür .",
+  "metal sert ve parlak bir maddedir .",
+  "bitkiler topraktan su çeker .",
+  "metaller dövülerek biçimlenir .",
+  "deniz tuzludur .",
+  "lale bir çiçektir .",
+  "martı bir kuştur .",
+  "taşıtlar yolcu taşır .",
+  "kartal bir kuştur .",
+  "ağaçlar yaprak döker .",
+  "serçe bir kuştur .",
+  "sürüngenler güneşte ısınır .",
+  "kuş bir hayvandır .",
+  "çınar bir ağaçtır .",
+  "ıhlamur bir ağaçtır .",
+  "krom bir metaldir .",
+  "timsah bir sürüngendir .",
+  "balıklar solungaçla solunum yapar .",
+  "leylek bir kuştur .",
+  "otobüs bir taşıttır .",
+  "bakır bir metaldir .",
+  "menekşe bir çiçektir .",
+  "kuşlar uçar .",
+  "kertenkele bir sürüngendir .",
+  "kuşlar kanat çırpar ."
+ ],
+ "shown": [
+  {
+   "thing": "serçe",
+   "kind": "kuş",
+   "form": "another of a kind that was asked",
+   "q": "serçe ne yapar ?",
+   "must": [
+    "serçe yumurtlar .",
+    "serçe kanat çırpar .",
+    "serçe uçar ."
+   ],
+   "may": [
+    "serçe bir hayvandır .",
+    "serçe nefes alır .",
+    "serçe bir kuştur .",
+    "serçe bir kuştur ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "kartal",
+   "kind": "kuş",
+   "form": "another of a kind that was asked",
+   "q": "kartal ne yapar ?",
+   "must": [
+    "kartal yumurtlar .",
+    "kartal kanat çırpar .",
+    "kartal uçar ."
+   ],
+   "may": [
+    "kartal bir hayvandır .",
+    "kartal nefes alır .",
+    "kartal bir kuştur .",
+    "kartal bir kuştur ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "çınar",
+   "kind": "ağaç",
+   "form": "another of a kind that was asked",
+   "q": "çınar ne yapar ?",
+   "must": [
+    "çınar gölge verir .",
+    "çınar yaprak döker ."
+   ],
+   "may": [
+    "çınar bir bitkidir .",
+    "çınar fotosentezle oksijen üretir .",
+    "çınar üreticidir .",
+    "çınar topraktan su çeker .",
+    "çınar bir ağaçtır ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "kavak",
+   "kind": "ağaç",
+   "form": "another of a kind that was asked",
+   "q": "kavak ne yapar ?",
+   "must": [
+    "kavak gölge verir .",
+    "kavak yaprak döker ."
+   ],
+   "may": [
+    "kavak bir bitkidir .",
+    "kavak fotosentezle oksijen üretir .",
+    "kavak üreticidir .",
+    "kavak topraktan su çeker .",
+    "kavak bir ağaçtır ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "bakır",
+   "kind": "metal",
+   "form": "another of a kind that was asked",
+   "q": "bakır ne yapar ?",
+   "must": [
+    "bakır ısıyı iletir .",
+    "bakır dövülerek biçimlenir ."
+   ],
+   "may": [
+    "bakır sert ve parlak bir maddedir .",
+    "bakır bir metaldir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "nikel",
+   "kind": "metal",
+   "form": "another of a kind that was asked",
+   "q": "nikel ne yapar ?",
+   "must": [
+    "nikel ısıyı iletir .",
+    "nikel dövülerek biçimlenir ."
+   ],
+   "may": [
+    "nikel sert ve parlak bir maddedir .",
+    "nikel bir metaldir ."
+   ],
+   "not": []
+  }
+ ],
+ "asked": [
+  {
+   "thing": "leylek",
+   "kind": "kuş",
+   "form": "another of a kind that was asked",
+   "q": "leylek ne yapar ?",
+   "must": [
+    "leylek yumurtlar .",
+    "leylek kanat çırpar .",
+    "leylek uçar ."
+   ],
+   "may": [
+    "leylek bir hayvandır .",
+    "leylek nefes alır .",
+    "leylek bir kuştur ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "martı",
+   "kind": "kuş",
+   "form": "another of a kind that was asked",
+   "q": "martı ne yapar ?",
+   "must": [
+    "martı yumurtlar .",
+    "martı kanat çırpar .",
+    "martı uçar ."
+   ],
+   "may": [
+    "martı bir hayvandır .",
+    "martı nefes alır .",
+    "martı bir kuştur ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "sazan",
+   "kind": "balık",
+   "form": "of a kind never asked",
+   "q": "sazan ne yapar ?",
+   "must": [
+    "sazan solungaçla solunum yapar ."
+   ],
+   "may": [
+    "sazan solungaçla solur .",
+    "sazan bir hayvandır .",
+    "sazan nefes alır .",
+    "sazan bir balıktır .",
+    "sazan bir balıktır ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "levrek",
+   "kind": "balık",
+   "form": "of a kind never asked",
+   "q": "levrek ne yapar ?",
+   "must": [
+    "levrek solungaçla solunum yapar ."
+   ],
+   "may": [
+    "levrek solungaçla solur .",
+    "levrek bir hayvandır .",
+    "levrek nefes alır .",
+    "levrek bir balıktır ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "hamsi",
+   "kind": "balık",
+   "form": "of a kind never asked",
+   "q": "hamsi ne yapar ?",
+   "must": [
+    "hamsi solungaçla solunum yapar ."
+   ],
+   "may": [
+    "hamsi solungaçla solur .",
+    "hamsi bir hayvandır .",
+    "hamsi nefes alır .",
+    "hamsi bir balıktır .",
+    "hamsi bir balıktır ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "karınca",
+   "kind": "böcek",
+   "form": "of a kind never asked",
+   "q": "karınca ne yapar ?",
+   "must": [
+    "karınca altı bacakla yürür ."
+   ],
+   "may": [
+    "karınca bir hayvandır .",
+    "karınca nefes alır .",
+    "karınca bir böcektir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "çekirge",
+   "kind": "böcek",
+   "form": "of a kind never asked",
+   "q": "çekirge ne yapar ?",
+   "must": [
+    "çekirge altı bacakla yürür ."
+   ],
+   "may": [
+    "çekirge bir hayvandır .",
+    "çekirge nefes alır .",
+    "çekirge bir böcektir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "pervane",
+   "kind": "böcek",
+   "form": "of a kind never asked",
+   "q": "pervane ne yapar ?",
+   "must": [
+    "pervane altı bacakla yürür ."
+   ],
+   "may": [
+    "pervane bir hayvandır .",
+    "pervane nefes alır .",
+    "pervane bir böcektir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "meşe",
+   "kind": "ağaç",
+   "form": "another of a kind that was asked",
+   "q": "meşe ne yapar ?",
+   "must": [
+    "meşe gölge verir .",
+    "meşe yaprak döker ."
+   ],
+   "may": [
+    "meşe bir bitkidir .",
+    "meşe fotosentezle oksijen üretir .",
+    "meşe üreticidir .",
+    "meşe topraktan su çeker .",
+    "meşe bir ağaçtır ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "ıhlamur",
+   "kind": "ağaç",
+   "form": "another of a kind that was asked",
+   "q": "ıhlamur ne yapar ?",
+   "must": [
+    "ıhlamur gölge verir .",
+    "ıhlamur yaprak döker ."
+   ],
+   "may": [
+    "ıhlamur bir bitkidir .",
+    "ıhlamur fotosentezle oksijen üretir .",
+    "ıhlamur üreticidir .",
+    "ıhlamur topraktan su çeker .",
+    "ıhlamur bir ağaçtır ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "lale",
+   "kind": "çiçek",
+   "form": "of a kind never asked",
+   "q": "lale ne yapar ?",
+   "must": [
+    "lale baharda açar ."
+   ],
+   "may": [
+    "lale bir bitkidir .",
+    "lale fotosentezle oksijen üretir .",
+    "lale üreticidir .",
+    "lale topraktan su çeker .",
+    "lale bir çiçektir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "papatya",
+   "kind": "çiçek",
+   "form": "of a kind never asked",
+   "q": "papatya ne yapar ?",
+   "must": [
+    "papatya baharda açar ."
+   ],
+   "may": [
+    "papatya bir bitkidir .",
+    "papatya fotosentezle oksijen üretir .",
+    "papatya üreticidir .",
+    "papatya topraktan su çeker .",
+    "papatya bir çiçektir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "menekşe",
+   "kind": "çiçek",
+   "form": "of a kind never asked",
+   "q": "menekşe ne yapar ?",
+   "must": [
+    "menekşe baharda açar ."
+   ],
+   "may": [
+    "menekşe bir bitkidir .",
+    "menekşe fotosentezle oksijen üretir .",
+    "menekşe üreticidir .",
+    "menekşe topraktan su çeker .",
+    "menekşe bir çiçektir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "krom",
+   "kind": "metal",
+   "form": "another of a kind that was asked",
+   "q": "krom ne yapar ?",
+   "must": [
+    "krom ısıyı iletir .",
+    "krom dövülerek biçimlenir ."
+   ],
+   "may": [
+    "krom sert ve parlak bir maddedir .",
+    "krom bir metaldir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "çinko",
+   "kind": "metal",
+   "form": "another of a kind that was asked",
+   "q": "çinko ne yapar ?",
+   "must": [
+    "çinko ısıyı iletir .",
+    "çinko dövülerek biçimlenir ."
+   ],
+   "may": [
+    "çinko sert ve parlak bir maddedir .",
+    "çinko bir metaldir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "tren",
+   "kind": "taşıt",
+   "form": "of a kind never asked",
+   "q": "tren ne yapar ?",
+   "must": [
+    "tren yolcu taşır ."
+   ],
+   "may": [
+    "tren insanları bir yerden bir yere götürür .",
+    "tren bir taşıttır ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "vapur",
+   "kind": "taşıt",
+   "form": "of a kind never asked",
+   "q": "vapur ne yapar ?",
+   "must": [
+    "vapur yolcu taşır ."
+   ],
+   "may": [
+    "vapur insanları bir yerden bir yere götürür .",
+    "vapur bir taşıttır ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "otobüs",
+   "kind": "taşıt",
+   "form": "of a kind never asked",
+   "q": "otobüs ne yapar ?",
+   "must": [
+    "otobüs yolcu taşır ."
+   ],
+   "may": [
+    "otobüs insanları bir yerden bir yere götürür .",
+    "otobüs bir taşıttır ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "kertenkele",
+   "kind": "sürüngen",
+   "form": "its kind's bare name never told",
+   "q": "kertenkele ne yapar ?",
+   "must": [
+    "kertenkele güneşte ısınır ."
+   ],
+   "may": [
+    "kertenkele bir sürüngendir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "timsah",
+   "kind": "sürüngen",
+   "form": "its kind's bare name never told",
+   "q": "timsah ne yapar ?",
+   "must": [
+    "timsah güneşte ısınır ."
+   ],
+   "may": [
+    "timsah bir sürüngendir ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "penguen",
+   "kind": "kuş",
+   "form": "told to do otherwise than its kind",
+   "q": "penguen ne yapar ?",
+   "must": [
+    "penguen yumurtlar .",
+    "penguen kanat çırpar ."
+   ],
+   "may": [
+    "penguen bir hayvandır .",
+    "penguen nefes alır .",
+    "penguen bir kuştur .",
+    "penguen bir kuştur .",
+    "penguen uçamaz ."
+   ],
+   "not": [
+    "penguen uçar ."
+   ]
+  },
+  {
+   "thing": "fırtına",
+   "kind": null,
+   "form": "nothing of the sort was told",
+   "q": "fırtına ne yapar ?",
+   "must": [],
+   "may": [],
+   "not": []
+  },
+  {
+   "thing": "masa",
+   "kind": null,
+   "form": "nothing of the sort was told",
+   "q": "masa ne yapar ?",
+   "must": [],
+   "may": [],
+   "not": []
+  },
+  {
+   "thing": "bulut",
+   "kind": null,
+   "form": "nothing of the sort was told",
+   "q": "bulut ne yapar ?",
+   "must": [],
+   "may": [],
+   "not": []
+  },
+  {
+   "thing": "deniz",
+   "kind": null,
+   "form": "nothing of the sort was told",
+   "q": "deniz ne yapar ?",
+   "must": [],
+   "may": [
+    "deniz tuzludur ."
+   ],
+   "not": []
+  },
+  {
+   "thing": "taş",
+   "kind": null,
+   "form": "nothing of the sort was told",
+   "q": "taş ne yapar ?",
+   "must": [],
+   "may": [
+    "taş serttir ."
+   ],
+   "not": []
+  }
+ ]
+}
