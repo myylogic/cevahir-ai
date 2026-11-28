@@ -377,7 +377,7 @@
     1,
     2
    ],
-   "seconds": 0.1,
+   "seconds": 0.2,
    "chars": 1145
   },
   {
@@ -521,12 +521,12 @@
    "chars": 1479
   }
  ],
- "seconds": 5.6,
+ "seconds": 5.7,
  "manifest": {
   "what": "Cevahir, the final form (cevher)",
-  "version": 3,
-  "sha256": "56ab7a8d7e8f807da318c68d23261838af46cd0d4771c5e0cce00051b266af1f",
-  "digest": "a15cc890d065695816266f548a89d3a5",
+  "version": 4,
+  "sha256": "09af92e685b6b2a1a33f2a6d33a502cc7a9f12e4b16e0e86d6363eac51ead18b",
+  "digest": "a15cc890d065695839d49eabef11f226",
   "size": {
    "ties": {
     "ties": 28552,
@@ -555,8 +555,8 @@
    "letters": {
     "ties": 60213,
     "slots": 131072,
-    "let_go": 853,
-    "not_written": 0,
+    "let_go": 857,
+    "not_written": 5,
     "lived": 63866,
     "bytes": 1572864
    },

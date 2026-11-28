@@ -167,9 +167,8 @@ class Counts:
             return int(mix_np(self.key[at], self.cnt[at].astype(np.uint64)).sum(dtype=np.uint64))
 
     def state(self) -> dict:
-        """The table as it stands: each tie with the slot it sits in."""
-        at = np.flatnonzero(self.key != 0)
-        return {"at": at.astype(np.int64), "key": self.key[at], "cnt": self.cnt[at],
+        """The table as it stands: its two arrays (not copies)."""
+        return {"key": self.key, "cnt": self.cnt,
                 "nb": np.array([self.nb, self.max_buckets, self.let_go, self.not_written], dtype=np.int64)}
 
     @classmethod
@@ -181,11 +180,8 @@ class Counts:
         self.now_buckets = max_buckets
         if allowed:
             self.allow(allowed)
-        self.key = np.zeros(nb * self.WAYS, dtype=np.uint64)
-        self.cnt = np.zeros(nb * self.WAYS, dtype=np.uint32)
-        at = st["at"]
-        self.key[at], self.cnt[at] = st["key"], st["cnt"]
-        self.used, self.let_go, self.not_written = len(at), let_go, not_written
+        self.key, self.cnt = st["key"], st["cnt"]
+        self.used, self.let_go, self.not_written = int(np.count_nonzero(self.key)), let_go, not_written
         return self
 
 

@@ -25,7 +25,7 @@ import os
 import sys
 import time
 
-PIECE = 1 << 20                                              # a file is read so many characters at a time
+PIECE = 1 << 18                                              # a file is read so many characters at a time
 
 
 def pieces(f, most: int = PIECE):

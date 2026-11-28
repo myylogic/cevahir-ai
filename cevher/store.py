@@ -563,11 +563,11 @@ class Slots:
             return int(mix_np(mix_np(k, v), t.astype(np.uint64)).sum(dtype=np.uint64)) if len(k) else 0
 
     def state(self) -> dict:
-        """The table as it stands: each tie with the slot it sits in, and the ties that wait beside it."""
-        at = np.flatnonzero(self.key != 0)
+        """The table as it stands: its four arrays (not copies: keeping a mind takes no second table of memory),
+        and the ties that wait beside it."""
         beside = [(key, value, cell[0], cell[1]) for key, row in self.spill.items() for value, cell in row.items()]
-        return {"at": at.astype(np.int64), "key": self.key[at], "val": self.val[at], "cnt": self.cnt[at],
-                "tim": self.tim[at], "beside": np.array(beside, dtype=np.uint64).reshape(-1, 4),
+        return {"key": self.key, "val": self.val, "cnt": self.cnt, "tim": self.tim,
+                "beside": np.array(beside, dtype=np.uint64).reshape(-1, 4),
                 "nb": np.array([self.nb, self.max_buckets, self.let_go, self.not_kept], dtype=np.int64)}
 
     @classmethod
@@ -579,10 +579,8 @@ class Slots:
         self.now_buckets = max_buckets
         if allowed:
             self.allow(allowed)
-        self._alloc(nb)
-        at = st["at"]
-        self.key[at], self.val[at], self.cnt[at], self.tim[at] = st["key"], st["val"], st["cnt"], st["tim"]
-        self.used, self.spill, self.spilled = len(at), {}, 0
+        self.key, self.val, self.cnt, self.tim = st["key"], st["val"], st["cnt"], st["tim"]
+        self.used, self.spill, self.spilled = int(np.count_nonzero(self.key)), {}, 0
         for key, value, c, t in st["beside"].tolist():
             self.spill.setdefault(key, {})[value] = [c, t]
             self.spilled += 1

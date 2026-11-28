@@ -51,7 +51,7 @@ class Mind:
     def code(self, token: str) -> int:
         c = self._codes.get(token)
         if c is None:
-            if len(self._codes) > 300000:                    # a cache of codes, not a store: emptied when large
+            if len(self._codes) > 50000:                     # a cache of codes, not a store: emptied when large
                 self._codes.clear()
             c = self._codes[token] = code_of(token)
             self.spell.setdefault(c, token)

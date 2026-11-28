@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from cevher import Cevahir
+from cevher.cevahir import OVERHEAD_MB
 from cevher.letters import Counts, Letters
 from cevher.mind import Mind
 from cevher.store import Exact, Slots
@@ -191,7 +192,7 @@ def test_forgetting_an_entry_leaves_the_substance_as_if_it_had_never_been_lived(
 
 
 def test_forgetting_is_exact_in_a_full_table_too():
-    c = Cevahir(budget_mb=97, ledger=True)                   # 1 MB for both tables: they fill within the test
+    c = Cevahir(budget_mb=OVERHEAD_MB + 1, ledger=True)                   # 1 MB for both tables: they fill within the test
     rng = random.Random(5)
     words = ["".join(rng.choice("abcçdefgğhıijklmnoöprsştuüvyz") for _ in range(rng.randint(2, 8))) for _ in range(4000)]
     text = lambda n: " ".join(rng.choice(words) for _ in range(n)) + ". "
@@ -213,7 +214,7 @@ def test_a_long_text_is_written_a_group_of_sentences_at_a_time_and_forgotten_exa
     words = ["".join(rng.choice("abcçdefgğhıijklmnoöprsştuüvyz") for _ in range(rng.randint(2, 8))) for _ in range(3000)]
     text = "".join(" ".join(rng.choice(words) for _ in range(9)) + ". " for _ in range(2500))
     monkeypatch.setattr(module, "GROUP", 64 * 9)             # forty groups of this text, in a table that fills
-    c = Cevahir(budget_mb=97, ledger=True)
+    c = Cevahir(budget_mb=OVERHEAD_MB + 1, ledger=True)
     c.read("".join(" ".join(rng.choice(words) for _ in range(9)) + ". " for _ in range(4000)))
     assert c.store.let_go + c.store.not_kept > 0
     before, moments = c.digest(), c.moments()
@@ -252,7 +253,7 @@ def test_a_long_file_is_given_a_piece_at_a_time():
 def test_a_full_mind_goes_on_learning():
     """A table that kept only what is counted most could learn nothing new once it was full. What is new always
     finds a place; what gives way is the least evident of what the bucket held before."""
-    c = Cevahir(budget_mb=97)                                # 1 MB for the three tables
+    c = Cevahir(budget_mb=OVERHEAD_MB + 1)                                # 1 MB for the three tables
     rng = random.Random(11)
     words = ["".join(rng.choice("abcçdefgğhıijklmnoöprsştuüvyz") for _ in range(rng.randint(2, 8))) for _ in range(300)]
     for _ in range(700):                                     # told a sentence at a time, until that table is full
@@ -276,7 +277,7 @@ def test_a_full_mind_goes_on_learning():
 def test_reading_does_not_push_out_what_was_taught():
     """What long texts write lives in a table of its own: in one table with what the mind was taught, a megabyte
     of reading left 11 of 433 lesson dialogues answered (FINAL_FORM.md)."""
-    c = _taught(SCAN_LIFE, budget_mb=97)
+    c = _taught(SCAN_LIFE, budget_mb=OVERHEAD_MB + 1)
     c.tell("Kedi süt içer ve uyur.")
     taught = c.store.lived.digest()
     rng = random.Random(12)
@@ -377,7 +378,7 @@ def test_a_mind_kept_and_loaded_is_the_same_mind(tmp_path):
 
 
 def test_memory_is_bounded_by_the_budget_whatever_is_lived():
-    c = Cevahir(budget_mb=98)                                # 2 MB for both tables
+    c = Cevahir(budget_mb=OVERHEAD_MB + 2)                                # 2 MB for both tables
     rng = random.Random(4)
     for block in range(12):
         words = ["".join(rng.choice("abcdefghijklmnoprstuvyz") for _ in range(rng.randint(2, 9))) for _ in range(3000)]

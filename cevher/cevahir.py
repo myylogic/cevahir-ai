@@ -33,12 +33,13 @@ from cevher.units import LINE, TOKEN, Spellings, body, code_of, lower_tr, mix, r
 SEPARATOR = re.compile(r"(?<=[.!?…])\s+|\n+")              # Zihin's sentence split (zihin.__main__.sentences)
 R_FORM, R_GLUE = code_of("\0role written form"), code_of("\0role gap")
 GLUED, APART = 1, 2
-OVERHEAD_MB = 96                                             # the interpreter, NumPy and the mind's working memory
+OVERHEAD_MB = 224                                            # what the budget leaves outside the tables: the
+#   interpreter and NumPy (40 MB), the spellings, and the working memory of living (measured: gates.py bound)
 PER_CHARACTER = 8                                            # bytes the tables may hold for every character lived
 FLOOR_MB = 32                                                # ... and what they may hold however little was lived
 BULK = 4096                                                  # a text longer than this is read many ties at once
 GROUP = 1 << 15                                              # ... so many of its words at a time, about
-VERSION = 3                                                  # of the file a mind is kept in
+VERSION = 4                                                  # of the file a mind is kept in
 
 
 def _spans(text: str, lines: bool):
@@ -92,6 +93,7 @@ class Cevahir:
         self.budget_mb, self.rest, self.per_character = budget_mb, rest, per_character
         self.store = Two(Slots(max_bytes=rest // 8), Slots(max_bytes=rest * 5 // 8))
         self.mind = Mind(self.store)
+        self.mind.spell.most = max(100000, budget_mb * 2000) # the words it can spell are bounded with the budget
         self.letters = Letters(Counts(max_bytes=rest // 4), depth=depth)
         self.entries: Optional[List[dict]] = None
         self._ledger = None
@@ -444,7 +446,8 @@ class Cevahir:
         st["nb"] = np.array([st["nb"][0], max(int(st["nb"][0]), self.letters.T.max_buckets), st["nb"][2],
                              st["nb"][3]])
         self.letters.T = Counts.from_state(st, allowed // 4)
-        self.mind.spell = Spellings.from_state({k[2:]: v for k, v in a.items() if k.startswith("w_")})
+        self.mind.spell = Spellings.from_state({k[2:]: v for k, v in a.items() if k.startswith("w_")},
+                                               most=self.mind.spell.most)
         self.letters.zero, self.letters.sit = a["zero"], a["sit"]
         self.letters.tail, self.letters.lived = a["tail"].tobytes(), lived
         self.mind.clock, self.nights = clock, nights

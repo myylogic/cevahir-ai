@@ -57,15 +57,17 @@ def exact(args):
     Each case: the digest before, after living, after forgetting."""
     import corpora
     from cevher import Cevahir
+    from cevher.cevahir import OVERHEAD_MB
+    FULL = OVERHEAD_MB + 2                                   # a budget that leaves 2 MB for the three tables
     text = corpora.stream("tr-lessons")
     english = corpora.stream("en-pydoc")
     source = corpora.stream("code-pystdlib")[:150000]
     for name, budget, first, then, lines in (
             ("a text, tables with room", 512, english[:200000], text, False),
-            ("a text, tables full (2 MB for both)", 98, english[:400000], text, False),
-            ("a longer text, tables full (2 MB for both)", 98, english[:400000], english[400000:500000], False),
+            ("a text, tables full (2 MB for both)", FULL, english[:400000], text, False),
+            ("a longer text, tables full (2 MB for both)", FULL, english[:400000], english[400000:500000], False),
             ("source code read by lines, tables with room", 512, english[:200000], source, True),
-            ("source code read by lines, tables full (2 MB for both)", 98, english[:400000], source, True)):
+            ("source code read by lines, tables full (2 MB for both)", FULL, english[:400000], source, True)):
         c = Cevahir(budget_mb=budget, ledger=True)
         c.read(first)
         before, moments = c.digest(), c.moments()
@@ -82,9 +84,9 @@ def exact(args):
                    "ties_given_way_while_living": [size_lived["ties"]["let_go"] - size_before["ties"]["let_go"],
                                                    size_lived["letters"]["let_go"] - size_before["letters"]["let_go"]],
                    "forget_s": round(time.time() - t0, 2), "ledger_bytes": c.ledger_bytes()})
-    for budget in (512, 98):
+    for budget in (512, FULL):
         c = Cevahir(budget_mb=budget, ledger=True)
-        if budget == 98:
+        if budget == FULL:
             c.read(english[:400000])
         folder = tempfile.mkdtemp(prefix="gates-lessons-")
         paths = Y.lesson_files(folder)
