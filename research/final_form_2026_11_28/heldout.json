@@ -1,0 +1,6991 @@
+{
+"seed": 20261128,
+"what": "held-out set of research/final_form_2026_11_28 (gate G6)",
+"worlds": [
+{
+"ask": [
+{
+"keys": [
+"M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del dolan yukarı çift",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"M2 K1 M2 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del yukarı katla",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"K1 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del katla",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del dolan yukarı katla",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"M2 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del yukarı",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"M2 K1 M2 K1 M2 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del yukarı çift",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"G0 K1 G0 K1 G0 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del ileri çift",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"G0 K1 G0 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del ileri katla",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"G0 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del ileri",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"K1 K1 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del çift",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"M2 V7 K1 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "sar yukarı sonra del katla",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"G0 T6 G0 T6 K1 K1 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "bük ileri katla sonra del çift",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"M2 T6 G0 K1 G0 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "del ileri katla önce bük yukarı",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"V7 V7 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1 M2 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "sar katla sonra del dolan yukarı çift",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"G0 D9 K1 K1 K1"
+],
+"mode": "exact",
+"not": [],
+"q": "tara ileri sonra del çift",
+"tag": "a primitive lived only alone"
+},
+{
+"keys": [
+"G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9"
+],
+"mode": "exact",
+"not": [],
+"q": "tara dolan ileri katla",
+"tag": "a template never lived"
+},
+{
+"keys": [
+"G0 V7 G0 V7 G0 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "sar dolan ileri",
+"tag": "a template never lived"
+},
+{
+"keys": [
+"G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6"
+],
+"mode": "exact",
+"not": [],
+"q": "bük dolan ileri çift",
+"tag": "a template never lived"
+},
+{
+"keys": [
+"G0 D9 G0 D9 G0 D9"
+],
+"mode": "exact",
+"not": [],
+"q": "tara dolan ileri",
+"tag": "a template never lived"
+},
+{
+"keys": [
+"G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "sar dolan ileri çift",
+"tag": "a template never lived"
+},
+{
+"keys": [
+"G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7 G0 N7"
+],
+"mode": "exact",
+"not": [],
+"q": "sil dolan ileri çift",
+"tag": "a template never lived"
+},
+{
+"keys": [
+"G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9"
+],
+"mode": "exact",
+"not": [],
+"q": "tara dolan ileri katla önce tara ileri",
+"tag": "a template never lived"
+},
+{
+"keys": [
+"G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6"
+],
+"mode": "exact",
+"not": [],
+"q": "bük dolan ileri çift sonra bük dolan yukarı çift",
+"tag": "a template never lived"
+},
+{
+"keys": [
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9"
+],
+"mode": "exact",
+"not": [],
+"q": "tara dolan ileri katla önce bük dolan yukarı katla",
+"tag": "a template never lived"
+},
+{
+"keys": [
+"G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 G0 V7 N7 N7 N7"
+],
+"mode": "exact",
+"not": [],
+"q": "sar dolan ileri çift sonra sil çift",
+"tag": "a template never lived"
+},
+{
+"keys": [
+"T6 T6 M2 T6"
+],
+"mode": "exact",
+"not": [],
+"q": "bük katla sonra bük yukarı",
+"tag": "a new combination"
+},
+{
+"keys": [
+"M2 V7 M2 D9"
+],
+"mode": "exact",
+"not": [],
+"q": "sar yukarı sonra tara yukarı",
+"tag": "a new combination"
+},
+{
+"keys": [
+"G0 T6 T6"
+],
+"mode": "exact",
+"not": [],
+"q": "bük ileri sonra bük",
+"tag": "a new combination"
+},
+{
+"keys": [
+"G0 V7 G0 V7 G0 N7"
+],
+"mode": "exact",
+"not": [],
+"q": "sil ileri önce sar ileri katla",
+"tag": "a new combination"
+},
+{
+"keys": [
+"D9 D9 D9 M2 V7 M2 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "sar yukarı katla önce tara çift",
+"tag": "a new combination"
+},
+{
+"keys": [
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 D9 M2 D9 M2 D9"
+],
+"mode": "exact",
+"not": [],
+"q": "bük dolan yukarı çift sonra tara yukarı çift",
+"tag": "a new combination"
+},
+{
+"keys": [
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6"
+],
+"mode": "exact",
+"not": [],
+"q": "bük dolan yukarı katla önce sil dolan yukarı çift",
+"tag": "a new combination"
+},
+{
+"keys": [
+"D9 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6"
+],
+"mode": "exact",
+"not": [],
+"q": "bük dolan yukarı katla önce tara",
+"tag": "a new combination"
+},
+{
+"keys": [
+"G0 D9 G0 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "sar dolan yukarı çift önce tara ileri katla",
+"tag": "a new combination"
+},
+{
+"keys": [
+"G0 N7 G0 V7 G0 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "sil ileri sonra sar ileri katla",
+"tag": "a new combination"
+},
+{
+"keys": [
+"N7 N7 N7 N7 N7 N7"
+],
+"mode": "exact",
+"not": [],
+"q": "sil çift önce sil çift",
+"tag": "a new combination"
+},
+{
+"keys": [
+"M2 D9 G0 V7 G0 V7 G0 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "tara yukarı sonra sar ileri çift",
+"tag": "a new combination"
+},
+{
+"keys": [
+"M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7"
+],
+"mode": "exact",
+"not": [],
+"q": "bük dolan yukarı sonra sil dolan yukarı katla",
+"tag": "a new combination"
+},
+{
+"keys": [
+"V7 V7 V7 G0 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "sar ileri önce sar çift",
+"tag": "a new combination"
+},
+{
+"keys": [
+"T6 T6 G0 N7 G0 N7 G0 N7"
+],
+"mode": "exact",
+"not": [],
+"q": "bük katla sonra sil ileri çift",
+"tag": "a new combination"
+},
+{
+"keys": [
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "sar dolan yukarı çift önce tara dolan yukarı çift",
+"tag": "the longest new combinations"
+},
+{
+"keys": [
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "sar dolan yukarı çift önce bük dolan yukarı çift",
+"tag": "the longest new combinations"
+},
+{
+"keys": [
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6"
+],
+"mode": "exact",
+"not": [],
+"q": "bük dolan yukarı çift önce tara dolan yukarı çift",
+"tag": "the longest new combinations"
+},
+{
+"keys": [
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "tara dolan yukarı çift sonra sar dolan yukarı çift",
+"tag": "the longest new combinations"
+},
+{
+"keys": [
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6"
+],
+"mode": "exact",
+"not": [],
+"q": "bük dolan yukarı çift önce sar dolan yukarı çift",
+"tag": "the longest new combinations"
+},
+{
+"keys": [
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6"
+],
+"mode": "exact",
+"not": [],
+"q": "sil dolan yukarı çift sonra bük dolan yukarı çift",
+"tag": "the longest new combinations"
+},
+{
+"keys": [
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7"
+],
+"mode": "exact",
+"not": [],
+"q": "sil dolan yukarı çift önce tara dolan yukarı çift",
+"tag": "the longest new combinations"
+},
+{
+"keys": [
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7"
+],
+"mode": "exact",
+"not": [],
+"q": "sar dolan yukarı çift sonra sil dolan yukarı çift",
+"tag": "the longest new combinations"
+},
+{
+"keys": [
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7"
+],
+"mode": "exact",
+"not": [],
+"q": "bük dolan yukarı çift sonra sar dolan yukarı çift",
+"tag": "the longest new combinations"
+},
+{
+"keys": [
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6"
+],
+"mode": "exact",
+"not": [],
+"q": "bük dolan yukarı çift önce bük dolan yukarı çift",
+"tag": "the longest new combinations"
+}
+],
+"life": [
+[
+"watch",
+"tara",
+"D9 ."
+],
+[
+"watch",
+"sil",
+"N7 ."
+],
+[
+"watch",
+"sar",
+"V7 ."
+],
+[
+"watch",
+"bük",
+"T6 ."
+],
+[
+"watch",
+"del",
+"K1 ."
+],
+[
+"watch",
+"sar ileri",
+"G0 V7 ."
+],
+[
+"watch",
+"sar katla",
+"V7 V7 ."
+],
+[
+"watch",
+"bük katla",
+"T6 T6 ."
+],
+[
+"watch",
+"sil yukarı",
+"M2 N7 ."
+],
+[
+"watch",
+"tara çift",
+"D9 D9 D9 ."
+],
+[
+"watch",
+"sar yukarı",
+"M2 V7 ."
+],
+[
+"watch",
+"bük ileri",
+"G0 T6 ."
+],
+[
+"watch",
+"tara ileri",
+"G0 D9 ."
+],
+[
+"watch",
+"tara katla",
+"D9 D9 ."
+],
+[
+"watch",
+"tara yukarı",
+"M2 D9 ."
+],
+[
+"watch",
+"sil çift",
+"N7 N7 N7 ."
+],
+[
+"watch",
+"bük çift",
+"T6 T6 T6 ."
+],
+[
+"watch",
+"bük yukarı",
+"M2 T6 ."
+],
+[
+"watch",
+"sar çift",
+"V7 V7 V7 ."
+],
+[
+"watch",
+"sil katla",
+"N7 N7 ."
+],
+[
+"watch",
+"sil ileri",
+"G0 N7 ."
+],
+[
+"watch",
+"sil ileri çift",
+"G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sil yukarı katla",
+"M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı",
+"M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük ileri katla",
+"G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sil yukarı çift",
+"M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı",
+"M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük ileri çift",
+"G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"tara ileri çift",
+"G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sil ileri katla",
+"G0 N7 G0 N7 ."
+],
+[
+"watch",
+"bük yukarı katla",
+"M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara yukarı katla",
+"M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar ileri katla",
+"G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı",
+"M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar ileri çift",
+"G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sar yukarı katla",
+"M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara ileri katla",
+"G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sar dolan yukarı",
+"M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara yukarı çift",
+"M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük yukarı çift",
+"M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar yukarı çift",
+"M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar yukarı önce bük",
+"T6 M2 V7 ."
+],
+[
+"watch",
+"tara çift sonra bük",
+"D9 D9 D9 T6 ."
+],
+[
+"watch",
+"sar katla sonra sar",
+"V7 V7 V7 ."
+],
+[
+"watch",
+"tara dolan yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar yukarı sonra sil",
+"M2 V7 N7 ."
+],
+[
+"watch",
+"bük sonra sar çift",
+"T6 V7 V7 V7 ."
+],
+[
+"watch",
+"sar yukarı önce sar",
+"V7 M2 V7 ."
+],
+[
+"watch",
+"sar çift sonra sil",
+"V7 V7 V7 N7 ."
+],
+[
+"watch",
+"bük sonra sar ileri",
+"T6 G0 V7 ."
+],
+[
+"watch",
+"bük ileri sonra sar",
+"G0 T6 V7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük sonra bük ileri",
+"T6 G0 T6 ."
+],
+[
+"watch",
+"sar dolan yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar ileri sonra sil",
+"G0 V7 N7 ."
+],
+[
+"watch",
+"sar sonra sar yukarı",
+"V7 M2 V7 ."
+],
+[
+"watch",
+"sar sonra bük katla",
+"V7 T6 T6 ."
+],
+[
+"watch",
+"tara önce tara katla",
+"D9 D9 D9 ."
+],
+[
+"watch",
+"bük dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara ileri sonra sil",
+"G0 D9 N7 ."
+],
+[
+"watch",
+"tara çift sonra sar çift",
+"D9 D9 D9 V7 V7 V7 ."
+],
+[
+"watch",
+"sil sonra sar yukarı katla",
+"N7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük ileri önce sil katla",
+"N7 N7 G0 T6 ."
+],
+[
+"watch",
+"sil ileri sonra bük yukarı",
+"G0 N7 M2 T6 ."
+],
+[
+"watch",
+"tara çift önce tara yukarı",
+"M2 D9 D9 D9 D9 ."
+],
+[
+"watch",
+"sil ileri önce bük yukarı",
+"M2 T6 G0 N7 ."
+],
+[
+"watch",
+"sil sonra bük ileri çift",
+"N7 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sar çift sonra sar katla",
+"V7 V7 V7 V7 V7 ."
+],
+[
+"watch",
+"tara sonra sar ileri katla",
+"D9 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sil ileri çift sonra tara",
+"G0 N7 G0 N7 G0 N7 D9 ."
+],
+[
+"watch",
+"tara sonra sar ileri çift",
+"D9 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük yukarı çift önce bük",
+"T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara çift önce bük ileri",
+"G0 T6 D9 D9 D9 ."
+],
+[
+"watch",
+"sar dolan yukarı önce bük",
+"T6 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar ileri çift sonra sil",
+"G0 V7 G0 V7 G0 V7 N7 ."
+],
+[
+"watch",
+"sar yukarı önce sil ileri",
+"G0 N7 M2 V7 ."
+],
+[
+"watch",
+"bük yukarı önce tara yukarı",
+"M2 D9 M2 T6 ."
+],
+[
+"watch",
+"tara çift önce tara katla",
+"D9 D9 D9 D9 D9 ."
+],
+[
+"watch",
+"tara ileri önce bük ileri",
+"G0 T6 G0 D9 ."
+],
+[
+"watch",
+"tara yukarı katla önce bük",
+"T6 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"tara yukarı sonra tara ileri",
+"M2 D9 G0 D9 ."
+],
+[
+"watch",
+"sil ileri katla önce sar",
+"V7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"tara sonra sar yukarı çift",
+"D9 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar çift sonra sil ileri",
+"V7 V7 V7 G0 N7 ."
+],
+[
+"watch",
+"bük çift sonra bük katla",
+"T6 T6 T6 T6 T6 ."
+],
+[
+"watch",
+"sil sonra sil dolan yukarı",
+"N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara ileri çift sonra bük",
+"G0 D9 G0 D9 G0 D9 T6 ."
+],
+[
+"watch",
+"bük katla sonra tara ileri",
+"T6 T6 G0 D9 ."
+],
+[
+"watch",
+"sar ileri sonra tara ileri",
+"G0 V7 G0 D9 ."
+],
+[
+"watch",
+"sil ileri sonra sar çift",
+"G0 N7 V7 V7 V7 ."
+],
+[
+"watch",
+"tara katla sonra sil yukarı",
+"D9 D9 M2 N7 ."
+],
+[
+"watch",
+"sar katla önce tara katla",
+"D9 D9 V7 V7 ."
+],
+[
+"watch",
+"bük çift sonra tara katla",
+"T6 T6 T6 D9 D9 ."
+],
+[
+"watch",
+"sar ileri önce tara çift",
+"D9 D9 D9 G0 V7 ."
+],
+[
+"watch",
+"bük yukarı önce sil çift",
+"N7 N7 N7 M2 T6 ."
+],
+[
+"watch",
+"bük sonra bük yukarı katla",
+"T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara sonra sil yukarı katla",
+"D9 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara yukarı çift sonra bük",
+"M2 D9 M2 D9 M2 D9 T6 ."
+],
+[
+"watch",
+"sar ileri katla önce tara",
+"D9 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük sonra bük dolan yukarı",
+"T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar katla sonra bük ileri",
+"V7 V7 G0 T6 ."
+],
+[
+"watch",
+"tara katla sonra bük yukarı",
+"D9 D9 M2 T6 ."
+],
+[
+"watch",
+"sar ileri sonra sar ileri",
+"G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük sonra sar ileri katla",
+"T6 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sar katla sonra sar çift",
+"V7 V7 V7 V7 V7 ."
+],
+[
+"watch",
+"bük çift önce bük çift",
+"T6 T6 T6 T6 T6 T6 ."
+],
+[
+"watch",
+"tara katla sonra tara ileri",
+"D9 D9 G0 D9 ."
+],
+[
+"watch",
+"tara önce sar yukarı katla",
+"M2 V7 M2 V7 D9 ."
+],
+[
+"watch",
+"sil sonra sil yukarı çift",
+"N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar ileri sonra bük yukarı",
+"G0 V7 M2 T6 ."
+],
+[
+"watch",
+"sil ileri katla sonra sar",
+"G0 N7 G0 N7 V7 ."
+],
+[
+"watch",
+"sil çift sonra sar yukarı",
+"N7 N7 N7 M2 V7 ."
+],
+[
+"watch",
+"tara ileri önce sar yukarı",
+"M2 V7 G0 D9 ."
+],
+[
+"watch",
+"tara çift önce sar ileri",
+"G0 V7 D9 D9 D9 ."
+],
+[
+"watch",
+"sil ileri çift sonra sar",
+"G0 N7 G0 N7 G0 N7 V7 ."
+],
+[
+"watch",
+"sil yukarı katla sonra bük katla",
+"M2 N7 M2 N7 T6 T6 ."
+],
+[
+"watch",
+"tara çift önce sar dolan yukarı",
+"M2 V7 M2 V7 M2 V7 D9 D9 D9 ."
+],
+[
+"watch",
+"sil ileri çift önce tara çift",
+"D9 D9 D9 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı sonra bük ileri",
+"M2 T6 M2 T6 M2 T6 G0 T6 ."
+],
+[
+"watch",
+"bük çift sonra tara ileri çift",
+"T6 T6 T6 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"bük ileri katla önce bük yukarı",
+"M2 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı sonra tara çift",
+"M2 T6 M2 T6 M2 T6 D9 D9 D9 ."
+],
+[
+"watch",
+"bük çift önce tara ileri çift",
+"G0 D9 G0 D9 G0 D9 T6 T6 T6 ."
+],
+[
+"watch",
+"sil ileri çift önce sil çift",
+"N7 N7 N7 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı sonra sil çift",
+"M2 N7 M2 N7 M2 N7 N7 N7 N7 ."
+],
+[
+"watch",
+"sar ileri çift önce sil katla",
+"N7 N7 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"tara çift sonra sar ileri çift",
+"D9 D9 D9 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük ileri katla önce sar yukarı",
+"M2 V7 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra tara",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 D9 ."
+],
+[
+"watch",
+"sil ileri çift önce tara ileri",
+"G0 D9 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sar ileri sonra sil yukarı katla",
+"G0 V7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük ileri çift sonra tara ileri",
+"G0 T6 G0 T6 G0 T6 G0 D9 ."
+],
+[
+"watch",
+"bük yukarı katla sonra tara ileri",
+"M2 T6 M2 T6 G0 D9 ."
+],
+[
+"watch",
+"sar ileri önce sil ileri katla",
+"G0 N7 G0 N7 G0 V7 ."
+],
+[
+"watch",
+"sil yukarı çift sonra sar katla",
+"M2 N7 M2 N7 M2 N7 V7 V7 ."
+],
+[
+"watch",
+"bük yukarı önce bük ileri çift",
+"G0 T6 G0 T6 G0 T6 M2 T6 ."
+],
+[
+"watch",
+"bük ileri sonra bük dolan yukarı",
+"G0 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil yukarı katla sonra sil ileri",
+"M2 N7 M2 N7 G0 N7 ."
+],
+[
+"watch",
+"bük yukarı çift sonra bük çift",
+"M2 T6 M2 T6 M2 T6 T6 T6 T6 ."
+],
+[
+"watch",
+"tara ileri sonra sil ileri katla",
+"G0 D9 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı sonra bük katla",
+"M2 T6 M2 T6 M2 T6 T6 T6 ."
+],
+[
+"watch",
+"sar dolan yukarı sonra bük katla",
+"M2 V7 M2 V7 M2 V7 T6 T6 ."
+],
+[
+"watch",
+"tara yukarı çift sonra tara ileri",
+"M2 D9 M2 D9 M2 D9 G0 D9 ."
+],
+[
+"watch",
+"tara katla önce bük yukarı çift",
+"M2 T6 M2 T6 M2 T6 D9 D9 ."
+],
+[
+"watch",
+"sil yukarı önce bük dolan yukarı",
+"M2 T6 M2 T6 M2 T6 M2 N7 ."
+],
+[
+"watch",
+"tara ileri çift sonra sil katla",
+"G0 D9 G0 D9 G0 D9 N7 N7 ."
+],
+[
+"watch",
+"sar yukarı çift önce bük katla",
+"T6 T6 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara ileri çift sonra sar katla",
+"G0 D9 G0 D9 G0 D9 V7 V7 ."
+],
+[
+"watch",
+"tara çift sonra bük dolan yukarı",
+"D9 D9 D9 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil yukarı sonra sar ileri katla",
+"M2 N7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"tara dolan yukarı sonra sar yukarı",
+"M2 D9 M2 D9 M2 D9 M2 V7 ."
+],
+[
+"watch",
+"tara ileri çift sonra sil yukarı",
+"G0 D9 G0 D9 G0 D9 M2 N7 ."
+],
+[
+"watch",
+"sar ileri sonra bük yukarı çift",
+"G0 V7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük yukarı sonra sil yukarı çift",
+"M2 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar dolan yukarı önce sil yukarı",
+"M2 N7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara katla önce sil yukarı çift",
+"M2 N7 M2 N7 M2 N7 D9 D9 ."
+],
+[
+"watch",
+"bük yukarı önce tara yukarı katla",
+"M2 D9 M2 D9 M2 T6 ."
+],
+[
+"watch",
+"sar çift sonra tara yukarı katla",
+"V7 V7 V7 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"tara ileri katla sonra bük çift",
+"G0 D9 G0 D9 T6 T6 T6 ."
+],
+[
+"watch",
+"sil ileri çift sonra bük yukarı",
+"G0 N7 G0 N7 G0 N7 M2 T6 ."
+],
+[
+"watch",
+"bük yukarı çift sonra sar katla",
+"M2 T6 M2 T6 M2 T6 V7 V7 ."
+],
+[
+"watch",
+"sil yukarı katla sonra sil yukarı",
+"M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil ileri katla sonra sil yukarı",
+"G0 N7 G0 N7 M2 N7 ."
+],
+[
+"watch",
+"bük yukarı çift önce sar yukarı",
+"M2 V7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil yukarı çift önce tara yukarı",
+"M2 D9 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı sonra sar çift",
+"M2 D9 M2 D9 M2 D9 V7 V7 V7 ."
+],
+[
+"watch",
+"bük ileri sonra bük yukarı katla",
+"G0 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük ileri sonra sar ileri çift",
+"G0 T6 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük yukarı katla sonra tara çift",
+"M2 T6 M2 T6 D9 D9 D9 ."
+],
+[
+"watch",
+"sil ileri önce sar yukarı çift",
+"M2 V7 M2 V7 M2 V7 G0 N7 ."
+],
+[
+"watch",
+"tara yukarı önce sar yukarı katla",
+"M2 V7 M2 V7 M2 D9 ."
+],
+[
+"watch",
+"sar yukarı katla sonra bük ileri",
+"M2 V7 M2 V7 G0 T6 ."
+],
+[
+"watch",
+"bük ileri çift önce tara çift",
+"D9 D9 D9 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük ileri çift sonra sar yukarı",
+"G0 T6 G0 T6 G0 T6 M2 V7 ."
+],
+[
+"watch",
+"bük ileri önce bük dolan yukarı",
+"M2 T6 M2 T6 M2 T6 G0 T6 ."
+],
+[
+"watch",
+"bük çift önce sar yukarı çift",
+"M2 V7 M2 V7 M2 V7 T6 T6 T6 ."
+],
+[
+"watch",
+"bük yukarı çift önce bük ileri",
+"G0 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara dolan yukarı çift önce sil",
+"N7 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük ileri katla önce tara katla",
+"D9 D9 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sar ileri önce sar yukarı katla",
+"M2 V7 M2 V7 G0 V7 ."
+],
+[
+"watch",
+"sar ileri çift önce sar çift",
+"V7 V7 V7 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sil yukarı katla önce bük yukarı",
+"M2 T6 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar katla sonra tara ileri çift",
+"V7 V7 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sar çift önce sil dolan yukarı",
+"M2 N7 M2 N7 M2 N7 V7 V7 V7 ."
+],
+[
+"watch",
+"tara yukarı çift önce sar katla",
+"V7 V7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar ileri çift sonra bük yukarı",
+"G0 V7 G0 V7 G0 V7 M2 T6 ."
+],
+[
+"watch",
+"sar yukarı katla önce sar katla",
+"V7 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara yukarı katla önce sar yukarı",
+"M2 V7 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"tara ileri önce sar ileri çift",
+"G0 V7 G0 V7 G0 V7 G0 D9 ."
+],
+[
+"watch",
+"sar ileri çift sonra bük çift",
+"G0 V7 G0 V7 G0 V7 T6 T6 T6 ."
+],
+[
+"watch",
+"sil ileri katla sonra sar çift",
+"G0 N7 G0 N7 V7 V7 V7 ."
+],
+[
+"watch",
+"bük ileri önce sil dolan yukarı",
+"M2 N7 M2 N7 M2 N7 G0 T6 ."
+],
+[
+"watch",
+"tara ileri önce sil ileri katla",
+"G0 N7 G0 N7 G0 D9 ."
+],
+[
+"watch",
+"sil ileri çift önce sil katla",
+"N7 N7 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sil ileri önce bük ileri çift",
+"G0 T6 G0 T6 G0 T6 G0 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift önce bük",
+"T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar dolan yukarı önce sar çift",
+"V7 V7 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara katla sonra sil ileri çift",
+"D9 D9 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı önce tara yukarı",
+"M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük yukarı sonra tara yukarı çift",
+"M2 T6 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar yukarı katla önce bük çift",
+"T6 T6 T6 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara dolan yukarı katla sonra sar",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 V7 ."
+],
+[
+"watch",
+"bük ileri sonra sil yukarı çift",
+"G0 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra sil",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 N7 ."
+],
+[
+"watch",
+"sar yukarı çift önce sar çift",
+"V7 V7 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar ileri katla önce sar yukarı",
+"M2 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sar yukarı önce sar ileri çift",
+"G0 V7 G0 V7 G0 V7 M2 V7 ."
+],
+[
+"watch",
+"bük yukarı katla sonra tara ileri çift",
+"M2 T6 M2 T6 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"tara yukarı sonra tara dolan yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar yukarı çift sonra sil yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara katla önce sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 D9 D9 ."
+],
+[
+"watch",
+"sil ileri sonra sar dolan yukarı çift",
+"G0 N7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar yukarı önce tara dolan yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 ."
+],
+[
+"watch",
+"tara dolan yukarı çift sonra bük yukarı",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 T6 ."
+],
+[
+"watch",
+"tara ileri çift önce sil ileri çift",
+"G0 N7 G0 N7 G0 N7 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sil yukarı sonra sar dolan yukarı katla",
+"M2 N7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil çift önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 N7 N7 N7 ."
+],
+[
+"watch",
+"sar dolan yukarı önce tara ileri çift",
+"G0 D9 G0 D9 G0 D9 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla önce sil katla",
+"N7 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil ileri önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 G0 N7 ."
+],
+[
+"watch",
+"bük çift önce tara dolan yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 T6 T6 T6 ."
+],
+[
+"watch",
+"sil yukarı çift önce bük ileri çift",
+"G0 T6 G0 T6 G0 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük ileri katla sonra tara ileri katla",
+"G0 T6 G0 T6 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"tara dolan yukarı önce sar yukarı katla",
+"M2 V7 M2 V7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil çift önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 N7 N7 N7 ."
+],
+[
+"watch",
+"sar dolan yukarı önce tara yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra bük yukarı",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 ."
+],
+[
+"watch",
+"sar yukarı önce tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 ."
+],
+[
+"watch",
+"sil yukarı çift sonra tara yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil yukarı önce sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla önce bük katla",
+"T6 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı çift önce tara çift",
+"D9 D9 D9 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük yukarı katla önce bük ileri katla",
+"G0 T6 G0 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar yukarı çift sonra sar yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara ileri sonra tara dolan yukarı çift",
+"G0 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar yukarı çift sonra sil ileri çift",
+"M2 V7 M2 V7 M2 V7 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sar yukarı önce bük dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 ."
+],
+[
+"watch",
+"bük ileri çift önce bük ileri çift",
+"G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük ileri çift önce sar dolan yukarı",
+"M2 V7 M2 V7 M2 V7 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sar ileri katla sonra tara yukarı çift",
+"G0 V7 G0 V7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil dolan yukarı katla önce sar yukarı",
+"M2 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar ileri sonra sar dolan yukarı çift",
+"G0 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı katla önce sar katla",
+"V7 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara ileri çift önce bük yukarı çift",
+"M2 T6 M2 T6 M2 T6 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sil ileri katla sonra bük dolan yukarı",
+"G0 N7 G0 N7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı katla önce sil çift",
+"N7 N7 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı önce sar dolan yukarı",
+"M2 V7 M2 V7 M2 V7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar katla sonra sil dolan yukarı çift",
+"V7 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük ileri katla sonra sar dolan yukarı",
+"G0 T6 G0 T6 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı çift sonra sar katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 V7 V7 ."
+],
+[
+"watch",
+"sar çift sonra bük dolan yukarı çift",
+"V7 V7 V7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı çift önce bük ileri",
+"G0 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara katla sonra sar dolan yukarı katla",
+"D9 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük çift sonra sil dolan yukarı çift",
+"T6 T6 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil çift önce sar dolan yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 N7 N7 N7 ."
+],
+[
+"watch",
+"sar dolan yukarı sonra sil dolan yukarı",
+"M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil ileri katla sonra bük yukarı çift",
+"G0 N7 G0 N7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar yukarı katla önce sar ileri çift",
+"G0 V7 G0 V7 G0 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara dolan yukarı katla sonra bük çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 T6 T6 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı katla önce sar çift",
+"V7 V7 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar yukarı katla sonra sil dolan yukarı",
+"M2 V7 M2 V7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük yukarı sonra sar dolan yukarı katla",
+"M2 T6 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil ileri katla önce tara ileri çift",
+"G0 D9 G0 D9 G0 D9 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sil yukarı katla önce bük dolan yukarı",
+"M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil ileri çift sonra bük dolan yukarı",
+"G0 N7 G0 N7 G0 N7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara ileri katla önce bük yukarı katla",
+"M2 T6 M2 T6 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sar yukarı katla sonra bük dolan yukarı",
+"M2 V7 M2 V7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil katla önce sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 N7 N7 ."
+],
+[
+"watch",
+"sar yukarı çift sonra bük dolan yukarı",
+"M2 V7 M2 V7 M2 V7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara ileri çift önce tara ileri çift",
+"G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"tara ileri çift sonra tara ileri katla",
+"G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra sil katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 N7 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı önce bük yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük ileri çift sonra sil yukarı katla",
+"G0 T6 G0 T6 G0 T6 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar yukarı çift sonra sar dolan yukarı",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil yukarı katla sonra tara ileri katla",
+"M2 N7 M2 N7 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sar ileri katla sonra sar ileri katla",
+"G0 V7 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük yukarı katla önce sar ileri çift",
+"G0 V7 G0 V7 G0 V7 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara yukarı katla önce sil ileri çift",
+"G0 N7 G0 N7 G0 N7 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"tara ileri önce sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 G0 D9 ."
+],
+[
+"watch",
+"sar yukarı çift önce sil yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı çift sonra bük katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 T6 T6 ."
+],
+[
+"watch",
+"tara ileri çift önce sar ileri katla",
+"G0 V7 G0 V7 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"bük çift önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 T6 T6 T6 ."
+],
+[
+"watch",
+"sar ileri önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 V7 ."
+],
+[
+"watch",
+"bük katla önce bük dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 T6 T6 ."
+],
+[
+"watch",
+"bük çift sonra tara dolan yukarı katla",
+"T6 T6 T6 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük yukarı çift sonra sil dolan yukarı",
+"M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla önce tara ileri",
+"G0 D9 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük ileri katla sonra sil dolan yukarı",
+"G0 T6 G0 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı önce bük ileri katla",
+"G0 T6 G0 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara ileri katla sonra sar dolan yukarı",
+"G0 D9 G0 D9 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar ileri önce sil dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 G0 V7 ."
+],
+[
+"watch",
+"sil ileri çift önce sar ileri katla",
+"G0 V7 G0 V7 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı önce tara dolan yukarı",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar dolan yukarı sonra sar yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil katla sonra sar dolan yukarı katla",
+"N7 N7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük yukarı katla önce bük yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük yukarı çift sonra sar ileri çift",
+"M2 T6 M2 T6 M2 T6 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"tara ileri katla önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"bük ileri çift önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra bük ileri çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sar dolan yukarı önce sar dolan yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük yukarı çift önce sil dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük ileri çift önce tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı katla önce bük ileri çift",
+"G0 T6 G0 T6 G0 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı katla önce tara yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük dolan yukarı çift önce sil yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar ileri katla önce sil dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı sonra sil dolan yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar ileri çift önce tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra bük ileri katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sar ileri katla sonra sar dolan yukarı katla",
+"G0 V7 G0 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara dolan yukarı çift sonra bük ileri katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"tara dolan yukarı katla sonra sar ileri katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük ileri katla önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı katla sonra tara dolan yukarı",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"tara dolan yukarı önce sil dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra sar yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük dolan yukarı çift önce bük ileri katla",
+"G0 T6 G0 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük ileri çift sonra bük dolan yukarı katla",
+"G0 T6 G0 T6 G0 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı çift önce sil ileri çift",
+"G0 N7 G0 N7 G0 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük ileri katla önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sil yukarı çift önce sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara yukarı katla önce tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar dolan yukarı katla sonra bük ileri katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük ileri çift önce sar dolan yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"tara yukarı çift sonra sar dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı önce tara dolan yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla sonra bük yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar yukarı katla önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla sonra sar yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil ileri çift önce tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla önce sil dolan yukarı",
+"M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil yukarı katla önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra tara dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil dolan yukarı katla sonra sar dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara dolan yukarı katla sonra bük dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı çift sonra tara dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil dolan yukarı katla sonra bük dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı çift sonra sil dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla sonra bük dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı katla sonra tara dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar dolan yukarı çift önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla sonra bük dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara dolan yukarı çift sonra bük yukarı",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 T6 ."
+],
+[
+"watch",
+"bük ileri çift önce tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"tara çift sonra bük",
+"D9 D9 D9 T6 ."
+],
+[
+"watch",
+"sil ileri çift sonra sar",
+"G0 N7 G0 N7 G0 N7 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla sonra bük yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük çift sonra tara dolan yukarı katla",
+"T6 T6 T6 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar dolan yukarı",
+"M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar ileri çift önce sar çift",
+"V7 V7 V7 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük ileri çift önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"tara çift önce sar ileri",
+"G0 V7 D9 D9 D9 ."
+],
+[
+"watch",
+"sar dolan yukarı önce sar çift",
+"V7 V7 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil ileri çift önce sar ileri katla",
+"G0 V7 G0 V7 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"tara önce sar yukarı katla",
+"M2 V7 M2 V7 D9 ."
+],
+[
+"watch",
+"sar dolan yukarı önce sil yukarı",
+"M2 N7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar katla",
+"V7 V7 ."
+],
+[
+"watch",
+"sar yukarı önce bük",
+"T6 M2 V7 ."
+],
+[
+"watch",
+"sar",
+"V7 ."
+],
+[
+"watch",
+"tara dolan yukarı katla sonra sar ileri katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sar yukarı çift sonra sar yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara",
+"D9 ."
+],
+[
+"watch",
+"sar katla sonra bük ileri",
+"V7 V7 G0 T6 ."
+],
+[
+"watch",
+"bük ileri sonra sil yukarı çift",
+"G0 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara çift sonra sar ileri çift",
+"D9 D9 D9 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sil",
+"N7 ."
+],
+[
+"watch",
+"tara dolan yukarı çift önce sil",
+"N7 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"tara katla önce sil yukarı çift",
+"M2 N7 M2 N7 M2 N7 D9 D9 ."
+],
+[
+"watch",
+"tara yukarı katla",
+"M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar ileri katla sonra sar dolan yukarı katla",
+"G0 V7 G0 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar yukarı katla önce bük çift",
+"T6 T6 T6 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra bük ileri çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"tara yukarı çift sonra sar dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara çift önce sar dolan yukarı",
+"M2 V7 M2 V7 M2 V7 D9 D9 D9 ."
+],
+[
+"watch",
+"sil sonra sil dolan yukarı",
+"N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar katla önce tara katla",
+"D9 D9 V7 V7 ."
+],
+[
+"watch",
+"tara ileri önce sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 G0 D9 ."
+],
+[
+"watch",
+"sar ileri çift önce sil katla",
+"N7 N7 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük yukarı katla sonra tara ileri",
+"M2 T6 M2 T6 G0 D9 ."
+],
+[
+"watch",
+"sar ileri katla sonra sar ileri katla",
+"G0 V7 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"tara ileri katla sonra bük çift",
+"G0 D9 G0 D9 T6 T6 T6 ."
+],
+[
+"watch",
+"tara ileri",
+"G0 D9 ."
+],
+[
+"watch",
+"tara sonra sar yukarı çift",
+"D9 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar yukarı çift sonra sar dolan yukarı",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı çift sonra sar katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 V7 V7 ."
+],
+[
+"watch",
+"bük dolan yukarı sonra bük ileri",
+"M2 T6 M2 T6 M2 T6 G0 T6 ."
+],
+[
+"watch",
+"sar dolan yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara dolan yukarı sonra sar çift",
+"M2 D9 M2 D9 M2 D9 V7 V7 V7 ."
+],
+[
+"watch",
+"sar çift",
+"V7 V7 V7 ."
+],
+[
+"watch",
+"sar ileri katla önce tara",
+"D9 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sar ileri sonra bük yukarı çift",
+"G0 V7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara ileri çift",
+"G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"bük çift",
+"T6 T6 T6 ."
+],
+[
+"watch",
+"sil katla sonra sar dolan yukarı katla",
+"N7 N7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar sonra sar yukarı",
+"V7 M2 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift önce bük ileri",
+"G0 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar yukarı çift sonra bük dolan yukarı",
+"M2 V7 M2 V7 M2 V7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı çift sonra sil dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar çift sonra sil",
+"V7 V7 V7 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla önce sil çift",
+"N7 N7 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar ileri çift sonra bük yukarı",
+"G0 V7 G0 V7 G0 V7 M2 T6 ."
+],
+[
+"watch",
+"sil yukarı çift önce tara yukarı",
+"M2 D9 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar dolan yukarı sonra sil dolan yukarı",
+"M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara önce tara katla",
+"D9 D9 D9 ."
+],
+[
+"watch",
+"tara yukarı",
+"M2 D9 ."
+],
+[
+"watch",
+"sar dolan yukarı önce sar dolan yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara ileri sonra sil",
+"G0 D9 N7 ."
+],
+[
+"watch",
+"sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara ileri çift önce bük yukarı çift",
+"M2 T6 M2 T6 M2 T6 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"tara katla önce bük yukarı çift",
+"M2 T6 M2 T6 M2 T6 D9 D9 ."
+],
+[
+"watch",
+"tara çift sonra sar çift",
+"D9 D9 D9 V7 V7 V7 ."
+],
+[
+"watch",
+"sar ileri sonra sar dolan yukarı çift",
+"G0 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil ileri çift önce tara ileri",
+"G0 D9 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla önce bük ileri çift",
+"G0 T6 G0 T6 G0 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük yukarı önce bük ileri çift",
+"G0 T6 G0 T6 G0 T6 M2 T6 ."
+],
+[
+"watch",
+"bük sonra bük dolan yukarı",
+"T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil çift sonra sar yukarı",
+"N7 N7 N7 M2 V7 ."
+],
+[
+"watch",
+"sil ileri çift sonra bük yukarı",
+"G0 N7 G0 N7 G0 N7 M2 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı çift önce tara çift",
+"D9 D9 D9 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara katla sonra sil yukarı",
+"D9 D9 M2 N7 ."
+],
+[
+"watch",
+"tara ileri çift sonra bük",
+"G0 D9 G0 D9 G0 D9 T6 ."
+],
+[
+"watch",
+"bük çift sonra bük katla",
+"T6 T6 T6 T6 T6 ."
+],
+[
+"watch",
+"tara ileri çift önce sil ileri çift",
+"G0 N7 G0 N7 G0 N7 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"bük çift önce bük çift",
+"T6 T6 T6 T6 T6 T6 ."
+],
+[
+"watch",
+"bük yukarı katla önce sar ileri çift",
+"G0 V7 G0 V7 G0 V7 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı çift sonra tara dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar yukarı önce tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı çift sonra bük katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 T6 T6 ."
+],
+[
+"watch",
+"sil yukarı katla önce bük yukarı",
+"M2 T6 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla önce sil katla",
+"N7 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra sar yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar yukarı katla önce sar ileri çift",
+"G0 V7 G0 V7 G0 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar ileri sonra sil",
+"G0 V7 N7 ."
+],
+[
+"watch",
+"tara ileri çift sonra sil katla",
+"G0 D9 G0 D9 G0 D9 N7 N7 ."
+],
+[
+"watch",
+"bük çift sonra sil dolan yukarı çift",
+"T6 T6 T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra sil",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 N7 ."
+],
+[
+"watch",
+"bük ileri katla sonra sar dolan yukarı",
+"G0 T6 G0 T6 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil yukarı sonra sar dolan yukarı katla",
+"M2 N7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar ileri katla önce sil dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı katla önce sar katla",
+"V7 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara dolan yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük yukarı katla",
+"M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara sonra sar ileri katla",
+"D9 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük ileri çift önce tara çift",
+"D9 D9 D9 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı katla sonra tara dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar ileri önce sar yukarı katla",
+"M2 V7 M2 V7 G0 V7 ."
+],
+[
+"watch",
+"sil ileri",
+"G0 N7 ."
+],
+[
+"watch",
+"sar çift sonra sar katla",
+"V7 V7 V7 V7 V7 ."
+],
+[
+"watch",
+"tara ileri katla sonra sar dolan yukarı",
+"G0 D9 G0 D9 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük yukarı sonra sar dolan yukarı katla",
+"M2 T6 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara ileri katla",
+"G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra tara dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil ileri katla",
+"G0 N7 G0 N7 ."
+],
+[
+"watch",
+"bük yukarı sonra sil yukarı çift",
+"M2 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük yukarı çift sonra sar ileri çift",
+"M2 T6 M2 T6 M2 T6 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük yukarı çift önce bük",
+"T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil ileri çift önce tara çift",
+"D9 D9 D9 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sil ileri çift sonra tara",
+"G0 N7 G0 N7 G0 N7 D9 ."
+],
+[
+"watch",
+"bük dolan yukarı çift önce sil ileri çift",
+"G0 N7 G0 N7 G0 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar dolan yukarı sonra sil dolan yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara ileri çift sonra sil yukarı",
+"G0 D9 G0 D9 G0 D9 M2 N7 ."
+],
+[
+"watch",
+"bük ileri katla sonra tara ileri katla",
+"G0 T6 G0 T6 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sar katla sonra sar çift",
+"V7 V7 V7 V7 V7 ."
+],
+[
+"watch",
+"sil ileri katla önce tara ileri çift",
+"G0 D9 G0 D9 G0 D9 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sar yukarı çift sonra sil yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil ileri çift önce sil katla",
+"N7 N7 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"tara çift önce bük ileri",
+"G0 T6 D9 D9 D9 ."
+],
+[
+"watch",
+"tara yukarı önce sar yukarı katla",
+"M2 V7 M2 V7 M2 D9 ."
+],
+[
+"watch",
+"bük yukarı katla önce bük ileri katla",
+"G0 T6 G0 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil ileri önce sar yukarı çift",
+"M2 V7 M2 V7 M2 V7 G0 N7 ."
+],
+[
+"watch",
+"sar yukarı katla",
+"M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil ileri sonra sar dolan yukarı çift",
+"G0 N7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara ileri sonra tara dolan yukarı çift",
+"G0 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük yukarı katla önce bük yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük ileri katla önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük yukarı önce tara yukarı",
+"M2 D9 M2 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı çift önce bük ileri katla",
+"G0 T6 G0 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil yukarı çift sonra sar katla",
+"M2 N7 M2 N7 M2 N7 V7 V7 ."
+],
+[
+"watch",
+"tara katla önce sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 D9 D9 ."
+],
+[
+"watch",
+"bük katla sonra tara ileri",
+"T6 T6 G0 D9 ."
+],
+[
+"watch",
+"tara yukarı sonra tara ileri",
+"M2 D9 G0 D9 ."
+],
+[
+"watch",
+"sil dolan yukarı katla sonra bük dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara çift sonra bük dolan yukarı",
+"D9 D9 D9 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı çift önce sil yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük yukarı çift önce sil dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar ileri sonra tara ileri",
+"G0 V7 G0 D9 ."
+],
+[
+"watch",
+"sil dolan yukarı katla sonra sar dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük yukarı çift sonra sar katla",
+"M2 T6 M2 T6 M2 T6 V7 V7 ."
+],
+[
+"watch",
+"sil yukarı çift önce bük ileri çift",
+"G0 T6 G0 T6 G0 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar katla sonra sar",
+"V7 V7 V7 ."
+],
+[
+"watch",
+"tara yukarı çift sonra tara ileri",
+"M2 D9 M2 D9 M2 D9 G0 D9 ."
+],
+[
+"watch",
+"bük ileri katla önce sar yukarı",
+"M2 V7 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sil ileri katla sonra sar çift",
+"G0 N7 G0 N7 V7 V7 V7 ."
+],
+[
+"watch",
+"sil ileri katla sonra sar",
+"G0 N7 G0 N7 V7 ."
+],
+[
+"watch",
+"bük yukarı katla sonra tara çift",
+"M2 T6 M2 T6 D9 D9 D9 ."
+],
+[
+"watch",
+"tara yukarı çift",
+"M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar yukarı katla sonra bük ileri",
+"M2 V7 M2 V7 G0 T6 ."
+],
+[
+"watch",
+"sar ileri sonra sar ileri",
+"G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı önce tara dolan yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara dolan yukarı önce tara dolan yukarı",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil ileri katla önce sar",
+"V7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sil yukarı katla sonra bük katla",
+"M2 N7 M2 N7 T6 T6 ."
+],
+[
+"watch",
+"sar yukarı çift önce bük katla",
+"T6 T6 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil ileri önce bük yukarı",
+"M2 T6 G0 N7 ."
+],
+[
+"watch",
+"bük çift önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 T6 T6 T6 ."
+],
+[
+"watch",
+"bük sonra sar çift",
+"T6 V7 V7 V7 ."
+],
+[
+"watch",
+"tara katla sonra bük yukarı",
+"D9 D9 M2 T6 ."
+],
+[
+"watch",
+"tara dolan yukarı sonra sar yukarı",
+"M2 D9 M2 D9 M2 D9 M2 V7 ."
+],
+[
+"watch",
+"bük sonra sar ileri",
+"T6 G0 V7 ."
+],
+[
+"watch",
+"bük çift sonra tara katla",
+"T6 T6 T6 D9 D9 ."
+],
+[
+"watch",
+"sil yukarı sonra sar ileri katla",
+"M2 N7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük katla",
+"T6 T6 ."
+],
+[
+"watch",
+"sar ileri katla",
+"G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük yukarı çift sonra sil dolan yukarı",
+"M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla önce sil dolan yukarı",
+"M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük ileri çift önce sar dolan yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük ileri katla sonra sil dolan yukarı",
+"G0 T6 G0 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil ileri çift önce sil çift",
+"N7 N7 N7 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sar ileri çift önce tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sar yukarı önce sar ileri çift",
+"G0 V7 G0 V7 G0 V7 M2 V7 ."
+],
+[
+"watch",
+"sil çift önce sar dolan yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 N7 N7 N7 ."
+],
+[
+"watch",
+"sil yukarı çift sonra tara yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil yukarı katla önce bük dolan yukarı",
+"M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil katla",
+"N7 N7 ."
+],
+[
+"watch",
+"sil sonra sar yukarı katla",
+"N7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı katla sonra bük ileri katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük çift önce tara ileri çift",
+"G0 D9 G0 D9 G0 D9 T6 T6 T6 ."
+],
+[
+"watch",
+"tara dolan yukarı önce sar yukarı katla",
+"M2 V7 M2 V7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar yukarı katla önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük dolan yukarı",
+"M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar çift sonra bük dolan yukarı çift",
+"V7 V7 V7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük yukarı çift",
+"M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı önce bük ileri katla",
+"G0 T6 G0 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı katla sonra bük dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar ileri önce sil ileri katla",
+"G0 N7 G0 N7 G0 V7 ."
+],
+[
+"watch",
+"bük ileri katla önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük ileri sonra bük yukarı katla",
+"G0 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara ileri önce bük ileri",
+"G0 T6 G0 D9 ."
+],
+[
+"watch",
+"sar yukarı katla önce sar katla",
+"V7 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük yukarı çift önce sar yukarı",
+"M2 V7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük sonra sar ileri katla",
+"T6 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"tara katla sonra sil ileri çift",
+"D9 D9 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sar yukarı önce sar",
+"V7 M2 V7 ."
+],
+[
+"watch",
+"bük çift önce sar yukarı çift",
+"M2 V7 M2 V7 M2 V7 T6 T6 T6 ."
+],
+[
+"watch",
+"sar dolan yukarı önce tara yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla sonra bük dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar ileri önce tara çift",
+"D9 D9 D9 G0 V7 ."
+],
+[
+"watch",
+"tara yukarı katla önce tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük çift sonra tara ileri çift",
+"T6 T6 T6 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sar çift önce sil dolan yukarı",
+"M2 N7 M2 N7 M2 N7 V7 V7 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift önce bük",
+"T6 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar yukarı sonra sil",
+"M2 V7 N7 ."
+],
+[
+"watch",
+"sil sonra sil yukarı çift",
+"N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı",
+"M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil ileri sonra sar çift",
+"G0 N7 V7 V7 V7 ."
+],
+[
+"watch",
+"bük ileri sonra sar ileri çift",
+"G0 T6 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük ileri",
+"G0 T6 ."
+],
+[
+"watch",
+"sar ileri katla sonra tara yukarı çift",
+"G0 V7 G0 V7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil dolan yukarı önce bük yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara katla sonra sar dolan yukarı katla",
+"D9 D9 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı çift önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar yukarı önce sil ileri",
+"G0 N7 M2 V7 ."
+],
+[
+"watch",
+"tara yukarı katla önce bük",
+"T6 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar yukarı katla sonra sil dolan yukarı",
+"M2 V7 M2 V7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil ileri sonra bük yukarı",
+"G0 N7 M2 T6 ."
+],
+[
+"watch",
+"tara yukarı sonra tara dolan yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"tara dolan yukarı katla önce tara yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil ileri katla sonra bük dolan yukarı",
+"G0 N7 G0 N7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara katla sonra tara ileri",
+"D9 D9 G0 D9 ."
+],
+[
+"watch",
+"sar yukarı",
+"M2 V7 ."
+],
+[
+"watch",
+"sar katla sonra sil dolan yukarı çift",
+"V7 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar dolan yukarı önce tara ileri çift",
+"G0 D9 G0 D9 G0 D9 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sil ileri önce bük ileri çift",
+"G0 T6 G0 T6 G0 T6 G0 N7 ."
+],
+[
+"watch",
+"bük yukarı önce tara yukarı katla",
+"M2 D9 M2 D9 M2 T6 ."
+],
+[
+"watch",
+"bük sonra bük yukarı katla",
+"T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük ileri katla önce tara katla",
+"D9 D9 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"sil yukarı katla sonra tara ileri katla",
+"M2 N7 M2 N7 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sil ileri katla sonra bük yukarı çift",
+"G0 N7 G0 N7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sar dolan yukarı sonra sar yukarı katla",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük dolan yukarı sonra tara çift",
+"M2 T6 M2 T6 M2 T6 D9 D9 D9 ."
+],
+[
+"watch",
+"sil yukarı çift",
+"M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar ileri sonra sil yukarı katla",
+"G0 V7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil ileri çift sonra bük dolan yukarı",
+"G0 N7 G0 N7 G0 N7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil çift önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 N7 N7 N7 ."
+],
+[
+"watch",
+"sar ileri çift",
+"G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük ileri çift önce bük ileri çift",
+"G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük dolan yukarı katla sonra tara dolan yukarı",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"tara ileri çift sonra tara ileri katla",
+"G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"tara ileri katla önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"tara sonra sar ileri çift",
+"D9 G0 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"sar ileri önce sil dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 G0 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla önce sar çift",
+"V7 V7 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara ileri çift önce tara ileri çift",
+"G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"tara ileri çift önce sar ileri katla",
+"G0 V7 G0 V7 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"bük dolan yukarı sonra bük katla",
+"M2 T6 M2 T6 M2 T6 T6 T6 ."
+],
+[
+"watch",
+"sar ileri katla önce sar yukarı",
+"M2 V7 G0 V7 G0 V7 ."
+],
+[
+"watch",
+"bük ileri önce bük dolan yukarı",
+"M2 T6 M2 T6 M2 T6 G0 T6 ."
+],
+[
+"watch",
+"sil yukarı önce sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük ileri çift önce sar dolan yukarı",
+"M2 V7 M2 V7 M2 V7 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük ileri sonra sar",
+"G0 T6 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla önce tara ileri",
+"G0 D9 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük katla önce bük dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 T6 T6 ."
+],
+[
+"watch",
+"sar dolan yukarı sonra bük katla",
+"M2 V7 M2 V7 M2 V7 T6 T6 ."
+],
+[
+"watch",
+"sar katla sonra tara ileri çift",
+"V7 V7 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"tara çift önce tara yukarı",
+"M2 D9 D9 D9 D9 ."
+],
+[
+"watch",
+"tara dolan yukarı önce tara yukarı",
+"M2 D9 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil ileri çift",
+"G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı katla sonra sar",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 V7 ."
+],
+[
+"watch",
+"sar sonra bük katla",
+"V7 T6 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra tara",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 D9 ."
+],
+[
+"watch",
+"sar ileri sonra bük yukarı",
+"G0 V7 M2 T6 ."
+],
+[
+"watch",
+"tara dolan yukarı katla sonra bük çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 T6 T6 T6 ."
+],
+[
+"watch",
+"sil yukarı önce bük dolan yukarı",
+"M2 T6 M2 T6 M2 T6 M2 N7 ."
+],
+[
+"watch",
+"tara ileri sonra sil ileri katla",
+"G0 D9 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sar yukarı katla sonra bük dolan yukarı",
+"M2 V7 M2 V7 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara yukarı katla önce sil ileri çift",
+"G0 N7 G0 N7 G0 N7 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar yukarı çift önce sar çift",
+"V7 V7 V7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar yukarı önce tara dolan yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 V7 ."
+],
+[
+"watch",
+"sil dolan yukarı katla önce sar yukarı",
+"M2 V7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil yukarı katla",
+"M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük yukarı çift önce bük ileri",
+"G0 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara yukarı çift önce sar katla",
+"V7 V7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"tara ileri önce sar ileri çift",
+"G0 V7 G0 V7 G0 V7 G0 D9 ."
+],
+[
+"watch",
+"tara ileri çift sonra sar katla",
+"G0 D9 G0 D9 G0 D9 V7 V7 ."
+],
+[
+"watch",
+"sar dolan yukarı önce bük",
+"T6 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar ileri önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 G0 V7 ."
+],
+[
+"watch",
+"bük ileri katla",
+"G0 T6 G0 T6 ."
+],
+[
+"watch",
+"bük yukarı çift sonra bük çift",
+"M2 T6 M2 T6 M2 T6 T6 T6 T6 ."
+],
+[
+"watch",
+"bük ileri çift",
+"G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"tara katla",
+"D9 D9 ."
+],
+[
+"watch",
+"sil yukarı",
+"M2 N7 ."
+],
+[
+"watch",
+"sar yukarı çift",
+"M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"bük sonra bük ileri",
+"T6 G0 T6 ."
+],
+[
+"watch",
+"sar yukarı çift sonra sil ileri çift",
+"M2 V7 M2 V7 M2 V7 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"bük ileri çift sonra tara ileri",
+"G0 T6 G0 T6 G0 T6 G0 D9 ."
+],
+[
+"watch",
+"tara dolan yukarı katla sonra bük dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara çift önce tara katla",
+"D9 D9 D9 D9 D9 ."
+],
+[
+"watch",
+"sil çift",
+"N7 N7 N7 ."
+],
+[
+"watch",
+"sil katla önce sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 N7 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı önce sil dolan yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sil yukarı katla sonra sil yukarı",
+"M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"bük yukarı",
+"M2 T6 ."
+],
+[
+"watch",
+"sil yukarı katla önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil ileri önce bük dolan yukarı katla",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 G0 N7 ."
+],
+[
+"watch",
+"sil ileri katla sonra sil yukarı",
+"G0 N7 G0 N7 M2 N7 ."
+],
+[
+"watch",
+"sar çift sonra sil ileri",
+"V7 V7 V7 G0 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla önce bük katla",
+"T6 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"sil dolan yukarı sonra sil çift",
+"M2 N7 M2 N7 M2 N7 N7 N7 N7 ."
+],
+[
+"watch",
+"bük dolan yukarı katla sonra sar yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"tara ileri katla önce bük yukarı katla",
+"M2 T6 M2 T6 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"bük ileri çift sonra sar yukarı",
+"G0 T6 G0 T6 G0 T6 M2 V7 ."
+],
+[
+"watch",
+"tara yukarı katla önce sar yukarı",
+"M2 V7 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"sar ileri çift sonra bük çift",
+"G0 V7 G0 V7 G0 V7 T6 T6 T6 ."
+],
+[
+"watch",
+"bük yukarı önce sil çift",
+"N7 N7 N7 M2 T6 ."
+],
+[
+"watch",
+"sil yukarı katla sonra sil ileri",
+"M2 N7 M2 N7 G0 N7 ."
+],
+[
+"watch",
+"bük",
+"T6 ."
+],
+[
+"watch",
+"sar çift sonra tara yukarı katla",
+"V7 V7 V7 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük yukarı sonra tara yukarı çift",
+"M2 T6 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük ileri önce sil dolan yukarı",
+"M2 N7 M2 N7 M2 N7 G0 T6 ."
+],
+[
+"watch",
+"sil çift önce sar dolan yukarı çift",
+"M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 M2 V7 N7 N7 N7 ."
+],
+[
+"watch",
+"bük ileri sonra bük dolan yukarı",
+"G0 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"tara yukarı çift sonra bük",
+"M2 D9 M2 D9 M2 D9 T6 ."
+],
+[
+"watch",
+"bük ileri çift sonra sil yukarı katla",
+"G0 T6 G0 T6 G0 T6 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sar ileri çift sonra sil",
+"G0 V7 G0 V7 G0 V7 N7 ."
+],
+[
+"watch",
+"tara ileri önce sar yukarı",
+"M2 V7 G0 D9 ."
+],
+[
+"watch",
+"tara ileri önce sil ileri katla",
+"G0 N7 G0 N7 G0 D9 ."
+],
+[
+"watch",
+"sil yukarı çift önce sil dolan yukarı katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"tara dolan yukarı önce sar dolan yukarı",
+"M2 V7 M2 V7 M2 V7 M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük ileri çift sonra bük dolan yukarı katla",
+"G0 T6 G0 T6 G0 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 ."
+],
+[
+"watch",
+"bük ileri katla önce bük yukarı",
+"M2 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"tara sonra sil yukarı katla",
+"D9 M2 N7 M2 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra bük ileri katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"del",
+"K1 ."
+],
+[
+"watch",
+"sar yukarı çift önce sil yukarı çift",
+"M2 N7 M2 N7 M2 N7 M2 V7 M2 V7 M2 V7 ."
+],
+[
+"watch",
+"sar ileri",
+"G0 V7 ."
+],
+[
+"watch",
+"bük ileri önce sil katla",
+"N7 N7 G0 T6 ."
+],
+[
+"watch",
+"sil ileri çift önce tara dolan yukarı katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 G0 N7 G0 N7 G0 N7 ."
+],
+[
+"watch",
+"sil sonra bük ileri çift",
+"N7 G0 T6 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"tara dolan yukarı çift sonra bük ileri katla",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 G0 T6 G0 T6 ."
+],
+[
+"watch",
+"tara dolan yukarı",
+"M2 D9 M2 D9 M2 D9 ."
+],
+[
+"watch",
+"bük yukarı katla sonra tara ileri çift",
+"M2 T6 M2 T6 G0 D9 G0 D9 G0 D9 ."
+],
+[
+"watch",
+"sar yukarı önce bük dolan yukarı çift",
+"M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 T6 M2 V7 ."
+],
+[
+"watch",
+"tara çift",
+"D9 D9 D9 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra sil katla",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 N7 N7 ."
+],
+[
+"watch",
+"sil dolan yukarı çift sonra bük yukarı",
+"M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 N7 M2 T6 ."
+],
+[
+"watch",
+"bük çift önce tara dolan yukarı çift",
+"M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 M2 D9 T6 T6 T6 ."
+]
+],
+"mind": "fresh",
+"name": "compose",
+"switches": {
+"told_apart": true,
+"wholes": true
+},
+"variant": "speaking",
+"window": 13
+},
+{
+"ask": [
+{
+"keys": [
+"kalay paslanır"
+],
+"mode": "exact",
+"not": [],
+"q": "kalay ne yapar ?",
+"tag": "recall"
+},
+{
+"keys": [
+"nikel paslanır"
+],
+"mode": "exact",
+"not": [],
+"q": "nikel ne yapar ?",
+"tag": "recall"
+},
+{
+"keys": [
+"krom paslanır"
+],
+"mode": "exact",
+"not": [],
+"q": "krom ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"bakır paslanır"
+],
+"mode": "exact",
+"not": [],
+"q": "bakır ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"çinko paslanır"
+],
+"mode": "exact",
+"not": [],
+"q": "çinko ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"karınca vızıldar"
+],
+"mode": "exact",
+"not": [],
+"q": "karınca ne yapar ?",
+"tag": "recall"
+},
+{
+"keys": [
+"sinek vızıldar"
+],
+"mode": "exact",
+"not": [],
+"q": "sinek ne yapar ?",
+"tag": "recall"
+},
+{
+"keys": [
+"arı vızıldar"
+],
+"mode": "exact",
+"not": [],
+"q": "arı ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"çekirge vızıldar"
+],
+"mode": "exact",
+"not": [],
+"q": "çekirge ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"kelebek vızıldar"
+],
+"mode": "exact",
+"not": [],
+"q": "kelebek ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"zambak açar"
+],
+"mode": "exact",
+"not": [],
+"q": "zambak ne yapar ?",
+"tag": "recall"
+},
+{
+"keys": [
+"lale açar"
+],
+"mode": "exact",
+"not": [],
+"q": "lale ne yapar ?",
+"tag": "recall"
+},
+{
+"keys": [
+"menekşe açar"
+],
+"mode": "exact",
+"not": [],
+"q": "menekşe ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"papatya açar"
+],
+"mode": "exact",
+"not": [],
+"q": "papatya ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"gül açar"
+],
+"mode": "exact",
+"not": [],
+"q": "gül ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"antares parlar"
+],
+"mode": "exact",
+"not": [],
+"q": "antares ne yapar ?",
+"tag": "recall"
+},
+{
+"keys": [
+"rigel parlar"
+],
+"mode": "exact",
+"not": [],
+"q": "rigel ne yapar ?",
+"tag": "recall"
+},
+{
+"keys": [
+"sirius parlar"
+],
+"mode": "exact",
+"not": [],
+"q": "sirius ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"vega parlar"
+],
+"mode": "exact",
+"not": [],
+"q": "vega ne yapar ?",
+"tag": "deduction: a member never asked"
+},
+{
+"keys": [
+"elma olgunlaşır"
+],
+"mode": "exact",
+"not": [],
+"q": "elma ne yapar ?",
+"tag": "deduction: no member of its class ever asked"
+},
+{
+"keys": [
+"armut olgunlaşır"
+],
+"mode": "exact",
+"not": [],
+"q": "armut ne yapar ?",
+"tag": "deduction: no member of its class ever asked"
+},
+{
+"keys": [
+"kiraz olgunlaşır"
+],
+"mode": "exact",
+"not": [],
+"q": "kiraz ne yapar ?",
+"tag": "deduction: no member of its class ever asked"
+},
+{
+"keys": [
+"şeftali olgunlaşır"
+],
+"mode": "exact",
+"not": [],
+"q": "şeftali ne yapar ?",
+"tag": "deduction: no member of its class ever asked"
+},
+{
+"keys": [
+"incir olgunlaşır"
+],
+"mode": "exact",
+"not": [],
+"q": "incir ne yapar ?",
+"tag": "deduction: no member of its class ever asked"
+},
+{
+"keys": [
+"kapella vızıldar"
+],
+"mode": "exact",
+"not": [
+"parlar"
+],
+"q": "kapella ne yapar ?",
+"tag": "the exception"
+},
+{
+"keys": [],
+"mode": "silent",
+"not": [],
+"q": "deniz ne yapar ?",
+"tag": "control: nothing was told of it"
+},
+{
+"keys": [],
+"mode": "silent",
+"not": [],
+"q": "masa ne yapar ?",
+"tag": "control: nothing was told of it"
+}
+],
+"life": [
+[
+"tell",
+"böcekler vızıldar ."
+],
+[
+"tell",
+"yıldızlar parlar ."
+],
+[
+"tell",
+"nikel bir metaldir ."
+],
+[
+"watch",
+"kalay ne yapar ?",
+"kalay paslanır ."
+],
+[
+"tell",
+"karınca bir böcektir ."
+],
+[
+"tell",
+"bakır bir metaldir ."
+],
+[
+"tell",
+"metaller paslanır ."
+],
+[
+"watch",
+"karınca ne yapar ?",
+"karınca vızıldar ."
+],
+[
+"tell",
+"sinek bir böcektir ."
+],
+[
+"tell",
+"meyveler olgunlaşır ."
+],
+[
+"tell",
+"menekşe bir çiçektir ."
+],
+[
+"watch",
+"sinek ne yapar ?",
+"sinek vızıldar ."
+],
+[
+"tell",
+"armut bir meyvedir ."
+],
+[
+"tell",
+"gül bir çiçektir ."
+],
+[
+"tell",
+"incir bir meyvedir ."
+],
+[
+"watch",
+"antares ne yapar ?",
+"antares parlar ."
+],
+[
+"tell",
+"kapella vızıldar ."
+],
+[
+"tell",
+"kiraz bir meyvedir ."
+],
+[
+"tell",
+"antares bir yıldızdır ."
+],
+[
+"watch",
+"zambak ne yapar ?",
+"zambak açar ."
+],
+[
+"tell",
+"meyveler olgunlaşır ."
+],
+[
+"tell",
+"zambak bir çiçektir ."
+],
+[
+"tell",
+"papatya bir çiçektir ."
+],
+[
+"watch",
+"lale ne yapar ?",
+"lale açar ."
+],
+[
+"tell",
+"vega bir yıldızdır ."
+],
+[
+"tell",
+"kapella bir yıldızdır ."
+],
+[
+"tell",
+"metaller paslanır ."
+],
+[
+"watch",
+"nikel ne yapar ?",
+"nikel paslanır ."
+],
+[
+"tell",
+"rigel bir yıldızdır ."
+],
+[
+"tell",
+"kelebek bir böcektir ."
+],
+[
+"tell",
+"sirius bir yıldızdır ."
+],
+[
+"watch",
+"rigel ne yapar ?",
+"rigel parlar ."
+],
+[
+"tell",
+"çiçekler açar ."
+],
+[
+"tell",
+"yıldızlar parlar ."
+],
+[
+"tell",
+"arı bir böcektir ."
+],
+[
+"tell",
+"çiçekler açar ."
+],
+[
+"tell",
+"böcekler vızıldar ."
+],
+[
+"tell",
+"kalay bir metaldir ."
+],
+[
+"tell",
+"çekirge bir böcektir ."
+],
+[
+"tell",
+"krom bir metaldir ."
+],
+[
+"tell",
+"lale bir çiçektir ."
+],
+[
+"tell",
+"elma bir meyvedir ."
+],
+[
+"tell",
+"çinko bir metaldir ."
+],
+[
+"tell",
+"şeftali bir meyvedir ."
+],
+[
+"tell",
+"elma bir meyvedir ."
+],
+[
+"tell",
+"yıldızlar parlar ."
+],
+[
+"tell",
+"böcekler vızıldar ."
+],
+[
+"watch",
+"lale ne yapar ?",
+"lale açar ."
+],
+[
+"tell",
+"metaller paslanır ."
+],
+[
+"tell",
+"armut bir meyvedir ."
+],
+[
+"tell",
+"vega bir yıldızdır ."
+],
+[
+"watch",
+"zambak ne yapar ?",
+"zambak açar ."
+],
+[
+"tell",
+"sinek bir böcektir ."
+],
+[
+"tell",
+"şeftali bir meyvedir ."
+],
+[
+"tell",
+"çinko bir metaldir ."
+],
+[
+"watch",
+"antares ne yapar ?",
+"antares parlar ."
+],
+[
+"tell",
+"lale bir çiçektir ."
+],
+[
+"tell",
+"çiçekler açar ."
+],
+[
+"tell",
+"antares bir yıldızdır ."
+],
+[
+"watch",
+"kalay ne yapar ?",
+"kalay paslanır ."
+],
+[
+"tell",
+"metaller paslanır ."
+],
+[
+"tell",
+"zambak bir çiçektir ."
+],
+[
+"tell",
+"böcekler vızıldar ."
+],
+[
+"watch",
+"nikel ne yapar ?",
+"nikel paslanır ."
+],
+[
+"tell",
+"gül bir çiçektir ."
+],
+[
+"tell",
+"meyveler olgunlaşır ."
+],
+[
+"tell",
+"kelebek bir böcektir ."
+],
+[
+"watch",
+"sinek ne yapar ?",
+"sinek vızıldar ."
+],
+[
+"tell",
+"meyveler olgunlaşır ."
+],
+[
+"tell",
+"krom bir metaldir ."
+],
+[
+"tell",
+"menekşe bir çiçektir ."
+],
+[
+"watch",
+"karınca ne yapar ?",
+"karınca vızıldar ."
+],
+[
+"tell",
+"incir bir meyvedir ."
+],
+[
+"tell",
+"papatya bir çiçektir ."
+],
+[
+"tell",
+"rigel bir yıldızdır ."
+],
+[
+"watch",
+"rigel ne yapar ?",
+"rigel parlar ."
+],
+[
+"tell",
+"kiraz bir meyvedir ."
+],
+[
+"tell",
+"yıldızlar parlar ."
+],
+[
+"tell",
+"kapella bir yıldızdır ."
+],
+[
+"tell",
+"çekirge bir böcektir ."
+],
+[
+"tell",
+"çiçekler açar ."
+],
+[
+"tell",
+"arı bir böcektir ."
+],
+[
+"tell",
+"sirius bir yıldızdır ."
+],
+[
+"tell",
+"nikel bir metaldir ."
+],
+[
+"tell",
+"bakır bir metaldir ."
+],
+[
+"tell",
+"kapella vızıldar ."
+],
+[
+"tell",
+"kalay bir metaldir ."
+],
+[
+"tell",
+"karınca bir böcektir ."
+]
+],
+"mind": "fresh",
+"name": "deduce",
+"variant": "full"
+},
+{
+"ask": [
+{
+"keys": [
+"ilaç masada"
+],
+"mode": "exact",
+"not": [],
+"q": "ilaç nerede ?",
+"tag": "unchanged"
+},
+{
+"keys": [
+"harita dolapta"
+],
+"mode": "exact",
+"not": [
+"çekmecede"
+],
+"q": "harita nerede ?",
+"tag": "changed once"
+},
+{
+"keys": [
+"bardak masada"
+],
+"mode": "exact",
+"not": [
+"kutuda"
+],
+"q": "bardak nerede ?",
+"tag": "changed after three"
+},
+{
+"keys": [
+"gözlük dolapta"
+],
+"mode": "exact",
+"not": [
+"rafta"
+],
+"q": "gözlük nerede ?",
+"tag": "changed twice after three"
+},
+{
+"keys": [
+"terlik rafta"
+],
+"mode": "exact",
+"not": [
+"kutuda"
+],
+"q": "terlik nerede ?",
+"tag": "changed back"
+},
+{
+"keys": [
+"bilet rafta"
+],
+"mode": "exact",
+"not": [],
+"q": "bilet nerede ?",
+"tag": "unchanged"
+},
+{
+"keys": [
+"makas masada"
+],
+"mode": "exact",
+"not": [
+"kutuda"
+],
+"q": "makas nerede ?",
+"tag": "changed once"
+},
+{
+"keys": [
+"defter dolapta"
+],
+"mode": "exact",
+"not": [
+"kutuda"
+],
+"q": "defter nerede ?",
+"tag": "changed after three"
+},
+{
+"keys": [
+"cüzdan çekmecede"
+],
+"mode": "exact",
+"not": [
+"sepette"
+],
+"q": "cüzdan nerede ?",
+"tag": "changed twice after three"
+},
+{
+"keys": [
+"mektup sepette"
+],
+"mode": "exact",
+"not": [
+"kutuda"
+],
+"q": "mektup nerede ?",
+"tag": "changed back"
+}
+],
+"life": [
+[
+"tell",
+"çekiç dolapta ."
+],
+[
+"tell",
+"gözlük rafta ."
+],
+[
+"tell",
+"top sepette ."
+],
+[
+"tell",
+"bardak kutuda ."
+],
+[
+"tell",
+"bilet rafta ."
+],
+[
+"tell",
+"ilaç masada ."
+],
+[
+"tell",
+"telefon çekmecede ."
+],
+[
+"tell",
+"mektup sepette ."
+],
+[
+"tell",
+"şemsiye dolapta ."
+],
+[
+"tell",
+"kitap dolapta ."
+],
+[
+"tell",
+"kalem sepette ."
+],
+[
+"tell",
+"anahtar masada ."
+],
+[
+"tell",
+"gözlük rafta ."
+],
+[
+"tell",
+"mum masada ."
+],
+[
+"watch",
+"telefon nerede ?",
+"telefon çekmecede ."
+],
+[
+"tell",
+"cüzdan sepette ."
+],
+[
+"tell",
+"kibrit masada ."
+],
+[
+"watch",
+"anahtar nerede ?",
+"anahtar masada ."
+],
+[
+"tell",
+"telefon çekmecede ."
+],
+[
+"tell",
+"bardak kutuda ."
+],
+[
+"watch",
+"şemsiye nerede ?",
+"şemsiye dolapta ."
+],
+[
+"watch",
+"kibrit nerede ?",
+"kibrit masada ."
+],
+[
+"tell",
+"fener dolapta ."
+],
+[
+"tell",
+"cüzdan sepette ."
+],
+[
+"tell",
+"anahtar dolapta ."
+],
+[
+"tell",
+"mektup kutuda ."
+],
+[
+"tell",
+"harita çekmecede ."
+],
+[
+"watch",
+"fener nerede ?",
+"fener dolapta ."
+],
+[
+"tell",
+"makas kutuda ."
+],
+[
+"tell",
+"mektup sepette ."
+],
+[
+"watch",
+"top nerede ?",
+"top sepette ."
+],
+[
+"tell",
+"şemsiye sepette ."
+],
+[
+"watch",
+"kitap nerede ?",
+"kitap dolapta ."
+],
+[
+"tell",
+"terlik rafta ."
+],
+[
+"tell",
+"makas masada ."
+],
+[
+"tell",
+"bardak kutuda ."
+],
+[
+"tell",
+"kibrit çekmecede ."
+],
+[
+"tell",
+"harita dolapta ."
+],
+[
+"watch",
+"kibrit nerede ?",
+"kibrit çekmecede ."
+],
+[
+"watch",
+"mum nerede ?",
+"mum masada ."
+],
+[
+"watch",
+"kalem nerede ?",
+"kalem sepette ."
+],
+[
+"tell",
+"kitap dolapta ."
+],
+[
+"watch",
+"çekiç nerede ?",
+"çekiç dolapta ."
+],
+[
+"tell",
+"kibrit sepette ."
+],
+[
+"watch",
+"şemsiye nerede ?",
+"şemsiye sepette ."
+],
+[
+"tell",
+"terlik kutuda ."
+],
+[
+"watch",
+"kitap nerede ?",
+"kitap dolapta ."
+],
+[
+"tell",
+"kalem sepette ."
+],
+[
+"tell",
+"fener dolapta ."
+],
+[
+"watch",
+"kalem nerede ?",
+"kalem sepette ."
+],
+[
+"tell",
+"gözlük rafta ."
+],
+[
+"watch",
+"telefon nerede ?",
+"telefon çekmecede ."
+],
+[
+"watch",
+"fener nerede ?",
+"fener dolapta ."
+],
+[
+"tell",
+"top dolapta ."
+],
+[
+"watch",
+"kibrit nerede ?",
+"kibrit sepette ."
+],
+[
+"tell",
+"şemsiye çekmecede ."
+],
+[
+"tell",
+"kalem masada ."
+],
+[
+"tell",
+"cüzdan sepette ."
+],
+[
+"watch",
+"top nerede ?",
+"top dolapta ."
+],
+[
+"tell",
+"bardak masada ."
+],
+[
+"tell",
+"top çekmecede ."
+],
+[
+"watch",
+"şemsiye nerede ?",
+"şemsiye çekmecede ."
+],
+[
+"watch",
+"top nerede ?",
+"top çekmecede ."
+],
+[
+"tell",
+"defter kutuda ."
+],
+[
+"tell",
+"mum dolapta ."
+],
+[
+"tell",
+"cüzdan çekmecede ."
+],
+[
+"tell",
+"çekiç masada ."
+],
+[
+"watch",
+"çekiç nerede ?",
+"çekiç masada ."
+],
+[
+"tell",
+"cüzdan çekmecede ."
+],
+[
+"tell",
+"defter kutuda ."
+],
+[
+"watch",
+"kalem nerede ?",
+"kalem masada ."
+],
+[
+"tell",
+"defter kutuda ."
+],
+[
+"tell",
+"çekiç masada ."
+],
+[
+"tell",
+"terlik rafta ."
+],
+[
+"watch",
+"çekiç nerede ?",
+"çekiç masada ."
+],
+[
+"watch",
+"anahtar nerede ?",
+"anahtar dolapta ."
+],
+[
+"watch",
+"mum nerede ?",
+"mum dolapta ."
+],
+[
+"tell",
+"gözlük dolapta ."
+],
+[
+"tell",
+"telefon rafta ."
+],
+[
+"tell",
+"gözlük dolapta ."
+],
+[
+"tell",
+"mum sepette ."
+],
+[
+"watch",
+"telefon nerede ?",
+"telefon rafta ."
+],
+[
+"tell",
+"defter dolapta ."
+],
+[
+"watch",
+"mum nerede ?",
+"mum sepette ."
+],
+[
+"tell",
+"kitap masada ."
+],
+[
+"watch",
+"kitap nerede ?",
+"kitap masada ."
+],
+[
+"tell",
+"fener rafta ."
+],
+[
+"watch",
+"fener nerede ?",
+"fener rafta ."
+],
+[
+"tell",
+"anahtar çekmecede ."
+],
+[
+"watch",
+"anahtar nerede ?",
+"anahtar çekmecede ."
+]
+],
+"mind": "fresh",
+"name": "change",
+"variant": "speaking"
+},
+{
+"ask": [
+{
+"keys": [
+"hız * sıcaklık"
+],
+"mode": "exact",
+"not": [],
+"q": "hız ile sıcaklık çarp",
+"tag": "a new pair of lived fillers"
+},
+{
+"keys": [
+"alan * hız"
+],
+"mode": "exact",
+"not": [],
+"q": "alan ile hız çarp",
+"tag": "a new pair of lived fillers"
+},
+{
+"keys": [
+"yol * süre"
+],
+"mode": "exact",
+"not": [],
+"q": "yol ile süre çarp",
+"tag": "a new pair of lived fillers"
+},
+{
+"keys": [
+"hız * yol"
+],
+"mode": "exact",
+"not": [],
+"q": "hız ile yol çarp",
+"tag": "a new pair of lived fillers"
+},
+{
+"keys": [
+"enerji * basınç"
+],
+"mode": "exact",
+"not": [],
+"q": "enerji ile basınç çarp",
+"tag": "a filler lived in another frame"
+},
+{
+"keys": [
+"yol * basınç"
+],
+"mode": "exact",
+"not": [],
+"q": "yol ile basınç çarp",
+"tag": "a filler lived in another frame"
+},
+{
+"keys": [
+"basınç * hız"
+],
+"mode": "exact",
+"not": [],
+"q": "basınç ile hız çarp",
+"tag": "a filler lived in another frame"
+},
+{
+"keys": [
+"derinlik * sıcaklık"
+],
+"mode": "exact",
+"not": [],
+"q": "derinlik ile sıcaklık çarp",
+"tag": "a word never lived"
+},
+{
+"keys": [
+"ağırlık * hız"
+],
+"mode": "exact",
+"not": [],
+"q": "ağırlık ile hız çarp",
+"tag": "a word never lived"
+},
+{
+"keys": [
+"güç * yol"
+],
+"mode": "exact",
+"not": [],
+"q": "güç ile yol çarp",
+"tag": "a word never lived"
+},
+{
+"keys": [
+"göster ( yol )"
+],
+"mode": "exact",
+"not": [],
+"q": "yol değerini göster",
+"tag": "a filler lived in another frame"
+},
+{
+"keys": [
+"göster ( alan )"
+],
+"mode": "exact",
+"not": [],
+"q": "alan değerini göster",
+"tag": "a filler lived in another frame"
+},
+{
+"keys": [
+"göster ( enerji )"
+],
+"mode": "exact",
+"not": [],
+"q": "enerji değerini göster",
+"tag": "a filler lived in another frame"
+},
+{
+"keys": [
+"göster ( derinlik )"
+],
+"mode": "exact",
+"not": [],
+"q": "derinlik değerini göster",
+"tag": "a word never lived"
+},
+{
+"keys": [
+"göster ( ağırlık )"
+],
+"mode": "exact",
+"not": [],
+"q": "ağırlık değerini göster",
+"tag": "a word never lived"
+},
+{
+"keys": [
+"göster ( güç )"
+],
+"mode": "exact",
+"not": [],
+"q": "güç değerini göster",
+"tag": "a word never lived"
+},
+{
+"keys": [
+"tekrar 4 :"
+],
+"mode": "exact",
+"not": [],
+"q": "4 kere dön",
+"tag": "a word never lived"
+},
+{
+"keys": [
+"tekrar 20 :"
+],
+"mode": "exact",
+"not": [],
+"q": "20 kere dön",
+"tag": "a word never lived"
+},
+{
+"keys": [
+"tekrar 15 :"
+],
+"mode": "exact",
+"not": [],
+"q": "15 kere dön",
+"tag": "a word never lived"
+}
+],
+"life": [
+[
+"watch",
+"kütle değerini göster",
+"göster ( kütle ) ."
+],
+[
+"watch",
+"yükseklik değerini göster",
+"göster ( yükseklik ) ."
+],
+[
+"watch",
+"ısı değerini göster",
+"göster ( ısı ) ."
+],
+[
+"watch",
+"alan ile sıcaklık çarp",
+"alan * sıcaklık ."
+],
+[
+"watch",
+"süre ile sıcaklık çarp",
+"süre * sıcaklık ."
+],
+[
+"watch",
+"8 kere dön",
+"tekrar 8 :"
+],
+[
+"watch",
+"enerji ile süre çarp",
+"enerji * süre ."
+],
+[
+"watch",
+"süre ile alan çarp",
+"süre * alan ."
+],
+[
+"watch",
+"enerji ile hız çarp",
+"enerji * hız ."
+],
+[
+"watch",
+"hız ile süre çarp",
+"hız * süre ."
+],
+[
+"watch",
+"sıcaklık ile yol çarp",
+"sıcaklık * yol ."
+],
+[
+"watch",
+"6 kere dön",
+"tekrar 6 :"
+],
+[
+"watch",
+"yol ile enerji çarp",
+"yol * enerji ."
+],
+[
+"watch",
+"basınç değerini göster",
+"göster ( basınç ) ."
+],
+[
+"watch",
+"3 kere dön",
+"tekrar 3 :"
+],
+[
+"watch",
+"en değerini göster",
+"göster ( en ) ."
+],
+[
+"watch",
+"12 kere dön",
+"tekrar 12 :"
+],
+[
+"watch",
+"25 kere dön",
+"tekrar 25 :"
+],
+[
+"watch",
+"12 kere dön",
+"tekrar 12 :"
+],
+[
+"watch",
+"enerji ile hız çarp",
+"enerji * hız ."
+],
+[
+"watch",
+"süre ile alan çarp",
+"süre * alan ."
+],
+[
+"watch",
+"kütle değerini göster",
+"göster ( kütle ) ."
+],
+[
+"watch",
+"ısı değerini göster",
+"göster ( ısı ) ."
+],
+[
+"watch",
+"en değerini göster",
+"göster ( en ) ."
+],
+[
+"watch",
+"alan ile sıcaklık çarp",
+"alan * sıcaklık ."
+],
+[
+"watch",
+"6 kere dön",
+"tekrar 6 :"
+],
+[
+"watch",
+"basınç değerini göster",
+"göster ( basınç ) ."
+],
+[
+"watch",
+"sıcaklık ile yol çarp",
+"sıcaklık * yol ."
+],
+[
+"watch",
+"yükseklik değerini göster",
+"göster ( yükseklik ) ."
+],
+[
+"watch",
+"8 kere dön",
+"tekrar 8 :"
+],
+[
+"watch",
+"hız ile süre çarp",
+"hız * süre ."
+],
+[
+"watch",
+"25 kere dön",
+"tekrar 25 :"
+],
+[
+"watch",
+"süre ile sıcaklık çarp",
+"süre * sıcaklık ."
+],
+[
+"watch",
+"yol ile enerji çarp",
+"yol * enerji ."
+],
+[
+"watch",
+"3 kere dön",
+"tekrar 3 :"
+],
+[
+"watch",
+"enerji ile süre çarp",
+"enerji * süre ."
+]
+],
+"mind": "fresh",
+"name": "substitute",
+"variant": "full"
+},
+{
+"ask": [
+{
+"keys": [
+"cuma"
+],
+"mode": "exact",
+"not": [],
+"q": "perşembe den sonra ne gelir ?",
+"tag": "recall"
+},
+{
+"keys": [
+"pazar"
+],
+"mode": "exact",
+"not": [],
+"q": "cumartesi den sonra ne gelir ?",
+"tag": "recall"
+},
+{
+"keys": [
+"salı"
+],
+"mode": "exact",
+"not": [],
+"q": "pazartesi den sonra ne gelir ?",
+"tag": "recall"
+},
+{
+"keys": [
+"cumartesi"
+],
+"mode": "exact",
+"not": [],
+"q": "cuma den sonra ne gelir ?",
+"tag": "relation: what follows"
+},
+{
+"keys": [
+"perşembe"
+],
+"mode": "exact",
+"not": [],
+"q": "çarşamba den sonra ne gelir ?",
+"tag": "relation: what follows"
+},
+{
+"keys": [
+"çarşamba"
+],
+"mode": "exact",
+"not": [],
+"q": "salı den sonra ne gelir ?",
+"tag": "relation: what follows"
+},
+{
+"keys": [
+"ağustos"
+],
+"mode": "exact",
+"not": [],
+"q": "temmuz ayından sonraki ay hangisi ?",
+"tag": "recall"
+},
+{
+"keys": [
+"kasım"
+],
+"mode": "exact",
+"not": [],
+"q": "ekim ayından sonraki ay hangisi ?",
+"tag": "recall"
+},
+{
+"keys": [
+"ekim"
+],
+"mode": "exact",
+"not": [],
+"q": "eylül ayından sonraki ay hangisi ?",
+"tag": "recall"
+},
+{
+"keys": [
+"mart"
+],
+"mode": "exact",
+"not": [],
+"q": "şubat ayından sonraki ay hangisi ?",
+"tag": "recall"
+},
+{
+"keys": [
+"temmuz"
+],
+"mode": "exact",
+"not": [],
+"q": "haziran ayından sonraki ay hangisi ?",
+"tag": "recall"
+},
+{
+"keys": [
+"eylül"
+],
+"mode": "exact",
+"not": [],
+"q": "ağustos ayından sonraki ay hangisi ?",
+"tag": "relation: what follows"
+},
+{
+"keys": [
+"mayıs"
+],
+"mode": "exact",
+"not": [],
+"q": "nisan ayından sonraki ay hangisi ?",
+"tag": "relation: what follows"
+},
+{
+"keys": [
+"şubat"
+],
+"mode": "exact",
+"not": [],
+"q": "ocak ayından sonraki ay hangisi ?",
+"tag": "relation: what follows"
+},
+{
+"keys": [
+"aralık"
+],
+"mode": "exact",
+"not": [],
+"q": "kasım ayından sonraki ay hangisi ?",
+"tag": "relation: what follows"
+},
+{
+"keys": [
+"nisan"
+],
+"mode": "exact",
+"not": [],
+"q": "mart ayından sonraki ay hangisi ?",
+"tag": "relation: what follows"
+},
+{
+"keys": [
+"haziran"
+],
+"mode": "exact",
+"not": [],
+"q": "mayıs ayından sonraki ay hangisi ?",
+"tag": "relation: what follows"
+},
+{
+"keys": [
+"perşembe"
+],
+"mode": "exact",
+"not": [],
+"q": "salı den iki gün sonrası hangi gün ?",
+"tag": "recall"
+},
+{
+"keys": [
+"cumartesi"
+],
+"mode": "exact",
+"not": [],
+"q": "perşembe den iki gün sonrası hangi gün ?",
+"tag": "recall"
+},
+{
+"keys": [
+"pazar"
+],
+"mode": "exact",
+"not": [],
+"q": "cuma den iki gün sonrası hangi gün ?",
+"tag": "recall"
+},
+{
+"keys": [
+"çarşamba"
+],
+"mode": "exact",
+"not": [],
+"q": "pazartesi den iki gün sonrası hangi gün ?",
+"tag": "relation: two steps on"
+},
+{
+"keys": [
+"cuma"
+],
+"mode": "exact",
+"not": [],
+"q": "çarşamba den iki gün sonrası hangi gün ?",
+"tag": "relation: two steps on"
+}
+],
+"life": [
+[
+"watch",
+"perşembe den sonra ne gelir ?",
+"cuma ."
+],
+[
+"watch",
+"ekim ayından sonraki ay hangisi ?",
+"kasım ."
+],
+[
+"tell",
+"pazartesi salı çarşamba perşembe cuma cumartesi pazar ."
+],
+[
+"watch",
+"cuma den iki gün sonrası hangi gün ?",
+"pazar ."
+],
+[
+"watch",
+"perşembe den iki gün sonrası hangi gün ?",
+"cumartesi ."
+],
+[
+"watch",
+"cumartesi den sonra ne gelir ?",
+"pazar ."
+],
+[
+"watch",
+"eylül ayından sonraki ay hangisi ?",
+"ekim ."
+],
+[
+"tell",
+"pazartesi salı çarşamba perşembe cuma cumartesi pazar ."
+],
+[
+"watch",
+"haziran ayından sonraki ay hangisi ?",
+"temmuz ."
+],
+[
+"watch",
+"ekim ayından sonraki ay hangisi ?",
+"kasım ."
+],
+[
+"tell",
+"ocak şubat mart nisan mayıs haziran temmuz ağustos eylül ekim kasım aralık ."
+],
+[
+"watch",
+"salı den iki gün sonrası hangi gün ?",
+"perşembe ."
+],
+[
+"watch",
+"haziran ayından sonraki ay hangisi ?",
+"temmuz ."
+],
+[
+"watch",
+"cuma den iki gün sonrası hangi gün ?",
+"pazar ."
+],
+[
+"tell",
+"ocak şubat mart nisan mayıs haziran temmuz ağustos eylül ekim kasım aralık ."
+],
+[
+"watch",
+"şubat ayından sonraki ay hangisi ?",
+"mart ."
+],
+[
+"watch",
+"eylül ayından sonraki ay hangisi ?",
+"ekim ."
+],
+[
+"watch",
+"pazartesi den sonra ne gelir ?",
+"salı ."
+],
+[
+"watch",
+"temmuz ayından sonraki ay hangisi ?",
+"ağustos ."
+],
+[
+"watch",
+"cumartesi den sonra ne gelir ?",
+"pazar ."
+],
+[
+"watch",
+"perşembe den iki gün sonrası hangi gün ?",
+"cumartesi ."
+],
+[
+"watch",
+"şubat ayından sonraki ay hangisi ?",
+"mart ."
+],
+[
+"watch",
+"salı den iki gün sonrası hangi gün ?",
+"perşembe ."
+],
+[
+"tell",
+"ocak şubat mart nisan mayıs haziran temmuz ağustos eylül ekim kasım aralık ."
+],
+[
+"tell",
+"pazartesi salı çarşamba perşembe cuma cumartesi pazar ."
+],
+[
+"watch",
+"pazartesi den sonra ne gelir ?",
+"salı ."
+],
+[
+"watch",
+"perşembe den sonra ne gelir ?",
+"cuma ."
+],
+[
+"watch",
+"temmuz ayından sonraki ay hangisi ?",
+"ağustos ."
+]
+],
+"mind": "fresh",
+"name": "sequence",
+"variant": "full"
+},
+{
+"ask": [
+{
+"keys": [
+"kemer mavi"
+],
+"mode": "exact",
+"not": [],
+"q": "kemer hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"çit mor"
+],
+"mode": "exact",
+"not": [],
+"q": "çit hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"kulübe yeşil"
+],
+"mode": "exact",
+"not": [],
+"q": "kulübe hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"koltuk turuncu"
+],
+"mode": "exact",
+"not": [],
+"q": "koltuk hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"kule kırmızı"
+],
+"mode": "exact",
+"not": [],
+"q": "kule hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"süpürge pembe"
+],
+"mode": "exact",
+"not": [],
+"q": "süpürge hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"battaniye turuncu"
+],
+"mode": "exact",
+"not": [],
+"q": "battaniye hangi renk ?",
+"tag": "told once, never asked"
+},
+{
+"keys": [
+"sabun mor"
+],
+"mode": "exact",
+"not": [],
+"q": "sabun hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"eldiven gri"
+],
+"mode": "exact",
+"not": [],
+"q": "eldiven hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"ayna kırmızı"
+],
+"mode": "exact",
+"not": [],
+"q": "ayna hangi renk ?",
+"tag": "told once, never asked"
+},
+{
+"keys": [
+"bahçe gri"
+],
+"mode": "exact",
+"not": [],
+"q": "bahçe hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"perde gri"
+],
+"mode": "exact",
+"not": [],
+"q": "perde hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"yelken mavi"
+],
+"mode": "exact",
+"not": [],
+"q": "yelken hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"şapka sarı"
+],
+"mode": "exact",
+"not": [],
+"q": "şapka hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"pencere turuncu"
+],
+"mode": "exact",
+"not": [],
+"q": "pencere hangi renk ?",
+"tag": "told once, never asked"
+},
+{
+"keys": [
+"duvar beyaz"
+],
+"mode": "exact",
+"not": [],
+"q": "duvar hangi renk ?",
+"tag": "told once, never asked"
+},
+{
+"keys": [
+"tarak yeşil"
+],
+"mode": "exact",
+"not": [],
+"q": "tarak hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"köprü gri"
+],
+"mode": "exact",
+"not": [],
+"q": "köprü hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"kaşık siyah"
+],
+"mode": "exact",
+"not": [],
+"q": "kaşık hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"tabak sarı"
+],
+"mode": "exact",
+"not": [],
+"q": "tabak hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"çatı pembe"
+],
+"mode": "exact",
+"not": [],
+"q": "çatı hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"çorap siyah"
+],
+"mode": "exact",
+"not": [],
+"q": "çorap hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"çatal yeşil"
+],
+"mode": "exact",
+"not": [],
+"q": "çatal hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"yastık siyah"
+],
+"mode": "exact",
+"not": [],
+"q": "yastık hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"atkı mavi"
+],
+"mode": "exact",
+"not": [],
+"q": "atkı hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"fincan mor"
+],
+"mode": "exact",
+"not": [],
+"q": "fincan hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"lamba mor"
+],
+"mode": "exact",
+"not": [],
+"q": "lamba hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"çadır turuncu"
+],
+"mode": "exact",
+"not": [],
+"q": "çadır hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"tencere beyaz"
+],
+"mode": "exact",
+"not": [],
+"q": "tencere hangi renk ?",
+"tag": "told once, never asked"
+},
+{
+"keys": [
+"sandalye mor"
+],
+"mode": "exact",
+"not": [],
+"q": "sandalye hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"sürahi turuncu"
+],
+"mode": "exact",
+"not": [],
+"q": "sürahi hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"kazak beyaz"
+],
+"mode": "exact",
+"not": [],
+"q": "kazak hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"kova kırmızı"
+],
+"mode": "exact",
+"not": [],
+"q": "kova hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"vazo yeşil"
+],
+"mode": "exact",
+"not": [],
+"q": "vazo hangi renk ?",
+"tag": "told once, never asked"
+},
+{
+"keys": [
+"havlu mor"
+],
+"mode": "exact",
+"not": [],
+"q": "havlu hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"tekne turuncu"
+],
+"mode": "exact",
+"not": [],
+"q": "tekne hangi renk ?",
+"tag": "told once, never asked"
+},
+{
+"keys": [
+"merdiven beyaz"
+],
+"mode": "exact",
+"not": [],
+"q": "merdiven hangi renk ?",
+"tag": "told once, never asked"
+},
+{
+"keys": [
+"kapı mor"
+],
+"mode": "exact",
+"not": [],
+"q": "kapı hangi renk ?",
+"tag": "told once, never asked"
+},
+{
+"keys": [
+"halı kırmızı"
+],
+"mode": "exact",
+"not": [],
+"q": "halı hangi renk ?",
+"tag": "watched once"
+},
+{
+"keys": [
+"fırça mor"
+],
+"mode": "exact",
+"not": [],
+"q": "fırça hangi renk ?",
+"tag": "told once, never asked"
+}
+],
+"life": [
+[
+"watch",
+"şapka hangi renk ?",
+"şapka sarı ."
+],
+[
+"tell",
+"tekne turuncu ."
+],
+[
+"tell",
+"vazo yeşil ."
+],
+[
+"watch",
+"sandalye hangi renk ?",
+"sandalye mor ."
+],
+[
+"watch",
+"tabak hangi renk ?",
+"tabak sarı ."
+],
+[
+"watch",
+"süpürge hangi renk ?",
+"süpürge pembe ."
+],
+[
+"watch",
+"halı hangi renk ?",
+"halı kırmızı ."
+],
+[
+"watch",
+"çatı hangi renk ?",
+"çatı pembe ."
+],
+[
+"watch",
+"eldiven hangi renk ?",
+"eldiven gri ."
+],
+[
+"watch",
+"çadır hangi renk ?",
+"çadır turuncu ."
+],
+[
+"watch",
+"çit hangi renk ?",
+"çit mor ."
+],
+[
+"watch",
+"bahçe hangi renk ?",
+"bahçe gri ."
+],
+[
+"watch",
+"havlu hangi renk ?",
+"havlu mor ."
+],
+[
+"watch",
+"kaşık hangi renk ?",
+"kaşık siyah ."
+],
+[
+"tell",
+"duvar beyaz ."
+],
+[
+"tell",
+"fırça mor ."
+],
+[
+"watch",
+"perde hangi renk ?",
+"perde gri ."
+],
+[
+"watch",
+"kemer hangi renk ?",
+"kemer mavi ."
+],
+[
+"watch",
+"atkı hangi renk ?",
+"atkı mavi ."
+],
+[
+"watch",
+"lamba hangi renk ?",
+"lamba mor ."
+],
+[
+"watch",
+"fincan hangi renk ?",
+"fincan mor ."
+],
+[
+"watch",
+"kova hangi renk ?",
+"kova kırmızı ."
+],
+[
+"watch",
+"kazak hangi renk ?",
+"kazak beyaz ."
+],
+[
+"watch",
+"sürahi hangi renk ?",
+"sürahi turuncu ."
+],
+[
+"watch",
+"yelken hangi renk ?",
+"yelken mavi ."
+],
+[
+"tell",
+"merdiven beyaz ."
+],
+[
+"watch",
+"kulübe hangi renk ?",
+"kulübe yeşil ."
+],
+[
+"tell",
+"kapı mor ."
+],
+[
+"watch",
+"tarak hangi renk ?",
+"tarak yeşil ."
+],
+[
+"tell",
+"battaniye turuncu ."
+],
+[
+"watch",
+"çorap hangi renk ?",
+"çorap siyah ."
+],
+[
+"tell",
+"pencere turuncu ."
+],
+[
+"watch",
+"sabun hangi renk ?",
+"sabun mor ."
+],
+[
+"watch",
+"kule hangi renk ?",
+"kule kırmızı ."
+],
+[
+"tell",
+"tencere beyaz ."
+],
+[
+"watch",
+"koltuk hangi renk ?",
+"koltuk turuncu ."
+],
+[
+"watch",
+"çatal hangi renk ?",
+"çatal yeşil ."
+],
+[
+"watch",
+"köprü hangi renk ?",
+"köprü gri ."
+],
+[
+"tell",
+"ayna kırmızı ."
+],
+[
+"watch",
+"yastık hangi renk ?",
+"yastık siyah ."
+]
+],
+"mind": "fresh",
+"name": "recall",
+"variant": "full"
+},
+{
+"ask": [],
+"ledger": true,
+"life": [
+[
+"converse",
+"benim yaşım 52"
+],
+[
+"converse",
+"akşam yürüyüşe çıkacağım"
+],
+[
+"converse",
+"biraz yorgunum"
+],
+[
+"converse",
+"doğduğum şehir izmir"
+],
+[
+"converse",
+"merhaba"
+],
+[
+"converse",
+"en sevdiğim renk mor"
+],
+[
+"converse",
+"nasılsın"
+],
+[
+"converse",
+"akşam yürüyüşe çıkacağım"
+],
+[
+"converse",
+"kedimin adı zeytin"
+],
+[
+"converse",
+"teşekkür ederim"
+],
+[
+"converse",
+"kahve içtim"
+],
+[
+"converse",
+"en sevdiğim yemek börek"
+],
+[
+"converse",
+"bugün hava çok güzel"
+],
+[
+"converse",
+"akşam yürüyüşe çıkacağım"
+],
+[
+"converse",
+"benim adım yasin"
+],
+[
+"converse",
+"nasılsın"
+],
+[
+"converse",
+"dün geç yattım"
+],
+[
+"ask",
+{
+"keys": [
+"börek"
+],
+"mode": "holds",
+"not": [
+"mantı",
+"pilav",
+"çorba",
+"makarna"
+],
+"q": "en sevdiğim yemek ne ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [
+"zeytin"
+],
+"mode": "holds",
+"not": [
+"pamuk",
+"duman",
+"boncuk",
+"tarçın"
+],
+"q": "kedimin adı ne ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [
+"izmir"
+],
+"mode": "holds",
+"not": [
+"bursa",
+"konya",
+"adana",
+"samsun"
+],
+"q": "doğduğum şehir neresi ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [
+"yasin"
+],
+"mode": "holds",
+"not": [
+"elif",
+"murat",
+"zehra",
+"kerem",
+"aylin",
+"orhan"
+],
+"q": "benim adım ne ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [
+"mor"
+],
+"mode": "holds",
+"not": [
+"mavi",
+"yeşil",
+"turuncu",
+"kırmızı",
+"sarı"
+],
+"q": "en sevdiğim renk ne ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [
+"52"
+],
+"mode": "holds",
+"not": [
+"27",
+"34",
+"41",
+"19",
+"63"
+],
+"q": "benim yaşım kaç ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"converse",
+"benim adım orhan"
+],
+[
+"converse",
+"nasılsın"
+],
+[
+"ask",
+{
+"keys": [
+"orhan"
+],
+"mode": "holds",
+"not": [
+"yasin",
+"elif",
+"murat",
+"zehra",
+"kerem",
+"aylin"
+],
+"q": "benim adım ne ?",
+"tag": "told again otherwise, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [],
+"mode": "silent",
+"not": [],
+"q": "babamın adı ne ?",
+"tag": "control: never told"
+}
+],
+[
+"ask",
+{
+"keys": [],
+"mode": "silent",
+"not": [],
+"q": "arabamın rengi ne ?",
+"tag": "control: never told"
+}
+],
+[
+"ask",
+{
+"keys": [],
+"mode": "none",
+"not": [],
+"q": "ne düşünüyorsun ?",
+"tag": "everyday line, no key"
+}
+],
+[
+"ask",
+{
+"keys": [],
+"mode": "none",
+"not": [],
+"q": "bana bir şey anlat",
+"tag": "everyday line, no key"
+}
+],
+[
+"ask",
+{
+"keys": [],
+"mode": "none",
+"not": [],
+"q": "bugün ne yapalım ?",
+"tag": "everyday line, no key"
+}
+]
+],
+"mind": "fresh",
+"name": "conversation (fresh mind)",
+"variant": "full"
+},
+{
+"ask": [],
+"ledger": true,
+"life": [
+[
+"converse",
+"en sevdiğim yemek pilav"
+],
+[
+"converse",
+"biraz yorgunum"
+],
+[
+"converse",
+"dün geç yattım"
+],
+[
+"converse",
+"benim yaşım 63"
+],
+[
+"converse",
+"teşekkür ederim"
+],
+[
+"converse",
+"benim adım aylin"
+],
+[
+"converse",
+"bugün hava çok güzel"
+],
+[
+"converse",
+"kedimin adı boncuk"
+],
+[
+"converse",
+"kahve içtim"
+],
+[
+"converse",
+"en sevdiğim renk mor"
+],
+[
+"converse",
+"bugün hava çok güzel"
+],
+[
+"converse",
+"doğduğum şehir bursa"
+],
+[
+"converse",
+"teşekkür ederim"
+],
+[
+"converse",
+"kahve içtim"
+],
+[
+"ask",
+{
+"keys": [
+"63"
+],
+"mode": "holds",
+"not": [
+"27",
+"34",
+"41",
+"19",
+"52"
+],
+"q": "benim yaşım kaç ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [
+"pilav"
+],
+"mode": "holds",
+"not": [
+"mantı",
+"çorba",
+"börek",
+"makarna"
+],
+"q": "en sevdiğim yemek ne ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [
+"bursa"
+],
+"mode": "holds",
+"not": [
+"izmir",
+"konya",
+"adana",
+"samsun"
+],
+"q": "doğduğum şehir neresi ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [
+"boncuk"
+],
+"mode": "holds",
+"not": [
+"pamuk",
+"duman",
+"zeytin",
+"tarçın"
+],
+"q": "kedimin adı ne ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [
+"aylin"
+],
+"mode": "holds",
+"not": [
+"yasin",
+"elif",
+"murat",
+"zehra",
+"kerem",
+"orhan"
+],
+"q": "benim adım ne ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [
+"mor"
+],
+"mode": "holds",
+"not": [
+"mavi",
+"yeşil",
+"turuncu",
+"kırmızı",
+"sarı"
+],
+"q": "en sevdiğim renk ne ?",
+"tag": "told in conversation, asked later"
+}
+],
+[
+"converse",
+"benim adım yasin"
+],
+[
+"converse",
+"biraz yorgunum"
+],
+[
+"ask",
+{
+"keys": [
+"yasin"
+],
+"mode": "holds",
+"not": [
+"elif",
+"murat",
+"zehra",
+"kerem",
+"aylin",
+"orhan"
+],
+"q": "benim adım ne ?",
+"tag": "told again otherwise, asked later"
+}
+],
+[
+"ask",
+{
+"keys": [],
+"mode": "silent",
+"not": [],
+"q": "babamın adı ne ?",
+"tag": "control: never told"
+}
+],
+[
+"ask",
+{
+"keys": [],
+"mode": "silent",
+"not": [],
+"q": "arabamın rengi ne ?",
+"tag": "control: never told"
+}
+],
+[
+"ask",
+{
+"keys": [],
+"mode": "none",
+"not": [],
+"q": "ne düşünüyorsun ?",
+"tag": "everyday line, no key"
+}
+],
+[
+"ask",
+{
+"keys": [],
+"mode": "none",
+"not": [],
+"q": "bana bir şey anlat",
+"tag": "everyday line, no key"
+}
+],
+[
+"ask",
+{
+"keys": [],
+"mode": "none",
+"not": [],
+"q": "bugün ne yapalım ?",
+"tag": "everyday line, no key"
+}
+]
+],
+"mind": "raised",
+"name": "conversation (raised mind)",
+"variant": "full"
+},
+{
+"ask": [
+{
+"keys": [
+"nemeto"
+],
+"mode": "exact",
+"not": [],
+"q": "tarık in kodu nedir ?",
+"tag": "kept"
+},
+{
+"keys": [
+"rivido"
+],
+"mode": "exact",
+"not": [],
+"q": "gönül in kodu nedir ?",
+"tag": "kept"
+},
+{
+"keys": [
+"satoka"
+],
+"mode": "exact",
+"not": [],
+"q": "nermin in kodu nedir ?",
+"tag": "kept"
+},
+{
+"keys": [],
+"mode": "silent",
+"not": [
+"metosa"
+],
+"q": "fatoş in kodu nedir ?",
+"tag": "forgotten"
+},
+{
+"keys": [
+"lutone"
+],
+"mode": "exact",
+"not": [],
+"q": "ilker in kodu nedir ?",
+"tag": "kept"
+},
+{
+"keys": [
+"lunevi"
+],
+"mode": "exact",
+"not": [],
+"q": "necati in kodu nedir ?",
+"tag": "kept"
+},
+{
+"keys": [
+"lusame"
+],
+"mode": "exact",
+"not": [],
+"q": "sevgi in kodu nedir ?",
+"tag": "kept"
+},
+{
+"keys": [],
+"mode": "silent",
+"not": [
+"kanevi"
+],
+"q": "bülent in kodu nedir ?",
+"tag": "forgotten"
+}
+],
+"ledger": true,
+"life": [
+[
+"watch",
+"tarık in kodu nedir ?",
+"nemeto ."
+],
+[
+"watch",
+"gönül in kodu nedir ?",
+"rivido ."
+],
+[
+"watch",
+"nermin in kodu nedir ?",
+"satoka ."
+],
+[
+"watch",
+"fatoş in kodu nedir ?",
+"metosa ."
+],
+[
+"watch",
+"ilker in kodu nedir ?",
+"lutone ."
+],
+[
+"watch",
+"necati in kodu nedir ?",
+"lunevi ."
+],
+[
+"watch",
+"sevgi in kodu nedir ?",
+"lusame ."
+],
+[
+"watch",
+"bülent in kodu nedir ?",
+"kanevi ."
+],
+[
+"forget",
+7
+],
+[
+"forget",
+3
+]
+],
+"mind": "fresh",
+"name": "forget",
+"variant": "full"
+},
+{
+"ask": [],
+"chars": 384,
+"life": [],
+"mind": "fresh",
+"name": "text",
+"path": "docs/ZIHIN_KILAVUZ.md",
+"sha256": "3653d2d395a63fc18b6f45b5dd87469a67d91536c3aa9ed68abb97c3a25e274e",
+"variant": "full"
+}
+]
+}
