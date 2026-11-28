@@ -176,12 +176,13 @@ class Slots:
         bits = max(1 << 16, self.nb * self.WAYS * 8)
         self.fmask = bits - 1
         flt = np.zeros(bits // 8, dtype=np.uint8)
-        k = self.key[self.key != 0]
-        if self.spill:
-            k = np.concatenate([k, np.fromiter(self.spill, dtype=np.uint64, count=len(self.spill))])
-        if len(k):
-            h = (mix_np(k, _SALT[1]) & np.uint64(self.fmask)).astype(np.int64)
-            np.bitwise_or.at(flt, h >> 3, (1 << (h & 7)).astype(np.uint8))
+        pieces = [np.fromiter(self.spill, dtype=np.uint64, count=len(self.spill))] if self.spill else []
+        pieces += [self.key[a:a + (1 << 18)] for a in range(0, len(self.key), 1 << 18)]      # views, not copies
+        for k in pieces:                                     # a piece of the table at a time
+            k = k[k != 0]
+            if len(k):
+                h = (mix_np(k, _SALT[1]) & np.uint64(self.fmask)).astype(np.int64)
+                np.bitwise_or.at(flt, h >> 3, (1 << (h & 7)).astype(np.uint8))
         self.filter = bytearray(flt.tobytes())
 
     def _seen(self, key: int) -> bool:
@@ -560,17 +561,29 @@ class Slots:
             c, t = np.concatenate([c, g[:, 2].astype(np.int32)]), np.concatenate([t, g[:, 3].astype(np.uint32)])
         return k, v, c, t
 
-    def digest(self) -> int:
-        k, v, c, _ = self._all()
+    def _summed(self, which: str) -> int:
+        """The sum over the ties of the table of each tie hashed with its count (or its last moment), a piece of
+        the table at a time: a digest takes no second table of memory."""
+        total = np.uint64(0)
+        other = self.cnt if which == "count" else self.tim
         with np.errstate(over="ignore"):
-            d = mix_np(mix_np(k, v), c.astype(np.int64).astype(np.uint64))
-            return int(d.sum(dtype=np.uint64))
+            for a in range(0, len(self.key), 1 << 18):
+                k = self.key[a:a + (1 << 18)]
+                at = k != 0
+                if at.any():
+                    x = other[a:a + (1 << 18)][at].astype(np.int64).astype(np.uint64)
+                    total += mix_np(mix_np(k[at], self.val[a:a + (1 << 18)][at]), x).sum(dtype=np.uint64)
+            for key, row in self.spill.items():
+                for value, cell in row.items():
+                    total += np.uint64(mix(mix(key, value), (cell[0] if which == "count" else cell[1]) & MASK))
+        return int(total)
+
+    def digest(self) -> int:
+        return self._summed("count")
 
     def moments(self) -> int:
         """A digest of when each tie was last written (what was told last is read from it)."""
-        k, v, _, t = self._all()
-        with np.errstate(over="ignore"):
-            return int(mix_np(mix_np(k, v), t.astype(np.uint64)).sum(dtype=np.uint64)) if len(k) else 0
+        return self._summed("moment")
 
     def state(self) -> dict:
         """The table as it stands: its four arrays (not copies: keeping a mind takes no second table of memory),

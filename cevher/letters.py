@@ -162,9 +162,14 @@ class Counts:
                 "not_written": self.not_written}
 
     def digest(self) -> int:
-        at = self.key != 0
+        total = np.uint64(0)
         with np.errstate(over="ignore"):
-            return int(mix_np(self.key[at], self.cnt[at].astype(np.uint64)).sum(dtype=np.uint64))
+            for a in range(0, len(self.key), 1 << 18):       # a piece of the table at a time
+                k = self.key[a:a + (1 << 18)]
+                at = k != 0
+                if at.any():
+                    total += mix_np(k[at], self.cnt[a:a + (1 << 18)][at].astype(np.uint64)).sum(dtype=np.uint64)
+        return int(total)
 
     def state(self) -> dict:
         """The table as it stands: its two arrays (not copies)."""
