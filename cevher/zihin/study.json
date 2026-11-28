@@ -179,7 +179,7 @@
     1,
     2
    ],
-   "seconds": 0.2,
+   "seconds": 0.3,
    "chars": 1560
   },
   {
@@ -279,7 +279,7 @@
     2,
     5
    ],
-   "seconds": 0.3,
+   "seconds": 0.4,
    "chars": 1365
   },
   {
@@ -461,7 +461,7 @@
     0,
     2
    ],
-   "seconds": 0.2,
+   "seconds": 0.3,
    "chars": 709
   },
   {
@@ -521,20 +521,36 @@
    "chars": 1479
   }
  ],
- "seconds": 5.4,
+ "seconds": 5.6,
  "manifest": {
   "what": "Cevahir, the final form (cevher)",
-  "version": 2,
-  "sha256": "ddd60d11ab17b8c6762595ec412a40fb6f114b46ab599f4c7a0a12939ef64f65",
-  "digest": "10529aa447630c9716266f548a89d3a5",
+  "version": 3,
+  "sha256": "56ab7a8d7e8f807da318c68d23261838af46cd0d4771c5e0cce00051b266af1f",
+  "digest": "a15cc890d065695816266f548a89d3a5",
   "size": {
    "ties": {
+    "ties": 28552,
+    "keys": 22286,
+    "slots": 270336,
+    "beside": 720,
+    "let_go": 3781,
+    "not_kept": 6923
+   },
+   "lived": {
     "ties": 28552,
     "keys": 22286,
     "slots": 262144,
     "beside": 720,
     "let_go": 3781,
     "not_kept": 6923
+   },
+   "read": {
+    "ties": 0,
+    "keys": 0,
+    "slots": 8192,
+    "beside": 0,
+    "let_go": 0,
+    "not_kept": 0
    },
    "letters": {
     "ties": 60213,
@@ -545,7 +561,7 @@
     "bytes": 1572864
    },
    "words": 1521,
-   "table_bytes": 7164288,
+   "table_bytes": 7336320,
    "spelling_bytes": 38113,
    "moments": 1349
   }

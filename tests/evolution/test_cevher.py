@@ -101,8 +101,8 @@ SCAN_LIFE = [("walk", "W"), ("run", "R"), ("look", "L"), ("zap", "Z"), ("walk tw
              ("look after walk", "W L"), ("run twice after look", "L R R"), ("look left after run", "R T L")]
 
 
-def _taught(pairs, rounds=2):
-    c = Cevahir()
+def _taught(pairs, rounds=2, **how):
+    c = Cevahir(**how)
     for _ in range(rounds):
         for q, a in pairs:
             c.watch(q, a + " .")
@@ -252,22 +252,41 @@ def test_a_long_file_is_given_a_piece_at_a_time():
 def test_a_full_mind_goes_on_learning():
     """A table that kept only what is counted most could learn nothing new once it was full. What is new always
     finds a place; what gives way is the least evident of what the bucket held before."""
-    c = Cevahir(budget_mb=97)                                # 1 MB for both tables
+    c = Cevahir(budget_mb=97)                                # 1 MB for the three tables
     rng = random.Random(11)
-    words = ["".join(rng.choice("abcçdefgğhıijklmnoöprsştuüvyz") for _ in range(rng.randint(2, 8))) for _ in range(4000)]
-    for _ in range(3):                                       # read until the tables are full of ties met twice and more
-        c.read("".join(" ".join(rng.choice(words[:800]) for _ in range(10)) + ". " for _ in range(6000)))
-    size = c.size()
-    assert size["ties"]["let_go"] > 0 and size["letters"]["let_go"] > 0
+    words = ["".join(rng.choice("abcçdefgğhıijklmnoöprsştuüvyz") for _ in range(rng.randint(2, 8))) for _ in range(300)]
+    for _ in range(700):                                     # told a sentence at a time, until that table is full
+        c.tell(" ".join(rng.choice(words) for _ in range(10)) + " .")
+    lived = c.size()["lived"]
+    assert lived["let_go"] > 0 and lived["slots"] == 4096    # it cannot grow, and ties have given way
     c.watch("gizli söz nedir ?", "mavi fil .")
     assert c.reply("gizli söz nedir ?") == "mavi fil ."
     for q, a in (("zap", "Z"), ("zap twice", "Z Z"), ("dax", "D"), ("dax twice", "D D"), ("wif", "W")):
         c.watch(q, a + " .")
     assert c.reply("wif twice") == "W W ."
+    for _ in range(3):                                       # and the letters, full of what one text wrote,
+        c.read("".join(" ".join(rng.choice(words) for _ in range(10)) + ". " for _ in range(6000)))
+    assert c.size()["letters"]["let_go"] > 0
     new = "yepyeni bir dil: qwx zvk qwx zvk qwx zvk. " * 40
     first = c.letters.live(new[:len(new) // 2])
     second = c.letters.live(new[len(new) // 2:])
-    assert second < first / 2                                # the letters go on learning a text they had not met
+    assert second < first / 2                                # go on learning a text they had not met
+
+
+def test_reading_does_not_push_out_what_was_taught():
+    """What long texts write lives in a table of its own: in one table with what the mind was taught, a megabyte
+    of reading left 11 of 433 lesson dialogues answered (FINAL_FORM.md)."""
+    c = _taught(SCAN_LIFE, budget_mb=97)
+    c.tell("Kedi süt içer ve uyur.")
+    taught = c.store.lived.digest()
+    rng = random.Random(12)
+    words = ["".join(rng.choice("abcçdefgğhıijklmnoöprsştuüvyz") for _ in range(rng.randint(2, 8))) for _ in range(4000)]
+    for _ in range(4):
+        c.read("".join(" ".join(rng.choice(words) for _ in range(10)) + ". " for _ in range(6000)))
+    read = c.size()["read"]
+    assert read["let_go"] > 3 * read["slots"]                # the reading overflowed its table several times over
+    assert c.store.lived.digest() == taught
+    assert c.reply("zap twice") == "Z Z ." and c.reply("walk and run") == "W R ."
 
 
 def test_forgetting_brings_back_what_was_told_last():

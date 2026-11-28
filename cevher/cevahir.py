@@ -4,9 +4,10 @@
 The interface is the one ``living.cevahir.Cevahir`` has, so that the same batteries run on both: ``tell``,
 ``watch``, ``read``, ``converse``, ``feedback``, ``forget``, ``sleep``, ``save``, ``load``, ``answers``.
 
-The substance is two tables of fixed capacity (``cevher.store.Slots`` for the ties of words and frames,
-``cevher.letters.Counts`` for the letters' contexts) and the spellings of the words met. Everything lived is written
-into them in one forward pass; nothing is kept per experience except, with a ledger, what is needed to take the
+The substance is three tables of fixed capacity: the ties of what was lived a sentence or a dialogue at a time,
+the ties of what long texts wrote (``cevher.store.Slots`` both, read as one by ``cevher.store.Two``), and the
+letters' contexts (``cevher.letters.Counts``); and the spellings of the words met. Everything lived is written into
+them in one forward pass; nothing is kept per experience except, with a ledger, what is needed to take the
 experience back: its text, the writes that were not a function of the text alone, and the ties that gave way to it.
 
 NumPy and the standard library only: no compiled code, no network, no pickle.
@@ -26,7 +27,7 @@ import numpy as np
 
 from cevher.letters import Counts, Letters
 from cevher.mind import O_ASKED, Mind
-from cevher.store import Slots
+from cevher.store import Slots, Two
 from cevher.units import LINE, TOKEN, Spellings, body, code_of, lower_tr, mix, rule, tokens
 
 SEPARATOR = re.compile(r"(?<=[.!?…])\s+|\n+")              # Zihin's sentence split (zihin.__main__.sentences)
@@ -37,7 +38,7 @@ PER_CHARACTER = 8                                            # bytes the tables 
 FLOOR_MB = 32                                                # ... and what they may hold however little was lived
 BULK = 4096                                                  # a text longer than this is read many ties at once
 GROUP = 1 << 15                                              # ... so many of its words at a time, about
-VERSION = 2                                                  # of the file a mind is kept in
+VERSION = 3                                                  # of the file a mind is kept in
 
 
 def _spans(text: str, lines: bool):
@@ -78,17 +79,18 @@ def _groups(text: str, lines: bool):
 
 
 class Cevahir:
-    """One mind. ``budget_mb`` bounds its resident memory for any length of life: the two tables may grow to what
-    is left of it after ``OVERHEAD_MB``, three quarters for the ties and a quarter for the letters, and no further.
-    On the way there they hold at most ``per_character`` bytes for every character lived (and ``FLOOR_MB`` however
-    little was lived): memory a character is bounded by a constant first, and by the budget in the end.
+    """One mind. ``budget_mb`` bounds its resident memory for any length of life: the tables may grow to what is
+    left of it after ``OVERHEAD_MB`` and no further: an eighth for the ties of what was lived a sentence or a
+    dialogue at a time, five eighths for the ties of what long texts wrote, a quarter for the letters. On the way
+    there, what texts write holds at most ``per_character`` bytes for every character lived (and ``FLOOR_MB``
+    however little was lived): memory a character is bounded by a constant first, and by the budget in the end.
     ``ledger``: keep what is needed to forget an entry exactly (a file in a temporary folder, or in the folder
     given)."""
 
     def __init__(self, budget_mb: int = 512, ledger=False, depth: int = 5, per_character: int = PER_CHARACTER):
         rest = max(1, budget_mb - OVERHEAD_MB) << 20
         self.budget_mb, self.rest, self.per_character = budget_mb, rest, per_character
-        self.store = Slots(max_bytes=rest * 3 // 4)
+        self.store = Two(Slots(max_bytes=rest // 8), Slots(max_bytes=rest * 5 // 8))
         self.mind = Mind(self.store)
         self.letters = Letters(Counts(max_bytes=rest // 4), depth=depth)
         self.entries: Optional[List[dict]] = None
@@ -157,11 +159,12 @@ class Cevahir:
 
     # ------------------------------------------------------------------------------------------------- living ----
     def _letters(self, stream: str, open_entry: Optional[dict]) -> float:
-        """The letters live a stream. Before it, the tables are told how far they may grow: so many bytes for
-        every character lived (this stream counted), a floor, and never more than the budget leaves."""
+        """The letters live a stream. Before it, the tables that texts write are told how far they may grow: so
+        many bytes for every character lived (this stream counted), a floor, and never more than the budget
+        leaves. (The table of what is lived a dialogue at a time grows as it fills, to its share of the budget.)"""
         lived = self.letters.lived + len(stream)
         allowed = min(self.rest, max(FLOOR_MB << 20, self.per_character * lived))
-        self.store.allow(allowed * 3 // 4)
+        self.store.read.allow(allowed * 3 // 4)
         self.letters.T.allow(allowed // 4)
         return self.letters.live(stream, gone=None if open_entry is None else open_entry["lgone"])
 
@@ -377,7 +380,8 @@ class Cevahir:
         return "%016x" % self.store.moments()
 
     def size(self) -> dict:
-        return {"ties": self.store.size(), "letters": self.letters.size(), "words": len(self.mind.spell),
+        return {"ties": self.store.size(), "lived": self.store.lived.size(), "read": self.store.read.size(),
+                "letters": self.letters.size(), "words": len(self.mind.spell),
                 "table_bytes": self.store.nbytes() + self.letters.T.nbytes(),
                 "spelling_bytes": self.mind.spell.nbytes(), "moments": self.mind.clock}
 
@@ -387,8 +391,8 @@ class Cevahir:
         self.flush()
         os.makedirs(folder, exist_ok=True)
         arrays = {}
-        for prefix, st in (("s_", self.store.state()), ("l_", self.letters.T.state()),
-                           ("w_", self.mind.spell.state())):
+        for prefix, st in (("s_", self.store.lived.state()), ("r_", self.store.read.state()),
+                           ("l_", self.letters.T.state()), ("w_", self.mind.spell.state())):
             for k, v in st.items():
                 arrays[prefix + k] = v
         arrays["zero"], arrays["sit"] = self.letters.zero, self.letters.sit
@@ -427,10 +431,14 @@ class Cevahir:
         clock, lived, depth, nights, budget = (int(x) for x in a["misc"])
         self = cls(budget_mb=budget_mb or budget, depth=depth)
         self.letters.lived = lived
-        st = {k[2:]: v for k, v in a.items() if k.startswith("s_")}
-        st["nb"] = np.array([st["nb"][0], max(int(st["nb"][0]), self.store.max_buckets), st["nb"][2], st["nb"][3]])
         allowed = min(self.rest, max(FLOOR_MB << 20, self.per_character * lived))    # the growth law, as in living
-        self.store = Slots.from_state(st, allowed * 3 // 4)
+        tables = []
+        for prefix, most, law in (("s_", self.store.lived.max_buckets, 0),
+                                  ("r_", self.store.read.max_buckets, allowed * 3 // 4)):
+            st = {k[2:]: v for k, v in a.items() if k.startswith(prefix)}
+            st["nb"] = np.array([st["nb"][0], max(int(st["nb"][0]), most), st["nb"][2], st["nb"][3]])
+            tables.append(Slots.from_state(st, law))
+        self.store = Two(*tables)
         self.mind.S = self.store
         st = {k[2:]: v for k, v in a.items() if k.startswith("l_")}
         st["nb"] = np.array([st["nb"][0], max(int(st["nb"][0]), self.letters.T.max_buckets), st["nb"][2],

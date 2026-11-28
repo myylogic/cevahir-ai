@@ -586,3 +586,85 @@ class Slots:
         self._refilter()
         self.let_go, self.not_kept = let_go, not_kept
         return self
+
+
+class Two:
+    """Two bounded tables of ties read as one: what was lived a sentence or a dialogue at a time (``lived``: what
+    the mind was told, shown and asked), and what long texts wrote many ties at once (``read``). The evidence of a
+    tie is the sum of what the two hold for it, so the mind reads one substance; but each table is bounded on its
+    own, so that reading, however much of it, cannot push out what the mind was taught (in one table it did:
+    docs/architecture/FINAL_FORM.md). A tie written one at a time goes to ``lived``, a batch to ``read``."""
+
+    def __init__(self, lived: "Slots", read: "Slots"):
+        self.lived, self.read = lived, read
+
+    # -- a tie at a time: what is lived in conversation -------------------------------------------------------------
+    def add(self, key, value, w=1, t=0):
+        return self.lived.add(key, value, w, t)
+
+    def bump(self, key, w=1, t=0):
+        return self.lived.bump(key, w, t)
+
+    def put_back(self, gone) -> None:
+        self.lived.put_back(gone)
+
+    def moment(self, key, value) -> int:
+        return self.lived.moment(key, value)
+
+    def set_moment(self, key, value, t) -> None:
+        self.lived.set_moment(key, value, t)
+
+    # -- many at once: a long text ------------------------------------------------------------------------------------
+    def add_many(self, keys, values, w, t=0, before=None):
+        return self.read.add_many(keys, values, w, t, before=before)
+
+    def sub_many(self, keys, values, w, before=None, moment=0) -> None:
+        self.read.sub_many(keys, values, w, before=before, moment=moment)
+
+    def put_back_many(self, gone) -> None:
+        self.read.put_back_many(gone)
+
+    # -- reading: the two as one --------------------------------------------------------------------------------------
+    def get(self, key, value):
+        return self.lived.get(key, value) + self.read.get(key, value)
+
+    def tot(self, key):
+        return self.lived.tot(key) + self.read.tot(key)
+
+    def vals(self, key):
+        a, b = self.lived.vals(key), self.read.vals(key)
+        if not b:
+            return a
+        if not a:
+            return b
+        row = {v: [c, t] for v, c, t in a}
+        for v, c, t in b:
+            cell = row.get(v)
+            if cell is None:
+                row[v] = [c, t]
+            else:
+                cell[0] += c
+                cell[1] = max(cell[1], t)
+        return sorted(((v, c[0], c[1]) for v, c in row.items()), key=lambda x: (-x[1], -x[2], x[0]))
+
+    # -- what they hold -----------------------------------------------------------------------------------------------
+    @property
+    def let_go(self) -> int:
+        return self.lived.let_go + self.read.let_go
+
+    @property
+    def not_kept(self) -> int:
+        return self.lived.not_kept + self.read.not_kept
+
+    def nbytes(self) -> int:
+        return self.lived.nbytes() + self.read.nbytes()
+
+    def size(self) -> dict:
+        a, b = self.lived.size(), self.read.size()
+        return {k: a[k] + b[k] for k in a}
+
+    def digest(self) -> int:
+        return (self.lived.digest() + mix(self.read.digest(), 1)) & MASK
+
+    def moments(self) -> int:
+        return (self.lived.moments() + mix(self.read.moments(), 1)) & MASK
